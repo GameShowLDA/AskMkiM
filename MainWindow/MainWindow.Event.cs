@@ -7,13 +7,14 @@ using static Utilities.LoggerUtility;
 using Mode.Metrology.KC;
 using Mode.Metrology.IE;
 using Mode.Metrology.CI;
+using System.Windows.Controls;
 
 namespace MainWindowProgram
 {
   public partial class MainWindow
   {
 
-    #region Кнопки управления главным окном.
+    #region Основные события управления окном.
 
     /// <summary>
     /// Обработчик нажатия на кнопку "Максимизировать", изменяет состояние окна между нормальным и максимизированным.
@@ -52,6 +53,31 @@ namespace MainWindowProgram
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private void mainMenu_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => this.DragMove();
+
+    /// <summary>
+    /// Обработчик перетаскивания окна при нажатии и удерживании левой кнопки мыши на верхней панели.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => this.DragMove();
+
+    private async void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      var maxWidth = this.ActualWidth - mainMenu.ActualWidth - 50;
+      var minWidth = 50 + ButtonsPanel.ActualWidth + mainMenu.ActualWidth;
+
+      double minFontSize = 11;
+      double maxFontSize = 15;
+      double minWindowWidth = 300;
+      double maxWindowWidth = 800;
+
+      double fontSize = minFontSize + (maxFontSize - minFontSize) *
+                        ((maxWidth - minWindowWidth) / (maxWindowWidth - minWindowWidth));
+
+      fontSize = Math.Clamp(fontSize, minFontSize, maxFontSize);
+
+      mainMenu.FontSize = fontSize;
+    }
 
     #endregion
 
