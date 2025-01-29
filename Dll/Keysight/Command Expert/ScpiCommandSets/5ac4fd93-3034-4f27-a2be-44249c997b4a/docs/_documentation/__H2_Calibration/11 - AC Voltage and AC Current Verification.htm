@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Performance Verification" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>AC Voltage and AC Current Verification</title>
+        <link href="../CalTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor602"></a>AC Voltage and AC Current Verification</h1>
+        <p>This procedure verifies AC voltage and current.</p>
+        <ol>
+            <li class="IndentTight" value="1">Make sure you have read <a href="01%20-%20Calibration%20Introduction.htm#TestConsiderations">Test Considerations</a>.</li>
+            <li class="IndentTight" value="2">Connect the calibrator to the input terminals. For the 34461A/65A/70A, use the front panel input terminals and select the front input terminals with the <b>Front/Rear</b> switch.</li>
+            <li class="IndentTight" value="3">Set the AC Volts or AC Current function and the filter as shown below.</li>
+            <li class="IndentTight" value="4">Select each range in the order shown below. Provide the indicated input voltage and frequency. Compare measurement results to the test limits shown below. (Be certain to allow for appropriate source settling.)</li>
+        </ol>
+        <p>
+            <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-CalTable-Head-Header1">
+                        <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="9">ACV Values for 34460A DMM</th>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Head-Header1">
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" colspan="3">Input</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                        <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Head-Header1">
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">Vrms</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">Frequency</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">Filter</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                        <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="padding-left: 2pt;padding-right: 2pt;padding-top: 2pt;padding-bottom: 2pt;border-right-style: solid;border-right-width: 1px;border-right-color: #000000;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #000000;">1 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 90 µV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 110 µV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 120 µV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 130 µV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 170 µV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 190 µV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 200 µV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 210 µV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                        </td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 4.5 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">1 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">1 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 900 µV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.1 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.2 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 1.3 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.7 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.9 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 2.1 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center" colspan="4">± 45 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">0.03 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="8">10 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 3 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2.7 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3.8 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3.9 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 4 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">10 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 11 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 12 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 13 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">20 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 11 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 12 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 13 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">20 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 11 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 12 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 13 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="padding-left: 2pt;padding-right: 2pt;padding-top: 2pt;padding-bottom: 2pt;border-right-style: solid;border-right-width: 1px;border-right-color: #000000;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #000000;">50 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                        </td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 17 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 19 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 20 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 21 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 66 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 71 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 450 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                        </td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 90 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 110 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 120 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 130 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 170 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 190 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 200 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 210 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">70 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center" colspan="4">± 3.3 V</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">750 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">750 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 675 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 825 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 900 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 975 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">210 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 573 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 669 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 690 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 711 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyB-Column1-Body1">70 V</td>
+                        <td class="TableStyle-CalTable-BodyB-Column1-Body1">300 kHz</td>
+                        <td class="TableStyle-CalTable-BodyB-Column1-Body1" />
+                        <td class="TableStyle-CalTable-BodyA-Column1-Body1" style="text-align: center" colspan="4">± 6.6 V</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="Indented3"><b>Q</b><i>: <span style="font-size: 9pt;">Quick performance verification test point.</span></i>
+            </p>
+        </p>
+        <div>
+            <p>
+                <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="9">ACV Values for 34461A DMM</th>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" colspan="3">Input</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Vrms</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Frequency</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Filter</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 µV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 80 µV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 90 µV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 100 µV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 140 µV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 160 µV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 170 µV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 180 µV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 4.5 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">1 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">1 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 600 µV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 800 µV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 900 µV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 1 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.4 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.6 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1.7 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 1.8 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center" colspan="4">± 45 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">0.03 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="8">10 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 3 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2.4 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3.5 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3.6 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 3.7 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">10 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 8 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 10 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">20 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 8 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 10 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">20 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 8 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 10 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 14 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 16 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 17 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 18 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 63 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 68 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 450 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 80 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 90 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 100 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 140 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 160 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 170 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 180 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">70 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center" colspan="4">± 3.3 V</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">750 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">750 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 450 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 600 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 675 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 750 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">210 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 510 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 606 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 627 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 648 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1">70 V</td>
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1">300 kHz</td>
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyA-Column1-Body1" style="text-align: center" colspan="4">± 6.6 V</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="Indented3"><b>Q</b><i>: <span style="font-size: 9pt;">Quick performance verification test point.</span></i>
+                </p>
+            </p>
+        </div>
+        <div>
+            <p>
+                <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="9">ACI Values for 34460A and 34461A DMMs</th>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" colspan="3">Input</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Current, rms</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Frequency</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Filter</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">2 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">3 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4" rowspan="2">± 5.8 mA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4" rowspan="2">± 1.4 mA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" rowspan="3" style="text-align: center;">&#160; ± 140 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 µA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="4">10 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="4">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">4.1 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">5 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">10 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4" rowspan="2">14 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" rowspan="2" style="text-align: center;">1.4 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 µA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 µA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" rowspan="2" style="text-align: center;">0.14 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1">5 kHz</td>
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="Indented3"><b>Q</b><i>: <span style="font-size: 9pt;">Quick performance verification test point.</span></i>
+                </p>
+            </p>
+            <div>
+                <p>
+                    <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <thead>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="9">ACV Values for 34465A and 34470A DMMs</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" colspan="3">Input</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Vrms</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Frequency</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Filter</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 40 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 70 µV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 80 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 80 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 90 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 100 µV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 110 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 1.1 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">1 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">1 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 400 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 600 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 700 µV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 800 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 800 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 900 µV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 1 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 1.1 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center" colspan="4">± 11 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">0.03 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="8">10 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 2 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2.2 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2.4 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 2.5 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 2.6 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">10 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="3">± 4 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="3"> ± 6 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="3">± 7 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" rowspan="3"> ± 8 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">20 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">20 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 8 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 10 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 11 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 20 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 110 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 40 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 70 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 80 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 80 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 90 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 100 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 110 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">70 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">300 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center" colspan="4">± 800 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">750 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">750 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 750 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 900 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 975 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 1.1 V</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">210 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">50 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 330 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 351 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 372 mV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 393 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">70 V</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">300 kHz</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyA-Column1-Body1" style="text-align: center" colspan="4">± 1.5 V</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="Indented3"><b>Q</b><i>: <span style="font-size: 9pt;">Quick performance verification test point.</span></i>
+                    </p>
+                </p>
+            </div>
+            <p>
+                <div>
+                    <table style="mc-table-style: url('../CalTable.css');border-left-style: solid;border-left-width: 1px;border-left-color: #000000;border-right-style: solid;border-right-width: 1px;border-right-color: #000000;border-top-style: solid;border-top-width: 1px;border-top-color: #000000;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #000000;" class="TableStyle-CalTable" cellspacing="0">
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <thead>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="9">ACI Values for 34465A and 34470A DMMs</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" colspan="3">Input</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Current, rms</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Frequency</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Filter</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">2 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">3 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4" rowspan="2">
+                                    <p colspan="4" rowspan="2">± 5.8 mA</p>
+                                </td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2" style="text-align: center;">± 1.1 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2" style="text-align: center;">± 1.3 mA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="2" rowspan="2" style="text-align: center;">± 1.4 mA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="3">100 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="3">
+                                    <p rowspan="3">± 110 µA</p>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="3">
+                                    <p rowspan="3">± 130 µA</p>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="2" style="text-align: center;" rowspan="3">
+                                    <p colspan="2" rowspan="3">± 140 µA</p>
+                                </td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">
+                                </td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">
+                                    <p><b>Q</b>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="4">10 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="4">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 4.1 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 4.7 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 4.9 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="2" style="text-align: center;">± 5 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">10 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="2">± 11 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="2">± 13 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="2" style="text-align: center;" rowspan="2">± 14 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">1 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="2">± 1.1 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" rowspan="2">± 1.3 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="2" style="text-align: center;" rowspan="2">± 1.4 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 kHz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">100 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2">200 Hz</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2" style="text-align: center;">± 0.110 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="2" style="text-align: center;">± 0.130 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="2" rowspan="2" style="text-align: center;">± 0.140 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">5 kHz</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">&#160;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="Indented3"><b>Q</b><i>: <span style="font-size: 9pt;">Quick performance verification test point.</span></i>
+                    </p>
+                </div>
+            </p>
+        </div>
+        
+    </body>
+</html>

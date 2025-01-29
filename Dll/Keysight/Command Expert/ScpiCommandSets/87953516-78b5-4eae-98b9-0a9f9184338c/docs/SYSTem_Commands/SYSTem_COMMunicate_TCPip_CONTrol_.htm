@@ -1,0 +1,143 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>SYSTem:COMMunicate:TCPip:CONTrol?</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+-->
+</style>
+</head>
+<body>
+<h1>SYSTem:COMMunicate:TCPip:CONTrol?</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_system_comm_tcpip">Syntax</a></font> 
+ | <a href="#Description_system_comm_tcpip">Description</a> | <span class="hcp1">Parameters</span> 
+ | <span class="hcp1"><a href="#Remarks_system_comm_tcpip">Remarks</a></span> 
+ | <a href="#Return_system_comm_tcpip">Return Format</a> | <a href="#Example_system_comm_tcpip">Example</a></p>
+
+<h2><a name=Syntax_system_comm_tcpip></a>Syntax</h2>
+
+<p class=CmdSyntax>SYSTem:COMMunicate:TCPip:CONTrol? </p>
+
+<h2><a name=Description_system_comm_tcpip></a>Description</h2>
+
+<p class=Indented1>This query returns the control connection port number. 
+ This is used to open a control socket connection to the instrument. Unlike 
+ the data socket, which uses a fixed port number (5025 for Agilent instruments), 
+ the port number for a control socket varies, and must be obtained using 
+ this query. </p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr style="x-cell-content-align: top;"
+	valign=top>
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>Refer to chapter 3 of the User's Guide under “Using Sockets” for more 
+ information.</td></tr>
+</table>
+
+<h2><a name=Remarks_system_comm_tcpip></a>Remarks</h2>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p><p>After the control port number is obtained, a control 
+ socket connection can be opened. </p></li>
+	
+	<li class=kadov-p><p>The control socket connection can only be used 
+ by a client to send a Device Clear to the instrument or to detect Service 
+ Request (SRQ) events. </p></li>
+	
+	<li class=kadov-p><p>All commands to the control socket must be terminated 
+ with a newline &lt;NL&gt;, and all query responses returned on the control 
+ socket will be terminated with a newline.</p></li>
+</ul>
+
+<h2><a name=Return_system_comm_tcpip></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The Control connection port number.</p>
+
+<h2><a name=Example_system_comm_tcpip></a>Example</h2>
+
+<p class=Indented1>The following query returns the Control connection port 
+ number.</p>
+
+<p class=Shaded>SYST:COMM:TCP:CONT?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> +5000</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+<p class=IndentTight>&nbsp;</p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

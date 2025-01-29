@@ -1,0 +1,2 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<HelpSystem DefaultUrl="_Home_Page/welcome.htm" Alias="Content/Data/Alias.xml" Skin="Data/SkinKeysightHelp/Skin.xml" Skins="KeysightHelp" BuildTime="2/23/2015 4:59:06 PM" BuildVersion="10.2.2.0" TargetType="HtmlHelp" SkinTemplateFolder="Skin/" InPreviewMode="false" MoveOutputContentToRoot="false" MakeFileLowerCase="false" UseCustomTopicFileExtension="false" />

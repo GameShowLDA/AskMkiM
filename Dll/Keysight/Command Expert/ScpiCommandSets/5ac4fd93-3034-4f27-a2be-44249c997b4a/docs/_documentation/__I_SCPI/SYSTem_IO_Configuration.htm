@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>SYSTem Subsystem - I/O Configuration</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor531"></a>SYSTem Subsystem - I/O Configuration</h1>
+        <p>The SYSTem subsystem includes <a href="SYSTem_General%20Commands.htm">general instrument configuration commands</a>, <a href="SYSTem_LOCK_Subsystem.htm">I/O locking commands</a>, <a href="SYSTem_LICense_Subsystem.htm">license management commands</a>, and remote interface configuration commands (listed below).</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#SYSTem_COMMunicate_ENABle">SYSTem:COMMunicate:ENABle</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_GPIB_ADDRess">SYSTem:COMMunicate:GPIB:ADDRess</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_CONTrol">SYSTem:COMMunicate:LAN:CONTrol?</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_DHCP">SYSTem:COMMunicate:LAN:DHCP</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_DNS">SYSTem:COMMunicate:LAN:DNS[{1|2}]</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_DOMain">SYSTem:COMMunicate:LAN:DOMain?</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_GATeway">SYSTem:COMMunicate:LAN:GATeway</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_HOSTname">SYSTem:COMMunicate:LAN:HOSTname</a>
+        </p>
+        <p><a href="#SYSTem_COMMunicate_LAN_IPADdress">SYSTem:COMMunicate:LAN:IPADdress</a>
+        </p>
+        <p><a href="#MAC">SYSTem:COMMunicate:LAN:MAC?</a>
+        </p>
+        <p><a href="#SMASk">SYSTem:COMMunicate:LAN:SMASk</a>
+        </p>
+        <p><a href="#TELN-PROMpt">SYSTem:COMMunicate:LAN:TELNet:PROMpt</a>
+        </p>
+        <p><a href="#TELN-WMESsage">SYSTem:COMMunicate:LAN:TELNet:WMESsage</a>
+        </p>
+        <p><a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a>
+        </p>
+        <p><a href="#WINS">SYSTem:COMMunicate:LAN:WINS[{1|2}]</a>
+        </p>
+        <p><a href="#USB-HOST-ENAB">SYSTem:USB:HOST:ENABle</a>
+        </p>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor532"></a><a name="SYSTem_COMMunicate_ENABle"></a>SYSTem:COMMunicate:ENABle  {ON|1|OFF|0},  &lt;<i>interface</i>&gt;<br />SYSTem:COMMunicate:ENABle?  &lt;<i>interface</i>&gt;</h2>
+            <p>Disables or enables the GPIB, USB, or LAN remote interface. Also disables or enables available remote services such as Sockets, HiSLIP, Telnet, VXI11, and the built-in Web Interface.</p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-right-style: none;border-right-width: 0px;border-top-style: none;border-top-width: 0px;border-bottom-style: none;border-bottom-width: 0px;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">The GPIB interface is an optional feature. See <a href="../__A_Preliminary%20Information/02%20-%20Models%20and%20Options.htm">Models and Options</a> for details.</td>
+                    </tr>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.&#160;for all interfaces</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1" rowspan="2">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">&lt;<i>interface</i>&gt;:  {GPIB|HISLip|USB|LAN|SOCKets|TELNet|VXI11|WEB|USBMtp|USBHost}</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Disable the USB interface:<br /><br />SYST:COMM:ENAB OFF,USB</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">After making changes, you must cycle instrument power for the changes to take effect.</li>
+                <li class="IndentTight" value="2">Enabling USBMtp allows you to transfer files, using media transfer protocol (MTP), from the instrument to a PC via the rear-panel USB port. See <a href="../__E_Features%20and%20Functions/63%20Utility-IO%20Config.htm#MTP">Utility Menu - I/O Configuration</a> for more information on MTP. </li>
+                <li class="IndentTight" value="3">The USBHost parameter refers to the instrument's front panel USB port.</li>
+                <li class="IndentTight" value="4">If you disable the LAN interface, none of the associated LAN services will be started when you power on the instrument.</li>
+                <li class="IndentTight" value="5"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> enables all interfaces except USBMtp.</li>
+                <li class="IndentTight" value="6">For HiSLIP, LAN, SOCKets, TELNet, VXI11, or WEB on the 34460A, you must have option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="7">The interface enable settings are stored in nonvolatile memory. They do not change when power has been off, after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or after an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor533"></a><a name="SYSTem_COMMunicate_GPIB_ADDRess"></a>SYSTem:COMMunicate:GPIB:ADDRess  &lt;<i>address</i>&gt;<br />SYSTem:COMMunicate:GPIB:ADDRess?</h2>
+            <p>Assigns instrument's GPIB (IEEE-488) address, which is displayed at power-on. Each device on the GPIB interface must have a unique address.</p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">The GPIB interface is an optional feature. See <a href="../__A_Preliminary%20Information/02%20-%20Models%20and%20Options.htm">Models and Options</a> for details.</td>
+                    </tr>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">0&#160;to&#160;30,&#160;default&#160;22</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+15</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set GPIB address to 15:<br /><br />SYST:COMM:GPIB:ADDR 15</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Your computer's GPIB interface card has its own address. Avoid using this address for any instrument on the GPIB bus.</li>
+                <li class="IndentTight" value="2">Cycle power for this command to take effect.</li>
+                <li class="IndentTight" value="3">GPIB is enabled or disabled by <a href="#SYSTem_COMMunicate_ENABle">SYSTem:COMMunicate:ENABle</a>.</li>
+                <li class="IndentTight" value="4">The GPIB interface is an optional feature. See <a href="../__A_Preliminary%20Information/02%20-%20Models%20and%20Options.htm">Models and Options</a> for details.</li>
+                <li class="IndentTight" value="5">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="6">This parameter is set to its default value when the instrument is shipped from the factory and after <a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <div>
+                <h2 style="font-size: 14px;"><a name="kanchor534"></a><a name="SYSTem_COMMunicate_LAN_CONTrol"></a>SYSTem:COMMunicate:LAN:CONTrol?</h2>
+                <p>Reads the initial Control connection port number for Sockets communications. This connection is used to send and receive commands and queries.</p>
+                <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">5000 (0 if the interface does not support sockets)</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the Control connection port number:<br /><br />SYST:COMM:LAN:CONT?</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul type="disc" class="UL_Disc">
+                    <li class="IndentTight" value="1"><a name="kanchor535"></a><a name="kanchor536"></a>Use the Control socket connection to send a Device Clear (DCL) to the instrument or to detect pending Service Request (SRQ) events.</li>
+                    <li class="IndentTight" value="2">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                </ul>
+            </div>
+            <h2 style="font-size: 14px;"><a name="kanchor537"></a><a name="SYSTem_COMMunicate_LAN_DHCP"></a>SYSTem:COMMunicate:LAN:DHCP  {ON|1|OFF|0}<br />SYSTem:COMMunicate:LAN:DHCP?</h2>
+            <p>Disables or enables instrument's use of DHCP. The acronym DHCP stands for Dynamic Host Configuration Protocol, a protocol for assigning dynamic IP addresses to networked devices. With dynamic addressing, a device can have a different IP address every time it connects to the network.</p>
+            <p class="IndentTight"><b>ON:</b> instrument tries to obtain an IP address from a DHCP server. If a DHCP server is found, it assigns a dynamic <a href="#SYSTem_COMMunicate_LAN_IPADdress">IP address</a>, <a href="#SMASk">Subnet Mask</a>, and <a href="#SYSTem_COMMunicate_LAN_GATeway">Default Gateway</a> to the instrument.</p>
+            <p class="IndentTight"><b>OFF or DHCP unavailable:</b> instrument uses the static IP address, Subnet Mask, and Default Gateway during power-on.<br /></p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Disable DHCP:<br /><br />SYST:COMM:LAN:DHCP OFF<br />SYST:COMM:LAN:UPDate</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Most corporate LANs have a DHCP server.</li>
+                <li class="IndentTight" value="2"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+                <li class="IndentTight" value="3">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="4">If a DHCP LAN address is not assigned by a DHCP server, then an Auto-IP address is obtained after approximately 2 minutes. An Auto-IP address has the form 169.254.nnn.nnn.</li>
+                <li class="IndentTight" value="5">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor538"></a><a name="SYSTem_COMMunicate_LAN_DNS"></a>SYSTem:COMMunicate:LAN:DNS[{1|2}]  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:DNS[{1|2}]? [{CURRent|STATic}]</h2>
+            <p>Assigns static IP addresses of Domain Name System (DNS) servers. A primary and a secondary server address may be assigned. If DHCP is available and enabled, DHCP will auto-assign these server addresses. These auto-assigned server addresses take precedence over the static addresses assigned with this command. Contact your LAN administrator for details.</p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Command: "<a href="#DotNotationDetails">nnn.nnn.nnn.nnn</a>". Default: "0.0.0.0".</p>
+                            <p>Query: {CURRent|STATic}. Default: CURRent.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"198.105.232.4"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set a static primary DNS address:<br /><br />SYST:COMM:LAN:DNS "198.105.232.4"<br />SYST:COMM:LAN:UPD<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"><b>CURRent:</b> returns address currently being used by the instrument.</li>
+                <li class="IndentTight" value="2"><b>STATic:</b> returns static address from non-volatile memory. This address is used if DHCP is disabled or unavailable.</li>
+                <li class="IndentTight" value="3"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+                <li class="IndentTight" value="4">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="5">The assigned DNS server addresses are used if DHCP is disabled or unavailable. Otherwise, the DNS server addresses are auto-assigned by DHCP.</li>
+                <li class="IndentTight" value="6">The DNS server addresses are stored in nonvolatile memory. They do not change when power has been off, after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or after an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor539"></a><a name="SYSTem_COMMunicate_LAN_DOMain"></a>SYSTem:COMMunicate:LAN:DOMain?</h2>
+        <div>
+            <p>Returns the domain name assigned to the instrument.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"example.com"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the domain name being used by the instrument:<br />SYST:COMM:LAN:DOM?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">If Dynamic Domain Name System (DNS) is available on your network and your instrument uses <a href="#SYSTem_COMMunicate_LAN_DHCP">DHCP</a>, the domain name is assigned by the Dynamic DNS service at power-on.</li>
+                <li class="IndentTight" value="2">A null string ("") indicates that no domain name is assigned.</li>
+                <li class="IndentTight" value="3">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor540"></a><a name="SYSTem_COMMunicate_LAN_GATeway"></a>SYSTem:COMMunicate:LAN:GATeway  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:GATeway? [{CURRent|STATic}]]</h2>
+            <p>Assigns a default gateway for the instrument. The specified IP Address sets the default gateway, which allows the instrument to communicate with systems that are not on the local subnet. Thus, this is the default gateway where packets are sent that are destined for a device not on the local subnet, as determined by the <a href="#SMASk">Subnet Mask</a> setting. Contact your LAN administrator for details.</p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Command: "<a href="#DotNotationDetails">nnn.nnn.nnn.nnn</a>". Default: "0.0.0.0".</p>
+                            <p>Query: {CURRent|STATic}. Default: CURRent.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"198.105.232.1"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set default gateway address:<br /><br />SYST:COMM:LAN:GATEWAY "198.105.232.1"<br />SYST:COMM:LAN:UPD<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"><b>CURRent:</b> returns address currently being used by the instrument.</li>
+                <li class="IndentTight" value="2"><b>STATic:</b> returns static address from non-volatile memory. This address is used if DHCP is disabled or unavailable.</li>
+                <li class="IndentTight" value="3"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+                <li class="IndentTight" value="4">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="5">If DHCP is enabled (<a href="#SYSTem_COMMunicate_LAN_DHCP">SYSTem:COMMunicate:LAN:DHCP ON</a>), the specified default gateway is not used. However, if the DHCP server fails to assign a valid <a href="#SYSTem_COMMunicate_LAN_IPADdress">IP address</a>, the currently configured default gateway is used.</li>
+                <li class="IndentTight" value="6">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor541"></a><a name="SYSTem_COMMunicate_LAN_HOSTname"></a>SYSTem:COMMunicate:LAN:HOSTname  "&lt;<i>name</i>&gt;"<br />SYSTem:COMMunicate:LAN:HOSTname? [{CURRent|STATic}]]</h2>
+            <p class="IndentTight">Assigns a hostname to the instrument. A hostname is the host portion of the domain name, which is translated into an IP address. If Dynamic Domain Name System (Dynamic DNS) is available on your network and your instrument uses DHCP, the hostname is registered with the Dynamic DNS service at power-on. If DHCP is enabled (SYSTem:COMMunicate:LAN:DHCP ON), the DHCP server can change the specified hostname.</p>
+            <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tr style="height: 16px;" valign="top">
+                    <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                        <p>
+                            <img src="../_Graphics_/note.gif" alt="Note" />
+                        </p>
+                    </td>
+                    <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                        <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                    </td>
+                </tr>
+            </table>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>String of up to 15 characters.<br />Must start with letter (A-Z)<br />May contain letters, numbers (0-9), or dashes ("-")</p>
+                            <p>Default: "K-<i>&lt;instrument model number&gt;</i>-nnnnn", where <b>nnnnn</b> is the last five digits of the instrument's serial number.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"LAB1-34461A"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Define a hostname:<br /><br />SYST:COMM:LAN:HOST "LAB1-DMM"<br />SYST:COMM:LAN:UPD</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">If no hostname exists, a null string ("") is returned.</li>
+                <li class="IndentTight" value="2">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="3">For the query form, specify "CURRent" (default) to read the value currently being used by the instrument. Specify "STATic" to read the host name currently stored in nonvolatile memory within the instrument (may not be the actual name used by the instrument if DHCP is enabled).</li>
+                <li class="IndentTight" value="4">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="5">This parameter is set to its default value when the instrument is shipped from the factory and after <a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor542"></a><a name="SYSTem_COMMunicate_LAN_IPADdress"></a>SYSTem:COMMunicate:LAN:IPADdress  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:IPADdress? [{CURRent|STATic}]]</h2>
+            <p>Assigns a static Internet Protocol (IP) address for the instrument. If DHCP is enabled (SYSTem:COMMunicate:LAN:DHCP ON), the specified static IP address is not used. Contact your LAN administrator for details.<br /></p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Command: "<a href="../__E_Features%20and%20Functions/03%20LAN%20Configuration%20Procedure.htm#More_about_IP_Addresses_and_Dot_Notation">nnn.nnn.nnn.nnn</a>"</p>
+                            <p>Query: {CURRent|STATic}. Default: CURRent.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"169.254.149.35"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set a static IP address:<br /><br />SYST:COMM:LAN:IPAD "169.254.149.35"<br />SYST:COMM:LAN:UPD</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+            </ul>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2">For the query form, specify "CURRent" (default) to read the value currently being used by the instrument. Specify "STATic" to read the value currently stored in nonvolatile memory within the instrument (may not be the actual address used by the instrument if DHCP is enabled).</li>
+                <li class="IndentTight" value="3">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value when the instrument is shipped from the factory and after <a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor543"></a><a name="MAC"></a>SYSTem:COMMunicate:LAN:MAC?</h2>
+            <p>Returns the instrument's Media Access Control (MAC) address as an ASCII string of 12 hexadecimal characters (0-9 and A-F) enclosed in quotation marks.</p>
+            <p>
+                <table cellspacing="0" style="margin-left: 0;margin-right: auto;">
+                    <col />
+                    <col />
+                    <tr>
+                        <td>
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;padding-left: 2px;padding-right: 2px;padding-top: 2px;padding-bottom: 2px;border-left-style: none;border-right-style: none;border-top-style: none;border-bottom-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </td>
+                        <td>
+                            <p>Your LAN administrator may need the MAC address to assign a static IP address for this device.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"0030D3001041"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the MAC address:<br /><br />SYST:COMM:LAN:MAC?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2">The MAC address is also known as the link-layer address, the Ethernet (station) address, LANIC ID or Hardware Address. This is an unchangeable 48-bit address assigned by the manufacturer to each unique Internet device.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor544"></a><a name="SMASk"></a>SYSTem:COMMunicate:LAN:SMASk  "&lt;<i>mask</i>&gt;"<br />SYSTem:COMMunicate:LAN:SMASk? [{CURRent|STATic}]]</h2>
+            <p>Assigns a subnet mask for the instrument to use in determining whether a client IP address is on the same local subnet. When a client <a href="#SYSTem_COMMunicate_LAN_IPADdress">IP address</a> is on a different subnet, all packets must be sent to the <a href="#SYSTem_COMMunicate_LAN_GATeway">Default Gateway</a>. Contact your LAN administrator for details.</p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Command: "<a href="../__E_Features%20and%20Functions/03%20LAN%20Configuration%20Procedure.htm#More_about_IP_Addresses_and_Dot_Notation">nnn.nnn.nnn.nnn</a>". Default: "255.255.0.0".</p>
+                            <p>Query: {CURRent|STATic}. Default: CURRent.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"255.255.255.0"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set the subnet mask:<br /><br />SYST:COMM:LAN:SMAS "255.255.255.0"<br />SYST:COMM:LAN:UPD</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2">If DHCP is enabled (<a href="#SYSTem_COMMunicate_LAN_DHCP">SYSTem:COMMunicate:LAN:DHCP ON</a>), the specified subnet mask is not used. However, if the DHCP server fails to assign a valid IP address, the instrument uses the Auto-IP subnet mask.</li>
+                <li class="IndentTight" value="3">A value of "0.0.0.0" or "255.255.255.255" indicates that subnetting is not being used.</li>
+                <li class="IndentTight" value="4"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+                <li class="IndentTight" value="5"><b>CURRent:</b> returns address currently being used by the instrument.</li>
+                <li class="IndentTight" value="6"><b>STATic:</b> returns static address from non-volatile memory. This address is used if DHCP is disabled or unavailable.</li>
+                <li class="IndentTight" value="7">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor545"></a><a name="TELN-PROMpt"></a>SYSTem:COMMunicate:LAN:TELNet:PROMpt  "&lt;<i>string</i>&gt;"<br />SYSTem:COMMunicate:LAN:TELNet:PROMpt?</h2>
+            <p>Sets the command prompt seen when communicating with the instrument via Telnet.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>String of up to 15 characters</p>
+                            <p>Default is Instrument Model Number: <b>34460A&gt;</b>, <b>34461A&gt;</b>,<b> 34465A&gt;</b>, or <b> 34470A&gt;</b></p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"Command&gt;"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set the command prompt:<br /><br />SYST:COMM:LAN:TELN:PROM "Command&gt;"</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2">The instrument uses LAN port 5024 for SCPI Telnet sessions and port 5025 for SCPI Socket sessions.</li>
+                <li class="IndentTight" value="3">Telnet sessions are typically started from a host computer shell:<br /><br />&#160;&#160;&#160;&#160;telnet &lt;<i>IP_address</i>&gt; &lt;<i>port</i>&gt;<br /><br />For example:<br /><br /><span class="CourierNew">&#160;telnet 169.254.4.10 5024</span><br /><br />                To exit a Telnet session, press &lt;<b>Ctrl-D</b>&gt;.</li>
+                <li class="IndentTight" value="4">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="5"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor546"></a><a name="TELN-WMESsage"></a>SYSTem:COMMunicate:LAN:TELNet:WMESsage  "&lt;<i>string</i>&gt;"<br />SYSTem:COMMunicate:LAN:TELNet:WMESsage?</h2>
+            <p>Sets welcome message seen when communicating with instrument via Telnet.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Quoted string of up to 63 characters.</p>
+                            <p>Default: <b>"Welcome to Keysight's <i>&lt;instrument model number&gt;</i> Digital Multimeter"</b></p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"Welcome to the Telnet Session"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Define a welcome message:<br /><br />SYST:COMM:LAN:TELN:WMES "Welcome to the Telnet Session"</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2">The instrument uses LAN port 5024 for SCPI Telnet sessions and port 5025 for SCPI Socket sessions.</li>
+                <li class="IndentTight" value="3">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="4"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor547"></a><a name="UPDate"></a>SYSTem:COMMunicate:LAN:UPDate</h2>
+            <p>Stores any changes made to the LAN settings into non-volatile memory and restarts the LAN driver with the updated settings.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">(see below)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2"> Must be sent after changing the settings for DHCP, DNS, gateway, hostname, IP address, subnet mask, or WINS.</li>
+                <li class="IndentTight" value="3">Make all changes to the LAN settings before sending this command.</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;">Example</h2>
+        <div>
+            <p class="Indented1">The following example configures the instrument to use statically assigned LAN settings.</p>
+            <p class="Shaded">SYST:COMM:LAN:DHCP OFF<br />SYST:COMM:LAN:DNS "198.105.232.4"<br />SYST:COMM:LAN:DNS2 "198.105.232.5"<br />SYST:COMM:LAN:GAT "198.105.232.1"<br />SYST:COMM:LAN:HOST "LAB1-DMM"<br />SYST:COMM:LAN:IPAD "198.105.232.101"<br />SYST:COMM:LAN:SMAS "255.255.255.0"<br />SYST:COMM:LAN:WINS "198.105.232.4"<br />SYST:COMM:LAN:WINS "198.105.232.5"<br />SYST:COMM:LAN:UPD</p>
+            <p class="Indented1">The following example configures the instrument back to use DHCP.</p>
+            <p class="Shaded">SYST:COMM:LAN:DHCP ON<br />SYST:COMM:LAN:UPD</p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor548"></a><a name="WINS"></a>SYSTem:COMMunicate:LAN:WINS[{1|2}] "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:WINS[{1|2}]? [{CURRent|STATic}]</h2>
+            <p>Assigns the static IP addresses of the Windows Internet Name System (WINS) servers. A primary and a secondary server address may be assigned. If DHCP is available and enabled, DHCP will auto-assign these server addresses. These auto-assigned server addresses take precedence over the static addresses assigned with this command. Contact your LAN administrator for details.</p>
+            <p>
+                <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr style="height: 16px;" valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>If you change this setting, you must send <a href="#UPDate">SYSTem:COMMunicate:LAN:UPDate</a> to activate the new setting.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Command: "<a href="#DotNotationDetails">nnn.nnn.nnn.nnn</a>". Default: "0.0.0.0".</p>
+                            <p>Query: {CURRent|STATic}. Default: CURRent.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"198.105.232.4"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set a static primary WINS address:<br /><br />SYST:COMM:LAN:WINS "198.105.232.4"<br />SYST:COMM:LAN:UPD</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">On the 34460A, this requires option 34460A-LAN or option 3446LANU.</li>
+                <li class="IndentTight" value="2">The WINS addresses are stored in nonvolatile memory. They do not change when power has been off, after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or after an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="3"><a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a> sets this parameter to its default value.</li>
+                <li class="IndentTight" value="4"><b>CURRent:</b> returns address currently being used by the instrument.</li>
+                <li class="IndentTight" value="5"><b>STATic:</b> returns static address from non-volatile memory. This address is used if DHCP is disabled or unavailable.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor549"></a><a name="USB-HOST-ENAB"></a>SYSTem:USB:HOST:ENABle  {ON|1|OFF|0}<br />SYSTem:USB:HOST:ENABle?</h2>
+            <p>Disables or enables the front panel USB host port. Calibration security must be unsecured (<a href="CALibration_Subsystem.htm#CALibration_SECure_STATe">CALibration:SECure:STATe &lt;<i>code</i>&gt;,OFF</a>) before sending this command.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Disable the USB host port:</p>
+                            <p colspan="2">
+                                <br />CAL:SEC:STAT OFF,MY_CAL_CODE<br />SYST:USB:HOST:ENAB OFF<br />CAL:SEC:STAT ON<br /></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This feature requires the SEC licensed option. This option can be ordered as factory option or as customer-installable option.  See <a href="../__A_Preliminary%20Information/02%20-%20Models%20and%20Options.htm">Models and Options</a> for details. Without this option, the front panel USB interface is always enabled.</li>
+                <li class="IndentTight" value="2">If the front panel USB host port is disabled, it cannot be used to store or load measurements, state files, preferences or other files or to perform firmware update.</li>
+                <li class="IndentTight" value="3">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

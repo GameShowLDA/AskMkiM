@@ -1,0 +1,254 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>SENSe:WINDow[:TYPE]</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+table.hcp1 { x-cell-content-align:top; margin-left:18pt; border-spacing:0px; }
+tr.hcp2 { x-cell-content-align:top; }
+td.hcp3 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp4 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp5 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>SENSe:WINDow[:TYPE]</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_sens_window">Syntax</a></font> 
+ | <a href="#Description_sens_window">Description</a> | <a href="#Parameters_sens_window">Parameters</a> 
+ | Remarks | <a href="#Return_sens_window">Return Format</a> | <a href="#Example_sens_window">Examples</a></p>
+
+<h2><a name=Syntax_sens_window></a>Syntax</h2>
+
+<p class=CmdSyntax>SENSe:WINDow[:TYPE] &lt;window&gt;, (@&lt;<span class=CmdItalics
+	style="font-style: normal;">chanlist</span><span class=CmdItalics>&gt;</span>)</p>
+
+<p class=CmdSyntax>SENSe:WINDow[:TYPE]? (@&lt;<span class=CmdItalics
+													style="font-style: normal;">chanlist</span><span 
+ class=CmdItalics>&gt;</span>)</p>
+
+<h2><a name=Description_sens_window></a>Description</h2>
+
+<p class=Indented1>This command sets the window function used in DC measurement 
+ calculations on models that have measurement controls. Select from the 
+ following window types:</p>
+
+<table x-use-null-cells style="width:94.093%;" cellspacing="0" width="94.093%" class="hcp1">
+<col style="width: 17.205%;">
+<col style="width: 82.795%;">
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;
+			border-top-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">HANNing</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-top-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody
+	style="margin-right: 0px;">A signal conditioning window that reduces 
+ errors in DC measurement calculations in the presence of periodic signals 
+ such as AC line ripple. The Hanning window multiplies each point in the 
+ sample by the function cosine<span style="vertical-align: Super;">4</span>.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">RECTangular</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody>A window that returns measurement calculations with 
+ no signal conditioning.</td></tr>
+</table>
+
+<p class=Indented1>Note that neither window function alters the instantaneous 
+ voltage or current data returned in the measurement array.</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp2">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>This command is used only with models N6761A/N6762A, or models that 
+ have Option 054 (High Speed Test Extensions).</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_sens_window></a>Parameters</h2>
+
+<table x-use-null-cells style="width:80.163%;" cellspacing="0" width="80.163%" class="hcp1">
+<col style="width: 15.787%;">
+<col style="width: 11.387%;">
+<col style="width: 44.403%;">
+<col style="width: 28.422%;">
+
+<tr style="height:18px;" valign="top" class="hcp2">
+<td style="width: 15.787%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=15.787%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:11.387%;" bgcolor="#E9E9E9" width="11.387%" class="hcp3">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:44.403%;" bgcolor="#E9E9E9" width="44.403%" class="hcp3">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:28.422%;" bgcolor="#E9E9E9" width="28.422%" class="hcp3">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width:15.787%;" width="15.787%" class="hcp4">
+<p class=TableBody>&lt;window&gt;</td>
+<td style="width:11.387%;" width="11.387%" class="hcp5">
+<p class=TableBody>CPD</td>
+<td rowspan="1" colspan="1" style="width:44.403%;" width="44.403%" class="hcp5">
+<p class=TableBody
+	id=p1>HANNing|RECTangular</td>
+<td rowspan="1" colspan="1" style="width:28.422%;" width="28.422%" class="hcp5">
+<p class=TableBody>RECTangular</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp2">
+<td style="width:15.787%;" width="15.787%" class="hcp4">
+<p class=TableBody>&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span>&gt;</td>
+<td style="width:11.387%;" width="11.387%" class="hcp5">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:44.403%;" width="44.403%" class="hcp5">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:28.422%;" width="28.422%" class="hcp5">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_sens_window></a>Return Format</h2>
+
+<p class=Indented1>&lt;CRD&gt;</p>
+
+<p class=Indented1>The query command returns the window setting for each 
+ channel specified. Multiple responses are separated by commas.</p>
+
+<h2><a name=Example_sens_window></a>Examples</h2>
+
+<p class=Indented1>The following command specifies a RECTangular measurement 
+ window for channel 3. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">SENS:WIND RECT,(@3)</p>
+
+<p class=Indented1>The following query returns the measurement window for 
+ channel 1. </p>
+
+<p class=Shaded>SENS:WIND? (@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;RECT</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

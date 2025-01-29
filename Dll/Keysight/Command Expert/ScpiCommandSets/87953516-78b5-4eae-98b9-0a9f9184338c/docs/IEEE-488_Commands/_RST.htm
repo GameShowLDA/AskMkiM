@@ -1,0 +1,63 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>*RST</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+-->
+</style>
+</head>
+<body>
+<h1>*RST</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_rst">Syntax</a></font> 
+ | <a href="#Description_rst">Description</a> | <span class="hcp1">Parameters</span> 
+ | <a href="#Remarks_rst">Remarks</a> | <span class="hcp1">Return 
+ Format</span> | <a href="#Example_rst">Example</a></p>
+
+<h2><a name=Syntax_rst></a>Syntax</h2>
+
+<p class=CmdSyntax>*RST</p>
+
+<h2><a name=Description_rst></a>Description</h2>
+
+<p class=Indented1>This command resets the volatile memory of the instrument 
+ to a factory-defined state. &nbsp;See 
+ <a href="../Home_Page/Reset_Settings.htm">Factory Reset State</a> for 
+ a complete listing of the instrument's factory configuration. </p>
+
+<h2><a name=Remarks_rst></a>Remarks</h2>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p><p>*RST also forces the ABORt:ACQuire and ABORt:TRANsient 
+ commands. This cancels any measurement or output trigger actions presently 
+ in process, and resets the two WTG bits in the Status Operation Condition 
+ register.</p></li>
+</ul>
+
+<h2><a name=Example_rst></a>Example</h2>
+
+<p class=Indented1>The following command resets the instrument. &nbsp;</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">*RST</p>
+
+<h2><a name=See_rst></a>See Also</h2>
+
+<p class=IndentTight><a href="../ABORt_Commands/ABORt_ACQuire.htm">ABORt:ACQuire</a></p>
+
+<p class=IndentTight><a href="../ABORt_Commands/ABORt_TRANsient.htm">ABORt:TRANsient</a></p>
+
+</body>
+</html>

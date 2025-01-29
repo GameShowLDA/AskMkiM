@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Measurement Tutorial" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Resistance Measurement Considerations</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor70"></a>Resistance Measurement Considerations</h1>
+        <p>The multimeter offers two resistance measurements: 2-wire and 4-wire ohms. For both methods, the test current flows from the input HI terminal, through the resistor being measured. For 2-wire ohms, the voltage drop across the resistor being measured is sensed internal to the multimeter. Therefore, test lead resistance is also measured. For 4-wire ohms, separate "sense" connections are required. Because no current flows in the sense leads, the resistance in these leads does not give a measurement error.</p>
+        <table style="mc-table-style: url('../NoteTable.css');" class="TableStyle-NoteTable" cellspacing="0">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tbody>
+                <tr>
+                    <td class="TableStyle-NoteTable-BodyB-Column1-">
+                        <img src="../_Graphics_/note.gif" />
+                    </td>
+                    <td class="TableStyle-NoteTable-BodyA-Column1-">The errors mentioned earlier in this chapter for DC voltage measurements also apply to resistance measurements. Additional error sources unique to resistance measurements are discussed below.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>The 4-wire ohms method provides the most accurate way to measure small resistances because it reduces test lead and contact resistances. This is often used in automated test applications where resistive and/or long cable, numerous connections, or switches exist between the multimeter and the DUT. The recommended connections for 4-wire ohms measurements are shown below. </p>
+        <p>
+            <img src="../_Graphics_/Tutorial%20Drawing%20-%204%20Wire%20Ohms_424x301.png" style="width: 424;height: 301;" />
+        </p>
+        <p>For the 34465A and 34470A, you can also enable offset compensated resistance measurements using <a href="../__I_SCPI/SENSe_RESistanceFRESistance_Subsystem.htm#OCOMp">[SENSe:]{RESistance|FRESistance}:OCOMpensated {OFF|ON}</a>. Offset compensation removes the effects of 
+ small dc voltages in the circuit being measured. The technique involves 
+ taking the difference between two resistance measurements, one with the 
+ current source set to the normal value, and one with the current source 
+ set to a lower value. </p>
+        <h2><a name="kanchor71"></a>Removing Test Lead Resistance Errors</h2>
+        <p>To eliminate offset errors associated with test lead resistance in 2-wire ohms measurements, follow these steps:</p>
+        <p>Short the test lead ends together and read the displayed test lead resistance.</p>
+        <p>Press <b>Null</b>. The multimeter will store the test lead resistance as the 2-wire ohms null value, and subtract that value from subsequent measurements.</p>
+        <p>See also "Null Measurements."</p>
+        <div>
+            <h2><a name="kanchor72"></a>Minimizing Power Dissipation Effects</h2>
+            <p>When measuring resistors designed for temperature measurements (or other resistive devices with large temperature coefficients), be aware that the multimeter will dissipate some power in the DUT. The following table shows several examples.</p>
+            <table style="mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Range</th>
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Standard Test Current</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Power Dissipation in DUT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 G&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">500 nA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">2.5 µW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 M&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">500 nA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">2.5 µW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 M&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">500 nA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">2.5 µW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 M&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">5 µA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">25 µW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 k&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 µA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">10 µW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 k&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 µA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">100 µW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 k&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 mA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">1 mW</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyB-Column1-Body1">100 &#8486;</td>
+                        <td class="TableStyle-RegTable-BodyB-Column1-Body1">1 mA</td>
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1">100 µW</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>If power dissipation is a problem, you should select a higher fixed range (all multimeter models) or, for the 34465A/70A, select the low power resistance measurement mode (see <a href="../__E_Features%20and%20Functions/13%20Resistance.htm">Resistance</a> (front panel), or <a href="../__I_SCPI/SENSe_RESistanceFRESistance_Subsystem.htm#LPOWer">[SENSe:]{RESistance|FRESistance}:POWer:LIMit[:STATe</a>] (remote). The low power mode sources less test current per measurement range than is normally sourced for standard resistance measurements, to reduce power dissipation and self-heating in the DUT. The following table shows the various resistance ranges, the standard test current delivered for 2- and 4-wire resistance measurements, and the low power mode test current.</p>
+            <table style="mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Range</th>
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Standard Test Current</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Low Power Mode Test Current</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 G&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">500 nA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">500 nA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 M&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">500 nA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">500 nA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 M&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">500 nA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">500 nA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 M&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">5 µA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">5 µA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 k&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 µA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">5 µA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 k&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 µA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">10 µA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 k&#8486;</td>
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 mA</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">100 µA</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyB-Column1-Body1">100 &#8486;</td>
+                        <td class="TableStyle-RegTable-BodyB-Column1-Body1">1 mA</td>
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1">100 µA</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2><a name="kanchor73"></a>Errors in High Resistance Measurements</h2>
+            <p>When you are measuring large resistances, significant errors can occur due to insulation resistance and surface cleanliness. You should take the necessary precautions to maintain a "clean" high–resistance system. Test leads and fixtures are susceptible to leakage due to moisture absorption in insulating materials and "dirty" surface films. Nylon and PVC are relatively poor insulators (10<sup>9</sup> &#8486;) when compared to PTFE insulators (10<sup>13</sup> &#8486;). Leakage from nylon or PVC insulators can easily contribute a 0.1% error when measuring a 1 M&#8486; resistance in humid conditions.</p>
+        </div>
+        
+    </body>
+</html>

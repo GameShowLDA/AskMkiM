@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Features and Functions|Utility Menu" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Utility Menu - I/O Configuration</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor58"></a>Utility Menu - I/O Configuration</h1>
+        <p>
+            <img src="../_Graphics_/Util-SK-MainMenu.png" />
+        </p>
+        <p><b>I/O Config</b> configures the I/O parameters for remote operations over the LAN (optional on 34460A), USB, or GPIB (optional) interface.</p>
+        <p>
+            <img src="../_Graphics_/Util-SK-IOConfig.png" />
+        </p>
+        <p><b>LAN</b> enables and disables the instrument's LAN interface, and <b>LAN Reset</b> resets the LAN using its current settings and enables DHCP and mDNS. The <b>LAN Reset</b> softkey also clears any user-defined Web Interface password.</p>
+        <h2>LAN Settings</h2>
+        <p><b>LAN Settings</b> opens the menu shown below. <b>Set to Defaults</b> resets the LAN settings to their default values.</p>
+        <p>
+            <img src="../_Graphics_/Util-SK-LANSettingsMenu.png" />
+        </p>
+        <div>
+            <h3>Modify Settings</h3>
+            <p><b>Modify Settings</b> enables DHCP or Manual (Auto-IP) assignment of the instrument’s IP address. It also enables configuration of network parameters based on the protocol (DHCP or Manual) selected.</p>
+            <p>
+                <img src="../_Graphics_/Util-SK-IOConfModSettings.png" />
+            </p>
+            <p>For example, press <b>Host Name</b> or <b>Service mDNS</b> to modify the instrument's host name or mDNS Service Name, shown below.</p>
+            <p>
+                <img src="../_Graphics_/Util-HostNameScreen.png" />
+            </p>
+        </div>
+        <div>
+            <h3>LAN Services</h3>
+            <p><b>LAN Services</b> enables and disables the LAN services shown below.</p>
+            <p>
+                <img src="../_Graphics_/Util-SK-LANServices.png" />
+            </p>
+            <p>
+                <img src="../_Graphics_/Util-SK-LANServices2.png" />
+            </p>
+            <p>After enabling/disabling one or more services, press <b>Done &gt; Apply Changes</b>. After that, you must cycle instrument power for the new settings to take effect.</p>
+            <p>The Web server enables or disables instrument programming from the instrument’s Web interface.</p>
+            <p>The multicast DNS (mDNS) service is for use in networks where no conventional DNS server is installed. Cycling power or resetting the LAN always enables mDNS.</p>
+            <p>The instrument Telnet port is 5024. Open SCPI sessions on the Telnet connection by entering:</p>
+            <blockquote>
+                <p>telnet <i>IP address</i> 5024</p>
+            </blockquote>
+            <p>Refer to the Keysight IO&#160;Libraries help for information on the VXI-11, Sockets, and HiSLIP protocols.</p>
+            <div>
+                <h2><a name="USBSettings"></a>USB Settings</h2>
+                <p><b>USB Settings</b> configures the front panel USB (storage) and rear-panel USB (connectivity) connectors.</p>
+                <p>
+                    <img src="../_Graphics_/Util-SK-USBMenu.png" />
+                </p>
+                <table class="TableStyle-NoteTable" style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">The SEC licensed option also gives you the ability to enable or disable the front panel USB interface via a <b>USB&#160;Front</b> softkey. This option can be ordered as factory option or as customer-installable option.   See <a href="../__A_Preliminary%20Information/02%20-%20Models%20and%20Options.htm">Models and Options</a> for details. Without this option, the front panel USB interface is always enabled.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div>
+                    <h3>USB SCPI</h3>
+                    <p><b>USB SCPI</b> enables or disables the rear-panel USB control port. After changing the interface state, cycle instrument power to make the change take effect. When disabled, the interface cannot be configured by the Keysight IO Libraries Connection Expert utility.</p>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h3><a name="MTP"></a>Easy File Access (File Access Softkey)</h3>
+            <p><b>Easy File Access</b> uses media transfer protocol (MTP) to easily download instrument files to your PC. Simply connect the rear-panel USB port on the instrument to a USB port on your PC. The DMM will appear as a read-only drive on your PC's file system.</p>
+            <p>
+                <img src="../_Graphics_/FileAccessWindow.png" />
+            </p>
+            <p>You can use your PC's standard file management features to copy files from the DMM to your PC.</p>
+            <table class="TableStyle-NoteTable" style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" cellspacing="0">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tbody>
+                    <tr>
+                        <td class="TableStyle-NoteTable-BodyB-Column1-">
+                            <img src="../_Graphics_/note.gif" />
+                        </td>
+                        <td class="TableStyle-NoteTable-BodyA-Column1-">To use <b>Easy File Access</b> at the same time that you are remotely programming the instrument with SCPI over the USB interface (<b>USB SCPI</b>), you must have Keysight IO Libraries Suite 16.3 or later installed on your PC. You may download the latest version at <a href="http://www.keysight.com/find/iosuite">www.keysight.com/find/iosuite</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>To use <b>Easy File Access</b> on a PC running the Windows XP operating system, make sure you have Microsoft Windows Media Player 11 for Windows XP SP1, or are using a Microsoft Windows XP SP2, SP3, or a newer version of Windows. You may download this software at <a href="http://www.microsoft.com/en-us/download/details.aspx?id=8163">www.microsoft.com/en-us/download/details.aspx?id=8163</a>.</p>
+        </div>
+        <div>
+            <h2>GPIB Settings (optional)</h2>
+            <p><b>GPIB Settings</b> enables or disables your instrument's GPIB interface. </p>
+            <p>When disabled, the interface cannot be configured by the Keysight IO Libraries Connection Expert utility.</p>
+            <p>You can also set GPIB address to a value from 0 to 30. After enabling or disabling GPIB or changing the address, cycle instrument power for the change to take effect.</p>
+            <p>
+                <img src="../_Graphics_/Util-SK-GPIBMenu.png" />
+            </p>
+        </div>
+        
+    </body>
+</html>

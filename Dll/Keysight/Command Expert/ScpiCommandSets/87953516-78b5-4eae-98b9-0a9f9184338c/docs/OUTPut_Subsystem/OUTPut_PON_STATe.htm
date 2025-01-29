@@ -1,0 +1,139 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>OUTPut:PON:STATe</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>OUTPut:PON:STATe</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_output_pon">Syntax</a></font> 
+ | <a href="#Description_output_pon">Description</a> | <a href="#Parameters_output_pon">Parameters</a> 
+ | Remarks | <a href="#Return_output_pon">Return Format</a> | <a href="#Example_output_pon">Example</a></p>
+
+<h2><a name=Syntax_output_pon></a>Syntax</h2>
+
+<p class=CmdSyntax>OUTPut:PON:STATe &lt;state&gt;</p>
+
+<p class=CmdSyntax>OUTPut:PON:STATe?</p>
+
+<h2><a name=Description_output_pon></a>Description</h2>
+
+<p class=Indented1>This command determines if the power-on state is set 
+ to the *RST (RST) state or the instrument state stored in memory location 
+ 0 (RCL0). The parameter is saved in non-volatile memory. Instrument states 
+ can be stored using the *SAV command.</p>
+
+<p class=Indented1>When shipped from the factory, the <a href="../IEEE-488_Commands/_RST.htm">*RST</a> 
+ command is issued at power-on.</p>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_output_pon></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 78.723%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=78.723%>
+<col style="width: 19.863%;">
+<col style="width: 14.327%;">
+<col style="width: 39.523%;">
+<col style="width: 22.885%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 19.863%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=19.863%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:14.327%;" bgcolor="#E9E9E9" width="14.327%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:39.523%;" bgcolor="#E9E9E9" width="39.523%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:22.885%;" bgcolor="#E9E9E9" width="22.885%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width: 19.863%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=19.863%>
+<p class=TableBody>&lt;state&gt;</td>
+<td style="width:14.327%;" width="14.327%" class="hcp3">
+<p class=TableBody>CPD</td>
+<td rowspan="1" colspan="1" style="width:39.523%;" width="39.523%" class="hcp3">
+<p class=TableBody>RST | RCL0</td>
+<td rowspan="1" colspan="1" style="width:22.885%;" width="22.885%" class="hcp3">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_output_pon></a>Return Format</h2>
+
+<p class=Indented1>&lt;CRD&gt;</p>
+
+<p class=Indented1>The query command returns RST or RCL0.</p>
+
+<h2><a name=Example_output_pon></a>Example</h2>
+
+<p class=Indented1>The following command sets the power-on state to the 
+ *RST state. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">OUTP:PON:STAT RST</p>
+
+<p class=Indented1>The following query returns the setting of the power-on 
+ state. </p>
+
+<p class=Shaded>OUTP:PON:STAT?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;RST</span></p>
+
+<h2>See Also</h2>
+
+<p class=IndentTight><a href="../IEEE-488_Commands/_RCL.htm">*RCL</a></p>
+
+<p class=IndentTight><a href="../IEEE-488_Commands/_RST.htm">*RST</a></p>
+
+<p class=IndentTight><a href="../IEEE-488_Commands/_SAV.htm">*SAV</a></p>
+
+</body>
+</html>

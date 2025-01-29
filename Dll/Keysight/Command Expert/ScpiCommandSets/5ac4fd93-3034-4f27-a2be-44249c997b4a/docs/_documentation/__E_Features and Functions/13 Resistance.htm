@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Features and Functions|Measurements" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Resistance</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor27"></a>Resistance</h1>
+        <p>This section describes how to configure 2-wire and 4-wire resistance measurements from the front panel.</p>
+        <p><b>Step 1:</b> Configure the test leads as shown.</p>
+        <p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;">
+                <col />
+                <tbody>
+                    <tr>
+                        <td style="text-align: center;"><b>2-wire Resistance:</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="../_Graphics_/ConnDiag-2WOhms.png" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;">
+                <col />
+                <tbody>
+                    <tr>
+                        <td style="text-align: center;">
+                            <p><b>4-wire Resistance:</b>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="../_Graphics_/ConnDiag-4WOhms.png" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <p><b>Step 2:</b> Press <b>[&#937;2W]</b> or <b>[&#937;4W]</b> on the front panel. The following menu appears. (The &#937;4W menu does not include <b>Auto Zero</b>.)</p>
+        <p>
+            <img src="../_Graphics_/Resistance1.png" />
+        </p>
+        <p><b>Step 3:</b> <b>For the 34465A/70A</b>, the <b>Aperture NPLC</b> softkey is selected by default. Use the up/down arrow keys to specify integration time in power-line cycles (PLCs) to use for the measurement . 1, 10, and 100 PLC provide normal mode (line frequency noise) rejection. Selecting 100 PLC provides the best noise rejection and resolution, but the slowest measurements:</p>
+        <div>
+            <p><b>Step 4:</b>Press <b>Range</b> to select a range for the measurement. (<b>Auto</b> (autorange) automatically selects the range for the measurement based on the input. Autoranging is convenient, but it results in slower measurements than using a manual range. Autoranging goes up a range at 120% of the present range, and down a range below 10% of the present range. Press <b>More</b> to switch between the two pages of settings.</p>
+            <p>
+                <img src="../_Graphics_/Resistance2.png" />
+            </p>
+            <p>Notice the amount of test current sourced is shown for each range. After selecting a range, the main resistance menu is displayed.</p>
+            <p>
+                <img src="../_Graphics_/Resistance1.png" />
+            </p>
+        </div>
+        <div>
+            <p><b>Step 5:</b> <b>Auto Zero</b>: Autozero provides the most accurate measurements, but requires additional time to perform the zero measurement.With autozero enabled (On), the DMM internally measures the offset following each measurement. It then subtracts that measurement from the preceding reading. This prevents offset voltages present on the DMM’s input circuitry from affecting measurement accuracy. With autozero disabled (Off), the DMM measures the offset once and subtracts the offset from all subsequent measurements. The DMM takes a new offset measurement each time you change the function, range, or integration time. ( There is no autozero setting for 4-wire measurements.)</p>
+            <p><b>Step 6:</b> <b>OffstComp</b> (34465A/70A only): Enables or disables offset compensation. Offset compensation removes the effects of 
+ small dc voltages in the circuit being measured. The technique involves 
+ taking the difference between two resistance measurements, one with the 
+ current source set to the normal value, and one with the current source 
+ set to a lower value. Enabling Offset Compensation approximately doubles the reading time.</p>
+            <p><b>Step 7:</b> <b>Low Power</b> (34465A/70A only):The low power mode sources less test current per measurement range than is normally sourced for standard resistance measurements, to reduce power dissipation and self-heating in the DUT. With low power On, pressing <b>Range</b> displays the lower current sourced for each range:</p>
+            <p>
+                <img src="../_Graphics_/Resistance3.png" />
+            </p>
+            <p>Low-power resistance measurements apply to the 100&#8486; through 100k&#8486; ranges only. The 1 M&#8486; through 1 G&#8486; ranges source the same current (~.5 µA) regardless of the low-power setting.</p>
+        </div>
+        <div>
+            <h2>Negative Resistance Measurements</h2>
+            <p>Under certain conditions, the instrument may report negative resistance measurements. These may occur in 2-wire and 4-wire resistance measurements or continuity measurements.</p>
+            <p>Conditions that may cause negative ohms values include:</p>
+            <ul>
+                <li class="IndentTight" value="1">Changes in Front/Rear switch contact resistance</li>
+                <li class="IndentTight" value="2">Reversed Sense Hi and Lo leads</li>
+                <li class="IndentTight" value="3">Circuits with external bias or thermal voltages at circuit connections</li>
+                <li class="IndentTight" value="4">Changes in measurement connection after a NULL operation</li>
+            </ul>
+            <p>Under the same conditions, the 34401A returns the measurement’s absolute value so as to prevent the confusion associated with negative readings. The Keysight True<i>volt</i> Series DMMs will return negative values. This allows the most accurate results after a NULL operation.</p>
+        </div>
+        
+    </body>
+</html>

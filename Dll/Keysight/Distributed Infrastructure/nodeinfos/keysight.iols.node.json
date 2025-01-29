@@ -1,0 +1,7 @@
+{
+    "version": "18.4.0.0",
+    "kiis": {
+        "http_port": 9980,
+        "endpoint": "/ws"
+    }
+}

@@ -1,0 +1,1121 @@
+<html>
+<!-- Sitemap 1.0 -->
+<object type="text/site properties">
+  <param name="SiteType" value="toc">
+  <param name="Image Width" value="16">
+  <param name="Window Styles" value="0x800427">
+  <param name="ExWindow Styles" value="0x100">
+</object>
+<ul>
+  <li><object type="text/sitemap">
+    <param name="Name" value="Agilent N6700 Programmer's Reference">
+    <param name="Local" value="Home_Page/welcome.htm">
+  </object>
+  <ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Introduction to the SCPI Language">
+      <param name="Local" value="Home_Page/scpi_introduction.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SCPI Commands">
+        <param name="Local" value="Home_Page/scpi_introduction.htm#SCPI_commands_SCPI_intro">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Multiple Commands in a Message">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#multiple_commands_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Moving Among Subsystems">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#moving_subsystems_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Including Common Commands">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#common_commands_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Using Queries">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#queries_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Coupled Commands">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#coupled_command_SCPI_intro">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SCPI Messages">
+        <param name="Local" value="Home_Page/scpi_introduction.htm#SCPI_messages_SCPI_intro">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="The Message Unit">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#message_unit_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Channel List Parameter">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#channel_list_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Headers">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#headers_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Query Indicator">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#query_indicator_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Message Unit Separator">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#message_separator_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Root Specifier">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#root_specifier_SCPI_intro">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Message Terminator">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#message_terminator_SCPI_intro">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SCPI Conventions and Data Format">
+        <param name="Local" value="Home_Page/scpi_introduction.htm#SCPI_conventions_SCPI_intro">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SCPI Command Completion">
+        <param name="Local" value="Home_Page/scpi_introduction.htm#command_completion_SCPI_intro">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="Device Clear">
+          <param name="Local" value="Home_Page/scpi_introduction.htm#device_clear_SCPI_intro">
+        </object>
+        </ul>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Commands A-Z">
+      <param name="Local" value="Home_Page/Commands_Alphabetical.htm">
+    </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Commands by Subsystem">
+      <param name="Local" value="Home_Page/Commands_by_Subsystem.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="ABORt Commands">
+        <param name="Local" value="ABORt_Commands/ABORt_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="ABORt:ACQuire">
+          <param name="Local" value="ABORt_Commands/ABORt_ACQuire.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="ABORt:DLOG">
+          <param name="Local" value="ABORt_Commands/ABORt__DLOG.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="ABORt:TRANsient">
+          <param name="Local" value="ABORt_Commands/ABORt_TRANsient.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="CALibrate Subsystem">
+        <param name="Local" value="CALibrate_Subsystem/CALibrate_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:CURRent[:LEVel]">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_CURRent__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:CURRent:MEASure">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_CURRent_MEASure_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:CURRent:PEAK">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_CURRent_PEAK.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:DATA">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_DATA.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:DATE">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_DATE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:DPRog">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_DPRog.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:LEVel">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_LEVel.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:PASSword">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_PASSword.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:SAVE">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_SAVE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:STATe">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_STATe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:VOLTage[:LEVel]">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_VOLTage__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:VOLTage:CMRR">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_VOLTage_CMRR.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="CALibrate:VOLTage:MEASure">
+          <param name="Local" value="CALibrate_Subsystem/CALibrate_VOLTage_MEASure.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="DISPlay Commands">
+        <param name="Local" value="DISPlay_Commands/DISPlay_Commands_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="DISPlay[:WINDow]:VIEW">
+          <param name="Local" value="DISPlay_Commands/DISPlay_VIEW_.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="FETCh Subsystem">
+        <param name="Local" value="FETCh_Subsystem/FETCh_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="FETCh[:SCALar]:CURRent[:DC]?">
+          <param name="Local" value="FETCh_Subsystem/FETCh__SCALar__CURRent__DC__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="FETCh[:SCALar]:VOLTage[:DC]?">
+          <param name="Local" value="FETCh_Subsystem/FETCh__SCALar__VOLTage__DC__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="FETCh:ARRay:CURRent[:DC]?">
+          <param name="Local" value="FETCh_Subsystem/FETCh_ARRay_CURRent__DC__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="FETCh:ARRay:VOLTage[:DC]?">
+          <param name="Local" value="FETCh_Subsystem/FETCh_ARRay_VOLTage__DC__.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="HCOPY Commands">
+        <param name="Local" value="HCopy_Commands/HCOPY_Commands_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="HCOPy:SDUMp:DATA?">
+          <param name="Local" value="HCopy_Commands/HCOPy_SDUMp_DATA_.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="IEEE-488.2 Common Commands">
+        <param name="Local" value="IEEE-488_Commands/IEEE-488_Common_Commands_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*CLS">
+          <param name="Local" value="IEEE-488_Commands/_CLS.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*ESE">
+          <param name="Local" value="IEEE-488_Commands/_ESE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*ESR?">
+          <param name="Local" value="IEEE-488_Commands/_ESR_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*IDN?">
+          <param name="Local" value="IEEE-488_Commands/_IDN_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*OPC">
+          <param name="Local" value="IEEE-488_Commands/_OPC.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*OPT?">
+          <param name="Local" value="IEEE-488_Commands/_OPT_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*RCL">
+          <param name="Local" value="IEEE-488_Commands/_RCL.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*RDT?">
+          <param name="Local" value="IEEE-488_Commands/_RDT_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*RST">
+          <param name="Local" value="IEEE-488_Commands/_RST.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*SAV">
+          <param name="Local" value="IEEE-488_Commands/_SAV.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*SRE">
+          <param name="Local" value="IEEE-488_Commands/_SRE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*STB?">
+          <param name="Local" value="IEEE-488_Commands/_STB_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*TRG">
+          <param name="Local" value="IEEE-488_Commands/_TRG.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*TST?">
+          <param name="Local" value="IEEE-488_Commands/_TST_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="*WAI">
+          <param name="Local" value="IEEE-488_Commands/_WAI.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="INITiate Subsystem">
+        <param name="Local" value="INITiate_Subsystem/INITiate_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="INITiate[:IMMediate]:ACQuire">
+          <param name="Local" value="INITiate_Subsystem/INITiate__IMMediate__ACQuire.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="INITiate[:IMMediate]:DLOG">
+          <param name="Local" value="INITiate_Subsystem/INITiate__IMMediate__DLOG.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="INITiate[:IMMediate]:TRANsient">
+          <param name="Local" value="INITiate_Subsystem/INITiate__IMMediate__TRANsient.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="INITiate:CONTinuous:TRANsient">
+          <param name="Local" value="INITiate_Subsystem/INITiate_CONTinuous_TRANsient.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="MEASure Subsystem">
+        <param name="Local" value="MEASure_Subsystem/MEASure_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MEASure[:SCALar]:CURRent[:DC]?">
+          <param name="Local" value="MEASure_Subsystem/MEASure__SCALar__CURRent__DC__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MEASure[:SCALar]:VOLTage[:DC]?">
+          <param name="Local" value="MEASure_Subsystem/MEASure__SCALar__VOLTage__DC__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MEASure:ARRay:CURRent[:DC]?">
+          <param name="Local" value="MEASure_Subsystem/MEASure_ARRay_CURRent__DC__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MEASure:ARRay:VOLTage[:DC]?">
+          <param name="Local" value="MEASure_Subsystem/MEASure_ARRay_VOLTage__DC__.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="MMEMory Subsystem">
+        <param name="Local" value="MMEMory_Subsystem/MMEMory_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MMEMory:ATTRibute?">
+          <param name="Local" value="MMEMory_Subsystem/MMEMory_ATTRibute_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MMEMory:DATA[:DEFinite]?">
+          <param name="Local" value="MMEMory_Subsystem/MMEMory_DATA_INDefinite_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MMEMory:DELete">
+          <param name="Local" value="MMEMory_Subsystem/MMEMory_DELete.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="MMEMory:EXPort:DLOG">
+          <param name="Local" value="MMEMory_Subsystem/MMEMory_EXPort_DLOG.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="OUTput Subsystem">
+        <param name="Local" value="OUTPut_Subsystem/OUTPut_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:COUPle[:STATe]">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__COUPle__STATe_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:COUPle:CHANnel">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__COUPle_CHANnel.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:COUPle:DOFFset">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__COUPle_DOFFset.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:COUPle:DOFFset:MODE">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__COUPle_DOFFset_MODE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:COUPle:MAX:DOFFset?">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__COUPle_MAX_DOFFset_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:DELay:FALL">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__DELay_FALL.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:DELay:RISE">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__DELay_RISE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut[:STATe]:PMODe">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut__STATe__PMODe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut:INHibit:MODE">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut_INHibit_MODE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut:PON:STATe">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut_PON_STATe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut:PROTection:CLEar">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut_PROTection_CLEar.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut:PROTection:COUPle">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut_PROTection_COUPle.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut:PROTection:DELay">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut_PROTection_DELay.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="OUTPut:RELay:POLarity">
+          <param name="Local" value="OUTPut_Subsystem/OUTPut_RELay_POLarity.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SENSe Subsystem">
+        <param name="Local" value="SENSe_Subsystem/SENSe_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:CURRent[:DC]:RANGe">
+          <param name="Local" value="SENSe_Subsystem/SENSe_CURRent__DC__RANGe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:CURRent:CCOMPensate">
+          <param name="Local" value="SENSe_Subsystem/SENSe_CURRent_CCOMPensate.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:DLOG:FUNCtion:CURRent">
+          <param name="Local" value="SENSe_Subsystem/SENSe_DLOG_FUNCtion_CURRent.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:DLOG:FUNCtion:MINMax">
+          <param name="Local" value="SENSe_Subsystem/SENSe_DLOG_FUNCtion_MINMax.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:DLOG:FUNCtion:VOLTage">
+          <param name="Local" value="SENSe_Subsystem/SENSe_DLOG_FUNCtion_VOLTage.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:DLOG:OFFset">
+          <param name="Local" value="SENSe_Subsystem/SENSe_DLOG_OFFset.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:DLOG:TIME">
+          <param name="Local" value="SENSe_Subsystem/SENSe_DLOG_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:DLOG:TINTerval">
+          <param name="Local" value="SENSe_Subsystem/SENSe_DLOG_TINTerval.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:FUNCtion">
+          <param name="Local" value="SENSe_Subsystem/SENSe_FUNCtion.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:SWEep:OFFSet:POINts">
+          <param name="Local" value="SENSe_Subsystem/SENSe_SWEep_OFFset_POINts.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:SWEep:POINts">
+          <param name="Local" value="SENSe_Subsystem/SENSe_SWEep_POINts.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:SWEep:TINTerval">
+          <param name="Local" value="SENSe_Subsystem/SENSe_SWEep_TINTerval.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:VOLTage[:DC]:RANGe">
+          <param name="Local" value="SENSe_Subsystem/SENSe_VOLTage__DC__RANGe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SENSe:WINDow[:TYPE]">
+          <param name="Local" value="SENSe_Subsystem/SENSe_WINDow__TYPE_.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SOURce Subsystem">
+        <param name="Local" value="SOURce_Subsystem/SOURce_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:COUNt">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_COUNt.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:CURRent:UDEFined:BOSTep[:DATA]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_CURRent_UDEFined_BOSTep__DATA_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:CURRent:UDEFined:BOSTep:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_CURRent_UDEFined_BOSTep_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:CURRent:UDEFined:DWELl">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_CURRent_UDEFined_DWELl.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:CURRent:UDEFined:DWELl:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_CURRent_UDEFined_DWELl_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:CURRent:UDEFined:LEVel">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_CURRent_UDEFined_LEVel.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:CURRent:UDEFined:LEVel:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_CURRent_UDEFined_LEVle_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:FUNCtion">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_FUNCtion.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:TERMinate:LAST">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_TERMinate_LAST.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:CONVert">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_CONVert.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:EXPonential:END[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_EXPonential_END__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:EXPonential:STARt[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_EXPonential_STARt__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:EXPonential:STARt:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_EXPonential_STARt_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:EXPonential:TCONstant">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_EXPonential_TCONstant.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:EXPonential:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_EXPonential_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:PULSe:END:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_PULSe_END_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:PULSe:STARt[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_PULSe_STARt__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:PULSe:STARt:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_PULSe_STARt_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:PULSe:TOP[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_PULSe_TOP__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:PULSe:TOP:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_PULSe_TOP_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:RAMP:END[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_RAMP_END__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:RAMP:END:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_RAMP_END_TIME.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:RAMP:RTIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_RAMP_RTIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:RAMP:STARt[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_RAMP_STARt__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:RAMP:STARt:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_RAMP_STARt_TIME.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:SINusoid:AMPLitude">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_SINusoid_AMPLitude.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:SINusoid:FREQuency">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_SINusoid_FREQuency.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:SINusoid:OFFSet">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_SINusoid_OFFSet.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STAircase:END[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STAircase_END__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STAircase:END:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STAircase_END_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STAircase:NSTeps">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STAircase_NSTeps.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STAircase:STARt[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STAircase_STARt__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STAircase:STARt:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STAircase_STARt_TIME.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STAircase:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STAircase_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STEP:END[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STEP_END__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STEP:STARt[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STEP_STARt__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:STEP:STARt:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_STEP_STARt_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:END:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_END_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:FTIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_FTIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:RTIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_RTIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:STARt[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_STARt__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:STARt:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_STARt_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:TOP[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_TOP__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:TRAPezoid:TOP:TIMe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_TRAPezoid_TOP_TIMe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:UDEFined:BOSTep[:DATA]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_UDEFined_BOSTep__DATA_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:UDEFined:BOSTep:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_UDEFined_BOSTep_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:UDEFined:DWELl">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_UDEFined_DWELl.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:UDEFined:DWELl:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_UDEFined_DWELl_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:UDEFined:LEVel">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_UDEFined_LEVel.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]ARB:VOLTage:UDEFined:LEVel:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__ARB_VOLTage_UDEFined_LEVel_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent[:LEVel][:IMMediate]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent[:LEVel]:TRIGgered">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent__LEVel__TRIGgered.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent:MODE">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent_MODE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent:PROTection:DELay[:TIME]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent_PROTection_DELay__TIME_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent:PROTection:DELay:STARt">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent_PROTection_DELay_STARt.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent:PROTection:STATe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent_PROTection_STATe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]CURRent:RANGe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__CURRent_RANGe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]DIGital:INPut:DATA?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__DIGital_INPut_DATA_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]DIGital:OUTput:DATA">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__DIGital_OUTput_DATA.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]DIGital:PIN&lt;1-7&gt;:FUNCtion">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__DIGital_PIN_1-7__FUNCtion.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]DIGital:PIN&lt;1-7&gt;:POLarity">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__DIGital_PIN_1-7__POLarity.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:COUNt">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_COUNt.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:CURRent[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_CURRent__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:CURRent:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_CURRent_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:DWELl">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_DWELl.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:DWELl:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_DWELl_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:STEP">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_STEP.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:TERMinate:LAST">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_TERMinate_LAST.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:TOUTput:BOSTep[:DATA]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_TOUTput_BOSTep__DATA_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:TOUTput:EOSTep[:DATA]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_TOUTput_EOSTep__DATA_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:VOLTage[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_VOLTage__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]LIST:VOLTage:POINts?">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__LIST_VOLTage_POINts_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]POWer:LIMit">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__POWer_LIMit.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]STEP:TOUTput">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__STEP_TOUTput.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage[:LEVel][:IMMediate]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage[:LEVel]:TRIGgered">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage__LEVel__TRIGgered.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage:MODE">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage_MODE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage:PROTection[:LEVel]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage_PROTection__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage:RANGe">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage_RANGe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage:SENSe:SOURce">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage_SENSe_SOURce.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="[SOURce:]VOLTage:SLEW[:IMMediate]">
+          <param name="Local" value="SOURce_Subsystem/_SOURce__VOLTage_SLEW__IMMediate_.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="STATus Subsystem">
+        <param name="Local" value="STATus_Subsystem/Status_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:OPERation[:EVENt]?">
+          <param name="Local" value="STATus_Subsystem/STATus_OPERation__EVENt__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:OPERation:CONDition?">
+          <param name="Local" value="STATus_Subsystem/STATus_OPERation_CONDition_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:OPERation:ENABle">
+          <param name="Local" value="STATus_Subsystem/STATus_OPERation_ENABle.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:OPERation:NTRansition">
+          <param name="Local" value="STATus_Subsystem/STATus_OPERation_NTRansition.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:OPERation:PTRansition">
+          <param name="Local" value="STATus_Subsystem/STATus_OPERation_PTRansition.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:PRESet">
+          <param name="Local" value="STATus_Subsystem/STATus_PRESet.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:QUEStionable[:EVENt]?">
+          <param name="Local" value="STATus_Subsystem/STATus_QUEStionable__EVENt__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:QUEStionable:CONDition?">
+          <param name="Local" value="STATus_Subsystem/STATus_QUEStionable_CONDition_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:QUEStionable:ENABle">
+          <param name="Local" value="STATus_Subsystem/STATus_QUEStionable_ENABle.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:QUEStionable:NTRansition">
+          <param name="Local" value="STATus_Subsystem/STATus_QUEStionable_NTRansition.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="STATus:QUEStionable:PTRansition">
+          <param name="Local" value="STATus_Subsystem/STATus_QUEStionable_PTRansition.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="SYSTem Commands">
+        <param name="Local" value="SYSTem_Commands/SYSTem_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:CHANnel[:COUNt]?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_CHANnel__COUNt__.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:CHANnel:MODel?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_CHANnel_MODel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:CHANnel:OPTion?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_CHANnel_OPTion_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:CHANnel:SERial?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_CHANnel_SERial_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:COMMunicate:RLSTate">
+          <param name="Local" value="SYSTem_Commands/SYSTem_COMMunicate_RLSTate.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:COMMunicate:TCPip:CONTrol?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_COMMunicate_TCPip_CONTrol_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:DATE">
+          <param name="Local" value="SYSTem_Commands/SYSTem_DATE.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:ERRor?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_ERRor_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:GROup:CATalog?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_GROup_CATalog_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:GROup:DEFine">
+          <param name="Local" value="SYSTem_Commands/SYSTem_GROup_DEFine.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:GROup:DELete">
+          <param name="Local" value="SYSTem_Commands/SYSTem_GROup_DELete.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:GROup:DELete:ALL">
+          <param name="Local" value="SYSTem_Commands/SYSTem_GROup_DELete_ALL.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:PASSword:FPANel:RESet">
+          <param name="Local" value="SYSTem_Commands/SYSTem_PASSword_FPANel_RESet.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:REBoot">
+          <param name="Local" value="SYSTem_Commands/SYSTem_REBoot.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:TIME">
+          <param name="Local" value="SYSTem_Commands/SYSTem_TIME.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="SYSTem:VERSion?">
+          <param name="Local" value="SYSTem_Commands/SYSTem_VERSion_.htm">
+        </object>
+        </ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="TRIGger Subsystem">
+        <param name="Local" value="TRIGger_Subsystem/TRIGger_Subsystem_Introduction.htm">
+      </object>
+      <ul>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:ACQuire[:IMMediate]">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_ACQuire__IMMediate_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:ACQuire:SOURce">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_ACQuire_SOURce.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:ARB:SOURce">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_ARB_SOURce.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:DLOG[:IMMediate]">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_DLOG__IMMediate_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:DLOG:CURRent[:LEVel]">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_DLOG_CURRent__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:DLOG:CURRent:SLOPe">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_DLOG_CURRent_SLOPe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:DLOG:SOURce">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_DLOG_SOURce.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:DLOG:VOLTage[:LEVel]">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_DLOG_VOLTage__LEVel_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:DLOG:VOLTage:SLOPe">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_DLOG_VOLTage_SLOPe.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:TRANsient[:IMMediate]">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_TRANsient__IMMediate_.htm">
+        </object>
+        <li><object type="text/sitemap">
+          <param name="Name" value="TRIGger:TRANsient:SOURce">
+          <param name="Local" value="TRIGger_Subsystem/TRIGger_TRANsient_SOURce.htm">
+        </object>
+        </ul>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Command Quick Reference">
+      <param name="Local" value="Home_Page/Command_Quick_Reference.htm#command_summary_top">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Abort Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Abort">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Calibrate Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Calibration">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Display Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Display">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Fetch Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Fetch">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="HCopy Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#HCopy">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Initiate Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Initiate">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Measure Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Measure">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="MMemory Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#MMemory">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Output Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Output">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Sense Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Sense">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Source Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Source">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Status Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Status">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="System Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#System">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Trigger Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Trigger">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Common Commands">
+        <param name="Local" value="Home_Page/Command_Quick_Reference.htm#Common">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Non-Volatile Settings">
+      <param name="Local" value="Home_Page/Non-Volatile_Settings.htm">
+    </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Reset Settings (*RST)">
+      <param name="Local" value="Home_Page/Reset_Settings.htm">
+    </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Programming Examples">
+      <param name="Local" value="Programming_Examples/Programming_Examples.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Arb Example">
+        <param name="Local" value="Programming_Examples/Arb_Programming_Example.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Output Example">
+        <param name="Local" value="Programming_Examples/Output_Programming_Example.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="List Example">
+        <param name="Local" value="Programming_Examples/List_Programming_Example.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Digitizer Example">
+        <param name="Local" value="Programming_Examples/Digitizer_Programming_Example.htm">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="SCPI Error Messages">
+      <param name="Local" value="Home_Page/SCPI_Error_Messages.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Device-Dependent Errors">
+        <param name="Local" value="Home_Page/SCPI_Error_Messages.htm#Device_Dependent_errors">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Command Errors">
+        <param name="Local" value="Home_Page/SCPI_Error_Messages.htm#Command_errors">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Execution Errors">
+        <param name="Local" value="Home_Page/SCPI_Error_Messages.htm#Execution_errors">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Query Errors">
+        <param name="Local" value="Home_Page/SCPI_Error_Messages.htm#Query_errors">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Self-Test Errors">
+        <param name="Local" value="Home_Page/SCPI_Error_Messages.htm#Self_Test_errors">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Agilent 662xA Compatibility">
+      <param name="Local" value="Compatibility/Compatibility.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Differences - In General">
+        <param name="Local" value="Compatibility/Compatibility.htm#Differences_in_general">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Compatibility Command Summary">
+        <param name="Local" value="Compatibility/Compatibility.htm#Compatibility_command_summary">
+      </object>
+      </ul>
+    </ul>
+</ul>
+</html>

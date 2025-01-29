@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
+        <link href="../SkinSupport/Slideshow.css" rel="stylesheet" type="text/css" />
+        <link href="../SkinSupport/MadCap.css" rel="stylesheet" type="text/css" /><title>FORMat Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor233"></a>FORMat Subsystem</h1>
+        <p>This subsystem applies only to the 34465A and 34470A.</p>
+        <h2 style="font-size: 14px;"><a name="kanchor234"></a>Command Summary</h2>
+        <p class="NormalTight"><a href="#BORDer" id="a3">FORMat:BORDer</a>
+        </p>
+        <p class="NormalTight"><a href="#DATA">FORMat[:DATA]</a>
+        </p>
+        <p class="NormalTight">&#160;</p>
+        <h2 style="font-size: 14px;"><a name="kanchor235"></a><a name="BORDer"></a>FORMat:BORDer {NORMal|SWAPped} <br />FORMat:BORDer?<![CDATA[  ]]></h2>
+        <p class="Indented1" style="background-color: Transparent;"><span class="CmdItalics">Used 
+ for binary block transfers only</span>. Selects the byte 
+ order for binary block transfers using <a href="MEASure_Subsystem.htm">MEASure?</a>, <a href="READ_.htm">READ?</a>, <a href="FETCh_.htm">FETCh?</a>, <a href="DATA_Subsystem.htm#REMove">DATA:REMove?</a> 
+ and <a href="R_.htm">R?</a>.</p>
+        <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" style="width: 410px;" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">{NORMal|SWAPped} (see bullet points below). Default: NORM.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">NORM</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2">Select the swapped byte order:<br /> <br />FORMat:BORDer SWAP</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul type="disc" class="hcp1">
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">In the 
+ <span class="CmdItalics">NORMal</span> byte order (default) the most-significant 
+ byte (MSB) of each data point is assumed first. </li>
+            <li class="IndentTight" value="3">In the 
+ <span class="CmdItalics">SWAPped</span> byte order the least-significant 
+ byte (LSB) of each data point is assumed first. Most PCs use the "swapped" 
+ byte order. </li>
+        </ul>
+        <ul type="disc" class="hcp1">
+            <li class="IndentTight" value="1">The byte 
+ order setting is stored in <span class="MCPopup"><a href="javascript:void(0);" onclick="FMCPopup( event, this ); return false;" class="MCPopupSpot">non-volatile</a></span> 
+ memory and does not change when power has been off. The default value 
+ is restored <span style="background-color: Transparent;"><a name="kanchor236"></a>after a 
+ Factory Reset (<a class="hcp3" href="IEEE-488_Common_Commands.htm#RST">*RST</a><a name="kanchor237"></a>), 
+ or after an Instrument Preset (<a class="hcp3" href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</span></li>
+        </ul>
+        <h2 style="font-size: 14px;"><a name="kanchor238"></a><a name="DATA"></a>FORMat[:DATA] {ASCii|REAL} 
+ [, <span class="hcp1">&lt;<i>length</i>&gt;</span>] <br />FORMat[:DATA]?<![CDATA[  ]]></h2>
+        <p class="Indented1" style="background-color: Transparent;font-style: normal;">Specifies the data format to be either 
+ ASCII or REAL. Affects the data format of the <a href="MEASure_Subsystem.htm">MEASure?</a>, <a href="READ_.htm">READ?</a>, <a href="FETCh_.htm">FETCh?</a>, <a href="DATA_Subsystem.htm#REMove">DATA:REMove?</a> 
+ and <a href="R_.htm">R?</a> commands only.</p>
+        <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" style="width: 272px;" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">&lt;<span class="CmdItalics">length</span>&gt; ASCii: "9" or REAL: "64"</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">ASC,9</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2">Specify the  64-bit REAL data format:<br /> <br />FORM:DATA REAL,64 <i>or</i> FORM:DATA REAL</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul style="list-style: disc;" type="disc">
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">If ASCii is specified, numeric data is transferred 
+ as ASCii characters. The numbers are separated by commas as specified 
+ in IEEE 488.2. The <span class="hcp1">&lt;length&gt;</span> 
+ parameter is optional,<span style="font-weight: bold;"> </span>but "9" 
+ is the default and only allowed value, and the instrument returns 9 significant 
+ digits (for example: +4.57553816E-05).</li>
+            <li class="IndentTight" value="3">If REAL is specified, numeric data is transferred 
+ as REAL binary data in IEEE 488.2 definite-length block format. The <span class="hcp1">&lt;<i>length</i>&gt;</span> parameter is optional, 
+ but "64" 
+ is the default and only allowed value. The 
+ byte order is controlled by <a href="#BORDer">FORMat:BORDer</a>.</li>
+        </ul>
+        
+    </body>
+</html>

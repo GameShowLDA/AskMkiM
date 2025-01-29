@@ -1,0 +1,129 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>DISPlay[:WINDow]:VIEW</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>DISPlay[:WINDow]:VIEW</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_display_state">Syntax</a></font> 
+ | <a href="#Description_display_state">Description</a> | <a href="#Parameters_display_state">Parameters</a> 
+ | Remarks | <a href="#Return_display_state">Return Format</a> | <a href="#Example_display_state">Example</a></p>
+
+<h2><a name=Syntax_display_state></a>Syntax</h2>
+
+<p class=CmdSyntax>DISPlay[:WINDow]:VIEW &lt;view&gt;</p>
+
+<p class=CmdSyntax>DISPlay[:WINDow]:VIEW?</p>
+
+<h2><a name=Description_display_state></a>Description</h2>
+
+<p class=Indented1>This command selects the output channel view of the 
+ front panel display. METER1 displays one output channel. METER4 displays 
+ all output channels up to a maximum of four. </p>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_display_state></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				border-spacing: 0px;
+				width: 66.465%;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=66.465%>
+<col style="width: 18.777%;">
+<col style="width: 14.327%;">
+<col style="width: 35.522%;">
+<col style="width: 28.331%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 18.777%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=18.777%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:14.327%;" bgcolor="#E9E9E9" width="14.327%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:35.522%;" bgcolor="#E9E9E9" width="35.522%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:28.331%;" bgcolor="#E9E9E9" width="28.331%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width: 18.777%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=18.777%>
+<p class=TableBody>&lt;view&gt;</td>
+<td style="width:14.327%;" width="14.327%" class="hcp3">
+<p class=TableBody>CPD</td>
+<td rowspan="1" colspan="1" style="width:35.522%;" width="35.522%" class="hcp3">
+<p class=TableBody>METER1 | METER4</td>
+<td rowspan="1" colspan="1" style="width:28.331%;" width="28.331%" class="hcp3">
+<p class=TableBody>METER1</td></tr>
+</table>
+
+<h2><a name=Return_display_state></a>Return Format</h2>
+
+<p class=Indented1>&lt;CRD&gt;</p>
+
+<p class=Indented1>The query command returns METER1 or METER4.</p>
+
+<h2><a name=Example_display_state></a>Example</h2>
+
+<p class=Indented1>The following command sets the front panel to display 
+ only one output channel. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">DISP:VIEW METER1</p>
+
+<p class=Indented1>The following query returns the channel view of the 
+ front-panel display. </p>
+
+<p class=Shaded>DISP:VIEW?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;METER1</span></p>
+
+<p class=Indented1>&nbsp;</p>
+
+</body>
+</html>

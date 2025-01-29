@@ -1,0 +1,146 @@
+﻿using System.IO;
+using System.Windows;
+using Utilities.USB;
+
+namespace MainWindowProgram
+{
+  /// <summary>
+  /// Класс KeyManagementWindow, представляющий окно управления ключами на USB-накопителях.
+  /// </summary>
+  /// <remarks>
+  /// Этот класс содержит логику взаимодействия с пользователем для создания, перезаписи и удаления ключевых файлов на USB-накопителях.
+  /// Включает в себя элементы управления для выбора USB-накопителя и кнопки для выполнения различных операций с ключами.
+  /// </remarks>
+  public partial class KeyManagementWindow : Window
+  {
+    /// <summary>
+    /// Менеджер USB-ключей, отвечающий за создание и управление ключевыми файлами.
+    /// </summary>
+    private USBKeyManager usbKeyManager;
+
+    /// <summary>
+    /// Конструктор KeyManagementWindow.
+    /// </summary>
+    /// <remarks>
+    /// Инициализирует компоненты окна и загружает доступные USB-накопители в выпадающий список.
+    /// </remarks>
+    public KeyManagementWindow()
+    {
+      InitializeComponent();
+      usbKeyManager = new USBKeyManager();
+      LoadUsbDrives();
+    }
+
+    /// <summary>
+    /// Загружает доступные USB-накопители в выпадающий список.
+    /// </summary>
+    /// <remarks>
+    /// Очищает текущий список элементов и добавляет все доступные USB-накопители в комбобокс.
+    /// Если нет доступных USB-накопителей, устанавливается начальный текст "Выберите USB-накопитель".
+    /// </remarks>
+    private void LoadUsbDrives()
+    {
+      usbDrivesComboBox.Items.Clear();
+      usbDrivesComboBox.Items.Add("Выберите USB-накопитель");
+      foreach (var drive in DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.Removable && d.IsReady))
+      {
+        usbDrivesComboBox.Items.Add(drive.Name);
+      }
+      usbDrivesComboBox.SelectedIndex = 0;
+    }
+
+    /// <summary>
+    /// Обработчик события нажатия кнопки "Создать ключ".
+    /// </summary>
+    /// <param name="sender">Объект, который вызвал событие.</param>
+    /// <param name="e">Аргументы события.</param>
+    /// <remarks>
+    /// Проверяет, выбран ли USB-накопитель. Если выбран, создает ключевой файл на этом устройстве.
+    /// В случае успешного создания выводит сообщение об успехе, иначе — предупреждение о необходимости выбора устройства.
+    /// </remarks>
+    private void CreateKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (usbDrivesComboBox.SelectedIndex > 0)
+      {
+        string selectedDrive = usbDrivesComboBox.SelectedItem.ToString();
+        var drive = new DriveInfo(selectedDrive);
+        usbKeyManager.CreateKeyFile(drive);
+        MessageBox.Show("Ключ успешно создан.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+      }
+      else
+      {
+        MessageBox.Show("Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+      }
+    }
+
+    /// <summary>
+    /// Обработчик события нажатия кнопки "Перезаписать ключ".
+    /// </summary>
+    /// <param name="sender">Объект, который вызвал событие.</param>
+    /// <param name="e">Аргументы события.</param>
+    /// <remarks>
+    /// Проверяет, выбран ли USB-накопитель. Если выбран, перезаписывает ключевой файл на этом устройстве.
+    /// В случае успешной перезаписи выводит сообщение об успехе, иначе — предупреждение о необходимости выбора устройства.
+    /// </remarks>
+    private void OverwriteKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (usbDrivesComboBox.SelectedIndex > 0)
+      {
+        string selectedDrive = usbDrivesComboBox.SelectedItem.ToString();
+        var drive = new DriveInfo(selectedDrive);
+        usbKeyManager.CreateKeyFile(drive); // Перезаписываем ключ
+        MessageBox.Show("Ключ успешно перезаписан.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+      }
+      else
+      {
+        MessageBox.Show("Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+      }
+    }
+
+    /// <summary>
+    /// Обработчик события нажатия кнопки "Удалить ключ".
+    /// </summary>
+    /// <param name="sender">Объект, который вызвал событие.</param>
+    /// <param name="e">Аргументы события.</param>
+    /// <remarks>
+    /// Проверяет, выбран ли USB-накопитель. Если выбран, удаляет ключевой файл с этого устройства.
+    /// В случае успешного удаления выводит сообщение об успехе, если файл не найден — предупреждение.
+    /// В противном случае — предупреждение о необходимости выбора устройства.
+    /// </remarks>
+    private void DeleteKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (usbDrivesComboBox.SelectedIndex > 0)
+      {
+        string selectedDrive = usbDrivesComboBox.SelectedItem.ToString();
+        var drive = new DriveInfo(selectedDrive);
+        string filePath = System.IO.Path.Combine(drive.RootDirectory.FullName, "usbkey.dat");
+        if (File.Exists(filePath))
+        {
+          File.Delete(filePath);
+          MessageBox.Show("Ключ успешно удален.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else
+        {
+          MessageBox.Show("Ключ не найден на выбранном устройстве.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+      }
+      else
+      {
+        MessageBox.Show("Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+      }
+    }
+
+    /// <summary>
+    /// Обработчик события нажатия кнопки "Выход".
+    /// </summary>
+    /// <param name="sender">Объект, который вызвал событие.</param>
+    /// <param name="e">Аргументы события.</param>
+    /// <remarks>
+    /// Закрывает текущее окно приложения.
+    /// </remarks>
+    private void ExitButton_Click(object sender, RoutedEventArgs e)
+    {
+      this.Close();
+    }
+  }
+}

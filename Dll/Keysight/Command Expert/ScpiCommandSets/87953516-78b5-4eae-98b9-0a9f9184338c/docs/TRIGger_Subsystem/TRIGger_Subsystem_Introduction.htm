@@ -1,0 +1,232 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>TRIGger Subsystem Introduction</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+-->
+</style>
+</head>
+<body>
+<h1>TRIGger Subsystem Introduction</h1>
+
+<p>Trigger commands control the remote triggering of the instrument. They 
+ specify the trigger source for the transient and the measurement system 
+ and also generate software triggers.</p>
+
+<p>The Common command <a href="../IEEE-488_Commands/_TRG.htm">*TRG</a> 
+ is also used to trigger the instrument.</p>
+
+<h2>Command Summary<br>
+&nbsp;</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp1">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif" x-maintain-ratio="TRUE" style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;" width="70" height="17" border="0"></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>Hold the mouse cursor over a command to view the full syntax statement.</td></tr>
+</table>
+
+<p class=NormalTight>&nbsp;</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 52.39%;">
+<col style="width: 47.61%;">
+
+<tr valign="top" class="hcp1">
+<td colspan=1
+	rowspan=1
+	style="width: 52.39%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: None;
+			border-right-style: None;
+			border-left-style: None;
+			border-top-style: None;"
+	width=52.39%>
+<h3 class=NormalTight
+	style="text-indent: 0px; margin-left: -10px;">Trigger Commands</td>
+<td colspan=1
+	rowspan=1
+	style="width: 47.61%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: None;
+			border-top-style: None;
+			border-right-style: None;"
+	width=47.61%>
+<h3 class=NormalTight>Related Initiate and Abort Commands</td></tr>
+
+<tr valign="top" class="hcp1">
+<td colspan=1
+	rowspan=1
+	style="width: 52.39%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-style: None;
+			border-right-style: None;
+			border-bottom-style: None;"
+	width=52.39%>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_ACQuire__IMMediate_.htm"
+									title="TRIGger:ACQuire[:IMMediate] (@<chanlist>)">TRIGger:ACQuire[:IMMediate]</a></p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_ACQuire_SOURce.htm"
+									title="TRIGger:ACQuire:SOURce BUS | PIN<1-7> | TRANsient<1-4>, (@<chanlist>)">TRIGger:ACQuire:SOURce</a></p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_ACQuire_SOURce.htm"
+									title="TRIGger:ACQuire:SOURce? (@<chanlist>)">TRIGger:ACQuire:SOURce?</a></p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_ARB_SOURce.htm"
+									title="TRIGger:ARB:SOURce IMMediate | EXTernal | BUS">TRIGger:ARB:SOURce</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_ARB_SOURce.htm"
+									title="TRIGger:ARB:SOURce?">TRIGger:ARB:SOURce?</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG__IMMediate_.htm"
+									title="TRIGger:DLOG[:IMMediate]">TRIGger:DLOG[:IMMediate]</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_CURRent__LEVel_.htm"
+									title="TRIGger:DLOG:CURRent[:LEVel] <NRf+>, (@<chanlist>)">TRIGger:DLOG:CURRent[:LEVel]</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_CURRent__LEVel_.htm"
+									title="TRIGger:DLOG:CURRent[:LEVel]? [MIN | MAX,] (@<chanlist>)">TRIGger:DLOG:CURRent[:LEVel]?</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_CURRent_SLOPe.htm"
+									title="TRIGger:DLOG:CURRent:SLOPe POSitive | NEGative, (@<chanlist>)">TRIGger:DLOG:CURRent:SLOPe</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_CURRent_SLOPe.htm"
+									title="TRIGger:DLOG:CURRent:SLOPe? (@<chanlist>)">TRIGger:DLOG:CURRent:SLOPe?</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_SOURce.htm"
+									title="TRIGger:DLOG:SOURce IMMediate | EXTernal | BUS | VOLTage<n> | CURRent<n> | ARSKey | OOOKey">TRIGger:DLOG:SOURce</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_SOURce.htm"
+									title="TRIGger:DLOG:SOURce?">TRIGger:DLOG:SOURce?</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_VOLTage__LEVel_.htm"
+									title="TRIGger:DLOG:VOLTage[:LEVel] <NRf+>, (@<chanlist>)">TRIGger:DLOG:VOLTage[:LEVel]</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_VOLTage__LEVel_.htm"
+									title="TRIGger:DLOG:VOLTage[:LEVel]? [MIN | MAX,] (@<chanlist>)">TRIGger:DLOG:VOLTage[:LEVel]?</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_VOLTage_SLOPe.htm"
+									title="TRIGger:DLOG:VOLTage:SLOPe POSitive | NEGative, (@<chanlist>)">TRIGger:DLOG:VOLTage:SLOPe</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_DLOG_VOLTage_SLOPe.htm"
+									title="TRIGger:DLOG:VOLTage:SLOPe? (@<chanlist>)">TRIGger:DLOG:VOLTage:SLOPe?</a> 
+ (N6705A only)</p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_TRANsient__IMMediate_.htm"
+									title="TRIGger:TRANsient[:IMMediate] (@<chanlist>)">TRIGger:TRANsient[:IMMediate]</a></p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_TRANsient_SOURce.htm"
+									title="TRIGger:TRANsient:SOURce BUS | PIN<1-7> | TRANsient<1-4>, (@<chanlist>)">TRIGger:TRANsient:SOURce</a></p>
+<p class=NormalTight
+	style="margin-left: -12px;"><a href="TRIGger_TRANsient_SOURce.htm"
+									title="TRIGger:TRANsient:SOURce? (@<chanlist>)">TRIGger:TRANsient:SOURce?</a></td>
+<td colspan=1
+	rowspan=1
+	style="width: 47.61%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-right-style: None;
+			border-bottom-style: None;"
+	width=47.61%>
+<p class=NormalTight><a href="../INITiate_Subsystem/INITiate__IMMediate__ACQuire.htm"
+						title="INITiate[:IMMediate]:ACQuire (@<chanlist>)">INITiate[:IMMediate]:ACQuire</a></p>
+<p class=NormalTight><a href="../INITiate_Subsystem/INITiate__IMMediate__DLOG.htm"
+						title="INITiate[:IMMediate]:DLOG <&quot;filename&quot;>">INITiate[:IMMediate]:DLOG</a> 
+ (N6705A only)</p>
+<p class=NormalTight><a href="../INITiate_Subsystem/INITiate__IMMediate__TRANsient.htm"
+						title="INITiate[:IMMediate]:TRANsient (@<chanlist>)">INITiate[:IMMediate]:TRANsient</a></p>
+<p class=NormalTight><a href="../INITiate_Subsystem/INITiate_CONTinuous_TRANsient.htm"
+						title="INITiate:CONTinuous:TRANsient OFF | 0 | ON | 1, (@<chanlist>)">INITiate:CONTinuous:TRANsient</a></p>
+<p class=normaltight><a href="../INITiate_Subsystem/INITiate_CONTinuous_TRANsient.htm"
+						title="INITiate:CONTinuous:TRANsient? (@<chanlist>)">INITiate:CONTinuous:TRANsient?</a></p>
+<p class=NormalTight><a title="ABORt:ACQuire (@chanlist)"
+						href="../ABORt_Commands/ABORt_ACQuire.htm">ABORt:ACQuire</a></p>
+<p class=NormalTight><a title="ABORt:DLOG"
+						href="../ABORt_Commands/ABORt__DLOG.htm">ABORt:DLOG</a> 
+ (N6705A only)</p>
+<p class=NormalTight><a title="ABORt:TRANsient (@chanlist)"
+						href="../ABORt_Commands/ABORt_TRANsient.htm">ABORt:TRANsient</a></td></tr>
+</table>
+
+<p class=NormalTight>&nbsp;</p>
+
+</body>
+</html>

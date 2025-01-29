@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Features and Functions|Display" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Histogram</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor53"></a>Histogram</h1>
+        <p>The histogram shows measurement data as a graphical representation of the distribution of measurement data. Data is grouped in bins represented by vertical bars in the histogram display.</p>
+        <p>
+            <img src="../_Graphics_/Disp-Hist-CumulOff.png" />
+        </p>
+        <p>
+            <img src="../_Graphics_/note.gif" /> Autoranging can adversely affect the histogram display when measuring repetitive signals spanning multiple ranges. To avoid this, select a fixed range when using the histogram display.</p>
+        <h2>Selecting the Display</h2>
+        <p>Pressing the <img src="../_Graphics_/Key-Display-Utility.png" /> key, followed by the <b>Display</b> softkey allows you to select the display type:</p>
+        <p>
+            <img src="../_Graphics_/Disp-SK-DisplayChoices.png" />
+        </p>
+        <h2>Binning</h2>
+        <p>The <b>Binning</b> softkey allows you to either let the instrument control how the histogram is binned (automatic binning), or to manually specify the binning parameters with the <b>Bin Settings</b> softkey. Changing any binning parameter, or switching between automatic and manual binning, will automatically start the histogram over with new data. On the 34461A/65A/70A, this also resets the trend chart.</p>
+        <p>
+            <img src="../_Graphics_/Disp-SK-HistBinMenu.png" />
+        </p>
+        <p>For <b>Binning Auto</b>, the algorithm starts by continuously readjusting the histogram span based on the readings coming in, completely re-binning the data whenever a new value comes in outside of the current span. After acquiring a large number of readings, a new reading outside of the range causes the bins to be compressed by a factor of two such that the new bin range will cover the new reading. The number of bins shown is a function of the number of readings received: 0 to 100 readings = 10 bins, 101 to 500 readings = 20 bins, 501 to 1000 readings = 40 bins, 1001 to 5000 readings = 100 bins, 5001 to 10000 readings = 200 bins, &gt;10000 readings = 400 bins. If the NPLC setting is &lt; 1 PLC, or Aperture Time (34465A/70A only) is &lt; 20 mS, the maximum number of bins is 100.</p>
+        <p>For <b>Binning Manual</b>, you can set number of bins to 10, 20, 40, 100, 200, or 400. You can specify the bin range as either <b>Low</b> and <b>High</b> values, or as a <b>Span</b> around a <b>Center</b> value. For example, the histogram range shown above (from -5 to 4 V) could be specified as a <b>Low</b> of -5 V and a <b>High</b> of 4 V, or a <b>Center</b> of -0.5 V and a <b>Span</b> of 9 V.</p>
+        <p>The <b>Outer Bins</b> softkey displays two additional bins, for readings above and below the bin range. For example, this image shows the <b>Outer Bins</b> softkey set to <b>Off</b>.</p>
+        <p>
+            <img src="../_Graphics_/Disp-HistOuterBinsOff.png" />
+        </p>
+        <p>The image below adds the outer bins to the display. The relatively large number of readings above the bin range (the cyan bar) causes the bars within the bin range to shrink.</p>
+        <p>
+            <img src="../_Graphics_/Disp-HistOuterBinsOn.png" />
+        </p>
+        <p>The main histogram menu includes a <b>Cumulative</b> softkey that hides or shows a line representing the cumulative distribution of the histogram data. Note that this line represents <i>all</i> of the data only when the outer bins are shown; if the outer bins are not shown, the outer bin data is not represented in the line. The cumulative distribution line always goes from 0 to 100% on the vertical scale, regardless of the histogram’s scale.</p>
+        <p>
+            <img src="../_Graphics_/Disp-HistOuterCumulOn.png" />
+        </p>
+        <p>The final button on the histogram menu, <b>Clear Readings</b>, clears reading memory and starts a new histogram.</p>
+        <h2>Histogram Data</h2>
+        <p>The graphic below shows a histogram of frequency measurements. Data is displayed on the left side of the histogram. In the graphic below, reading from top left downward:</p>
+        <ul>
+            <li class="IndentTight" value="1"><b>3.011 06 kHz</b> - present measurement value.</li>
+            <li class="IndentTight" value="2"><b>48</b> - Number of samples in the largest bin.</li>
+            <li class="IndentTight" value="3"><b>19.0%</b> - Percentage of samples in the largest bin. </li>
+            <li class="IndentTight" value="4"><b>Total 253</b> - Total number of samples.</li>
+            <li class="IndentTight" value="5"><b># Bins 20</b> - Total number of bins. </li>
+            <li class="IndentTight" value="6"><b>0, 2.5k, 5k</b> - (Below the histogram) Range of frequency values.</li>
+        </ul>
+        <p>
+            <img src="../_Graphics_/HistoData.png" />
+        </p>
+        <h2>Cursors (34465A/70A only)</h2>
+        <p>Press the <b>Cursors</b> softkey (34465A/70A only) to display the histogram cursors.</p>
+        <p>
+            <img src="../_Graphics_/HistoCursorsSoftkey.png" />
+        </p>
+        <p>Cursors in the histogram are specified as bin numbers and display the range of values covered by those bins, the count and the percentage of the total. The total count and percentage of total, as well as the measurement range covered, between the cursor bins, is also displayed. In the graphic below, cursor B1 (violet vertical lines) is positioned on bin number 10 and cursor B2 (green vertical lines) is positioned on bin number 14 (bin number shown above the <b>B1</b> softkey). The bin information for cursor B1 is shown in the violet box, the bin information for B2 in the green box. For example, the information in the B1 box is in the graphic below is:</p>
+        <ul>
+            <li class="IndentTight" value="1"> <b>2.250 00 k to 2.500 00k</b> - Range of frequency measurement values for this bin.</li>
+            <li class="IndentTight" value="2"><b>#29</b> - Number of samples in this bin.</li>
+            <li class="IndentTight" value="3"><b>11.5%</b> - Percentage of the total number of samples in this bin.</li>
+        </ul>
+        <p>The data between the B1 and B2 cursors, including the data in the B1 and B2 bins, is shown to the right of the violet and green boxes. In the graphic below:</p>
+        <ul>
+            <li class="IndentTight" value="1"><b>Span:</b> - The measurement range covered from B1 to B2. </li>
+            <li class="IndentTight" value="2"><b>#178</b> - The number of samples from B1 to B2. </li>
+            <li class="IndentTight" value="3"><b>70.4%</b> - The percentage of the total number of samples from B1 to B2.</li>
+        </ul>
+        <p>
+            <img src="../_Graphics_/HistoCursors.png" />
+        </p>
+        <p>When Outer Bins are shown (when using manual binning) a zero cursor value indicates the outlier count below the histogram range, and one plus the number of bins indicates the outlier count above the histogram range.</p>
+        <h2>Histogram with Statistics</h2>
+        <p>Showing statistics (<b>Shift &gt; Math &gt; Statistics</b>) is particularly useful for the histogram display. For example, in the graphic below, the thick blue line is the average, each thin blue line represents one standard deviation from the average. </p>
+        <p>
+            <img src="../_Graphics_/HistoStdDev.png" />
+        </p>
+        <h2>See Also</h2>
+        <p><a href="50%20---Display---.htm">Display - Introduction</a>
+        </p>
+        <p><a href="51%20Display-Number.htm">Number</a>
+        </p>
+        <p><a href="52%20Display-Bar%20Meter.htm">Bar Meter</a>
+        </p>
+        <p><a href="53%20Display-Trend%20Chart.htm">Trend Chart (34461A/65A/70A only)</a>
+        </p>
+        
+    </body>
+</html>

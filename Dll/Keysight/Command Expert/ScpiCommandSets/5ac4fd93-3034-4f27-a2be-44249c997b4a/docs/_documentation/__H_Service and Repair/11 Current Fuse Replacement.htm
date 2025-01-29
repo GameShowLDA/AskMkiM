@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Service and Repair" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>3 A and 10 A Current Path Fuse Replacement</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor595"></a>3 A and 10 A Current Path Fuse Replacement</h1>
+        <p>This section describes the procedure for testing and replacing the 3 A and 10 A current path fuses inside the instrument.</p>
+        <table style="border-left-width: 0px;border-left-style: Solid;border-top-width: 0px;border-top-style: Solid;border-right-width: 0px;border-right-style: Solid;border-bottom-width: 0px;border-bottom-style: Solid;border-spacing: 0px;border-spacing: 0px;margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" cellspacing="0" class="TableStyle-NoteTable">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tr valign="top">
+                <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                    <p>
+                        <img src="../_Graphics_/warning.gif" alt="Warning" />
+                    </p>
+                </td>
+                <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">
+                    <p width="88.316%" style="font-weight: bold;">Only qualified, service-trained personnel who are aware of the hazards involved should remove instrument covers. Always disconnect the power cable and any external circuits before removing the instrument cover. Some circuits are active and have power applied even when the power switch is turned off.</p>
+                    <p width="88.316%" style="font-weight: bold;">Always disconnect all inputs, cords, and cables before disassembling the instrument.</p>
+                </td>
+            </tr>
+        </table>
+        <p>
+            <p>
+                <table style="border-left-width: 0px;border-left-style: Solid;border-top-width: 0px;border-top-style: Solid;border-right-width: 0px;border-right-style: Solid;border-bottom-width: 0px;border-bottom-style: Solid;border-spacing: 0px;border-spacing: 0px;margin-left: 0;margin-right: auto;" cellspacing="0">
+                    <col />
+                    <col />
+                    <tr valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%">
+                            <p>
+                                <img src="../_Graphics_/caution.gif" alt="Warning" />
+                            </p>
+                        </td>
+                        <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%">
+                            <p>Do not turn the screw that fastens the shield in place, as this will affect the instrument's calibration.</p>
+                            <p>
+                                <img src="../_Graphics_/DoNotTouchScrew_265x209.jpg" style="width: 265;height: 209;" />
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+        </p>
+        <div>
+            <h2><a name="Tools_Required"></a>Tools Required</h2>
+            <ul>
+                <li class="IndentTight" value="1">T20 Torx driver (most disassembly)</li>
+                <li class="IndentTight" value="2">Small, flat-blade screw driver (for prying)</li>
+            </ul>
+        </div>
+        <div>
+            <h2>Testing the Fuses</h2>
+            <h3>3 A Current Path</h3>
+            <p>To determine whether the instrument's 3 A current path has a fuse that must be replaced, press <b>[Cont]</b> to put the DMM in continuity measurement mode, and short the HI Input terminal to the 3 A current terminal. If the measurement displays OPEN, one of the two fuses must be replaced. One fuse is accessible from the instrument's rear panel; the other is internal.</p>
+            <p>If the 3 A current path has a bad fuse, it is very likely to be the fuse accessible from the lower left corner of the instrument's rear panel (part number 2110-1547, 3.15 A, 500 V, time delay). Simply use a flat-blade screw driver to turn the fuse holder counter-clockwise and access the fuse. Put the new fuse into the fuse holder and insert the assembly back into the instrument, turning the fuse holder clockwise to lock it in place.</p>
+            <p>If the 3 A path still has a bad fuse, replace the internal 3 A current path fuse as described below.</p>
+            <h3>10 A Current Path (34461A/65A/70A only)</h3>
+            <p>To determine whether the instrument's 10 A current path has a fuse that must be replaced, press <b>[Cont]</b> to put the DMM in continuity measurement mode, and short the HI Input terminal to the 10 A current terminal. If the measurement displays OPEN, replace the internal 10 A current path fuse as described below.</p>
+        </div>
+        <div>
+            <h2>Internal Fuse Replacement Procedure</h2>
+            <p>Both internal current path fuses are part number 2110-1402, 11 A, 1000 V, fast acting. To replace an internal fuse:</p>
+            <ol>
+                <li class="IndentTight" value="1">Turn off the power and remove all measurement leads and other cables, including the power cord, from the instrument before continuing.</li>
+                <li class="IndentTight" value="2">Follow the <a href="07%20Disassembly.htm">disassembly procedure</a> to disassemble the instrument.<br /></li>
+                <li class="IndentTight" value="3">Locate the fuse to be replaced, as shown below.<br /><img src="../_Graphics_/Internal%20Fuses_317x232.jpg" style="width: 317;height: 232;" /><br /><br /></li>
+                <li class="IndentTight" value="4">Use the screwdriver to pry the fuse from the fuse holder, being careful not to damage the circuit board. For the 3 A fuse, it may be easiest to access the fuse from the side, through the rectangular aperture in the sheet metal.<br /></li>
+                <li class="IndentTight" value="5">Remove the fuse.</li>
+                <li class="IndentTight" value="6">Position the new fuse in the fuse holder. Push down gently to seat the fuse in the holder.</li>
+                <li class="IndentTight" value="7">Re-assemble the instrument completely before connecting any cables or cords.<br /></li>
+            </ol>
+            <p>This concludes the fuse replacement procedure. </p>
+        </div>
+        
+    </body>
+</html>

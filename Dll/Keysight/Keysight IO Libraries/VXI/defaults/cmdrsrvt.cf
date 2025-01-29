@@ -1,0 +1,31 @@
+#
+# This database contains the commander/servant hierarchy for the
+# VXI cardcage.
+#
+# Note that this file doesn't need to contain the entire commander/servant
+# hierarchy, just changes from the default (which is specified in the
+# VXI Specifiecations).
+#
+# The format of this files is as follows:
+#
+# cmdr_log_id	srvnt_log_id
+#
+# All fields are <tab> separated.  All values can be expressed in
+# decimal or hex.
+#
+# Initially, the resource manager builds a commander/servant hierarchy
+# by using the servant numbers of all commanders and follows the
+# VXI specifications for creating this hierarchy.  Then the resource
+# manager reads this file and modifies the hierarchy as specified
+# in this file.
+#
+# For example, lets say the following line appears:
+#
+# 3	10
+#
+# When this line is read, the list of servants for commander #3 is
+# increased to include servant #10.  In addition, the commander for
+# servant #10 is changed from its previous value to #3.  The list
+# of servants for the old commander of servant #10 is updated to
+# have servant #10 removed.
+#

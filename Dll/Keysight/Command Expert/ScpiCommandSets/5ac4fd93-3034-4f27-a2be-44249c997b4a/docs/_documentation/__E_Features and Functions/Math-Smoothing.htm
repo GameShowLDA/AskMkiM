@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="Features and Functions|Math" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Math - Smoothing</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor45"></a>Math - Smoothing</h1>
+        <p>(34465A/70A only) Smoothing uses a moving average (boxcar) filter to reduce random noise in measurements. Smoothing is intended to average out small variations in the measurements.  Larger variations will cause the filter to reset.</p>
+        <p>
+            <img src="../_Graphics_/Smoothing1.png" />
+        </p>
+        <p>Press <b>Response</b> to select <b>Slow</b> (100 readings), <b>Medium</b> (50 readings), or <b>Fast</b> (10 readings) to average.</p>
+        <p>
+            <img src="../_Graphics_/Smoothing2.png" />
+        </p>
+        <p>The smoothing filter applies to all measurement functions except Digitizing, Data Logging, Continuity, Diode, and Probe Hold.</p>
+        <p>The smoothing filter starts out from a reset condition (no readings in the filter) and is reset if the measurement function is changed  or if a reading is too far beyond 
+ the current average. After the filter is reset, the reading is the average of all readings up to the specified response (10, 50, 100). At that point, the reading is the moving average of the last 10 (Fast), 50 (Medium), or 100 (Slow) readings. Equal weighting is applied to all readings in the average.</p>
+        <p>The <img src="../_Graphics_/FilterReset.png" /> icon (top, right-side of the display) indicates the variation of readings, the amount of allowable readings in the filter, and when the filter is reset as follows:</p>
+        <ul>
+            <li class="IndentTight" value="1">Too great of reading variation will constantly reset the filter and the filter icon will be solid yellow (<img src="../_Graphics_/FilterReset.png" />).     </li>
+            <li class="IndentTight" value="2">As the filter fills with readings, that are within the allowable variation from the readings already in the filter, the filter icon will turn green progressively from left to right( <img src="../_Graphics_/FilterLow.png" /> -&gt; <img src="../_Graphics_/FilterMed.png" />). </li>
+            <li class="IndentTight" value="3"> A single reading, that is beyond the allowable variation from the readings in the filter, will reset the filter and set the filter icon to solid yellow (<img src="../_Graphics_/FilterReset.png" />). </li>
+            <li class="IndentTight" value="4">  If all readings are within the allowable variation from the readings in the filter, the filter icon will be solid green (<img src="../_Graphics_/FilterMax.png" />).</li>
+        </ul>
+        <p>&#160;</p>
+        
+    </body>
+</html>

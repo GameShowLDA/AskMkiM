@@ -1,0 +1,29 @@
+
+visaDir: "C:/Program Files/Keysight/IO Libraries Suite/bin"       # The path for VISA libraries, iproc processes, nko server, etc;
+
+database:
+  databaseDir: "C:/ProgramData/Keysight/Keysight IO Libraries" # The directory where db files are located.
+
+websocket:
+  host: "0.0.0.0"                     # IP address that WebSocket is listening
+  port: 7878                          # WebSocket port number
+  responseTimeoutMs: 60000            # Timeout (milliseconds) for agents waiting for response
+
+# agents:
+#   - name: "IoAgentTcpip"       # Agent name
+#     config: "   ./lan-agent-tt.yml"  # Configuration file for this agent, can use absolute path or relative path the the agent executable
+
+logging:
+  logDir: "C:/ProgramData/Keysight/Keysight IO Libraries"          # The directory where log files are saved, if is empty, use the same dir with the executable.
+  consoleSink: true   # Enable logging to console  
+  logLevel: "info"   # Valid logging levels are: "trace", "debug", "info", "warn", "error", "fatal", "panic"
+  maxSize: 25         # The maximum size (in megabytes) of the log file before it gets rotated
+  maxBackups: 10      # The maximum number of old log files to retain
+  maxAge: 13          # The maximum number of days to retain old log files
+
+
+hub:
+  supportDual: true
+  oldDSAddress: "localhost"
+  oldDSPort: 7887
+  oldDSResponseTimeoutSec: 20            # Timeout (seconds) for waiting response from C# DS

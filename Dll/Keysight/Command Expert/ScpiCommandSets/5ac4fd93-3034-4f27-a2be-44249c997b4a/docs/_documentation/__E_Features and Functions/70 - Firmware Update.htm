@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Introduction to the Instrument" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Firmware Update</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor11"></a>Firmware Update</h1>
+        <p>Use the following procedure to update instrument firmware:</p>
+        <table class="TableStyle-NoteTable" style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" cellspacing="0">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tbody>
+                <tr>
+                    <td class="TableStyle-NoteTable-BodyB-Column1-">
+                        <img src="../_Graphics_/caution.gif" />
+                    </td>
+                    <td class="TableStyle-NoteTable-BodyA-Column1-">Do not turn off the instrument during the update.</td>
+                </tr>
+            </tbody>
+        </table>
+        <ol>
+            <li class="IndentTight" value="1">Press <b>[Help] &gt; About</b> to determine what instrument firmware version is currently installed.</li>
+            <li class="IndentTight" value="2">Go to <a href="http://www.keysight.com/find/truevolt">www.keysight.com/find/truevolt</a> and use the links there to find the latest firmware version. If this matches the version installed on your instrument, there is no need to continue with this procedure. Otherwise, download the firmware update utility and a ZIP file of the firmware. Detailed firmware instructions are in the <i>Firmware Update Utility Instructions</i> located on the download page.</li>
+            <li class="IndentTight" value="3">Unzip the ZIP file and use the firmware update utility to prepare a USB drive with the updated firmware:</li>
+            <li class="IndentTight" value="4">Attach the USB drive to the instrument front panel and press <b>[Utility] &gt; Test / Admin &gt; Firmware Update</b> to update the firmware. If the security option is installed, unlock the instrument with the security code before installing firmware.</li>
+        </ol>
+        <p><b>Important:</b> In order to update the instrument firmware <i>from remote</i>, the model number in the <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response must match the actual instrument model number.  If you have changed the instrument's <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response to another instrument, when attempting to update the firmware from remote, you will see this error: <i>The instrument is not supported by this firmware file.</i> To update the firmware, either update using the front panel procedure or, from remote, use <a href="../__I_SCPI/SYSTem_General%20Commands.htm#IDEN">SYSTem:IDENtify</a> to set the <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> to match the actual model number, update the firmware, and then use <a href="../__I_SCPI/SYSTem_General%20Commands.htm#IDEN">SYSTem:IDENtify</a> again to set the <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response to the other model number. </p>
+        
+    </body>
+</html>

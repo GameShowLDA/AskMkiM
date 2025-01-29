@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="SCPI Programming Reference" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Command Quick Reference</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 class="CmdSyntaxQRG"><a name="kanchor575"></a>Command Quick Reference</h1>
+        <p>Be sure to read <a href="../__I_SCPI/Scpi_introduction.htm#Syntax_SCPI_intro">language syntax conventions</a>. Commands or parameters shown in <span style="color: #0000ff;">blue</span> apply only to the 34465A/70A, all other commands/parameters apply to all True<i>volt</i> DMMs.</p>
+        <div>
+            <h2>Configuration Commands</h2>
+            <p class="CmdQRG">CONFigure?</p>
+            <p class="CmdQRG">CONFigure:CAPacitance [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure:CONTinuity</p>
+            <p class="CmdQRG">CONFigure:CURRent:{AC|DC} [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure:DIODe</p>
+            <p class="CmdQRG">CONFigure:{FREQuency|PERiod}  [{&lt;<i>range</i>&gt;|MIN|MAX|DEF} [,  {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]] </p>
+            <p class="CmdQRG">CONFigure:{RESistance|FRESistance} [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure:TEMPerature [{FRTD|RTD|FTHermistor|THERmistor|<span style="color: #0000ff;">TCouple</span>|DEFault} [, {&lt;<i>type</i>&gt;|DEFault} [,1 , {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]]] </p>
+            <p class="CmdQRG">CONFigure[:VOLTage]:{AC|DC} [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure[:VOLTage][:DC]:RATio [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <h2><a name="MEAS_"></a><a name="kanchor576"></a>Measurement Commands</h2>
+            <p class="CmdQRG">MEASure:CAPacitance?  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">MEASure:CONTinuity?</p>
+            <p class="CmdQRG">MEASure:CURRent:{AC|DC}?  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">MEASure:DIODe?</p>
+            <p class="CmdQRG">MEASure:{FREQuency|PERiod}?  [{&lt;<i>range</i>&gt;|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">MEASure:{RESistance|FRESistance}?  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">MEASure:TEMPerature? [{FRTD|RTD|FTHermistor|THERmistor|<span style="color: #0000ff;">TCouple</span>|DEFault} [, {&lt;<i>type</i>&gt;|DEFault} [,1 , {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]]]</p>
+            <p class="CmdQRG">MEASure[:VOLTage]:{AC|DC}?  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">MEASure[:VOLTage][:DC]:RATio?  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+        </div>
+        <div>
+            <h2>Measurement Configuration Commands</h2>
+            <p class="CmdQRG">[SENSe:]FUNCtion[:ON] "&lt;function&gt;"<br />[SENSe:]FUNCtion[:ON]?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Voltage"></a>AC and DC Voltage and DC Ratio Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure[:VOLTage]:{AC|DC}  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure[:VOLTage][:DC]:RATio  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:AC:BANDwidth   {&lt;<i>filter</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]VOLTage:AC:BANDwidth?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:{AC|DC}:NULL[:STATe] {OFF|ON}<br />[SENSe:]VOLTage:{AC|DC}:NULL[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:{AC|DC}:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]VOLTage:{AC|DC}:NULL:VALue?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:{AC|DC}:NULL:VALue:AUTO {OFF|ON}<br />[SENSe:]VOLTage:{AC|DC}:NULL:VALue:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:{AC|DC}:RANGe  {&lt;<i>range</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]VOLTage:{AC|DC}:RANGe?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:{AC|DC}:RANGe:AUTO  {OFF|ON|ONCE}<br />[SENSe:]VOLTage:{AC|DC}:RANGe:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage:AC:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"FREQuency"|"VOLTage[:DC]"} <br />[SENSe:]VOLTage:AC:SECondary?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]VOLTage[:DC]:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]VOLTage[:DC]:APERture?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]VOLTage[:DC]:APERture:ENABled
+ {OFF|ON} <br />[SENSe:]VOLTage[:DC]:APERture:ENABled?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage[:DC]:IMPedance:AUTO {OFF|ON}<br />[SENSe:]VOLTage[:DC]:IMPedance:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage[:DC]:NPLC  {&lt;<i>PLCs</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]VOLTage[:DC]:NPLC?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]VOLTage[:DC]:RATio:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"SENSe:DATA"} <br />[SENSe:]VOLTage[:DC]:RATio:SECondary?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage[:DC]:RESolution  {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]VOLTage[:DC]:RESolution?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]VOLTage[:DC]:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"VOLTage:AC"|"PTPeak"} <br />[SENSe:]VOLTage[:DC]:SECondary?</p>
+            <p class="CmdQRG">[SENSe:]VOLTage[:DC]:ZERO:AUTO  {OFF|ON|ONCE}<br />[SENSe:]VOLTage[:DC]:ZERO:AUTO?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Resistance"></a>2-Wire and 4-Wire Resistance Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure:{RESistance|FRESistance}  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]{RESistance|FRESistance}:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]{RESistance|FRESistance}:APERture?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]{RESistance|FRESistance}:APERture:ENABled {OFF|ON} <br />[SENSe:]{RESistance|FRESistance}:APERture:ENABled?</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:NPLC  {&lt;<i>PLCs</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{RESistance|FRESistance}:NPLC?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:NULL[:STATe] {OFF|ON}<br />[SENSe:]{RESistance|FRESistance}:NULL[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{RESistance|FRESistance}:NULL:VALue?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:NULL:VALue:AUTO {OFF|ON}<br />[SENSe:]{RESistance|FRESistance}:NULL:VALue:AUTO?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]{RESistance|FRESistance}:OCOMpensated {OFF|ON} <br />[SENSe:]{RESistance|FRESistance}:OCOMpensated?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]{RESistance|FRESistance}:POWer:LIMit[:STATe] {OFF|ON}<br />[SENSe:]{RESistance|FRESistance}:POWer:LIMit[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:RANGe  {&lt;<i>range</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{RESistance|FRESistance}:RANGe?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:RANGe:AUTO  {OFF|ON|ONCE}<br />[SENSe:]{RESistance|FRESistance}:RANGe:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]{RESistance|FRESistance}:RESolution  {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{RESistance|FRESistance}:RESolution?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{FRESistance|RESistance}:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>}<br />[SENSe:]{FRESistance|RESistance}:SECondary?</p>
+            <p class="CmdQRG">[SENSe:]RESistance:ZERO:AUTO  {OFF|ON|ONCE}<br />[SENSe:]RESistance:ZERO:AUTO?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Current"></a>AC and DC Current Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure:CURRent:{AC|DC}  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure?</p>
+            <p class="CmdQRG">[SENSe:]CURRent:AC:BANDwidth  {&lt;<i>filter</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]CURRent:AC:BANDwidth?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CURRent:{AC|DC}:NULL[:STATe] {OFF|ON}<br />[SENSe:]CURRent:{AC|DC}:NULL[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]CURRent:{AC|DC}:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]CURRent:{AC|DC}:NULL:VALue?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CURRent:{AC|DC}:NULL:VALue:AUTO {OFF|ON}<br />[SENSe:]CURRent:{AC|DC}:NULL:VALue:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]CURRent:{AC|DC}:RANGe  {&lt;<i>range</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]CURRent:{AC|DC}:RANGe?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CURRent:{AC|DC}:RANGe:AUTO  {OFF|ON|ONCE}<br />[SENSe:]CURRent:{AC|DC}:RANGe:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]CURRent:{AC|DC}:TERMinals  {3|10}<br />[SENSe:]CURRent:{AC|DC}:TERMinals?</p>
+            <p class="CmdQRG">[SENSe:]CURRent:AC:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"FREQuency"|"CURRent[:DC]"} <br />[SENSe:]CURRent:AC:SECondary?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]CURRent[:DC]:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]CURRent[:DC]:APERture?  [{MIN|MAX|DEF}] </p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]CURRent[:DC]:APERture:ENABled<![CDATA[  ]]>{OFF|ON}<br />[SENSe:]CURRent[:DC]:APERture:ENABled?</p>
+            <p class="CmdQRG">[SENSe:]CURRent[:DC]:NPLC  {&lt;<i>PLCs</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]CURRent[:DC]:NPLC?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CURRent[:DC]:RESolution  {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]CURRent[:DC]:RESolution?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CURRent[:DC]:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"CURRent:AC"|"PTPeak"} <br />[SENSe:]CURRent[:DC]:SECondary?</p>
+            <p class="CmdQRG">[SENSe:]CURRent[:DC]:ZERO:AUTO  {OFF|ON|ONCE}<br />[SENSe:]CURRent[:DC]:ZERO:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]CURRent:SWITch:MODE {FAST|CONTinuous} <br></br>[SENSe:]CURRent:SWITch:MODE?</p>
+        </div>
+        <div>
+            <h3><a name="Capacitance"></a>Capacitance Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure:CAPacitance  [{&lt;<i>range</i>&gt;|AUTO|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]</p>
+            <p class="CmdQRG">CONFigure?</p>
+            <p class="CmdQRG">[SENSe:]CAPacitance:NULL[:STATe]<![CDATA[  ]]>{OFF|ON} <br />[SENSe:]CAPacitance:NULL[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]CAPacitance:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]CAPacitance:NULL:VALue?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CAPacitance:NULL:VALue:AUTO {OFF|ON} <br />[SENSe:]CAPacitance:NULL:VALue:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]CAPacitance:RANGe<![CDATA[ 
+ ]]> {&lt;<i>range</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]CAPacitance:RANGe?<![CDATA[ 
+ ]]> [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]CAPacitance:RANGe:AUTO  {OFF|ON|ONCE} <br />[SENSe:]CAPacitance:RANGe:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]CAPacitance:SECondary{"OFF"|"CALCulate:DATA"}<br></br>[SENSe:]CAPacitance:SECondary?</p>
+            <h3 class="CmdSyntaxH3"><a name="Temperature"></a>Temperature Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure:TEMPerature [{FRTD|RTD|FTHermistor|THERmistor|<span style="color: #0000ff;">TCouple</span>|DEFault} [, {&lt;<i>type</i>&gt;|DEFault} [,1 , {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]]]<br />CONFigure?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]TEMPerature:APERture?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:APERture:ENABled {OFF|ON} <br />[SENSe:]TEMPerature:APERture:ENABled?</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:NPLC  {&lt;<i>PLCs</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:NPLC?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:NULL[:STATe] {OFF|ON}<br />[SENSe:]TEMPerature:NULL[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:NULL:VALue?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:NULL:VALue:AUTO {OFF|ON}<br />[SENSe:]TEMPerature:NULL:VALue:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"SENSe:DATA"} <br />[SENSe:]TEMPerature:SECondary?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:OCOMpensated {OFF|ON} <br />[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:OCOMpensated?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:POWer:LIMit[:STATe] {OFF|ON}<br />[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:POWer:LIMit[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:RESistance[:REFerence] {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:RESistance[:REFerence]? [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:POWer:LIMit[:STATe] {OFF|ON}<br />[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:POWer:LIMit[:STATe]?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:TCouple:CHECk {OFF|ON} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:CHECk?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction {&lt;<span class="CmdItalics">temperature</span>&gt;|MIN|MAX|DEF} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:OFFSet:ADJust {&lt;<i>temperature</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:OFFSet:ADJust?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:TYPE {INTernal|FIXed} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:TYPE?</p>
+            <p class="CmdQRG" style="color: #0000ff;">[SENSe:]TEMPerature:TRANsducer:TCouple:TYPE
+ {E|J|K|N|R|T} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:TYPE?</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:TRANsducer:TYPE  {FRTD|RTD|FTHermistor|THERmistor|<span style="color: #0000ff;">TCouple</span>}<br />[SENSe:]TEMPerature:TRANsducer:TYPE?</p>
+            <p class="CmdQRG">[SENSe:]TEMPerature:ZERO:AUTO  {OFF|ON|ONCE}<br />[SENSe:]TEMPerature:ZERO:AUTO?</p>
+            <p class="CmdQRG">UNIT:TEMPerature  {C|F|K}<br />UNIT:TEMPerature?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Frequency"></a>Frequency/Period Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure:{FREQuency|PERiod}  [{&lt;<i>range</i>&gt;|MIN|MAX|DEF} [, {&lt;<i>resolution</i>&gt;|MIN|MAX|DEF}]]<br />CONFigure?</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:APERture?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:NULL[:STATe]  {OFF|ON}<br />[SENSe:]{FREQuency|PERiod}:NULL[:STATe]?</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:NULL:VALue?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO {OFF|ON}<br />[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:RANGe:LOWer<![CDATA[  ]]>{&lt;<i>freq</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:RANGe:LOWer? </p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:TIMeout:AUTO {OFF|ON}</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe  {&lt;<i>range</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe:AUTO  {OFF|ON|ONCE}<br />[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe:AUTO?</p>
+            <p class="CmdQRG">[SENSe:]FREQuency:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"PERiod"|"VOLTage:AC"}<br />[SENSe:]FREQuency:SECondary?</p>
+            <p class="CmdQRG">[SENSe:]PERiod:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"FREQuency"|"VOLTage:AC"}<br />[SENSe:]PERiod:SECondary?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Continuity"></a>Continuity and Diode Configuration Commands</h3>
+            <p class="CmdQRG">CONFigure:CONTinuity</p>
+            <p class="CmdQRG">CONFigure:DIODe</p>
+        </div>
+        <h3>Secondary Measurement Commands</h3>
+        <p class="CmdQRG">[SENSe:]CAPacitance:SECondary {"OFF"|"CALCulate:DATA"}<br></br>[SENSe:]CAPacitance:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]CURRent:AC:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"FREQuency"|"CURRent[:DC]"} <br />[SENSe:]CURRent:AC:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]CURRent[:DC]:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"CURRent:AC"|"PTPeak"} <br />[SENSe:]CURRent[:DC]:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]DATA2?</p>
+        <p class="CmdQRG">[SENSe:]DATA2:CLEar[:IMMediate]</p>
+        <p class="CmdQRG">[SENSe:]{FRESistance|RESistance}:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>}<br />[SENSe:]{FRESistance|RESistance}:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]FREQuency:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"PERiod"|"VOLTage:AC"}<br />[SENSe:]PERiod:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"FREQuency"|"VOLTage:AC"}</p>
+        <p class="CmdQRG">[SENSe:]TEMPerature:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"SENSe:DATA"}<br />[SENSe:]TEMPerature:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]VOLTage:AC:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"FREQuency"|"VOLTage[:DC]"}<br />[SENSe:]VOLTage:AC:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]VOLTage[:DC]:RATio:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"SENSe:DATA"}<br />[SENSe:]VOLTage[:DC]:RATio:SECondary?</p>
+        <p class="CmdQRG">[SENSe:]VOLTage[:DC]:SECondary {"OFF"|<span style="color: #0000ff;">"CALCulate:DATA"</span>|"VOLTage:AC"|"PTPeak"}<br />[SENSe:]VOLTage[:DC]:SECondary?</p>
+        <div>
+            <h3 class="CmdSyntaxH3">Miscellaneous Configuration Commands</h3>
+            <p class="CmdQRG">ROUTe:TERMinals?</p>
+        </div>
+        <div>
+            <h2>Sample Commands</h2>
+            <p class="CmdQRG" style="color: #000000;">SAMPle:COUNt  {&lt;<i>count</i>&gt;|MIN|MAX|DEF}<br />SAMPle:COUNt?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">SAMPle:COUNt:PRETrigger {&lt;<span class="CmdItalics">count</span>&gt;|MIN|MAX|DEF} <br />SAMPle:COUNt:PRETrigger? [{MIN|MAX|DEF}]  </p>
+            <p class="CmdQRG" style="color: #0000ff;">SAMPle:SOURce  {IMMediate|TIMer} <br />SAMPle:SOURce? </p>
+            <p class="CmdQRG" style="color: #0000ff;">SAMPle:TIMer {<span class="hcp1">&lt;<i>interval</i>&gt;</span>|MIN|MAX|DEF} <br />SAMPle:TIMer? [{MIN|MAX|DEF}]</p>
+            <h2><a name="triggering"></a>Triggering Commands</h2>
+            <p class="CmdQRG">ABORt</p>
+            <p class="CmdQRG">INITiate[:IMMediate]</p>
+            <p class="CmdQRG">OUTPut:TRIGger:SLOPe  {POSitive|NEGative}<br />OUTPut:TRIGger:SLOPe?</p>
+            <p class="CmdQRG">READ?</p>
+            <p class="CmdQRG">SAMPle:COUNt  {&lt;<i>count</i>&gt;|MIN|MAX|DEF}<br />SAMPle:COUNt?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">SAMPle:COUNt:PRETrigger {&lt;<span class="CmdItalics">count</span>&gt;|MIN|MAX|DEF} <br />SAMPle:COUNt:PRETrigger? [{MIN|MAX|DEF}] </p>
+            <p class="CmdQRG">*TRG</p>
+            <p class="CmdQRG">TRIGger:COUNt  {&lt;<i>count</i>&gt;|MIN|MAX|DEF|INFinity}<br />TRIGger:COUNt?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">TRIGger:DELay  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF}<br />TRIGger:DELay?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">TRIGger:DELay:AUTO {OFF|ON}<br />TRIGger:DELay:AUTO?</p>
+            <p class="CmdQRG" style="color: #0000ff;">TRIGger:LEVel {&lt;<span class="CmdItalics">level</span>&gt;|MIN|MAX|DEF} <br />TRIGger:LEVel?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">TRIGger:SLOPe  {POSitive|NEGative}<br />TRIGger:SLOPe?</p>
+            <p class="CmdQRG">TRIGger:SOURce  {IMMediate|EXTernal|BUS|INTernal}<br />TRIGger:SOURce?</p>
+        </div>
+        <div>
+            <h2><a name="Calculate_cmds"></a>Calculation (Math) Commands</h2>
+            <h3>Overall</h3>
+            <p class="CmdQRG">CALCulate:CLEar[:IMMediate]</p>
+            <h3 class="CmdSyntaxH3"><a name="Histogram"></a>Histogram</h3>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:ALL?</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:CLEar[:IMMediate]</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:COUNt?</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:DATA?</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:POINts  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />CALCulate:TRANsform:HISTogram:POINts?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:RANGe:AUTO {OFF|ON}<br />CALCulate:TRANsform:HISTogram:RANGe:AUTO?</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:TRANsform:HISTogram[:STATe] {OFF|ON}<br />CALCulate:TRANsform:HISTogram[:STATe]?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Limit"></a><a name="kanchor577"></a>Limit Testing</h3>
+            <p class="CmdQRG">CALCulate:LIMit:CLEar[:IMMediate]</p>
+            <p class="CmdQRG">CALCulate:LIMit:{LOWer|UPPer}[:DATA]  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />CALCulate:LIMit:{LOWer|UPPer}[:DATA]?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:LIMit[:STATe] {OFF|ON}<br />CALCulate:LIMit[:STATe]?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="Scaling"></a><a name="kanchor578"></a>Scaling</h3>
+            <p class="CmdQRG">CALCulate:SCALe:DB:REFerence  {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:DB:REFerence?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:SCALe:DBM:REFerence  {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:DBM:REFerence?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:SCALe:FUNCtion<![CDATA[  ]]>{DB|DBM|<span style="color: #0000ff;">PCT</span>|<span style="color: #0000ff;">SCALe</span>}<br /><br />CALCulate:SCALe:FUNCtion?</p>
+            <p class="CmdQRG" style="color: #0000ff;">CALCulate:SCALe:GAIN {&lt;<i>gain</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:GAIN?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG" style="color: #0000ff;">CALCulate:SCALe:OFFSet {&lt;<i>offset</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:OFFSet?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:SCALe:REFerence:AUTO {OFF|ON}<br />CALCulate:SCALe:REFerence:AUTO?</p>
+            <p class="CmdQRG" style="color: #0000ff;">CALCulate:SCALe:REFerence {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:REFerence?  [{MIN|MAX|DEF}]</p>
+            <p class="CmdQRG">CALCulate:SCALe[:STATe] {OFF|ON}<br />CALCulate:SCALe[:STATe]?</p>
+            <p class="CmdQRG">CALCulate:SCALe:UNIT &lt;<i>quoted_string</i>&gt; <br />CALCulate:SCALe:UNIT?</p>
+            <p class="CmdQRG" style="color: #0000ff;">CALCulate:SCALe:UNIT:STATe {OFF|ON}<br />CALCulate:SCALe:UNIT:STATe?</p>
+        </div>
+        <div>
+            <h3 class="CmdSyntaxH3"><a name="stats"></a>Statistics</h3>
+            <p class="CmdQRG">CALCulate:AVERage:ALL?</p>
+            <p class="CmdQRG">CALCulate:AVERage:AVERage?</p>
+            <p class="CmdQRG">CALCulate:AVERage:CLEar[:IMMediate]</p>
+            <p class="CmdQRG">CALCulate:AVERage:COUNt?</p>
+            <p class="CmdQRG">CALCulate:AVERage:MAXimum?</p>
+            <p class="CmdQRG">CALCulate:AVERage:MINimum?</p>
+            <p class="CmdQRG">CALCulate:AVERage:PTPeak?</p>
+            <p class="CmdQRG">CALCulate:AVERage:SDEViation?</p>
+            <p class="CmdQRG">CALCulate:AVERage[:STATe] {OFF|ON}<br />CALCulate:AVERage[:STATe]?</p>
+            <h3><a name="Smoothing"></a>Smoothing</h3>
+            <p class="CmdQRG" style="color: #0000ff;">CALCulate:SMOothing:RESPonse {SLOW|MEDium|FAST} <br />CALCulate:SMOothing:RESPonse?</p>
+            <p class="CmdQRG" style="color: #0000ff;">CALCulate:SMOothing[:STATe] {OFF|ON} <br />CALCulate:SMOothing[:STATe]?</p>
+            <h3><a name="TrendChart"></a>Trend Chart</h3>
+            <p class="CmdQRG">CALCulate:TCHart[:STATe] {OFF|ON}<br />CALCulate:TCHart[:STATe]?</p>
+        </div>
+        <div>
+            <h2><a name="memory"></a>Reading Memory Commands</h2>
+            <p class="CmdQRG">DATA:LAST?</p>
+            <p class="CmdQRG">DATA:POINts:EVENt:THReshold  &lt;<i>count</i>&gt;<br />DATA:POINts:EVENt:THReshold?</p>
+            <p class="CmdQRG">DATA:POINts?</p>
+            <p class="CmdQRG">DATA:REMove?  &lt;<i>num_readings</i>&gt; [,WAIT]</p>
+            <p class="CmdQRG">FETCh?</p>
+            <p class="CmdQRG">R? [&lt;<i>max_readings</i>&gt;]</p>
+        </div>
+        <div>
+            <h2><a name="Calibration"></a><a name="kanchor579"></a>Calibration Commands</h2>
+            <p class="CmdQRG">*CAL?</p>
+            <p class="CmdQRG">CALibration:ADC?</p>
+            <p class="CmdQRG">CALibration[:ALL]?</p>
+            <p class="CmdQRG">CALibration:COUNt?</p>
+            <p class="CmdQRG">CALibration:DATE?</p>
+            <p class="CmdQRG">CALibration:SECure:CODE  &lt;<i>new_code</i>&gt;</p>
+            <p class="CmdQRG">CALibration:SECure:STATe {OFF|ON} [, &lt;<i>code</i>&gt;]<br />CALibration:SECure:STATe?</p>
+            <p class="CmdQRG">CALibration:STORe</p>
+            <p class="CmdQRG">CALibration:STRing  "&lt;<i>string</i>&gt;"<br />CALibration:STRing?</p>
+            <p class="CmdQRG">CALibration:TEMPerature?</p>
+            <p class="CmdQRG">CALibration:TIME?</p>
+            <p class="CmdQRG">CALibration:VALue  &lt;<i>value</i>&gt;<br />CALibration:VALue?</p>
+            <p class="CmdQRG">SYSTem:ACALibration:DATE?</p>
+            <p class="CmdQRG">SYSTem:ACALibration:TEMPerature?</p>
+            <p class="CmdQRG">SYSTem:ACALibration:TIME?</p>
+        </div>
+        <div>
+            <h2><a name="State_storage"></a>State Storage and Preferences Commands</h2>
+            <p class="CmdQRG">*LRN?</p>
+            <p class="CmdQRG">MMEMory:LOAD:PREFerences &lt;<i>file</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:LOAD:STATe  &lt;<i>file</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:STORe:PREFerences &lt;<i>file</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:STORe:STATe  &lt;<i>file</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:STATe:RECall:AUTO {OFF|ON}<br />MMEMory:STATe:RECall:AUTO?</p>
+            <p class="CmdQRG">MMEMory:STATe:RECall:SELect  &lt;<i>file</i>&gt;<br />MMEMory:STATe:RECall:SELect?</p>
+            <p class="CmdQRG">MMEMory:STATe:VALid?  &lt;<i>file</i>&gt;</p>
+            <p class="CmdQRG">*RCL  {0|1|2|3|4}</p>
+            <p class="CmdQRG">*SAV  {0|1|2|3|4}</p>
+        </div>
+        <div>
+            <h2>General Purpose File Management Commands</h2>
+            <p class="CmdQRG">MMEMory:CATalog[:ALL]? [&lt;<i>folder</i>&gt;[&lt;<i>filespec</i>&gt;]]</p>
+            <p class="CmdQRG">MMEMory:CDIRectory  &lt;<i>folder</i>&gt;<br />MMEMory:CDIRectory?</p>
+            <p class="CmdQRG">MMEMory:COPY &lt;<i>file1</i>&gt;, &lt;<i>file2</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:DELete  {&lt;<i>file</i>&gt;|&lt;<i>filespec</i>&gt;}</p>
+            <p class="CmdQRG">MMEMory:MDIRectory  &lt;<i>folder</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:MOVE &lt;<i>file1</i>&gt;, &lt;<i>file2</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:RDIRectory  &lt;<i>folder</i>&gt;</p>
+        </div>
+        <div>
+            <h2>Data Transfer Commands</h2>
+            <p class="CmdQRG">MMEMory:DOWNload:DATA &lt;<i>binary_block</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:DOWNload:FNAMe &lt;<i>file</i>&gt;<br></br>MMEMory:DOWNload:FNAMe?</p>
+            <p class="CmdQRG" style="color: #0000ff;">MMEMory:FORMat:READing:CSEParator {COMMa|SEMicolon|TAB}<br></br>MMEMory:FORMat:READing:CSEParator?</p>
+            <p class="CmdQRG" style="color: #0000ff;">MMEMory:FORMat:READing:INFormation {OFF|ON}<br />MMEMory:FORMat:READing:INFormation?</p>
+            <p class="CmdQRG" style="color: #0000ff;">MMEMory:FORMat:READing:RLIMit {OFF|ON}<br />MMEMory:FORMat:READing:RLIMit?</p>
+            <p class="CmdQRG">MMEMory:STORe:DATA RDG_STORE, &lt;<i>file</i>&gt;</p>
+            <p class="CmdQRG">MMEMory:UPLoad? &lt;<i>file</i>&gt;</p>
+            <h2><a name="IEEE-488"></a>IEEE-488 Commands</h2>
+            <p class="CmdQRG">*CAL?</p>
+            <p class="CmdQRG">*CLS</p>
+            <p class="CmdQRG">*ESE  &lt;<i>enable_value</i>&gt;<br />*ESE?</p>
+            <p class="CmdQRG">*ESR?</p>
+            <p class="CmdQRG">*IDN?</p>
+            <p class="CmdQRG">*LRN?</p>
+            <p class="CmdQRG">*OPC</p>
+            <p class="CmdQRG">*OPC?</p>
+            <p class="CmdQRG">*OPT?</p>
+            <p class="CmdQRG">*PSC  {0|1}<br />*PSC?</p>
+            <p class="CmdQRG">*RCL  {0|1|2|3|4}</p>
+            <p class="CmdQRG">*RST</p>
+            <p class="CmdQRG">*SAV  {0|1|2|3|4}</p>
+            <p class="CmdQRG">*SRE  &lt;<i>enable_value</i>&gt;<br />*SRE?</p>
+            <p class="CmdQRG">*STB?</p>
+            <p class="CmdQRG">*TRG</p>
+            <p class="CmdQRG">*TST?</p>
+            <p class="CmdQRG">*WAI</p>
+        </div>
+        <div>
+            <h2>Format Subsystem</h2>
+            <p class="CmdQRG" style="color: #0000ff;">FORMat:BORDer {NORMal|SWAPped} <br />FORMat:BORDer?</p>
+            <p class="CmdQRG" style="color: #0000ff;">FORMat[:DATA] {ASCii|REAL} 
+ [, <span class="hcp1">&lt;<i>length</i>&gt;</span>] <br />FORMat[:DATA]?</p>
+            <h2><a name="System_related"></a>System-Related Commands</h2>
+            <p class="CmdQRG">*CAL?</p>
+            <p class="CmdQRG">DISPlay[:STATe] {OFF|ON}<br />DISPlay[:STATe]?</p>
+            <p class="CmdQRG">DISPlay:TEXT:CLEar</p>
+            <p class="CmdQRG">DISPlay:TEXT[:DATA]  "&lt;<i>string</i>&gt;"<br />DISPlay:TEXT[:DATA]?</p>
+            <p class="CmdQRG">DISPlay:VIEW  {NUMeric|HISTogram|TCHart|METer}<br />DISPlay:VIEW?</p>
+            <p class="CmdQRG">HCOPy:SDUMp:DATA:FORMat  {PNG|BMP}<br />HCOPy:SDUMp:DATA:FORMat?</p>
+            <p class="CmdQRG">HCOPy:SDUMp:DATA?</p>
+            <p class="CmdQRG">*IDN?</p>
+            <p class="CmdQRG">LXI:IDENtify[:STATe] {OFF|ON}<br />LXI:IDENtify[:STATe]?</p>
+            <p class="CmdQRG">LXI:MDNS:ENABle {OFF|ON}<br />LXI:MDNS:ENABle?</p>
+            <p class="CmdQRG">LXI:MDNS:HNAMe[:RESolved]?</p>
+            <p class="CmdQRG">LXI:MDNS:SNAMe:DESired  "&lt;<i>name</i>&gt;"<br />LXI:MDNS:SNAMe:DESired?</p>
+            <p class="CmdQRG">LXI:MDNS:SNAMe[:RESolved]?</p>
+            <p class="CmdQRG">LXI:RESet</p>
+            <p class="CmdQRG">LXI:RESTart</p>
+            <p class="CmdQRG">*RST</p>
+            <p class="CmdQRG">SYSTem:ACALibration:DATE?</p>
+            <p class="CmdQRG">SYSTem:ACALibration:TEMPerature?</p>
+            <p class="CmdQRG">SYSTem:ACALibration:TIME? </p>
+            <p class="CmdQRG">SYSTem:BEEPer[:IMMediate]</p>
+            <p class="CmdQRG">SYSTem:BEEPer:STATe {OFF|ON}<br />SYSTem:BEEPer:STATe?</p>
+            <p class="CmdQRG">SYSTem:CLICk:STATe {OFF|ON}<br />SYSTem:CLICk:STATe?</p>
+            <p class="CmdQRG">SYSTem:DATE  &lt;<i>year</i>&gt;, &lt;<i>month</i>&gt;, &lt;<i>day</i>&gt;<br />SYSTem:DATE?</p>
+            <p class="CmdQRG">SYSTem:ERRor[:NEXT]?</p>
+            <p class="CmdQRG">SYSTem:HELP?</p>
+            <p class="CmdQRG">SYSTem:IDENtify  {DEFault|AT34460A|AT34461A|AT34410A|AT34411A|HP34401A}*<br />SYSTem:IDENtify?</p>
+            <p class="CmdQRG">SYSTem:LABel  "&lt;<i>string</i>&gt;"<br />SYSTem:LABel?</p>
+            <p class="CmdQRG">SYSTem:PRESet</p>
+            <p class="CmdQRG">SYSTem:SECurity:COUNt?</p>
+            <p class="CmdQRG">SYSTem:SECurity:IMMediate</p>
+            <p class="CmdQRG">SYSTem:TEMPerature?</p>
+            <p class="CmdQRG">SYSTem:TIME &lt;<i>hour</i>&gt;, &lt;<i>minute</i>&gt;, &lt;<i>second</i>&gt;<br />SYSTem:TIME?</p>
+            <p class="CmdQRG">SYSTem:UPTime?</p>
+            <p class="CmdQRG">SYSTem:USB:HOST:ENABle {OFF|ON}<br />SYSTem:USB:HOST:ENABle?</p>
+            <p class="CmdQRG">SYSTem:VERSion?</p>
+            <p class="CmdQRG">SYSTem:WMESsage  "&lt;<i>string</i>&gt;"<br />SYSTem:WMESsage?</p>
+            <p class="CmdQRG">TEST:ALL?</p>
+            <p class="CmdQRG">*TST?</p>
+            <p><i>*Parameters vary by DMM model number. See</i><a href="../__I_SCPI/SYSTem_General%20Commands.htm#IDEN"><i>  <![CDATA[ ]]></i>SYSTem:IDENtify</a><i> for details.</i>
+            </p>
+        </div>
+        <div>
+            <h2><a name="Locking"></a>Interface Locking Commands</h2>
+            <p class="CmdQRG">SYSTem:LOCK:NAME?</p>
+            <p class="CmdQRG">SYSTem:LOCK:OWNer?</p>
+            <p class="CmdQRG">SYSTem:LOCK:RELease</p>
+            <p class="CmdQRG">SYSTem:LOCK:REQuest?</p>
+        </div>
+        <div>
+            <h2><a name="Licensing"></a>License Management Commands</h2>
+            <p class="CmdQRG">SYSTem:LICense:CATalog?</p>
+            <p class="CmdQRG">SYSTem:LICense:DELete  "&lt;<i>option_name</i>&gt;"</p>
+            <p class="CmdQRG">SYSTem:LICense:DELete:ALL</p>
+            <p class="CmdQRG">SYSTem:LICense:DESCription?  "&lt;<i>option_name</i>&gt;"</p>
+            <p class="CmdQRG">SYSTem:LICense:ERRor?</p>
+            <p class="CmdQRG">SYSTem:LICense:ERRor:COUNt?</p>
+            <p class="CmdQRG">SYSTem:LICense:INSTall  [{&lt;<i>folder</i>&gt;|&lt;<i>file</i>&gt;}]<br />SYSTem:LICense:INSTall?  "&lt;<i>option_name</i>&gt;"</p>
+        </div>
+        <div>
+            <h2><a name="IO_Config"></a>Interface Configuration Commands</h2>
+            <p class="CmdQRG">SYSTem:COMMunicate:ENABle {OFF|ON},  {GPIB|HISLip|USB|LAN|SOCKets|TELNet|VXI11|WEB|USBMtp|USBHost}<br />SYSTem:COMMunicate:ENABle?  {GPIB|HISLip|USB|LAN|SOCKets|TELNet|VXI11|WEB|USBMtp|USBHost}</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:GPIB:ADDRess  &lt;<i>address</i>&gt;<br />SYSTem:COMMunicate:GPIB:ADDRess?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:CONTrol?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:DHCP {OFF|ON}<br />SYSTem:COMMunicate:LAN:DHCP?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:DNS[{1|2}]  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:DNS[{1|2}]? [{CURRent|STATic}]</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:DOMain?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:GATeway  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:GATeway? [{CURRent|STATic}]</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:HOSTname  "&lt;<i>name</i>&gt;"<br />SYSTem:COMMunicate:LAN:HOSTname? [{CURRent|STATic}]</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:IPADdress  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:IPADdress? [{CURRent|STATic}]</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:MAC?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:SMASk  "&lt;<i>mask</i>&gt;"<br />SYSTem:COMMunicate:LAN:SMASk? [{CURRent|STATic}]</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:TELNet:PROMpt  "&lt;<i>string</i>&gt;"<br />SYSTem:COMMunicate:LAN:TELNet:PROMpt?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:TELNet:WMESsage  "&lt;<i>string</i>&gt;"<br />SYSTem:COMMunicate:LAN:TELNet:WMESsage?</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:UPDate</p>
+            <p class="CmdQRG">SYSTem:COMMunicate:LAN:WINS[{1|2}]  "&lt;<i>address</i>&gt;"<br />SYSTem:COMMunicate:LAN:WINS[{1|2}]? [{CURRent|STATic}]</p>
+            <p class="CmdQRG">SYSTem:USB:HOST:ENABle {OFF|ON}<br />SYSTem:USB:HOST:ENABle?</p>
+        </div>
+        <div>
+            <h2><a name="Status"></a>Status System Commands</h2>
+            <p class="CmdQRG">*CLS</p>
+            <p class="CmdQRG">*ESE  &lt;<i>enable_value</i>&gt;<br />*ESE?</p>
+            <p class="CmdQRG">*ESR?</p>
+            <p class="CmdQRG">*PSC  {0|1}<br />*PSC?</p>
+            <p class="CmdQRG">*SRE  &lt;<i>enable_value</i>&gt;<br />*SRE?</p>
+            <p class="CmdQRG">STATus:OPERation:CONDition?</p>
+            <p class="CmdQRG">STATus:OPERation:ENABle  &lt;<i>enable_value</i>&gt;<br />STATus:OPERation:ENABle?</p>
+            <p class="CmdQRG">STATus:OPERation[:EVENt]?</p>
+            <p class="CmdQRG">STATus:PRESet</p>
+            <p class="CmdQRG">STATus:QUEStionable:CONDition?</p>
+            <p class="CmdQRG">STATus:QUEStionable:ENABle  &lt;<i>enable_value</i>&gt;<br />STATus:QUEStionable:ENABle?</p>
+            <p class="CmdQRG">STATus:QUEStionable[:EVENt]?</p>
+            <p class="CmdQRG">*STB?</p>
+        </div>
+        
+    </body>
+</html>

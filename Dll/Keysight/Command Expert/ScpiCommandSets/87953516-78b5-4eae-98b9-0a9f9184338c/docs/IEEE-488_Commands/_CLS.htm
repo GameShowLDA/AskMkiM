@@ -1,0 +1,128 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>*CLS</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+-->
+</style>
+</head>
+<body>
+<h1>*CLS</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_cls">Syntax</a></font> 
+ | <a href="#Description_cls">Description</a> | <span class="hcp1">Parameters</span> 
+ | <span class="hcp1">Remarks</span> | <span class="hcp1">Return 
+ Format</span> | <a href="#Example_cls">Example</a></p>
+
+<h2><a name=Syntax_cls></a>Syntax</h2>
+
+<p class=CmdSyntax>*CLS</p>
+
+<h2><a name=Description_cls></a>Description</h2>
+
+<p class=Indented1>This command causes the following actions on the status 
+ system:</p>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p-CIndented1><p class=Indented1
+									style="margin-left: 0px;">Clears the 
+ Standard Event Status, Operation Status Event, and Questionable Status 
+ Event registers.</p></li>
+	
+	<li class=kadov-p-CIndented1><p class=Indented1
+									style="margin-left: 0px;">Clears the 
+ Status Byte and the Error Queue.</p></li>
+	
+	<li class=kadov-p-CIndented1><p class=Indented1
+									style="margin-left: 0px;">If *CLS immediately 
+ follows a program message terminator (&lt;NL&gt;), then the output queue 
+ and the MAV bit are also cleared. </p></li>
+</ul>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr style="x-cell-content-align: top;"
+	valign=top>
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>For more information on the SCPI Status System, see the <a href="../STATus_Subsystem/Status_Subsystem_Introduction.htm#Status_Diagram">Status 
+ System diagram</a>.</td></tr>
+</table>
+
+<h2><a name=Example_cls></a>Example</h2>
+
+<p class=Indented1>The following command clears the event register bits. 
+ </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">*CLS</p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

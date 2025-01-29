@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="LXI_Subsystem_Introduction" MadCap:check_list="Ran Smart Index" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>LXI Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor267"></a>LXI Subsystem</h1>
+        <p>This subsystem supports LAN eXtensions for Instrumentation (LXI) functionality.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#LXI_IDENtify">LXI:IDENtify[:STATe]<br /></a>
+        </p>
+        <p><a href="#LXI_MDNS_ENABle">LXI:MDNS:ENABle<br /></a>
+        </p>
+        <p><a href="#LXI_MDNS_HNAMe">LXI:MDNS:HNAMe[:RESolved]?</a>
+        </p>
+        <p><a href="#LXI_MDNS_SNAMe_DESired">LXI:MDNS:SNAMe:DESired<br /></a>
+        </p>
+        <p><a href="#LXI_MDNS_SNAMe">LXI:MDNS:SNAMe[:RESolved]?</a>
+        </p>
+        <p><a href="#LXI_RESet">LXI:RESet</a>
+        </p>
+        <p><a href="#LXI_RESTart">LXI:RESTart</a>
+        </p>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor268"></a><a name="LXI_IDENtify"></a>LXI:IDENtify[:STATe]  {ON|1|OFF|0}<br />LXI:IDENtify[:STATe]?</h2>
+            <p>Shows or removes the LXI Web Identify indicator on the display.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 78px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Turn on the LXI Web Identify indicator:<br /><br />LXI:IDEN ON</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight" value="1">The indicator helps you identify the device associated with the LAN address.</li>
+                <li class="IndentTight" value="2">Press the <b>[Local]</b> key or send <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> to turn off the indicator.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor269"></a><a name="LXI_MDNS_ENABle"></a>LXI:MDNS:ENABle  {ON|1|OFF|0}<br />LXI:MDNS:ENABle?</h2>
+            <p>Disables or enables the multicast Domain Name System (mDNS), which provides the capabilities of a DNS server for service discovery in a small network without a DNS server.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Turn mDNS ON:<br /><br />LXI:MDSN:ENAB ON</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value when the instrument is shipped from the factory and after <a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor270"></a><a name="LXI_MDNS_HNAMe"></a>LXI:MDNS:HNAMe[:RESolved]?</h2>
+            <p>Returns the resolved (unique) mDNS hostname in the form K-&lt;<i>model number</i>&gt;-&lt;<i>serial</i>&gt;-N , where &lt;<i>serial</i>&gt; is the last 5 digits of the instrument's serial number. The <i>N</i> is an integer appended if necessary to make the name unique. The desired name may be truncated, if necessary, to make room for the appended integer.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"K-34460A-yyyyy", where yyyyy is the last five digits of the serial number.</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the resolved mDNS hostname:<br /><br />LXI:MDNS:HNAMe:RESolved?</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor271"></a><a name="LXI_MDNS_SNAMe_DESired"></a>LXI:MDNS:SNAMe:DESired  "&lt;<i>name</i>&gt;"<br />LXI:MDNS:SNAMe:DESired?</h2>
+            <p>Sets the desired mDNS service name.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Quoted string of up to 63 characters.</p>
+                            <p>Default:</p>
+                            <p>"Keysight &lt;<i>model number</i>&gt; Digital Multimeter - &lt;<i>serial</i>&gt;"</p>
+                            <p>where &lt;<i>serial</i>&gt; is the last 5 digits of the instrument's serial number </p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"Keysight 34460A  Digital Multimeter - 98765"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set the mDNS&#160;service name:<br /><br />LXI:MDNS:SNAM:DES "LAB1-DMM"
+</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value when the instrument is shipped from the factory and after <a href="SYSTem_General%20Commands.htm#SEC-IMM">SYSTem:SECurity:IMMediate</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor272"></a><a name="LXI_MDNS_SNAMe"></a>LXI:MDNS:SNAMe[:RESolved]?</h2>
+            <p>The resolved mDNS service name will be the desired service name (<a href="#LXI_MDNS_SNAMe_DESired">LXI:MDNS:SNAMe:DESired</a>), possibly with "(&lt;<i>N</i>&gt;)" appended. The <i>N</i> is an integer appended if necessary to make the name unique. The desired name may be truncated, if necessary, to make room for the appended integer.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"Keysight 34461A Digital Multimeter - 00123"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return resolved mDNS service name:<br /><br />LXI:MDNS:SNAMe:RESolved?</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor273"></a><a name="LXI_RESet"></a>LXI:RESet</h2>
+            <p>Resets LAN settings to a known operating state, beginning with DHCP, and clears the Web Interface password. If DHCP fails, it uses Auto-IP. </p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Reset the LAN&#160;settings:<br /><br />LXI:RES</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Depending on your network, the LAN interface may take several seconds to restart after this command is sent.</li>
+                <li class="IndentTight" value="2">If the LAN interface or specific LAN services (VXI-11, sockets, and so on) have been disabled by <a href="SYSTem_IO_Configuration.htm#SYSTem_COMMunicate_ENABle">SYSTem:COMMunicate:ENABle</a>, you must separately re-enable the interface or services and cycle instrument power for the LAN to be operational.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor274"></a><a name="LXI_RESTart"></a>LXI:RESTart</h2>
+            <p>Restarts the LAN with the current settings as specified by the <a href="SYSTem_IO_Configuration.htm">SYSTem:COMMunicate:LAN</a> commands. </p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Restart the LAN&#160;interface:<br /><br />LXI:REST</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Depending on your network, the LAN interface may take several seconds to restart after this command is sent.</li>
+                <li class="IndentTight" value="2">If the LAN interface or specific LAN services (VXI-11, sockets, and so on) have been disabled by <a href="SYSTem_IO_Configuration.htm#SYSTem_COMMunicate_ENABle">SYSTem:COMMunicate:ENABle</a>, you must separately re-enable the interface or services and cycle instrument power for the LAN to be operational.</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

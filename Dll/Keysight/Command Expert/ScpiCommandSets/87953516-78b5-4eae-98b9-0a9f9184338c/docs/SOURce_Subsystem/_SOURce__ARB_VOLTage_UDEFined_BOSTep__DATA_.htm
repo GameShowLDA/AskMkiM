@@ -1,0 +1,214 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>[SOURce:]ARB:VOLTage:UDEFined:BOSTep[:DATA]</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp4 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+span.hcp5 { line-height:Normal; }
+-->
+</style>
+</head>
+<body>
+<h1>[SOURce:]ARB:VOLTage:UDEFined:BOSTep[:DATA]</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_source_arb_volt_U_B">Syntax</a></font> 
+ | <a href="#Description_source_arb_volt_U_B">Description</a> | <a href="#Parameters_source_arb_volt_U_B">Parameters</a> 
+ | <span style="color: #808080;">Remarks</span> | <a href="#Return_source_arb_volt_U_B">Return 
+ Format</a> | <a href="#Example_source_arb_volt_U_B">Examples</a></p>
+
+<h2><a name=Syntax_source_arb_volt_U_B></a>Syntax</h2>
+
+<p class=CmdSyntax
+	style="margin-bottom: 0pt; line-height: Normal;">[SOURce:]ARB:VOLTage:UDEFined:BOSTep[:DATA] 
+ &lt;Bool&gt;{,&lt;Bool&gt;}, (@&lt;<span class=CmdItalics
+											style="font-style: normal;">chanlist</span><span 
+ class=CmdItalics>&gt;</span>)</p>
+
+<p class=CmdSyntax
+	style="margin-bottom: 0pt; line-height: Normal;">[SOURce:]ARB:VOLTage:UDEFined:BOSTep[:DATA]? 
+ (@&lt;<span class=CmdItalics
+			style="font-style: normal;">chanlist</span><span class=CmdItalics>&gt;</span>)</p>
+
+<h2><a name=Description_source_arb_volt_U_B></a>Description</h2>
+
+<p class=Indented1>This command specifies which user-defined ARB points 
+ or steps generate a trigger-out signal at the beginning of the step (BOSTep). 
+ A comma-delimited list of up to 512 steps may be programmed. The state 
+ is either ON (1) or OFF (0).</p>
+
+<p class=Indented1>&nbsp;A 
+ trigger is only generated when the state is set to ON. </p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				margin-top: 18px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp1">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>This command is only available on model N6705A with firmware revision 
+ A.02.00 or later.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_source_arb_volt_U_B></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 83.577%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=83.577%>
+<col style="width: 15.483%;">
+<col style="width: 11.167%;">
+<col style="width: 39.951%;">
+<col style="width: 23.538%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 15.483%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=15.483%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:11.167%;" bgcolor="#E9E9E9" width="11.167%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:39.951%;" bgcolor="#E9E9E9" width="39.951%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:23.538%;" bgcolor="#E9E9E9" width="23.538%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:15.483%;" width="15.483%" class="hcp3">
+<p class=TableBody>&lt;Bool&gt;</td>
+<td style="width:11.167%;" width="11.167%" class="hcp4">
+<p class=TableBody>Boolean</td>
+<td rowspan="1" colspan="1" style="width:39.951%;" width="39.951%" class="hcp4">
+<p class=TableBody>OFF | 0 | ON | 1</td>
+<td rowspan="1" colspan="1" style="width:23.538%;" width="23.538%" class="hcp4">
+<p class=TableBody>1 point with a value of OFF</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp1">
+<td style="width:15.483%;" width="15.483%" class="hcp3">
+<p class=TableBody>&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span>&gt;</td>
+<td style="width:11.167%;" width="11.167%" class="hcp4">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:39.951%;" width="39.951%" class="hcp4">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:23.538%;" width="23.538%" class="hcp4">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_source_arb_volt_U_B></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The query command returns 0 if no trigger is generated, 
+ and 1 if a trigger is generated. Multiple responses are separated by commas.</p>
+
+<h2><a name=Example_source_arb_volt_U_B></a>Examples</h2>
+
+<p class=Indented1>The following command specifies that triggers will be 
+ generated at the beginning of each user-defined ARB step. The ARB contains 
+ 5 points or steps and is on channel 1.</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;"><span class="hcp5">ARB:VOLT:UDEF</span>:BOST 
+ ON,ON,ON,ON,ON,(@1)</p>
+
+<p class=Indented1>The following query returns the ARB step trigger settings 
+ of channel 1. </p>
+
+<p class=Shaded><span class="hcp5">ARB:VOLT:UDEF</span>:BOST? 
+ (@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;1,1,1,1,1</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

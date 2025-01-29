@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<sequenceprocedure xsi:schemaLocation="http://tempuri.org/SequenceProcedureSchema.xsd" procedurename="N6700B Output Setup" synopsis="Initializes channel 1 and enables the output of an Agilent N6700B power supply.  &#xD;&#xA;&#xD;&#xA;Instructions for Running:&#xD;&#xA;1. Enter your instrument address in the Connect step.&#xD;&#xA;2. Run the sequence.&#xD;&#xA;&#xD;&#xA;Operation:&#xD;&#xA;1. Reset the power supply.&#xD;&#xA;2. Set voltage to 3 volts and current to 1.5 amperes.  &#xD;&#xA;3. Set voltage and current protection.  &#xD;&#xA;4. Turn the output of channel 1 on.&#xD;&#xA;5. Wait for output to settle.&#xD;&#xA;6. Measure the voltage.&#xD;&#xA;7. Reset the power supply, turning off the output.&#xD;&#xA;&#xD;&#xA;Requirements:&#xD;&#xA;This example was written for the N6700B power supply.  This example was tested with the following instrument(s): N6700B(ver C.00.02).&#xD;&#xA;&#xD;&#xA;You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs." schemaVersion="7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://tempuri.org/SequenceProcedureSchema.xsd">
+	<parameters>
+		<localvariables />
+		<inputparameters />
+		<outputparameters />
+	</parameters>
+	<actions>
+		<connect configuration="N6700" address="%prompt" commandSet="87953516-78b5-4eae-98b9-0a9f9184338c" source="SCPI" commandSetDesc="N6700 Power Supplies / C.02.18" />
+		<do configuration="N6700" hierarchy="SCPI" path="*RST" syntax="0">
+			<inputs />
+			<outputs />
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="*CLS" syntax="0">
+			<inputs />
+			<outputs />
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="SOURce:VOLTage:LEVel:IMMediate:AMPLitude" syntax="0">
+			<inputs>
+				<input>
+					<unitaryscalartype basetype="Real64">
+						<availableunits>
+							<units name="V" default="true" />
+						</availableunits>
+					</unitaryscalartype>
+					<value>3</value>
+				</input>
+				<input>
+					<scalartype basetype="String" />
+					<value>@1</value>
+				</input>
+			</inputs>
+			<outputs />
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="SOURce:VOLTage:PROTection:LEVel" syntax="0">
+			<inputs>
+				<input>
+					<unitaryscalartype basetype="Real64">
+						<availableunits>
+							<units name="V" default="true" />
+						</availableunits>
+					</unitaryscalartype>
+					<value>10</value>
+				</input>
+				<input>
+					<scalartype basetype="String" />
+					<value>@1</value>
+				</input>
+			</inputs>
+			<outputs />
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="SOURce:CURRent:LEVel:IMMediate:AMPLitude" syntax="0">
+			<inputs>
+				<input>
+					<unitaryscalartype basetype="Real64">
+						<availableunits>
+							<units name="A" default="true" />
+						</availableunits>
+					</unitaryscalartype>
+					<value>1.5</value>
+				</input>
+				<input>
+					<scalartype basetype="String" />
+					<value>@1</value>
+				</input>
+			</inputs>
+			<outputs />
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="SOURce:CURRent:PROTection:STATe" syntax="0">
+			<inputs>
+				<input>
+					<scalartype basetype="Bool" />
+					<value>1</value>
+				</input>
+				<input>
+					<scalartype basetype="String" />
+					<value>@1</value>
+				</input>
+			</inputs>
+			<outputs />
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="OUTPut:STATe" syntax="0">
+			<inputs>
+				<input>
+					<scalartype basetype="Bool" />
+					<value>1</value>
+				</input>
+				<input>
+					<scalartype basetype="String" />
+				</input>
+				<input>
+					<scalartype basetype="String" />
+					<value>@1</value>
+				</input>
+			</inputs>
+			<outputs />
+		</do>
+		<wait milliseconds="60" />
+		<do configuration="N6700" hierarchy="SCPI" path="MEASure:SCALar:VOLTage:DC" syntax="0">
+			<inputs>
+				<input>
+					<scalartype basetype="String" />
+					<value>@1</value>
+				</input>
+			</inputs>
+			<outputs>
+				<output />
+			</outputs>
+		</do>
+		<do configuration="N6700" hierarchy="SCPI" path="*RST" syntax="0">
+			<inputs />
+			<outputs />
+		</do>
+	</actions>
+</sequenceprocedure>

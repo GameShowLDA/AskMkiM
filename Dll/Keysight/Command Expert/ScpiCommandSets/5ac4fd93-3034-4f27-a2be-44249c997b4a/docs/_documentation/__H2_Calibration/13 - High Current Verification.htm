@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Performance Verification" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>High Current Verification </title>
+        <link href="../CalTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor603"></a>High Current Verification </h1>
+        <p>This procedure applies to the 34461A, 34465A, and 34470A only (not applicable to the 34460A).</p>
+        <p>This procedure verifies AC and DC current on the 10 A terminals.</p>
+        <ol>
+            <li class="IndentTight" value="1">Make sure you have read <a href="01%20-%20Calibration%20Introduction.htm#TestConsiderations">Test Considerations</a>.</li>
+            <li class="IndentTight" value="2">Connect the calibrator to the front 10 A input terminals and select the Front input terminals with the <b>Front/Rear</b> switch.</li>
+            <li class="IndentTight" value="3">Select each function in the order shown below. Provide the indicated input current and frequency, and for ACI, use the 200 Hz input filter. Compare measurement results to the test limits shown below. (Be certain to allow for appropriate source settling.)</li>
+        </ol>
+        <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" style="width: 48px;" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <col class="TableStyle-CalTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-CalTable-Head-Header1">
+                    <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="9">Values for the 34461A, 34465A, and 34470A DMMs</th>
+                </tr>
+                <tr class="TableStyle-CalTable-Head-Header1">
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1" colspan="4">Input</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">
+                    </th>
+                    <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                </tr>
+                <tr class="TableStyle-CalTable-Head-Header1">
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">Function</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">Current<sup>[1]</sup></th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">Frequency</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                    <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                    <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-CalTable-Body-Body1">
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">DCI</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">5 A</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">N/A</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 A</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">
+                    </td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3.5 mA</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1" colspan="2" style="text-align: center;">± 7 mA</td>
+                    <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;">± 8.5 mA</td>
+                </tr>
+                <tr class="TableStyle-CalTable-Body-Body1">
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">DCI</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 A</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">N/A</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 A</td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                    </td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">
+                        <p>± 16 mA</p>
+                    </td>
+                    <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" colspan="2">± 23 mA</td>
+                    <td class="TableStyle-CalTable-BodyD-Column1-Body1">± 26 mA</td>
+                </tr>
+                <tr class="TableStyle-CalTable-Body-Body1">
+                    <td class="TableStyle-CalTable-BodyB-Column1-Body1">ACI</td>
+                    <td class="TableStyle-CalTable-BodyB-Column1-Body1">10 A</td>
+                    <td class="TableStyle-CalTable-BodyB-Column1-Body1">5 kHz</td>
+                    <td class="TableStyle-CalTable-BodyB-Column1-Body1">10 A</td>
+                    <td class="TableStyle-CalTable-BodyB-Column1-Body1">
+                    </td>
+                    <td class="TableStyle-CalTable-BodyB-Column1-Body1" style="text-align: center;">± 24 mA</td>
+                    <td class="TableStyle-CalTable-BodyA-Column1-Body1" colspan="3" style="text-align: center;">± 29 mA</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="Indented3"><sup>[1]</sup> <i>If you are NOT using the Fluke 5725 for calibration, reduce the current to 2 A.</i></p>
+        
+    </body>
+</html>

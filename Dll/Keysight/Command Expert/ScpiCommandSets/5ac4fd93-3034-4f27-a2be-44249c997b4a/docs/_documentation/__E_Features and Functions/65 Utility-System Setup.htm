@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Features and Functions|Utility Menu" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Utility Menu - System Setup</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="top"></a><a name="kanchor60"></a>Utility Menu - System Setup</h1>
+        <p>
+            <img src="../_Graphics_/Util-SK-MainMenu.png" />
+        </p>
+        <p><b>System Setup</b> configures user preferences, sets the date and time, and sets a power-on message.</p>
+        <p>
+            <img src="../_Graphics_/Util-SK-SystemSetup.png" />
+        </p>
+        <h2>User Settings</h2>
+        <p><b>User Settings</b> specifies user preferences that control how you interact with the instrument. These settings are stored in non-volatile memory and can be saved in a preferences (.prf) file.</p>
+        <p>
+            <img src="../_Graphics_/Util-SK-SystemSetup-UserSettings.png" />
+        </p>
+        <h3>Help Language</h3>
+        <p><b>Help Lang</b> selects the help language for front panel use: English, French, German, Japanese, Korean, Russian, or Simplified Chinese. All messages, context-sensitive help, and help topics appear in the selected language. The softkey labels are always in English.</p>
+        <h3>Number Format</h3>
+        <p><b>Number Format</b> specifies how numbers are displayed on the front panel: 12,345.6 or 12.345,6. Other possibilities also exist. For example, you can use the space as a separator.</p>
+        <p>
+            <img src="../_Graphics_/Util-SK-SystemSetup-UserSettings-NumberFormat.png" />
+        </p>
+        <h3>Sounds</h3>
+        <p>
+            <img src="../_Graphics_/Util-SK-SystemSetup-UserSettings-Sounds..png" />
+        </p>
+        <p>Disables or enables the click heard when a front panel key or softkey is pressed.</p>
+        <p>Also enables or disables the audible tone (<b>Beeper On</b> or <b>Off</b>) associated with the following features:</p>
+        <ul>
+            <li class="IndentTight" value="1">Limits – a measurement limit is exceeded (if limits are enabled)</li>
+            <li class="IndentTight" value="2">Probe Hold – the measured signal records a stable reading</li>
+            <li class="IndentTight" value="3">Diode – the forward bias voltage is between 0.3 and 0.8 V</li>
+            <li class="IndentTight" value="4">Continuity – a short is measured (less than or equal to 10 &#937;)</li>
+            <li class="IndentTight" value="5">Error - an error is generated from the front panel or remote interface</li>
+        </ul>
+        <p>This non-volatile setting appears in several different menus on the front panel. Turning the beeper on or off in one menu affects all of the other menus and functions. For example, turning the beeper off for probe hold, also turns the beeper off for limits, diode, continuity, and errors.</p>
+        <div>
+            <h3><a name="DisplaySettings"></a>Display Options</h3>
+            <p><b>Display Options</b> configures the display.</p>
+            <p>
+                <img src="../_Graphics_/Util-SK-SystemSetup-UserSettings-DisplayOptions.png" />
+            </p>
+            <p>You can enable or disable the display, adjust the brightness (10 to 100%), enable or disable the screen saver, and pick a color scheme. If you turn off the display, press any front panel key to turn it on again.</p>
+            <p>By default, the screen saver turns off and blanks the screen after eight hours of inactivity. You may disable this screen saver from the front panel only.</p>
+            <p>The display is enabled when power is cycled, after an instrument reset (<a href="../__I_SCPI/IEEE-488_Common_Commands.htm#RST">*RST</a>), or when you return to local (front panel) operation. Press the <b>[Local]</b> key or execute the IEEE-488 GTL (Go To Local) command from the remote interface to return to the local state.</p>
+        </div>
+        <h3><a name="ScpiID"></a>SCPI ID</h3>
+        <p><b>SCPI ID</b> determines the instrument's response to a <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> query. Choices for each DMM model are:</p>
+        <ul>
+            <li class="IndentTight" value="1"><b>34460A</b> -  34460A, AT34460A, HP34401A</li>
+            <li class="IndentTight" value="2"><b>34461A</b> - 34461A, AT34461A, HP34401A</li>
+            <li class="IndentTight" value="3"><b>34465A</b> -  34465A, AT34410A, AT34411A</li>
+            <li class="IndentTight" value="4"><b>34470A</b> -  34470A, AT34410A, AT34411A</li>
+        </ul>
+        <p>Choices above with no prefix (34460A, for example) return Keysight Technologies as the manufacturer. Choices above with an AT or HP&#160;prefix, return Agilent Technologies or Hewlett Packard, respectively, as the manufacturer. These choices are included for *IDN? compatibility with existing programs that expect *IDN? to return a particular manufacturer and model number.</p>
+        <p>If you have an older Agilent 34460A or 34461A and upgrade to the new (Keysight) firmware, your instrument  continues to respond with the manufacturer name “Agilent”, not “Keysight” until you set the front panel SCPI&#160;ID to 34460A or 34461A, send the <a href="#IDEN">SYST:IDEN DEF</a> command, or reset user preferences. After doing this, the instrument  responds with “Keysight” as the manufacturer.</p>
+        <p><b>Important:</b> In order to update the instrument firmware <i>from remote</i>, the model number in the <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response must match the actual instrument model number.  If you have changed the instrument's <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response to another instrument, when attempting to update the firmware from remote, you will see this error: <i>The instrument is not supported by this firmware file.</i> To update the firmware, either update using the front panel procedure or, from remote, use <a href="../__I_SCPI/SYSTem_General%20Commands.htm#IDEN">SYSTem:IDENtify</a> to set the <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> to match the actual model number, update the firmware, and then use <a href="../__I_SCPI/SYSTem_General%20Commands.htm#IDEN">SYSTem:IDENtify</a> again to set the <a href="../__I_SCPI/IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response to the other model number. </p>
+        <h2>Date / Time</h2>
+        <p><b>Date / Time</b> sets the instrument's real-time clock, which always uses a 24-hour format (00:00:00 to 23:59:59). There is no automatic setting of the date and time, such as to adjust for daylight savings time. Use the front panel arrow keys to set the year, month, day, hour, and minute.</p>
+        <p>
+            <img src="../_Graphics_/Util-SK-SystemSetup-DateTime.png" />
+        </p>
+        <div>
+            <h2>Power on Message</h2>
+            <p><b>Power on Message</b> sets a message that is displayed when the instrument powers up and when you press <b>[Help] &gt; About</b>.</p>
+            <p>
+                <img src="../_Graphics_/Util-PowerOnMessage.png" />
+            </p>
+            <p>Use the front panel arrows and <b>[Select]</b> key to select the letters. Then press <b>Done</b> to exit and save the message. The message will appear as shown below when you turn the instrument on or press <b>[Help] &gt; About</b>.</p>
+            <p>
+                <img src="../_Graphics_/Util-PowerOnMessageBox.png" />
+            </p>
+        </div>
+        
+    </body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>*IDN?</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+p.hcp2 { font-weight:bold; }
+td.hcp3 { padding-right:10px; padding-left:10px; border-bottom-style:None; border-right-style:None; border-left-style:None; }
+td.hcp4 { padding-right:10px; padding-left:10px; border-bottom-style:None; border-right-style:None; }
+-->
+</style>
+</head>
+<body>
+<h1>*IDN?</h1>
+
+<p class=BarLink><font id=font4><a href="#Syntax_idn"
+									target=_self>Syntax</a></font> | <span 
+ class=MouseOverLink
+	id=span2><font id=font5><a href="#Description_idn">Description</a></font> 
+ | </span><span class=MouseOverLink
+				id=span2
+				style="color: #808080;">Parameters</span><span class=MouseOverLink
+	id=span2> | </span><span class=MouseOverLink
+							id=span2
+							style="color: #808080;">Remarks</span><span 
+ class=MouseOverLink
+	id=span2> | </span><span class=MouseOverLink
+							id=span8><font id=font8><a href="#Return_format_idn">Return 
+ Format</a></font></span><span class=MouseOverLink
+								id=span5> | <font id=font9><a href="#Example_idn">Example</a></font></span></p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Syntax_idn></a>Syntax</span></h2>
+
+<p class=CmdSyntax>*IDN?</p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Description_idn></a>Description</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span5>This command reads the instrument's (mainframe) 
+ identification string which contains four comma-separated fields. The 
+ first field is the manufacturer's name, the second field is the instrument 
+ model number, the third field is the serial number, and the fourth field 
+ is the firmware revision. </span>&nbsp;</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				border-spacing: 0px;
+				border-spacing: 0px;
+				width: 84.759%;"
+		width=84.759%
+		cellspacing=0>
+<col style="width: 27.481%;">
+<col style="width: 72.519%;">
+
+<tr valign="top" class="hcp1">
+<td style="padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: None;
+			border-right-style: None;
+			border-left-style: None;
+			border-top-style: None;"
+	width=27.481%>
+<p class="hcp2">Agilent Technologies</td>
+<td style="padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: None;
+			border-top-style: None;
+			border-right-style: None;"
+	width=72.519%>
+<p>Manufacturer</td></tr>
+
+<tr valign="top" class="hcp1">
+<td width="27.481%" class="hcp3">
+<p class="hcp2">N67xxX</td>
+<td width="72.519%" class="hcp4">
+<p>Mainframe model number</td></tr>
+
+<tr valign="top" class="hcp1">
+<td width="27.481%" class="hcp3">
+<p class="hcp2">MYxxxxxxxx</td>
+<td width="72.519%" class="hcp4">
+<p>Mainframe serial number if available, or zero</td></tr>
+
+<tr valign="top" class="hcp1">
+<td width="27.481%" class="hcp3">
+<p class="hcp2">X.xx.xx</td>
+<td width="72.519%" class="hcp4">
+<p>Revision levels of firmware</td></tr>
+</table>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Return_format_idn></a>Return Format</span></h2>
+
+<p class=Indented1>&lt;AARD&gt;</p>
+
+<p class=Indented1>The command returns an arbitrary ASCII string with four 
+ comma-separated fields. To read the string into your computer, be sure 
+ to dimension a string variable with at least 50 characters. </p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Example_idn></a>Example</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span2>T</span>he following query <span class=MouseOverLink
+	id=span1>returns the instrument's identification string</span>.</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;"><span class=MouseOverLink
+											id=span2>*IDN?</span></p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;AGILENT 
+ TECHNOLOGIES,N6700B,MY00123456,B.00.00</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

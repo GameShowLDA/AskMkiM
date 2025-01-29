@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="Features and Functions|Math" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Math - Scaling</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor44"></a>Math - Scaling</h1>
+        <table style="width: 100%;border-spacing: 0px;border-spacing: 0px;border-left-style: Solid;border-left-width: 0px;border-right-style: Solid;border-right-width: 0px;border-top-style: Solid;border-top-width: 0px;border-bottom-style: Solid;border-bottom-width: 0px;margin-left: 0;margin-right: auto;" cellspacing="0" width="100%">
+            <col style="width: 11.684%;" />
+            <col style="width: 88.316%;" />
+            <tr valign="top">
+                <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%">
+                    <p>
+                        <img src="../_Graphics_/note.gif" alt="Note" />
+                    </p>
+                </td>
+                <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%">
+                    <p>This topic describes dB/dBm Scaling for the 34465A/70A. Scaling features are different for the 34460A/61A and are described in the  <a href="42%20Math-dB-dBm%20Scaling.htm">dB dBm Scaling Menus</a> topic. </p>
+                </td>
+            </tr>
+        </table>
+        <p>Press the <b>Scaling</b> softkey to open the default dB scaling menu:</p>
+        <p>
+            <img src="../_Graphics_/Scaling1.png" />
+        </p>
+        <p>Press the <b>Function</b> softkey to select a scaling function:</p>
+        <p>
+            <img src="../_Graphics_/Scaling2.png" />
+        </p>
+        <p>
+            <img src="../_Graphics_/note.gif" />Scaling is set to OFF when you change measurement functions (for example, changing from DCV to ACV). You must re-enable scaling after changing measurement functions.</p>
+        <div>
+            <h2>dB Scaling</h2>
+            <p>Each dB measurement is the difference between the input signal and a stored reference value, with both values converted to dBm:</p>
+            <p>dB = reading in dBm – reference value in dBm</p>
+            <p>The relative value must be from -200 to +200 dBm (default 0). You can either measure this value by pressing <b>Measure Ref Value</b>, or you can use the <b>dB Ref Value</b> softkey to specify a value.</p>
+            <p>dB scaling applies to ACV and DCV measurements only.</p>
+        </div>
+        <div>
+            <h2>dBm Scaling</h2>
+            <p>
+                <img src="../_Graphics_/Scaling3.png" />
+            </p>
+            <p>The dBm function is logarithmic, comparing power delivered to a reference resistance, relative to 1 milliwatt:</p>
+            <p>dBm = 10 x log<sub>10</sub> ( reading<sup>2</sup> / reference resistance / 1 mW )</p>
+            <p>The reference resistance value (<b>Ref R</b>) may be 50, 75, 93, 110, 124, 125, 135, 150, 250, 300, 500, 600 (default), 800, 900, 1000, 1200, or 8000 &#937;. Press <b>Ref R</b> and use the front panel up and down arrows to make your selection.</p>
+            <p>dBm scaling applies to ACV and DCV measurements only.</p>
+            <h2>% Scaling</h2>
+            <p>
+                <img src="../_Graphics_/Scaling4.png" />
+            </p>
+            <p><b>%</b> performs a percent change operation. The result is the percent change of the measurement from the reference value:<br /><br />Result = ((Measurement – Reference) / Reference) * 100. </p>
+            <p>Press <b>Measure Reference</b> to use the first measurement as the reference value, or press <b>Ref Value</b> to specify the reference value.</p>
+            <p>% scaling applies to all measurement functions except Ratio, Continuity, and Diode.</p>
+            <h2>Mx-B Scaling</h2>
+            <p>
+                <img src="../_Graphics_/Scaling5.png" />
+            </p>
+            <p class="IndentTight">For Mx-B scaling, the result is the measurement multiplied by the <b>Gain (M)</b> value minus the <b>Offset (B)</b> value. </p>
+            <p class="IndentTight">The <b>User Units</b> softkey allows you to specify the custom alphanumeric label of up to four characters (for example, RPM or °C) for Mx-B scaled measurements.</p>
+            <p>Mx-B scaling applies to all measurement functions except Ratio, Continuity, and Diode.</p>
+        </div>
+        <div>
+            <h2>See Also</h2>
+            <p><a href="40%20---Math---.htm">Math - Introduction</a>
+            </p>
+            <p><a href="41%20Math-Null.htm">Null</a>
+            </p>
+            <p><a href="43%20Math-Statistics.htm">Statistics</a>
+            </p>
+            <p><a href="44%20Math-Limits.htm">Limits</a>
+            </p>
+        </div>
+        
+    </body>
+</html>

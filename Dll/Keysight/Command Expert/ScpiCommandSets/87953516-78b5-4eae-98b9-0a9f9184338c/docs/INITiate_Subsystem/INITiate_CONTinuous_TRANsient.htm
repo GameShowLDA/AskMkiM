@@ -1,0 +1,203 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>INITiate:CONTinuous:TRANsient</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style title="hcp" type="text/css">
+<!--
+font.hcp1 { color:#808080; }
+tr.hcp2 { x-cell-content-align:top; }
+td.hcp3 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp4 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp5 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>INITiate:CONTinuous:TRANsient</h1>
+
+<p class=BarLink><font id=font4><a href="#Syntax_init_cont">Syntax</a></font> 
+ | <span class=MouseOverLink
+		id=span2><font id=font5><a href="#Description_init_cont">Description</a></font> 
+ | </span><span class=MouseOverLink
+				id=span2
+				style="color: #808080;"><a href="#Parameters_init_cont">Parameters</a></span><span 
+ class=MouseOverLink
+	id=span2> | </span><span class=MouseOverLink
+							id=span1><font id="font1" color="#808080" class="hcp1">Remarks</font></span><span 
+ class=MouseOverLink
+	id=span4> | </span><span class=MouseOverLink
+							id=span8><font id="font8" color="#808080" class="hcp1"><a href="#Return_init_cont">Return 
+ Format</a></font></span><span class=MouseOverLink
+								id=span5> | <font id=font9><a href="#Example_init_cont">Example</a></font></span></p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Syntax_init_cont></a>Syntax</span></h2>
+
+<p class=CmdSyntax>INITiate:CONTinuous:TRANsient &lt;Bool&gt;, (@&lt;chanlist&gt;)</p>
+
+<p class=CmdSyntax>INITiate:CONTinuous:TRANsient? (@&lt;chanlist&gt;)</p>
+
+<h2><a name=Description_init_cont></a>Description</h2>
+
+<p class=Indented1>This command continuously initiates the output trigger 
+ system. This allows multiple triggers to generate multiple output transients 
+ with no intermediate commands. The enabled state is ON (1); the disabled 
+ state is OFF (0). </p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp2">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif" x-maintain-ratio="TRUE" style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;" width="70" height="17" border="0"></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>With continuous triggering disabled, the output trigger system must 
+ be initiated for each trigger using the <a href="INITiate__IMMediate__TRANsient.htm">INITiate:TRANsient</a> 
+ command.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><span class=MouseOverLink
+										id=span5><a name=Parameters_init_cont></a>P</span>arameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 76.778%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=76.778%>
+<col style="width: 19.863%;">
+<col style="width: 14.327%;">
+<col style="width: 35.255%;">
+<col style="width: 22.925%;">
+
+<tr style="height:18px;" valign="top" class="hcp2">
+<td style="width: 19.863%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=19.863%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:14.327%;" bgcolor="#E9E9E9" width="14.327%" class="hcp3">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:35.255%;" bgcolor="#E9E9E9" width="35.255%" class="hcp3">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:22.925%;" bgcolor="#E9E9E9" width="22.925%" class="hcp3">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:19.863%;" width="19.863%" class="hcp4">
+<p class=TableBody>&lt;Bool&gt;</td>
+<td colspan="1" rowspan="1" style="width:14.327%;" width="14.327%" class="hcp5">
+<p class=TableBody>Boolean</td>
+<td colspan="1" rowspan="1" style="width:35.255%;" width="35.255%" class="hcp5">
+<p class=TableBody>OFF | 0 | ON | 1</td>
+<td colspan="1" rowspan="1" style="width:22.925%;" width="22.925%" class="hcp5">
+<p class=TableBody>OFF</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width:19.863%;" width="19.863%" class="hcp4">
+<p class=TableBody>&lt;chanlist&gt;</td>
+<td style="width:14.327%;" width="14.327%" class="hcp5">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:35.255%;" width="35.255%" class="hcp5">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:22.925%;" width="22.925%" class="hcp5">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_init_cont></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The query command returns 0 if continuous transients 
+ are disabled (OFF), and 1 if continuous transients are enabled (ON).</p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Example_init_cont></a>Example</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span3>T</span>he following command continually 
+ initiates the transient trigger system on channel 1.</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">INIT:CONT:TRAN ON,(@1)</p>
+
+<p class=Indented1>The following query returns the continuous transient 
+ trigger state. &nbsp;</p>
+
+<p class=Shaded>INIT:CONT:TRAN? (@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;0</span></p>
+
+</body>
+</html>

@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="CALCulate_Subsystems_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|CALCulate_Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>CALCulate:TRANsform:HISTogram Subsystem</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor156"></a>CALCulate:TRANsform:HISTogram Subsystem</h1>
+        <p>The HISTogram subsystem configures the histogram display. The instrument clears histogram data when the measurement function changes and when any of the following commands are sent:</p>
+        <p><a href="#CLEAr">CALCulate:TRANsform:HISTogram:CLEar[:IMMediate]</a>
+            <br />
+            <br /><a href="#POINts">CALCulate:TRANsform:HISTogram:POINts</a>
+            <br />
+            <br /><a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO</a>
+            <br />
+            <br /><a href="#RANGe-LOWer-UPPer">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}</a>
+            <br />
+            <br /><a href="#STATe">CALCulate:TRANsform:HISTogram[:STATe]</a>
+            <br />
+            <br /><a href="INITiate_IMMediate.htm">INITiate[:IMMediate]</a>
+            <br />
+            <br /><a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a>
+            <br />
+            <br /><a href="READ_.htm">READ?</a>
+            <br />
+            <br /><a href="IEEE-488_Common_Commands.htm#RST">*RST</a>
+            <br />
+            <br /><a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>
+            <br />
+        </p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#ALLandDATA">CALCulate:TRANsform:HISTogram:ALL?</a>
+        </p>
+        <p><a href="#CLEAr">CALCulate:TRANsform:HISTogram:CLEar[:IMMediate]</a>
+        </p>
+        <p><a href="#COUNt">CALCulate:TRANsform:HISTogram:COUNt?</a>
+        </p>
+        <p><a href="#ALLandDATA">CALCulate:TRANsform:HISTogram:DATA?</a>
+        </p>
+        <p><a href="#POINts">CALCulate:TRANsform:HISTogram:POINts<br /></a>
+        </p>
+        <p><a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO<br /></a>
+        </p>
+        <p><a href="#RANGe-LOWer-UPPer">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}<br /></a>
+        </p>
+        <p><a href="#STATe">CALCulate:TRANsform:HISTogram[:STATe]<br /></a>
+        </p>
+        <div>
+            <h2 class="Indented1"><a name="128BinHistOf1000DCVMez"></a>Example</h2>
+            <p>This example enables an automatically scaled, 100-bin histogram of 1000 DCV measurements. It then returns the computed histogram, including the lower and upper range values, the total measurement count, and the bin data. </p>
+            <p class="Shaded">CONF:VOLT:DC 10,0.001<br />SAMP:COUN 1000<br />CALC:TRAN:HIST:RANG:AUTO ON<br />CALC:TRAN:HIST:POIN 100<br />CALC:TRAN:HIST:STAT ON<br />INIT<br />*WAI<br />CALC:TRAN:HIST:ALL?</p>
+            <p class="Indented1">Typical Response: +9.99383828E+00,+1.00513398E+01,+1000,&lt;<i>102 bin counts</i>&gt;</p>
+            <table class="TableStyle-NoteTable" style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" cellspacing="0">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tbody>
+                    <tr>
+                        <td class="TableStyle-NoteTable-BodyB-Column1-">
+                            <img src="../_Graphics_/note.gif" />
+                        </td>
+                        <td class="TableStyle-NoteTable-BodyA-Column1-">The above response indicates 102 bin counts because the histogram includes bins for values below and above the histogram range.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor157"></a><a name="ALLandDATA"></a>CALCulate:TRANsform:HISTogram:ALL?<br />CALCulate:TRANsform:HISTogram:DATA?</h2>
+            <p>The ALL form of the query returns a comma-separated list of the lower and upper range values, the number of measurements, and the bin data collected since the last time the histogram data was cleared. The DATA form returns only the bin data.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">See <a href="#128BinHistOf1000DCVMez">Example</a>.</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#128BinHistOf1000DCVMez">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The bin data includes the following, in order:</li>
+                <li class="IndentTight2" value="2"> The number of measurements less than the lower range value </li>
+                <li class="IndentTight2" value="3"> The number of measurements in the each of the bins, starting at the lower range value bin </li>
+                <li class="IndentTight2" value="4"> The number of measurements greater than the upper range value </li>
+                <li class="IndentTight" value="5">Range values are real numbers returned in the form +1.00000000E+00. The number of measurements and bin data are signed, positive integers returned in the form +100.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor158"></a><a name="CLEAr"></a>CALCulate:TRANsform:HISTogram:CLEar[:IMMediate]</h2>
+            <p>Clears the histogram data and restarts histogram ranging if it is enabled (<a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO ON</a>).</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Clear the histogram data:<br /><br />CALC:TRAN:HIST:CLE</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"> Does not clear measurements in reading memory. </li>
+                <li class="IndentTight" value="2">To clear statistics, limits, histogram data, and measurement data, use <a href="CALC_CLE_IMM.htm">CALCulate:CLEar[:IMMediate]</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor159"></a><a name="COUNt"></a>CALCulate:TRANsform:HISTogram:COUNt?</h2>
+            <p>Returns the number of measurements collected since the last time the histogram was cleared.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 514px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+87</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the number of measurements used to compute the current histogram:<br /><br />CALC:TRAN:HIST:COUN?<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor160"></a><a name="POINts"></a>CALCulate:TRANsform:HISTogram:POINts {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />CALCulate:TRANsform:HISTogram:POINts? [{MIN|MAX|DEF}]</h2>
+            <p>Sets the number of bins between the lower and upper range values for the histogram. Two additional bins always exist: one for measurements below the lower range and one for measurements above the upper range.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {10|20|40|100|200|400|MIN|MAX|DEF}. Default: 100.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+100</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#128BinHistOf1000DCVMez">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">You can specify the lower and upper range values using <a href="#RANGe-LOWer-UPPer">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}</a>. Lower and upper range values are computed automatically if <a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO</a> is ON.</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor161"></a><a name="RANGe-AUTO"></a>CALCulate:TRANsform:HISTogram:RANGe:AUTO {ON|1|OFF|0}<br />CALCulate:TRANsform:HISTogram:RANGe:AUTO?</h2>
+            <p>Enables or disables automatic selection of the histogram's lower and upper range values.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#128BinHistOf1000DCVMez">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"><b>ON:</b> the instrument uses the first 1,000 measurements to set the lower and upper range values. </li>
+                <li class="IndentTight" value="2"><b>OFF:</b> the lower and upper range values are specified by <a href="#RANGe-LOWer-UPPer">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}</a>.</li>
+            </ul>
+            <ul>
+                <li class="IndentTight" value="1">Setting the lower or upper range value (<a href="#RANGe-LOWer-UPPer">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer</a>) disables automatic selection of the lower and upper range values (<a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO OFF</a>).</li>
+                <li class="IndentTight" value="2">The instrument restarts automatic range value selection (if enabled) when <a href="INITiate_IMMediate.htm">INITiate</a>, <a href="MEASure_Subsystem.htm">MEASure?</a> or <a href="READ_.htm">READ?</a> is executed.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor162"></a><a name="RANGe-LOWer-UPPer"></a>CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer} {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer}? [{MIN|MAX|DEF}]</h2>
+            <p>Sets the histogram's lower and upper range values. Setting the lower or upper range value (<a href="#RANGe-LOWer-UPPer">CALCulate:TRANsform:HISTogram:RANGe:{LOWer|UPPer</a>) disables automatic selection of the lower and upper range values (<a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO OFF</a>).</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>-1.0E+15 to -1.0E-15,<br /> or <br />0.0 (default)<br />or<br />+1.0E-15 to 1.0E+15</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E+06</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#128BinHistOf1000DCVMez">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">If automatic range value selection is enabled (<a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO ON</a>), the query returns the computed range value. If no histogram data exists, 9.91E37 (Not a Number) is returned.</li>
+                <li class="IndentTight" value="2">Lower and upper range values are computed automatically if <a href="#RANGe-AUTO">CALCulate:TRANsform:HISTogram:RANGe:AUTO</a> is ON.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor163"></a><a name="STATe"></a>CALCulate:TRANsform:HISTogram[:STATe] {ON|1|OFF|0}<br />CALCulate:TRANsform:HISTogram[:STATe]?</h2>
+            <p>Enables or disables histogram computation.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#128BinHistOf1000DCVMez">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The instrument turns this setting OFF when the measurement function is changed or after <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

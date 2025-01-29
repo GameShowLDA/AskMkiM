@@ -1,0 +1,17 @@
+server-properties:
+  host: "localhost"
+  port: "8180"
+
+logging:
+  loglevel: "info"
+  maxsize: 25
+  maxbackup: 10
+  maxage: 14
+
+sice:
+  supportsice1: true
+  
+  # - Specify the DISPLAY environment variable used to popup the confirm dialog on desktop Linux system
+  # - This item is only valid when supportsice1=true and on Linux system. Default value is ":0"
+  # display: ":0"
+

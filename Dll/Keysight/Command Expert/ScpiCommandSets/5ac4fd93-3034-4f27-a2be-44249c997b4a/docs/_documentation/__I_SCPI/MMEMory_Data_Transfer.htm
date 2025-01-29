@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>MMEMory Subsystem - Data Transfer Commands</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor309"></a>MMEMory Subsystem - Data Transfer Commands</h1>
+        <p>These commands transfer files into and out of the instrument's mass memory.</p>
+        <p>The MMEMory subsystem also includes two other types of commands:</p>
+        <p class="IndentTight"><a href="MMEMory_Subsystem.htm">General Purpose File Management</a>
+        </p>
+        <p class="IndentTight"><a href="MMEMory_STATe_PREF.htm">STATe and PREFerence File Management</a>
+        </p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p class="IndentTight"><a href="#DOWNload_DATA">MMEMory:DOWNload:DATA</a>
+        </p>
+        <p class="IndentTight"><a href="#DOWNload_FNAMe">MMEMory:DOWNload:FNAMe</a>
+        </p>
+        <p class="IndentTight"><a href="#CSEParator">MMEMory:FORMat:READing:CSEParator</a>
+        </p>
+        <p class="IndentTight"><a href="#INFormation">MMEMory:FORMat:READing:INFormation</a>
+        </p>
+        <p class="IndentTight"><a href="#RLIMit">MMEMory:FORMat:READing:RLIMit</a>
+        </p>
+        <p class="IndentTight"><a href="#STOR-DATA">MMEMory:STORe:DATA</a>
+        </p>
+        <p class="IndentTight"><a href="#UPLoad">MMEMory:UPLoad?</a>
+        </p>
+        <div>
+            <h2 style="font-size: 14px;">Folder and file formats</h2>
+            <p>Many MMEMory commands refer to folders and files. These have specific structures, described below.</p>
+            <h3><a name="Valid-Folder-Format"></a>Format for a &lt;<i>folder</i>&gt;</h3>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight" value="1">The format for &lt;<i>folder</i>&gt; is "[[&lt;<i>drive</i>&gt;:]&lt;<i>path</i>&gt;]", where &lt;<i>drive</i>&gt; can be INTernal or USB, and &lt;<i>path</i>&gt; is a folder path, and &lt;<i>filespec</i>&gt; specifies a subset of files.</li>
+                <li class="IndentTight" value="2">INTernal specifies the internal flash file system. USB specifies a front panel USB storage device.</li>
+                <li class="IndentTight" value="3">If &lt;<i>drive</i>&gt; is specified, &lt;<i>path</i>&gt; is interpreted as an absolute folder path. Absolute paths begin with "\" or "/" and start at the root folder of &lt;<i>drive</i>&gt;.</li>
+                <li class="IndentTight" value="4">If &lt;<i>drive</i>&gt; is omitted, &lt;<i>path</i>&gt; is relative to the folder specified by <a href="MMEMory_Subsystem.htm#CDIRectory">MMEMory:CDIRectory</a>. Relative paths must NOT begin with \ or /.</li>
+                <li class="IndentTight" value="5">Folder and file names cannot contain the following characters: \ / : * ? " &lt; &gt; |</li>
+                <li class="IndentTight" value="6">The &lt;<i>folder</i>&gt; parameter cannot exceed 240 characters.</li>
+                <li class="IndentTight" value="7">The specified folder must exist and cannot be marked as hidden or system. The exception is <a href="MMEMory_Subsystem.htm#MDIRectory">MMEMory:MDIRectory</a>, which creates a folder. For MMEMory:MDIRectory, all folder levels above the new one must exist.</li>
+            </ul>
+            <h3><a name="Valid-File-Format"></a>Format for a &lt;<i>file</i>&gt;</h3>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight" value="1">The format for a file name is "[[&lt;<i>drive</i>&gt;:]&lt;<i>path</i>&gt;]&lt;<i>file_name</i>&gt;", where &lt;<i>drive</i>&gt; can be INTernal or USB, and &lt;<i>path</i>&gt;is a folder path.</li>
+                <li class="IndentTight" value="2">INTernal specifies the internal flash file system. USB specifies a front panel USB storage device.</li>
+                <li class="IndentTight" value="3">If &lt;<i>drive</i>&gt; is specified, &lt;<i>path</i>&gt; is interpreted as an absolute folder path. Absolute paths begin with "\" or "/" and start at the root folder of &lt;<i>drive</i>&gt;.</li>
+                <li class="IndentTight" value="4">If &lt;<i>drive</i>&gt; is omitted, &lt;<i>path</i>&gt; is relative to the folder specified by <a href="MMEMory_Subsystem.htm#CDIRectory">MMEMory:CDIRectory</a>. Relative paths must NOT begin with \ or /.</li>
+                <li class="IndentTight" value="5">Folder and file names cannot contain the following characters: \ / : * ? " &lt; &gt; |</li>
+                <li class="IndentTight" value="6">The combination of folder and file name cannot exceed 240 characters.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor310"></a><a name="DOWNload_DATA"></a>MMEMory:DOWNload:DATA  &lt;<i>binary_block</i>&gt;</h2>
+            <p>Downloads data from the host computer to a file whose name has been specified by <a href="#DOWNload_FNAMe">MMEMory:DOWNload:FNAMe</a>.</p>
+            <p>The data in &lt;<i>binary_block</i>&gt; is written to the selected file.</p>
+            <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tr valign="top">
+                    <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                        <p>
+                            <img src="../_Graphics_/note.gif" alt="Note" />
+                        </p>
+                    </td>
+                    <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">Any data previously stored in the file is lost when you execute this command.</td>
+                </tr>
+            </table>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Any IEEE-488.2 definite- or indefinite-length block</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Write "Hello" to the file "\Myfile" on internal storage.<br /><br />MMEM:DOWN:FNAM "INT:\Myfile"<br />MMEM:DOWN:DATA #15Hello</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor311"></a><a name="DOWNload_FNAMe"></a>MMEMory:DOWNload:FNAMe  &lt;<i>filename</i>&gt;<br />MMEMory:DOWNload:FNAMe?</h2>
+            <p>Creates or opens the specified filename prior to writing data to that file with <a href="#DOWNload_DATA">MMEMory:DOWNload:DATA</a>.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Any valid file name</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>(none)</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Write "Hello" to the file "\Myfile" on internal storage.<br /><br />MMEM:DOWN:FNAM "INT:\Myfile"<br />MMEM:DOWN:DATA #15Hello</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The specified folder must exist and cannot be marked as hidden or system.</li>
+                <li class="IndentTight" value="2">If the destination file exists, it will be overwritten, unless marked as hidden or system.</li>
+                <li class="IndentTight" value="3">The file is created if it does not already exist.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor312"></a><a name="CSEParator"></a>MMEMory:FORMat:READing:CSEParator {COMMa|SEMicolon|TAB}<br /> MMEMory:FORMat:READing:CSEParator?</h2>
+            <p>Specifies the character used to separate the columns in stored data.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 278px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">{COMMa|SEMicolon|TAB}.
+Default: COMMa.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>TAB, COMM or SEM</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Specify tabs as the column separator:
+
+<br /><br />MMEMory:FORMat:READing:CSEParator TAB</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <ul>
+            <li class="IndentTight2" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight2" value="2">Affects the format for the .csv file created by the <a href="#STOR-DATA">MMEMory:STORe:DATA</a> command, or by the data logging/digitizing features in the 34465A/34470A.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor313"></a><a name="INFormation"></a>MMEMory:FORMat:READing:INFormation {OFF|ON}<br />MMEMory:FORMat:READing:INFormation?</h2>
+            <p>Disables/enables header information and reading numbers in stored data.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;width: 562px;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">{OFF|ON}. Default OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>OFF or ON</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Enable the format for the .csv file:</p>
+                            <p>MMEM:FORMat:READing:INFormation ON</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <ul>
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">The format for the .csv file (<a href="#STOR-DATA">MMEMory:STORe:DATA</a> ), or by the data logging/digitizing features in the 34465A/34470A, are affected as follows:<br /><b>OFF</b> = one reading per row, no other header or reading information.<br /><b>ON</b> = enables a file header and reading numbers. The file header contains the start date and start time of the first reading and, if the sample source is timer (SAMPle:SOURce:TIMer), the sample interval. Each data row includes a reading number and the reading.</li>
+            <li class="IndentTight" value="3">Affects the .dat (binary) file created by <a href="#STOR-DATA">MMEMory:STORe:DATA</a> as follows:<br /><b>OFF</b> = one reading per row, no other header or per reading information.<br /><b>ON</b> = one time stamp row consisting of eight 16-bit integers for: year, month, day of week, day, hour, minute, and milliseconds. 32-bit integer reading number and 64-bit IEEE-754 reading. <br style="font-family: 'Courier New';" /></li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor314"></a><a name="RLIMit"></a>MMEMory:FORMat:READing:RLIMit {OFF|ON} <br />MMEMory:FORMat:READing:RLIMit?</h2>
+            <p>When enabled, limits the maximum number rows per stored .csv data file to one million, including any header row, if enabled.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;width: 562px;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">{OFF|ON}. Default ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>OFF or ON</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Disable row limits for the .csv file:</p>
+                            <p>MMEM:FORM:READ:RLIMit OFF</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <ul>
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">Affects the format for the .csv file created by the <a href="#STOR-DATA">MMEMory:STORe:DATA</a> command, or by the data logging/digitizing features in the 34465A/34470A.</li>
+            <li class="IndentTight" value="3">This feature enables you to accommodate common spreadsheet, database and data analysis programs that have limitations of 1 million rows per file.</li>
+            <li class="IndentTight" value="4">ON - Readings are stored in files named dat00001.csv, dat00002.csv, dat00003.csv ...</li>
+            <li class="IndentTight" value="5">OFF - Readings are is stored in a single file named dat00001.csv. The file size is limited to 2<sup>32</sup> = 4.294967296 GBytes (the maximum allowed by the FAT32 file system).</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor315"></a><a name="STOR-DATA"></a>MMEMory:STORe:DATA RDG_STORE, &lt;<i>file</i>&gt;</h2>
+            <p>Stores all measurements in reading memory to the specified data file. The file name optionally includes the folder name and the .csv or .dat file extension.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Any valid file name</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Store all measurements in reading memory to MyVoltMeas.csv in the root folder of the internal flash file system.</p>
+                            <p>MMEM:STOR:DATA RDG_STORE,"INT:\MyVoltMeas"</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">If a .csv file extension is specified, or if no file extension is specified, the date is stored in ASCII format. If the .dat file extension is specified, the data is stored in binary format.</li>
+                <li class="IndentTight" value="2">The format of the file is affected by <a href="#CSEParator">MMEMory:FORMat:READing:CSEParator</a>, <a href="#INFormation">MMEMory:FORMat:READing:INFormation</a>, and <a href="#RLIMit">MMEMory:FORMat:READing:RLIMit</a>.</li>
+                <li class="IndentTight" value="3">The destination folder must exist and cannot be marked as hidden or system. </li>
+                <li class="IndentTight" value="4">If the destination file exists, it will be overwritten, unless marked as hidden or system.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor316"></a><a name="UPLoad"></a>MMEMory:UPLoad?  &lt;<i>filename</i>&gt;</h2>
+            <p>Uploads the contents of a file from the instrument to the host computer.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Any valid file name</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">IEEE 488.2 definite-length block</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Upload the state file "Myfile.sta" in the root directory of the internal flash file system to the host computer:<br /><br />MMEM:UPL? "INT:\Myfile.sta"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </body>
+</html>

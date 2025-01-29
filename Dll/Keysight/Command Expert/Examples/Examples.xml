@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Examples>
+  <Example>
+    <Guid>009ea295-f19c-4e0a-9678-ac97b8c6e130</Guid>
+    <Name>AgN67xx Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[Configures channel 1 and enables the output of an Agilent N67xx power supply using the AgN67xx IVI-COM driver.
+
+Operation:
+1. Reset the power supply.
+2. Set voltage to 3 volts and current to 1.5 amperes.  
+3. Set voltage and current protection.  
+4. Turn the output of channel 1 on.
+5. Wait for output to settle.
+6. Measure the voltage.
+7. Reset the power supply, turning off the output.
+
+Instructions for Running:
+1. If needed, edit the Connect step to provide a VISA instrument address.
+2. Run the sequence.
+
+Requirements:
+This example was written using the AgN67xx IVI driver for N67xx series of power supplies.  This example was tested with version 1.2.2.0 of the AgN67xx driver.  This example was tested with the following instrument(s): N6700B(ver C.02.18).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700A, N6700B, N6701A, N6702A, N6705A, N6705B]]></Description>
+    <CreateDate>Thursday, January 02, 2014</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>IVI-COM</DriverType>
+    <Entry>AgN67xx_PowerSupply_OutputSetup_IVI-COM_V1_0.iseq</Entry>
+    <FileCount>1</FileCount>
+    <AddOnName></AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName></DisplayName>
+        <Version>0.0</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>settle</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="AgN67xx" CommandSet="" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>4920f822-4d8c-48e9-8834-296b9c16113e</Guid>
+    <Name>N6700 Power Supply Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[Configures selected channel and enables the output of an Agilent N6700 power supply.  
+
+Instructions for Running:
+1. Enter an address for an N6700 power supply in the worksheet.
+2. Enter the inputs in the spreadsheet.
+3. Click Run in the Command Expert Ribbon.
+
+Operation:
+1. Reset the power supply.
+2. Configure the selected channel based on user inputs.
+3. Enable the output on the selected channel.
+5. Wait for output to settle.
+6. Measure the voltage.
+7. Leave the output enabled.
+
+Requirements:
+This example was written for the N6700 family of  power supplies.  This example was tested with the following instrument(s): N6700B (ver. C.02.18).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700B]]></Description>
+    <CreateDate>Thursday, October 31, 2013</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>SCPI</DriverType>
+    <Entry>N6700_PowerSupply_OutputSetup_SCPI_V1_0.xlsx</Entry>
+    <FileCount>1</FileCount>
+    <AddOnName>Excel</AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName>Excel 2007</DisplayName>
+        <Version>13.0</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>output</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="N6700 Power Supplies" CommandSet="" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>f2b8cecf-a8c9-440b-81cd-d462f2ad02e8</Guid>
+    <Name>AgN67xx Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[Retrieve waveform data and the min/max/average voltage from channel 1 of an Agilent M92xx digitizer using the AgMD1 IVI-COM driver.  Note that this example can take 2 minutes or longer to complete initialization.
+
+Instructions for Running:
+1. Enter a VISA address for an Agilent M92xx digitizer.
+2. Enter the inputs Range, Offset, RecordSize, and SampleRate.
+3. Click Run in VEE.
+4. This example can take2 minutes or longer to complete initialization.  Progress is indicated in the Status display.
+
+Operation:
+1. Reset and configure the digitizer.
+2. Set and configure the source channel and trigger.
+3. Initiate a measurement.
+4. Retrieve the waveform data.
+5. Fetch the min/max/average voltage.
+
+Restrictions and Requirements:
+This example was written for modular digitizing scopes in the Agilent M92xx family using version 1.2.1.0 of the AgMD1 IVI-COM driver.
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700A, N6700B, N6701A, N6702A, N6705A, N6705B ]]></Description>
+    <CreateDate>Thursday, January 02, 2014</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>IVI-COM</DriverType>
+    <Entry>\AgN67xx Output Setup_V1_0\AgN67xx_PowerSupply_OutputSetup.vee</Entry>
+    <FileCount>1</FileCount>
+    <AddOnName>VEE</AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName>VEE 9.2</DisplayName>
+        <Version>9.2</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>settle</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="AgN67xx" CommandSet="" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>73b1eb01-abb1-489d-915b-27cd658df016</Guid>
+    <Name>AgN67xx Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[This is an example for the Agilent N67xx power supply using the AgN67xx IVI-COM driver.  The example configures the voltage, current limit, and over-voltage on channel 1 of the power supply.   After enabling the power supply output, the output voltage is measured.  The power supply is reset at the beginning and end of the example.
+
+Instructions:
+1. Input a VISA instrument address for an Agilent N67xx power supply.
+2. Input the power supply settings.
+3. Press the Run button.
+4. Check the displayed value of Measured Voltage.
+
+Requirements:
+This example was written using the AgN67xx IVI driver for N67xx series of power supplies.  This example was tested with version 1.2.2.0 of the AgN67xx driver.  This example was tested with the following instrument(s): N6700B(ver C.02.18).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700A, N6700B, N6701A, N6702A, N6705A, N6705B ]]></Description>
+    <CreateDate>Thursday, January 02, 2014</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>IVI-COM</DriverType>
+    <Entry>\AgN67xx Output Setup_V1_0\AgN67xx_PowerSupply_OutputSetup.vi</Entry>
+    <FileCount>1</FileCount>
+    <AddOnName>LabVIEW</AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName>LabVIEW 8.2</DisplayName>
+        <Version>8.2.1</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>settle</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="AgN67xx" CommandSet="" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>7c235520-5b11-448d-931f-d8168ac2c1a3</Guid>
+    <Name>N6700B Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[Initializes channel 1 and enables the output of an Agilent N6700B power supply.  
+
+Instructions for Running:
+1. Enter your instrument address in the Connect step.
+2. Run the sequence.
+
+Operation:
+1. Reset the power supply.
+2. Set voltage to 3 volts and current to 1.5 amperes.  
+3. Set voltage and current protection.  
+4. Turn the output of channel 1 on.
+5. Wait for output to settle.
+6. Measure the voltage.
+7. Reset the power supply, turning off the output.
+
+Requirements:
+This example was written for the N6700B power supply.  This example was tested with the following instrument(s): N6700B(ver C.00.02).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700B]]></Description>
+    <CreateDate>Monday, November 25, 2013</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>SCPI</DriverType>
+    <Entry>N6700_PowerSupply_OutputSetup_SCPI_V1_0.iseq</Entry>
+    <FileCount>1</FileCount>
+    <AddOnName></AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName></DisplayName>
+        <Version>0.0</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>output</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="N6700 Power Supplies" CommandSet="87953516-78b5-4eae-98b9-0a9f9184338c" Source="SCPI" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>d4c24b1c-cb02-460e-9bf7-cf408f7790d1</Guid>
+    <Name>AgN67xx Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[Configures channel 1 and enables the output of an Agilent N6700 power supply using the AgN67xx IVI-COM driver.  
+
+Instructions for Running:
+1. Enter a VISA address for an N67xx power supply in the worksheet.
+2. Enter the inputs in the spreadsheet.
+3. Click Run in the Command Expert Ribbon.
+
+Operation:
+1. Reset the power supply.
+2. Configure the voltage, current limit, and over-voltage protection for channel 1.
+3. Enable the output on the selected channel.
+4. Wait for output to settle.
+5. Measure the voltage.
+6. Leave the output enabled.
+
+Requirements:
+This example was written using the AgN67xx IVI driver for N67xx series of power supplies.  This example was tested with version 1.2.2.0 of the AgN67xx driver.  This example was tested with the following instrument(s): N6700B(ver C.02.18).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700A, N6700B, N6701A, N6702A, N6705A, N6705B ]]></Description>
+    <CreateDate>Thursday, January 02, 2014</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>IVI-COM</DriverType>
+    <Entry>AgN67xx_PowerSupply_OutputSetup_IVI-COM_V1_0.xlsx</Entry>
+    <FileCount>1</FileCount>
+    <AddOnName>Excel</AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName>Excel 2007</DisplayName>
+        <Version>13.0</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>settle</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="AgN67xx" CommandSet="" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>a178425e-4d80-4bdb-81af-4e878b6c7fbc</Guid>
+    <Name>N6700 Power Supply Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[This is a simple example for the Agilent N6700 power supply that sets a voltage, current, over-voltage, and the status of over-current protection.  After enabling the power supply output, the output voltage is measured.  The power supply is reset at the beginning and end of the example.
+
+Instructions:
+1. Enter an instrument address of an N6700 power supply in the Connect frame.
+2. Specify the settings in the Configure frame.
+3. Press the Run button.
+4. Check the displayed value of Measured Voltage.
+
+Note:
+The output of the command :MEASure:SCALar:VOLTage:DC? in the sequence PS Measure Voltage is an array since the input to this command can specify measuring multiple channels.  Thus the measured voltage output of the sequence PS Measure Voltage is an array of doubles.
+
+Requirements:
+This example was written for an Agilent N6700 power supply.  This example was tested with the following instrument(s): N6700B (ver C.02.18).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700B]]></Description>
+    <CreateDate>Thursday, November 21, 2013</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>SCPI</DriverType>
+    <Entry>\N6700 Power Supply Output Setup_V1_0\N6700_PowerSupply_OutputSetup\N6700_PowerSupply_OutputSetup.vi</Entry>
+    <FileCount>0</FileCount>
+    <AddOnName>LabVIEW</AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName>LabVIEW 8.2</DisplayName>
+        <Version>8.2.1</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>output</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="N6700 Power Supplies" CommandSet="N6700 Power Supplies / C.02.18" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+  <Example>
+    <Guid>121a5d37-49ab-40e2-8956-871a889c4a9f</Guid>
+    <Name>N6700 Power Supply Output Setup</Name>
+    <Author>Agilent Technologies, Inc.</Author>
+    <Description><![CDATA[This is an example for the Agilent N6700 power supply that sets a voltage, current, over-voltage, and over-current protection.  After enabling the power supply output, the output voltage is measured.  The power supply is reset at the beginning and end of the example.
+
+Instructions:
+1. Input an instrument address for an Agilent N6700 power supply.
+2. Input the power supply settings.
+3. Press the Run button.
+4. Check the displayed value of Measured Voltage.
+
+Requirements:
+This example was written for an Agilent N6700 power supply.  This example was tested with the following instrument(s): N6700B (ver C.00.02).
+
+You have a royalty-free right to use, modify, reproduce and distribute this example program (and/or any modified version) in any way you find useful, provided you agree that Agilent Technologies has no warranty, obligations, or liability for any example programs.
+
+Supported Instruments: N6700B]]></Description>
+    <CreateDate>Thursday, November 21, 2013</CreateDate>
+    <Version>
+      <VersionInfo>
+        <DisplayName>1.0</DisplayName>
+        <Version>1.0</Version>
+      </VersionInfo>
+    </Version>
+    <ApplicationVersion>
+      <VersionInfo>
+        <DisplayName>Command Expert 1.3</DisplayName>
+        <Version>1.3</Version>
+      </VersionInfo>
+    </ApplicationVersion>
+    <DriverType>SCPI</DriverType>
+    <Entry>\N6700 Power Supply Output Setup_V1_0\N6700_PowerSupply_OutputSetup\N6700_PowerSupply_OutputSetup.vee</Entry>
+    <FileCount>0</FileCount>
+    <AddOnName>VEE</AddOnName>
+    <AddOnRegistryPath></AddOnRegistryPath>
+    <AddOnRegistryValue></AddOnRegistryValue>
+    <AddOnVersion>
+      <VersionInfo>
+        <DisplayName>VEE 9.2</DisplayName>
+        <Version>9.2</Version>
+      </VersionInfo>
+    </AddOnVersion>
+    <DriverDownloadUrls />
+    <Measurements>
+      <Measurement>DC voltage</Measurement>
+      <Measurement>current</Measurement>
+      <Measurement>output</Measurement>
+      <Measurement>measure</Measurement>
+    </Measurements>
+    <Instruments>
+      <Instrument Name="N6700 Power Supplies" CommandSet="N6700 Power Supplies / C.02.18" Source="" DownloadUrl="" />
+    </Instruments>
+    <ExtendedProperties />
+    <Snapshots />
+  </Example>
+</Examples>

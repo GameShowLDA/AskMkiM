@@ -1,0 +1,114 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>STATus:PRESet</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+tr.hcp2 { x-cell-content-align:top; }
+p.hcp3 { font-weight:bold; }
+td.hcp4 { padding-right:10px; padding-left:10px; border-top-style:None; border-right-style:None; border-bottom-style:None; background-color:#e9e9e9; }
+td.hcp5 { padding-right:10px; padding-left:10px; border-left-style:None; border-right-style:None; border-bottom-style:None; }
+td.hcp6 { padding-right:10px; padding-left:10px; border-right-style:None; border-bottom-style:None; }
+-->
+</style>
+</head>
+<body>
+<h1>STATus:PRESet</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_status_preset">Syntax</a></font> 
+ | <a href="#Description_status_preset">Description</a> | <span class="hcp1">Parameters</span> 
+ | <span class="hcp1">Remarks</span> | <span class="hcp1">Return 
+ Format</span> | <a href="#Example_status_preset">Example</a></p>
+
+<h2><a name=Syntax_status_preset></a>Syntax</h2>
+
+<p class=CmdSyntax>STATus:PRESet</p>
+
+<h2><a name=Description_status_preset></a>Description</h2>
+
+<p class=Indented1>This command sets all defined bits in the status system's 
+ PTR registers and clears all bits in the NTR and Enable registers. </p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18px;
+				border-spacing: 0px;
+				width: 95.647%;"
+		width=95.647%
+		cellspacing=0>
+<col style="width: 28.44%;">
+<col style="width: 32.647%;">
+<col style="width: 38.913%;">
+
+<tr valign="top" class="hcp2">
+<td style="padding-right: 10px;
+			padding-left: 10px;
+			border-left-style: None;
+			border-top-style: None;
+			border-right-style: None;
+			border-bottom-style: None;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=28.44%>
+<p class="hcp3">Operation Register</td>
+<td bgcolor="#E9E9E9" width="32.647%" class="hcp4">
+<p class="hcp3">Questionable Register</td>
+<td bgcolor="#E9E9E9" width="38.913%" class="hcp4">
+<p class="hcp3">Preset setting</td></tr>
+
+<tr valign="top" class="hcp2">
+<td width="28.44%" class="hcp5">
+<p>STAT:OPER:ENAB</td>
+<td width="32.647%" class="hcp6">
+<p>STAT:QUES:ENAB</td>
+<td width="38.913%" class="hcp6">
+<p>0 - all bits disabled</td></tr>
+
+<tr valign="top" class="hcp2">
+<td width="28.44%" class="hcp5">
+<p>STAT:OPER:NTR</td>
+<td width="32.647%" class="hcp6">
+<p>STAT:QUES:NTR</td>
+<td width="38.913%" class="hcp6">
+<p>0 - all bits disabled</td></tr>
+
+<tr valign="top" class="hcp2">
+<td width="28.44%" class="hcp5">
+<p>STAT:OPER:PTR</td>
+<td width="32.647%" class="hcp6">
+<p>&nbsp;</td>
+<td width="38.913%" class="hcp6">
+<p>31 - all defined bits enabled</td></tr>
+
+<tr valign="top" class="hcp2">
+<td width="28.44%" class="hcp5">
+<p>&nbsp;</td>
+<td width="32.647%" class="hcp6">
+<p>STAT:QUES:PTR</td>
+<td width="38.913%" class="hcp6">
+<p>3647 - all defined bits enabled</td></tr>
+</table>
+
+<h2><a name=Example_status_preset></a>Example</h2>
+
+<p class=Indented1>The following command presets the Operation and Questionable 
+ status registers. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">STAT:PRES</p>
+
+<p class=IndentTight>&nbsp;</p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

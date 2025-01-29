@@ -1,0 +1,209 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>CALibrate:STATe</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+tr.hcp2 { x-cell-content-align:top; }
+td.hcp3 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp4 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp5 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>CALibrate:STATe</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_cal_state">Syntax</a></font> 
+ | <a href="#Description_cal_state">Description</a> |<span class="hcp1"> 
+ <a href="#Parameters_cal_state">Parameters</a> </span>|<span class="hcp1"> 
+ <a href="#Remarks_cal_state">Remarks</a> </span>|<span class="hcp1"> 
+ <a href="#Return_cal_state">Return Format</a> </span>| <a href="#Example_cal_state">Example</a></p>
+
+<h2><a name=Syntax_cal_state></a>Syntax</h2>
+
+<p class=CmdSyntax>CALibrate:STATe &lt;Bool&gt;, [<span class=CmdItalics
+														style="font-style: normal;">&lt;password&gt;]</span></p>
+
+<p class=CmdSyntax>CALibrate:STATe?</p>
+
+<h2><a name=Description_cal_state></a>Description</h2>
+
+<p class=Indented1>This command enables or disables calibration mode. Calibration 
+ mode must be enabled for the instrument to accept any calibration commands. 
+ The first parameter specifies the ON (1) or OFF (0) state. The second 
+ parameter is the password. </p>
+
+<p class=Indented1>A numeric password is required if calibration mode is 
+ being enabled and the existing password is not 0. &nbsp;If 
+ the password is not entered or is incorrect, an error is generated and 
+ the calibration mode remains disabled. </p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp2">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif" x-maintain-ratio="TRUE" style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;" width="70" height="17" border="0"></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>Refer to Chapter 2 in the Service Guide for a detailed description of 
+ the calibration procedure.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_cal_state></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 79.267%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=79.267%>
+<col style="width: 15.966%;">
+<col style="width: 11.516%;">
+<col style="width: 42.141%;">
+<col style="width: 30.377%;">
+
+<tr style="height:18px;" valign="top" class="hcp2">
+<td style="width: 15.966%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=15.966%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:11.516%;" bgcolor="#E9E9E9" width="11.516%" class="hcp3">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:42.141%;" bgcolor="#E9E9E9" width="42.141%" class="hcp3">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:30.377%;" bgcolor="#E9E9E9" width="30.377%" class="hcp3">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:15.966%;" width="15.966%" class="hcp4">
+<p class=TableBody>&lt;Bool&gt;</td>
+<td colspan="1" rowspan="1" style="width:11.516%;" width="11.516%" class="hcp5">
+<p class=TableBody>Boolean</td>
+<td colspan="1" rowspan="1" style="width:42.141%;" width="42.141%" class="hcp5">
+<p class=TableBody>OFF | 0 | ON | 1</td>
+<td colspan="1" rowspan="1" style="width:30.377%;" width="30.377%" class="hcp5">
+<p class=TableBody>OFF</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width:15.966%;" width="15.966%" class="hcp4">
+<p class=TableBody>&lt;password&gt;</td>
+<td style="width:11.516%;" width="11.516%" class="hcp5">
+<p class=TableBody>NRf</td>
+<td rowspan="1" colspan="1" style="width:42.141%;" width="42.141%" class="hcp5">
+<p class=TableBody>A numeric value up to 15 digits in length.</td>
+<td rowspan="1" colspan="1" style="width:30.377%;" width="30.377%" class="hcp5">
+<p class=TableBody>Required if password not 0</td></tr>
+</table>
+
+<h2><a name=Remarks_cal_state></a>Remarks</h2>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p><p>When the calibration state is changed from enabled 
+ to disabled, new calibration constants are lost unless they have already 
+ been stored with CALibrate:SAVE.</p></li>
+</ul>
+
+<h2><a name=Return_cal_state></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The query returns only the calibration state, not the 
+ password. It returns either 0 (OFF), or 1 (ON).</p>
+
+<h2><a name=Example_cal_state></a>Example</h2>
+
+<p class=Indented1>The following command enables calibration mode; the 
+ password is 1234.</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">CAL:STAT ON, 1234</p>
+
+<p class=Indented1>The following query returns the calibration state. </p>
+
+<p class=Shaded>CAL:STAT?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;1</span></p>
+
+<h2>See Also</h2>
+
+<p class=IndentTight><a href="CALibrate_SAVE.htm">CALibrate:SAVE</a></p>
+
+</body>
+</html>

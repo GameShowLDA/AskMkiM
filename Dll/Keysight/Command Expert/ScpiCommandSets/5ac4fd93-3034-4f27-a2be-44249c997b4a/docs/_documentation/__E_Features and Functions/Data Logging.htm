@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="Features and Functions|Measurements" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Data Logging</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor34"></a>Data Logging</h1>
+        <p>The Data Log mode is standard on the 34465A and 34470A only, as is available only from the DMM's front panel. Data Log mode provides a front–panel user interface that allows you to set up data logging into the instrument’s non–volatile memory, or to internal/external file(s), without programming, and without a connection to a computer. Once you have finished collecting data, you can view it from the front panel, or you can transfer the data to your computer. Data Log mode allows you to log a specified number of readings, or readings acquired for a specified period of time, to instrument memory or to internal or external data files. </p>
+        <p>To select Data Log mode, press <b>[Acquire]</b> <b>Acquire &gt; Data Log</b>. You can then select the Sample Interval (time between measurements - for example, 500 mS), Duration as either an amount of Time or a number of Readings, whether to Start after a Delay or at a specific Time of Day, and whether to Log to Memory or Log to File(s). After configuring the data logging parameters, press <b>[Run/Stop]</b>. Data logging will begin following the specified Delay or at the specified Time of Day. </p>
+        <p>Data Log mode can be used with the DC voltage, DC current, AC voltage, AC current, 2-wire and 4-wire resistance, frequency, period, temperature, capacitance, and ratio measurement functions (diode and continuity are excluded). The maximum reading rate is 1000 readings/s and the maximum duration is 100 hours resulting in a maximum number of readings of 360,000,000 to file. The number of readings you can log to memory depends on the amount of instrument memory. With the MEM option, the limit is 2,000,000 readings; without the MEM option, the limit is 50,000 readings. By default, data logging implements auto trigger. The level and external trigger sources are not supported for data logging.</p>
+        <blockquote>
+            <p>
+                <img src="../_Graphics_/caution.gif" alt="Caution">
+                </img>
+            </p>
+            <p><b>Loss of data possible - local to remote transition clears instrument memory:</b> When data logging or digitizing <i>to memory</i>, if you access the instrument from remote (send a SCPI or common command)* and then return to local (by pressing <b>[Local]</b>), the readings in memory are cleared and the instrument returns to Continuous mode. </p>
+            <p>For data logging only, you can prevent this situation by data logging to a file instead of to memory (see <a href="#">Data Log Mode</a> for details). You can also prevent this from happening for data logging or digitizing by taking steps to keep the instrument from being accessed from remote. To prevent remote access, you may want to disconnect the LAN, GPIB, and USB interface cables from the instrument before starting the measurements. To prevent remote access via LAN, you can connect the instrument behind a router to minimize the possibility of remote access. You can also disable the various I/O interfaces from the front panel menus under <b>[Utility]</b> &gt; <b>I/O Config</b>.</p>
+            <p>To view the status of a data logging or digitizing operation remotely, use the instrument’s <a href="Web%20Interface.htm">Web User Interface</a>. The Web User Interface monitor does not set the instrument to remote.</p>
+            <p><span style="font-size: 11px; font-style: italic;">*When accessed from remote, the instrument will continue data logging or digitizing to completion, and you can retrieve the readings from remote. </span>
+            </p>
+        </blockquote>
+        <h2>Data Logging Overview</h2>
+        <p>This section is a summary of the steps involved in setting up data logging. Detailed steps are described below in Detailed Data Logging Steps.</p>
+        <ol>
+            <li value="1">Select the measurement function and make connections to the DUT (see <a href="04%20---%20Measurements%20---.htm">Measurements</a> for details).</li>
+            <li value="2">Select Data Log mode (press <b>[Acquire]</b> &gt; <b>Acquire</b> &gt; <b>Data Log</b>).</li>
+            <li value="3">Specify the sample interval (time between readings) for example, 20 mS.</li>
+            <li value="4">Specify the duration as amount of time or number of readings.</li>
+            <li value="5">Specify when to start data logging (delay or time of day). You can only use auto trigger (default) or single trigger (press <b>[Single]</b>)for data logging. </li>
+            <li value="6">Select whether to log data to memory or internal or external data file(s). </li>
+            <li value="7">Press <b>[Run/Stop]</b> or <b>[Single]</b>. Data logging starts when the specified delay has elapsed or the time of day occurs (specified in Step 5). Data logging will stop after the specified duration (time or number of readings) has occurred or after you press <b>[Run/Stop]</b> again.</li>
+        </ol>
+        <h2>Detailed Data Logging Steps</h2>
+        <p><b>Note:</b> For more information, on any of the softkeys described below, such as  the range of values for a particular setting, press and hold the softkey to display help for that softkey. </p>
+        <p><b>Step 1:</b> Select the measurement function and make connections to the DUT (see<a href="04%20---%20Measurements%20---.htm"> Measurements</a> for details). For example, press <b>DCV</b> and configure the test leads as shown.</p>
+        <p>
+            <img src="../_Graphics_/ConnDiag-DCV_326x185.png" style="width: 326;height: 185;" />
+        </p>
+        <p><b>Step 2:</b> Press <b>[Acquire]</b> on the front panel to display these softkeys:</p>
+        <p>
+            <img src="../_Graphics_/Dig1.png">
+            </img>
+        </p>
+        <p>Press the <b>Acquire</b> softkey.</p>
+        <p>
+            <img src="../_Graphics_/Dig2.png">
+            </img>
+        </p>
+        <p>Press the <b>Data Log</b> softkey. The Data Log menu opens:</p>
+        <p>
+            <img src="../_Graphics_/Data%20Log1.png" />
+        </p>
+        <p><b>Step 3:</b> Press <b>Sample Interval</b> and specify the time interval between samples (readings). </p>
+        <p><b>Note:</b> You may see  this message when configuring data logging: <i>Sample interval is limited by measurement settings</i>. The measurement time is determined by the measurement function, NPLC, Aperture, Autorange, Autozero, Offset Compensation, AC Filter, TC Open Check, and Gate Time. The data logging Sample Interval cannot be less than the measurement time. You can shorten the measurement time by selecting less integration time, selecting a fixed range, and so on.</p>
+        <p>
+            <img src="../_Graphics_/Data%20Log2.png" />
+        </p>
+        <p><b>Step 4:</b> Press the <b>Duration</b> softkey to specify the length of time to log data, or, press <b>Duration</b> again to specify the total number of readings to log.</p>
+        <p><b>Step 5:</b> Press <b>Start</b> to specify when to start data logging. You can select:</p>
+        <ul>
+            <li class="IndentTight" value="1"><b>Start Delay</b> - Starts data logging after a specified time delay. Specified in HH.MM.SS format.</li>
+            <li class="IndentTight" value="2"><b>Start Time of Day</b> - Starts data logging at a specified time of day. Specified in HH.MM.SS format. Using the time of day requires that the instrument’s real-time clock is properly set. To set the clock, press <b>[Shift]</b> &gt; <b>[Utility]</b> &gt; <b>System Setup</b> &gt; <b>Date/Time</b>.</li>
+        </ul>
+        <p>
+            <img src="../_Graphics_/Data%20Log3.png" />
+        </p>
+        <p>
+            <img src="../_Graphics_/note.gif" />  You cannot configure a trigger source when data logging. You can only use auto trigger (selected by default) or, when ready to initiate data logging, you can cause a single trigger (by pressing <b>[Single]</b>). The effect is the same, as you only need one auto trigger or single trigger event to enable data logging.</p>
+        <p><b>Step 6:</b> Press <b>Log To</b> &gt; <b>Log To Memory</b> or <b>Log To Files</b> to specify whether the data logging results will be stored in volatile memory for display or written to one or more internal/external files.</p>
+        <ul>
+            <li class="IndentTight" value="1">When data logging to memory, the data is volatile (not remaining during power off) but can be saved to an internal or external file after data logging is complete (see Step 7 below). The number of readings you can store in memory depends on the amount of instrument memory. With the MEM option, the limit is 2,000,000 readings. Without the MEM option, the limit is 50,000 readings.</li>
+            <li class="IndentTight" value="2">When data logging to file(s), <b>Browse</b> to an internal or external path and specify a <b>File Name</b>. If more than one file needs to be created to hold the data, the second file name will be appended with _00001, the third file name with _00002, and so on. When data logging to files, the maximum number of readings is 360,000,000.<br /><br /><img src="../_Graphics_/SaveToFiles.png" /><br /><br />When <b>Add Date</b> is <b>On</b>, the data logging start date and time is appended to the file name using the format:<br /><br /><i>_YYYYMMDD_HHMMSS</i> <br /><br />For example, for a file named <i>Data 1</i>, the result will be similar to: <i>Data 1_20140720_032542</i>.<br /><br /><a name="Options"></a>Press <b>Options</b> to to configure reading storage options:<br /><br /><img src="../_Graphics_/ReadingOptions.png" /><br /><br /><b>Rows/File</b> - Specifies the maximum number of rows or readings to be written to a file.  For <b>Max</b>, the limit is the number of bytes allowed by the file system (2<sup>32</sup> = 4.294967296 GBytes). This represents approximately 252 M readings with Metadata Off, or 159 M readings with Metadata On.  For <b>1M</b>, the limit is 1,000,000 rows in the resulting file. This allows you to accommodate common spreadsheet, database and data analysis programs that have limitations of 1 million rows per file.<br /><br /><b>Metadata</b> - Enables reading number, time stamp of first reading, and sample interval (if available) in the file.<br /><br /><b>Separator</b> - Specifies the character (Comma, Tab, or Semicolon) to use for separating the information on each row.<br /><br />When finished configuring reading storage, press <b>Done</b> &gt; <b>Done</b> to return to the main data logging menu.<br /></li>
+        </ul>
+        <p><b>Step 7:</b> Press <b>[Run/Stop]</b> or <b>[Single]</b>. Data logging starts when the specified delay has elapsed or the time of day occurs (specified in Step 5). Data logging will stop after the specified duration (time or number of readings) has occurred or after you press <b>[Run/Stop]</b> again.</p>
+        <p>When data logging is complete:</p>
+        <ul>
+            <li class="IndentTight" value="1">When data logging to file(s), the&#160;instrument&#160;saves&#160;the&#160;file(s)&#160;with the&#160;specified&#160;name&#160;and&#160;path.</li>
+            <li class="IndentTight" value="2">When data logging to memory, you can now save the readings from the main data log menu by pressing <b>Save Readings</b>.<br /><br /><img src="../_Graphics_/SaveReadings.png" /><br /><br />You can then <b>Browse</b> to an internal or external path and specify a <b>File Name</b>. You can also specify reading storage <b>Options</b> as described above in Step 6.<br /><br /><img src="../_Graphics_/SaveReadingsOptions.png" /><br /></li>
+        </ul>
+        <h2>Trend Chart for Data Logging</h2>
+        <p>The Trend Chart is particularly useful for viewing data logging measurements. See  <a href="56%20Trend%20Chart%20(Digitizing%20Mode).htm">Trend Chart (Digitize and Data Log Modes)</a> for details.</p>
+        
+    </body>
+</html>

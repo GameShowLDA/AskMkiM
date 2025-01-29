@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>STATus Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor488"></a><a name="Status_Diagram"></a>STATus Subsystem</h1>
+        <p>&#160;</p>
+        <p>
+            <img src="../_Graphics_/Status2_710x813.jpg" style="width: 710;height: 813;" />
+        </p>
+        <div>
+            <p><a name="QuestionableDataRegister"></a>The following table lists the bit definitions for the <i>Questionable Data Register</i>:</p>
+            <table cellspacing="0" class="Indented" style="margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;padding-left: 2px;padding-right: 2px;padding-top: 2px;padding-bottom: 2px;border-left-style: none;border-right-style: none;border-top-style: none;border-bottom-style: none;" width="70" height="17" border="0" alt="Note" />
+                    </td>
+                    <td>
+                        <p class="TableBody">The overload bits are set once per <a href="INITiate_IMMediate.htm">INITiate</a> command. If you clear an overload bit, it is not set again until a new INITiate is sent.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th style="text-align: center;" class="TableStyle-RegTable-HeadE-Column1-Header1">
+                            <p class="TableHead" style="text-align: center;">Bit Number</p>
+                        </th>
+                        <th style="text-align: center;" class="TableStyle-RegTable-HeadE-Column1-Header1">
+                            <p class="TableHead">Bit Name</p>
+                        </th>
+                        <th style="text-align: center;" class="TableStyle-RegTable-HeadE-Column1-Header1">Decimal Value</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Definition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">0</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Voltage Overload</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">1</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">Only reported as event. Returns 0. Read the Event Register.<br /></p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">1</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Current Overload</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">2</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>Only reported as event. Returns 0. Read the Event Register.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">2</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Sample Timing Violation</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">4</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">A sample timing violation has occurred involving the <a href="SAMPle_Subsystem.htm#TIMer">SAMPle:TIMer</a> command. Sample timing may not be valid.
+Applies only to the 34465A and 34470A.</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">3</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Not Used</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">8</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">(Reserved for future use)</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">4</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Temperature Overload</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">16</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">Only reported as event. Returns 0. Read the Event Register.</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">5</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Frequency Overload/Underflow</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">32</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>Only reported as event. Returns 0. Read the Event Register.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">6</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">Not Used</td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">64</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">(Reserved for future use)</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">7</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Not Used</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">128</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">(Reserved for future use)</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">8</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Calibration Corrupt</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">256</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">At least one calibration constant is corrupt.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">9</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Resistance Overload</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">512</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p>Only reported as event. Returns 0. Read the Event Register.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">10</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Capacitance Overload</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">1024</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">Only reported as event. Returns 0. Read the Event Register.</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">11</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Lower Limit Failed</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">2048</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">The most recent measurement failed the lower limit test.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">12</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Upper Limit Failed</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">4096</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">The most recent measurement failed the upper limit test.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">13</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Not Used</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">8192</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">(Reserved for future use)</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">14</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">Memory Overflow</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody">16384</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                            <p class="TableBody">Reading memory is full. One or more (oldest) measurements have been lost.</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyB-Column1-Body1">
+                            <p class="TableBody">15</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyB-Column1-Body1">
+                            <p>Not Used</p>
+                        </td>
+                        <td style="text-align: center;" class="TableStyle-RegTable-BodyB-Column1-Body1">
+                            <p class="TableBody">32768</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1">
+                            <p class="TableBody">(Reserved for future use)</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <br />
+        <li value="7">
+            <div>
+                <p><a name="StandardOperationRegister"></a>The following table lists the bit definitions for the <i>Standard Operation Register</i>:</p>
+                <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th style="text-align: center;" class="TableStyle-RegTable-HeadE-Column1-Header1">
+                                <p class="TableHead" style="text-align: center;">Bit Number</p>
+                            </th>
+                            <th style="text-align: center;" class="TableStyle-RegTable-HeadE-Column1-Header1">
+                                <p class="TableHead">Bit Name</p>
+                            </th>
+                            <th style="text-align: center;" class="TableStyle-RegTable-HeadE-Column1-Header1">Decimal Value</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Definition</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">0</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Calibrating</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">1</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">Instrument is performing a calibration.</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">1</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">2</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">2</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">4</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">3</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">8</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">4</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Measuring</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">16</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">Instrument is initiated, and is making or about to make a measurement.</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">5</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Waiting for Trigger</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">32</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">Instrument is waiting for a trigger.</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">6</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">64</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">7</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">128</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">8</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Configuration Change</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">256</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">Instrument configuration has been changed since the last INIT, READ? or MEASure?, either from the front panel or from SCPI.</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">9</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Memory Threshold</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">512</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">Programmed number of measurements (DATA:POINts:EVENt:THReshold) have been stored in measurement memory.</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">10</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Instrument Locked</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">1024</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody"> Set if a remote interface (GPIB, USB or LAN) has a lock (SYSTem:LOCK:REQuest?). Cleared when the remote interface releases the lock (SYSTem:LOCK:RELease).</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">11</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">2048</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">12</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">4096</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">13</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">Global Error</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">8192</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">Set if any remote interface has an error in its error queue; cleared otherwise.</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">14</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">16384</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">(Reserved for future use)</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td style="text-align: center;font-weight: bold;" class="TableStyle-RegTable-BodyB-Column1-Body1">
+                                <p class="TableBody">15</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyB-Column1-Body1">
+                                <p>Not Used</p>
+                            </td>
+                            <td style="text-align: center;" class="TableStyle-RegTable-BodyB-Column1-Body1">
+                                <p class="TableBody">32768</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1">
+                                <p class="TableBody">"0" is returned.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </li>
+        <br />
+        <div>
+            <h2 style="font-size: 14px;">Command Summary</h2>
+            <p><a href="#OPER-COND">STATus:OPERation:CONDition?</a>
+            </p>
+            <p><a href="#OPER-ENAB">STATus:OPERation:ENABle<br /></a>
+            </p>
+            <p><a href="#OPER-EVEN">STATus:OPERation[:EVENt]?</a>
+            </p>
+            <p><a href="#PRES">STATus:PRESet</a>
+            </p>
+            <p><a href="#QUES-COND">STATus:QUEStionable:CONDition?</a>
+            </p>
+            <p><a href="#QUES-ENAB">STATus:QUEStionable:ENABle<br /></a>
+            </p>
+            <p><a href="#QUES-EVEN">STATus:QUEStionable[:EVENt]?</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor489"></a><a name="OPER-COND"></a>STATus:OPERation:CONDition?</h2>
+            <p>Returns the sum of the bits in the condition register for the <a href="#StandardOperationRegister">Standard Operation Register</a> group. This register is read-only; bits are not cleared when read.</p>
+            <p>A condition register continuously monitors the state of the instrument. Condition register bits are updated in real time; they are neither latched nor buffered.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+32</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Read the condition register (bit 5 is set):<br /><br />STAT:OPER:COND?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The condition register bits reflect the current condition. If a condition goes away, the corresponding bit is cleared in the condition register.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor490"></a><a name="OPER-ENAB"></a>STATus:OPERation:ENABle  &lt;<i>enable_value</i>&gt;<br />STATus:OPERation:ENABle?</h2>
+            <p>Enables bits in the enable register for the <a href="#StandardOperationRegister">Standard Operation Register</a> group. The selected bits are then reported to the Status Byte. An enable register defines which bits in the event register will be reported to the Status Byte register group. You can write to or read from an enable register.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">A decimal value that corresponds to the binary-weighted sum of the bits in the register.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+32</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Enable bit 5 (decimal value 32) in the enable register:<br /><br />STAT:OPER:ENAB 32</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Use the &lt;<i>enable</i>&gt; parameter to specify which bits will be reported to the Status Byte. The decimal value specified corresponds to the binary-weighted sum of the bits you wish to enable in the register. For example, to enable bit 5 (decimal value = 32) and bit 9 (decimal value = 512), the corresponding decimal value would be 544 (32 + 512).</li>
+                <li class="IndentTight" value="2">A <a href="#PRES">STATus:PRESet</a> clears all bits in the enable register.</li>
+                <li class="IndentTight" value="3">The &lt;<i>enable</i>&gt; setting is nonvolatile; it does not change after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) , Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), Status Preset (<a href="#PRES">STATus:PRESet</a>) or Clear Status (<a href="IEEE-488_Common_Commands.htm#CLS">*CLS</a>).</li>
+                <li class="IndentTight" value="4"><a name="kanchor491"></a>The <a href="IEEE-488_Common_Commands.htm#PSC">*PSC</a> command controls whether the enable register is cleared at power on.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor492"></a><a name="OPER-EVEN"></a>STATus:OPERation[:EVENt]?</h2>
+            <p>Returns the sum of the bits in the event register for the <a href="#StandardOperationRegister">Standard Operation Register</a> group. An event register is a read-only register that latches events from the condition register. While an event bit is set, subsequent events corresponding to that bit are ignored. The register bits are cleared when you read the register.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+512</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Read the event register (bit 9 is set):<br /><br />STAT:OPER:EVEN?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Once a bit is set, it remains set until cleared by reading the event register or by sending <a href="IEEE-488_Common_Commands.htm#CLS">*CLS</a> (clear status).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor493"></a><a name="PRES"></a>STATus:PRESet</h2>
+            <p>Clears <a href="#QuestionableDataRegister">Questionable Data</a><a name="kanchor494"></a> enable register and <a href="#StandardOperationRegister">Standard Operation</a> enable register.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Clear enable register bits:<br /><br />STAT:PRES</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor495"></a><a name="QUES-COND"></a>STATus:QUEStionable:CONDition?</h2>
+            <p>Returns the sum of the bits in the condition register for the <a href="#QuestionableDataRegister">Questionable Data Register</a> group. This register is read-only; bits are not cleared when read.</p>
+            <p>A condition register continuously monitors the state of the instrument. Condition register bits are updated in real time; they are neither latched nor buffered.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+4096</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Read the condition register (bit 12 is set):<br />STAT:QUES:COND?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The condition register bits reflect the current condition. If a condition goes away, the corresponding bit is cleared in the condition register.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor496"></a><a name="QUES-ENAB"></a>STATus:QUEStionable:ENABle  &lt;<i>enable_value</i>&gt;<br />STATus:QUEStionable:ENABle?</h2>
+            <p>Enables bits in the enable register for the <a href="#QuestionableDataRegister">Questionable Data Register</a> group. The selected bits are then reported to the Status Byte. An enable register defines which bits in the event register will be reported to the Status Byte register group. You can write to or read from an enable register.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">A decimal value that corresponds to the binary-weighted sum of the bits in the register.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+512</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Enable bit 9 (decimal value 512) in the enable register.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Use the &lt;<i>enable</i>&gt; parameter to specify which bits will be reported to the Status Byte. The decimal value specified corresponds to the binary-weighted sum of the bits you wish to enable in the register. For example, to enable bit 0 (decimal value = 1), bit 1 (decimal value = 2) and bit 12 (decimal value = 4096), the corresponding decimal value would be 4099 (1 + 2 + 4096).</li>
+                <li class="IndentTight" value="2">A <a href="#PRES">STATus:PRESet</a> clears all bits in the enable register.</li>
+                <li class="IndentTight" value="3">The &lt;<i>enable</i>&gt; setting is nonvolatile; it does not change after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) , Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), Status Preset (<a href="#PRES">STATus:PRESet</a>) or Clear Status (<a href="IEEE-488_Common_Commands.htm#CLS">*CLS</a>).</li>
+                <li class="IndentTight" value="4"><a name="kanchor497"></a>The <a href="IEEE-488_Common_Commands.htm#PSC">*PSC</a> command controls whether the enable register is cleared at power on.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor498"></a><a name="QUES-EVEN"></a>STATus:QUEStionable[:EVENt]?</h2>
+            <p>Returns the event register for the <a href="#QuestionableDataRegister">Questionable Data Register</a> group. An event register is a read-only register that latches events from the condition register. While an event bit is set, subsequent events corresponding to that bit are ignored. The register bits are cleared when you read the register.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1024</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Read the event register (bit 10 is set):<br /><br />STAT:QUES?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Once a bit is set, it remains set until cleared by reading the event register or by sending <a href="IEEE-488_Common_Commands.htm#CLS">*CLS</a> (clear status).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

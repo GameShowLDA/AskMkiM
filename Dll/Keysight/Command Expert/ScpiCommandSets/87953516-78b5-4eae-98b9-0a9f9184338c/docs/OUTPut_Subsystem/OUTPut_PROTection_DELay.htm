@@ -1,0 +1,156 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>OUTPut:PROTection:DELay</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp4 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>OUTPut:PROTection:DELay</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_output_prot_del">Syntax</a></font> 
+ | <a href="#Description_output_prot_del">Description</a> | <a href="#Parameters_output_prot_del">Parameters</a> 
+ | <a href="#Remarks_output_prot_del1">Remarks</a> | <a href="#Return_output_prot_del">Return 
+ Format</a> | <a href="#Example_output_prot_del">Example</a></p>
+
+<h2><a name=Syntax_output_prot_del></a>Syntax</h2>
+
+<p class=CmdSyntax>OUTPut:PROTection:DELay &lt;delay&gt;, (@&lt;chanlist&gt;)</p>
+
+<p class=CmdSyntax>OUTPut:PROTection:DELay? [MIN|MAX,] (@&lt;chanlist&gt;)</p>
+
+<h2><a name=Description_output_prot_del></a>Description</h2>
+
+<p class=Indented1>This command sets the over-current protection delay. 
+ The over-current protection function will not be triggered on the specified 
+ output channel during the delay time. After the delay time has expired, 
+ the over-current protection function will be active. This prevents &nbsp;momentary 
+ changes in output status from triggering the over-current protection function. 
+ Programmed values can range from 0 to 255 milliseconds in increments of 
+ 1 millisecond.</p>
+
+<p class=Indented1>The operation of over-current protection is affected 
+ by the setting of the current protection delay start event, which is specified 
+ by <a href="../SOURce_Subsystem/_SOURce__CURRent_PROTection_DELay_STARt.htm">[SOURce:]CURRent:PROTection:DELay:STARt</a>. 
+ </p>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_output_prot_del></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 76.778%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=76.778%>
+<col style="width: 19.863%;">
+<col style="width: 14.327%;">
+<col style="width: 35.255%;">
+<col style="width: 22.925%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 19.863%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=19.863%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:14.327%;" bgcolor="#E9E9E9" width="14.327%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:35.255%;" bgcolor="#E9E9E9" width="35.255%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:22.925%;" bgcolor="#E9E9E9" width="22.925%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:19.863%;" width="19.863%" class="hcp3">
+<p class=TableBody>&lt;delay&gt;</td>
+<td colspan="1" rowspan="1" style="width:14.327%;" width="14.327%" class="hcp4">
+<p class=TableBody>NRf+</td>
+<td colspan="1" rowspan="1" style="width:35.255%;" width="35.255%" class="hcp4">
+<p class=TableBody>0 - 0.255 | MIN | MAX</td>
+<td colspan="1" rowspan="1" style="width:22.925%;" width="22.925%" class="hcp4">
+<p class=TableBody>20 ms</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:19.863%;" width="19.863%" class="hcp3">
+<p class=TableBody>&lt;chanlist&gt;</td>
+<td style="width:14.327%;" width="14.327%" class="hcp4">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:35.255%;" width="35.255%" class="hcp4">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:22.925%;" width="22.925%" class="hcp4">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2 class=Indented1><a name=Remarks_output_prot_del1></a>Remarks</h2>
+
+<p class=Indented1>This command is the same as <a href="../SOURce_Subsystem/_SOURce__CURRent_PROTection_DELay__TIME_.htm">[SOURce:]CURRent:PROTection:DELay</a>. 
+ </p>
+
+<h2 class=Indented1><a name=Return_output_prot_del></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR3&gt; </p>
+
+<p class=Indented1>The query command returns the programmed delay time. 
+ The reading is in the form <span class=CourierNew>+1.000000E+01</span>.</p>
+
+<h2><a name=Example_output_prot_del></a>Example</h2>
+
+<p class=Indented1>The following command sets a current protection delay 
+ of 0.2 seconds for channel 2. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">OUTP:PROT:DEL 0.2,(@2)</p>
+
+<p class=Indented1>The following query returns the maximum allowable current 
+ protection delay of channel 1. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">OUTP:PROT:DEL? MAX,(@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;+2.550000E-01</span></p>
+
+<h2>See Also</h2>
+
+<p class=IndentTight><a href="../SOURce_Subsystem/_SOURce__CURRent_PROTection_DELay__TIME_.htm">[SOURce:]CURRent:PROTection:DELay</a></p>
+
+<p class=IndentTight><a href="../SOURce_Subsystem/_SOURce__CURRent_PROTection_DELay_STARt.htm">[SOURce:]CURRent:PROTection:DELay:STARt</a></p>
+
+<p class=IndentTight><a href="../SOURce_Subsystem/_SOURce__CURRent_PROTection_STATe.htm">[SOURce:]CURRent:PROTection:STATe</a></p>
+
+<p class=IndentTight><a href="OUTPut_PROTection_CLEar.htm">OUTPut:PROTection:CLEar</a></p>
+
+</body>
+</html>

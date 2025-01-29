@@ -1,0 +1,184 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>OUTPut:INHibit:MODE</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+table.hcp1 { x-cell-content-align:top; margin-left:18pt; border-spacing:0px; }
+tr.hcp2 { x-cell-content-align:top; }
+td.hcp3 { padding-right:10px; padding-left:10px; border-bottom-style:none; border-right-style:none; border-left-style:none; }
+td.hcp4 { padding-right:10px; padding-left:10px; border-bottom-style:none; border-right-style:none; }
+td.hcp5 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp6 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>OUTPut:INHibit:MODE</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_output_inhibit">Syntax</a></font> 
+ | <a href="#Description_output_inhibit">Description</a> | <a href="#Parameters_output_inhibit">Parameters</a> 
+ | Remarks | <a href="#Return_output_inhibit">Return Format</a> | <a href="#Example_output_inhibit">Example</a></p>
+
+<h2><a name=Syntax_output_inhibit></a>Syntax</h2>
+
+<p class=CmdSyntax>OUTPut:INHibit:MODE &lt;mode&gt;</p>
+
+<p class=CmdSyntax>OUTPut:INHibit:MODE?</p>
+
+<h2><a name=Description_output_inhibit></a>Description</h2>
+
+<p class=Indented1>This command selects the mode of operation of the Inhibit 
+ input (INH). The inhibit function shuts down ALL output channels in response 
+ to an external signal on the Inhibit input. If an output channel has been 
+ turned off by OUTPut:STATe, the inhibit function does not affect the output 
+ channel while it is in the OFF state. The Inhibit mode setting is stored 
+ in non-volatile memory. </p>
+
+<p class=Indented1>The following modes can be selected:</p>
+
+<table x-use-null-cells style="width:94.093%;" cellspacing="0" width="94.093%" class="hcp1">
+<col style="width: 17.205%;">
+<col style="width: 82.795%;">
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;
+			border-top-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">LATChing</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-top-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody
+	style="margin-right: 0px;">Causes a logic-true transition on the Inhibit 
+ input to disable all outputs. The outputs remain disabled until the Inhibit 
+ input is returned to logic-false and the latched INH status bit is cleared 
+ by sending the OUTP:PROT:CLE command or a protection clear command from 
+ the front panel.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">LIVE</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody>Allows the enabled outputs to follow the state of the 
+ Inhibit input. When the Inhibit input is true, the outputs are disabled. 
+ When the Inhibit input is false, the outputs are re-enabled.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody><span style="font-weight: bold;">OFF</span></td>
+<td rowspan="1" colspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody>The Inhibit input is ignored.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_output_inhibit></a>Parameters</h2>
+
+<table x-use-null-cells style="width:78.723%;" cellspacing="0" width="78.723%" class="hcp1">
+<col style="width: 19.863%;">
+<col style="width: 14.327%;">
+<col style="width: 39.523%;">
+<col style="width: 22.885%;">
+
+<tr style="height:18px;" valign="top" class="hcp2">
+<td style="width: 19.863%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=19.863%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:14.327%;" bgcolor="#E9E9E9" width="14.327%" class="hcp5">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:39.523%;" bgcolor="#E9E9E9" width="39.523%" class="hcp5">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:22.885%;" bgcolor="#E9E9E9" width="22.885%" class="hcp5">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width: 19.863%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=19.863%>
+<p class=TableBody>&lt;mode&gt;</td>
+<td style="width:14.327%;" width="14.327%" class="hcp6">
+<p class=TableBody>CPD</td>
+<td rowspan="1" colspan="1" style="width:39.523%;" width="39.523%" class="hcp6">
+<p class=TableBody>LATChing | LIVE | OFF</td>
+<td rowspan="1" colspan="1" style="width:22.885%;" width="22.885%" class="hcp6">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_output_inhibit></a>Return Format</h2>
+
+<p class=Indented1>&lt;CRD&gt;</p>
+
+<p class=Indented1>The query command returns LATC, LIVE, or OFF.</p>
+
+<h2><a name=Example_output_inhibit></a>Example</h2>
+
+<p class=Indented1>The following command sets the Inhibit Input to Live 
+ mode. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">OUTP:INH:MODE LIVE</p>
+
+<p class=Indented1>The following query returns the setting of the Inhibit 
+ Input. </p>
+
+<p class=Shaded>OUTP:INH:MODE?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;OFF</span></p>
+
+<h2 class=Indented1><span class=MouseOverLink
+							id=span5>See Also</span></h2>
+
+<p class=IndentTight><a href="OUTPut__STATe_.htm">OUTPut[:STATe]</a></p>
+
+<p class=IndentTight><a href="OUTPut_PROTection_CLEar.htm">OUTPut:PROTection:CLEar</a></p>
+
+</body>
+</html>

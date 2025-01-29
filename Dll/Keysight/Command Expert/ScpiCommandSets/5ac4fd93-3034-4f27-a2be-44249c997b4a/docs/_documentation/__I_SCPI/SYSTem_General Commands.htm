@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:ignoredWords="yyyy;ACAL;42850208E" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="CHM.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>SYSTem Subsystem - General Purpose Commands</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <script type="text/javascript" src="../SkinSupport/jquery-1.12.4.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapGlobal.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapSlideshow.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapMerging.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapAliasFile.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapUtilities.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapBody.js">
+        </script>
+        <script type="text/javascript" src="../SkinSupport/MadCapHighlighter.js">
+        </script>
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor396"></a>SYSTem Subsystem - General Purpose Commands</h1>
+        <p>The SYSTem subsystem includes general commands (listed below), <a href="SYSTem_LICense_Subsystem.htm">license management commands</a>, and <a href="SYSTem_IO_Configuration.htm">remote interface configuration commands</a>.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#AUTOCAL_DATE">SYSTem:ACALibration:DATE?</a>
+        </p>
+        <p><a href="#AUTOCAL_TEMP">SYSTem:ACALibration:TEMPerature?</a>
+        </p>
+        <p><a href="#AUTOCAL_TIME">SYSTem:ACALibration:TIME?</a>
+        </p>
+        <p><a href="#BEEP">SYSTem:BEEPer[:IMMediate]</a>
+        </p>
+        <p><a href="#BEEP-STAT">SYSTem:BEEPer:STATe</a>
+        </p>
+        <p><a href="#CLIC-STAT">SYSTem:CLICk:STATe</a>
+            <br />
+        </p>
+        <p><a href="#DATE">SYSTem:DATE</a>
+        </p>
+        <p><a href="#ERR">SYSTem:ERRor[:NEXT]?</a>
+        </p>
+        <p><a href="#HELP">SYSTem:HELP?</a>
+        </p>
+        <p><a href="#IDEN">SYSTem:IDENtify</a>
+        </p>
+        <p><a href="#LAB">SYSTem:LABel</a>
+        </p>
+        <p><a href="#LFR">SYSTem:LFRequency?</a>
+        </p>
+        <p><a href="#LOC">SYSTem:LOCal</a>
+        </p>
+        <p><a href="#PRES">SYSTem:PRESet</a>
+        </p>
+        <p><a href="#SEC-COUNt">SYSTem:SECurity:COUNt?</a>
+        </p>
+        <p><a href="#SEC-IMM">SYSTem:SECurity:IMMediate</a>
+        </p>
+        <p><a href="#TEMP">SYSTem:TEMPerature?</a>
+        </p>
+        <p><a href="#TIME">SYSTem:TIME</a>
+        </p>
+        <p><a href="#UPTime">SYSTem:UPTime?</a>
+        </p>
+        <p><a href="#VERS">SYSTem:VERSion?</a>
+        </p>
+        <p><a href="#WMES">SYSTem:WMESsage</a>
+        </p>
+        <p>&#160;</p>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor397"></a><a name="AUTOCAL_DATE"></a>SYSTem:ACALibration:DATE?</h2>
+            <p>Returns the date of the last autocalibration in the format <i>yyyy,mm,dd</i>. </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">2014,4,26</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the autocalibration date:<br /><br />SYST:ACAL:DATE?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">(34465A/70A only)</li>
+                <li class="IndentTight"> You can perform this query regardless of whether the instrument is secured.</li>
+                <li class="IndentTight">The date is based on the instrument's real-time clock. Set the date for the instrument's real-time clock with <a href="#DATE">SYSTem:DATE</a>. </li>
+                <li class="IndentTight">The real-time clock does not adjust itself for time zone changes or daylight savings time. Be sure to set the date and time when you first receive your instrument.</li>
+                <li class="IndentTight">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="#PRES">SYSTem:PRESet</a>.</li>
+                <li class="IndentTight">Use <a href="IEEE-488_Common_Commands.htm#CAL">*CAL?</a> to perform autocal.</li>
+            </ul>
+            <h3>See Also</h3>
+            <p><a href="#DATE">SYSTem:DATE</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor398"></a><a name="AUTOCAL_TEMP"></a>SYSTem:ACALibration:TEMPerature?</h2>
+            <p>Returns the temperature of the last autocalibration in °C. </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.42850208E+001</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the autocalibration temperature:<br /><br />SYST:ACAL:TEMP?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">(34465A/70A only)</li>
+                <li class="IndentTight"> You can perform this query regardless of whether the instrument is secured.</li>
+                <li class="IndentTight">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="#PRES">SYSTem:PRESet</a>.</li>
+                <li class="IndentTight">Use <a href="IEEE-488_Common_Commands.htm#CAL">*CAL?</a> to perform autocal.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor399"></a><a name="AUTOCAL_TIME"></a>SYSTem:ACALibration:TIME?</h2>
+            <p>Returns the time of the last autocalibration in the format <i>hh,mm,ss.sss</i>. </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">20,15,30.000</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the calibration time:<br /><br />SYST:ACAL:TIME?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight">(34465A/70A only)</li>
+                <li class="IndentTight">The date is based on the instrument's real-time clock. Set the date for the instrument's real-time clock with SYSTem:DATE.</li>
+                <li class="IndentTight">The real-time clock does not adjust itself for time zone changes or daylight savings time. Be sure to set the date and time when you first receive your instrument.</li>
+                <li class="IndentTight">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight">Use <a href="IEEE-488_Common_Commands.htm#CAL">*CAL?</a> to perform autocal.</li>
+            </ul>
+            <h3>See Also</h3>
+            <p><a href="#TIME">SYSTem:TIME</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor400"></a><a name="BEEP"></a>SYSTem:BEEPer[:IMMediate]</h2>
+            <p>Issues a single beep.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Issue a single beep:<br /><br />SYST:BEEP</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight">Programmed beeps may be useful for program development and troubleshooting.</li>
+                <li class="IndentTight">You can issue a beep with this command regardless of the current beeper state (<a href="#BEEP-STAT">SYSTem:BEEPer:STATe</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor401"></a><a name="BEEP-STAT"></a>SYSTem:BEEPer:STATe  {ON|1|OFF|0}<br />SYSTem:BEEPer:STATe?</h2>
+            <p>Disables or enables the beep heard during continuity, diode, or probe hold measurements, or when an error is generated from the front panel or remote interface.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Disable beeper state:<br /><br />SYST:BEEP:STAT OFF</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">Does not affect the front panel key click. </li>
+                <li class="IndentTight">A beep is always emitted (even with beeper state OFF) when <a href="#BEEP">SYSTem:BEEPer</a> is sent. </li>
+                <li class="IndentTight">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor402"></a><a name="CLIC-STAT"></a>SYSTem:CLICk:STATe  {ON|1|OFF|0}<br />SYSTem:CLICk:STATe?</h2>
+        <p>Disables or enables the click heard when a front panel key or softkey is pressed.</p>
+        <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Disable keyboard click:<br /><br />SYST:CLIC:STAT OFF</td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight">Does not affect the beeper for diode and continuity tests, errors and so on. </li>
+            <li class="IndentTight">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="#PRES">SYSTem:PRESet</a>).</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor403"></a><a name="DATE"></a>SYSTem:DATE  &lt;<i>year</i>&gt;, &lt;<i>month</i>&gt;, &lt;<i>day</i>&gt;<br />SYSTem:DATE?</h2>
+            <p>Sets the date for the instrument's real-time clock. Use <a href="#TIME">SYSTem:TIME</a> to set the time.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>&lt;<i>year</i> 2000 to 2099<br />&lt;<i>month</i>&gt; 1 to 12<br />&lt;<i>day</i>&gt; 1 to 31</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2011,+07,+26</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set system date to July 26, 2011:<br /><br />SYST:DATE 2011, 7,26</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight"><a name="kanchor404"></a><a name="kanchor405"></a>The real-time clock is used for Mass Memory (MMEMory) system file time stamps.</li>
+                <li class="IndentTight">The real-time clock is battery-backed and retains the date and time when power is off.</li>
+                <li class="IndentTight"><a name="kanchor406"></a><a name="kanchor407"></a><a name="kanchor408"></a><a name="kanchor409"></a>The date and time are not affected by <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="#PRES">SYSTem:PRESet</a>.</li>
+                <li class="IndentTight">The real-time clock does not adjust itself for time zone changes or daylight savings time. Be sure to set the date and time when you first receive your instrument.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor410"></a><a name="ERR"></a>SYSTem:ERRor[:NEXT]?</h2>
+            <p>Reads and clears one error from the error queue. See <a href="SCPI_Error_Messages.htm">SCPI Error Messages</a> for the complete SCPI error message list.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 78px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">-113,"Undefined header"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Read and clear the first error in the error queue:<br /><br />SYST:ERR?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight">Up to 20 errors can be stored in the instrument's error queue. Each remote interface I/O session (GPIB, USB, VXI-11, Telnet/Sockets) has its own interface-specific error queue. Errors appear in the error queue of the I/O session that caused the error. For example, if an error was generated by a command sent over GPIB, send <a href="#ERR">SYSTem:ERRor?</a> from GPIB to read the error queue. Errors generated by instrument hardware are broadcast to all I/O sessions.</li>
+                <li class="IndentTight">Error retrieval is first-in-first-out (FIFO), and errors are cleared as you read them. The instrument beeps each time an error is generated (unless disabled by <a href="#SYSTem_BEEPer_STATe">SYSTem:BEEPer:STATe OFF</a>).</li>
+                <li class="IndentTight">If more than 20 errors have occurred, the most recent error stored in the queue is replaced with -350,"Queue overflow". No additional errors are stored until you remove errors from the queue. If no errors have occurred when you read the error queue, the instrument responds with +0,"No error".</li>
+                <li class="IndentTight">Errors have the following format (the error string may contain up to 255 characters).<br /><br />&lt;<i>error code</i>&gt;,&lt;<i>error string</i>&gt;<br /><br />Where:<br /><br />&lt;<i>error code</i>&gt; = a positive or negative integer<br /><br />&lt;<i>error string</i>&gt; = a quoted ASCII string up to 255 characters</li>
+            </ul>
+            <h3>See Also</h3>
+            <p class="IndentTight"><a href="IEEE-488_Common_Commands.htm#SRE">*SRE</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor411"></a><a name="HELP"></a>SYSTem:HELP?</h2>
+            <p>Returns a complete list of the instrument's SCPI commands.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 78px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(see below)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the list of SCPI commands:<br /><br />SYST:HELP?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">The query returns Definite Length Block Data, which allows any type of data to be transmitted as a series of 8-bit data bytes. The first line is a pound sign (#) followed by one digit representing the number of digits in the decimal integer to follow. This digit is followed by a decimal integer indicating the number of data bytes to follow, followed by the first New Line. (For example, "#47947" in the first line means that there are 7947 data bytes to follow.) The rest of the block has one command per line, each terminated by a New Line character (ASCII character 10).<br /><br />The beginning of a returned list is shown below. Note that the actual contents may vary, depending on the firmware revision:<br /><br /><span class="CourierNew">#48085</span><br style="mc-tag-and-class: span;" /><span class="CourierNew">:ABORt/nquery/</span><br /><span class="CourierNew">:CALibration:ADC?/qonly/</span><br style="mc-tag-and-class: span;" /><span class="CourierNew">:CALibration:ALL?/qonly/</span><br style="mc-tag-and-class: span;" /><span class="CourierNew">:CALibration:COUNt?/qonly/</span><br style="mc-tag-and-class: span;" /><span class="CourierNew">:CALibration:DATA</span><br /><br />In this list, <ul><li class="IndentTight"><span class="CourierNew">/nquery/</span> indicates a command with no query.</li><li class="IndentTight"><span class="CourierNew">/qonly/</span> indicates a query with no command form.</li><li class="IndentTight">All other commands consist of a command and query.</li></ul></li>
+                <li class="IndentTight">Syntax for each command is found in the <a href="../_Home_Page/Command_Quick_Reference.htm">Command Quick Reference</a>.</li>
+                <li class="IndentTight">The list may include commands or queries not described in this document. These are deprecated commands included for compatibility with older instruments.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor412"></a><a name="IDEN"></a>SYSTem:IDENtify  {DEFault|AT34460A|AT34461A|AT34410A|AT34411A|HP34401A}<br />SYSTem:IDENtify?</h2>
+            <p>Selects the manufacturer and model number returned by <a href="IEEE-488_Common_Commands.htm#IDN">*IDN?</a>. The serial number and revision information are unaffected, and this command does not change instrument operation. Use  to avoid changing existing test system code where the manufacturer/model number are verified.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {DEFault|AT34460A|AT34461A|AT34410A|AT34411A|HP34401A}(see  bullet points  below)<br /></td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">DEF (see bullet points below), HP34401A, AT34410A, or AT34411A</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"> Select a *IDN? response compatible with the 34401A:<br /><br />SYST:IDEN HP34401A<br />*IDN?</p>
+                            <p colspan="2">Typical Response: HEWLETT-PACKARD,34401A,...<br /></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">The allowable parameters for each DMM model are:<blockquote><ul><li>34460A - valid parameters: DEFault, AT34460A, HP34401A</li><li>34461A - valid parameters: DEFault, AT34461A, HP34401A</li><li>34465A - valid parameters: DEFault, AT34410A, AT34411A</li><li>34470A - valid parameters: DEFault, AT34410A, AT34411A</li></ul></blockquote></li>
+                <li class="IndentTight">DEFault returns "Keysight Technologies" followed by the actual instrument model number:<blockquote><ul><li> "Keysight Technologies,34460A, ..."</li><li> "Keysight Technologies,34461A, ..." </li><li> "Keysight Technologies,34465A, ..." </li><li> "Keysight Technologies,34470A, ..." </li></ul></blockquote></li>
+                <li class="IndentTight">If you have an older Agilent 34460A or 34461A and upgrade to the new (Keysight) firmware, your instrument  continues to respond with the manufacturer name “Agilent”, not “Keysight” until you set the front panel SCPI&#160;ID to 34460A or 34461A, send the <a href="#IDEN">SYST:IDEN DEF</a> command, or reset user preferences. After doing this, the instrument  responds with “Keysight” as the manufacturer.</li>
+                <li class="IndentTight">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight"><b>Important:</b> In order to update the instrument firmware <i>from remote</i>, the model number in the <a href="IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response must match the actual instrument model number.  If you have changed the instrument's <a href="IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response to another instrument, when attempting to update the firmware from remote, you will see this error: <i>The instrument is not supported by this firmware file.</i> To update the firmware, either update using the front panel procedure or, from remote, use <a href="#IDEN">SYSTem:IDENtify</a> to set the <a href="IEEE-488_Common_Commands.htm#IDN">*IDN?</a> to match the actual model number, update the firmware, and then use <a href="#IDEN">SYSTem:IDENtify</a> again to set the <a href="IEEE-488_Common_Commands.htm#IDN">*IDN?</a> response to the other model number. </li>
+            </ul>
+        </div>
+        <div>
+            <div>
+                <h2 style="font-size: 14px;"><a name="kanchor413"></a><a name="LAB"></a>SYSTem:LABel  "&lt;<i>string</i>&gt;"<br />SYSTem:LABel?</h2>
+                <p>Places a message in a large font on the bottom half of the instrument's front panel display.</p>
+                <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p>A quoted string of up to 40 characters. You can use letters (A-Z), numbers (0-9) and special characters such as @, %, *, and so forth.</p>
+                                <p>Default ""</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">"Battery DCI"</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                                <p colspan="2">Set the message to be displayed on the screen:<br /><br />SYST:LAB "Battery DCI"</p>
+                                <p colspan="2">To turn off the message, send the following  to change the label to a null string. This also removes the label area from the screen:</p>
+                                <p colspan="2"> SYST:LAB ""</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul>
+                    <li class="IndentTight">If you enter a string longer than 40 characters, the instrument truncates the string after the first 40 characters.</li>
+                    <li class="IndentTight">The font size changes based on the length of the message and whatever other information is shown on the display.</li>
+                    <li class="IndentTight">The value of this parameter is not affected by <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="#PRES">SYSTem:PRESet</a>.</li>
+                </ul>
+            </div>
+        </div>
+        <h2><a name="kanchor414"></a><a name="LFR"></a>SYSTem:LFRequency?</h2>
+        <p>Queries the line frequency.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1">
+            </col>
+            <col class="TableStyle-RegTable-Column-Column1">
+            </col>
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                        <p>(none)</p>
+                    </td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+50</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2">Query the line frequency:</p>
+                        <p>SYST:LFR?</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight">At power on, the DMM sets the line frequency to the actual line frequency of either 50 Hz or 60 Hz (400 Hz is detected as 50 Hz). </li>
+            <li class="IndentTight">The line frequency value is not affected by <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="#PRES">SYSTem:PRESet</a>.</li>
+        </ul>
+        <h2><a name="kanchor415"></a><a name="LOC"></a>SYSTem:LOCal</h2>
+        <p>Sets the instrument state to local, clears the Remote display annunciator, and enables front-panel operation.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1">
+            </col>
+            <col class="TableStyle-RegTable-Column-Column1">
+            </col>
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                        <p>(none)</p>
+                    </td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2">Set the instrument state to local:</p>
+                        <p>SYST:LOC</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor416"></a><a name="PRES"></a>SYSTem:PRESet</h2>
+            <p>This command is nearly identical to <a href="IEEE-488_Common_Commands.htm#RST">*RST</a>. The difference is that *RST resets the instrument for SCPI operation, and SYSTem:PRESet resets the instrument for front panel operation. As a result, *RST turns the histogram and statistics off, and SYSTem:PRESet turns them on.</p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor417"></a><a name="SEC-COUNt"></a>SYSTem:SECurity:COUNt?</h2>
+            <p>Returns the instrument's security count.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+22</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the instrument's security count:<br /><br />SYSTem:SECurity:COUNt?<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">The security count is incremented by 1 every time you perform an action, other than calibration, that requires the instrument to be unsecured. This includes enabling or disabling interfaces, sanitizing memory per the NISPOM standard (<a href="#SEC-IMM">SYSTem:SECurity:IMMediate</a>), updating firmware, changing the security code, or overriding the calibration security.</li>
+                <li class="IndentTight">The act of securing or unsecuring the instrument does not increment the counter.</li>
+                <li class="IndentTight">Be sure to read the security count upon receiving your instrument.</li>
+            </ul>
+            <h3>See Also</h3>
+            <p><a href="CALibration_Subsystem.htm#CALibration_COUNt">CALibration:COUNt?</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor418"></a><a name="SEC-IMM"></a>SYSTem:SECurity:IMMediate</h2>
+            <p>(Requires the SEC option.)&#160;Sanitizes all user-accessible instrument memory except for the calibration constants and reboots the instrument. This complies with requirements in chapter 8 of the National Industrial Security Program Operating Manual (NISPOM).</p>
+            <p>Requires the optional security feature. See <a href="../__A_Preliminary%20Information/02%20-%20Models%20and%20Options.htm">Models and Options</a> for details.</p>
+            <p>
+                <table style="border-spacing: 0px;left: 0px;top: 193px;mc-table-style: url('../NoteTable.css');border-left-style: Solid;border-left-width: 0px;border-left-color: #000000;border-right-style: Solid;border-right-width: 0px;border-right-color: #000000;border-top-style: Solid;border-top-width: 0px;border-top-color: #000000;border-bottom-style: Solid;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;caption-side: top;" cellspacing="0" class="TableStyle-NoteTable">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tr valign="top">
+                        <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: none;border-top-color: #000000;border-top-style: none;border-right-color: #000000;border-right-style: none;border-bottom-color: #000000;border-bottom-style: none;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                            <p>
+                                <img src="../_Graphics_/caution.gif" alt="Caution" />
+                            </p>
+                        </td>
+                        <td style="padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: none;border-right-color: #000000;border-right-style: none;border-bottom-color: #000000;border-bottom-style: none;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" class="TableStyle-NoteTable-BodyG-Column1-">
+                            <p>The <b>NISPOM Sanitize</b> softkey and the SYSTem:SECurity:IMMEdiate command are equivalent. They are for customers, such as military contractors, who must comply with NISPOM. </p>
+                            <p>This feature destroys all user-defined state information, measurement data, and user-defined I/O settings such as the IP address. This feature is not recommended for use in routine applications because of the possibility of unintended data loss.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 78px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Sanitize all user-accessible instrument memory:<br /><br />SYST:SEC:IMM</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight">Typically used before removing an instrument from a secure area.</li>
+                <li class="IndentTight">Initializes all instrument settings to their Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) values. It also destroys all user-defined state and preference information (see <a href="MMEMory_STATe_PREF.htm">MMEMory Subsystem - STATe and PREFerence Files</a>).</li>
+                <li class="IndentTight">Increments the <a href="#SEC-COUNt">security count</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor419"></a><a name="TEMP"></a>SYSTem:TEMPerature?</h2>
+            <p>Returns the instrument's internal temperature in °C.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 78px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.85000000E+01</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the instrument's internal temperature:<br /><br />SYST:TEMP?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight">The value returned is not affected by <a href="UNIT_TEMPerature.htm">UNIT:TEMPerature</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor420"></a><a name="TIME"></a>SYSTem:TIME &lt;<i>hour</i>&gt;, &lt;<i>minute</i>&gt;, &lt;<i>second</i>&gt;<br />SYSTem:TIME?</h2>
+            <p>Sets the time for the instrument's real-time clock. Use SYSTem:DATE to set the date.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">&lt;<i>hour</i>&gt; 0 to 23<br />&lt;<i>minute</i>&gt; 0 to 59<br />&lt;<i>second</i>&gt; 0 to 60</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">20,15,30.000</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set instrument time to 20:15:30 (8:15:30 PM):<br /><br />SYST:TIME 20,15,30</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight"><a name="kanchor421"></a><a name="kanchor422"></a>The real-time clock is used for Mass Memory (MMEMory) system file time stamps.</li>
+                <li class="IndentTight">The real-time clock is battery-backed and retains the date and time when power is off.</li>
+                <li class="IndentTight"><a name="kanchor423"></a><a name="kanchor424"></a><a name="kanchor425"></a><a name="kanchor426"></a>The date and time are not affected by <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="#PRES">SYSTem:PRESet</a>.</li>
+                <li class="IndentTight">The real-time clock does not adjust itself for time zone changes or daylight savings time. Be sure to set the date and time when you first receive your instrument.</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor427"></a><a name="UPTime"></a>SYSTem:UPTime?</h2>
+        <p>Returns the amount of time that the instrument has been running since the last power-on.</p>
+        <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+8,+2,+13,+50</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return time that the instrument has been running:<br /><br />SYST:UPT?</td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight">Typically used to verify that the instrument is warmed up sufficiently before calibration.</li>
+            <li class="IndentTight">The numbers returned indicate days, hours, minutes, and seconds, respectively.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor428"></a><a name="VERS"></a>SYSTem:VERSion?</h2>
+            <p>Returns the version of SCPI (Standard Commands for Programmable Instruments) that the instrument complies with. There is no front panel equivalent. See <a href="Scpi_introduction.htm">Introduction to the Introduction to the SCPI Language</a> for details.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">1994.0</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Return the SCPI version:<br /><br />SYST:VERS?</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor429"></a><a name="WMES"></a>SYSTem:WMESsage  "&lt;<i>string</i>&gt;"<br />SYSTem:WMESsage?</h2>
+            <p>Displays a power-on message.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>A quoted string of up to 40 characters. You can use letters (A-Z), numbers (0-9) and special characters such as @, %, *, and so forth.</p>
+                            <p>Default ""</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"RETURN&#160;TO&#160;JOE&#160;AT&#160;POST D6"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Display a power-on message:<br /><br />SYST:WMES "RETURN TO JOE AT POST D6"</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight">Specifying a null string ("") disables the power-on message. </li>
+                <li class="IndentTight">This setting is non-volatile; it is not changed by power cycling, a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), or an Instrument Preset (<a href="#PRES">SYSTem:PRESet</a>).</li>
+                <li class="IndentTight">This parameter is set to its default value when the instrument is shipped from the factory and after <a href="#SEC-IMM">SYSTem:SECurity:IMMediate</a>.</li>
+            </ul>
+        </div>
+        <script type="text/javascript" src="../SkinSupport/MadCapBodyEnd.js">
+        </script>
+    </body>
+</html>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|SENSe Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>[SENSe:]DATA2 Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor381"></a>[SENSe:]DATA2 Subsystem</h1>
+        <p>This subsystem retrieves or clears secondary measurements.</p>
+        <h3><a name="Data2q"></a><a name="kanchor382"></a>[SENSe:]DATA2?</h3>
+        <p>Retrieves the secondary measurement.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">See example below</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Configure DC voltage measurements using the 10 V range with 1 mV resolution. Select peak-to-peak as the secondary measurement. Make and retrieve measurements.  </p>
+                        <p>CONF:VOLT:DC 10,0.001<br />VOLT:DC:SEC "PTP"<br />READ?;DATA2?</p>
+                        <p>&#160;</p>
+                        <p>Typical Response: -1.84694879E-03;-2.23115575E-03,+5.98403324E-04,+2.82955909E-03 <i>(Data returned in this order: DCV reading, Min Peak, Max Peak, Peak-to-Peak)</i></p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">Returns 1, 2, or 3 values depending on the active secondary measurement.  For example, ratio returns 2 values (main and sense terminal measurements); PTPeak  returns 3 values (minimum peak, maximum peak, peak-to-peak).</li>
+            <li class="IndentTight" value="2">If there is currently no valid secondary measurement specified, the query returns "9.91000000E+37" (which is the IEEE488.2 definition of <i>Not a Number</i> - usually referred to as <i>NaN</i>).</li>
+            <li class="IndentTight" value="3">Configure secondary measurements using <a href="SENSe_CAPacitance_Subsystem.htm#CAPacitance-SECondary">[SENSe:]CAPacitance:SECondary</a>, <a href="SENSe_CURRent_Subsystem.htm#CURR-AC-Secondary">[SENSe:]CURRent:AC:SECondary</a>, <a href="SENSe_CURRent_Subsystem.htm#CURR-DC-Secondary">[SENSe:]CURRent:DC:SECondary</a>, <a href="SENSe_FREQuencyPERiod_Subsystem.htm#FREQ-Secondary">[SENSe:]FREQuency:SECondary</a>, <a href="SENSe_FREQuencyPERiod_Subsystem.htm#PER-Secondary">[SENSe:]PERiod:SECondary</a>, <a href="SENSe_TEMPerature_Subsystem.htm#TEMP-Secondary">[SENSe:]TEMPerature:SECondary</a>, <a href="SENSe_VOLTage_Subsystem.htm#VOLT-AC-Secondary">[SENSe:]VOLTage:AC:SECondary</a>, <a href="SENSe_VOLTage_Subsystem.htm#VOLT-DC-SECondary">[SENSe:]VOLTage:DC:SECondary</a>, or <a href="SENSe_VOLTage_Subsystem.htm#VOLT-DC-RATio-SECondary">[SENSe:]VOLTage[:DC]:RATio:SECondary</a>.</li>
+            <li class="IndentTight" value="4">Use <a href="READ_.htm">READ?</a> or <a href="INITiate_IMMediate.htm">INITiate</a> to start the measurement. Use <a href="#">DATA2?</a> to retrieve the secondary measurement.</li>
+            <li class="IndentTight" value="5">The instrument clears all measurements from reading memory when the measurement configuration changes, or when any of these commands are 
+		executed: <a href="INITiate_IMMediate.htm">INITiate</a>,     
+        <a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a>, <a href="READ_.htm">READ?</a>, <a href="IEEE-488_Common_Commands.htm#RST">*RST</a>, <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="ClearIMM"></a>[SENSe:]DATA2:CLEar[:IMMediate]</h2>
+            <p>Clears the latest result(s) of the secondary measurement. This is typically used to clear the accumulated history of the peak-to-peak function (<a href="SENSe_VOLTage_Subsystem.htm#VOLT-DC-SECondary">[SENSe:]VOLT:[DC:]SECondary "PTPeak"</a> or <a href="SENSe_CURRent_Subsystem.htm#CURR-DC-Secondary">[SENSe:]CURRent:[DC:]SECondary "PTPeak"</a>).</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">See example below</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Configure DC voltage measurements using the 10 V range with 1 mV resolution. Select peak-to-peak as the secondary measurement. Make and retrieve measurements.  </p>
+                            <p>CONF:VOLT:DC 10,0.001<br />VOLT:DC:SEC "PTP"<br />READ?;DATA2?</p>
+                            <p>Typical Response: -1.84694879E-03;-2.23115575E-03,+5.98403324E-04,+2.82955909E-03 <i>(Data returned in this order: DCV reading, Min Peak, Max Peak, Peak-to-Peak)</i></p>
+                            <p>Later, clear peak-to-peak secondary measurement data. Make and retrieve measurements.  </p>
+                            <p>DATA2:CLE<br />READ?;DATA2?</p>
+                            <p>Typical Response: +1.29177114E-03;+6.07221096E-04,+3.43677658E-03,+2.82955548E-03 <i>(Data returned in this order: DCV reading, Min Peak, Max Peak, Peak-to-Peak)</i></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </body>
+</html>

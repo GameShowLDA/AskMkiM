@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="UI.Components.Invoke.OpenFileButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components.Invoke"
+             xmlns:Components="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="20" d:DesignWidth="100"
+             MinWidth="50"
+             MaxWidth="300">
+    <Border x:Name="ButtonPage"
+            Background="{StaticResource ActiveBorderSolidColorBrush}"
+            CornerRadius="10,10,0,0"
+            Padding="5,0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="Header" 
+                       Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                       FontSize="15" 
+                       VerticalAlignment="Center" 
+                       HorizontalAlignment="Left"
+                       Margin="0,0,0,3"
+                       TextTrimming="CharacterEllipsis"
+                       TextWrapping="NoWrap"
+                       Text="Ваш текст тут..."/>
+
+            <Components:CloseButton Grid.Column="1" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"
+                               x:Name="CloseButton"/>
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="Measurement Tutorial" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Level Triggering</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor36"></a>Level Triggering</h1>
+        <p>Level triggering is available only on the 34465A/70A with the DIG option. Level triggering allows you to trigger measurements at some defined point on the input signal, such as when the signal crosses zero volts or when it reaches the midpoint of its positive or negative peak amplitude. For example, this graphic shows sampling beginning as the input signal crosses 0V with a positive slope:</p>
+        <p>
+            <img src="../_Graphics_/LevelTrig0vPosSlope_491x218.jpg" style="width: 491;height: 218;" />
+        </p>
+        <h2>About Level Trigger</h2>
+        <p>Level triggering is available for these measurement functions: </p>
+        <ul>
+            <li class="IndentTight" value="1">DC voltage and DC current</li>
+            <li class="IndentTight" value="2">AC voltage and AC current</li>
+            <li class="IndentTight" value="3">2-wire and 4-wire resistance with offset compensation off, and low power off </li>
+            <li class="IndentTight" value="4">Temperature, RTD or thermistor sensors only</li>
+            <li class="IndentTight" value="5">Frequency and period</li>
+        </ul>
+        <p>The level trigger is edge-sensitive. That is, the instrument must detect a <i>change</i> in the quantity being measured from one side of the level setting to the other side (direction controlled by Slope setting). For example, if the Slope is positive, then the quantity being measured must first reach a value <i>below</i> the set level before a trigger event can be detected.</p>
+        <p>Level trigger performance is not uniform. Its accuracy, latency, and sensitivity are dependent on other DMM features. These dependencies vary by measurement function as described below.</p>
+        <h3>DC voltage, DC current, and 2-wire resistance considerations</h3>
+        <p>These measurement functions can use a fast-response detector built into the hardware for fixed-range measurements. For lowest latency and highest sensitivity, use a fixed range when using level trigger. However, trigger level accuracy is reduced when the hardware detector is used.</p>
+        <p>To increase trigger level accuracy and reduce sensitivity (avoid false triggers due to noise), use autorange: </p>
+        <ul>
+            <li class="IndentTight" value="1">When auto-range is enabled, trigger level accuracy is increased, latency is increased, and sensitivity is decreased as the aperture or NPLC setting is increased. </li>
+            <li class="IndentTight" value="2">When auto-range is enabled, trigger level accuracy is increased, latency is increased, and sensitivity is decreased if autozero is enabled.</li>
+            <li class="IndentTight" value="3">When auto-range is enabled, range changes may be made while waiting for the trigger crossing which can cause additional latency/uncertainty.</li>
+        </ul>
+        <h3>4-wire resistance and temperature considerations</h3>
+        <ul>
+            <li class="IndentTight" value="1">Trigger level accuracy is increased, latency is increased, and sensitivity is decreased as aperture or NPLC is increased.</li>
+            <li class="IndentTight" value="2">Fixed range (only available for resistance) eliminates uncertainties (due to range change) in trigger latency.</li>
+        </ul>
+        <h3>AC voltage and AC current considerations</h3>
+        <ul>
+            <li class="IndentTight" value="1">Trigger latency is increased, and sensitivity is decreased as filter bandwidth is increased.</li>
+            <li class="IndentTight" value="2">Trigger latency can be controlled by trigger delay setting.</li>
+            <li class="IndentTight" value="3">Fixed range eliminates uncertainties (due to range change) in trigger latency.</li>
+            <li class="IndentTight" value="4">Autorange uncertainties become worse as filter bandwidth is increased.</li>
+        </ul>
+        <h3>Frequency and period considerations</h3>
+        <ul>
+            <li class="IndentTight" value="1">Trigger level accuracy is increased, latency is increased, and sensitivity is decreased as gate time is increased.</li>
+            <li class="IndentTight" value="2">Fixed voltage range eliminates uncertainties (due to range change) in trigger latency.</li>
+        </ul>
+        
+    </body>
+</html>

@@ -1,0 +1,209 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>MEASure:ARRay:VOLTage[:DC]?</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>MEASure:ARRay:VOLTage[:DC]?</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_meas_arr_volt">Syntax</a></font> 
+ | <a href="#Description_meas_arr_volt">Description</a> | <a href="#Parameters_meas_arr_volt">Parameters</a> 
+ | <a href="#Remarks_meas_arr_volt">Remarks</a> | <a href="#Return_meas_arr_volt">Return 
+ Format</a> | <a href="#Example_meas_arr_volt">Example</a></p>
+
+<h2><a name=Syntax_meas_arr_volt></a>Syntax</h2>
+
+<p class=CmdSyntax>MEASure:ARRay:VOLTage[:DC]? (@&lt;<span class=CmdItalics
+															style="font-style: normal;">chanlist</span><span 
+ class=CmdItalics>&gt;</span>)</p>
+
+<h2><a name=Description_meas_arr_volt></a>Description</h2>
+
+<p class=Indented1>This query initiates and triggers a measurement and 
+ returns an array containing the digitized output voltage in volts. The 
+ sampling rate is set by SENSe:SWEep:TINTerval. The position of the trigger 
+ relative to the beginning of the data buffer is determined by SENSe:SWEep:OFFSet:POINts. 
+ The number of points returned is set by SENSe:SWEep:POINts.</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp1">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif" x-maintain-ratio="TRUE" style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;" width="70" height="17" border="0"></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>This command is used only with models N6761A/N6762A, or models that 
+ have Option 054 (High Speed Test Extensions).</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_meas_arr_volt></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 79.267%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=79.267%>
+<col style="width: 15.966%;">
+<col style="width: 11.516%;">
+<col style="width: 42.141%;">
+<col style="width: 30.377%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 15.966%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=15.966%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:11.516%;" bgcolor="#E9E9E9" width="11.516%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:42.141%;" bgcolor="#E9E9E9" width="42.141%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:30.377%;" bgcolor="#E9E9E9" width="30.377%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp1">
+<td style="width: 15.966%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=15.966%>
+<p class=TableBody>&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span>&gt;</td>
+<td style="width:11.516%;" width="11.516%" class="hcp3">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:42.141%;" width="42.141%" class="hcp3">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:30.377%;" width="30.377%" class="hcp3">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Remarks_meas_arr_volt></a>Remarks</h2>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p><p>Use this command when the measurement does not 
+ need to be synchronized with any other event.</p></li>
+	
+	<li class=kadov-p><p>All previous data is erased from the measurement 
+ buffer when a &nbsp;MEASurement 
+ or an INITiate command is executed.</p></li>
+</ul>
+
+<h2><a name=Return_meas_arr_volt></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR3&gt; [,&lt;NR3&gt;]</p>
+
+<p class=Indented1>The reading is in the form <span class=CourierNew>+1.000000E+01</span>. 
+ Array values are separated by commas.</p>
+
+<h2><a name=Example_meas_arr_volt></a>Example</h2>
+
+<p class=Indented1>The following query returns the voltage measured on 
+ channel 1. </p>
+
+<p class=Shaded>MEAS:ARR:VOLT? (@1)</p>
+
+<h2>See Also</h2>
+
+<p class=IndentTight><a href="MEASure_ARRay_CURRent__DC__.htm">MEASure:ARRay:CURRent[:DC]?</a></p>
+
+<p class=IndentTight><a href="../SENSe_Subsystem/SENSe_SWEep_TINTerval.htm">SENSe:SWEep:TINTerval</a></p>
+
+<p class=IndentTight><a href="../SENSe_Subsystem/SENSe_SWEep_OFFset_POINts.htm">SENSe:SWEep:OFFset:POINts</a></p>
+
+<p class=IndentTight><a href="../SENSe_Subsystem/SENSe_SWEep_POINts.htm">SENSe:SWEep:POINts</a></p>
+
+</body>
+</html>

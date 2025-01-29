@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="CALCulate_Subsystems_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|CALCulate_Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>CALCulate:AVERage Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor178"></a>CALCulate:AVERage Subsystem</h1>
+        <p>This subsystem calculates measurement statistics.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#ALL">CALCulate:AVERage:ALL?</a>
+        </p>
+        <p><a href="#AVER">CALCulate:AVERage:AVERage?</a>
+        </p>
+        <p><a href="#CLE">CALCulate:AVERage:CLEar[:IMMediate]</a>
+        </p>
+        <p><a href="#COUN">CALCulate:AVERage:COUNt?</a>
+        </p>
+        <p><a href="#MAX">CALCulate:AVERage:MAXimum?</a>
+        </p>
+        <p><a href="#MIN">CALCulate:AVERage:MINimum?</a>
+        </p>
+        <p><a href="#PTP">CALCulate:AVERage:PTPeak?</a>
+        </p>
+        <p><a href="#SDEV">CALCulate:AVERage:SDEViation?</a>
+        </p>
+        <p><a href="#STAT">CALCulate:AVERage[:STATe]<br /></a>
+        </p>
+        <br />
+        <div>
+            <div>
+                <h2 style="font-size: 14px;"><a name="kanchor179"></a><a name="ALL"></a>CALCulate:AVERage:ALL?</h2>
+                <p style="font-size: 14px;">
+                    <br /><a name="kanchor180"></a><a name="AVER"></a>CALCulate:AVERage:AVERage?</p>
+                <p style="font-size: 14px;">
+                    <br /><a name="kanchor181"></a><a name="COUN"></a>CALCulate:AVERage:COUNt?</p>
+                <p style="font-size: 14px;">
+                    <br /><a name="kanchor182"></a><a name="MAX"></a>CALCulate:AVERage:MAXimum?</p>
+                <p style="font-size: 14px;">
+                    <br /><a name="kanchor183"></a><a name="MIN"></a>CALCulate:AVERage:MINimum?</p>
+                <p style="font-size: 14px;">
+                    <br /><a name="kanchor184"></a><a name="PTP"></a>CALCulate:AVERage:PTPeak?</p>
+                <p style="font-size: 14px;">
+                    <br /><a name="kanchor185"></a><a name="SDEV"></a>CALCulate:AVERage:SDEViation?</p>
+                <p>The CALCulate:AVERage:ALL? query returns the arithmetic mean (average), standard deviation, minimum value and maximum value of all measurements taken since the statistics were last cleared. The count and peak-to-peak statistics are not returned by CALCulate:AVERage:ALL?.</p>
+                <p>The other six queries listed above return individual values.</p>
+                <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">(see below)</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                                <p>Return the statistics of 100 frequency measurements:<br /><br />CONF:FREQ 1.0E3,.001 <br />SAMP:COUN 100 <br />CALC:AVER:STAT ON <br />INIT <br />*WAI <br />CALC:AVER:ALL? <br /><br />Typical Response: +1.00520000E+03,+1.00512000E+03,+1.00527000E+03,+4.13500000E-01</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul>
+                    <li class="IndentTight" value="1">Statistics are cleared when the measurement function changes or when any of these commands is executed:<br /><br /><a href="#STAT">CALCulate:AVERage:STATe ON</a><br /><br /><a href="#CLE">CALCulate:AVERage:CLEar</a><br /><br /><a href="INITiate_IMMediate.htm">INITiate</a><br /><br /><a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a><br /><br /><a href="READ_.htm">READ?</a><br /><br /><a href="IEEE-488_Common_Commands.htm#RST">*RST</a><br /><br /><a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a></li>
+                    <li class="IndentTight" value="2">All values are returned in the form +1.23450000E+01.</li>
+                    <li class="IndentTight" value="3">When dB or dBm scaling is used, the CALC:AVER:AVER and CALC:AVER:SDEV queries return +9.91000000E+37 (not a number).</li>
+                </ul>
+            </div>
+            <div>
+                <div>
+                    <h2 style="font-size: 14px;"><a name="kanchor186"></a><a name="CLE"></a>CALCulate:AVERage:CLEar[:IMMediate]</h2>
+                    <p>Clears all computed statistics: minimum, maximum, average, peak-to-peak, count and standard deviation. </p>
+                    <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                        <col class="TableStyle-RegTable-Column-Column1" />
+                        <col class="TableStyle-RegTable-Column-Column1" />
+                        <thead>
+                            <tr class="TableStyle-RegTable-Head-Header1">
+                                <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                                <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="TableStyle-RegTable-Body-Body1">
+                                <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                                <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                            </tr>
+                            <tr class="TableStyle-RegTable-Body-Body1">
+                                <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Clear the stored statistical data:<br /><br />CALC:AVER:CLE</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ul>
+                        <li class="IndentTight" value="1"> Does not clear measurements in reading memory. </li>
+                        <li class="IndentTight" value="2">Statistics are cleared when the measurement function changes or when any of these commands is executed:<br /><br /><a href="#STAT">CALCulate:AVERage:STATe ON</a><br /><br /><a href="#CLE">CALCulate:AVERage:CLEar</a><br /><br /><a href="INITiate_IMMediate.htm">INITiate</a><br /><br /><a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a><br /><br /><a href="READ_.htm">READ?</a><br /><br /><a href="IEEE-488_Common_Commands.htm#RST">*RST</a><br /><br /><a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a></li>
+                        <li class="IndentTight" value="3">To clear statistics, limits, histogram data, and measurement data, use <a href="CALC_CLE_IMM.htm">CALCulate:CLEar[:IMMediate]</a>.</li>
+                    </ul>
+                </div>
+                <h2 style="font-size: 14px;"><a name="kanchor187"></a><a name="STAT"></a>CALCulate:AVERage[:STATe] {ON|1|OFF|0}<br />CALCulate:AVERage[:STATe]?</h2>
+                <p>Enables or disables statistics computation.</p>
+                <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                                <p colspan="2">Return the statistics of 100 frequency measurements:<br /><br />CONF:FREQ 1.0E3,.001 <br />SAMP:COUN 100 <br />CALC:AVER:STAT ON <br />INIT <br />*WAI <br />CALC:AVER:ALL? <br /><br /></p>
+                                <p colspan="2">Typical Response: +1.00520000E+03,+1.00512000E+03,+1.00527000E+03,+4.13500000E-01</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul>
+                    <li class="IndentTight" value="1">Statistics are cleared when the measurement function changes or when any of these commands is executed:<br /><br /><a href="#STAT">CALCulate:AVERage:STATe ON</a><br /><br /><a href="#CLE">CALCulate:AVERage:CLEar</a><br /><br /><a href="INITiate_IMMediate.htm">INITiate</a><br /><br /><a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a><br /><br /><a href="READ_.htm">READ?</a><br /><br /><a href="IEEE-488_Common_Commands.htm#RST">*RST</a><br /><br /><a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a></li>
+                    <li class="IndentTight" value="2">The instrument turns this setting OFF when the measurement function is changed or after <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+                </ul>
+            </div>
+        </div>
+        
+    </body>
+</html>

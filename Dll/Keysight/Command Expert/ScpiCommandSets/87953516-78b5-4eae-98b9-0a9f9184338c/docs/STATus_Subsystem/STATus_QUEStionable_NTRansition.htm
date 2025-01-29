@@ -1,0 +1,418 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>STATus:QUEStionable:NTRansition</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp4 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp5 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+ul.hcp6 { list-style:disc; }
+td.hcp7 { padding-right:10px; padding-left:10px; border-left-color:#000000; border-left-width:1px; border-left-style:Solid; border-right-style:None; border-bottom-color:#000000; border-bottom-width:1px; border-bottom-style:Solid; }
+-->
+</style>
+</head>
+<body>
+<h1>STATus:QUEStionable:NTRansition</h1>
+
+<p class=BarLink><font id=font4><a href="#Syntax_stat_ques_ntr"
+									target=_self>Syntax</a></font> | <span 
+ class=MouseOverLink
+	id=span1><font id=font5><a href="#Description_stat_ques_ntr">Description</a></font> 
+ | </span><span class=MouseOverLink
+				id=span3><font id=font6><a href="#Parameters_stat_ques_ntr">Parameters</a></font> 
+ | </span><span class=MouseOverLink
+				id=span4><font id=font7><a href="#Remarks_stat_ques_ntr">Remarks</a></font> 
+ | </span><span class=MouseOverLink
+				id=span8><font id=font8><a href="#Return_stat_ques_ntr">Return 
+ Format</a></font></span><span class=MouseOverLink
+								id=span6> | <font id=font9><a href="#Example_stat_ques_ntr">Examples</a></font></span></p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Syntax_stat_ques_ntr></a>Syntax</span></h2>
+
+<p class=CmdSyntax>STATus:QUEStionable:NTRansition &lt;<span class=CmdItalics
+															style="font-style: normal;">value</span>&gt;, 
+ (@&lt;chanlist&gt;)</p>
+
+<p class=CmdSyntax>STATus:QUEStionable:NTRansition? (@&lt;chanlist&gt;)</p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Description_stat_ques_ntr></a>Description</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span5>T</span>hese command sets and reads the 
+ value of the Questionable NTR (Negative-Transition) &nbsp;register. 
+ This register serves as a polarity filter between the Questionable Condition 
+ and Questionable Event registers.</p>
+
+<p class=Indented1>When a bit in the Questionable NTR register is set to 
+ 1, then a 1-to-0 transition of the corresponding bit in the Questionable 
+ Condition register causes that bit in the Questionable Event register 
+ to be set.</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp1">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>For more information on the SCPI Status System, see the <a href="Status_Subsystem_Introduction.htm#Status_Diagram">Status 
+ System diagram</a>.</td></tr>
+</table>
+
+<h2 class=Indented1
+	style="margin-bottom: 14pt;"><span class=MouseOverLink
+										id=span9><a name=Parameters_stat_ques_ntr></a>Parameters</span></h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 87.549%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=87.549%>
+<col style="width: 14.209%;">
+<col style="width: 10.931%;">
+<col style="width: 39.932%;">
+<col style="width: 29.913%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width:14.209%;" bgcolor="#E9E9E9" width="14.209%" class="hcp2">
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:10.931%;" bgcolor="#E9E9E9" width="10.931%" class="hcp3">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:39.932%;" bgcolor="#E9E9E9" width="39.932%" class="hcp3">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:29.913%;" bgcolor="#E9E9E9" width="29.913%" class="hcp3">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:14.209%;" width="14.209%" class="hcp4">
+<p class=TableBody>&lt;value&gt;</td>
+<td style="width:10.931%;" width="10.931%" class="hcp5">
+<p class=TableBody>NR1</td>
+<td rowspan="1" colspan="1" style="width:39.932%;" width="39.932%" class="hcp5">
+<p class=TableBody>A decimal value which corresponds to the binary-weighted 
+ sum of the bits in the register (see table below). </td>
+<td rowspan="1" colspan="1" style="width:29.913%;" width="29.913%" class="hcp5">
+<p class=TableBody>Preset = 0</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp1">
+<td style="width:14.209%;" width="14.209%" class="hcp4">
+<p class=TableBody>&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span>&gt;</td>
+<td style="width:10.931%;" width="10.931%" class="hcp5">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:39.932%;" width="39.932%" class="hcp5">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3. </td>
+<td rowspan="1" colspan="1" style="width:29.913%;" width="29.913%" class="hcp5">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span11>F</span>or example, to enable bit 3 (decimal 
+ value = 8) and bit 5 (decimal value = 32), the corresponding decimal value 
+ would be 40 (8 + 32).</p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Remarks_stat_ques_ntr></a>R</span>emarks</h2>
+
+<ul type="disc" class="hcp6">
+	
+	<li class=kadov-p><p>The following table lists the bit definitions 
+ for the Questionable Status registers. </p></li>
+</ul>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 30pt;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0>
+<col style="width: 43px;">
+<col style="width: 73px;">
+<col style="width: 62px;">
+<col style="width: 316px;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td rowspan="1" colspan="2" style="width:130px;" bgcolor="#E9E9E9" width="130px" class="hcp2">
+<p class=TableHead>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bit 
+ Number</td>
+<td rowspan="1" colspan="1" style="width:62px;" bgcolor="#E9E9E9" width="62px" class="hcp3">
+<p class=TableHead
+	style="text-align: center;"
+	align=center>Decimal Value</td>
+<td rowspan="1" colspan="1" style="width:316px;" bgcolor="#E9E9E9" width="316px" class="hcp3">
+<p class=TableHead>Definition</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>0</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>OV</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>1</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is disabled by the over-voltage protection.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>1</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>OC</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>2</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is disabled by the over-current protection.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>2</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>PF</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>4</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is disabled by the power-fail - which may 
+ be caused by a low-line or brownout condition on the AC line.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>3</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>CP+</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>8</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is limited (or disabled on some models) by 
+ the positive power limit.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>4</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>OT</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>16</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The over-temperature protection has tripped.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>5</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>CP-</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>32</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is limited by the negative power limit.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>6-8</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>Not Used</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>Not Used</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>0 is returned.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>9</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>INH</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>512</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is inhibited by an external signal.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>10</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>UNR</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>1024</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output is unregulated.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>11</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>PROT</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>2048</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>The output has been disabled because it is coupled to 
+ a protection condition that occurred on another channel.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:43px;" width="43px" class="hcp7">
+<p class=TableBody
+	style="text-align: center; font-weight: bold;"
+	align=center>12-15</td>
+<td colspan="1" rowspan="1" style="width:73px;" width="73px" class="hcp5">
+<p class=TableBody>Not Used</td>
+<td colspan="1" rowspan="1" style="width:62px;" width="62px" class="hcp5">
+<p class=TableBody
+	style="text-align: center;"
+	align=center>Not Used</td>
+<td colspan="1" rowspan="1" style="width:316px;" width="316px" class="hcp5">
+<p class=TableBody>0 is returned.</td></tr>
+</table>
+
+<ul type="disc" class="hcp6">
+	
+	<li class=kadov-p><p>If the same bits in both NTR and PTR registers 
+ are set to 1, then any transition of that bit at the Questionable Condition 
+ register sets the corresponding bit in the Questionable Event register.</p></li>
+	
+	<li class=kadov-p><p>If the same bits in both NTR and PTR registers 
+ are set to 0, then no transition of that bit at the Questionable Condition 
+ register can set the corresponding bit in the Questionable Event register. 
+ </p></li>
+	
+	<li class=kadov-p><p>The <a href="STATus_PRESet.htm">STATus:PRESet</a> 
+ command will set all bits in the NTR register to 0. &nbsp;</p></li>
+</ul>
+
+<h2><span class=MouseOverLink
+			id=span7><a name=Return_stat_ques_ntr></a>Return Format</span></h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The value returned is the binary-weighted sum of all 
+ bits set in the register. </p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Example_stat_ques_ntr></a>Examples</span></h2>
+
+<p class=Indented1>The following command enables bits 0 and 1 (decimal 
+ value = 3) in the NTR register.</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">STAT:QUES:NTR 3,(@1)</p>
+
+<p class=Indented1>The following query returns which bits are enabled in 
+ the register. &nbsp;</p>
+
+<p class=Shaded>STAT:QUES:NTR? (@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;+3</span></p>
+
+<h2><span class=MouseOverLink
+			id=span5>See Also</span></h2>
+
+<p class=IndentTight><a href="STATus_QUEStionable_PTRansition.htm">STATus:QUEStionable:PTRansition</a></p>
+
+<p class=IndentTight><a href="STATus_PRESet.htm">STATus:PRESet</a></p>
+
+</body>
+</html>

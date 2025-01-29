@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="CALCulate_Subsystems_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|CALCulate_Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title> CALCulate:LIMit Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor152"></a> CALCulate:LIMit Subsystem</h1>
+        <p>This subsystem specifies measurements and indicates when a limit has been exceeded.</p>
+        <h2 style="font-size: 14px;"><a name="Limit_Example"></a>Example</h2>
+        <p>The following example enables limit testing of 100 DC voltage measurements and indicates whether measurements were outside the range of 3.2 to 3.4 V. Measurements above 3.4 V  set bit 12 (Upper Limit Failed) of the Questionable Status Register; measurements below 3.2 V set bit 11 (Lower Limit Failed).</p>
+        <p class="Shaded">*CLS<br />STAT:PRES<br />CONF:VOLT 10,.001<br />SAMP:COUN 100<br />CALC:LIM:LOW 3.2<br />CALC:LIM:UPP 3.4<br />CALC:LIM:STAT ON<br />INIT<br />*WAI<br />STAT:QUES?</p>
+        <p>Typical Response: +4096 (at least one measurement was above the upper limit)</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p class="IndentTight"><a href="#CALCulate_LIMit_CLEar">CALCulate:LIMit:CLEar[:IMMediate]</a>
+        </p>
+        <p class="IndentTight"><a href="#LIMit-LOWer-UPPer">CALCulate:LIMit:{LOWer|UPPer}[:DATA]<br /></a>
+        </p>
+        <p class="IndentTight"><a href="#LIMit-STATe">CALCulate:LIMit[:STATe]<br /></a>
+        </p>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor153"></a><a name="CALCulate_LIMit_CLEar"></a>CALCulate:LIMit:CLEar[:IMMediate]</h2>
+            <p>Clears front panel indications of limits being exceeded and clears bit 11 ("Lower Limit Failed") and bit 12 ("Upper Limit Failed") in the Condition Register of the Questionable Data Register event register group. The corresponding event register bits are unaffected.</p>
+            <p>A condition register continuously monitors the state of the instrument. Condition register bits are updated in real time; they are neither latched nor buffered.</p>
+            <p>An event register is a read-only register that latches events from the condition register. While an event bit is set, subsequent events corresponding to that bit are ignored.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Clear the limit test results:<br /><br />CALC:LIM:CLE</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"> Does not clear measurements in reading memory. </li>
+                <li class="IndentTight" value="2">The instrument clears front panel indications of limits being exceeded and clears bits 11 and 12 in the Questionable Data Register when the measurement function changes, or when any of the following commands is executed:<br /><br /><a href="#LIMit-STATe">CALCulate:LIMit:STATe ON</a><br /><br /><a href="INITiate_IMMediate.htm">INITiate</a><br /><br /><a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a><br /><br /><a href="READ_.htm">READ?</a><br /><br /><a href="#CALCulate_LIMit_CLEar">CALCulate:LIMit:CLEar</a><br /><br /><a href="IEEE-488_Common_Commands.htm#RST">*RST</a><br /><br /><a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a></li>
+                <li class="IndentTight" value="3">To clear statistics, limits, histogram data, and measurement data, use <a href="CALC_CLE_IMM.htm">CALCulate:CLEar[:IMMediate]</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor154"></a><a name="LIMit-LOWer-UPPer"></a>CALCulate:LIMit:{LOWer|UPPer}[:DATA]  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />CALCulate:LIMit:{LOWer|UPPer}[:DATA]?  [{MIN|MAX|DEF}]</h2>
+            <p>Sets an upper or lower limit.<br /></p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">-1.0E+15 to -1.0E-15,<br /> or <br />0.0 (default)<br />or<br />+1.0E-15 to 1.0E+15</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E+00</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#Limit_Example">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">You can assign a lower limit, an upper limit or both. Do not set the lower limit above the upper limit. </li>
+                <li class="IndentTight" value="2"><i>Limit crossing</i>: If a measurement is less than the specified lower limit, bit 11 ("Lower Limit Failed") is set in the Questionable Data Condition Register. A measurement greater than the specified upper limit sets bit 12 ("Upper Limit Failed"). See <a href="STATus_Subsystem.htm">STATus Subsystem Introduction</a> for further information.</li>
+                <li class="IndentTight" value="3"><a href="CONFigure_Subsystem.htm">CONFigure</a> resets both limits to 0.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor155"></a><a name="LIMit-STATe"></a>CALCulate:LIMit[:STATe] {ON|1|OFF|0}<br />CALCulate:LIMit[:STATe]?</h2>
+            <p>Enables or disables limit testing.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">See <a href="#Limit_Example">Example</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The instrument clears front panel indications of limits being exceeded and clears bits 11 and 12 in the Questionable Data Register when the measurement function changes, or when any of the following commands is executed:<br /><br /><a href="#LIMit-STATe">CALCulate:LIMit:STATe ON</a><br /><br /><a href="INITiate_IMMediate.htm">INITiate</a><br /><br /><a href="MEASure_Subsystem.htm">MEASure:&lt;<i>function</i>&gt;?</a><br /><br /><a href="READ_.htm">READ?</a><br /><br /><a href="#CALCulate_LIMit_CLEar">CALCulate:LIMit:CLEar</a><br /><br /><a href="IEEE-488_Common_Commands.htm#RST">*RST</a><br /><br /><a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a></li>
+                <li class="IndentTight" value="2">The instrument turns this setting OFF when the measurement function is changed or after <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

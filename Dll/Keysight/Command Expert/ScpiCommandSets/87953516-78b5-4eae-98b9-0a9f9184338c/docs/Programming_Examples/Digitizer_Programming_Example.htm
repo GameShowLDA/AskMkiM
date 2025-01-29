@@ -1,0 +1,425 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>Digitizer Example</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css">
+</head>
+<body>
+<h1>Digitizer Programming Example</h1>
+
+<p>This program uses the voltage in step mode and also demonstrates how 
+ to set up and use the digitizer. When done, the program checks for instrument 
+ error and gives a message if there is an error.</p>
+
+<p>You have a royalty-free right to use, modify, reproduce and distribute 
+ this example program (and/or any modified version) in any way you find 
+ useful, provided you agree that Agilent Technologies has no warranty, 
+ obligations, or liability for any example programs.</p>
+
+<p>This program is written in Microsoft Visual Basic 6.0 using the VISA 
+ COM IO library. The VISA COM library must be downloaded from the Automation-Ready 
+ CD-ROM to use this program. For information about using VISA COM in another 
+ Visual Basic project, refer to “Programming Your Instruments” in the USB/LAN/GPIB 
+ Interfaces Connectivity Guide, also included on the Automation-Ready CD-ROM.</p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>Sub 
+ digitizer_programming_example()</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ IDN As String</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ GPIBaddress As String</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ ErrString As String</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ channel As String</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ measPoints As Long</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ measOffset As Long</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ VoltSetting As Double</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ finalVoltage As Double</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ timeInterval As Double</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ VoltPoints() As Variant</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ i As Long</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Const 
+ WTG_MEAS = 8</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Const 
+ WTG_TRANS = 16</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;'These 
+ variables are necessary to initialize the VISA COM.</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ ioMgr As AgilentRMLib.SRMCls</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Dim 
+ Instrument As VisaComLib.FormattedIO488</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ The following command line provides the program with the VISA name of 
+ the</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ interface that it will communicate with. It is currently set to use GPIB.</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;GPIBaddress 
+ = &quot;GPIB0::5::INSTR&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Use the following line instead for LAN communication</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ TCPIPaddress=&quot;TCPIP0::141.25.36.214&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Use the following line instead for USB communication</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ USBaddress = &quot;USB0::2391::1799::US00000002&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Initialize the VISA COM communication</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Set 
+ ioMgr = New AgilentRMLib.SRMCls</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Set 
+ Instrument = New VisaComLib.FormattedIO488</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;Set 
+ Instrument.IO = ioMgr.Open(GPIBaddress)</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ This controls the number of points the measurement system measures</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;measPoints 
+ = 100</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ This controls the number of points to offset the measurement (positive 
+ for</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ forward, negative for reverse)</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;measOffset 
+ = 0</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ This sets the time between points</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;timeInterval 
+ = 0.0025</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ This controls the voltage</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;VoltSetting 
+ = 5</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ This is the final voltage that will be triggered</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;finalVoltage 
+ = 10</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;' 
+ This variable can be changed to program any channel in the mainframe</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;channel 
+ = &quot;(@1)&quot; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ channel 1</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;With 
+ Instrument</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Send a power reset to the instrument</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;*RST&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Query the instrument for the IDN string</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;*IDN?&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDN 
+ = .ReadString</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Put the Voltage into step mode which causes it to transition from one</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ voltage to another upon receiving a trigger</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;VOLT:MODE STEP,&quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Set the voltage</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;VOLT&quot; &amp; Str$(VoltSetting) &amp; &quot;,&quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Go to final value</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;VOLT:TRIG&quot; &amp; Str$(finalVoltage) &amp; &quot;,&quot; &amp; 
+ channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Turn the output on</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;OUTP ON,&quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Wait for output to turn on.</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;*OPC?&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.ReadString</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Set the bus as the transient trigger source</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;TRIG:TRAN:SOUR BUS,&quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Set the number of points for the measurement system to use as an offset</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;SENS:SWE:OFFS:POIN&quot; &amp; Str$(measOffset) &amp; &quot;,&quot; 
+ &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Set the number of points that the measurement system uses</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;SENS:SWE:POIN&quot; &amp; Str$(measPoints) &amp; &quot;,&quot; &amp; 
+ channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Set the time interval between points</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;SENS:SWE:TINT&quot; &amp; Str$(timeInterval) &amp; &quot;,&quot; 
+ &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Set the measurement trigger source</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;TRIG:ACQ:SOUR BUS,&quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Initiate the measurement trigger system</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;INIT:ACQ &quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Initiate the transient trigger system</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;INIT:TRAN &quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Wait for INITiate commands to complete</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;STAT:OPER:COND? &quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status 
+ = .ReadString</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loop 
+ Until (Status And (WTG_MEAS + WTG_TRANS)) = (WTG_MEAS + WTG_TRANS)</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Trigger the unit</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;*TRG&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Read back the voltage points</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;FETC:ARR:VOLT? &quot; &amp; channel</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VoltPoints 
+ = .ReadList</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Print the first 10 voltage points</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For 
+ i = 0 To 9</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Debug.Print 
+ i, VoltPoints(i)</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next 
+ i</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ Check instrument for any errors</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WriteString 
+ &quot;Syst:err?&quot;</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ErrString 
+ = .ReadString</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+ give message if there is an error</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If 
+ Val(ErrString) Then</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MsgBox 
+ &quot;Error in instrument!&quot; &amp; vbCrLf &amp; ErrString</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End 
+ If</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>&nbsp;&nbsp;&nbsp;&nbsp;End 
+ With</span></p>
+
+<p class=CmdSyntaxQRG
+	style="margin-left: 0px; font-size: 12px;"><span class=CourierNew>End 
+ Sub</span></p>
+
+<p class=CmdSyntax
+	style="margin-left: 0px;">&nbsp;</p>
+
+</body>
+</html>

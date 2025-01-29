@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Calibration Adjustment Procedures|Calibration Overview" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Security Code Override</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor597"></a>Security Code Override</h1>
+        <p>The instrument security code is set to AT3446XA at the factory. If it has been changed and you no longer remember the code, you can reset the code back to its factory default value by using one of the two following procedures.</p>
+        <h2>Which Procedure Should I Use?</h2>
+        <p>From the instrument front panel, press <b>[Shift]</b> &gt; <b>[Help]</b> &gt; <b>About</b> to view the instrument firmware revision. An example display is:</p>
+        <p>
+            <img src="../_Graphics_/HelpFirmware.png" />
+        </p>
+        <p> The last two digits of the firmware revision indicate the front panel PC board revision and which of the two procedures you should use. If the firmware revision ends with 02 or greater, use <a href="#ProcedureA">Procedure A</a>. If the firmware revision ends with 01, use <a href="#ProcedureB">Procedure B</a>.</p>
+        <p>
+            <img src="../_Graphics_/phone_58x40.png" style="width: 58;height: 40;" alt="Telephone image" />
+        </p>
+        <p style="font-family: Verdana;font-size: 12px;">If you encounter problems, contact Keysight Technologies for technical support.</p>
+        <ul>
+            <p style="font-family: Verdana;font-size: 12px;">In the United States: (800) 829-4444</p>
+            <p style="font-family: Verdana;font-size: 12px;">In Europe:	31 20 547 2111</p>
+            <p style="font-family: Verdana;font-size: 12px;">In Japan:	0120-421-345</p>
+        </ul>
+        <p style="font-family: Verdana;font-size: 12px;">Use <a href="http://www.keysight.com/find/assist">www.keysight.com/find/assist</a> to contact Keysight worldwide, or contact your Keysight Technologies representative.</p>
+        <h2 style="page-break-before: always;"><a name="ProcedureA"></a>Procedure A: For Firmware Revision Ending in 02, or Greater</h2>
+        <table style="width: 100%;border-left-width: 0px;border-left-style: Solid;border-top-width: 0px;border-top-style: Solid;border-right-width: 0px;border-right-style: Solid;border-bottom-width: 0px;border-bottom-style: Solid;border-spacing: 0px;border-spacing: 0px;" cellspacing="0" width="100%">
+            <col style="width: 11.684%;" />
+            <col style="width: 88.316%;" />
+            <tr valign="top">
+                <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%">
+                    <p>
+                        <img src="../_Graphics_/warning.gif" alt="Warning" />
+                    </p>
+                </td>
+                <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%">
+                    <p width="88.316%" style="font-weight: bold;">This procedure should be performed by qualified service personnel only.Turn off the power and remove all measurement leads and other cables, including the power cord, from the instrument before continuing.</p>
+                </td>
+            </tr>
+        </table>
+        <ol>
+            <li class="IndentTight" value="1">Follow the <a href="07%20Disassembly.htm">disassembly procedure</a> to disassemble the instrument.</li>
+            <li class="IndentTight" value="2">Locate connector J102 on the front panel board. Short pin A1 to B1 as shown by the orange line below.<br /><br /><img src="../_Graphics_/FpBoardRev02Jumper.png" /><br /><br /><br /></li>
+            <li class="IndentTight" value="3">Reassemble the instrument, apply power and turn it on; the instrument will generate an error and beep (this is normal). Wait 30 to 40 seconds for the instrument to power up completely.</li>
+            <li class="IndentTight" value="4">Reset the security code to the factory default:<ol style="list-style-type: lower-alpha;"><li class="IndentTight" value="1">Press <b>[Shift] </b>&gt;<b> [Utility] </b>&gt;<b> Test / Admin </b>&gt;<b> Security &gt; New Code</b>.</li><li class="IndentTight" value="2">Enter AT3446XA as the new passcode.</li><li class="IndentTight" value="3">Press <b>Done</b>.</li><li class="IndentTight" value="4">Verify the new code and press <b>Yes</b> to confirm the change.</li></ol></li>
+            <li class="IndentTight" value="5">Remove power, disassemble the instrument, and remove the short. Then reassemble the instrument to complete the security code reset procedure.</li>
+        </ol>
+        <h2 style="page-break-before: always;"><a name="ProcedureB"></a>Procedure B: For Firmware Revision Ending in 01</h2>
+        <table style="width: 100%;border-left-width: 0px;border-left-style: Solid;border-top-width: 0px;border-top-style: Solid;border-right-width: 0px;border-right-style: Solid;border-bottom-width: 0px;border-bottom-style: Solid;border-spacing: 0px;border-spacing: 0px;" cellspacing="0" width="100%">
+            <col style="width: 11.684%;" />
+            <col style="width: 88.316%;" />
+            <tr valign="top">
+                <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%">
+                    <p>
+                        <img src="../_Graphics_/warning.gif" alt="Warning" />
+                    </p>
+                </td>
+                <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%">
+                    <p width="88.316%" style="font-weight: bold;">This procedure should be performed by qualified service personnel only.Turn off the power and remove all measurement leads and other cables, including the power cord, from the instrument before continuing.</p>
+                </td>
+            </tr>
+        </table>
+        <ol>
+            <li class="IndentTight" value="1">Follow the <a href="07%20Disassembly.htm">disassembly procedure</a> to disassemble the instrument.</li>
+            <li class="IndentTight" value="2">Locate connector J102 on the front panel board. Short pin A1 to A6 or A7 as shown by the orange lines below. You do not need to short both pins to A1, just one of them.<br /><br /><img src="../_Graphics_/FpBoardRev01Jumper.jpg" /><br /><br /><br /></li>
+            <li class="IndentTight" value="3">Reassemble the instrument, apply power and turn it on; the instrument will generate an error and beep (this is normal). Wait 30 to 40 seconds for the instrument to power up completely.</li>
+            <li class="IndentTight" value="4">Reset the security code to the factory default:<ol style="list-style-type: lower-alpha;"><li class="IndentTight" value="1">Press <b>[Shift] </b>&gt;<b> [Utility] </b>&gt;<b> Test / Admin </b>&gt;<b> Security &gt; New Code</b>.</li><li class="IndentTight" value="2">Enter AT3446XA as the new passcode.</li><li class="IndentTight" value="3">Press <b>Done</b>.</li><li class="IndentTight" value="4">Verify the new code and press <b>Yes</b> to confirm the change.</li></ol></li>
+            <li class="IndentTight" value="5">Remove power, disassemble the instrument, and remove the short. Then reassemble the instrument to complete the security code reset procedure.</li>
+        </ol>
+        
+    </body>
+</html>

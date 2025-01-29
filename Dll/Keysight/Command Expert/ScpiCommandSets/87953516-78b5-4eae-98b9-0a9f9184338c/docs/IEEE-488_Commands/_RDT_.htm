@@ -1,0 +1,102 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>*RDT?</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css">
+</head>
+<body>
+<h1>*RDT?</h1>
+
+<p class=BarLink><font id=font4><a href="#Syntax_rdt"
+									target=_self>Syntax</a></font> | <span 
+ class=MouseOverLink
+	id=span2><font id=font5><a href="#Description_rdt">Description</a></font> 
+ | </span><span class=MouseOverLink
+				id=span2
+				style="color: #808080;">Parameters</span><span class=MouseOverLink
+	id=span2> | </span><span class=MouseOverLink
+							id=span2
+							style="color: #808080;">Remarks</span><span 
+ class=MouseOverLink
+	id=span2> | </span><span class=MouseOverLink
+							id=span8><font id=font8><a href="#Return_rdt">Return 
+ Format</a></font></span><span class=MouseOverLink
+								id=span5> | <font id=font9><a href="#Example_rdt">Example</a></font></span></p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Syntax_rdt></a>Syntax</span></h2>
+
+<p class=CmdSyntax>*RDT?</p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Description_rdt></a>Description</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span5>This query returns a description of all 
+ the power modules (channels) installed in a mainframe. Semicolons separate 
+ multiple channel descriptions. </span>&nbsp;</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 79.666%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=79.666%>
+<col style="width: 39.409%;">
+<col style="width: 60.591%;">
+
+<tr style="x-cell-content-align: top;"
+	valign=top>
+<td style="width: 39.409%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: None;
+			border-right-style: None;
+			border-left-style: None;
+			border-top-style: None;"
+	width=39.409%>
+<p style="font-weight: bold;">CHAN&lt;c&gt;:description</td>
+<td style="width: 60.591%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: None;
+			border-top-style: None;
+			border-right-style: None;"
+	width=60.591%>
+<p>&lt;c&gt; refers to the channel number.<br>
+Description returns the model number of the power modules.</td></tr>
+</table>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Return_rdt></a>Return Format</span></h2>
+
+<p class=Indented1>&lt;AARD&gt;</p>
+
+<p class=Indented1>The command returns an arbitrary ASCII string with up 
+ to four semicolon-separated fields. To read the string into your computer, 
+ be sure to dimension a string variable with at least 50 characters. </p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Example_rdt></a>Example</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span2>T</span>he following query identifies<span 
+ class=MouseOverLink
+	id=span1> the mainframe's installed power modules</span>.</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;"><span class=MouseOverLink
+											id=span2>*RDT?</span></p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;CHAN1:N6751A;CHAN2:N6752A</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

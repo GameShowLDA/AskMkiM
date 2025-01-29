@@ -1,0 +1,308 @@
+﻿using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using static AppConfig.Config.ProtocolConfig;
+using static AppConfig.Config.SystemStateManager;
+using static Utilities.LoggerUtility;
+
+namespace UI.Components.Invoke.InvokeRichTextBox
+{
+  /// <summary>
+  /// Логика взаимодействия для InvokeRichTextBoxUI.xaml
+  /// </summary>
+  public partial class InvokeRichTextBoxUI : UserControl
+  {
+    private bool _isCtrlPressed;
+
+    /// <summary>
+    /// Текущий размер шрифта.
+    /// </summary>
+    private double _currentFontSize = 15;
+
+    /// <summary>
+    /// Получение или установка значения, определяющего доступность элемента управления, предназначенного для редактирование текста, только для чтения.
+    /// </summary>
+    public bool IsReadOnly
+    {
+      get
+      {
+        bool readOnly = false;
+        Application.Current.Dispatcher.Invoke(() => readOnly = protocolTextBox.IsReadOnly);
+        return readOnly;
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(new Action(() => protocolTextBox.IsReadOnly = value));
+      }
+    }
+
+    /// <summary>
+    ///  Возвращает или задает System.Windows.Documents.FlowDocument представляющий содержимое System.Windows.Controls.RichTextBox.
+    /// </summary>
+    public FlowDocument Document
+    {
+      get
+      {
+        FlowDocument document = default;
+        Application.Current.Dispatcher.Invoke(() => document = protocolTextBox.Document);
+        return document;
+      }
+    }
+
+    public void ScrollToEnd()
+    {
+      Application.Current.Dispatcher.Invoke(new Action(() => protocolTextBox.ScrollToEnd()));
+    }
+
+    public InvokeRichTextBoxUI()
+    {
+      InitializeComponent();
+      protocolTextBox.KeyDown += ProtocolTextBox_KeyDown;
+      protocolTextBox.KeyUp += ProtocolTextBox_KeyUp;
+      protocolTextBox.PreviewMouseWheel += ProtocolTextBox_PreviewMouseWheel;
+    }
+
+    /// <summary>
+    /// Выводит информацию в текстовое окно.
+    /// </summary>
+    /// <param name="header">Заголовок.</param>
+    /// <param name="headerColor">Цвет заголовка.</param>
+    /// <param name="description">Описание.</param>
+    /// <param name="descriptionColor">Цвет описания.</param>
+    /// <returns></returns>
+    public async Task ShowMessageAsync(string header = null, Color? headerColor = null, string description = null, Color? descriptionColor = null)
+    {
+      await AppendLineAsync(header, description, headerColor, descriptionColor);
+    }
+
+    public void AppendParagraph(Paragraph paragraph)
+    {
+      StringBuilder text = new StringBuilder();
+      foreach (var inline in paragraph.Inlines)
+      {
+        if (inline is Run run)
+        {
+          text.Append(run.Text);
+        }
+      }
+      LogInformation($"Отобразить текст: {text.ToString()}");
+      protocolTextBox.Document.Blocks.Add(paragraph);
+    }
+
+    public async Task AppendLineAsync(string header = null, string description = null, Color? headerColor = null, Color? descriptionColor = null)
+    {
+      (header, headerColor, descriptionColor) = SetDefaultValues(header, headerColor, descriptionColor);
+
+      await Application.Current.Dispatcher.InvokeAsync(async () =>
+      {
+        Paragraph paragraph = await CreateParagraphAsync(header, headerColor.Value, description, descriptionColor);
+        this.AppendParagraph(paragraph);
+        protocolTextBox.ScrollToEnd();
+      });
+    }
+
+    /// <summary>
+    /// Асинхронно удаляет указанное количество последних строк из RichTextBox.
+    /// </summary>
+    /// <param name="count">Количество строк для удаления. По умолчанию 1.</param>
+    /// <returns>Количество фактически удаленных строк.</returns>
+    public async Task<int> RemoveLastLinesAsync(int count = 1)
+    {
+      return await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        try
+        {
+          var blocks = protocolTextBox.Document.Blocks.ToList();
+          if (!blocks.Any())
+          {
+            return 0;
+          }
+
+          int linesToRemove = Math.Min(count, blocks.Count);
+          for (int i = 0; i < linesToRemove; i++)
+          {
+            protocolTextBox.Document.Blocks.Remove(blocks[blocks.Count - 1 - i]);
+          }
+
+          protocolTextBox.ScrollToEnd();
+          return linesToRemove;
+        }
+        catch (Exception ex)
+        {
+          LogError($"Ошибка при удалении строк: {ex.Message}");
+          return 0;
+        }
+      });
+    }
+
+    /// <summary>
+    /// Асинхронно удаляет блок, содержащий указанную строку или её часть, из RichTextBox.
+    /// </summary>
+    /// <param name="textToRemove">Строка для поиска и удаления.</param>
+    /// <returns>True, если блок был найден и удален; иначе False.</returns>
+    public async Task<bool> RemoveLineContainingTextAsync(string textToRemove)
+    {
+      return await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        try
+        {
+          var blocks = protocolTextBox.Document.Blocks.ToList();
+          foreach (var block in blocks)
+          {
+            if (block is Paragraph paragraph)
+            {
+              var text = new TextRange(paragraph.ContentStart, paragraph.ContentEnd).Text;
+              if (text.Contains(textToRemove))
+              {
+                protocolTextBox.Document.Blocks.Remove(block);
+                protocolTextBox.ScrollToEnd();
+                LogInformation($"Строка '{textToRemove}' найдена и удалена.");
+                return true;
+              }
+            }
+          }
+
+          // Если полное совпадение не найдено, ищем часть строки
+          foreach (var block in blocks)
+          {
+            if (block is Paragraph paragraph)
+            {
+              var text = new TextRange(paragraph.ContentStart, paragraph.ContentEnd).Text;
+              if (text.Contains(textToRemove.Substring(0, Math.Min(20, textToRemove.Length)))) // Ищем часть строки
+              {
+                protocolTextBox.Document.Blocks.Remove(block);
+                protocolTextBox.ScrollToEnd();
+                LogInformation($"Часть строки '{textToRemove}' найдена и удалена.");
+                return true;
+              }
+            }
+          }
+
+          LogWarning($"Строка '{textToRemove}' не найдена.");
+          return false;
+        }
+        catch (Exception ex)
+        {
+          LogError($"Ошибка при удалении строки: {ex.Message}");
+          return false;
+        }
+      });
+    }
+
+    /// <summary>
+    /// Создает параграф с заголовком, описанием и временем выполнения (если включено).
+    /// </summary>
+    private async Task<Paragraph> CreateParagraphAsync(string header, Color headerColor, string description, Color? descriptionColor)
+    {
+      Paragraph paragraph = new Paragraph { LineHeight = 2, Foreground = new SolidColorBrush(Colors.White) };
+
+      Run headerRun = new Run(header) { FontWeight = FontWeights.Bold, FontSize = _currentFontSize, Foreground = new SolidColorBrush(headerColor) };
+      paragraph.Inlines.Add(headerRun);
+
+      if (!string.IsNullOrEmpty(description))
+      {
+        paragraph.Inlines.Add(new Run(":  "));
+        Run descriptionRun = new Run(description) { FontSize = _currentFontSize, Foreground = new SolidColorBrush(descriptionColor ?? Colors.White) };
+        paragraph.Inlines.Add(descriptionRun);
+      }
+
+      if (await GetTimeStart() && !string.IsNullOrEmpty(description))
+      {
+        string elapsedTime = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", System.Globalization.CultureInfo.InvariantCulture);
+        paragraph.Inlines.Add(new Run("  ["));
+        Run timeWatch = new Run(elapsedTime) { FontSize = _currentFontSize, Foreground = new SolidColorBrush(Colors.YellowGreen) };
+        paragraph.Inlines.Add(timeWatch);
+        paragraph.Inlines.Add(new Run("]"));
+      }
+
+      return paragraph;
+    }
+
+    /// <summary>
+    /// Устанавливает значения по умолчанию для параметров.
+    /// </summary>
+    private (string header, Color? headerColor, Color? descriptionColor) SetDefaultValues(string header, Color? headerColor, Color? descriptionColor)
+    {
+      return
+      (
+        header ?? string.Empty,
+        headerColor ?? Colors.White,
+        descriptionColor ?? Colors.White
+      );
+    }
+
+    /// <summary>
+    /// Обрабатывает событие KeyDown для ProtocolTextBox. Устанавливает _isCtrlPressed в true, если нажата любая клавиша Ctrl.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события.</param>
+    private void ProtocolTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+      {
+        _isCtrlPressed = true;
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает событие KeyUp для ProtocolTextBox. Устанавливает _isCtrlPressed в false, если отпущена любая клавиша Ctrl.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события.</param>
+    private void ProtocolTextBox_KeyUp(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+      {
+        _isCtrlPressed = false;
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает событие PreviewMouseWheel для ProtocolTextBox. Изменяет размер шрифта текстового поля, если нажата клавиша Ctrl.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события.</param>
+    private void ProtocolTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+      if (_isCtrlPressed)
+      {
+        if (e.Delta > 0)
+        {
+          ChangeFontSize(2);
+        }
+        else if (e.Delta < 0)
+        {
+          ChangeFontSize(-2);
+        }
+        e.Handled = true;
+      }
+    }
+
+    /// <summary>
+    /// Изменяет размер шрифта всего текста в _richTextBox на указанное значение.
+    /// </summary>
+    /// <param name="change">Величина, на которую изменяется размер шрифта.</param>
+    public void ChangeFontSize(double change)
+    {
+      if (_currentFontSize + change > 0)
+        _currentFontSize += change; // Update the current font size
+
+      foreach (Block block in protocolTextBox.Document.Blocks)
+      {
+        if (block is Paragraph paragraph)
+        {
+          foreach (Inline inline in paragraph.Inlines)
+          {
+            if (inline.FontSize + change > 0)
+            {
+              inline.FontSize = _currentFontSize;
+            }
+          }
+        }
+      }
+    }
+  }
+}

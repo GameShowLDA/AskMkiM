@@ -1,0 +1,157 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>*OPC</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+ul.hcp2 { list-style:disc; }
+-->
+</style>
+</head>
+<body>
+<h1>*OPC</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_opc">Syntax</a></font> 
+ | <a href="#Description_opc">Description</a> | <span class="hcp1">Parameters</span> 
+ | <a href="#Remarks_opc">Remarks</a> | <span class="hcp1"><a 
+ href="#Return_opc">Return Format</a></span> | <a href="#Example_opc">Example</a></p>
+
+<h2><a name=Syntax_opc></a>Syntax</h2>
+
+<p class=CmdSyntax>*OPC</p>
+
+<p class=CmdSyntax>*OPC?</p>
+
+<h2><a name=Description_opc></a>Description</h2>
+
+<p class=Indented1>The command is mainly used for program synchronization. 
+ It causes the instrument to set the OPC bit (bit 0) of the Standard Event 
+ Status register when the instrument has completed all pending operations 
+ sent before the *OPC command. Pending operations are complete when:</p>
+
+<ul type="disc" class="hcp2">
+	
+	<li class=kadov-p-CIndented1><p class=Indented1
+									style="margin-left: 0px;">All commands 
+ sent before *OPC, including paralleled commands, have been completed. 
+ Most commands are sequential and are completed before the next command 
+ is executed. Commands that affect output voltage, current, or state, relays, 
+ and trigger actions are executed in parallel with subsequent commands. 
+ *OPC provides notification that all parallel commands have completed.</p></li>
+	
+	<li class=kadov-p-CIndented1><p class=Indented1
+									style="margin-left: 0px;">All triggered 
+ actions are completed.</p></li>
+</ul>
+
+<p class=Indented1>The query returns 1 to the output buffer. </p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr style="x-cell-content-align: top;"
+	valign=top>
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>For more information on the SCPI Status System, see the <a href="../STATus_Subsystem/Status_Subsystem_Introduction.htm#Status_Diagram">Status 
+ System diagram</a>.</td></tr>
+</table>
+
+<h2><a name=Remarks_opc></a>Remarks</h2>
+
+<ul type="disc" class="hcp2">
+	
+	<li class=kadov-p><p>*OPC does not prevent processing of subsequent 
+ commands, but the OPC bit will not be set until all pending operations 
+ are completed.</p></li>
+	
+	<li class=kadov-p><p>*OPC? causes the instrument to place a 1 in the 
+ output buffer when all pending operations are completed. &nbsp;*OPC? 
+ does not suspend processing of commands. </p></li>
+</ul>
+
+<h2><a name=Return_opc></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>Returns 1 to the output buffer. </p>
+
+<h2><a name=Example_opc></a>Example</h2>
+
+<p class=Indented1>The following command sets the operation complete bit. 
+ </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">*OPC</p>
+
+<p class=Indented1>The following command waits until the completion of 
+ the current command and then sends 1 to the output buffer. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">*OPC?</p>
+
+</body>
+</html>

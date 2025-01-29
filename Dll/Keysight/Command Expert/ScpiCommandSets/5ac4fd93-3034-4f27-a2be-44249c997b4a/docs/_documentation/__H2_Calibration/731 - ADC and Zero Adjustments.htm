@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Calibration Adjustment Procedures|34465A and 34470A Calibration Procedures" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>ADC and Zero Calibration</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor631"></a>ADC and Zero Calibration</h1>
+        <p>Each time you perform a zero calibration, the instrument stores a new set of offset correction constants for every measurement function and range. The instrument sequences through all required functions and ranges automatically and stores new zero offset calibration constants. All offset corrections are determined automatically. You may not correct a single range or function without re–entering ALL zero offset correction constants automatically. This feature is intended to save calibration time and improve zero calibration consistency.</p>
+        <table class="TableStyle-NoteTable" style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" cellspacing="0">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tbody>
+                <tr>
+                    <td class="TableStyle-NoteTable-BodyB-Column1-">
+                        <img src="../_Graphics_/caution.gif" />
+                    </td>
+                    <td class="TableStyle-NoteTable-BodyA-Column1-">Never turn off the instrument during Zero Calibration. This may cause ALL calibration memory to be lost.</td>
+                </tr>
+            </tbody>
+        </table>
+        <h2>ADC and DC Zero Calibration Procedure</h2>
+        <p>This calibration procedure applies to all models (34460A/61A/65A/70A).</p>
+        <p>Be sure to allow the instrument to warm up and stabilize for 90 minutes before performing the calibration.</p>
+        <ol>
+            <li class="IndentTight" value="1">Follow the steps outlined below. Review <a href="01%20-%20Calibration%20Introduction.htm#TestConsiderations">Test Considerations</a> before beginning this test.</li>
+            <li class="IndentTight" value="2">This procedure uses a low–thermal shorting block installed on the input connectors.<br /></li>
+            <table class="TableStyle-NoteTable" style="margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" cellspacing="0">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tbody>
+                    <tr class="Body-Body1">
+                        <td class="TableStyle-NoteTable-BodyB-Column1-">
+                            <img src="../_Graphics_/note.gif" />
+                        </td>
+                        <td class="TableStyle-NoteTable-BodyA-Column1-">For the 34461A/65A/70A, two shorting blocks are recommended; one on the front panel and one on the rear panel. A single shorting block can be used with the 34460A.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <li class="IndentTight" value="3">Select the front panel input terminals. Install a shorting block on the front panel input terminals.</li>
+            <li class="IndentTight" value="4">Select the ADC calibration mode (<b>[Utility] &gt; Test/Admin &gt; Calibrate &gt; Perform Cal &gt; Perform ADC Cal</b>).</li>
+            <li class="IndentTight" value="5">The display will show a message indicating that ADC calibration is in process. It will then display the results of the ADC calibration. A Calibration Step Succeeded message indicates success; if the display shows Calibration Step Failed, check the input value, range, function, and entered calibration value and repeat the calibration step. Press <b>Save Cal Values</b>.</li>
+            <li class="IndentTight" value="6">Select the DCV measurement function. Enter a calibration value of +0.</li>
+            <li class="IndentTight" value="7">Press <b>[Utility] &gt; Test/Admin &gt; Calibrate &gt; Perform Cal &gt; Perform Cal Step</b>.</li>
+            <li class="IndentTight" value="8">The Zero Calibration lasts approximately two minutes. A Calibration Step Succeeded message indicates success; if the display shows Calibration Step Failed, check the input value, range, function, and entered calibration value and repeat the calibration step.</li>
+            <li class="IndentTight" value="9">Press <b>Save Cal Values</b>.</li>
+            <li class="IndentTight" value="10">Select the rear input terminals. Install a shorting block rear-panel input terminals.</li>
+            <li class="IndentTight" value="11">Repeat steps 4 through 9 for the rear input terminals.<br /></li>
+            <li class="IndentTight" value="12">Store the new ADC and Zero calibration constants (see Storing the Calibration Constants).</li>
+        </ol>
+        <table class="TableStyle-NoteTable" style="margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" cellspacing="0">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tbody>
+                <tr class="Body-Body1">
+                    <td class="TableStyle-NoteTable-BodyB-Column1-">
+                        <img src="../_Graphics_/note.gif" />
+                    </td>
+                    <td class="TableStyle-NoteTable-BodyA-Column1-">The following gain and flatness calibration procedures can be done using either the front or rear terminals (rear terminals not available on the 34460A). On the 34461A/65A/70A, make sure the <b>Front/Rear</b> switch matches the terminals in use.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p> <![CDATA[ ]]></p>
+        <table style="margin-left: auto;margin-right: 0;">
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td style="text-align: right;">
+                        <br /><a href="733%20-%20AC%20Voltage%20Low%20Freq%20Gain%20and%20Flatness%20Cal.htm">Next Procedure</a>
+                    </td>
+                    <td style="text-align: right;">
+                        <img src="../_Graphics_/Next_53x46.png" style="width: 53;height: 46;" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </body>
+</html>

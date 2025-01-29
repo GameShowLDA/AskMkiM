@@ -1,0 +1,13 @@
+# client:
+#     kdic_scheme: "wss"
+#     kdic_host: "localhost:9090"
+#     kdic_path: "/svc"
+
+logging:
+    consolesink: true   # enable logging to console
+    filesink: true      # enable logging to log file
+    loglevel: "info"    # Valid logging levels are: "trace", "debug", "info", "warn", "error", "fatal", "panic"
+    maxsize: 25         # The maximum size (in megabytes) of the log file before it gets rotated
+    maxbackup: 10       # The maximum number of old log files to retain
+    maxage: 14          # The maximum number of days to retain old log files
+    

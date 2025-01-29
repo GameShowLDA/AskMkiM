@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="Measurement Tutorial" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>How Sample Rate/Interval is Determined</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor105"></a>How Sample Rate/Interval is Determined</h1>
+        <p>The DMM always attempts to make the sample interval greater than the expected time required to take the measurements, whether in continuous, data log, or digitize mode. A number of  settings go into the calculation of the minimum allowable sample interval. These settings include the measurement function, NPLC, aperture, autorange, autozero, offset compensation, AC filter, TC open check and gate time. For example, when autorange is on, the assumption is that no more than one range change will be required. If more than one level of change occurs, the measurement may be delayed and an error will be issued.</p>
+        <p>When you change any of these settings, the sample interval (sample timer in continuous mode, sample interval in data log or digitize mode) is increased to be greater than the calculated measurement time. In the continuous and data log modes, attempting to reduce the sample interval below the calculated value results in an error message. You must then choose among the various ways you can achieve a smaller measurement time  to achieve the smaller sample interval, such as decreasing the NPLC setting. For digitizing, the emphasis is on high sample rates and all settings except aperture/NPLC are fixed to achieve minimum measurement time. NPLC and aperture are automatically set to their minimum values upon entering digitize mode. If you set NPLC or aperture to greater values, the sample interval will be increased (or the sample rate decreased) to accommodate the longer measurement. However, in digitize mode, unlike continuous and data log modes, if you subsequently decrease the sample interval (or increase the sample rate), the NPLC or aperture will be reduced as needed.</p>
+        <p>Another way to put it is that for continuous and data log modes, sample timer/interval is always controlled by the other measurement settings. In digitize mode, the sample timer/interval, NPLC, and aperture have equal control; changing any one setting can change the other settings.</p>
+        
+    </body>
+</html>

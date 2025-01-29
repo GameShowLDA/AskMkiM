@@ -1,0 +1,165 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>[SOURce:]VOLTage:SLEW[:IMMediate]</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp4 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>[SOURce:]VOLTage:SLEW[:IMMediate]</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_source_volt_slew">Syntax</a></font> 
+ | <a href="#Description_source_volt_slew">Description</a> | <a href="#Parameters_source_volt_slew">Parameters</a> 
+ | <a href="#Remarks_source_volt_slew">Remarks</a> | <a href="#Return_source_volt_slew">Return 
+ Format</a> | <a href="#Example_source_volt_slew">Examples</a></p>
+
+<h2><a name=Syntax_source_volt_slew></a>Syntax</h2>
+
+<p class=CmdSyntax
+	style="margin-bottom: 0pt; line-height: Normal;"><span style="line-height: Normal;">[SOURce:]VOLTage:SLEW[:IMMediate] 
+ &lt;slew&gt;|INFinity, (@&lt;chanlist&gt;)</span></p>
+
+<p class=CmdSyntax
+	style="margin-bottom: 0pt; line-height: Normal;">[SOURce:]VOLTage:SLEW[:IMMediate]? 
+ [MIN|MAX,] (@&lt;<span class=CmdItalics
+						style="font-style: normal;">chanlist</span><span 
+ class=CmdItalics>&gt;</span>)</p>
+
+<h2><a name=Description_source_volt_slew></a>Description</h2>
+
+<p class=Indented1>This command sets the voltage slew rate in volts per 
+ second. The slew rate setting affects all programmed voltage changes, 
+ including those due to the output state turning on or off. The slew rate 
+ can be set to any value between 0 and 9.9E+37. &nbsp;For 
+ very large values, the slew rate will be limited by the analog performance 
+ of the output circuit. The keywords MAX or INFinity set the slew rate 
+ to maximum.</p>
+
+<p class=Indented1>The query returns the value that was sent, unless the 
+ value was less than the minimum slew rate, in which case the minimum value 
+ is returned. The LSB weight of the 24-bit register can be queried using 
+ VOLTage:SLEW? MIN. The exact value varies slightly according to the voltage 
+ calibration.</p>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_source_volt_slew></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 93.494%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=93.494%>
+<col style="width: 14.209%;">
+<col style="width: 10.931%;">
+<col style="width: 44.358%;">
+<col style="width: 25.679%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 14.209%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=14.209%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:10.931%;" bgcolor="#E9E9E9" width="10.931%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:44.358%;" bgcolor="#E9E9E9" width="44.358%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:25.679%;" bgcolor="#E9E9E9" width="25.679%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:14.209%;" width="14.209%" class="hcp3">
+<p class=TableBody>&lt;slew&gt;</td>
+<td style="width:10.931%;" width="10.931%" class="hcp4">
+<p class=TableBody>NRf+</td>
+<td rowspan="1" colspan="1" style="width:44.358%;" width="44.358%" class="hcp4">
+<p class=TableBody>0 - 9.9E+37 | MIN | MAX | INFinity</td>
+<td rowspan="1" colspan="1" style="width:25.679%;" width="25.679%" class="hcp4">
+<p class=TableBody>9.9E+37</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp1">
+<td style="width:14.209%;" width="14.209%" class="hcp3">
+<p class=TableBody>&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span>&gt;</td>
+<td style="width:10.931%;" width="10.931%" class="hcp4">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:44.358%;" width="44.358%" class="hcp4">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3. </td>
+<td rowspan="1" colspan="1" style="width:25.679%;" width="25.679%" class="hcp4">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Remarks_source_volt_slew></a>Remarks</h2>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p><p>Internally, the slew rate is controlled by a 24-bit 
+ register. The slowest or minimum slew rate is a function of the full-scale 
+ voltage range. For a model with a 50 V range, the minimum slew rate is 
+ about 4.76 V/s. For other voltage ranges the minimum slew rate is proportional 
+ to this value, so for a model with a 5 V range the minimum slew rate is 
+ about 0.476 V/s. The unit accepts slew rates as low as 0 V/s, but values 
+ sent to the 24-bit register will be limited at 1 count. </p></li>
+</ul>
+
+<h2><a name=Return_source_volt_slew></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR3&gt;</p>
+
+<p class=Indented1>The query command returns the programmed slew rate in 
+ the form <span class=CourierNew>+1.000000E+01</span> for each channel 
+ specified. Multiple responses are separated by commas.</p>
+
+<h2><a name=Example_source_volt_slew></a>Examples</h2>
+
+<p class=Indented1>The following command sets the slew rate to 5 volts 
+ per second on channel 1. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">VOLT:SLEW 5,(@1)</p>
+
+<p class=Indented1>The following query returns the programmed slew rate 
+ on channel 1. </p>
+
+<p class=Shaded>VOLT:SLEW? (@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;+5.000000E+00</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

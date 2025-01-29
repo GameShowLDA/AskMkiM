@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>DISPlay Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor227"></a>DISPlay Subsystem</h1>
+        <p>This subsystem controls the instrument's display. </p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#DISPlay">DISPlay[:STATe]</a>
+            <br />
+        </p>
+        <p><a href="#DISPlay_TEXT">DISPlay:TEXT[:DATA]</a>
+            <br />
+        </p>
+        <p><a href="#DISPlay_TEXT_CLEar">DISPlay:TEXT:CLEar</a>
+        </p>
+        <p><a href="#DISPlay_VIEW">DISPlay:VIEW</a>
+        </p>
+        <h2 style="font-size: 14px;"><a name="kanchor228"></a><a name="DISPlay"></a>DISPlay[:STATe]  {ON|1|OFF|0}<br />DISPlay[:STATe]?</h2>
+        <p>Disables or enables the front panel display. When disabled, the display dims, and all annunciators are disabled. However, the screen remains on.</p>
+        <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td colspan="2" class="TableStyle-RegTable-BodyA-Column1-Body1">Turn display off:
+					<br /><br />DISP OFF</td>
+                </tr>
+            </tbody>
+        </table>
+        <ul type="disc" class="UL_Disc">
+            <li class="IndentTight" value="1">Disabling the display improves command execution speed from the remote interface and provides basic security. </li>
+            <li class="IndentTight" value="2">Sending <a href="#DISPlay_TEXT">DISPlay:TEXT &lt;<i>string</i>&gt;</a> will display the text even with <a href="#DISPlay">DISP:STAT OFF</a>.</li>
+            <li class="IndentTight" value="3">The display is enabled when power is cycled, or when you return to local (front panel) operation by pressing the <b>[Local]</b> key.</li>
+        </ul>
+        <h2 style="font-size: 14px;"><a name="kanchor229"></a><a name="kanchor230"></a><a name="DISPlay_TEXT"></a>DISPlay:TEXT[:DATA]  "&lt;<i>string</i>&gt;"<br />DISPlay:TEXT[:DATA]?</h2>
+        <p>Displays a text message on the front panel display. </p>
+        <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                        <p>A quoted string of up to 40 characters. You can use letters (A-Z), numbers (0-9) and special characters such as @, %, *, and so forth.</p>
+                        <p>Default ""</p>
+                    </td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">"Test in progress..."</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td colspan="2" class="TableStyle-RegTable-BodyA-Column1-Body1">Show message on display:<br />DISP:TEXT "Test in progress..."</td>
+                </tr>
+            </tbody>
+        </table>
+        <ul type="disc" class="UL_Disc">
+            <li class="IndentTight" value="1">Sending <a href="#DISPlay_TEXT">DISPlay:TEXT &lt;<i>string</i>&gt;</a> will display the text even with <a href="#DISPlay">DISP:STAT OFF</a>.</li>
+            <li class="IndentTight" value="2">While a message is displayed, information relating to the current instrument operation is not sent to the front panel display.</li>
+            <li class="IndentTight" value="3">The display text is unaffected by <a href="IEEE-488_Common_Commands.htm#RST">*RST</a>. It is cleared at power-on.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor231"></a><a name="DISPlay_TEXT_CLEar"></a>DISPlay:TEXT:CLEar</h2>
+            <p>Clears the text message from the display.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td colspan="2" class="TableStyle-RegTable-BodyA-Column1-Body1">Clear displayed message:<br /><br />DISP:TEXT:CLE</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight" value="1">With <a href="#DISPlay">DISPlay ON</a>, DISP:TEXT:CLEar returns the display to its normal mode.</li>
+                <li class="IndentTight" value="2">With <a href="#DISPlay">DISPlay OFF</a>, DISP:TEXT:CLEar clears the message and the display remains disabled. To enable the display, send <a href="#DISPlay">DISPlay ON</a> or press the front panel <b>[Local]</b> key.</li>
+                <li class="IndentTight" value="3">The display text is unaffected by <a href="IEEE-488_Common_Commands.htm#RST">*RST</a>. It is cleared at power-on.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor232"></a><a name="DISPlay_VIEW"></a>DISPlay:VIEW  {NUMeric|HISTogram|TCHart|METer}<br />DISPlay:VIEW?</h2>
+            <p>Specifies whether measurement data is displayed in numeric, histogram, trend chart (not available on the 34460A), or bar meter form.</p>
+            <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../RegTable.css');" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {NUMeric|HISTogram|TCHart|METer}. Default: NUM.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">HIST</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td colspan="2" class="TableStyle-RegTable-BodyA-Column1-Body1">Display histogram:<br /><br />DISP:VIEW HIST</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul type="disc" class="UL_Disc">
+                <li class="IndentTight" value="1">The display is not turned on if the display state is OFF.</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

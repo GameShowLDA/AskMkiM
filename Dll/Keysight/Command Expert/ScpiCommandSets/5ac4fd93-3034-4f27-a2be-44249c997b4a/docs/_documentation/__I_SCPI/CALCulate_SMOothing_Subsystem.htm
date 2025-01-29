@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|CALCulate_Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>CALCulate:SMOothing Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;">CALCulate:SMOothing Subsystem</h1>
+        <p>This subsystem controls the smoothing 
+ (moving average) filter. This subsystem applies only to the 34465A and 34470A.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#RESP">CALCulate:SMOothing:RESPonse</a>
+        </p>
+        <p><a href="#STAT">CALCulate:SMOothing[:STATe]</a>
+        </p>
+        <h2 style="font-size: 14px;"><a name="kanchor188"></a><a name="RESP"></a>CALCulate:SMOothing:RESPonse {SLOW|MEDium|FAST} <br />CALCulate:SMOothing:RESPonse? </h2>
+        <p class="CmdSyntax"><a name="kanchor189"></a><a name="kanchor190"></a><a name="kanchor191"></a>Selects the number of measurements to be 
+ averaged by the moving average (boxcar) filter.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">{SLOW|MEDium|FAST} SLOW = 100 measurements,
+MEDium = 50 measurements,
+FAST = 10 measurements. Default: 10 measurements.
+</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">SLOW</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Enable a 50-point moving average filter on 1000 measurements:</p>
+                        <p>CONF:VOLT 10<br />SAMP:COUN 1000<br />CALC:SMO:RESP MED<br />CALC:SMO:STAT ON<br />CALC:STAT ON<br />READ?<br /><br />Typical Response:<span class="CourierNew"> &#160;+9.99383828200000E+00,+9.99352315400000E+00,... 
+ &#160;&#160;&#160;</span><span class="CourierNew" style="font-style: italic;">(1000 
+ measurements)</span></p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">The smoothing 
+ (moving average) filter produces one result for each measurement made.</li>
+            <li class="IndentTight" value="3">The smoothing 
+ (moving average) filter is reset when the measurement function 
+ changes, by <a href="INITiate_IMMediate.htm">INITiate:IMMediate</a>, 
+ <a href="READ_.htm">READ?</a>, or <a href="MEASure_Subsystem.htm">MEASure?</a>, or if a reading is too far beyond 
+ the current average. </li>
+            <li class="IndentTight" value="4">After the 
+ smoothing (moving average) filter is reset, the filter produces results 
+ which are the average of all measurements made after the reset, until 
+ the required number of measurements are made as selected by <a href="#RESP">CALCulate:SMOothing:RESPonse</a>. 
+ &#160;Once the 
+ required number measurements are made, the results are the moving average 
+ of the last 10, 50, or 100 measurements. &#160;Equal 
+ weighting is applied to all measurements used in the average.</li>
+            <li class="IndentTight" value="5">The instrument 
+ sets the response time to FAST after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST" class="hcp6">*RST</a> ) or after an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES" class="hcp6">SYSTem:PRESet</a>).</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor192"></a><a name="STAT"></a>CALCulate:SMOothing[:STATe] {OFF|ON} <br />CALCulate:SMOothing[:STATe]? </h2>
+            <p class="Indented1">Enables or disables a smoothing (moving 
+ average) filter on the measurements. Smoothing is intended to average out small variations in the measurements.  Larger variations will cause the filter to reset.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Enable a 50-point moving average filter on 1000 measurements:</p>
+                            <p>CONF:VOLT 10<br />SAMP:COUN 1000<br />CALC:SMO:RESP MED<br />CALC:SMO:STAT ON<br />CALC:STAT ON<br />READ?<br /><br />Typical Response:<span class="CourierNew">+9.99383828200000E+03,+9.99352315400000E+03,... 
+ &#160;&#160;&#160;</span><span class="CourierNew" style="font-style: italic;">(1000 
+ measurements)</span></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">The <a href="CALCulate_Subsystem_Introduction.htm">CALCulate</a> subsystem 
+ and the individual calculate functions are disabled for timestamp measurements.</li>
+                <li class="IndentTight" value="3">The instrument 
+ disables the smoothing (moving average) filter after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST" class="hcp2">*RST</a>) or an Instrument 
+ Preset (<a href="SYSTem_General%20Commands.htm#PRES" class="hcp2">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

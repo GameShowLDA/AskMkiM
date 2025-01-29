@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Features and Functions|Measurements" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Frequency and Period</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor33"></a>Frequency and Period</h1>
+        <p>This section describes how to configure frequency and period measurements from the front panel.</p>
+        <p><b>Step 1:</b> Configure the test leads as shown.</p>
+        <p>
+            <img src="../_Graphics_/ConnDiag-FreqPer_326x185.png" style="width: 326;height: 185;" />
+        </p>
+        <p><b>Step 2:</b> Press <b>[Freq]</b> on the front panel and then use the first softkey to choose either frequency or period measurement.</p>
+        <p>
+            <img src="../_Graphics_/Freq1.png" />
+        </p>
+        <div>
+            <p><b>Step 3:</b> Press <b>Range</b> to select a range for the measurement. (<b>Auto</b> (autorange) automatically selects the range for the measurement based on the input. Autoranging is convenient, but it results in slower measurements than using a manual range. Autoranging goes up a range at 120% of the present range, and down a range below 10% of the present range.</p>
+            <p>
+                <img src="../_Graphics_/Freq2.png" />
+            </p>
+        </div>
+        <div>
+            <p><b>Step 4:</b> Press <b>AC Filter</b> and choose the filter for the measurement. The instrument uses three different AC filters that enable you either to optimize low frequency accuracy or to achieve faster AC settling times following a change in input signal amplitude.<br /><br />The three filters are 3 Hz, 20 Hz, and 200 Hz, and you should generally select the highest frequency filter whose frequency is less than that of the signal you are measuring, because higher frequency filters result in faster measurements. For example, when measuring a signal between 20 and 200 Hz, use the 20 Hz filter.<br /><br />If measurement speed is not an issue, choosing a lower frequency filter may result in quieter measurements, depending on the signal that you are measuring.</p>
+            <p>
+                <img src="../_Graphics_/ACV3.png" />
+            </p>
+        </div>
+        <div>
+            <p><b>Step 5:</b> Press <b>Gate Time</b> and choose the measurement aperture (integration time) of 1 ms (34465A/70A only) 10 ms, 100 ms (default), or 1&#160;s.</p>
+            <p>
+                <img src="../_Graphics_/Freq4.png" />
+            </p>
+            <p><b>Step 6:</b> (34465A/70A only) Press <b>Timeout</b> to control how long the instrument waits before timing out on a frequency or period measurement when no signal is present. When set to 1s, the instrument waits 1 second before timing out.  When set to Auto, the wait time varies with AC filter bandwidth; for the faster bandwidths, the instrument waits a shorter time before timing out and returning 0.0.  This is advantageous in manufacturing test systems where a DUT failure may result in no signal; in this case, the failure can be detected sooner, speeding up test throughput.</p>
+            <p>
+                <img src="../_Graphics_/Freq5.png" />
+            </p>
+            <table class="TableStyle-NoteTable" style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" cellspacing="0">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tbody>
+                    <tr>
+                        <td class="TableStyle-NoteTable-BodyB-Column1-">
+                            <img src="../_Graphics_/note.gif" />
+                        </td>
+                        <td class="TableStyle-NoteTable-BodyA-Column1-">For accurate displayed statistics of AC measurements in Front Panel mode, the default manual trigger delay (<b>[Acquire] &gt; Delay Man</b>) must be used.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </body>
+</html>

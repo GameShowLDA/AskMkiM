@@ -1,0 +1,247 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>OUTPut[:STATe]:PMODe</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+table.hcp1 { x-cell-content-align:top; margin-left:18pt; border-spacing:0px; }
+tr.hcp2 { x-cell-content-align:top; }
+td.hcp3 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp4 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp5 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>OUTPut[:STATe]:PMODe</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_output_pmode">Syntax</a></font> 
+ | <a href="#Description_output_pmode">Description</a> | <a href="#Parameters_output_pmode">Parameters</a> 
+ | Remarks | <a href="#Return_output_pmode">Return Format</a> | <a href="#Example_output_pmode">Example</a></p>
+
+<h2><a name=Syntax_output_pmode></a>Syntax</h2>
+
+<p class=CmdSyntax>OUTPut[:STATe]:PMODe &lt;mode&gt;, (@&lt;chanlist&gt;)</p>
+
+<p class=CmdSyntax>OUTPut[:STATe]:PMODe? (@&lt;chanlist&gt;)</p>
+
+<h2><a name=Description_output_pmode></a>Description</h2>
+
+<p class=Indented1>This command sets the preferred mode for output on or 
+ output off transitions. It allows output state transitions to be optimized 
+ for either constant voltage or constant current operation. Turn-on and 
+ turn-off overshoots are minimized for the preferred mode of operation.</p>
+
+<table x-use-null-cells style="width:94.093%;" cellspacing="0" width="94.093%" class="hcp1">
+<col style="width: 17.205%;">
+<col style="width: 82.795%;">
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;
+			border-top-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">VOLTage</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-top-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody
+	style="margin-right: 0px;">Minimizes output on/off voltage overshoots 
+ in constant voltage operation.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">CURRent</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody>Minimizes output on/off current overshoots in constant 
+ current operation.</td></tr>
+</table>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				margin-top: 18px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp2">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>This command is used only with models N6761A/N6762A.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_output_pmode></a>Parameters</h2>
+
+<table x-use-null-cells style="width:80.742%;" cellspacing="0" width="80.742%" class="hcp1">
+<col style="width: 20.048%;">
+<col style="width: 14.461%;">
+<col style="width: 41.815%;">
+<col style="width: 23.676%;">
+
+<tr style="height:18px;" valign="top" class="hcp2">
+<td style="width: 20.048%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=20.048%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:14.461%;" bgcolor="#E9E9E9" width="14.461%" class="hcp3">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:41.815%;" bgcolor="#E9E9E9" width="41.815%" class="hcp3">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:23.676%;" bgcolor="#E9E9E9" width="23.676%" class="hcp3">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:20.048%;" width="20.048%" class="hcp4">
+<p class=TableBody>&lt;mode&gt;</td>
+<td colspan="1" rowspan="1" style="width:14.461%;" width="14.461%" class="hcp5">
+<p class=TableBody>CPD</td>
+<td colspan="1" rowspan="1" style="width:41.815%;" width="41.815%" class="hcp5">
+<p class=TableBody>VOLTage | CURRent</td>
+<td colspan="1" rowspan="1" style="width:23.676%;" width="23.676%" class="hcp5">
+<p class=TableBody>VOLTage</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width:20.048%;" width="20.048%" class="hcp4">
+<p class=TableBody>&lt;chanlist&gt;</td>
+<td style="width:14.461%;" width="14.461%" class="hcp5">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:41.815%;" width="41.815%" class="hcp5">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:23.676%;" width="23.676%" class="hcp5">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_output_pmode></a>Return Format</h2>
+
+<p class=Indented1>&lt;CRD&gt;</p>
+
+<p class=Indented1>The query command returns VOLT or CURR.</p>
+
+<h2><a name=Example_output_pmode></a>Example</h2>
+
+<p class=Indented1>The following command sets the preferred mode of channel 
+ 1 to CURRent. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">OUTP:PMOD CURR,(@1)</p>
+
+<p class=Indented1>The following query returns the setting of the preferred 
+ mode of channel 2. </p>
+
+<p class=Shaded>OUTP:PMOD? (@2)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;VOLT</span></p>
+
+<h2 class=Indented1><span class=MouseOverLink
+							id=span5>See Also</span></h2>
+
+<p class=IndentTight><a href="OUTPut__STATe_.htm">OUTPut[:STATe]</a></p>
+
+</body>
+</html>

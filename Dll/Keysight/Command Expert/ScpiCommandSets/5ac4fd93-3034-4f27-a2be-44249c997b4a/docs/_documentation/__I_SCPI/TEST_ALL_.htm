@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>TEST:ALL?</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor148"></a>TEST:ALL?<br /></h1>
+        <p>Runs an instrument self-test and returns a pass/fail indication. The <a href="#">TEST:ALL?</a> self-test is more comprehensive than the <a href="IEEE-488_Common_Commands.htm#TST">*TST?</a> self-test.</p>
+        <p>
+            <table style="caption-side: top;mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" class="TableStyle-NoteTable" cellspacing="0">
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <col class="TableStyle-NoteTable-Column-Column1" />
+                <tbody>
+                    <tr>
+                        <td class="TableStyle-NoteTable-BodyB-Column1-">
+                            <img src="../_Graphics_/caution.gif" />
+                        </td>
+                        <td class="TableStyle-NoteTable-BodyA-Column1-">You must remove all input connections to the instrument before running the full self-test.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Run a self-test:<br /><br />TEST:ALL?</p>
+                        <p>Typical Response: +0 (pass) or +1 (one or more tests failed)</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">If one or more tests fail, the query returns +1 and stores an error in the error queue. For a complete listing of the error messages related to self-test failures, see <a href="SCPI_Error_Messages.htm#Licensing_SelfTest_Errors">Self-test Error Messages</a>.</li>
+            <li class="IndentTight" value="2">Following the test, the instrument returns to the instrument state that existed before the self-test.</li>
+        </ul>
+        
+    </body>
+</html>

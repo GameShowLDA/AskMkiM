@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="CALibrate_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>CALibration Subsystem</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="top"></a><a name="kanchor194"></a>CALibration Subsystem</h1>
+        <table style="border-spacing: 0px;border-spacing: 0px;mc-table-style: url('../NoteTable.css');border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;" cellspacing="0" class="TableStyle-NoteTable">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tr valign="top">
+                <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%" class="TableStyle-NoteTable-BodyH-Column1-">
+                    <p class="TableBody">
+                        <img src="../_Graphics_/note.gif" alt="Note" />
+                    </p>
+                </td>
+                <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%" class="TableStyle-NoteTable-BodyG-Column1-">Read the <a href="../__H2_Calibration/01%20-%20Calibration%20Introduction.htm">calibration procedure</a> before calibrating. Improper calibration can reduce accuracy and reliability.</td>
+            </tr>
+        </table>
+        <p><a href="#CALibration_ADC">CALibration:ADC?</a>
+        </p>
+        <p><a href="#CALibration_ALL">CALibration[:ALL]?</a>
+        </p>
+        <p><a href="#CALibration_COUNt">CALibration:COUNt?</a>
+        </p>
+        <p><a href="#CALibration_DATE">CALibration:DATE?</a>
+        </p>
+        <p><a href="#CALibration_SECure_CODE">CALibration:SECure:CODE</a>
+        </p>
+        <p><a href="#CALibration_SECure_STATe">CALibration:SECure:STATe</a>
+            <br />
+        </p>
+        <p><a href="#CALibration_STORe">CALibration:STORe</a>
+        </p>
+        <p><a href="#CALibration_STRing">CALibration:STRing</a>
+        </p>
+        <p><a href="#CALibration_TEMP">CALibration:TEMPerature?</a>
+        </p>
+        <p><a href="#CALibration_TIME">CALibration:TIME?</a>
+        </p>
+        <p><a href="#CALibration_VALue">CALibration:VALue<br /></a>
+        </p>
+        <h2 style="font-size: 14px;"><a name="kanchor195"></a><a name="CALibration_ADC"></a>CALibration:ADC?</h2>
+        <p>Performs a low-level calibration of the ADC (analog-to-digital converter) circuitry.</p>
+        <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+            <col />
+            <col />
+            <tr>
+                <td>
+                    <p class="TableBody">
+                        <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                    </p>
+                </td>
+                <td>
+                    <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                </td>
+            </tr>
+        </table>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0 (successful) or 1 (unsuccessful)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Calibrate the ADC:
+					<br /><br />CAL:ADC?<br /></td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">This is the first step in a re-calibration sequence, and must be done before doing the offset calibration.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor196"></a><a name="CALibration_ALL"></a>CALibration[:ALL]?</h2>
+            <p>Performs a calibration using the calibration value based on the function and range (<a href="#CALibration_VALue">CALibration:VALue</a>). A short must be applied for the resistance and voltage measurement functions, and the inputs must be open for the current measurement functions.</p>
+            <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <p class="TableBody">
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </p>
+                    </td>
+                    <td>
+                        <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+0 (pass) or +1 (fail)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Perform a zero calibration of the ACV measurement function and return a pass/fail indication:<br /> <br />CONF:VOLT:AC<br />CAL:SEC:STAT OFF,MY_CAL_CODE
+<br />CAL:VAL 0.0
+<br />CAL?
+<br />CAL:STOR
+<br />CAL:SEC:STAT ON<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This query increments the instrument’s calibration count (<a href="#CALibration_COUNt">CALibration:COUNt?</a>) and modifies the volatile version of the calibration constants. Use <a href="#CALibration_STORe">CALibration:STORe</a> to save these constants in nonvolatile memory at end of calibration.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor197"></a><a name="CALibration_COUNt"></a>CALibration:COUNt?</h2>
+            <p>Returns the calibration count. Read and record the initial count when you first receive your instrument.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+117</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the calibration count:<br /><br />CAL:COUN?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Because the value increments each time you store the calibration constants, a complete calibration adds many counts. The calibration count also increments whenever you save a calibration string, change the calibration password, or override the calibration security.</li>
+                <li class="IndentTight" value="2"> You can perform this query regardless of whether the instrument is secured.</li>
+                <li class="IndentTight" value="3">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+            <h3>See Also</h3>
+            <p><a href="SYSTem_General%20Commands.htm#SEC-COUNt">SYSTem:SECurity:COUNt?</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor198"></a><a name="CALibration_DATE"></a>CALibration:DATE?</h2>
+            <p>Returns the date of the last calibration in the format <i>yyyy,mm,dd</i>. </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">2014,4,26</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the calibration date:<br /><br />CAL:DATE?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"> You can perform this query regardless of whether the instrument is secured.</li>
+                <li class="IndentTight" value="2">The date is based on the instrument's real-time clock. Set the date for the instrument's real-time clock with <a href="SYSTem_General%20Commands.htm#DATE">SYSTem:DATE</a> and <a href="SYSTem_General%20Commands.htm#TIME">SYSTem:TIME</a>.</li>
+                <li class="IndentTight" value="3">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+            <h3>See Also</h3>
+            <p><a href="SYSTem_General%20Commands.htm#DATE">SYSTem:DATE</a>
+            </p>
+            <p><a href="SYSTem_General%20Commands.htm#TIME">SYSTem:TIME</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor199"></a><a name="CALibration_SECure_CODE"></a>CALibration:SECure:CODE  &lt;<i>new_code</i>&gt;</h2>
+            <p>Sets the security code to prevent unauthorized calibrations.</p>
+            <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <p class="TableBody">
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </p>
+                    </td>
+                    <td>
+                        <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Unquoted&#160;string&#160;up&#160;to&#160;12&#160;characters<br />Must start with letter (A-Z)<br />May contain letters, numbers (0-9) and underscores<br /></td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Set new security code:<br /><br />CAL:SEC:STAT OFF,OLD_CAL_CODE<br />CAL:SEC:CODE TST_DUT165<br />CAL:SEC:STAT ON</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">To change the code: unsecure calibration memory with the old code, then set the new code.</li>
+                <li class="IndentTight" value="2">If you forget your security code, see <a href="../__H_Service%20and%20Repair/20%20Security%20Code%20Override.htm">Security Code Override</a>.</li>
+                <li class="IndentTight" value="3">When shipped from the factory, the instrument is secured, with the security code set to <b>AT3446XA</b>.</li>
+                <li class="IndentTight" value="4">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor200"></a><a name="CALibration_SECure_STATe"></a>CALibration:SECure:STATe {ON|1|OFF|0}[, &lt;<i>code</i>&gt;]<br />CALibration:SECure:STATe?</h2>
+            <p>Unsecures or secures the instrument for calibration.</p>
+            <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <p class="TableBody">
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </p>
+                    </td>
+                    <td>
+                        <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Unsecure calibration:<br /><br />CAL:SEC:STAT OFF,MY_CODE_272<br /></p>
+                            <p colspan="2">Secure calibration:<br /><br />CAL:SEC:STAT ON</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The &lt;<i>code</i>&gt; is optional to secure the instrument, but must be correct if provided.</li>
+                <li class="IndentTight" value="2">When shipped from the factory, the instrument is secured, with the security code set to <b>AT3446XA</b>.</li>
+                <li class="IndentTight" value="3">Front panel and remote interface calibration share the same code.</li>
+                <li class="IndentTight" value="4">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor201"></a><a name="CALibration_STORe"></a>CALibration:STORe</h2>
+            <p>Takes calibration constants in volatile memory (<a href="#CALibration_ALL">CALibration:ALL?</a>), and places them in nonvolatile memory, where they are not changed by cycling power,  <a href="IEEE-488_Common_Commands.htm#RST">*RST</a>, or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>. Do this at the end of calibration to avoid losing changes.</p>
+            <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <p class="TableBody">
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </p>
+                    </td>
+                    <td>
+                        <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">(none)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Store calibration constants into non-volatile memory:<br /><br />CAL:STOR</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor202"></a><a name="CALibration_STRing"></a>CALibration:STRing "&lt;<i>string</i>&gt;"<br />CALibration:STRing?</h2>
+            <p>Stores a message in calibration memory. Common messages include the last calibration date, calibration due date, or calibration department contact information.   You can perform this query regardless of whether the instrument is secured.</p>
+            <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <p class="TableBody">
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </p>
+                    </td>
+                    <td>
+                        <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Quoted&#160;string&#160;up&#160;to&#160;40&#160;characters<br />May contain letters, numbers, spaces, and other common characters.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"FOR CAL HELP, CALL JOE AT EXT 1234"<br />(If no string stored, returns "")</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">CAL:STR "FOR CAL HELP, CALL JOE AT EXT 1234"</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This string may be stored only from the remote interface, but you can read the message from the front panel or remote interface.</li>
+                <li class="IndentTight" value="2">Storing a calibration message overwrites the previous message.</li>
+                <li class="IndentTight" value="3">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor203"></a><a name="CALibration_TEMP"></a>CALibration:TEMPerature?</h2>
+            <p>Returns the temperature of the last calibration in °C. </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.42850208E+001</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the calibration temperature:<br /><br />CAL:TEMP?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"> You can perform this query regardless of whether the instrument is secured.</li>
+                <li class="IndentTight" value="2">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor204"></a><a name="CALibration_TIME"></a>CALibration:TIME?</h2>
+            <p>Returns the amount of time since the last calibration in the format  <i>hh,mm,ss.sss</i>. </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">20,15,30.000</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Return the calibration time:<br /><br />CAL:TIME?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">You can perform this query regardless of whether the instrument is secured.</li>
+                <li class="IndentTight" value="2">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        <h3>See Also</h3>
+        <div>
+            <p><a href="SYSTem_General%20Commands.htm#TIME">SYSTem:TIME</a>
+            </p>
+            <p><a href="SYSTem_General%20Commands.htm#DATE">SYSTem:DATE</a>
+            </p>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor205"></a><a name="CALibration_VALue"></a>CALibration:VALue &lt;<i>value</i>&gt;<br />CALibration:VALue?</h2>
+            <p>Specifies the value of the applied calibration signal.</p>
+            <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                <col />
+                <col />
+                <tr>
+                    <td>
+                        <p class="TableBody">
+                            <img src="../_Graphics_/note.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;" width="70" height="17" border="0" alt="Note" />
+                        </p>
+                    </td>
+                    <td>
+                        <p class="TableBody"> You must unsecure the instrument to calibrate it or to change the calibration string or security code.</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">Numeric,&#160;default&#160;0.0</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.37000000E-02</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Specify calibration value 0.0237:<br /><br />CAL:VAL 2.37E-2</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

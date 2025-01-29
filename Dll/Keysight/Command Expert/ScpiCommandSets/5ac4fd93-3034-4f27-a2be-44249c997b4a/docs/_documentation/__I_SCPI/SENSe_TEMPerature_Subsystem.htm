@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|SENSe Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>[SENSe:]TEMPerature Subsystem</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor423"></a>[SENSe:]TEMPerature Subsystem</h1>
+        <p>This subsystem configures temperature measurements.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#TEMPaper">[SENSe:]TEMPerature:APERture</a>
+        </p>
+        <p><a href="#TEMPaperENAB">[SENSe:]TEMPerature:APERture:ENABled</a>
+        </p>
+        <p><a href="#NPLC">[SENSe:]TEMPerature:NPLC</a>
+            <br />
+        </p>
+        <p><a href="#NULLSTATE">[SENSe:]TEMPerature:NULL[:STATe]</a>
+            <br />
+        </p>
+        <p><a href="#NULLVALUE">[SENSe:]TEMPerature:NULL:VALue</a>
+            <br />
+        </p>
+        <p><a href="#NULL-VALUE-AUTO">[SENSe:]TEMPerature:NULL:VALue:AUTO</a>
+        </p>
+        <p><a href="#TEMP-Secondary">[SENSe:]TEMPerature:SECondary</a>
+        </p>
+        <p><a href="#TEMP-OCOMP">[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:OCOMpensated</a>
+        </p>
+        <p><a href="#RTD_LPOWer">[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:POWer:LIMit[:STATe]</a>
+        </p>
+        <p><a href="#RESistance-REFerence">[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:RESistance[:REFerence]</a>
+        </p>
+        <p><a href="#THER_LPOWer">[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:POWer:LIMit[:STATe]</a>
+        </p>
+        <p><a href="#TRANsducer-TherFth-TYPE">[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:TYPE</a>
+            <br />
+        </p>
+        <p><a href="#TcCHECk">[SENSe:]TEMPerature:TRANsducer:TCouple:CHECk</a>
+        </p>
+        <p><a href="#RJUNction">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction</a>
+        </p>
+        <p><a href="#RJUNADJ">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:OFFSet:ADJust</a>
+        </p>
+        <p><a href="#RJUNtype">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:TYPE</a>
+        </p>
+        <p><a href="#TcoupleType">[SENSe:]TEMPerature:TRANsducer:TCouple:TYPE
+</a>
+        </p>
+        <p><a href="#TRANsducer-TYPE">[SENSe:]TEMPerature:TRANsducer:TYPE</a>
+            <br />
+        </p>
+        <p><a href="#ZERO-AUTO">[SENSe:]TEMPerature:ZERO:AUTO</a>
+        </p>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor424"></a><a name="TEMPaper"></a>[SENSe:]TEMPerature:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]TEMPerature:APERture?  [{MIN|MAX|DEF}]<![CDATA[  ]]></h2>
+            <p class="Indented1">Specifies the integration time in seconds 
+ (called <span class="CmdItalics">aperture time</span>) for temperature measurements.</p>
+            <table style="width: 100%;border-left-width: 0px;border-left-style: Solid;border-top-width: 0px;border-top-style: Solid;border-right-width: 0px;border-right-style: Solid;border-bottom-width: 0px;border-bottom-style: Solid;margin-left: 14px;border-spacing: 0px;border-spacing: 0px;" cellspacing="0" width="100%">
+                <col style="width: 11.684%;">
+                </col>
+                <col style="width: 88.316%;">
+                </col>
+                <tr valign="top" class="hcp1">
+                    <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%">
+                        <p>
+                            <img src="../_Graphics_/note.gif" />
+                        </p>
+                    </td>
+                    <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%">
+                        <p><a name="kanchor425"></a><a name="kanchor426"></a>Use this command for precise control of the 
+DMM's integration time. Use NPLC (see <a href="#NPLC">[SENSe:]TEMPerature:NPLC</a><a name="kanchor427"></a>)  for better power-line noise rejection characteristics (NPLC &gt; 1).</p>
+                    </td>
+                </tr>
+            </table>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>(<i>Without</i> the DIG&#160;option) 200&#160;µs 
+ to 1 s (2 µs resolution), default: 100 ms. (<i>With</i> the DIG option) 
+ &#160;20 µs 
+ to 1 s (2 µs resolution), default: 100 ms.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E-01</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p> Enable aperture, set the aperture time to 300&#160;ms:</p>
+                            <p>TEMP:APER:ENAB ON<br />TEMP:APER 300E-03</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul style="list-style: disc;" type="disc">
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">Both the [SENSe:]&lt;<i>function</i>&gt;:NPLC and [SENSe:]&lt;<i>function</i>&gt;:APERture commands control the instrument's integration time. When using both commands (not recommended), whichever command is sent last will override the other command and set the integration time.  Sending the [SENSe:]&lt;<i>function</i>&gt;:APERture command sets the [SENSe:]&lt;<i>function</i>&gt;:APERture:ENABled command to 1 (ON); sending [SENSe:]&lt;<i>function</i>&gt;:NPLC sets it to 0 (OFF).</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+            <h2 style="font-size: 14px;"><a name="kanchor428"></a><a name="TEMPaperENAB"></a>[SENSe:]TEMPerature:APERture:ENABled  {ON|1|OFF|0} <br />[SENSe:]TEMPerature:APERture:ENABled?<![CDATA[  ]]></h2>
+            <p class="Indented1">Enables the setting of integration time in seconds 
+ (called <span class="CmdItalics">aperture time</span>) for temperature measurements. 
+ If aperture time mode is disabled (default), the 
+ integration time is set in PLC (power-line cycles).</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Enable aperture time mode, set the aperture time to 300&#160;ms:</p>
+                            <p>TEMP:APER:ENAB ON<br />TEMP:APER 300E-03</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul style="list-style: disc;" type="disc">
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">The <a href="CONFigure_Subsystem.htm#TEMP">CONFigure:TEMPerature</a>, 
+ <a href="MEASure_Subsystem.htm#TEMP">MEASure:TEMPerature?</a>,and 
+ <a href="#NPLC">[SENSe:]TEMPerature:NPLC</a><a name="kanchor429"></a> 
+ commands disable the aperture time mode, and select an integration 
+ time in number of power line cycles.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor430"></a><a name="NPLC"></a>[SENSe:]TEMPerature:NPLC  {&lt;<i>PLC</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:NPLC?  [{MIN|MAX|DEF}]</h2>
+            <p>Sets the integration time in number of power line cycles (PLC) for temperature measurements.  Integration time is the period that the instrument's analog-to-digital (A/D) converter samples the input signal for a measurement. A longer integration time gives better measurement resolution but slower measurement speed.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> 0.02, 0.2, 1, 10, 100. Default: 10 (34460A/61A)<br /> 0.02, 0.06, 0.2, 1, 10, 100. Default: 10 (34465A/70A without DIG option)<br /> 0.001, 0.002, 0.006, 0.02, 0.06, .2, 1, 10, 100. Default: 10 (34465A/70A with DIG option) <br />See <a href="../Misc_Definitions/Range-Resolution_Relationships.htm">Range, Resolution and NPLC</a> for more information.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E+01</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure 4-wire RTD measurements using a 10 PLC integration time. Then make and read one measurement:</p>
+                            <p colspan="2">CONF:TEMP FRTD<br />TEMP:NPLC 10<br />READ?</p>
+                            <p colspan="2">Typical Response: +6.27530000E+01</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Selecting an integration time in power line cycles overrides an aperture set with the <a href="#TEMPaper">[SENSe:]TEMPerature:APERture</a> command.</li>
+                <li class="IndentTight" value="2">Only integration times of 1, 10, or 100 PLC provide normal mode (line frequency noise) rejection.</li>
+                <li class="IndentTight" value="3">Setting the integration time also sets the measurement resolution.&#160;<a href="../Misc_Definitions/Resolution_Table.htm">Resolution Table</a> shows the relationship between integration time and resolution.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor431"></a><a name="NULLSTATE"></a>[SENSe:]TEMPerature:NULL[:STATe]  {ON|1|OFF|0}<br />[SENSe:]TEMPerature:NULL[:STATe]?</h2>
+            <p><a name="kanchor432"></a>Enables or disables the null function for temperature measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"><a name="kanchor433"></a><a name="kanchor434"></a><a name="kanchor435"></a><a name="kanchor436"></a>Configure 4-wire RTD measurements, using the null function to subtract 25°. Make and read two measurements: <br />CONF:TEMP RTD<br />TEMP:NULL:STAT ON<br />VAL 25;SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+00,+1.04570000E+00 </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Enabling the scaling function also enables automatic null value selection (<a href="#NULL-VALUE-AUTO">[SENSe:]TEMPerature:NULL:VALue:AUTO ON</a>).</li>
+                <li class="IndentTight" value="2">To set a fixed null value, use:  <a href="#NULLVALUE">[SENSe:]TEMPerature:NULL:VALue</a>. </li>
+                <li class="IndentTight" value="3">The instrument disables the null function after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor437"></a><a name="NULLVALUE"></a>[SENSe:]TEMPerature:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:NULL:VALue?  [{MIN|MAX|DEF}]</h2>
+            <p>Stores a null value for temperature measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">-1.0E15 to +1.0E15. Default: 0.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.50000000E+01</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"><a name="kanchor438"></a><a name="kanchor439"></a><a name="kanchor440"></a><a name="kanchor441"></a>Configure 4-wire RTD measurements, using the null function to subtract 25°. Make and read two measurements: <br />CONF:TEMP RTD<br />TEMP:NULL:STAT ON<br />VAL 25;SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+00,+1.04570000E+00 </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Specifying a null value disables automatic null value selection (<a href="#NULL-VALUE-AUTO">[SENSe:]TEMPerature:NULL:VALue:AUTO OFF</a>).</li>
+                <li class="IndentTight" value="2">To use the null value, the null state must be on (<a href="#NULLSTATE">[SENSe:]TEMPerature:NULL:STATe ON</a>).</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor442"></a><a name="NULL-VALUE-AUTO"></a>[SENSe:]TEMPerature:NULL:VALue:AUTO  {ON|1|OFF|0}<br />[SENSe:]TEMPerature:NULL:VALue:AUTO?</h2>
+            <p>Enables or disables automatic null value selection for temperature measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Configure temperature measurements, using the null function to subtract 25° from them.  &#160;Make and read two measurements:<br />CONF:TEMP RTD<br />TEMP:NULL:STAT ON;VAL 25&gt;<br />SAMP:COUN 2<br />READ?</p>
+                            <p>Typical Response: +1.04530000E+00,+1.04570000E+00</p>
+                            <p colspan="2">Make a second set of measurements using automatic null value selection:</p>
+                            <p colspan="2">TEMP:NULL:VAL:AUTO ON <br />READ?</p>
+                            <p>Typical Response: +0.00000000E+00,+0.01420000E+00</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">When automatic reference selection is ON, the first measurement made is used as the null value for all subsequent measurements. <a href="#NULLVALUE">[SENSe:]TEMPerature:NULL:VALue</a> is set to this value. Automatic null value selection will be disabled.</li>
+                <li class="IndentTight" value="2">When automatic null value selection is disabled (OFF), the null value is specified by: <a href="#NULLVALUE">[SENSe:]TEMPerature:NULL:VALue</a>.</li>
+            </ul>
+            <ul>
+                <li class="IndentTight" value="1">The instrument enables automatic null value selection when the null function is enabled (<a href="#NULLSTATE">[SENSe:]TEMPerature:NULL:STATe ON</a>). </li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor443"></a><a name="TEMP-Secondary"></a>[SENSe:]TEMPerature:SECondary {"OFF"|"CALCulate:DATA"|"SENSe:DATA"} <br />[SENSe:]TEMPerature:SECondary? </h2>
+            <p>Selects the secondary measurement function for temperature measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>{"OFF"|"CALCulate:DATA"|"SENSe:DATA"}, default "OFF"</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"CALC:DATA"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure a 4-wire RTD measurement. Select the raw sensor value (ohms in this example) as the secondary measurement. Make and retrieve measurements.<br /></p>
+                            <p colspan="2">CONF:TEMP FRTD,85<br />TEMP:SEC "SENS:DATA"<br />READ?;DATA2?</p>
+                            <p colspan="2">Typical Response: -6.95327319E-01;+9.97282173E+01</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">"CALCulate:DATA" - (Applies only to the 34465A and 34470A.) The measurement value before any math operations are done (including NULL). </li>
+                <li class="IndentTight" value="2">“SENSe:DATA” is the raw sensor value; resistance for thermistor/RTD, voltage and reference temperature for thermocouple (thermocouple measurements apply to the 34465A and 34470A only).  </li>
+                <li class="IndentTight" value="3">Use <a href="READ_.htm">READ?</a> or <a href="INITiate_IMMediate.htm">INITiate</a> to start the measurement.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor444"></a><a name="TEMP-OCOMP"></a>[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:OCOMpensated  {ON|1|OFF|0} <br />[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:OCOMpensated? </h2>
+            <p>Enables or disables offset compensation for 2-wire and 4-wire RTD measurements.</p>
+            <p>Offset compensation removes the effects of small dc voltages in the circuit being measured. The technique involves taking the difference between two resistance measurements, one with the current source set to the normal value, and one with the current source set to a lower value.</p>
+            <p>
+                <table style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" class="TableStyle-NoteTable" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">This parameter is common to 2-wire and 4-wire resistance measurements. Using the FRTD version of this command or query is identical to using the RTD version.
+            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>{ON|1|OFF|0}. Default: OFF.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0 (OFF) or 1 (ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Configure offset-compensated 2-wire RTD measurements. Make and read two measurements:</p>
+                            <p>CONF:TEMP RTD<br />TEMP:TRANS:RTD:POW:LIM ON<br />TEMP:TRANS:RTD:OCOM ON<br />SAMP:COUN 2</p>
+                            <p>READ?</p>
+                            <p>Typical Response: +1.05451008E+01,+1.07391062E+01</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul style="list-style: disc;" type="disc">
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">Affects both 2-wire and 4-wire resistance measurements.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor445"></a><a name="RTD_LPOWer"></a>[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:POWer:LIMit[:STATe]  {ON|1|OFF|0}<br />[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:POWer:LIMit[:STATe]? <br /></h2>
+            <p>Enables or disables low-power, 2-wire or 4-wire, RTD measurements.</p>
+            <p>
+                <table style="mc-table-style: url('../NoteTable.css');margin-left: 0;margin-right: auto;" class="TableStyle-NoteTable" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">This parameter is common to 2-wire and 4-wire RTD measurements. Using the FRTD version of this command or query is identical to using the RTD version.
+            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Configure offset-compensated 2-wire RTD measurements. Make and read two measurements:</p>
+                            <p>CONF:TEMP RTD<br />TEMP:TRANS:RTD:POW:LIM ON<br />TEMP:TRANS:RTD:OCOM ON<br />SAMP:COUN 2</p>
+                            <p>READ?</p>
+                            <p>Typical Response: +1.05451008E+01,+1.07391062E+01</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+            <h2 style="font-size: 14px;"><a name="kanchor446"></a><a name="RESistance-REFerence"></a>[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:RESistance[:REFerence]  {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:TRANsducer:{FRTD|RTD}:RESistance[:REFerence]?  [{MIN|MAX|DEF}] </h2>
+            <p>Selects the nominal resistance (R<span style="vertical-align: sub;">0</span>) for 2-wire and 4-wire RTD measurements. R<span style="vertical-align: sub;">0</span> is the nominal resistance of an RTD at 0 °C. </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>34460A/61A: 80 &#937; to 120 &#937;. Default: 100 &#937;.<br />34465A/70A: 49 &#937; to 2100 &#937;. Default: 100 &#937;.<br /></p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00100000E+02</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure 4-wire RTD measurements using an RTD with an R<sub>0</sub> of 100.1 &#937;.  &#160;Make and read two measurements:<br />CONF:TEMP FRTD<br />TEMP:TRAN:FRTD:RES 100.1<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+02,+1.04570000E+02</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor447"></a><a name="THER_LPOWer"></a>[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:POWer:LIMit[:STATe] {ON|1|OFF|0}<br />[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:POWer:LIMit[:STATe]?</h2>
+            <br />
+            <p>Enables or disables low-power thermistor measurements (either 2- or 4-wire).</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure 4-wire thermistor measurements. Enable low-power thermistor measurements. &#160;Make and read two measurements:<br />CONF:TEMP FTH<br />TEMP:TRAN:FTH:TYPE 5000<br />TEMP:TRAN:FTH:POW:LIM ON<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+02,+1.04570000E+02</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">Only integration times of 1, 10, or 100 PLC provide normal mode (line frequency noise) rejection.</li>
+                <li class="IndentTight" value="3">Setting the integration time also sets the measurement resolution.&#160;<a href="../Misc_Definitions/Resolution_Table.htm">Resolution Table</a> shows the relationship between integration time and resolution.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor448"></a><a name="TRANsducer-TYPE"></a>[SENSe:]TEMPerature:TRANsducer:TYPE {FRTD|RTD|FTHermistor|THERmistor|TCouple}<br />[SENSe:]TEMPerature:TRANsducer:TYPE?</h2>
+            <p>Selects the transducer probe type to use for temperature measurements. The supported probes are 2-wire and 4-wire RTDs, 2-wire and 4-wire thermistors (5 k 44007 type, see Thermistor Requirements below), and, for the 34465A/70A only, type E, J, K, N, R, or T thermocouples.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {FRTD|RTD|FTHermistor|THERmistor|TCouple}. Default: FRTD.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">FRTD, RTD, FTH, TC, or THER</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure 2-wire RTD measurements using an RTD with an R<sub>0</sub> of 100.1 &#937;.  &#160;Make and read two measurements:<br /><br />FUNC "TEMP"<br />TEMP:TRAN:TYPE RTD<br />TEMP:TRAN:FRTD:RES 100.1<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +2.54530000E+01,+2.54570000E+01</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">TCouple applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor449"></a><a name="TcCHECk"></a>[SENSe:]TEMPerature:TRANsducer:TCouple:CHECk  {ON|1|OFF|0} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:CHECk?<![CDATA[  ]]></h2>
+        <p class="Indented1"><a name="kanchor450"></a><a name="kanchor451"></a><a name="kanchor452"></a>Disables or enables the <span class="CmdItalics">thermocouple 
+ check</span> feature to verify that your thermocouples are properly connected 
+ for measurements. When enabled, the instrument measures 
+ the  resistance after each thermocouple measurement to ensure a 
+ proper connection. If an open connection is detected (greater than 5&#160;k&#937; 
+ on the 10&#160;k&#937; range), the instrument reports an overload condition. </p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2">Configure K-type thermocouple measurements. Select fixed reference junction and set reference junction temperature to +20&#160;°C. Enable thermocouple check.  &#160;Make and read two measurements:</p>
+                        <p colspan="2">
+                            <br />CONF:TEMP TC,K<br />TEMP:TRAN:TC:RJUN:TYPE FIX<br />TEMP:TRAN:TC:RJUN 20.0<br />TEMP:TRAN:TC:CHEC ON<br />SAMP:COUN 2<br />READ?</p>
+                        <p colspan="2">Typical Response: +3.31785468E+00,+3.61554515E+00</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul style="list-style: disc;" type="disc">
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">Enabling the thermocouple check feature  slows measurement rates because two measurements have to be made for each temperature measurement values produced.</li>
+            <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+        </ul>
+        <h2 style="font-size: 14px;"><a name="RJUNction"></a>[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction {&lt;<span class="CmdItalics">temperature</span>&gt;|MIN|MAX|DEF}] <br />[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction?  [{MIN|MAX|DEF}] </h2>
+        <p class="Indented1">Sets the <span class="CmdItalics">fixed</span><a name="kanchor453"></a><a name="kanchor454"></a><a name="kanchor455"></a><a name="kanchor456"></a> 
+ reference junction temperature in degrees Celsius for thermocouple measurements.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">-20&#160;°C 
+ to +80&#160;°C. Default: 0&#160;°C.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.00000000E+01 &#160; (always in degrees Celsius). </td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2">Configure K-type thermocouple measurements. Select fixed reference junction and set reference junction temperature to +20&#160;°C. Enable thermocouple check.  &#160;Make and read two measurements:</p>
+                        <p colspan="2">
+                            <br />CONF:TEMP TC,K<br />TEMP:TRAN:TC:RJUN:TYPE FIX<br />TEMP:TRAN:TC:RJUN 20.0<br />TEMP:TRAN:TC:CHEC ON<br />SAMP:COUN 2<br />READ?</p>
+                        <p colspan="2">Typical Response: +3.31785468E+00,+3.61554515E+00</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul style="list-style: disc;" type="disc">
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2"><a name="kanchor457"></a>For this command, you must always 
+ specify the temperature in degrees Celsius regardless of the temperature 
+ units currently selected (see <a href="UNIT_TEMPerature.htm">UNIT:TEMPerature</a> 
+ command). 
+            </li>
+            <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor458"></a><a name="RJUNADJ"></a>[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:OFFSet:ADJust {&lt;<i>temperature</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:OFFSet:ADJust?  [{MIN|MAX|DEF}] </h2>
+            <p>Allows you to make minor temperature adjustments to correct for the differences between the DMM internal temperature measurement of the front connection and the actual temperature of the measurement terminals.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p class="TableBody"> -20&#160;°C 
+to +20&#160;°C. Default: 0&#160;°C.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+2.00000000E+01</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure thermocouple temperature measurements using the internal reference junction. Measure the temperature inside the instrument. Assuming the temperature outside the instrument is 5 °C cooler than the inside measurement, adjust the temperature by -5 °C. Then make and read one measurement:</p>
+                            <p colspan="2">CONF:TEMP TC,K<br />TEMP:TRAN:TC:RJUN:TYPE INT<br />TEMP:TRAN:TC:CHEC ON<br />SYST:TEMP?<br />TEMP:TRAN:TC:RJUN:OFFS:ADJ -5<br />READ?</p>
+                            <p colspan="2">Typical Response: +3.31785468E+00</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2"><b>Important:</b> Since the internal reference temperature is the temperature of the <i>front</i> connections, use of the <i>rear</i> connections with the selection of the internal reference junction will have an unknown error with no specified performance and is not recommended.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="RJUNtype"></a>[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:TYPE {INTernal|FIXed} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:TYPE? </h2>
+            <p class="Indented1">Thermocouple measurements require 
+ a reference junction temperature. For the reference junction temperature, 
+ you can use an <span class="CmdItalics">internal</span> measurement, or a known <span class="CmdItalics">fixed</span><a name="kanchor459"></a><a name="kanchor460"></a> 
+ junction temperature. This command selects the reference junction source 
+ for thermocouple measurements. </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">{FIXed|INTernal} default INT</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">FIX or INT</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure K-type thermocouple measurements. Select fixed reference junction and set reference junction temperature to +20&#160;°C. Enable thermocouple check.  &#160;Make and read two measurements:</p>
+                            <p colspan="2">
+                                <br />CONF:TEMP TC,K<br />TEMP:TRAN:TC:RJUN:TYPE FIX<br />TEMP:TRAN:TC:RJUN 20.0<br />TEMP:TRAN:TC:CHEC ON<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +3.31785468E+00,+3.61554515E+00</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            </ul>
+            <ul>
+                <li class="IndentTight" value="1"><b>Important:</b> Since the internal reference temperature is the temperature of the <i>front</i> connections, use of the <i>rear</i> connections with the selection of the internal reference junction will have an unknown error with no specified performance and is not recommended.</li>
+            </ul>
+            <ul>
+                <li class="IndentTight" value="1">The accuracy of the measurement is highly dependent 
+ upon the thermocouple connections and the type of reference junction used. 
+ Use a <span class="CmdItalics">fixed</span> temperature reference for the 
+ highest accuracy measurements (you must maintain the known junction temperature). 
+ </li>
+                <li class="IndentTight" value="2">If you select a <span class="CmdItalics">fixed</span> 
+ reference junction source, you can specify a value between -20&#160;°C and +80&#160;°C using the <a href="#RJUNction">[Sense:]TEMPerature:TRANsducer:TCouple:RJUNction</a><a name="kanchor461"></a><a name="kanchor462"></a> 
+ command. You must always specify the temperature in degrees Celsius regardless 
+ of the temperature units currently selected (see <a href="UNIT_TEMPerature.htm">UNIT:TEMPerature</a> 
+ command).</li>
+                <li class="IndentTight" value="3">You can read the internal reference junction 
+ temperature using the <a href="SYSTem_General%20Commands.htm#TEMP">SYSTem:TEMPerature</a> 
+ &#160;command. 
+ </li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="TcoupleType"></a>[SENSe:]TEMPerature:TRANsducer:TCouple:TYPE
+ {E|J|K|N|R|T} <br />[SENSe:]TEMPerature:TRANsducer:TCouple:TYPE? </h2>
+            <p class="Indented1"><a name="kanchor463"></a><a name="kanchor464"></a>Selects the thermocouple type for thermocouple 
+ measurements. </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">{E|J|K|N|R|T} default J</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">E, J, K, N, R, or T</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure K-type thermocouple measurements. Select fixed reference junction and set reference junction temperature to +20&#160;°C. Enable thermocouple check.  &#160;Make and read two measurements:</p>
+                            <p colspan="2">
+                                <br />CONF:TEMP TC,K<br />TEMP:TRAN:TC:RJUN:TYPE FIX<br />TEMP:TRAN:TC:RJUN 20.0<br />TEMP:TRAN:TC:CHEC ON<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +3.31785468E+00,+3.61554515E+00</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul style="list-style: disc;" type="disc">
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">Thermocouple measurements 
+ require a reference junction temperature (see <a href="#RJUNtype">[SENSe:]TEMPerature:TRANsducer:TCouple:RJUNction:TYPE</a> 
+ command). For the reference junction temperature, you can use an <span class="CmdItalics">internal</span> measurement,  or a known <span class="CmdItalics">fixed</span> junction 
+ temperature. By default, an internal reference junction temperature  is used.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor465"></a><a name="TRANsducer-TherFth-TYPE"></a>[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:TYPE 5000<br />[SENSe:]TEMPerature:TRANsducer:{FTHermistor|THERmistor}:TYPE?</h2>
+            <p>Selects the thermistor type for 2-wire and 4-wire temperature measurements. Choosing the THERmistor or the FTHermistor command form makes no difference, as both commands affect the same parameter.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">5000 (only available choice)</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+5000</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure 4-wire thermistor measurements.  &#160;Make and read two measurements:<br />CONF:TEMP FTH<br />TEMP:TRAN:FTH:TYPE 5000<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+02,+1.04570000E+02</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor466"></a><a name="ZERO-AUTO"></a>[SENSe:]TEMPerature:ZERO:AUTO  {OFF|ON|ONCE}<br />[SENSe:]TEMPerature:ZERO:AUTO?</h2>
+            <p>Disables or enables the autozero mode for 2-wire temperature measurements.</p>
+            <ul>
+                <li class="IndentTight" value="1"><b>ON (default):</b> the DMM internally measures the offset following each measurement. It then subtracts that measurement from the preceding reading. This prevents offset voltages present on the DMM’s input circuitry from affecting measurement accuracy.</li>
+                <li class="IndentTight" value="2"><b>OFF:</b> the instrument uses the last measured zero measurement and subtracts it from each measurement. It takes a new zero measurement each time you change the function, range or integration time.</li>
+                <li class="IndentTight" value="3"><b><a name="kanchor467"></a>ONCE:</b> the instrument takes one zero measurement and sets autozero OFF.  The zero measurement taken is used for all subsequent measurements until the next change to the function, range or integration time. If the specified integration time is less than 1 PLC, the zero measurement is taken at 1 PLC to optimize noise rejection. Subsequent measurements are taken at the specified fast (&lt; 1 PLC) integration time.</li>
+            </ul>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {OFF|ON|ONCE}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure 2-wire RTD measurements and perform an immediate zero autozero.  &#160;Make and read two measurements:<br />CONF:TEMP RTD<br />TEMP:ZERO:AUTO ONCE<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +2.57530000E+01,+2.57570000E+01</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Does not affect 4-wire resistance measurements, which are always made with autozero ON.</li>
+                <li class="IndentTight" value="2">The autozero mode is set indirectly when you set the resolution and integration time using <a href="CONFigure_Subsystem.htm#TEMP">CONFigure:TEMPerature</a> or <a href="MEASure_Subsystem.htm#TEMP">MEASure:TEMPerature?</a>. Autozero is automatically turned OFF when you select an integration time less than 1 PLC with these commands.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

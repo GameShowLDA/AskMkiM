@@ -1,0 +1,161 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>[SOURce:]CURRent:PROTection:STATe</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+td.hcp2 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp3 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp4 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>[SOURce:]CURRent:PROTection:STATe</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_source_current_prot">Syntax</a></font> 
+ | <a href="#Description_source_current_prot">Description</a> | <a href="#Parameters_source_current_prot">Parameters</a> 
+ | <span class=MouseOverLink
+		id=span1><font id=font2
+						style="color: #808080;"
+						color=#808080><a href="#Remarks_source_curr_prot">Remarks</a></font></span> 
+ | <a href="#Return_source_current_prot">Return Format</a> | <a href="#Example_source_current_prot">Examples</a></p>
+
+<h2><a name=Syntax_source_current_prot></a>Syntax</h2>
+
+<p class=CmdSyntax
+	style="margin-bottom: 0pt; line-height: Normal;">[SOURce:]CURRent:PROTection:STATe 
+ &lt;Bool&gt;, (@&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span><span 
+ class=CmdItalics>&gt;</span>)</p>
+
+<p class=CmdSyntax
+	style="margin-bottom: 0pt; line-height: Normal;">[SOURce:]CURRent:PROTection:STATe? 
+ (@&lt;<span class=CmdItalics
+			style="font-style: normal;">chanlist</span><span class=CmdItalics>&gt;</span>)</p>
+
+<h2><a name=Description_source_current_prot></a>Description</h2>
+
+<p class=Indented1>This command enables or disables the over-current protection 
+ (OCP) function. The enabled state is On (1); the disabled state is Off 
+ (0). If the over-current protection function is enabled and the output 
+ goes into constant current operation, the output is disabled and the Questionable 
+ Condition status register OCP bit is set.</p>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_source_current_prot></a>Parameters</h2>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 18pt;
+				width: 81.739%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=81.739%>
+<col style="width: 15.483%;">
+<col style="width: 11.167%;">
+<col style="width: 47.812%;">
+<col style="width: 25.538%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 15.483%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=15.483%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:11.167%;" bgcolor="#E9E9E9" width="11.167%" class="hcp2">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:47.812%;" bgcolor="#E9E9E9" width="47.812%" class="hcp2">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:25.538%;" bgcolor="#E9E9E9" width="25.538%" class="hcp2">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:15.483%;" width="15.483%" class="hcp3">
+<p class=TableBody>&lt;Bool&gt;</td>
+<td style="width:11.167%;" width="11.167%" class="hcp4">
+<p class=TableBody>Boolean</td>
+<td rowspan="1" colspan="1" style="width:47.812%;" width="47.812%" class="hcp4">
+<p class=TableBody>OFF | 0 | ON | 1</td>
+<td rowspan="1" colspan="1" style="width:25.538%;" width="25.538%" class="hcp4">
+<p class=TableBody>OFF</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp1">
+<td style="width:15.483%;" width="15.483%" class="hcp3">
+<p class=TableBody>&lt;<span class=CmdItalics
+							style="font-style: normal;">chanlist</span>&gt;</td>
+<td style="width:11.167%;" width="11.167%" class="hcp4">
+<p class=TableBody>Numeric</td>
+<td rowspan="1" colspan="1" style="width:47.812%;" width="47.812%" class="hcp4">
+<p class=TableBody>One or more channels.<br>
+(@2) - channel 2<br>
+(@1,4) - channels 1 and 4<br>
+(@1:3) - channels 1 through 3.</td>
+<td rowspan="1" colspan="1" style="width:25.538%;" width="25.538%" class="hcp4">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Remarks_source_curr_prot></a>Remarks</h2>
+
+<ul style="list-style: disc;"
+	type=disc>
+	
+	<li class=kadov-p><p>The current limit setting determines when the 
+ output channel goes into constant current operation.</p></li>
+	
+	<li class=kadov-p><p>An over-current condition can be cleared with 
+ <a href="../OUTPut_Subsystem/OUTPut_PROTection_CLEar.htm">OUTPut:PROTection:CLEar</a> 
+ after the cause of the condition is removed.</p></li>
+</ul>
+
+<h2><a name=Return_source_current_prot></a>Return Format</h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The query command returns 0 if the current protection 
+ state is OFF, and 1 if the current protection state is ON.</p>
+
+<h2><a name=Example_source_current_prot></a>Examples</h2>
+
+<p class=Indented1>The following command sets the current protection state 
+ of channel 4. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">CURR:PROT:STAT ON,(@4)</p>
+
+<p class=Indented1>The following query returns the current protection state 
+ of channel 1. </p>
+
+<p class=Shaded>CURR:PROT:STAT? (@1)</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;0</span></p>
+
+<h2>See Also</h2>
+
+<p class=IndentTight><a href="../OUTPut_Subsystem/OUTPut_PROTection_CLEar.htm">OUTPut:PROTection:CLEar</a></p>
+
+</body>
+</html>

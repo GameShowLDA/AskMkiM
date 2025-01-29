@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>ROUTe:TERMinals?</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor147"></a>ROUTe:TERMinals?</h1>
+        <p>Indicates which input terminals are selected on the 34461A front panel <b>Front/Rear</b> switch. This switch is not programmable; this query reports the position of the switch, but cannot change it.</p>
+        <table cellspacing="0" class="Indented">
+            <col style="width: 85px;" />
+            <col />
+            <tr>
+                <td>
+                    <p>
+                        <img src="../_Graphics_/warning.gif" style="border: none;float: none;border-style: none;border-style: none;padding-left: 2px;padding-right: 2px;padding-top: 2px;padding-bottom: 2px;border-left-style: none;border-right-style: none;border-top-style: none;border-bottom-style: none;" border="0" alt="Warning" />
+                    </p>
+                </td>
+                <td>
+                    <p style="font-weight: bold;" class="TableBody">Do not toggle the Front/Rear switch with active signals on the terminals. This switch is not intended to be used in this way and may be damaged by high voltages or currents, possibly compromising the instrument's safety features.</p>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">(none)</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">FRON or REAR</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Return the state of the Front/Rear switch:<br /><br />ROUT:TERM?</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">On the 34460A, this query always returns FRON.</li>
+        </ul>
+        
+    </body>
+</html>

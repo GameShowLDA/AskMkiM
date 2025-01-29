@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|SENSe Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>[SENSe:]{FREQuency|PERiod} Subsystem</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor383"></a>[SENSe:]{FREQuency|PERiod} Subsystem</h1>
+        <p>This subsystem configures frequency and period measurements.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#FREQ-APER">[SENSe:]{FREQuency|PERiod}:APERture </a>
+        </p>
+        <p><a href="#NULL-STAT">[SENSe:]{FREQuency|PERiod}:NULL[:STATe] </a>
+        </p>
+        <p><a href="#NULL-VAL">[SENSe:]{FREQuency|PERiod}:NULL:VALue</a>
+        </p>
+        <p><a href="#NULL-VAL-AUTO">[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO</a>
+        </p>
+        <p><a href="#RANGe-LOWer">[SENSe:]{FREQuency|PERiod}:RANGe:LOWer</a>
+        </p>
+        <p><a href="#TIMeout">[SENSe:]{FREQuency|PERiod}:TIMeout:AUTO</a>
+        </p>
+        <p><a href="#VOLT-RANG-UPP">[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe </a>
+        </p>
+        <p><a href="#VOLT-RANG-AUTO">[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe:AUTO</a>
+        </p>
+        <p><a href="#FREQ-Secondary">[SENSe:]FREQuency:SECondary</a>
+        </p>
+        <p><a href="#PER-Secondary">[SENSe:]PERiod:SECondary</a>
+        </p>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor384"></a><a name="FREQ-APER"></a>[SENSe:]{FREQuency|PERiod}:APERture  {&lt;<i>seconds</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:APERture?  [{MIN|MAX|DEF}]<br /></h2>
+            <p>Sets the aperture time (gate time) for frequency and period measurements.</p>
+            <p>
+                <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" class="TableStyle-NoteTable" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">This parameter is shared between frequency and period measurements. Setting or querying the parameter with the FREQuency version of this command is identical to setting or querying it with the PERiod version.
+            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">{1 mS|10 ms|100 ms|1 s}. Default: 100 ms.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E-01</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Configure frequency measurements using a 1 s aperture, make a measurement, and return the result:<br /><br />CONF:FREQ<br />FREQ:APER 1<br />READ?<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The 1 mS aperture applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">The aperture for frequency and period measurements does not autorange. </li>
+                <li class="IndentTight" value="3">The measurement resolution is related to the aperture (gate time) as follows: </li>
+            </ul>
+            <p>
+                <table style="mc-table-style: url('../RegTable.css');margin-left: auto;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Resolution (34460A/61A)</th>
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Resolution (34465A/70A)</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Aperture</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">Not Applicable</td>
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 ppm × &lt;<i>range</i>&gt;  (MAXimum)</td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">1 ms</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">100 ppm × &lt;<i>range</i>&gt; (MAXimum)</td>
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 ppm × &lt;<i>range</i>&gt; (DEFault)</td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">10 ms</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">10 ppm × &lt;<i>range</i>&gt; (DEFault)</td>
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">1 ppm × &lt;<i>range</i>&gt; </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">100 ms</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyB-Column1-Body1">1 ppm × &lt;<i>range</i>&gt; (MINimum)</td>
+                            <td class="TableStyle-RegTable-BodyB-Column1-Body1">0.1 ppm × &lt;<i>range</i>&gt; (MINimum)</td>
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1"> 1 s</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <ul>
+                <li class="IndentTight" value="1">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor385"></a><a name="NULL-STAT"></a>[SENSe:]{FREQuency|PERiod}:NULL[:STATe]  {ON|1|OFF|0}<br />[SENSe:]{FREQuency|PERiod}:NULL[:STATe]?<br /></h2>
+            <p>Enables or disables the null function for frequency and period measurements.</p>
+            <p>
+                <table style="margin-left: 0; margin-right: auto;">
+                    <col />
+                    <col />
+                    <tbody>
+                        <tr>
+                            <td>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td>Unlike the SENSe:FREQuency and SENSe:PERiod range and aperture commands, this parameter is not shared between frequency and period measurements.  The null parameters are independent for frequency and period measurements.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: auto;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"><a name="kanchor386"></a><a name="kanchor387"></a>Configure frequency measurements, using the null function to subtract 1kHz from the measurements. Make and read two measurements:<br></br>CONF:FREQ<br></br>FREQ:NULL:STAT ON;VAL 1 kHz<br></br>SAMP:COUN 2<br></br>READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+03,+1.04570000E+03 </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Enabling the scaling function also enables automatic null value selection (<a href="#NULL-VAL-AUTO">[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO ON</a>).</li>
+                <li class="IndentTight" value="2">To set a fixed null value, use:  <a href="#NULL-VAL">[SENSe:]{FREQuency|PERiod}:NULL:VALue</a>. </li>
+                <li class="IndentTight" value="3">The instrument disables the null function after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor388"></a><a name="NULL-VAL"></a>[SENSe:]{FREQuency|PERiod}:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:NULL:VALue?  [{MIN|MAX|DEF}]</h2>
+            <p>Stores a null value for frequency and period measurements.</p>
+            <p>
+                <table style="margin-left: 0; margin-right: auto;">
+                    <col />
+                    <col />
+                    <tbody>
+                        <tr>
+                            <td>
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td>Unlike the SENSe:FREQuency and SENSe:PERiod range and aperture commands, this parameter is not shared between frequency and period measurements.  The null parameters are independent for frequency and period measurements.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>Frequency: -1.2E6 to +1.2E6. Default: 0.<br />Period: -1.2 to +1.2 seconds. Default: 0.</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E-02</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"><a name="kanchor389"></a><a name="kanchor390"></a>Configure frequency measurements, using the null function to subtract 1kHz from the measurements. Make and read two measurements:<br></br>CONF:FREQ<br></br>FREQ:NULL:STAT ON;VAL 1 kHz<br></br>SAMP:COUN 2<br></br>READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+03,+1.04570000E+03 </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Specifying a null value disables automatic null value selection (<a href="#NULL-VAL-AUTO">[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO OFF</a>).</li>
+                <li class="IndentTight" value="2">To use the null value, the null state must be on (<a href="#NULL-STAT">[SENSe:]{FREQuency|PERiod}:NULL:STATe ON</a>).</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor391"></a><a name="NULL-VAL-AUTO"></a>[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO  {ON|1|OFF|0}<br />[SENSe:]{FREQuency|PERiod}:NULL:VALue:AUTO?</h2>
+        <p>Enables or disables automatic null value selection for frequency and period measurements.</p>
+        <p>
+            <table style="margin-left: 0; margin-right: auto;">
+                <col />
+                <col />
+                <tbody>
+                    <tr>
+                        <td>
+                            <img src="../_Graphics_/note.gif" alt="Note" />
+                        </td>
+                        <td>Unlike the SENSe:FREQuency and SENSe:PERiod range and aperture commands, this parameter is not shared between frequency and period measurements.  The null parameters are independent for frequency and period measurements.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Configure frequency measurements, using the null function to subtract 1 kHz from them.  &#160;Make and read two measurements:<br />CONF:FREQ <br />FREQ:NULL:STAT ON;VAL 1 kHz <br />SAMP:COUN 2<br />READ?</p>
+                        <p>Typical Response: +1.04530000E+00,+1.04570000E+00</p>
+                        <p>Make a second set of measurements using automatic null value selection:<br />FREQ:NULL:VAL:AUTO ON <br />READ?</p>
+                        <p>Typical Response: +0.00000000E+00,+0.01420000E+00</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">When automatic reference selection is ON, the first measurement made is used as the null value for all subsequent measurements. <a href="#NULL-VAL">[SENSe:]{FREQuency|PERiod}:NULL:VALue</a> is set to this value. Automatic null value selection will be disabled.</li>
+            <li class="IndentTight" value="2">When automatic null value selection is disabled (OFF), the null value is specified by: <a href="#NULL-VAL">[SENSe:]{FREQuency|PERiod}:NULL:VALue.</a></li>
+            <li class="IndentTight" value="3">The instrument enables automatic null value selection when the null function is enabled (<a href="#NULL-STAT">[SENSe:]{FREQuency|PERiod}:NULL:STATe ON</a>). </li>
+            <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor392"></a><a name="RANGe-LOWer"></a>[SENSe:]{FREQuency|PERiod}:RANGe:LOWer {&lt;<i>freq</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:RANGe:LOWer?  [{MIN|MAX|DEF}]</h2>
+            <p>Sets the AC bandwidth used to detect the signal during frequency and period measurements.</p>
+            <p>
+                <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" class="TableStyle-NoteTable" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">This parameter is shared between frequency and period measurements. Setting or querying the parameter with the FREQuency version of this command is identical to setting or querying it with the PERiod version.
+            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <p>The instrument uses three different AC filters that enable you either to optimize low frequency accuracy or to achieve faster AC settling times following a change in input signal amplitude.  The instrument selects the slow (3 Hz), medium (20 Hz) or fast (200 Hz) filter based on the cutoff frequency specified by this command. Specify the lowest frequency that you expect to encounter.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {3 Hz|20 Hz|200 Hz}. Default: 20Hz.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1"><span class="CourierNew">+6.27530000E+03</span>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Make and read a frequency measurement. Use the 3 Hz filter bandwidth:<br /><br />CONF:FREQ<br />FREQ:RANG:LOW 3<br />READ?<br /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">If you enter the lowest expected frequency that you intend to encounter, the command will select the appropriate &lt;<i>filter</i>&gt;. For example, if you enter 15 Hz, the slow filter (3 Hz) is selected. If you enter 190 Hz, the medium filter (20 Hz) is selected to provide the appropriate low cutoff.</li>
+                <li class="IndentTight" value="2">Set the lowest frequency that you expect to encounter. Lower bandwidths result in longer settling delays, as shown:<br /></li>
+                <li class="IndentTight" value="3">
+                    <table style="caption-side: top;margin-left: 0;margin-right: auto;mc-table-style: url('../RegTable.css');" cellspacing="0" class="TableStyle-RegTable">
+                        <col class="TableStyle-RegTable-Column-Column1" />
+                        <col class="TableStyle-RegTable-Column-Column1" />
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <th class="TableStyle-RegTable-BodyE-Column1-Body1" style="font-weight: bold;">
+                                <p class="TableHead"><b>Input Frequency</b>
+                                </p>
+                            </th>
+                            <th class="TableStyle-RegTable-BodyD-Column1-Body1" style="font-weight: bold;">
+                                <p class="TableHead"><b>Default Settling Delay</b>
+                                </p>
+                            </th>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">3 Hz - 300 kHz (<i>Slow</i>)</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">1.66 s/measurement</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">20 Hz - 300 kHz (<i>Medium</i>)</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">0.25 s/measurement</p>
+                            </td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                                <p class="TableBody">200 Hz - 300 kHz (<i>Fast</i>)</p>
+                            </td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">
+                                <p class="TableBody">0.025 s/measurement</p>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor393"></a><a name="TIMeout"></a>[SENSe:]{FREQuency|PERiod}:TIMeout:AUTO  {ON|1|OFF|0}<br />[SENSe:]{FREQuency|PERiod}:TIMeout:AUTO?<br /></h2>
+            <p>Controls how long the instrument waits before timing out on a frequency or period measurement when no signal is present.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: auto;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2" style="text-align: left;">Configure frequency measurements, using the null function to subtract 1kHz from the measurements. Enable the automatic timeout. Make and read two measurements:<br />CONF:FREQ<br />FREQ:NULL:STAT ON;VAL 1 kHz<br />TIM:AUTO ON<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+03,+1.04570000E+03 </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">When set to OFF, the instrument waits 1 second before timing out.  When set to ON, the wait time varies with AC filter bandwidth; for the faster bandwidths, the instrument waits a shorter time before timing out and returning 0.0.  This is advantageous in manufacturing test systems where a DUT failure may result in no signal; in this case, the failure can be detected sooner, speeding up test throughput.</li>
+                <li class="IndentTight" value="2">This setting is non-volatile; it will not be changed by power cycling or <a href="IEEE-488_Common_Commands.htm#RST">*RST</a> or <a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor394"></a><a name="VOLT-RANG-UPP"></a>[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe {&lt;<i>range</i>&gt;|MIN|MAX|DEF}<br />[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe?  [{MIN|MAX|DEF}]</h2>
+            <p>Selects a fixed <i>voltage</i> range for frequency and period measurements.</p>
+            <p>
+                <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" class="TableStyle-NoteTable" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">This parameter is shared between frequency and period measurements. Setting or querying the parameter with the FREQuency version of this command is identical to setting or querying it with the PERiod version.
+            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <p>
+                <table cellspacing="0" style="border-left-style: none;border-left-width: 0px;border-left-color: #000000;border-right-style: none;border-right-width: 0px;border-right-color: #000000;border-top-style: none;border-top-width: 0px;border-top-color: #000000;border-bottom-style: none;border-bottom-width: 0px;border-bottom-color: #000000;margin-left: 0;margin-right: auto;">
+                    <col />
+                    <col />
+                    <tr>
+                        <td>
+                            <p>
+                                <img src="../_Graphics_/warning.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;padding-left: 2px;padding-right: 2px;padding-top: 2px;padding-bottom: 2px;border-left-style: none;border-right-style: none;border-top-style: none;border-bottom-style: none;" width="70" height="17" border="0" alt="Warning" />
+                            </p>
+                        </td>
+                        <td>
+                            <p style="font-weight: bold;" class="TableBody">The maximum range parameter (MAX) is 1000 V. However, the SAFETY LIMIT on the front and rear HI/LO input terminals is 750 VAC (rms). The rms voltage is waveform dependent. A sine wave is limited to 750 VAC (rms), but a 1000 Vpk square wave is safe. Connection to AC mains power is further limited to CAT II (300 V). See <a href="../__A_Preliminary%20Information/01%20-%20Safety%20and%20Regulatory%20Information.htm">Safety and Regulatory Information</a> for more information on the safety features and the safe operation of this instrument.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <p>
+                <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <col class="TableStyle-RegTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-RegTable-Head-Header1">
+                            <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                            <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyE-Column1-Body1">&lt;<i>range</i>&gt;: {100 mV|1 V|10 V|100 V|1000 V}. Default: 10V</td>
+                            <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.04530000E+03</td>
+                        </tr>
+                        <tr class="TableStyle-RegTable-Body-Body1">
+                            <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Configures frequency measurements using the 10 VAC range.  &#160;Make and read two measurements:<br /><br />CONF:FREQ<br />FREQ:VOLT:RANG 10<br />SAMP:COUN 2<br />READ?</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <ul>
+                <li class="IndentTight" value="1">The input signal for frequency or period measurements has an <i>AC voltage</i> component. Use this command to select a fixed <i>voltage</i> range for frequency and period measurements. Use <a href="#VOLT-RANG-AUTO">[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe:AUTO</a> to disable or enable voltage autoranging or use <a href="CONFigure_Subsystem.htm#FREQ">CONFigure:{FREQuency|PERiod}</a> to select voltage autoranging by default.  </li>
+                <li class="IndentTight" value="2">Selecting a fixed range ([SENSe:]&lt;<i>function</i>&gt;:RANGe) disables autoranging.</li>
+                <li class="IndentTight" value="3">If the input voltage is too large for the selected voltage range (manual ranging), the instrument displays the word Overload on the front panel and returns "9.9E37" from the remote interface. Autoranging can be enabled for the input voltage.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor395"></a><a name="VOLT-RANG-AUTO"></a>[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe:AUTO {OFF|ON|ONCE}<br />[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe:AUTO?</h2>
+            <p>Disables or enables <i>voltage</i> autoranging for frequency and period measurements.  Autoranging is convenient because it automatically selects the range for each measurement based on the input signal.</p>
+            <p>Specifying ONCE performs an immediate autorange and then turns autoranging off.</p>
+            <p>
+                <table style="margin-left: 0;margin-right: auto;mc-table-style: url('../NoteTable.css');" class="TableStyle-NoteTable" cellspacing="0">
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <col class="TableStyle-NoteTable-Column-Column1" />
+                    <tbody>
+                        <tr>
+                            <td class="TableStyle-NoteTable-BodyB-Column1-">
+                                <img src="../_Graphics_/note.gif" alt="Note" />
+                            </td>
+                            <td class="TableStyle-NoteTable-BodyA-Column1-">This parameter is shared between frequency and period measurements. Setting or querying the parameter with the FREQuency version of this command is identical to setting or querying it with the PERiod version.
+            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </p>
+            <p>
+                <table cellspacing="0" class="Indented">
+                    <col style="width: 85px;" />
+                    <col />
+                    <tr>
+                        <td>
+                            <p>
+                                <img src="../_Graphics_/warning.gif" style="border: none;width: 70px;height: 17px;float: none;border-style: none;border-style: none;padding-left: 2px;padding-right: 2px;padding-top: 2px;padding-bottom: 2px;border-left-style: none;border-right-style: none;border-top-style: none;border-bottom-style: none;" width="70" height="17" border="0" alt="Warning" />
+                            </p>
+                        </td>
+                        <td>
+                            <p style="font-weight: bold;" class="TableBody">The maximum range parameter (MAX) is 1000 V. However, the SAFETY LIMIT on the front and rear HI/LO input terminals is 750 VAC (rms). The rms voltage is waveform dependent. A sine wave is limited to 750 VAC (rms), but a 1000 Vpk square wave is safe. Connection to AC mains power is further limited to CAT II (300 V). See <a href="../__A_Preliminary%20Information/01%20-%20Safety%20and%20Regulatory%20Information.htm">Safety and Regulatory Information</a> for more information on the safety features and the safe operation of this instrument.</p>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {OFF|ON|ONCE}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure frequency measurements and perform an immediate AC voltage autorange.  &#160;Make and read two measurements:<br />CONF:FREQ<br />FREQ:VOLT:RANG:AUTO ONCE<br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +1.04530000E+03,+1.04570000E+03</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The input signal for frequency or period measurements has an <i>AC voltage</i> component. Use this command to disable or enable voltage autoranging or use <a href="CONFigure_Subsystem.htm#FREQ">CONFigure:{FREQuency|PERiod}</a> to select voltage autoranging by default. Use <a href="#VOLT-RANG-UPP">[SENSe:]{FREQuency|PERiod}:VOLTage:RANGe</a> to select a fixed voltage range for frequency and period measurements. </li>
+                <li class="IndentTight" value="2">Autoranging goes down a range at less than 10% of range and up a range at greater than 120% of range.</li>
+                <li class="IndentTight" value="3">Selecting a fixed range ([SENSe:]&lt;<i>function</i>&gt;:RANGe) disables autoranging.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor396"></a><a name="FREQ-Secondary"></a>[SENSe:]FREQuency:SECondary {"OFF"|"CALCulate:DATA"|"PERiod"|"VOLTage:AC"} <br />[SENSe:]FREQuency:SECondary? </h2>
+            <p>Selects the secondary measurement function for frequency measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>{"OFF"|"CALCulate:DATA"|"PERiod"|"VOLTage:AC"}, default "OFF"</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"CALC:DATA"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure frequency measurements, select period as the secondary measurement,  make and retrieve measurements.</p>
+                            <p colspan="2">CONF:FREQ MAX, MAX<br />FREQ:SEC "PERiod"<br />READ?;DATA2?</p>
+                            <p colspan="2">Typical Response: +1.22230020E+02;+8.18129619E-03<br /></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">"CALCulate:DATA" - (Applies only to the 34465A and 34470A.) The measurement value before any math operations are done (including NULL). </li>
+                <li class="IndentTight" value="2">“PERiod” - The period measurement of the input signal.</li>
+                <li class="IndentTight" value="3">"VOLTage:AC" - The AC voltage measurement of the input signal.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor397"></a><a name="PER-Secondary"></a>[SENSe:]PERiod:SECondary {"OFF"|"CALCulate:DATA"|"FREQuency"|"VOLTage:AC"} <br />[SENSe:]PERiod:SECondary? </h2>
+            <p>Selects the secondary measurement function for period measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>{"OFF"|"CALCulate:DATA"|"FREQuency"|"VOLTage:AC"}, default "OFF"</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"CALC:DATA"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure period measurements, select frequency as the secondary measurement, make and retrieve measurements.</p>
+                            <p colspan="2">CONF:PER MAX, MAX<br></br>PER:SEC "FREQ"<br></br>READ?;DATA2?</p>
+                            <p colspan="2">Typical Response: +8.90363477E-03;+1.12313682E+02</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">"CALCulate:DATA" - (Applies only to the 34465A and 34470A.) The measurement value before any math operations are done (including NULL).</li>
+                <li class="IndentTight" value="2">“FREQuency” - The frequency measurement of the input signal.</li>
+                <li class="IndentTight" value="3">"VOLTage:AC" - The AC voltage measurement of the input signal.</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

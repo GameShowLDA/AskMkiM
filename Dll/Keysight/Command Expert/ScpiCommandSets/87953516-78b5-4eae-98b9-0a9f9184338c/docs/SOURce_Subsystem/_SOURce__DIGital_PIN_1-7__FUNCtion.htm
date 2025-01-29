@@ -1,0 +1,236 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>[SOURce:]DIGital:PIN&lt;1-7&gt;:FUNCtion</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+span.hcp1 { color:#808080; }
+table.hcp2 { x-cell-content-align:top; margin-left:18pt; border-spacing:0px; }
+tr.hcp3 { x-cell-content-align:top; }
+td.hcp4 { padding-right:10px; padding-left:10px; border-bottom-style:none; border-right-style:none; border-left-style:none; }
+td.hcp5 { padding-right:10px; padding-left:10px; border-bottom-style:none; border-right-style:none; }
+span.hcp6 { font-style:italic; font-weight:bold; }
+td.hcp7 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp8 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>[SOURce:]DIGital:PIN&lt;1-7&gt;:FUNCtion</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_source_digital_pin_f">Syntax</a></font> 
+ | <a href="#Description_source_digital_pin_f">Description</a> | <span class="hcp1"><a href="#Parameters_source_digital_pin_f">Parameters</a> 
+ </span>|<span class="hcp1"> Remarks </span>|<span class="hcp1"> 
+ <a href="#Return_source_digital_pin_f">Return Format</a></span> | <a href="#Example_source_digital_pin_f">Example</a></p>
+
+<h2><a name=Syntax_source_digital_pin_f></a>Syntax</h2>
+
+<p class=CmdSyntax>[SOURce:]DIGital:PIN&lt;1-7&gt;:FUNCtion &lt;function&gt;</p>
+
+<p class=CmdSyntax>[SOURce:]DIGital:PIN&lt;1-7&gt;:FUNCtion?</p>
+
+<h2><a name=Description_source_digital_pin_f></a>Description</h2>
+
+<p class=Indented1>This command sets the functions of the digital port 
+ pins. The pin functions are saved in non-volatile memory.</p>
+
+<table x-use-null-cells style="width:94.093%;" cellspacing="0" width="94.093%" class="hcp2">
+<col style="width: 17.205%;">
+<col style="width: 82.795%;">
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;
+			border-top-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">DIO</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-top-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody
+	style="margin-right: 0px;">The pin is a general-purpose ground-referenced 
+ digital input/output. The output can be set with <a href="_SOURce__DIGital_OUTput_DATA.htm">[SOURce:]DIGital:OUTPut:DATA</a>. 
+ </td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">DINPut</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody>The pin is in digital input-only mode. &nbsp;The 
+ digital output data of the corresponding pin is ignored.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">TOUTput</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody>The pin is configured as a trigger output. When configured 
+ as a trigger output, the pin will only generate output triggers if the 
+ Step or List transient system has been configured to generated trigger 
+ signals. See: &nbsp;<a href="_SOURce__STEP_TOUTput.htm">[SOURce:]STEP:TOUTput</a>, 
+ [SOURce:]LIST:TOUTput:BOSTep, and [SOURce:]LIST:TOUTput:EOSTep </td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">TINPut</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody>The pin is configured as a trigger input. When configured 
+ as a trigger input, the pin can be selected as the source for measurement 
+ and transient trigger signals. See <a href="../TRIGger_Subsystem/TRIGger_ACQuire_SOURce.htm">TRIGger:ACQuire:SOURce</a> 
+ and <a href="../TRIGger_Subsystem/TRIGger_TRANsient_SOURce.htm">TRIGger:TRANsient:SOURce</a></td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">FAULt</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody><span class="hcp6">Applies 
+ only to pin 1.</span> Setting FAULt means that pin 1 functions as an isolated 
+ fault output. The fault signal is true when any output is in a protected 
+ state (from OC, OV, OT, INH, PF, or CP+ on some models). Note also that 
+ Pin 2 serves as the isolated common for pin 1. When pin 1 is set to the 
+ FAULt function, the instrument ignores any commands to program pin 2. 
+ Queries of pin 2 will return FAULt. If pin 1 is changed from FAULt to 
+ another function, pin 2 is set to DINPut.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">INHibit</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody><span class="hcp6">Applies 
+ only to pin 3.</span> When pin 3 is configured as an inhibit input, a 
+ true signal at the pin will disable all output channels.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">ONCouple</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody><span class="hcp6">Applies 
+ only to pins 4 -7.</span> When configured as an On control, the pin will 
+ synchronize the output On state between mainframes. Only one pin can be 
+ configured as an On control. The pin will function as both an input and 
+ an output. The polarity of the pin is fixed and cannot be programmed.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp3">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">OFFCouple</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp5">
+<p class=TableBody><span class="hcp6">Applies 
+ only to pins 4-7.</span> When configured as an Off control, the pin will 
+ synchronize the output Off state between mainframes. Only one pin can 
+ be configured as an Off control. The pin will function as both an input 
+ and an output. The polarity of the pin is fixed and cannot be programmed.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_source_digital_pin_f></a>Parameters</h2>
+
+<table x-use-null-cells style="width:81.949%;" cellspacing="0" width="81.949%" class="hcp2">
+<col style="width: 14.209%;">
+<col style="width: 10.931%;">
+<col style="width: 46.251%;">
+<col style="width: 28.609%;">
+
+<tr style="height:18px;" valign="top" class="hcp3">
+<td style="width: 14.209%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=14.209%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:10.931%;" bgcolor="#E9E9E9" width="10.931%" class="hcp7">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:46.251%;" bgcolor="#E9E9E9" width="46.251%" class="hcp7">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:28.609%;" bgcolor="#E9E9E9" width="28.609%" class="hcp7">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp3">
+<td style="width: 14.209%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=14.209%>
+<p class=TableBody>&lt;function&gt;</td>
+<td style="width:10.931%;" width="10.931%" class="hcp8">
+<p class=TableBody>CPD</td>
+<td rowspan="1" colspan="1" style="width:46.251%;" width="46.251%" class="hcp8">
+<p class=TableBody>DIO | DINPut | TOUTput | TINPut | FAULt | INHibit | 
+ ONCouple | OFFCouple</td>
+<td rowspan="1" colspan="1" style="width:28.609%;" width="28.609%" class="hcp8">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_source_digital_pin_f></a>Return Format</h2>
+
+<p class=Indented1>&lt;CRD&gt;</p>
+
+<p class=Indented1>The query command returns DIO, DINP, TOUT, TINP, FAUL, 
+ INH, ONC, or OFFC.</p>
+
+<h2><a name=Example_source_digital_pin_f></a>Example</h2>
+
+<p class=Indented1>The following command sets pin 1 to Fault mode. </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">DIG:PIN1:FUNC FAUL</p>
+
+<p class=Indented1>The following query returns the setting of pin 7. </p>
+
+<p class=Shaded>DIG:PIN7:FUNC?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;DIO</span></p>
+
+<h2 class=Indented1><span class=MouseOverLink
+							id=span5>See Also</span></h2>
+
+<p class=IndentTight><a href="_SOURce__DIGital_PIN_1-7__POLarity.htm">[SOURce:]DIGital:PIN&lt;1-7&gt;:POLarity</a></p>
+
+</body>
+</html>

@@ -1,0 +1,2083 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AgSCPI99_1_0</name>
+    </assembly>
+    <members>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.AgSCPI99">
+            <summary>
+            Generic SCPI-99 Instrument
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.AAD">
+            <summary>
+            This command, in conjunction with the Address Set protocol, allows the controller to detect all address-configurable devices (that is, devices that implement this command) and assign an IEEE 488.1 address to each of those devices.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_AAD.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.CAL">
+            <summary>
+            The Calibration query causes a device to perform an internal self-calibration and generate a response that indicates whether or not the device completed the self-calibration without error.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_CAL.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.CLS">
+            <summary>
+            This command clears the event registers in all register groups. This command also clears the Error queue. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_CLS.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.DDT">
+            <summary>
+            The Define Device Trigger command stores a command sequence that is executed when a group execute trigger (GET), IEEE 488.1 interface message, or *TRG common command is received.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_DDT.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.DLF">
+            <summary>
+            The Disable Listener Function command causes a device to cease being a listener (change to L0 subset). 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_DLF.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.DMC">
+            <summary>
+            The Define Macro command allows the programmer to assign a sequence of zero or more program message unit elements to a macro label.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_DMC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.EMC">
+            <summary>
+            The Enable Macro command enables and disables expansion of macros. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_EMC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.ESE">
+            <summary>
+            This command enables bits in the enable register for the Standard Event Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_ESE.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.ESR">
+            <summary>
+            This command queries the event register for the Standard Event Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_ESR_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.GMC">
+            <summary>
+            The Get Macro Contents query allows the current definition of a macro to be retrieved from a device.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_GMC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.IDN">
+            <summary>
+            This command reads the instrument's (mainframe) identification string which contains comma-separated fields.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_IDN_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.IST">
+            <summary>
+            The Individual Status query allows the programmer to read the current state of the IEEE 488.1 defined “ist” local message in the device.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_IST.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.LMC">
+            <summary>
+            This query returns the currently defined macro labels.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_LMC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.LRN">
+            <summary>
+            This command returns the learn string, which is an ASCII string of SCPI commands.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_LRN_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.OPC">
+             <summary>
+             This command sets the "Operation Complete" bit (bit 0) in the Standard Event register at the completion of the current operation.
+            This command returns "1" to the output buffer at the completion of the current operation. 
+            
+            
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_OPC.htm
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_OPC_.htm
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.OPT">
+            <summary>
+            The Option Identification query is for identifying reportable device options over the system interface.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_OPT.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.PCB">
+            <summary>
+            The Pass Control Back command is used by a controller to tell a device, being a potential controller, to which address the control is to be passed back when the device (acting as a controller) sends the IEEE 488.1 interface message, take control (TCT). 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PCB.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.PMC">
+            <summary>
+            The Purge Macros command causes the device to delete all macros that may have been previously defined using the *DMC command. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PMC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.PRE">
+             <summary>
+             The Parallel Poll Enable Register command sets the Parallel Poll Enable Register bits.
+            The Parallel Poll Enable Register query allows the programmer to determine the current contents of the Parallel Poll Enable Register.
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PRE.htm
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.PSC">
+            <summary>
+            This command enables or disables the clearing of certain enable registers at power on. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PSC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.PUD">
+             <summary>
+             The Protected User Data command stores data unique to the device such as calibration date, usage time, environmental conditions, and inventory control numbers.
+            The Protected User Data query allows the programmer to retrieve the contents of the *PUD storage area.
+            
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PUD.htm
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.RCL">
+            <summary>
+            This command recalls the instrument state stored in the specified storage location.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RCL.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.RDT">
+             <summary>
+             The Resource Description Transfer command allows a Resource Description to be stored in a device.
+            The Resource Description Transfer query allows a Resource Description to be retrieved from a device. The Resource Description may be memory or in a read-write memory settable by the *RDT command.
+            
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RDT.htm
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.RST">
+            <summary>
+            This command resets the multimeter to the Factory configuration.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RST.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.SAV">
+            <summary>
+            This command stores (saves) the current instrument state in the specified storage location.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_SAV.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.SRE">
+            <summary>
+            This command enables bits in the enable register for the Status Byte Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_SRE.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.STB">
+            <summary>
+            This command queries the condition register for the Status Byte Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_STB_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.TRG">
+            <summary>
+            This command is used to trigger the instrument from the remote interface. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_TRG.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.TST">
+            <summary>
+            This command performs a complete self-test of the instrument and returns a pass/fail indication.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_TST_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.WAI">
+            <summary>
+            This command configures the instrument's output buffer to wait for all pending operations to complete before executing any additional commands over the interface.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_WAI.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.RMC">
+            <summary>
+            The Remove Individual Macro command removes a single macro definition from the device. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RMC.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SCPIClass.SDS">
+            <summary>
+            The Save Default Device Settings command initializes the contents of a save/recall register.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_SDS.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.STATusClass.PRESet">
+            <summary>
+            This command clears all bits in the Questionable Data enable register and the Standard Operation enable register.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_PRESet.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.OPERationClass.CONDition">
+            <summary>
+            This command queries the condition register for the Standard Operation Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_OPERation_CONDition_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.OPERationClass.ENABle">
+            <summary>
+            This command enables bits in the enable register for the Standard Operation Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_OPERation_ENABle.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.OPERationClass.EVENt">
+            <summary>
+            This command queries the event register for the Standard Operation Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_OPERation__EVENt__.htm
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.CONDition.CONDitionClass">
+            <summary>
+            This command queries the condition register for the Standard Operation Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_OPERation_CONDition_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.CONDition.CONDitionClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.ENABle.ENABleClass">
+            <summary>
+            This command enables bits in the enable register for the Standard Operation Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_OPERation_ENABle.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.ENABle.ENABleClass.Command(System.Int32)">
+            <param name="enable_value">A decimal value which corresponds to the binary-weighted sum of the bits in the register.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.ENABle.ENABleClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.EVENt.EVENtClass">
+            <summary>
+            This command queries the event register for the Standard Operation Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_OPERation__EVENt__.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.OPERation.EVENt.EVENtClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.QUEStionableClass.CONDition">
+            <summary>
+            This command queries the condition register for the Questionable Data Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_QUEStionable_CONDition_.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.QUEStionableClass.ENABle">
+            <summary>
+            This command enables bits in the enable register for the Questionable Data Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_QUEStionable_ENABle.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.QUEStionableClass.EVENt">
+            <summary>
+            This command queries the event register for the Questionable Data Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_QUEStionable__EVENt__.htm
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.CONDition.CONDitionClass">
+            <summary>
+            This command queries the condition register for the Questionable Data Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_QUEStionable_CONDition_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.CONDition.CONDitionClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.ENABle.ENABleClass">
+            <summary>
+            This command enables bits in the enable register for the Questionable Data Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_QUEStionable_ENABle.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.ENABle.ENABleClass.Command(System.Int32)">
+            <param name="enable_value">A decimal value which corresponds to the binary-weighted sum of the bits in the register.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.ENABle.ENABleClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.EVENt.EVENtClass">
+            <summary>
+            This command queries the event register for the Questionable Data Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_QUEStionable__EVENt__.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.QUEStionable.EVENt.EVENtClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.PRESet.PRESetClass">
+            <summary>
+            This command clears all bits in the Questionable Data enable register and the Standard Operation enable register.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/STATus_Subsystem/STATus_PRESet.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STATus.PRESet.PRESetClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.SYSTemClass.ERRor">
+            <summary>
+            This command reads and clears one error from the instrument's error queue. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/SYSTem_Subsystem/SYSTem_ERRor.htm
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.SYSTemClass.VERSion">
+            <summary>
+            This command returns the version of the SCPI (Standard Commands for Programmable Instruments) standard with which the instrument is in compliance.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/SYSTem_Subsystem/SYSTem_VERSion_.htm
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.ERRor.ERRorClass">
+            <summary>
+            This command reads and clears one error from the instrument's error queue. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/SYSTem_Subsystem/SYSTem_ERRor.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.ERRor.ERRorClass.Query(System.Int32@,System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.ERRor.ERRorClass.NEXT">
+            <summary>
+            This command reads and clears one error from the instrument's error queue.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/SYSTem_Subsystem/SYSTem_ERRor__NEXT__.htm
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.ERRor.NEXT.NEXTClass">
+            <summary>
+            This command reads and clears one error from the instrument's error queue.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/SYSTem_Subsystem/SYSTem_ERRor__NEXT__.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.ERRor.NEXT.NEXTClass.Query(System.Double@,System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.VERSion.VERSionClass">
+            <summary>
+            This command returns the version of the SCPI (Standard Commands for Programmable Instruments) standard with which the instrument is in compliance.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/SYSTem_Subsystem/SYSTem_VERSion_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SYSTem.VERSion.VERSionClass.Query(System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.AAD.AADClass">
+            <summary>
+            This command, in conjunction with the Address Set protocol, allows the controller to detect all address-configurable devices (that is, devices that implement this command) and assign an IEEE 488.1 address to each of those devices.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_AAD.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.AAD.AADClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.CAL.CALClass">
+            <summary>
+            The Calibration query causes a device to perform an internal self-calibration and generate a response that indicates whether or not the device completed the self-calibration without error.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_CAL.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.CAL.CALClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.CLS.CLSClass">
+            <summary>
+            This command clears the event registers in all register groups. This command also clears the Error queue. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_CLS.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.CLS.CLSClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DDT.DDTClass">
+            <summary>
+            The Define Device Trigger command stores a command sequence that is executed when a group execute trigger (GET), IEEE 488.1 interface message, or *TRG common command is received.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_DDT.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DDT.DDTClass.Command1(System.String)">
+            <param name="string">A command sequence that is executed when a group execute trigger (GET), IEEE 488.1 interface message, or *TRG common command is received.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DDT.DDTClass.Command2(System.String[])">
+            <param name="block_data">A command sequence that is executed when a group execute trigger (GET), IEEE 488.1 interface message, or *TRG common command is received.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DDT.DDTClass.Query3(System.Byte[]@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DLF.DLFClass">
+            <summary>
+            The Disable Listener Function command causes a device to cease being a listener (change to L0 subset). 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_DLF.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DLF.DLFClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DMC.DMCClass">
+            <summary>
+            The Define Macro command allows the programmer to assign a sequence of zero or more program message unit elements to a macro label.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_DMC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DMC.DMCClass.Command1(System.String,System.String[])">
+            <param name="string">The macro label</param>
+            <param name="block_data">The macro definition</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.DMC.DMCClass.Command2(System.String,System.String)">
+            <param name="string">The macro label</param>
+            <param name="macro_string">The macro definition</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.EMC.EMCClass">
+            <summary>
+            The Enable Macro command enables and disables expansion of macros. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_EMC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.EMC.EMCClass.Command(System.Int32)">
+            <param name="integer">Controls whether macro expansion is enabled or disabled.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.EMC.EMCClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.ESE.ESEClass">
+            <summary>
+            This command enables bits in the enable register for the Standard Event Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_ESE.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.ESE.ESEClass.Command(System.Int32)">
+            <param name="enable_value">A decimal value which corresponds to the binary-weighted sum of the bits in the register.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.ESE.ESEClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.ESR.ESRClass">
+            <summary>
+            This command queries the event register for the Standard Event Register group. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_ESR_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.ESR.ESRClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.GMC.GMCClass">
+            <summary>
+            The Get Macro Contents query allows the current definition of a macro to be retrieved from a device.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_GMC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.GMC.GMCClass.Query(System.String,System.Byte[]@)">
+            <param name="label">The macro label.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.IDN.IDNClass">
+            <summary>
+            This command reads the instrument's (mainframe) identification string which contains comma-separated fields.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_IDN_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.IDN.IDNClass.Query(System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.IST.ISTClass">
+            <summary>
+            The Individual Status query allows the programmer to read the current state of the IEEE 488.1 defined “ist” local message in the device.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_IST.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.IST.ISTClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.LMC.LMCClass">
+            <summary>
+            This query returns the currently defined macro labels.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_LMC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.LMC.LMCClass.Query(System.String[]@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.LRN.LRNClass">
+            <summary>
+            This command returns the learn string, which is an ASCII string of SCPI commands.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_LRN_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.LRN.LRNClass.Query(System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.OPC.OPCClass">
+             <summary>
+             This command sets the "Operation Complete" bit (bit 0) in the Standard Event register at the completion of the current operation.
+            This command returns "1" to the output buffer at the completion of the current operation. 
+            
+            
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_OPC.htm
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_OPC_.htm
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.OPC.OPCClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.OPC.OPCClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.OPT.OPTClass">
+            <summary>
+            The Option Identification query is for identifying reportable device options over the system interface.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_OPT.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.OPT.OPTClass.Query(System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PCB.PCBClass">
+            <summary>
+            The Pass Control Back command is used by a controller to tell a device, being a potential controller, to which address the control is to be passed back when the device (acting as a controller) sends the IEEE 488.1 interface message, take control (TCT). 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PCB.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PCB.PCBClass.Command(System.Int32,System.Int32)">
+             <param name="integer1">The primary address of the controller sending the command.</param>
+             <param name="integer2">(Pass null to omit this optional parameter or ignore it)
+            The secondary address of the controller sending the command.</param>
+             <summary>
+             
+             </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PCB.PCBClass.Command(System.Int32,System.Object)">
+             <param name="integer1">The primary address of the controller sending the command.</param>
+             <param name="integer2">(Pass null to omit this optional parameter or ignore it)
+            The secondary address of the controller sending the command.</param>
+             <summary>
+             
+             </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PMC.PMCClass">
+            <summary>
+            The Purge Macros command causes the device to delete all macros that may have been previously defined using the *DMC command. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PMC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PMC.PMCClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PRE.PREClass">
+             <summary>
+             The Parallel Poll Enable Register command sets the Parallel Poll Enable Register bits.
+            The Parallel Poll Enable Register query allows the programmer to determine the current contents of the Parallel Poll Enable Register.
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PRE.htm
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PRE.PREClass.Command(System.Int32)">
+            <param name="integer">The Parallel Poll Enable Register.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PRE.PREClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PSC.PSCClass">
+            <summary>
+            This command enables or disables the clearing of certain enable registers at power on. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PSC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PSC.PSCClass.Command(System.Int32)">
+            <param name="psc">Controls the clearing of certain enable registers at power on.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PSC.PSCClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PUD.PUDClass">
+             <summary>
+             The Protected User Data command stores data unique to the device such as calibration date, usage time, environmental conditions, and inventory control numbers.
+            The Protected User Data query allows the programmer to retrieve the contents of the *PUD storage area.
+            
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_PUD.htm
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PUD.PUDClass.Command1(System.String)">
+            <param name="string">Instrument data.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PUD.PUDClass.Command2(System.Byte[])">
+            <param name="block_data">Instrument data.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.PUD.PUDClass.Query3(System.Byte[]@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RCL.RCLClass">
+            <summary>
+            This command recalls the instrument state stored in the specified storage location.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RCL.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RCL.RCLClass.Command(System.Int32)">
+            <param name="rcl">The instrument state register identifier.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RDT.RDTClass">
+             <summary>
+             The Resource Description Transfer command allows a Resource Description to be stored in a device.
+            The Resource Description Transfer query allows a Resource Description to be retrieved from a device. The Resource Description may be memory or in a read-write memory settable by the *RDT command.
+            
+             </summary>
+             <remarks>
+             file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RDT.htm
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RDT.RDTClass.Command1(System.String)">
+            <param name="string">The Resource Description.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RDT.RDTClass.Command2(System.Byte[])">
+            <param name="block_data">The Resource Description.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RDT.RDTClass.Query3(System.Byte[]@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RST.RSTClass">
+            <summary>
+            This command resets the multimeter to the Factory configuration.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RST.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RST.RSTClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SAV.SAVClass">
+            <summary>
+            This command stores (saves) the current instrument state in the specified storage location.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_SAV.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SAV.SAVClass.Command(System.Int32)">
+            <param name="sav">The instrument state register identifier.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SRE.SREClass">
+            <summary>
+            This command enables bits in the enable register for the Status Byte Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_SRE.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SRE.SREClass.Command(System.Int32)">
+            <param name="enable_value">A decimal value which corresponds to the binary-weighted sum of the bits in the register.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SRE.SREClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STB.STBClass">
+            <summary>
+            This command queries the condition register for the Status Byte Register group.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_STB_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.STB.STBClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.TRG.TRGClass">
+            <summary>
+            This command is used to trigger the instrument from the remote interface. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_TRG.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.TRG.TRGClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.TST.TSTClass">
+            <summary>
+            This command performs a complete self-test of the instrument and returns a pass/fail indication.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_TST_.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.TST.TSTClass.Query(System.Int32@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.WAI.WAIClass">
+            <summary>
+            This command configures the instrument's output buffer to wait for all pending operations to complete before executing any additional commands over the interface.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_WAI.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.WAI.WAIClass.Command">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RMC.RMCClass">
+            <summary>
+            The Remove Individual Macro command removes a single macro definition from the device. 
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_RMC.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.RMC.RMCClass.Command(System.String)">
+            <param name="label">The label of the macro to be removed.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SDS.SDSClass">
+            <summary>
+            The Save Default Device Settings command initializes the contents of a save/recall register.
+            </summary>
+            <remarks>
+            file:///C:/ProgramData/Keysight/Command%20Expert/ScpiCommandSets/4f69a1f4-88d1-4939-916c-dc95e07e213a/docs/IEEE-488_Commands/_SDS.htm
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.SCPI.SDS.SDSClass.Command(System.Int32)">
+            <param name="integer">The save/recall register identifier.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.DefaultTimeout">
+             <summary>
+             DefaultTimeout specifies the timeout, in milliseconds, for queries issued to this instrument.
+            
+            A timeout will occur if there is no response from the instrument within the specified duration.
+            
+            A value of -1 is used to specify no timeout.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.ErrorQueryBehavior">
+             <summary>
+             ErrorQueryBehavior specifies whether Command Expert automatically retrieves errors from the instrument's SCPI error queue by sending SYST:ERR? queries. Command Expert displays errors retrieved from the SCPI error queue in the Results column of the Sequence pane.
+            
+            The supported values for ErrorQueryBehavior are:
+            
+                 None - SYST:ERR? queries will not be automatically sent.
+            
+                 ErrorQueryPerCommand - a :SYST:ERR? query will be sent after each command, and after each query that times out.
+            
+                 ErrorQueryPerCommandAndQuery - a :SYST:ERR? query will be sent after each command and after each query.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.OpcBehavior">
+             <summary>
+             OpcBehavior specifies whether Command Expert automatically sends a *OPC? query after each command.
+            
+            The supported values for OpcBehavior are:
+            
+                 None - *OPC? queries will not be automatically sent to the instrument.
+            
+                 OpcPerCommand - an *OPC? query will be sent after every command, and no further commands or queries will be sent until the *OPC? returns.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.OmitDefaultKeywords">
+            <summary>
+            OmitDefaultKeywords specifies whether to omit default keywords when sending SCPI commands.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.UseShortFormKeywords">
+            <summary>
+            UseShortFormKeywords specifies whether to use the short form of SPCI keywords when sending SCPI commands.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.IgnoredErrors">
+             <summary>
+             IgnoredErrors is a string that specifies the list of SCPI error codes that will be ignored during execution.
+            
+            For example, setting IgnoredErrors to the string "1:100,301:400" specifies that error codes from 1 to 100 inclusive and 301 to 400 inclusive will be ignored.
+            
+            When setting IgnoredErrors, the input string should contain a list of zero or more items, separated by commas. Each item is either an integer, or a range of the form X:Y where X and Y are integers. The integers can be positive, 0, or negative.
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.AddToIgnoredErrors">
+             <summary>
+             AddToIgnoredErrors adds the specified error codes to IgnoredErrors (the list of SCPI error codes ignored during execution).
+            
+            For example, invoking AddToIgnoredErrors with the string "1:100,301:400" will add the error codes from 1 to 100 inclusive and 301 to 400 inclusive.
+            
+            When invoking AddToIgnoredErrors, the input string should contain a list of zero or more items, separated by commas. Each item is either an integer, or a range of the form X:Y where X and Y are integers. The integers can be positive, 0, or negative.
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.RemoveFromIgnoredErrors">
+             <summary>
+             RemoveFromIgnoredErrors removes the specified error codes from IgnoredErrors (the list of SCPI error codes ignored during execution).
+            
+            For example, invoking RemoveFromIgnoredErrors with the string "1:100,301:400" will remove the error codes from 1 to 100 inclusive and 301 to 400 inclusive.
+            
+            When invoking RemoveFromIgnoredErrors, the input string should contain a list of zero or more items, separated by commas. Each item is either an integer, or a range of the form X:Y where X and Y are integers. The integers can be positive, 0, or negative.
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.Command">
+            <summary>
+            Sends a SCPI command that does not return a response from the instrument.  Use the transport resource Query if the instrument returns a response.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.Query">
+            <summary>
+            Sends a SCPI query string directly to the instrument and returns the result.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.CommandBatching">
+             <summary>
+             CommandBatching specifies SCPI command batching behavior.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.TransportClass.SendBatchedCommands">
+             <summary>
+             SendBatchedCommands sends any commands that are currently batched.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.DefaultTimeout.DefaultTimeoutClass">
+             <summary>
+             DefaultTimeout specifies the timeout, in milliseconds, for queries issued to this instrument.
+            
+            A timeout will occur if there is no response from the instrument within the specified duration.
+            
+            A value of -1 is used to specify no timeout.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.ErrorQueryBehavior.ErrorQueryBehaviorClass">
+             <summary>
+             ErrorQueryBehavior specifies whether Command Expert automatically retrieves errors from the instrument's SCPI error queue by sending SYST:ERR? queries. Command Expert displays errors retrieved from the SCPI error queue in the Results column of the Sequence pane.
+            
+            The supported values for ErrorQueryBehavior are:
+            
+                 None - SYST:ERR? queries will not be automatically sent.
+            
+                 ErrorQueryPerCommand - a :SYST:ERR? query will be sent after each command, and after each query that times out.
+            
+                 ErrorQueryPerCommandAndQuery - a :SYST:ERR? query will be sent after each command and after each query.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.OpcBehavior.OpcBehaviorClass">
+             <summary>
+             OpcBehavior specifies whether Command Expert automatically sends a *OPC? query after each command.
+            
+            The supported values for OpcBehavior are:
+            
+                 None - *OPC? queries will not be automatically sent to the instrument.
+            
+                 OpcPerCommand - an *OPC? query will be sent after every command, and no further commands or queries will be sent until the *OPC? returns.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.OmitDefaultKeywords.OmitDefaultKeywordsClass">
+            <summary>
+            OmitDefaultKeywords specifies whether to omit default keywords when sending SCPI commands.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.UseShortFormKeywords.UseShortFormKeywordsClass">
+            <summary>
+            UseShortFormKeywords specifies whether to use the short form of SPCI keywords when sending SCPI commands.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.IgnoredErrors.IgnoredErrorsClass">
+             <summary>
+             IgnoredErrors is a string that specifies the list of SCPI error codes that will be ignored during execution.
+            
+            For example, setting IgnoredErrors to the string "1:100,301:400" specifies that error codes from 1 to 100 inclusive and 301 to 400 inclusive will be ignored.
+            
+            When setting IgnoredErrors, the input string should contain a list of zero or more items, separated by commas. Each item is either an integer, or a range of the form X:Y where X and Y are integers. The integers can be positive, 0, or negative.
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.AddToIgnoredErrors.AddToIgnoredErrorsClass">
+             <summary>
+             AddToIgnoredErrors adds the specified error codes to IgnoredErrors (the list of SCPI error codes ignored during execution).
+            
+            For example, invoking AddToIgnoredErrors with the string "1:100,301:400" will add the error codes from 1 to 100 inclusive and 301 to 400 inclusive.
+            
+            When invoking AddToIgnoredErrors, the input string should contain a list of zero or more items, separated by commas. Each item is either an integer, or a range of the form X:Y where X and Y are integers. The integers can be positive, 0, or negative.
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.AddToIgnoredErrors.AddToIgnoredErrorsClass.Invoke(System.String)">
+            <param name="errorsToAdd">The list of error codes to ignore.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.RemoveFromIgnoredErrors.RemoveFromIgnoredErrorsClass">
+             <summary>
+             RemoveFromIgnoredErrors removes the specified error codes from IgnoredErrors (the list of SCPI error codes ignored during execution).
+            
+            For example, invoking RemoveFromIgnoredErrors with the string "1:100,301:400" will remove the error codes from 1 to 100 inclusive and 301 to 400 inclusive.
+            
+            When invoking RemoveFromIgnoredErrors, the input string should contain a list of zero or more items, separated by commas. Each item is either an integer, or a range of the form X:Y where X and Y are integers. The integers can be positive, 0, or negative.
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.RemoveFromIgnoredErrors.RemoveFromIgnoredErrorsClass.Invoke(System.String)">
+            <param name="errorsToRemove">The list of error codes to stop ignoring.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Command.CommandClass">
+            <summary>
+            Sends a SCPI command that does not return a response from the instrument.  Use the transport resource Query if the instrument returns a response.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Command.CommandClass.Invoke(System.String)">
+            <param name="commandString">A SCPI command to send to the instrument.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Query.QueryClass">
+            <summary>
+            Sends a SCPI query string directly to the instrument and returns the result.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Query.QueryClass.Invoke(System.String,System.String@)">
+            <param name="queryString">A SCPI query to send to the instrument.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.CommandBatching.CommandBatchingClass">
+             <summary>
+             CommandBatching specifies SCPI command batching behavior.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.SendBatchedCommands.SendBatchedCommandsClass">
+             <summary>
+             SendBatchedCommands sends any commands that are currently batched.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.SendBatchedCommands.SendBatchedCommandsClass.Invoke">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElementClass.SetArrayElement_Double">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElementClass.SetArrayElement_Int">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElementClass.SetArrayElement_Byte">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElementClass.SetArrayElement_String">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_Double.SetArrayElement_DoubleClass">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_Double.SetArrayElement_DoubleClass.Invoke(System.Double[],System.Int32,System.Double,System.Double[]@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to set.</param>
+            <param name="value">The new value for the specified element.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_Int.SetArrayElement_IntClass">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_Int.SetArrayElement_IntClass.Invoke(System.Int32[],System.Int32,System.Int32,System.Int32[]@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to set.</param>
+            <param name="value">The new value for the specified element.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_Byte.SetArrayElement_ByteClass">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_Byte.SetArrayElement_ByteClass.Invoke(System.Byte[],System.Int32,System.Byte,System.Byte[]@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to set.</param>
+            <param name="value">The new value for the specified element.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_String.SetArrayElement_StringClass">
+             <summary>
+             Set a value to the element at the specified position in the one-dimensional array.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.SetArrayElement.SetArrayElement_String.SetArrayElement_StringClass.Invoke(System.String[],System.Int32,System.String,System.String[]@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to set.</param>
+            <param name="value">The new value for the specified element.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElementClass.GetArrayElement_Double">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElementClass.GetArrayElement_Int">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElementClass.GetArrayElement_Byte">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElementClass.GetArrayElement_String">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_Double.GetArrayElement_DoubleClass">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_Double.GetArrayElement_DoubleClass.Invoke(System.Double[],System.Int32,System.Double@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to get.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_Int.GetArrayElement_IntClass">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_Int.GetArrayElement_IntClass.Invoke(System.Int32[],System.Int32,System.Int32@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to get.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_Byte.GetArrayElement_ByteClass">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_Byte.GetArrayElement_ByteClass.Invoke(System.Byte[],System.Int32,System.Byte@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to get.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_String.GetArrayElement_StringClass">
+             <summary>
+             Get an element of one-dimensional array at the specified index.
+            Throw ArgumentOutOfRangeException when index is outside the range of valid indexes for the current array.
+            Throw ArgumentException when the current Array does not have exactly one dimension.
+            
+             </summary>
+             <remarks>
+             </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Array.GetArrayElement.GetArrayElement_String.GetArrayElement_StringClass.Invoke(System.String[],System.Int32,System.String@)">
+            <param name="array">The one-dimensional, zero-based array.</param>
+            <param name="index">The zero-based index of the element to get.</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.TerminatorClass.GetWriteTerminator">
+            <summary>
+            Get the write terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.TerminatorClass.SetWriteTerminator">
+            <summary>
+            Change the write terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.TerminatorClass.GetReadTerminator">
+            <summary>
+            Get the read terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.TerminatorClass.SetReadTerminator">
+            <summary>
+            Change the read terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.GetWriteTerminator.GetWriteTerminatorClass">
+            <summary>
+            Get the write terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.GetWriteTerminator.GetWriteTerminatorClass.Invoke(System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.SetWriteTerminator.SetWriteTerminatorClass">
+            <summary>
+            Change the write terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.SetWriteTerminator.SetWriteTerminatorClass.Invoke(System.String)">
+            <param name="terminator">The terminating characters</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.GetReadTerminator.GetReadTerminatorClass">
+            <summary>
+            Get the read terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.GetReadTerminator.GetReadTerminatorClass.Invoke(System.String@)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.SetReadTerminator.SetReadTerminatorClass">
+            <summary>
+            Change the read terminating characters of SCPI
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Terminator.SetReadTerminator.SetReadTerminatorClass.Invoke(System.String)">
+            <param name="terminator">The terminating characters</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.StringToInt">
+            <summary>
+            Convert String into Integer
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.StringToDouble">
+            <summary>
+            Convert String into Double
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.StringToByte">
+            <summary>
+            Convert String into Byte
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.IntToString">
+            <summary>
+            Convert Integer into String
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.IntToDouble">
+            <summary>
+            Convert Integer into Double
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.IntToByte">
+            <summary>
+            Convert Integer into Byte
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.DoubleToByte">
+            <summary>
+            Convert Double into Byte
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.DoubleToInt">
+            <summary>
+            Convert Double into Int
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.DoubleToString">
+            <summary>
+            Convert Double into String
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.ByteToString">
+            <summary>
+            Convert Byte into String
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.ByteToDouble">
+            <summary>
+            Convert Byte into Double
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ConvertClass.ByteToInt">
+            <summary>
+            Convert Byte into Int
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.StringToInt.StringToIntClass">
+            <summary>
+            Convert String into Integer
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.StringToInt.StringToIntClass.Invoke(System.String,System.Int32@)">
+            <param name="OriginalString">The original string value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.StringToDouble.StringToDoubleClass">
+            <summary>
+            Convert String into Double
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.StringToDouble.StringToDoubleClass.Invoke(System.String,System.Double@)">
+            <param name="OriginalString">The original string value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.StringToByte.StringToByteClass">
+            <summary>
+            Convert String into Byte
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.StringToByte.StringToByteClass.Invoke(System.String,System.Byte@)">
+            <param name="OriginalString">The original string value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.IntToString.IntToStringClass">
+            <summary>
+            Convert Integer into String
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.IntToString.IntToStringClass.Invoke(System.Int32,System.String@)">
+            <param name="OriginalInt">The original int value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.IntToDouble.IntToDoubleClass">
+            <summary>
+            Convert Integer into Double
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.IntToDouble.IntToDoubleClass.Invoke(System.Int32,System.Double@)">
+            <param name="OriginalInt">The original int value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.IntToByte.IntToByteClass">
+            <summary>
+            Convert Integer into Byte
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.IntToByte.IntToByteClass.Invoke(System.Int32,System.Byte@)">
+            <param name="OriginalInt">The original int value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.DoubleToByte.DoubleToByteClass">
+            <summary>
+            Convert Double into Byte
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.DoubleToByte.DoubleToByteClass.Invoke(System.Double,System.Byte@)">
+            <param name="OriginalDouble">The original double value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.DoubleToInt.DoubleToIntClass">
+            <summary>
+            Convert Double into Int
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.DoubleToInt.DoubleToIntClass.Invoke(System.Double,System.Int32@)">
+            <param name="OriginalDouble">The original double value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.DoubleToString.DoubleToStringClass">
+            <summary>
+            Convert Double into String
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.DoubleToString.DoubleToStringClass.Invoke(System.Double,System.String@)">
+            <param name="OriginalDouble">The original double value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ByteToString.ByteToStringClass">
+            <summary>
+            Convert Byte into String
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ByteToString.ByteToStringClass.Invoke(System.Int32,System.String@)">
+            <param name="OriginalByte">The original byte value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ByteToDouble.ByteToDoubleClass">
+            <summary>
+            Convert Byte into Double
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ByteToDouble.ByteToDoubleClass.Invoke(System.Int32,System.Double@)">
+            <param name="OriginalByte">The original byte value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ByteToInt.ByteToIntClass">
+            <summary>
+            Convert Byte into Int
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Convert.ByteToInt.ByteToIntClass.Invoke(System.Int32,System.Int32@)">
+            <param name="OriginalByte">The original byte value</param>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.ComponentVersion">
+            <summary>
+            A numeric version for this component.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.HardwareInterfaceName">
+            <summary>
+            The Name of the Hardware Interface (GPIB, ASRL, etc)
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.HardwareInterfaceNumber">
+            <summary>
+            The Board Number of the Hardware Interface
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.HardwareInterfaceType">
+            <summary>
+            The type number of the Hardware Interface
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.IOProtocol">
+            <summary>
+            This property sets the protocol type for I/O communication with the physical resource.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.LastStatus">
+            <summary>
+            The return value from the last method call on this interface.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.LockState">
+            <summary>
+            The current locking state of the interface.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.OptionString">
+            <summary>
+            The Option String corresponding to the current state of the resource.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.ProgID">
+            <summary>
+            The Programmatic ID that can be used by COM to create this object.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.ResourceName">
+            <summary>
+            The VISA Resource name of the currently open resource.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.SendEndEnabled">
+            <summary>
+            This property enables/disables sending the END signal on the last byte of a write.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.SessionType">
+            <summary>
+            The session type string, such as "INSTR" or "INTFC".
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.SoftwareManufacturerID">
+            <summary>
+            The ID number of the vendor of this software component.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.SoftwareManufacturerName">
+            <summary>
+            The name of the vendor of this software component.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.SpecVersion">
+            <summary>
+            This property returns the VISA-defined version information for the specification version this component complies to.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.TerminationCharacter">
+            <summary>
+            This property sets/gets the ASCII character used to end reading.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.TerminationCharacterEnabled">
+            <summary>
+            This property enables/disables ending reads upon reception of the termination character.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="P:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.VisaClass.Clear">
+            <summary>
+            This function performs an IEEE 488.2-style clear.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.ComponentVersion.ComponentVersionClass">
+            <summary>
+            A numeric version for this component.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.HardwareInterfaceName.HardwareInterfaceNameClass">
+            <summary>
+            The Name of the Hardware Interface (GPIB, ASRL, etc)
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.HardwareInterfaceNumber.HardwareInterfaceNumberClass">
+            <summary>
+            The Board Number of the Hardware Interface
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.HardwareInterfaceType.HardwareInterfaceTypeClass">
+            <summary>
+            The type number of the Hardware Interface
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.IOProtocol.IOProtocolClass">
+            <summary>
+            This property sets the protocol type for I/O communication with the physical resource.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.LastStatus.LastStatusClass">
+            <summary>
+            The return value from the last method call on this interface.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.LockState.LockStateClass">
+            <summary>
+            The current locking state of the interface.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.OptionString.OptionStringClass">
+            <summary>
+            The Option String corresponding to the current state of the resource.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.ProgID.ProgIDClass">
+            <summary>
+            The Programmatic ID that can be used by COM to create this object.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.ResourceName.ResourceNameClass">
+            <summary>
+            The VISA Resource name of the currently open resource.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.SendEndEnabled.SendEndEnabledClass">
+            <summary>
+            This property enables/disables sending the END signal on the last byte of a write.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.SessionType.SessionTypeClass">
+            <summary>
+            The session type string, such as "INSTR" or "INTFC".
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.SoftwareManufacturerID.SoftwareManufacturerIDClass">
+            <summary>
+            The ID number of the vendor of this software component.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.SoftwareManufacturerName.SoftwareManufacturerNameClass">
+            <summary>
+            The name of the vendor of this software component.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.SpecVersion.SpecVersionClass">
+            <summary>
+            This property returns the VISA-defined version information for the specification version this component complies to.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.TerminationCharacter.TerminationCharacterClass">
+            <summary>
+            This property sets/gets the ASCII character used to end reading.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.TerminationCharacterEnabled.TerminationCharacterEnabledClass">
+            <summary>
+            This property enables/disables ending reads upon reception of the termination character.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="T:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.Clear.ClearClass">
+            <summary>
+            This function performs an IEEE 488.2-style clear.
+            </summary>
+            <remarks>
+            </remarks>
+        </member>
+        <member name="M:Agilent.CommandExpert.ScpiNet.AgSCPI99_1_0.Transport.Visa.Clear.ClearClass.Invoke">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>

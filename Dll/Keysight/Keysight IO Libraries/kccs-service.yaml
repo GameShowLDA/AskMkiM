@@ -1,0 +1,21 @@
+server-properties:
+  host: "0.0.0.0"
+  port: "9290"
+  dsPollMaxTimeout: 60 #in seconds
+  dsResponseTimeoutSec: 20 
+  rescanAllWaitingMinute: 10
+  jwt-token:
+    token-expire: 60
+    expire-unit: "min"
+
+traffic-control:
+  requestDelay: 0    # Delay time in milliseconds for client request
+  responseDelay: 100 # Delay time in milliseconds for response to client
+  maxConnections: 20 # Maximum concurrent connections
+
+logging:
+  loglevel: "info"
+  consolesink: true   # Enable logging to console  
+  maxsize: 25
+  maxbackups: 10
+  maxage: 14

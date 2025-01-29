@@ -1,0 +1,36 @@
+IO Libraries Version:	18.4.30319.0 
+Copyright © Keysight Technologies, 1983-2024
+
+This software is installed on a 64-bit operating system.
+
+==============================
+64-bit VISA information (1 installed):
+   Keysight VISA
+
+64-bit IO Libraries Path:
+   C:\Program Files\Keysight\IO Libraries Suite\
+64-bit IVI Components Path:
+   C:\Program Files\IVI Foundation\IVI\
+64-bit VISA Path:
+   C:\Program Files\IVI Foundation\VISA\
+
+==============================
+32-bit VISA Information:
+   Keysight VISA: 	 The primary VISA library
+
+32-bit IO Libraries Path:
+   C:\Program Files (x86)\Keysight\IO Libraries Suite\
+32-bit IVI Components Path:
+   C:\Program Files (x86)\IVI Foundation\IVI\
+32-bit VISA Path:
+   C:\Program Files (x86)\IVI Foundation\VISA\
+
+==============================
+Registry Path:
+   HKLM\SOFTWARE\Keysight\IO Libraries Suite\CurrentVersion
+
+To the extent you are entitled to a copy of the source code for
+the open source software distributed with this product, a free copy
+is provided in the same download location where you acquired this
+software.
+

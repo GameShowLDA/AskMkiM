@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="CALCulate_Subsystems_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:conditions="Primary.TorreysP" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|CALCulate_Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>CALCulate:SCALe Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor164"></a>CALCulate:SCALe Subsystem</h1>
+        <p>This subsystem controls math scaling.</p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#DB-REF">CALCulate:SCALe:DB:REFerence<br /></a>
+        </p>
+        <p><a href="#DBM-REF">CALCulate:SCALe:DBM:REFerence<br /></a>
+        </p>
+        <p><a href="#FUNCtion">CALCulate:SCALe:FUNCtion</a>
+        </p>
+        <p><a href="#GAIN">CALCulate:SCALe:GAIN<![CDATA[
+]]></a>
+        </p>
+        <p><a href="#OFFset">CALCulate:SCALe:OFFSet<![CDATA[
+]]></a>
+        </p>
+        <p><a href="#REFerence">CALCulate:SCALe:REFerence</a><a href="#FUNCtion"><br /></a>
+        </p>
+        <p><a href="#REF-AUTO">CALCulate:SCALe:REFerence:AUTO<br /></a>
+        </p>
+        <p><a href="#STATe">CALCulate:SCALe[:STATe]</a>
+        </p>
+        <p><a href="#SCALUNIT">CALCulate:SCALe:UNIT</a>
+        </p>
+        <p><a href="#SCALUNITSTAT">CALCulate:SCALe:UNIT:STATe</a>
+        </p>
+        <p><a href="#STATe"><br /></a>
+        </p>
+        <h2 style="font-size: 14px;"><a name="kanchor165"></a><a name="DB-REF"></a>CALCulate:SCALe:DB:REFerence  {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:DB:REFerence?  [{MIN|MAX|DEF}]</h2>
+        <p>Stores a relative value in the multimeter's dB Relative Register, which is used for the dB function in <a href="#FUNCtion">CALCulate:SCALe:FUNCtion</a>. When the dB function is enabled, this value is subtracted from each voltage measurement after the measurement is converted to dBm.</p>
+        <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">-200.0 dBm to +200.0 dBm. Default: 0.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+3.00000000E+02</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Enable dB scaling with a -10 dB reference and a 300 &#937; dBm reference resistance:</p>
+                        <p>CALC:SCAL:DBM:REF 300<br />CALC:SCAL:DB:REF -10.0 <br />CALC:SCAL:FUNC DB<br />CALC:SCAL:STAT ON</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">Specifying a reference value disables automatic reference selection (<a href="#REF-AUTO">CALCulate:SCALe:REFerence:AUTO OFF</a>).</li>
+            <li class="IndentTight" value="2">The dB relative value parameter is relative to the dBm reference resistance set with <a href="#DBM-REF">CALCulate:SCALe:DBM:REFerence</a>. </li>
+            <li class="IndentTight" value="3">The instrument sets the reference value to 0.0 with automatic reference selection enabled after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>),  or a change in measurement function.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor166"></a><a name="DBM-REF"></a>CALCulate:SCALe:DBM:REFerence  {&lt;<i>reference</i>&gt;|MIN|MAX|DEF}<br />CALCulate:SCALe:DBM:REFerence?  [{MIN|MAX|DEF}]</h2>
+            <p>Selects the reference resistance for converting voltage measurements to dBm. This reference value affects the dBm and dB scaling functions.</p>
+            <table style="mc-table-style: url('../RegTable.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">50, 75, 93, 110, 124, 125, 135, 150, 250, 300, 500, 600, 800, 900, 1000, 1200 or 8000 &#937;. Default: 600.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+3.00000000E+02</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Enable dBm scaling with a reference resistance of 300 &#937;: <br /></p>
+                            <p>CALC:SCAL:DBM:REF 300<br />CALC:SCAL:FUNC DBM <br />CALC:SCAL:STAT ON<br /></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">The instrument sets the reference value to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or a change in measurement function.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor167"></a><a name="FUNCtion"></a>CALCulate:SCALe:FUNCtion  {DB|DBM|PCT|SCALe}<br />CALCulate:SCALe:FUNCtion?</h2>
+            <p>Selects the operation  performed by the scaling function.</p>
+        </div>
+        <div>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {DB|DBM|PCT|SCALe}</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1"> DB, DBM, PCT, or SCALe</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Enable the DB scaling function referenced to the next measurement taken: <br /></p>
+                            <p>CALC:SCAL:FUNC DB<br />CALC:SCAL:STAT ON<br /></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <ul>
+            <li class="IndentTight" value="1">The PCT and SCALe functions apply only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">DB performs a relative dB computation. The result is the difference between the input signal and the stored DB relative value reference (<a href="#DB-REF">CALCulate:SCALe:DB:REFerence</a>), with both values converted to dBm (dB = measurement in dBm – relative value in dBm). For the dB function, the reference value can be automatically selected using the first measurement converted to dBm as the reference value (see <a href="#REF-AUTO">CALCulate:SCALe:REFerence:AUTO</a>), or it can be specified by <a href="#DB-REF">CALCulate:SCALe:DB:REFerence</a>. dB scaling applies to ACV and DCV measurements only.</li>
+            <li class="IndentTight" value="3">DBM performs a dBM computation. The result is logarithmic and is based on a calculation of power delivered to a reference resistance (<a href="#DBM-REF">CALCulate:SCALe:DBM:REFerence</a>), relative to 1 milliwatt. <br />(dBm = 10 × log<span style="vertical-align: sub;">10</span>(measurement <span style="vertical-align: super;">2</span> / reference resistance / 1 mW)). dBm scaling applies to ACV and DCV measurements only.</li>
+            <li class="IndentTight" value="4">PCT performs a percent change operation. The result is the percent change of the measurement from the reference value:<br /><br />Result = ((Measurement – Reference) / Reference) * 100<br /><br /> For the PCT function, the reference value can be automatically selected using the first measurement as the reference value (see <a href="#REF-AUTO">CALCulate:SCALe:REFerence:AUTO</a>), or it can be specified by <a href="#REFerence">CALCulate:SCALe:REFerence</a>. % scaling applies to all measurement functions except Ratio, Continuity, and Diode.</li>
+            <li class="IndentTight" value="5">SCALe performs an Mx-B operation.  The result is the measurement multiplied by the gain value M (<a href="#GAIN">CALCulate:SCALe:GAIN</a>) minus the offset value B (<a href="#OFFset">CALCulate:SCALe:OFFSet</a>). Mx-B scaling applies to all measurement functions except Ratio, Continuity, and Diode.</li>
+            <li class="IndentTight" value="6">Scaling function results must be in the range of -1.0E+24 to -1.0E-24, or +1.0E-24 to 1.0E+24. Results outside these limits will be replaced with -9.9E37 (negative infinity), 0, or 9.9E37 (positive infinity).</li>
+            <li class="IndentTight" value="7">You must execute CALCulate:SCALe:FUNCtion <i>before</i> executing CALCulate:SCALe[:STATe], otherwise an incompatibility error will be generated.</li>
+            <li class="IndentTight" value="8">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            <li class="IndentTight" value="9">Scaling is set to OFF when you change measurement functions (for example, changing from DCV to ACV). You must re-enable scaling after changing measurement functions.</li>
+        </ul>
+        <h2 style="font-size: 14px;"><a name="kanchor168"></a><a name="GAIN"></a>CALCulate:SCALe:GAIN {&lt;<i>gain</i>&gt;|MIN|MAX|DEF} <br />CALCulate:SCALe:GAIN?  [{MIN|MAX|DEF}]</h2>
+        <p>Stores a gain value <b style="font-style: italic;">M</b> for the scaling function in <a href="#FUNCtion">CALCulate:SCALe:FUNCtion</a>.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">-1.0E+15 to -1.0E-15, 0.0, +1.0E-15 to 1.0E+15. Default: 1.0.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E+02</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Enable <i style="font-weight: bold;">Mx-B</i> scaling with a gain of 100 and an offset of 5.</p>
+                        <p>CALC:SCAL:FUNC SCAL<br />CALC:SCAL:GAIN 100<br />CALC:SCAL:OFFS 5<br />CALC:SCAL:STAT ON</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2">The instrument sets the gain value to 0.0 after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor169"></a><a name="OFFset"></a>CALCulate:SCALe:OFFSet {&lt;<i>offset</i>&gt;|MIN|MAX|DEF} <br />CALCulate:SCALe:OFFSet?  [{MIN|MAX|DEF}]</h2>
+            <p>Stores an offset value <b style="font-style: italic;">B</b> for the scaling function in <a href="#FUNCtion">CALCulate:SCALe:FUNCtion</a>.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" style="width: 405px;" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">-1.0E+15 to -1.0E-15, 0.0, +1.0E-15 to 1.0E+15. Default: 0.0.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">+5.00000000E+00</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p>Enable <b style="font-style: italic;">Mx-B</b> scaling with a gain of 100 and an offset of 5.</p>
+                            <p>CALC:SCAL:FUNC SCAL<br />CALC:SCAL:GAIN 100<br />CALC:SCAL:OFFS 5<br />CALC:SCAL:STAT ON</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">The instrument sets the offset value to 0.0 after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor170"></a><a name="REFerence"></a>CALCulate:SCALe:REFerence {&lt;<i>reference</i>&gt;|MIN|MAX|DEF} <br />CALCulate:SCALe:REFerence?  [{MIN|MAX|DEF}]</h2>
+        <p>Stores a reference value for the PCT function  in <a href="#FUNCtion">CALCulate:SCALe:FUNCtion</a>.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">-1.0E+15 to -1.0E-15, 0.0, +1.0E-15 to 1.0E+15. Default: 0.0.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+3.00000000E+02</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Enable PCT scaling with a 100V reference.</p>
+                        <p>CALC:SCAL:REF 100<br />CALC:SCAL:FUNC PCT<br />CALC:SCAL:STAT ON</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <ul>
+                <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+                <li class="IndentTight" value="2">Specifying a reference value disables automatic reference selection (<a href="#REF-AUTO">CALCulate:SCALe:REFerence:AUTO</a> OFF).</li>
+                <li class="IndentTight" value="3">The instrument sets the reference value to 0.0 with automatic reference selection enabled after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>),  or a change in measurement function.</li>
+            </ul>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor171"></a><a name="REF-AUTO"></a>CALCulate:SCALe:REFerence:AUTO  {ON|1|OFF|0}<br />CALCulate:SCALe:REFerence:AUTO?</h2>
+            <p>Enables or disables automatic reference selection for the dB scaling functions.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Enable the DB function with automatic reference selection and use the first measurement as the reference value:<br /><br />CALC:SCAL:DBM:REF 50<br />CALC:SCAL:FUNC DB<br />CALC:SCAL:REF:AUTO ON<br />CALC:SCAL:STAT ON<br />READ?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1"><b>ON:</b> the first measurement made is used as the reference for all subsequent measurements, and automatic reference selection is disabled:<br /><blockquote><ul><li value="1"> For the dB scaling function, the first measurement is converted to dBm, and <a href="#DB-REF">CALCulate:SCALe:DB:REFerence</a> is set to the result. </li><li value="2">For the PCT scaling function, <a href="#REFerence">CALCulate:SCALe:REFerence</a> is set to the first measurement.</li></ul></blockquote></li>
+                <li class="IndentTight" value="2"><b>OFF:</b> <a href="#DB-REF">CALCulate:SCALe:DB:REFerence</a> specifies the reference for DB scaling, <a href="#REFerence">CALCulate:SCALe:REFerence</a> specifies the reference for PCT scaling.</li>
+                <li class="IndentTight" value="3">The instrument enables automatic reference selection when the scaling function is enabled (<a href="#STATe">CALCulate:SCALe:STATe ON</a>).</li>
+                <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or a change in measurement function.</li>
+                <li class="IndentTight" value="5">You must execute CALCulate:SCALe:FUNCtion <i>before</i> executing CALCulate:SCALe[:STATe], otherwise an incompatibility error will be generated.</li>
+                <li class="IndentTight" value="6">Scaling is set to OFF when you change measurement functions (for example, changing from DCV to ACV). You must re-enable scaling after changing measurement functions.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor172"></a><a name="STATe"></a>CALCulate:SCALe[:STATe]  {ON|1|OFF|0}<br />CALCulate:SCALe[:STATe]?</h2>
+            <p>Enables or disables the scaling function.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">Enable the DB function with automatic reference selection and use the first measurement as the reference value:<br /><br />CALC:SCAL:DBM:REF 50<br />CALC:SCAL:FUNC DB<br />CALC:SCAL:REF:AUTO ON<br />CALC:SCAL:STAT ON<br />READ?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Enabling the scaling function also enables automatic null value selection (<a href="#REF-AUTO">CALCulate:SCALe:REFerence:AUTO</a>).</li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), an Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or a change in measurement function.</li>
+                <li class="IndentTight" value="3">Scaling is set to OFF when you change measurement functions (for example, changing from DCV to ACV). You must re-enable scaling after changing measurement functions.</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor173"></a><a name="kanchor174"></a><a name="SCALUNIT"></a>CALCulate:SCALe:UNIT &lt;<i>quoted_string</i>&gt; <br />CALCulate:SCALe:UNIT?</h2>
+        <p class="Indented1">Allows you to specify the custom label of up to four characters (for example, RPM or °C) for scaled measurements.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">&lt;<i>quoted_string</i>&gt; A quoted ASCII string of up to four characters. </td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">"RPM"</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Enable scaling with a gain of 100 and an offset of 5, and display "PSI" with measurements on the front panel.</p>
+                        <p>CALC:SCAL:FUNC SCAL<br />CALC:SCAL:GAIN 100<br />CALC:SCAL:OFFS 5<br />CALC:SCAL:UNIT "PSI"<br />CALC:SCAL:UNIT:STAT ON<br />CALC:SCAL:STAT ON</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul type="disc" class="UL_Disc">
+            <li class="IndentTight" value="2">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="3">&lt;<i>quoted_string</i>&gt; You can use letters (A-Z), numbers (0-9), an underscore ( _ ), most standard punctuation (comma, ampersand, …), and some symbols, including the degree symbol ( ° ).</li>
+            <li class="IndentTight" value="2">If you set the measurement label to °C, °F, or K,  this has no effect the temperature units set using <a href="UNIT_TEMPerature.htm">UNIT:TEMPerature</a>.
+</li>
+            <li class="IndentTight" value="3"><a href="#SCALUNITSTAT">CALCulate:SCALe:UNIT:STATe</a> 
+ controls whether the unit string is displayed when the scaling function is enabled. </li>
+            <li class="IndentTight" value="4">The instrument 
+ resets the units to the null string after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST" class="hcp6">*RST</a>) or an Instrument 
+ Preset (<a href="SYSTem_General%20Commands.htm#PRES" class="hcp6">SYSTem:PRESet</a>).</li>
+        </ul>
+        <h2 style="font-size: 14px;"><a name="kanchor175"></a><a name="SCALUNITSTAT"></a>CALCulate:SCALe:UNIT:STATe {OFF|ON} <br />CALCulate:SCALe:UNIT:STATe?</h2>
+        <p class="Indented1"><a name="kanchor176"></a><a name="kanchor177"></a>Enables or disables displaying the unit 
+ string with measurements on the front panel when the scaling function 
+ is enabled.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: OFF.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p>Enable scaling with a gain of 100 and an offset of 5, and display "PSI" with measurements on the front panel.</p>
+                        <p>CALC:SCAL:FUNC SCAL<br />CALC:SCAL:GAIN 100<br />CALC:SCAL:OFFS 5<br />CALC:SCAL:UNIT "PSI"<br />CALC:SCAL:UNIT:STAT ON<br />CALC:SCAL:STAT ON<br /></p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul style="list-style: disc;" type="disc">
+            <li class="IndentTight" value="1">Applies only to the 34465A and 34470A.</li>
+            <li class="IndentTight" value="2"><a href="#SCALUNIT">CALCulate:SCALe:UNIT</a> 
+ specifies the unit string to be displayed.</li>
+            <li class="IndentTight" value="3">The instrument 
+ disables displaying the unit string after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST" class="hcp2">*RST</a>) or an Instrument 
+ Preset (<a href="SYSTem_General%20Commands.htm#PRES" class="hcp2">SYSTem:PRESet</a>).</li>
+        </ul>
+        
+    </body>
+</html>

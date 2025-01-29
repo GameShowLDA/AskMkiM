@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Calibration Adjustment Procedures|Calibration Overview" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Entering Calibration Values and Storing Calibration Constants</title>
+        <link href="../NoteTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor611"></a>Entering Calibration Values and Storing Calibration Constants</h1>
+        <h2>Selecting the Calibration Mode</h2>
+        <p>Use the CALibration:ADC? query to begin ADC calibration. The response to this query indicates a successful calibration (0) or a failure (1). Following the ADC calibration, use the measurement commands to set the DMM measurement parameters and functions for the mode being calibrated.</p>
+        <p><b>Front Panel: [Utility] &gt; Test/Admin &gt; Calibrate &gt; Perform Cal &gt; Cal Value &gt; Perform ADC Cal</b>
+        </p>
+        <h2><a name="EnteringAdjustVals"></a>Entering Calibration Values</h2>
+        <p>To enter a calibration value from the remote interface use CALibration:VALue &lt;<i>value</i>&gt; followed by the CALibration? query. The response to the query indicates whether the calibration is valid.</p>
+        <p><b>Front Panel: [Utility] &gt; Test/Admin &gt; Calibrate &gt; Perform Cal &gt; Cal Value &gt; (enter value) &gt; Perform Cal Step</b>
+        </p>
+        <h2><a name="StoringCalConsts"></a>Storing the Calibration Constants</h2>
+        <p>To store calibration values in non-volatile memory, use CALibration:STORe.</p>
+        <p><b>Front Panel: [Utility] &gt; Test/Admin &gt; Calibrate &gt; Save Cal Values</b>
+        </p>
+        <table style="margin-left: 0;margin-right: auto;caption-side: top;mc-table-style: url('../NoteTable.css');" class="TableStyle-NoteTable" cellspacing="0">
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <col class="TableStyle-NoteTable-Column-Column1" />
+            <tbody>
+                <tr>
+                    <td class="TableStyle-NoteTable-BodyB-Column1-">
+                        <img src="../_Graphics_/note.gif" />
+                    </td>
+                    <td class="TableStyle-NoteTable-BodyA-Column1-">You must have performed a successful calibration immediately before pressing <b>Save Cal Values</b>.</td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </body>
+</html>

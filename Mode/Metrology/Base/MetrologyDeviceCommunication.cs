@@ -1,0 +1,107 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using static Core.DeviceBusCommutation.Enums;
+using static Core.ModuleRelayControl.Enums;
+using static Utilities.DelegateManager;
+using Utilities.Models;
+using System.Windows.Media;
+using static AppConfig.Config.ExecutionConfig;
+using static AppConfig.Config.ProtocolConfig;
+using static AppConfig.Config.LoopConfig;
+using static AppConfig.Config.SystemStateManager;
+using static AppConfig.EventAggregator;
+using static AppConfig.SettingsFileReader;
+using static Utilities.Models.ShowMessageModel;
+using static Utilities.LoggerUtility;
+using Mode.Models;
+
+
+namespace Mode.Metrology.Base
+{
+  internal class MetrologyDeviceCommunication
+  {
+    static private readonly Tuple<string, Color> goodText = SuccessMessage;
+    static private readonly Tuple<string, Color> errorText = ErrorMessage;
+
+    /// <summary>
+    /// Производит подключение шин А2В2 на УКШ .
+    /// </summary>
+    /// <returns></returns>
+    static internal async Task DeviceBusCommutationConnectBus(CancellationToken token, MessageDelegate messageDelegate, Core.DeviceBusCommutation.Model model)
+    {
+      await DeviceBusCommutation_ConnectBusesAsync(BusDeviceBusCommutation.AB2, messageDelegate, model);
+    }
+
+    /// <summary>
+    /// Подключает шин(у/ы) УКШ на разъём XS4.
+    /// </summary>
+    /// <returns></returns>
+    static private async Task DeviceBusCommutation_ConnectBusesAsync(BusDeviceBusCommutation busDeviceBus, MessageDelegate messageDelegate, Core.DeviceBusCommutation.Model model)
+    {
+
+      string result = !await GetIsIdleModeEnabled() ? await Core.DeviceBusCommutation.Functions.ConnectBusAsync(model.IPAddress, MeterConnector.XS4, busDeviceBus, true, false) : "8.0.1";
+      if (result.Contains("8.0.1"))
+      {
+        await messageDelegate(new ShowMessageModel($"\tЗамыкание шин {busDeviceBus}:", null, $"[{goodText.Item1}]", goodText.Item2));
+      }
+      else
+      {
+        await messageDelegate(new ShowMessageModel($"\tЗамыкание шин {busDeviceBus}:", null, $"[{errorText.Item1}]", errorText.Item2));
+      }
+    }
+
+    /// <summary>
+    /// Подключает шин(у/ы) МКР на шину.
+    /// </summary>
+    /// <param name="model">Экземпляр устройства МКР.</param>
+    /// <param name="busModuleRelay">Шина подключения.</param>
+    /// <returns></returns>
+    static internal async Task ModuleRelayControl_ConnectBusesAsync(Core.ModuleRelayControl.Model model, BusModuleRelayControl busModuleRelay, MessageDelegate messageDelegate)
+    {
+      bool result = await GetIsIdleModeEnabled() || await Core.ModuleRelayControl.Functions.ConnectBusAsync(model.IPAddress, busModuleRelay, true);
+      if (result)
+      {
+        await messageDelegate(new ShowMessageModel($"\tЗамыкание шин {busModuleRelay}:", null, $"[{goodText.Item1}]", goodText.Item2));
+      }
+      else
+      {
+        await messageDelegate(new ShowMessageModel($"\tЗамыкание шин {busModuleRelay}:", null, $"[{errorText.Item1}]", errorText.Item2));
+      }
+    }
+
+    /// <summary>
+    /// Подключает точки МКР.
+    /// </summary>
+    /// <param name="model">Экземпляр устройства МКР.</param>
+    /// <returns>Задача асинхронного выполнения операции.</returns>
+    static internal async Task ModuleRelayControl_ConnectRelayAsync(PointModel firstModel, PointModel secondModel, Core.ModuleRelayControl.Model firstModelRelayControl, Core.ModuleRelayControl.Model secondModelRelayControl, MessageDelegate messageDelegate)
+    {
+      await messageDelegate(new ShowMessageModel("Подключение точек МКР", goodText.Item2));
+
+      await ConnectRelayPointAsync(firstModelRelayControl.IPAddress, BusPoint.A, firstModel.PointNumber, messageDelegate);
+      await ConnectRelayPointAsync(secondModelRelayControl.IPAddress, BusPoint.B, secondModel.PointNumber, messageDelegate);
+    }
+
+    /// <summary>
+    /// Подключает одну точку МКР и отображает результат.
+    /// </summary>
+    /// <param name="ipAddress">IP-адрес устройства.</param>
+    /// <param name="busPoint">Точка шины (A или B).</param>
+    /// <param name="pointNumber">Номер точки для подключения.</param>
+    /// <returns>Задача асинхронного выполнения операции.</returns>
+    static private async Task ConnectRelayPointAsync(IPAddress ipAddress, BusPoint busPoint, int pointNumber, MessageDelegate messageDelegate)
+    {
+      bool result = await GetIsIdleModeEnabled() || await Core.ModuleRelayControl.Functions.ConnectRelayAsync(ipAddress, busPoint, pointNumber);
+
+      string pointName = $"\tТочка {pointNumber}:";
+      string status = result ? goodText.Item1 : errorText.Item1;
+      Color color = result ? goodText.Item2 : errorText.Item2;
+
+      await messageDelegate(new ShowMessageModel(pointName, null, $"[{status}]", color));
+    }
+  }
+}

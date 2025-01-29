@@ -1,0 +1,264 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>MMEMory:ATTRibute?</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style>
+<!--
+body { background-color:#ffffff; }
+-->
+</style><style title="hcp" type="text/css">
+<!--
+table.hcp1 { x-cell-content-align:top; margin-left:18pt; border-spacing:0px; }
+tr.hcp2 { x-cell-content-align:top; }
+td.hcp3 { padding-right:10px; padding-left:10px; border-bottom-style:none; border-right-style:none; border-left-style:none; }
+td.hcp4 { padding-right:10px; padding-left:10px; border-bottom-style:none; border-right-style:none; }
+td.hcp5 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp6 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+td.hcp7 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+-->
+</style>
+</head>
+<body>
+<h1>MMEMory:ATTRibute?</h1>
+
+<p class=BarLink><font id=font1><a href="#Syntax_mmemory_attribute">Syntax</a></font> 
+ | <a href="#Description_mmemory_attribute">Description</a> | <a href="#Parameters_mmemory_attribute">Parameters</a> 
+ | Remarks | <a href="#Return_mmemory_attribute">Return Format</a> | <a 
+ href="#Example_mmemory_attribute">Examples</a></p>
+
+<h2><a name=Syntax_mmemory_attribute></a>Syntax</h2>
+
+<p class=CmdSyntax>MMEMory:ATTRibute? &lt;&quot;object&quot;&gt;, &lt;&quot;attribute&quot;&gt;</p>
+
+<h2><a name=Description_mmemory_attribute></a>Description</h2>
+
+<p class=Indented1>This query returns the attributes of a file system drive 
+ or of an individual file.</p>
+
+<table x-use-null-cells style="width:94.093%;" cellspacing="0" width="94.093%" class="hcp1">
+<col style="width: 17.205%;">
+<col style="width: 82.795%;">
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan=1
+	rowspan=1
+	style="width: 17.205%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-right-style: none;
+			border-left-style: none;
+			border-top-style: none;"
+	width=17.205%>
+<p class=TableBody
+	style="font-weight: bold;">&quot;INTernal:&quot;</td>
+<td colspan=1
+	rowspan=1
+	style="width: 82.795%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-bottom-style: none;
+			border-top-style: none;
+			border-right-style: none;"
+	width=82.795%>
+<p class=TableBody
+	style="margin-right: 0px;">This object specifies the instrument's internal 
+ drive. </td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">&quot;EXTernal:&quot;</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody>This object specifies the instrument's USB drive.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">&quot;&lt;filename&gt;&quot;</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody>The filename object should be the full path and filename. 
+ </td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">&quot;DriveCapacity&quot;</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody
+	style="font-style: normal; font-weight: normal;">This attribute specifies 
+ the capacity of the internal or external drive in bytes. Only applies 
+ when the object is INTernal: or EXTernal:</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">&quot;DriveFreeSpace&quot;</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody
+	style="font-weight: normal; font-style: normal;">This attribute specifies 
+ the number of free bytes on the internal or external drive. Only applies 
+ when the object is INTernal: or EXTernal:</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td colspan="1" rowspan="1" style="width:17.205%;" width="17.205%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">&quot;FileSize&quot;</td>
+<td colspan="1" rowspan="1" style="width:82.795%;" width="82.795%" class="hcp4">
+<p class=TableBody
+	style="font-weight: normal; font-style: normal;">This attribute specifies 
+ the size of the file or folder. Only applies when the object is &lt;filename&gt;.</td></tr>
+</table>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				margin-top: 18px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp2">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif" x-maintain-ratio="TRUE" style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;" width="70" height="17" border="0"></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>This command only applies to the Agilent N6705A DC Power Analyzer.</td></tr>
+</table>
+
+<h2 style="margin-bottom: 14pt;"><a name=Parameters_mmemory_attribute></a>Parameters</h2>
+
+<table x-use-null-cells style="width:81.739%;" cellspacing="0" width="81.739%" class="hcp1">
+<col style="width: 15.483%;">
+<col style="width: 11.167%;">
+<col style="width: 47.812%;">
+<col style="width: 25.538%;">
+
+<tr style="height:18px;" valign="top" class="hcp2">
+<td style="width: 15.483%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=15.483%>
+<p class=TableHead>Name</td>
+<td rowspan="1" colspan="1" style="width:11.167%;" bgcolor="#E9E9E9" width="11.167%" class="hcp5">
+<p class=TableHead>Type</td>
+<td rowspan="1" colspan="1" style="width:47.812%;" bgcolor="#E9E9E9" width="47.812%" class="hcp5">
+<p class=TableHead>Range of Values</td>
+<td rowspan="1" colspan="1" style="width:25.538%;" bgcolor="#E9E9E9" width="25.538%" class="hcp5">
+<p class=TableHead>Default Value</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp2">
+<td style="width:15.483%;" width="15.483%" class="hcp6">
+<p class=TableBody>&lt;&quot;object<span class=CmdItalics
+										style="font-style: normal;">&quot;</span>&gt;</td>
+<td style="width:11.167%;" width="11.167%" class="hcp7">
+<p class=TableBody>SPD</td>
+<td rowspan="1" colspan="1" style="width:47.812%;" width="47.812%" class="hcp7">
+<p class=TableBody>&quot;INTernal:&quot;|&quot;EXTernal:&quot;|&quot;&lt;filename&gt;&quot;</p>
+<p class=TableBody>Parameters must be enclosed in single or double quotes.</td>
+<td rowspan="1" colspan="1" style="width:25.538%;" width="25.538%" class="hcp7">
+<p class=TableBody>Required parameter</td></tr>
+
+<tr style="height:29px;" valign="top" class="hcp2">
+<td style="width:15.483%;" width="15.483%" class="hcp6">
+<p class=TableBody>&lt;&quot;attribute&quot;&gt;</td>
+<td style="width:11.167%;" width="11.167%" class="hcp7">
+<p class=TableBody>SPD</td>
+<td rowspan="1" colspan="1" style="width:47.812%;" width="47.812%" class="hcp7">
+<p class=TableBody>&quot;DriveCapacity&quot;|&quot;DriveFreeSpace&quot; 
+ |&quot;FileSize&quot;</p>
+<p class=TableBody>Parameters must be enclosed in single or double quotes.</td>
+<td rowspan="1" colspan="1" style="width:25.538%;" width="25.538%" class="hcp7">
+<p class=TableBody>Required parameter</td></tr>
+</table>
+
+<h2><a name=Return_mmemory_attribute></a>Return Format</h2>
+
+<p class=Indented1>&lt;SRD&gt;</p>
+
+<p class=Indented1>The query command returns an ASCII string enclosed in 
+ double quotes containing the value of the specified attribute, or a blank 
+ string if the name of the attribute is not valid or an error has occurred.</p>
+
+<h2><a name=Example_mmemory_attribute></a>Examples</h2>
+
+<p class=Indented1>The following queries the internal drive description 
+ (quotes are also returned). </p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">MMEM:ATTR? &quot;INT:&quot;,&quot;DriveFreeSpace&quot;</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;&quot;63422464&quot;</span></p>
+
+<p class=Indented1>The following queries the attributes of a data log file 
+ (quotes are also returned). </p>
+
+<p class=Shaded>MMEM:ATTR? &quot;INT:\datalog\data1.dlog&quot;,&quot;FileSize&quot;</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;&quot;112770&quot;</span></p>
+
+<p class=IndentTight>&nbsp;</p>
+
+</body>
+</html>

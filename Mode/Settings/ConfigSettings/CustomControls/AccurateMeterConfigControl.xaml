@@ -1,0 +1,150 @@
+﻿<UserControl x:Class="Mode.Settings.ConfigSettings.CustomControls.AccurateMeterConfigControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Mode.Settings.ConfigSettings.CustomControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="NonSelectableListViewItemStyle" TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="IsHitTestVisible" Value="false" />
+        </Style>
+
+        <Style TargetType="TextBox" x:Key="NonChangingBorderTextBox">
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Name="border"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="50*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="80*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock 
+             Name="descriptionHeader" 
+             Padding="20,10,0,10" 
+             Visibility="Visible" 
+             Text="Описание уcтройства:" 
+             Style="{StaticResource ConfigTextBlockHeaderStyle}"
+             FontSize="18" 
+             Height="Auto" 
+             Grid.Row="0" 
+             FontWeight="Bold"
+             />
+            <Border 
+             Name="descriptionPanel" 
+             Visibility="Visible" 
+             Grid.Row="1" 
+             Margin="20,10" 
+             Style="{StaticResource ConfigBorderDescriptionStyle}"
+             >
+                <RichTextBox 
+                 Name="InfoDevice" 
+                 IsReadOnly="True" 
+                 Style="{StaticResource ConfigTextDescriptionStyle}"
+                 />
+            </Border>
+
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock 
+             Name="mainHeader" 
+             Visibility="Visible" 
+             Text="Настройки уcтройства:" 
+             Padding="20,10,0,10" 
+             Style="{StaticResource ConfigTextBlockHeaderStyle}"
+             FontSize="18" 
+             Grid.Row="0" 
+             FontWeight="Bold"/>
+
+            <Grid Grid.Row="1" Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border 
+                 Grid.Row="1" 
+                 Style="{StaticResource ConfigAdditionalBlockStyle}"
+                 >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock 
+                       Name="textNumber" 
+                       Grid.Column="0" 
+                       Text="Номер:" 
+                       FontSize="20" 
+                       Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                       Margin="0,15"  
+                       Padding="20,0,0,0" 
+                       FontWeight="Bold"
+                         />
+                        <ComboBox Name="number"  Grid.Column="1" Height="30" Width="auto" Margin="15" Style="{StaticResource CustomComboBoxStyle}">
+                            <ComboBoxItem Name="variant1" Content="KEYSIGHT 34465A"/>
+                            <ComboBoxItem Name="variant2" Content="В7-78/3"/>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+            </Grid>
+
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Name="exit" Grid.Column="0" Content="Отменить" Style="{StaticResource CustomButtonStyle}" Background="{StaticResource SecondarySolidColorBrush}" Margin="20,10" Width="200" HorizontalAlignment="Left" PreviewMouseDown="Exit_PreviewMouseDown"/>
+                <Button Name="save" Grid.Column="1" Content="Сохранить" Style="{StaticResource CustomButtonStyle}" Background="{StaticResource SecondarySolidColorBrush}" Width="200" HorizontalAlignment="Left" PreviewMouseDown="Save_PreviewMouseDown"/>
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+</UserControl>

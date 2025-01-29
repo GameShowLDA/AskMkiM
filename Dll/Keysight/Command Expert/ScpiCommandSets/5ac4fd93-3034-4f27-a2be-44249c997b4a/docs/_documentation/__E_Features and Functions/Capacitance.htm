@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:tocPath="Features and Functions|Measurements" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Capacitance</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor30"></a>Capacitance</h1>
+        <p>This section describes how to configure capacitance measurements from the front panel.</p>
+        <p><b>Step 1:</b> Configure the test leads as shown.</p>
+        <p>
+            <img src="../_Graphics_/ConnDiag-Capacitance_326x185.png" style="width: 326;height: 185;" />
+        </p>
+        <p><b>Step 2:</b>  Press <img src="../_Graphics_/Key-Shift-Freq.png" /> on the front panel.</p>
+        <p><b>Step 3:</b> To null–out the test lead capacitance:</p>
+        <ul>
+            <li class="IndentTight" value="1">Disconnect the + and - test leads probe end from the test circuit, and leave open.</li>
+            <li class="IndentTight" value="2">Press <b>Null</b>. The DMM will now subtract this null value from capacitance measurements.</li>
+        </ul>
+        <p><b>Step 4:</b> Press <b>Range</b> to select a range for the measurement. You can also use the <b>[+]</b>, <b>[-]</b>, and <b>[Range]</b> keys on the front panel to select the range. (<b>Auto</b> (autorange) automatically selects the range for the measurement based on the input. Autoranging is convenient, but it results in slower measurements than using a manual range. Autoranging goes down a range at less than 10% of range and up a range at greater than 120% of range. For capacitance measurements only, when autorange is off, the instrument does not report an overload for readings greater than 120% of range.  Overload only occurs when the algorithm times out because the applied capacitance is too large for the algorithm to measure.  If you apply a DC voltage or a short to the input terminals in capacitance measurement mode, the instrument reports an overload.</p>
+        <p>
+            <img src="../_Graphics_/CapRange2.png" />
+        </p>
+        
+    </body>
+</html>

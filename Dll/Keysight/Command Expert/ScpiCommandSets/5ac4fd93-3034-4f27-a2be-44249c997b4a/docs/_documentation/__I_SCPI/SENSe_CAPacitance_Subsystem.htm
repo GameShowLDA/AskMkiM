@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.TorreysP" MadCap:ignoredWords="CAPacitance" MadCap:tocPath="SCPI Programming Reference|Commands by Subsystem|SENSe Subsystem" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>[SENSe:]CAPacitance Subsystem</title>
+        <link href="../RegTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;">[SENSe:]CAPacitance Subsystem</h1>
+        <p>This subsystem configures capacitance measurements. </p>
+        <h2 style="font-size: 14px;">Command Summary</h2>
+        <p><a href="#STATe">[SENSe:]CAPacitance:NULL[:STATe]</a>
+        </p>
+        <p><a href="#VALue">[SENSe:]CAPacitance:NULL:VALue </a>
+        </p>
+        <p><a href="#CAP-NULL-VALue-AUTO">[SENSe:]CAPacitance:NULL:VALue:AUTO</a>
+        </p>
+        <p><a href="#AUTo">[SENSe:]CAPacitance:RANGe:AUTO </a>
+        </p>
+        <p><a href="#UPPer">[SENSe:]CAPacitance:RANGe</a>
+        </p>
+        <p><a href="#CAPacitance-SECondary">[SENSe:]CAPacitance:SECondary</a>
+        </p>
+        <h2 style="font-size: 14px;"><a name="kanchor341"></a><a name="STATe"></a>[SENSe:]CAPacitance:NULL[:STATe]<![CDATA[  ]]> {ON|1|OFF|0} <br />[SENSe:]CAPacitance:NULL[:STATe]? </h2>
+        <p class="Indented1">Turns the null function on or off for capacitance 
+ measurements.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2"><a name="kanchor342"></a>Configure capacitance measurements, turn null function on, use the AUTO null function. Make two measurements and send them to the instrument's output buffer: <br /><br />CONF:CAP AUTO<br />CAP:NULL ON<br />CAP:NULL:VAL:AUTO ON <br />SAMP:COUN 2<br />READ?</p>
+                        <p colspan="2">Typical Response: +3.01963841E-10,+3.01566277E-10</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+            <li class="IndentTight" value="1">Enabling the scaling function also enables automatic null value selection (<a href="#CAP-NULL-VALue-AUTO">[SENSe:]CAPacitance:NULL:VALue:AUTO</a>).</li>
+            <li class="IndentTight" value="2">To set a fixed null value, use: <a href="#VALue">[SENSe:]CAPacitance:NULL:VALue</a>.</li>
+            <li class="IndentTight" value="3">The instrument disables the null function after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor343"></a><a name="VALue"></a>[SENSe:]CAPacitance:NULL:VALue  {&lt;<i>value</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]CAPacitance:NULL:VALue?  [{MIN|MAX|DEF}] </h2>
+            <p class="Indented1">Stores a null value for capacitance measurements. 
+ The null value is subtracted from each sample if the null state is turned 
+ on.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"><span class="hcp1">&lt;<i>value</i>&gt;</span> -120 to +120 µF. Default: 0. </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">-1.20000000E-04</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"><a name="kanchor344"></a>Configure capacitance measurements, turn null function on. Make two measurements and send them to the instrument's output buffer: <br /><br />CONF:CAP AUTO<br />CAP:NULL ON<br />CAP:NULL:VAL 1.2E-12 <br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +3.01963841E-10,+3.01566277E-10</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">Specifying a null value disables automatic null value selection (<a href="#CAP-NULL-VALue-AUTO">[SENSe:]CAPacitance:NULL:VALue:AUTO&#160;OFF</a>).</li>
+                <li class="IndentTight" value="2">To use 
+ the null value,  turn on the null state with the 
+ <a href="#STATe" class="hcp4">[Sense:]CAPacitance:NULL[:STATe]</a> 
+ command.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor345"></a><a name="CAP-NULL-VALue-AUTO"></a>[SENSe:]CAPacitance:NULL:VALue:AUTO  {ON|1|OFF|0} <br />[SENSe:]CAPacitance:NULL:VALue:AUTO?</h2>
+            <p style="font-weight: normal;">Enables or disables automatic null value selection for capacitance measurements.</p>
+            <br />
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {ON|1|OFF|0}. Default: ON.</td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2"><a name="kanchor346"></a>Configure capacitance measurements, turn null function on, use the AUTO null function. Make two measurements and send them to the instrument's output buffer: <br /><br />CONF:CAP AUTO<br />CAP:NULL ON<br />CAP:NULL:VAL:AUTO ON <br />SAMP:COUN 2<br />READ?</p>
+                            <p colspan="2">Typical Response: +3.01963841E-10,+3.01566277E-10</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">When automatic reference selection is ON, the first measurement made is used as the null value for all subsequent measurements.<a href="#VALue">[SENSe:]CAPacitance:NULL:VALue</a> is set to this value. Automatic null value selection will be disabled.</li>
+                <li class="IndentTight" value="2">When automatic null value selection is disabled (OFF), the null value is specified by:<a href="#VALue">[SENSe:]CAPacitance:NULL:VALue</a>.</li>
+            </ul>
+            <ul>
+                <li class="IndentTight" value="1">The instrument enables automatic null value selection when the null function is enabled (<a href="#STATe">[SENSe:]CAPacitance:NULL:STATe ON</a>). </li>
+                <li class="IndentTight" value="2">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>), Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>), or CONFigure function.</li>
+            </ul>
+        </div>
+        <h2 style="font-size: 14px;"><a name="kanchor347"></a><a name="AUTo"></a>[SENSe:]CAPacitance:RANGe:AUTO  {OFF|ON|ONCE} <br />[SENSe:]CAPacitance:RANGe:AUTO? </h2>
+        <p class="Indented1" style="background-color: Transparent;"><a name="kanchor348"></a><a name="kanchor349"></a>Disables or enables 
+ autoranging for capacitance measurements. </p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1"> {OFF|ON|ONCE}. Default: ON.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">0&#160;(OFF)&#160;or&#160;1&#160;(ON)</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2"><a name="kanchor350"></a>Configure capacitance measurements, turn autorange on, turn null function on, use the AUTO null function. Make two measurements and send them to the instrument's output buffer: <br /><br />CONF:CAP<br />CAP:RANG:AUTO ON<br />CAP:NULL ON<br />CAP:NULL:VAL:AUTO ON <br />SAMP:COUN 2<br />READ?</p>
+                        <p colspan="2">Typical Response: +3.01963841E-10,+3.01566277E-10</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul type="disc" class="hcp4">
+            <li class="IndentTight" value="1">Autoranging goes down a range at less than 10% of range and up a range at greater than 120% of range. For capacitance measurements only, when autorange is off, the instrument does not report an overload for readings greater than 120% of range.  Overload only occurs when the algorithm times out because the applied capacitance is too large for the algorithm to measure.  If you apply a DC voltage or a short to the input terminals in capacitance measurement mode, the instrument reports an overload.</li>
+            <li class="IndentTight" value="2"><a name="kanchor351"></a>ONCE performs an immediate autorange, 
+ and then sets autoranging to OFF. (Thus, the query returns "0".)</li>
+            <li class="IndentTight" value="3">Selecting 
+ a discrete range (see <a href="#UPPer" class="hcp6">[Sense:]CAPacitance:RANGe</a> 
+ command)  disables autoranging.</li>
+            <li class="IndentTight" value="4">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+        </ul>
+        <h2 style="font-size: 14px;"><a name="kanchor352"></a><a name="UPPer"></a>[SENSe:]CAPacitance:RANGe<![CDATA[ 
+ ]]> {&lt;<i>range</i>&gt;|MIN|MAX|DEF} <br />[SENSe:]CAPacitance:RANGe?<![CDATA[ 
+ ]]> [{MIN|MAX|DEF}] </h2>
+        <p class="Indented1" style="background-color: Transparent;">Selects a fixed 
+ range for capacitance measurements.</p>
+        <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <col class="TableStyle-RegTable-Column-Column1" />
+            <thead>
+                <tr class="TableStyle-RegTable-Head-Header1">
+                    <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                    <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyE-Column1-Body1">&lt;<i>range</i>&gt;: {1 nF|10 nF|100 nF|1 µF|10 µF|100 µF}. Default:  AUTO.</td>
+                    <td class="TableStyle-RegTable-BodyD-Column1-Body1">+1.00000000E-09</td>
+                </tr>
+                <tr class="TableStyle-RegTable-Body-Body1">
+                    <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                        <p colspan="2"><a name="kanchor353"></a>Configure capacitance measurements, select 1 nF range, turn null function on, use the AUTO null function. Make two measurements and send them to the instrument's output buffer: <br /><br />CONF:CAP<br />CAP:RANG 1 nF &#160;&#160;&#160;<i>or</i> CAP:RANG 1.0E-9<br />CAP:NULL ON<br />CAP:NULL:VAL:AUTO ON <br />SAMP:COUN 2<br />READ?</p>
+                        <p colspan="2">Typical Response: +3.01963841E-10,+3.01566277E-10</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ul style="list-style: disc;" type="disc">
+            <li class="IndentTight" value="1">Selecting 
+ a fixed range  ([SENSe:]&lt;function&gt;:RANGe) disables autoranging. </li>
+            <li class="IndentTight" value="2">If the input signal is greater than can be measured on the specified fixed range, the instrument displays <i>Overload</i> on front panel and returns "9.9E37" from the remote interface.</li>
+            <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+        </ul>
+        <div>
+            <h2 style="font-size: 14px;"><a name="kanchor354"></a><a name="CAPacitance-SECondary"></a>[SENSe:]CAPacitance:SECondary {"OFF"|"CALCulate:DATA"} <br />[SENSe:]CAPacitance:SECondary?</h2>
+            <p>Selects the secondary measurement function for capacitance measurements.</p>
+            <table style="mc-table-style: url('../RegTable.css');caption-side: top;margin-left: 0;margin-right: auto;" class="TableStyle-RegTable" cellspacing="0">
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <col class="TableStyle-RegTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-RegTable-Head-Header1">
+                        <th class="TableStyle-RegTable-HeadE-Column1-Header1">Parameter</th>
+                        <th class="TableStyle-RegTable-HeadD-Column1-Header1">Typical Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyE-Column1-Body1">
+                            <p>{"OFF"|"CALCulate:DATA"}, default "OFF"</p>
+                        </td>
+                        <td class="TableStyle-RegTable-BodyD-Column1-Body1">"CALC:DATA"</td>
+                    </tr>
+                    <tr class="TableStyle-RegTable-Body-Body1">
+                        <td class="TableStyle-RegTable-BodyA-Column1-Body1" colspan="2">
+                            <p colspan="2">Configure capacitance and secondary measurements. Make capacitance measurement and retrieve secondary measurement. </p>
+                            <p colspan="2">CONF:CAP AUTO,MAX<br />CAP:SEC "CALC:DATA"<br />READ?;DATA2?</p>
+                            <p>Typical Response: +3.01566373E-10;+3.01566373E-10</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li class="IndentTight" value="1">"CALCulate:DATA" - The measurement value before any math operations are done (including NULL). </li>
+                <li class="IndentTight" value="2">Use <a href="READ_.htm">READ?</a> or <a href="INITiate_IMMediate.htm">INITiate</a> to start the measurement. Use <a href="SENSe_DATA2_.htm">[SENSe:]DATA2?</a> to retrieve the secondary measurement.</li>
+                <li class="IndentTight" value="3">This parameter is set to its default value after a Factory Reset (<a href="IEEE-488_Common_Commands.htm#RST">*RST</a>) or Instrument Preset (<a href="SYSTem_General%20Commands.htm#PRES">SYSTem:PRESet</a>).</li>
+            </ul>
+        </div>
+        
+    </body>
+</html>

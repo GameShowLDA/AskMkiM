@@ -1,0 +1,286 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>*STB?</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+ul.hcp2 { list-style:disc; }
+td.hcp3 { border-top-style:Solid; border-top-color:#000000; border-top-width:1px; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; background-color:#e9e9e9; }
+td.hcp4 { border-left-width:1px; border-left-color:#000000; border-left-style:Solid; border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+span.hcp5 { font-weight:normal; }
+td.hcp6 { border-right-width:1px; border-right-color:#000000; border-right-style:Solid; border-bottom-style:Solid; border-bottom-color:#000000; border-bottom-width:1px; padding-right:10px; padding-left:10px; }
+span.hcp7 { font-weight:bold; }
+-->
+</style>
+</head>
+<body>
+<h1>*STB?</h1>
+
+<p class=BarLink><font id=font4><a href="#Syntax_stb"
+									target=_self>Syntax</a></font> | <a 
+ href="#Description_stb">Description</a><span class=MouseOverLink> </span><span 
+ class=MouseOverLink
+	id=span2>| </span><span class=MouseOverLink
+							id=span2
+							style="color: #808080;">Parameters</span><span 
+ class=MouseOverLink
+	id=span2> | </span><span class=MouseOverLink
+							id=span4><font id=font7><a href="#Remarks_stb">Remarks</a></font> 
+ | </span><span class=MouseOverLink
+				id=span8><font id=font8><a href="#Return_format_stb">Return 
+ Format</a></font></span><span class=MouseOverLink
+								id=span5> | <font id=font9><a href="#Example_stb">Example</a></font></span></p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Syntax_stb></a>Syntax</span></h2>
+
+<p class=CmdSyntax>*STB?</p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Description_stb></a>Description</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span5>T</span>his query reads the Status Byte 
+ register, which contains the status summary bits and the Output Queue 
+ MAV bit. &nbsp;The 
+ Status Byte register is a read-only register and the bits are not cleared 
+ when it is read. &nbsp;</p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				margin-left: 14px;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp1">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif" x-maintain-ratio="TRUE" style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;" width="70" height="17" border="0"></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>For more information on the SCPI Status System, see the <a href="../STATus_Subsystem/Status_Subsystem_Introduction.htm#Status_Diagram">Status 
+ System diagram</a>.</td></tr>
+</table>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Remarks_stb></a>Remarks</span></h2>
+
+<ul type="disc" class="hcp2">
+	
+	<li class=kadov-p><p>The following table lists the bit definitions 
+ for the Status Byte Register. </p></li>
+</ul>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				margin-left: 30pt;
+				width: 84.621%;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=84.621%>
+<col style="width: 28.528%;">
+<col style="width: 20.549%;">
+<col style="width: 50.923%;">
+
+<tr style="height:18px;" valign="top" class="hcp1">
+<td style="width: 28.528%;
+			border-left-width: 1px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-style: Solid;
+			border-top-color: #000000;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-width: 1px;
+			padding-right: 10px;
+			padding-left: 10px;
+			background-color: #e9e9e9;"
+	bgcolor=#E9E9E9
+	width=28.528%>
+<p class=TableHead>Bit Number</td>
+<td rowspan="1" colspan="1" style="width:20.549%;" bgcolor="#E9E9E9" width="20.549%" class="hcp3">
+<p class=TableHead>Decimal Value</td>
+<td rowspan="1" colspan="1" style="width:50.923%;" bgcolor="#E9E9E9" width="50.923%" class="hcp3">
+<p class=TableHead>Definition</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">0<span class="hcp5">&nbsp;&nbsp;Not 
+ Used</span></td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>Not Used</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>0 is returned.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody><span class="hcp7">1</span>&nbsp;&nbsp;Not 
+ Used</td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>Not Used</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>0 is returned.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody
+	style="font-weight: bold;">2&nbsp;&nbsp;<span class="hcp5">Error 
+ Queue not empty</span></td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>4</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>One or more errors have been stored in the Error Queue 
+ (see <a href="../SYSTem_Commands/SYSTem_ERRor_.htm">SYSTem:ERRor?</a> 
+ command).</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody><span class="hcp7">3</span>&nbsp;&nbsp;Questionable 
+ Status summary</td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>8</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>One or more bits are set in the Questionable Data Register 
+ (bits must be enabled, see <a href="../STATus_Subsystem/STATus_QUEStionable_ENABle.htm">STATus:QUEStionable:ENABle</a> 
+ command). </td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody><span class="hcp7">4</span>&nbsp;&nbsp;Message 
+ Available</td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>16</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>Data is available in the instrument's output buffer.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody><span class="hcp7">5</span>&nbsp;&nbsp;Event 
+ Status Byte summary</td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>32</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>One or more bits are set in the Standard Event Register 
+ (bits must be enabled, see <a href="_ESE.htm">*ESE</a> command). </td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody><span class="hcp7">6</span>&nbsp;&nbsp;Master 
+ Status summary<br>
+(Request for Service)</td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>64</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>One or more bits are set in the Status Byte Register 
+ (bits must be enabled, see <a href="_SRE.htm">*SRE</a> command).<br>
+Also used to indicate a request for service. &nbsp;</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:28.528%;" width="28.528%" class="hcp4">
+<p class=TableBody><span class="hcp7">7</span>&nbsp;&nbsp;Operation 
+ Status summary</td>
+<td colspan="1" rowspan="1" style="width:20.549%;" width="20.549%" class="hcp6">
+<p class=TableBody>128</td>
+<td colspan="1" rowspan="1" style="width:50.923%;" width="50.923%" class="hcp6">
+<p class=TableBody>One or more bits are set in the Standard Operation Register 
+ (bits must be enabled, see <a href="../STATus_Subsystem/STATus_OPERation_ENABle.htm">STATus:OPERation:ENABle</a> 
+ command). </td></tr>
+</table>
+
+<ul type="disc" class="hcp2">
+	
+	<li class=kadov-p><p>The input summary bits are cleared when the appropriate 
+ event registers are read. The MAV bit is cleared at power-on, by *CLS, 
+ or when there is no more response data available.</p></li>
+	
+	<li class=kadov-p><p><span class=MouseOverLink
+								id=span1>A serial poll also returns the 
+ value of the Status Byte register, except that bit 6 returns Request for 
+ Service (RQS) instead of Master Status Summary (MSS). A serial poll clears 
+ RQS, but not MSS. When MSS is set, it indicates that the instrument has 
+ one or more reasons for requesting service.</span></p></li>
+</ul>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Return_format_stb></a>Return Format</span></h2>
+
+<p class=Indented1>&lt;NR1&gt;</p>
+
+<p class=Indented1>The value returned is the binary-weighted sum of all 
+ bits set in the register. For example, if bit 1 (decimal value = 2) and 
+ bit 4 (decimal value = 16) are set (and the corresponding bits are enabled), 
+ this command will return <span class=CourierNew>18</span>. </p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Example_stb></a>Example</span></h2>
+
+<p class=Indented1><span class=MouseOverLink
+						id=span2>T</span>he following command reads the 
+ condition register (bits 3 and 4 are set).</p>
+
+<p class=Shaded
+	style="background-color: #bfbfbf;">*STB?</p>
+
+<p class=Indented1>Typical Response:<span class=CourierNew> &nbsp;+24</span></p>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=See_stb></a>See Also</span></h2>
+
+<p class=IndentTight><a href="_SRE.htm">*SRE</a></p>
+
+</body>
+</html>

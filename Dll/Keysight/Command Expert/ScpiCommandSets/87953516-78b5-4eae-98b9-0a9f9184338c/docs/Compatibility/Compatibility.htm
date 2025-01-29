@@ -1,0 +1,854 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>Compatibility</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="StyleSheet" href="../dds_best_rh.css"><style title="hcp" type="text/css">
+<!--
+tr.hcp1 { x-cell-content-align:top; }
+table.hcp2 { x-cell-content-align:top; margin-left:24px; border-spacing:0px; }
+td.hcp3 { padding-right:10px; padding-left:10px; border-left-style:none; border-top-style:none; border-right-style:none; border-bottom-style:none; background-color:#e9e9e9; }
+td.hcp4 { padding-right:10px; padding-left:10px; border-top-style:none; border-right-style:none; border-bottom-style:none; background-color:#e9e9e9; }
+td.hcp5 { padding-right:10px; padding-left:10px; border-left-style:none; border-right-style:none; border-bottom-style:none; }
+td.hcp6 { padding-right:10px; padding-left:10px; border-right-style:none; border-bottom-style:none; }
+-->
+</style>
+</head>
+<body>
+<h1>Compatibility</h1>
+
+<p><font id=font4>The Agilent N6700 Modular Power System is programmatically 
+ compatible with the Agilent 6621A - 6629A DC power supplies. This means 
+ that you can program the power system using the same commands that are 
+ used to program the Agilent 662xA power supplies.</font></p>
+
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				width: 100%;
+				border-left-width: 0px;
+				border-left-style: Solid;
+				border-top-width: 0px;
+				border-top-style: Solid;
+				border-right-width: 0px;
+				border-right-style: Solid;
+				border-bottom-width: 0px;
+				border-bottom-style: Solid;
+				border-spacing: 0px;
+				border-spacing: 0px;"
+		cellspacing=0
+		width=100%>
+<col style="width: 11.684%;">
+<col style="width: 88.316%;">
+
+<tr valign="top" class="hcp1">
+<td style="width: 11.684%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-color: #000000;
+			border-left-style: Solid;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-right-width: 0px;
+			border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;"
+	width=11.684%>
+<p><img src="../note.gif"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 70px;
+				height: 17px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=70
+		height=17
+		border=0></td>
+<td style="width: 88.316%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-top-color: #000000;
+			border-top-style: Solid;
+			border-right-color: #000000;
+			border-right-style: Solid;
+			border-bottom-color: #000000;
+			border-bottom-style: Solid;
+			border-top-width: 0px;
+			border-bottom-width: 0px;
+			border-right-width: 0px;"
+	width=88.316%>
+<p>Agilent 662xA commands ONLY work in Agilent N6700 mainframes that contain 
+ combinations of Agilent N675xA or N676xA power modules.</p>
+<p>Agilent 662xA commands will NOT work in Agilent N6700 mainframes that 
+ contain any Agilent N673xA/B, N674xA/B, or N677xA power modules. This 
+ is true even if the mainframes also contain Agilent N675xA or N676xA power 
+ modules. </td></tr>
+</table>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Differences_in_general></a>Differences - In 
+ General</span></h2>
+
+<p>The following table documents the general differences between the way 
+ Compatibility programming commands work on the Agilent N6700 Modular Power 
+ System and the way they work on the Agilent 662xA series DC power supplies.</p>
+
+<table x-use-null-cells style="width:94.093%;" cellspacing="0" width="94.093%" class="hcp2">
+<col style="width: 23.344%;">
+<col style="width: 76.656%;">
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" bgcolor="#E9E9E9" width="23.344%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">Item</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" bgcolor="#E9E9E9" width="76.656%" class="hcp4">
+<p class=TableBody
+	style="margin-right: 0px; font-weight: bold;">Differences</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Queries</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody
+	style="margin-right: 0px;">The Agilent N67xxA modules will respond 
+ to multiple queries.</p>
+<p class=TableBody
+	style="margin-right: 0px;">It will not allow a space separator between 
+ numbers.</p>
+<p class=TableBody
+	style="margin-right: 0px;">It will not allow a user to query information, 
+ read back only a portion of the information, send another command, and 
+ finish reading back the information from the original query.</p>
+<p class=TableBody
+	style="margin-right: 0px;">Sending a second query without reading the 
+ response to the first will generate an error.</p>
+<p class=TableBody
+	style="margin-right: 0px;">Model number queries will only return the 
+ N6700 model number.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Status functions</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody>Serial Poll will be controlled by the SCPI status model 
+ and will not act like a 662xA serial poll.</p>
+<p class=TableBody>SRQ will be controlled by the SCPI status model.</p>
+<p class=TableBody>Parallel poll will not work.</p>
+<p class=TableBody>The Agilent N67xxA modules will never set the CC- bit. 
+ All other status bits are translated to the closest 662xA bits.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Settings</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody>The full-scale limits will match the Agilent N67xxA 
+ module limits.</p>
+<p class=TableBody>There is no automatic setting adjustment.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Measurement</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody>Measurements use the present settings for points, time 
+ interval, etc.</p>
+<p class=TableBody>Floating point numbers returned by the power system 
+ may not have exactly the same syntax or number of digits.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Calibration</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody>Calibration must be done in SCPI.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Storage states</td>
+<td colspan="1" rowspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody>The Agilent N67xxA modules have 2 non-volatile states 
+ and 9 volatile states. The 9 volatile states are only available when using 
+ compatibility commands.</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:23.344%;" width="23.344%" class="hcp5">
+<p class=TableBody
+	style="font-weight: bold;">Protection functions</td>
+<td rowspan="1" colspan="1" style="width:76.656%;" width="76.656%" class="hcp6">
+<p class=TableBody>OVRST and OCRST will reset all latched protection functions, 
+ not just over-voltage or over-current.</td></tr>
+</table>
+
+<h2><span class=MouseOverLink
+			id=span5><a name=Compatibility_command_summary></a>Compatibility 
+ Command Summary</span></h2>
+
+<p>The following table documents the compatibility commands that the Agilent 
+ N6700 Modular Power System supports. All compatibility commands are accepted; 
+ however, some commands will generate an error. </p>
+
+<table x-use-null-cells style="width:94.577%;" cellspacing="0" width="94.577%" class="hcp2">
+<col style="width: 29.628%;">
+<col style="width: 48.545%;">
+<col style="width: 17.917%;">
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" bgcolor="#E9E9E9" width="29.628%" class="hcp3">
+<p class=TableBody
+	style="font-weight: bold;">Agilent 662xA Command</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" bgcolor="#E9E9E9" width="48.545%" class="hcp4">
+<p class=TableBody
+	style="margin-right: 0px; font-weight: bold;">Description</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" bgcolor="#E9E9E9" width="17.917%" class="hcp4">
+<p class=TableBody
+	style="margin-right: 0px; font-weight: bold;">Similar SCPI Command</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody
+	style="font-weight: normal;">ASTS? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody
+	style="margin-right: 0px;">Queries the accumulated status (ASTS) of 
+ the specified output channel. The response represents the sum of the binary 
+ weights of the ASTS register bits. The ASTS register is automatically 
+ set to the present status after being queried.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>STAT:OPER:EVEN?<br>
+STAT:QUES:EVEN?<br>
+*ESE?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>CLR</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Returns the entire power system (all outputs) to the 
+ power-on state, except the unit is not unaddressed and its store/recall 
+ registers are not changed.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*RST</p>
+<p class=TableBody>&nbsp;</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>CMODE &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ The unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>CMODE?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ The unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DC &lt;ch&gt;, &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Turns the specified output channel on or off. On/off 
+ = 0 turns the channel off; on/off = 1 turns the channel on.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:STAT</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DC? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries whether the specified output channel is on or 
+ off. Response is either 1 (on) or 0 (off).</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:STAT?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DCPON &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the power-on state of the output channels. For 
+ on/off = 0, all outputs will be off state when the unit is turned on. 
+ For on/off = 1 all outputs will be in the on state when the power system 
+ is turned on. This command requires the output power-on state to be set 
+ to RCL0.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PON:STAT RCL0</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody
+	style="font-weight: normal;">DCPON?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Returns a 1 if any channels are set to turn on their 
+ output at power on. </td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PON:STAT?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DLY &lt;ch&gt;, &lt;delay&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the reprogramming delay for the specified output 
+ channel. This delay is used to mask the CV, CC, CP-, UNR, and other status 
+ bits from the fault register and the OCP function for the specified delay 
+ period.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PROT:DEL</p>
+<p class=TableBody>&nbsp;</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DLY? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present reprogramming delay of the specified 
+ output channel. </td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PROT:DEL?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DSP &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Does nothing.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DSP?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Always returns a 1.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>DSP “ xxxxxxxxxxxx”</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Does nothing.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ERR?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present programming or hardware error. An 
+ error code number is returned over the GPIB to identify the error.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>SYST:ERR?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>FAULT? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the fault register of the specified output channel. 
+ A bit is set in the fault register when the corresponding bit in both 
+ the status and the mask registers. The response is an integer 0 to 255. 
+ The fault register is cleared after being read.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>STAT:OPER?<br>
+STAT:QUES?<br>
+*ESE?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ID?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the model number of the power system. </td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*IDN?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IDATA &lt;ch&gt;, &lt;Ilo&gt;, &lt;Ihi&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ Unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IHI &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ Unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ILO &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ Unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IOUT? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the measured output current of the specified 
+ output channel. The response is a real number. The front panel display 
+ can be used to monitor the measured output current (and voltage) of the 
+ selected output channel. </td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>MEAS:CURR?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IRLO &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IRHI &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IRLN &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IRHN &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IRSET &lt;ch&gt;, &lt;x&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the full-scale current range programming for an 
+ output channel. The power system will select the lowest operating range 
+ that will contain the value (x). If the present operating current is greater 
+ than the full-scale range selected, the present output current will be 
+ reduced to the full-scale value of the new range selected. If the current 
+ entered is larger than the highest possible range, an error will result.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>SENS:CURR:RANG</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>IRSET? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the full-scale current range setting of an output 
+ channel.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>SENS:CURR:RANG?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ISET &lt;ch&gt;, &lt;current&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the current of the specified output channel.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>CURR</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ISET? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present current setting of the specified 
+ output channel. The response is a real number.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>CURR?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ISTEP &lt;ch&gt;, &lt;x&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Increases or decreases the output channel current in 
+ steps. If the step value &lt;x&gt; is positive, output current will increase 
+ by the step value, if the step value is negative, the output current will 
+ decrease by the step value. Stepping beyond the active operating range 
+ causes an error.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>LIST:CURR</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>METER &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Does nothing.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>METER?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Always returns a 1. </td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OCP &lt;ch&gt;, &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Enables the over-current protection circuit for the 
+ specified output channel. This circuit, when enabled, causes the output 
+ to go to the off state when the output is in + CC mode. On/off is a 1 
+ to turn on (enable) or a 0 to turn off (disable) the circuit.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>CURR:PROT:STAT</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OCP? &lt; ch &gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the over-current protection circuit on/off status 
+ for the specified output channel. Response is either a 1 (on) or a 0 (off).</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>CURR:PROT:STAT?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OCRST &lt; ch &gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Returns the specified output channel to its previous 
+ settings after it has been turned off by a protection shutdown.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PROT:CLE</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OUT &lt;ch&gt;, &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Turns the specified output channel on or off. &lt;on/off&gt; 
+ equals 1 to turn the output on and equals 0 to turn the output off.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OUT? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries whether the specified output channel is turned 
+ on or off . The response is either 1 (on) or O (off).</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OVCAL &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ Unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OVRST &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Returns the specified output channel to its previous 
+ settings after it has been turned off by a protection shutdown.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PROT:CLE</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OVSET &lt;ch&gt;, &lt;ovpoint&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the over-voltage trip point for the specified output 
+ channel.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>VOLT:PROT:LEV</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>OVSET? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present over-voltage setting of the specified 
+ output channel. The response is a real number.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>VOLT:PROT:LEV?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>PON &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Does nothing.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*SRE</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>PON?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Always returns a 0.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*SRE?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>RCL &lt;reg&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Recalls the settings for all output channels from the 
+ specified internal register. These settings were previously stored using 
+ the STO command. RCL programs all output channels in sequential order 
+ to these stored settings.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*RCL</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>RELAY &lt;on/off&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error 203. This Option 750 capability is not 
+ supported.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>RELAY?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error 203. This Option 750 capability is not 
+ supported.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>RIRST &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Resets all protection functions for the specified channel. 
+ This Option 750 &nbsp;capability 
+ is supported.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>OUTP:PROT:CLE</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>ROM?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the revision of the power system's firmware.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*IDN?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>SROM?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the revision of the power system's firmware.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*IDN?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>SRQ &lt;setting&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Does nothing.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*SRQ</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>SRQ?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Always returns a 0.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*SRQ?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>STO &lt;reg&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Stores the present settings for all output channels 
+ in the specified register. These settings can be recalled when desired.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*SAV</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>STS? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present status of the specified output channel. 
+ The response represents the sum of the binary weights of the status register 
+ bits.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>STAT:OPER:COND?<br>
+STAT:QUES:COND?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>TEST?</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Always returns a 0.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>*TST?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>UNMASK &lt;ch&gt;, &lt;setting&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the bits in the mask register of the specified 
+ output channel to the setting. The setting is an integer that represents 
+ the sum of the binary weights of the bits. The mask register operates 
+ in conjunction with the status and fault registers.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>STAT:OPER:NTR<br>
+STAT:OPER:PTR<br>
+STAT:QUES:NTR<br>
+STAT:QUES:PTR</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>UNMASK? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present setting of the mask register of 
+ the specified output channel. &nbsp;The 
+ response is an integer from 0 to 255.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>STAT:OPER:NTR?<br>
+STAT:OPER:PTR?<br>
+STAT:QUES:NTR?<br>
+STAT:QUES:PTR?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VDATA &lt;ch&gt;, &lt;Vlo&gt;, &lt;Vhi&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113. 
+ Unit must be calibrated using SCPI commands.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>see Service Guide</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VHI &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VLO &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VMUX? &lt;ch&gt;, &lt;input&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VOUT? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the measured output voltage of the specified 
+ output channel. &nbsp;The 
+ response is a real number. The front panel display can be used to monitor 
+ the measured output voltage (and current) of the selected output channel.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>MEAS:VOLT?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VRLO &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VRHI &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Generates error &nbsp;-113.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VRSET &lt;ch&gt;, &lt;x&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the full-scale voltage range programming for an 
+ output channel. The power system will select the lowest operating range 
+ that will contain the value (x). If the present operating voltage is greater 
+ than the full-scale range selected, the present output voltage will be 
+ reduced to the full-scale value of the new range selected. If the voltage 
+ entered is larger than the highest possible range, an error message will 
+ result.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VRSET? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the full scale voltage range setting of an output 
+ channel.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>None</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VSET &lt;ch&gt;, &lt;voltage&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Sets the voltage of the specified output channel.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>VOLT</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td colspan="1" rowspan="1" style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VSET? &lt;ch&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Queries the present voltage setting of the specified 
+ output channel. The response is a real number.</td>
+<td colspan="1" rowspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>VOLT?</td></tr>
+
+<tr style="height:23px;" valign="top" class="hcp1">
+<td style="width:29.628%;" width="29.628%" class="hcp5">
+<p class=TableBody>VSTEP &lt;ch&gt;, &lt;x&gt;</td>
+<td colspan="1" rowspan="1" style="width:48.545%;" width="48.545%" class="hcp6">
+<p class=TableBody>Increases or decreases the output channel voltage in 
+ steps. If the step value &lt; x &gt; is positive, output voltage will 
+ increase by the step value, if the step value is negative, the output 
+ voltage will decrease by the step value. Trying to step beyond the operating 
+ range will cause a number range error.</td>
+<td rowspan="1" colspan="1" style="width:17.917%;" width="17.917%" class="hcp6">
+<p class=TableBody>LIST:VOLT</td></tr>
+</table>
+
+<p>&nbsp;</p>
+
+</body>
+</html>

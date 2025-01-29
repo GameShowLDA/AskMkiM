@@ -1,0 +1,19 @@
+#
+# This database contains the mapping of VXI devices to Interrupt lines.
+# Note that not all VXI devices need to use interrupt lines and that
+# not all interrupt lines need be assigned.  However, no interrupt
+# line that is allocated in this file can be allocated in the 'vmedevices'
+# file.
+#
+# The format of this files is as follows:
+#
+# line	handler	interruptors ...
+#
+# All fields are <tab> or <space> separated.  All values can be expressed in
+# decimal or hex.  The 'line' field is the interrupt line
+# being allocated.  There can be at most one line for each interrupt
+# line.  The handler field is the logical address of the interrupt handler
+# for this line (not that only one handler can be assigned for any
+# given line).  The interruptors field is a list of logical addresses of
+# interrupters that can use this interrupt line.
+#

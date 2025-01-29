@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="AM Subsystem Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Performance Verification" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Zero Offset Verification</title>
+        <link href="../CalTable.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor599"></a>Zero Offset Verification</h1>
+        <p>This procedure checks the instrument’s zero offset performance. Verification checks are only performed for those functions and ranges with unique offset calibration constants. Measurements are checked for each function and range as described below.</p>
+        <ol>
+            <li class="IndentTight" value="1">Make sure you have read <a href="01%20-%20Calibration%20Introduction.htm#TestConsiderations">Test Considerations</a>.</li>
+            <li class="IndentTight" value="2">Install the 34172B Calibration Short (or equivalent) on the front panel input terminals. Select the Front input terminals with the Front/Rear switch.</li>
+            <li class="IndentTight" value="3">Configure each function and range in the order shown in the table below corresponding to the DMM model number. Make a measurement and return the result. Compare measurement results to the test limits shown below.</li>
+            <li class="IndentTight" value="4">Install the 34172B Calibration Short (or equivalent) on the rear-panel input terminals. Select the Rear input terminals with the Front/Rear switch.</li>
+            <li class="IndentTight" value="5">Configure each function and range in the order shown in the table below corresponding to the DMM model number. Make a measurement and return the result. Compare measurement results to the test limits shown below.</li>
+        </ol>
+        <p>
+            <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <col class="TableStyle-CalTable-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-CalTable-Head-Header1">
+                        <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="8" style="text-align: center;">Values for 34460A DMM</th>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Head-Header1">
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;" />
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;" />
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;" />
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;" />
+                        <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4" style="text-align: center;">Error from Nominal</th>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Head-Header1">
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">Input</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">Function<sup>[1]</sup></th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">Range</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">Quick<br />Check</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">24 hours</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">90 days</th>
+                        <th class="TableStyle-CalTable-HeadE-Column1-Header1" style="text-align: center;">1 year</th>
+                        <th class="TableStyle-CalTable-HeadD-Column1-Header1" style="text-align: center;">2 years</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6" style="text-align: center;">Open</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6" style="text-align: center;">DC Current</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">100 µA</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                        </td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 0.02 µA</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 0.025 µA</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">1 mA</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 0.060 µA</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">10 mA</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 2 µA</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">100 mA</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 4 µA</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 5 µA</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">1 A</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 µA</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 100 µA</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">3 A</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 600 µA</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5" style="text-align: center;">Short</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5" style="text-align: center;">DC Volts</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">100 mV</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                        </td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 µV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 6.5 µV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">1 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 9 µV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 10 µV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">10 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 40 µV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 50 µV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">100 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 600 µV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">1000 V</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 mV</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 10 mV</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6" style="text-align: center;">Short</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6" style="text-align: center;">4-wire Ohms</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">100 &#8486;</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 m&#937;</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 7 m&#8486;</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">1 k&#8486;</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 8 m&#8486;</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 10 m&#937;</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">10 k&#8486;</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                        </td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 50 m&#937;</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 100 m&#937;</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">100 k&#8486;</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 500 m&#937;</td>
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 1 &#937;</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">1 M&#8486;</td>
+                        <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 10 &#937;</td>
+                    </tr>
+                    <tr class="TableStyle-CalTable-Body-Body1">
+                        <td class="TableStyle-CalTable-BodyB-Column1-Body1" style="text-align: center;">10 M&#8486;</td>
+                        <td class="TableStyle-CalTable-BodyB-Column1-Body1" style="text-align: center;" />
+                        <td class="TableStyle-CalTable-BodyA-Column1-Body1" colspan="4" style="text-align: center;">± 100 &#937;</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="Indented3"><sup style="font-size: 8pt;">[1]</sup><span style="font-size: 8pt;">Select 10 PLC. </span>
+                <br style="font-size: 8pt;" /><b>Q</b><span style="font-size: 8pt;">: Quick performance verification test point.</span>
+            </p>
+        </p>
+        <div>
+            <p>
+                <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <col class="TableStyle-CalTable-Column-Column1" />
+                    <thead>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="8">Values for 34461A DMM</th>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Head-Header1">
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Input</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Function<sup>[1]</sup></th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                            <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                            <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="7">Open</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="7">DC Current</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 µA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 0.02 µA</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 0.025 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 0.060 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 2 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 mA</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 4 µA</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 5 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 µA</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 100 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 600 µA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 A</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 1 mA</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5">Short</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5">DC Volts</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 mV</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3 µV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 3.5 µV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 µV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 7 µV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 40 µV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 50 µV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 600 µV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1000 V</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 6 mV</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 10 mV</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">Short</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">4-wire Ohms</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 &#8486;</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3 m&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 4 m&#8486;</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 k&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 5 m&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 10 m&#937;</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 k&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                            </td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 50 m&#937;</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 100 m&#937;</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 k&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 500 m&#937;</td>
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 1 &#937;</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 M&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 10 &#937;</td>
+                        </tr>
+                        <tr class="TableStyle-CalTable-Body-Body1">
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1">10 M&#8486;</td>
+                            <td class="TableStyle-CalTable-BodyB-Column1-Body1" />
+                            <td class="TableStyle-CalTable-BodyA-Column1-Body1" colspan="4" style="text-align: center;">± 100 &#937;</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="Indented3"><sup style="font-size: 8pt;">[1]</sup><span style="font-size: 8pt;">Select 10 PLC. </span>
+                    <br style="font-size: 8pt;" /><b>Q</b><span style="font-size: 8pt;">: Quick performance verification test point.</span>
+                </p>
+            </p>
+        </div>
+        <div>
+            <div>
+                <p>
+                    <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <thead>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="8">Values for 34465A DMM</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Input</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Function<sup>[1]</sup></th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="9">Open</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="9">DC Current</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 50 pA (50E-12
+A)<sup>[2]</sup></td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 200 pA (± 200.0E-12
+A)<sup>[2]</sup></td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 0.001  µA<sup>[2]</sup></td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 0.030 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 0.050 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 2 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 4 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 5 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 100 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 600 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 1 ma</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5">Short</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5">DC Volts</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3 µV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 3.5 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">&#160; ± 4 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 30 µV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 40 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 600 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1000 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 6 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">Short</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">4-wire Ohms</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 &#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3 m&#937;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 4 m&#8486;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 k&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 5 m&#8486;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 k&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 50 m&#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 k&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 500 m&#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 M&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 5 &#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 M&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 100 &#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">Short</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">2-wire Ohms</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">100 M&#937;</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyA-Column1-Body1" style="text-align: center;" colspan="4">1 k&#937;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </p>
+                <p class="Indented3"><sup style="font-size: 8pt;">[1]</sup><span style="font-size: 8pt;">Select 10 PLC. </span>
+                </p>
+                <p class="Indented3"><sup style="font-size: 8pt;">[2]</sup><span style="font-size: 8pt;">These values are typical and these ranges are calibrated internally.</span>
+                    <br style="font-size: 8pt;" /><b>Q</b><span style="font-size: 8pt;">: Quick performance verification test point.</span>
+                </p>
+            </div>
+            <div>
+                <p>
+                    <table style="mc-table-style: url('../CalTable.css');" class="TableStyle-CalTable" cellspacing="0">
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <col class="TableStyle-CalTable-Column-Column1" />
+                        <thead>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="8">Values for 34470A DMM</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1" />
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1" colspan="4">Error from Nominal</th>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Head-Header1">
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Input</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Function<sup>[1]</sup></th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Range</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">Quick<br />Check</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">24 hours</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">90 days</th>
+                                <th class="TableStyle-CalTable-HeadE-Column1-Header1">1 year</th>
+                                <th class="TableStyle-CalTable-HeadD-Column1-Header1">2 years</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="9">Open</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="9">DC Current</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 50 pA (50E-12
+								A)<sup>[2]</sup></td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 200 pA (± 200.0E-12
+								A)<sup>[2]</sup></td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 µA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 0.001  µA<sup>[2]</sup></td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 0.030 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 0.050 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 2 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 mA</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 4 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 5 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 60 µA</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="3">± 100 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">3 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 600 µA</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 A</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 1 ma</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5">Short</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="5">DC Volts</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 mV</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3 µV</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 3.5 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">&#160; ± 4 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 20 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 600 µV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1000 V</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 6 mV</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">Short</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" rowspan="6">4-wire Ohms</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 &#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;">± 3 m&#937;</td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="3" style="text-align: center;">± 4 m&#8486;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 k&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 5 m&#8486;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 k&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" style="text-align: center;"><b>Q</b>
+                                </td>
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 50 m&#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">100 k&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" style="text-align: center;" colspan="4">± 500 m&#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">1 M&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 5 &#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1">10 M&#8486;</td>
+                                <td class="TableStyle-CalTable-BodyE-Column1-Body1" />
+                                <td class="TableStyle-CalTable-BodyD-Column1-Body1" colspan="4" style="text-align: center;">± 100 &#937;</td>
+                            </tr>
+                            <tr class="TableStyle-CalTable-Body-Body1">
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">Short</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">2-wire Ohms</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">100 M&#937;</td>
+                                <td class="TableStyle-CalTable-BodyB-Column1-Body1">&#160;</td>
+                                <td class="TableStyle-CalTable-BodyA-Column1-Body1" style="text-align: center;" colspan="4">1 k&#937;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </p>
+                <p class="Indented3"><sup style="font-size: 8pt;">[1]</sup><span style="font-size: 8pt;">Select 10 PLC. </span>
+                </p>
+                <p class="Indented3"><sup style="font-size: 8pt;">[2]</sup><span style="font-size: 8pt;">These values are typical and these ranges are calibrated internally.</span>
+                    <br style="font-size: 8pt;" /><b>Q</b><span style="font-size: 8pt;">: Quick performance verification test point.</span>
+                </p>
+            </div>
+        </div>
+        
+    </body>
+</html>

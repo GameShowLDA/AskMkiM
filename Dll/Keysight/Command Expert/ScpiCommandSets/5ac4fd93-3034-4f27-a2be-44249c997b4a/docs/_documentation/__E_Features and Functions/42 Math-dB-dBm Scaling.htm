@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:check_list="Ran Smart Index" MadCap:id="HCOPy_Subsystem_Introduction" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:status="In Progress" MadCap:tocPath="Features and Functions|Math" MadCap:InPreviewMode="false" MadCap:PreloadImages="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="HtmlHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="Keysight Truevolt DMM Operating and Service Guide.xml" MadCap:SearchType="Stem">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=7,8,9,10" />
+        <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" /><title>Math - dB/dBm Scaling</title>
+        <link href="../Keysight_help_prelim.css" rel="stylesheet" type="text/css" />
+        
+        
+        
+        
+        
+        
+        
+        
+    </head>
+    <body>
+        <h1 style="page-break-before: always;"><a name="kanchor43"></a>Math - dB/dBm Scaling</h1>
+        <table style="width: 100%;border-spacing: 0px;border-spacing: 0px;border-left-style: Solid;border-left-width: 0px;border-right-style: Solid;border-right-width: 0px;border-top-style: Solid;border-top-width: 0px;border-bottom-style: Solid;border-bottom-width: 0px;margin-left: 0;margin-right: auto;" cellspacing="0" width="100%">
+            <col style="width: 11.684%;" />
+            <col style="width: 88.316%;" />
+            <tr valign="top">
+                <td style="width: 11.684%;padding-right: 10px;padding-left: 10px;border-left-color: #000000;border-left-style: Solid;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-right-width: 0px;border-left-width: 0px;border-top-width: 0px;border-bottom-width: 0px;" width="11.684%">
+                    <p>
+                        <img src="../_Graphics_/note.gif" alt="Note" />
+                    </p>
+                </td>
+                <td style="width: 88.316%;padding-right: 10px;padding-left: 10px;border-top-color: #000000;border-top-style: Solid;border-right-color: #000000;border-right-style: Solid;border-bottom-color: #000000;border-bottom-style: Solid;border-top-width: 0px;border-bottom-width: 0px;border-right-width: 0px;" width="88.316%">
+                    <p>This topic describes dB/dBm Scaling for the 34460A/61A. Scaling features are different for the 34465A/70A and are described in the <a href="Math-Scaling.htm">Scaling</a> topic.</p>
+                </td>
+            </tr>
+        </table>
+        <p>The dB and dBm scaling functions, which apply to ACV and DCV measurements only, allow you to scale measurements relative to a reference value.</p>
+        <p>
+            <img src="../_Graphics_/note.gif" /> Scaling is set to OFF when you change measurement functions (for example, changing from DCV to ACV). You must re-enable scaling after changing measurement functions.</p>
+        <h2>Front Panel Menus</h2>
+        <p>The dB and dBm functions are accessed from the second softkey in the <b>[Math]</b> menu.</p>
+        <p>
+            <img src="../_Graphics_/60_61Math-SK-MainMenu.png" />
+        </p>
+        <p>When the first softkey in the dB / dBm menu is enabled, as shown below, you will see one of the following menus:</p>
+        <p><b>When function is dB:</b>
+            <br />
+            <img src="../_Graphics_/Math-SK-ScaledBMenu.png" />
+        </p>
+        <p><b>When function is dBm:</b>
+            <br />
+            <img src="../_Graphics_/Math-SK-ScaledBmMenu.png" />
+        </p>
+        <div>
+            <h2>dB Scaling</h2>
+            <p>Each dB measurement is the difference between the input signal and a stored reference value, with both values converted to dBm:</p>
+            <p>dB = reading in dBm – reference value in dBm</p>
+            <p>The relative value must be from -200 to +200 dBm (default 0). You can either measure this value by pressing <b>Measure Ref Value</b>, or you can enter a specified value.</p>
+        </div>
+        <div>
+            <h2>dBm Scaling</h2>
+            <p>The dBm function is logarithmic, comparing power delivered to a reference resistance, relative to 1 milliwatt:</p>
+            <p>dBm = 10 x log<sub>10</sub> ( reading<sup>2</sup> / reference resistance / 1 mW )</p>
+            <p>The reference resistance value (<b>Ref R</b>) may be 50, 75, 93, 110, 124, 125, 135, 150, 250, 300, 500, 600 (default), 800, 900, 1000, 1200, or 8000 &#937;. Press <b>Ref R</b> and use the front panel up and down arrows to make your selection.</p>
+        </div>
+        <div>
+            <h2>See Also</h2>
+            <p><a href="40%20---Math---.htm">Math - Introduction</a>
+            </p>
+            <p><a href="41%20Math-Null.htm">Null</a>
+            </p>
+            <p><a href="43%20Math-Statistics.htm">Statistics</a>
+            </p>
+            <p><a href="44%20Math-Limits.htm">Limits</a>
+            </p>
+        </div>
+        
+    </body>
+</html>
