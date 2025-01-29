@@ -1,4 +1,6 @@
-﻿namespace AppConfig.Data.Theme
+﻿using AppConfig;
+
+namespace UI.Theme
 {
   static public class ThemeSettingsManager
   {
@@ -8,12 +10,10 @@
     static public async Task ReadThemeModeAsync()
     {
       ThemeFileManager themeFileManager = new ThemeFileManager(FileLocations.ColorConfigPath);
-
       if (!await themeFileManager.CreateFileIfNotExistsAsync())
       {
         return;
       }
-
       await ThemeScheme.LoadSettingsColor(themeFileManager);
     }
   }

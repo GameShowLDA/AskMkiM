@@ -40,7 +40,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        IsAdmin = enable;
+        EventAggregator.AdminRightsFlag = enable;
       });
     }
 
@@ -52,7 +52,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        IsActivePower = enable;
+        EventAggregator.PowerFlag = enable;
       });
     }
 
@@ -64,7 +64,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        IsLocked = enable;
+        EventAggregator.LockedFlag = enable;
       });
     }
 

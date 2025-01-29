@@ -40,7 +40,7 @@ namespace AppConfig
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
     /// </summary>
-    static private bool AdminRightsFlag
+    static internal bool AdminRightsFlag
     {
       get => IsAdmin;
       set
@@ -56,7 +56,7 @@ namespace AppConfig
     /// <summary>
     /// Флаг, указывающий, активно ли питание системы.
     /// </summary>
-    static private bool PowerFlag
+    static internal bool PowerFlag
     {
       get => IsActivePower;
       set
@@ -72,7 +72,7 @@ namespace AppConfig
     /// <summary>
     /// Флаг, указывающий, активно ли питание системы.
     /// </summary>
-    static private bool LockedFlag
+    static internal bool LockedFlag
     {
       get => IsLocked;
       set

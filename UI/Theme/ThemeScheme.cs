@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using static Utilities.LoggerUtility;
 
-namespace AppConfig.Data.Theme
+namespace UI.Theme
 {
   /// <summary>
   /// Класс для работы с темами приложения, включая загрузку, сохранение и преобразование цветовых настроек.
@@ -51,34 +51,49 @@ namespace AppConfig.Data.Theme
     /// <param name="themeModel">Модель темы с цветами.</param>
     private static void ApplyThemeToResources(ThemeModel themeModel)
     {
-      themeModel = GetLightTheme();
-      var resourceDictionary = new ResourceDictionary
+      try
       {
-        Source = new Uri("pack://application:,,,/UI;component/Style.xaml")
-      };
 
-      if (!Application.Current.Resources.MergedDictionaries.Contains(resourceDictionary))
-      {
-        Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
-        LogInformation("Ресурс Style.xaml был добавлен в MergedDictionaries.");
-      }
+        themeModel = GetLightTheme();
 
-      if (Application.Current.Resources.MergedDictionaries.Contains(resourceDictionary))
-      {
-        resourceDictionary["PrimaryColor"] = FromHex(themeModel.PrimaryColor);
-        resourceDictionary["SecondaryColor"] = FromHex(themeModel.SecondaryColor);
-        resourceDictionary["ForegroundColor"] = FromHex(themeModel.ForegroundColor);
-        resourceDictionary["ActiveColor"] = FromHex(themeModel.ActiveColor);
-        resourceDictionary["IsCheckedColor"] = FromHex(themeModel.IsCheckedColor);
-        LogInformation("Ресурсы успешно обновлены.");
-      }
-      else
-      {
-        LogError("Ошибка: Ресурс не найден в MergedDictionaries.");
-      }
+        // Получаем ссылку на существующий ресурсный словарь
+        var resourceDictionary = Application.Current.Resources.MergedDictionaries
+          .FirstOrDefault(rd => rd.Source?.OriginalString == "/UI;component/Style.xaml");
 
-      Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
+        // Если словарь найден, обновляем ресурсы
+        if (resourceDictionary != null)
+        {
+          resourceDictionary["PrimaryColor"] = FromHex(themeModel.PrimaryColor);
+          resourceDictionary["SecondaryColor"] = FromHex(themeModel.SecondaryColor);
+          resourceDictionary["ForegroundColor"] = FromHex(themeModel.ForegroundColor);
+          resourceDictionary["ActiveColor"] = FromHex(themeModel.ActiveColor);
+          resourceDictionary["IsCheckedColor"] = FromHex(themeModel.IsCheckedColor);
+
+          LogInformation("Ресурсы успешно обновлены.");
+        }
+        else
+        {
+          LogError("Ошибка: Ресурс не найден в MergedDictionaries.");
+          resourceDictionary = new ResourceDictionary
+          {
+            Source = new Uri("/UI;component/Style.xaml", UriKind.RelativeOrAbsolute)
+          };
+          resourceDictionary["PrimaryColor"] = FromHex(themeModel.PrimaryColor);
+          resourceDictionary["SecondaryColor"] = FromHex(themeModel.SecondaryColor);
+          resourceDictionary["ForegroundColor"] = FromHex(themeModel.ForegroundColor);
+          resourceDictionary["ActiveColor"] = FromHex(themeModel.ActiveColor);
+          resourceDictionary["IsCheckedColor"] = FromHex(themeModel.IsCheckedColor);
+
+          Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
+          LogInformation("Новый ресурсный словарь добавлен.");
+        }
+      }
+      catch (Exception ex)
+      {
+        LogError($"Ошибка при создании ресурса: {ex.Message}");
+      }
     }
+
 
     /// <summary>
     /// Преобразует строку шестнадцатеричного представления цвета в объект Color.
