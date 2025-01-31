@@ -238,6 +238,7 @@ namespace MainWindowProgram
       keyManagementWindow.ShowDialog();
       this.Effect = null;
     }
+    private void Gpt_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new UI.Controls.GPT.GPTPunchControl(), "GptManagement").ConfigureAwait(true);
 
     /// <summary>
     /// Добавляет элемент управления для отправки команды в multiEditors.
@@ -313,9 +314,11 @@ namespace MainWindowProgram
       else
       {
         LogInformation("Закрытие приложения.");
-        await Core.Communication.CommunicationManager.ResetAllSystem();
-        await Task.Delay(500);
-        await Core.ManagerShassy.Function.StopPowerAsync(ConfigCollector.GetManagerShassyIp());
+
+        // TODO : Раскоментить
+        // await Core.ManagerShassy.Function.StopPowerAsync(ConfigCollector.GetManagerShassyIp());
+        // await Task.Delay(1000);
+        // await Core.Communication.CommunicationManager.ResetAllSystem();
       }
     }
 

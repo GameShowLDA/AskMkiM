@@ -258,6 +258,18 @@
         PreviewMouseDown="USB_Handler"
         />
 
+                    <MenuItem 
+                    Header="Управление" 
+                    Name="DeviceManagment"
+                    >
+                        <MenuItem 
+                            Header="GPT" 
+                            Name="GptManagment"
+                            PreviewMouseDown="Gpt_Handler"
+                            >
+                        </MenuItem>
+                    </MenuItem>
+
                 </MenuItem>
             </Menu>
 

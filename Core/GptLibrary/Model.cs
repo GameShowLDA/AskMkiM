@@ -1,6 +1,7 @@
 ﻿using System.IO.Ports;
 using System.Text;
 using Core.Abstract;
+using YamlDotNet.Core.Tokens;
 using static Utilities.LoggerUtility;
 
 namespace Core.GptLibrary
@@ -235,6 +236,8 @@ namespace Core.GptLibrary
     {
       try
       {
+        LogInformation($"Отправка команды на GPT79904: {command}");
+
         if (!this.Port.IsOpen)
         {
           this.Port.Open();
