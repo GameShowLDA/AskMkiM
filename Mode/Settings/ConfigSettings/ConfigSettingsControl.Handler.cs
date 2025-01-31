@@ -195,6 +195,9 @@ namespace Mode.Settings.ConfigSettings
           list.Add(item);
         }
       }
+
+     var deviceFileManager = new AppConfig.Data.Device.DeviceFileManager(ConfigFilePath);
+     deviceFileManager.RewriteFileAsync(list).ConfigureAwait(true);
     }
 
     /// <summary>

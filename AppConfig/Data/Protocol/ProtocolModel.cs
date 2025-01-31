@@ -5,22 +5,22 @@
     /// <summary>
     /// Отображение данных об устройстве в протоколе.
     /// </summary>
-    public bool DeviceInfo { get; set; }
+    public bool ShowDeviceInfo { get; set; }
 
     /// <summary>
     /// Флаг, указывающий, нужно ли сохранять протокол.
     /// </summary>
-    public bool SaveProtocol { get; set; }
+    public bool AutoSaveProtocol { get; set; }
 
     /// <summary>
     /// Флаг, указывающий, нужно ли печатать протокол.
     /// </summary>
-    public bool PrintProtocol { get; set; }
+    public bool AutoPrintProtocol { get; set; }
 
     /// <summary>
     /// Флаг, указывающий время выполнения операций.
     /// </summary>
-    public bool StartTime { get; set; }
+    public bool DisplayOperationTime { get; set; }
 
     /// <summary>
     /// Флаг, указывающий на подробное отображение протокола.

@@ -25,10 +25,10 @@ namespace AppConfig.Config
     /// </summary>
     static public async Task SetProtocolModelAsync(ProtocolModel executionModel)
     {
-      await ProtocolConfig.SetDeviceInfo(executionModel.DeviceInfo);
-      await ProtocolConfig.SetSaveProtocol(executionModel.SaveProtocol);
-      await ProtocolConfig.SetPrintProtocol(executionModel.PrintProtocol);
-      await ProtocolConfig.SetTimeStart(executionModel.StartTime);
+      await ProtocolConfig.SetDeviceInfo(executionModel.ShowDeviceInfo);
+      await ProtocolConfig.SetSaveProtocol(executionModel.AutoSaveProtocol);
+      await ProtocolConfig.SetPrintProtocol(executionModel.AutoPrintProtocol);
+      await ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
       await ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
     }
 

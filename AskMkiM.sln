@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "UI\UI.csproj", "{B04B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mode", "Mode\Mode.csproj", "{80AED1BA-5417-4A1E-943E-E7AEAF9A11EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewCore", "NewCore\NewCore.csproj", "{67B15B16-B4F3-456C-9033-B4CF184C2CEC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Тесты", "Тесты", "{7844D43D-AB15-4288-8912-881384C2858F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsole", "TestConsole\TestConsole.csproj", "{3AC39CE3-3D43-4C90-A0DF-63853E4369A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,9 +51,20 @@ Global
 		{80AED1BA-5417-4A1E-943E-E7AEAF9A11EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80AED1BA-5417-4A1E-943E-E7AEAF9A11EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80AED1BA-5417-4A1E-943E-E7AEAF9A11EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67B15B16-B4F3-456C-9033-B4CF184C2CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67B15B16-B4F3-456C-9033-B4CF184C2CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67B15B16-B4F3-456C-9033-B4CF184C2CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67B15B16-B4F3-456C-9033-B4CF184C2CEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AC39CE3-3D43-4C90-A0DF-63853E4369A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AC39CE3-3D43-4C90-A0DF-63853E4369A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AC39CE3-3D43-4C90-A0DF-63853E4369A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AC39CE3-3D43-4C90-A0DF-63853E4369A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3AC39CE3-3D43-4C90-A0DF-63853E4369A0} = {7844D43D-AB15-4288-8912-881384C2858F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1BD86333-977E-498D-85E7-5B4A296991F9}

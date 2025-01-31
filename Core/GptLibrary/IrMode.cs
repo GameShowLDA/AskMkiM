@@ -10,20 +10,8 @@ namespace Core.GptLibrary
   /// </summary>
   public static class IrMode
   {
-    /// <summary>
-    /// Gets or sets значения напряжения пробойной установки.
-    /// </summary>
-    static public double Voltage { get; set; }
 
-    /// <summary>
-    /// Gets or sets значения высокого сопротивления пробойной установки.
-    /// </summary>
-    static public double Rhiset { get; set; }
-
-    /// <summary>
-    /// Gets or sets значения низкого сопротивления пробойной установки.
-    /// </summary>
-    static public double Rloset { get; set; }
+    static private int timeDelay = 2;
 
     /// <summary>
     /// Устанавливает режим сопротивления изоляции на пробойке.
@@ -36,7 +24,6 @@ namespace Core.GptLibrary
       await model.WriteLineAsync(query);
     }
 
-    static private int timeDelay = 2;
 
     /// <summary>
     /// Устанавливает напряжения на пробойном устройстве.

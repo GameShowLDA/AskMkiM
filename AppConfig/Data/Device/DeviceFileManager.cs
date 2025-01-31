@@ -27,6 +27,5 @@ namespace AppConfig.Data.Device
     {
       _jsonUtility = new JsonUtility<object>(pathFile);
     }
-
   }
 }

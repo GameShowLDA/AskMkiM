@@ -28,8 +28,6 @@ namespace AppConfig.Config
 
     #endregion
 
-
-
     #region Set.
 
     /// <summary>
@@ -71,6 +69,7 @@ namespace AppConfig.Config
     #endregion
 
     #region Get.
+
     /// <summary>
     /// Возвращает статус питания системы.
     /// </summary>
@@ -88,6 +87,7 @@ namespace AppConfig.Config
     /// </summary>
     /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
     static public async Task<bool> GetAdminRights() => await Task.Run(() => IsAdmin);
+
     #endregion
   }
 }

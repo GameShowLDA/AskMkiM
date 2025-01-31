@@ -92,6 +92,8 @@ namespace AppConfig.Config
           return IeMode;
         case MeasurementErrorModel.TypeCommand.CI:
           return CiMode;
+        case MeasurementErrorModel.TypeCommand.PR:
+          return PrMode;
         default:
           throw new ArgumentException($"Неизвестный тип команды: {type}", nameof(type));
       }
