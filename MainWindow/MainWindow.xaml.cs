@@ -81,15 +81,12 @@ namespace MainWindowProgram
 
     private void SetUsbMonitoring()
     {
-
-      usbMonitorService.Start();  // Запускаем сервис
+      usbMonitorService.Start(); 
     }
 
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
       AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
-
-
   }
 }

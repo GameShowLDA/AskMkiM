@@ -7,14 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PresentationFramework">
-      <HintPath>..\Dll\PresentFramew\PresentationFramework.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\NewCore\NewCore.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 
 </Project>

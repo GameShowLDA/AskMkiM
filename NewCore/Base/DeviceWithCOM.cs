@@ -56,6 +56,21 @@ namespace NewCore.Base
     /// </summary>
     /// <value>PID устройства в виде строки.</value>
     public string PID { get; set; }
+    public int Number { get; set; }
+    public object ConnectionDetails
+    {
+      get
+      { 
+        return COMPort; 
+      }
+
+      set
+      {
+        COMPort = (SerialPort)value;
+      }
+    }
+
+    public DeviceType DeviceType => throw new NotImplementedException();
 
     /// <summary>
     /// Подключается к устройству через COM-порт.
@@ -169,7 +184,7 @@ namespace NewCore.Base
     /// <returns>
     /// Возвращает <see cref="bool"/>, указывающий на наличие соединения.
     /// </returns>
-    public virtual async Task<bool> IsConnectedAsync()
+    public virtual async Task<bool> Initialize()
     {
       try
       {

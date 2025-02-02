@@ -159,46 +159,12 @@ namespace Mode.Settings.ConfigSettings
     /// <summary>
     /// Сохраняет текущую конфигурацию устройств.
     /// </summary>
+    /// <exception cref="NotImplementedException">Выбрасывается, если метод не реализован.</exception>
     private void SaveConfig()
     {
-      List<object> list = new List<object>();
-
-      if (managerShassyModel != null && managerShassyModel.IPAddress != null)
-      {
-        list.Add(managerShassyModel);
-      }
-
-      if (moduleVoltageCurrentSource != null && moduleVoltageCurrentSource.IPAddress != null)
-      {
-        list.Add(moduleVoltageCurrentSource);
-      }
-
-      if (deviceBusCommutationModel != null && deviceBusCommutationModel.IPAddress != null)
-      {
-        list.Add(deviceBusCommutationModel);
-      }
-
-      if (fastMeterModel != null)
-      {
-        list.Add(fastMeterModel);
-      }
-
-      if (accurateMeterModel != null)
-      {
-        list.Add(accurateMeterModel);
-      }
-
-      foreach (Core.ModuleRelayControl.Model item in mkrModels)
-      {
-        if (item != null && item.IPAddress != null)
-        {
-          list.Add(item);
-        }
-      }
-
-     var deviceFileManager = new AppConfig.Data.Device.DeviceFileManager(ConfigFilePath);
-     deviceFileManager.RewriteFileAsync(list).ConfigureAwait(true);
+      throw new NotImplementedException("Метод SaveConfig() ещё не реализован.");
     }
+
 
     /// <summary>
     /// Очищает отображение всех устройств в интерфейсе.

@@ -26,7 +26,7 @@ namespace NewCore.Device
     public ResistanceMeasurement ResistanceMeasurement => new(ag3466X);
     public VoltageMeasurement VoltageMeasurement => new(ag3466X);
 
-    public override Task<bool> IsConnectedAsync()
+    public override Task<bool> Initialize()
     {
       Task.Run(() =>
       {
@@ -162,7 +162,7 @@ namespace NewCore.Device
 
           await connectInstrumentTask;
 
-          if (await IsConnectedAsync())
+          if (await Initialize())
           {
             this.IPAddress = System.Net.IPAddress.Parse(address);
             LogInformation($"Успешное подключение к {IPAddress}");

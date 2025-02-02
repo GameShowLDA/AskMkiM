@@ -25,10 +25,19 @@ namespace NewCore.Base
     string Description { get; set; }
 
     /// <summary>
-    /// Получает или задает тип соединения устройства.
-    /// Тип соединения указывает на способ подключения устройства к системе (например, IP или COM).
+    /// Номер утсройства.
     /// </summary>
-    ConnectionType ConnectionType { get; set; }
+    int Number { get; set; }
+
+    /// <summary>
+    /// Универсальное свойство для хранения данных подключения (IP или COM)
+    /// </summary>
+    object ConnectionDetails { get; set; }
+
+    /// <summary>
+    /// Тип устройства.
+    /// </summary>
+    DeviceType DeviceType { get; }
 
     /// <summary>
     /// Проверяет соединение с устройством.
@@ -38,6 +47,6 @@ namespace NewCore.Base
     /// Возвращает <see cref="bool"/>, указывающий на наличие соединения:
     /// <c>true</c> — если соединение установлено, <c>false</c> — в противном случае.
     /// </returns>
-    Task<bool> IsConnectedAsync();
+    Task<bool> Initialize();
   }
 }

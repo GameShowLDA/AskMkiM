@@ -1,5 +1,6 @@
 ﻿using NewCore.Base;
 using NewCore.Device;
+using TestConsole;
 
 namespace TestConsole
 {
@@ -14,7 +15,7 @@ namespace TestConsole
         // Отображаем доступные опции
         Console.WriteLine("\nВыберите действие:");
         Console.WriteLine("1. Тест COM-портов");
-        Console.WriteLine("2. Другая функция (в разработке)");
+        Console.WriteLine("2. Работа с базой данных");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
@@ -34,8 +35,8 @@ namespace TestConsole
             break;
 
           case 2:
-            // Другая функция (в разработке)
-            Console.WriteLine("Эта функция находится в разработке.");
+            // Работа с базой данных
+            DBTest.Run();
             break;
 
           case 0:

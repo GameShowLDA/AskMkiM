@@ -90,7 +90,6 @@ namespace AppConfig.Config
     public static async Task<bool> GetIsStepByStepModeEnabled() => await Task.Run(() => ExecutionModel.StopOnError);
 
     #endregion
-
     public static async Task RewriteExecutionConfigAsync()
     {
       ExecutionModel executionModel = new ExecutionModel();

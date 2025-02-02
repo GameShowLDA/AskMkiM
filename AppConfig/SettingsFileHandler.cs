@@ -27,9 +27,9 @@ namespace AppConfig
         var themeTask = ThemeSettingsManager.ReadThemeModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-        var deviceConfigTask = DeviceSettingsManager.ReadDeviceModeAsync();
+        var deviceTask = DeviceSettingsManager.ReadDeviceConfigAsync();
 
-        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, deviceConfigTask);
+        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, deviceTask);
       }
       catch (Exception ex)
       {
@@ -42,6 +42,5 @@ namespace AppConfig
         LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
       }
     }
-
   }
 }

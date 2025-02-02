@@ -8,6 +8,50 @@ namespace NewCore.Enum
 {
   public class DeviceEnum
   {
+    /// <summary>
+    /// Перечисление типов устройств
+    /// </summary>
+    public enum DeviceType
+    {
+      /// <summary>
+      /// Менеджер шасси
+      /// </summary>
+      ChassisManager,
+
+      /// <summary>
+      /// Модуль коммутации реле
+      /// </summary>
+      RelaySwitchModule,
+
+      /// <summary>
+      /// Модуль источника напряжения и тока
+      /// </summary>
+      PowerSourceModule,
+
+      /// <summary>
+      /// Устройство коммутации
+      /// </summary>
+      SwitchingDevice,
+
+      /// <summary>
+      /// Измеритель точный
+      /// </summary>
+      PrecisionMeter,
+
+      /// <summary>
+      /// Измеритель быстрый
+      /// </summary>
+      FastMeter,
+
+      /// <summary>
+      /// Пробойная установка
+      /// </summary>
+      BreakdownTester
+    }
+
+    /// <summary>
+    /// Тип подключения.
+    /// </summary>
     public enum ConnectionType
     {
       IP,
@@ -80,7 +124,6 @@ namespace NewCore.Enum
       AB4,
     }
 
-
     /// <summary>
     /// Словарь соответствий шин и их параметров (группа, номер).
     /// </summary>
@@ -99,7 +142,6 @@ namespace NewCore.Enum
       { SwitchingBus.AB3, Tuple.Create(3, 3) },
       { SwitchingBus.AB4, Tuple.Create(3, 4) },
     };
-
 
     /// <summary>
     /// Шины точек модуля коммутации реле.

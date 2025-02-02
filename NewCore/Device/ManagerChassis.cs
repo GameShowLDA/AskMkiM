@@ -34,7 +34,7 @@ namespace NewCore.Device
     /// <c>true</c> — если соединение установлено, <c>false</c> — в противном случае.
     /// </returns>
     /// <exception cref="Exception">Выбрасывается, если произошла непредвиденная ошибка при проверке соединения.</exception>
-    public override async Task<bool> IsConnectedAsync()
+    public override async Task<bool> Initialize()
     {
       try
       {
