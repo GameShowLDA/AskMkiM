@@ -25,19 +25,10 @@ namespace NewCore.Base
     string Description { get; set; }
 
     /// <summary>
-    /// Номер утсройства.
+    /// Получает или задает тип соединения устройства.
+    /// Тип соединения указывает на способ подключения устройства к системе (например, IP или COM).
     /// </summary>
-    int Number { get; set; }
-
-    /// <summary>
-    /// Универсальное свойство для хранения данных подключения (IP или COM)
-    /// </summary>
-    object ConnectionDetails { get; set; }
-
-    /// <summary>
-    /// Тип устройства.
-    /// </summary>
-    DeviceType DeviceType { get; }
+    ConnectionType ConnectionType { get; set; }
 
     /// <summary>
     /// Проверяет соединение с устройством.

@@ -56,21 +56,6 @@ namespace NewCore.Base
     /// </summary>
     /// <value>PID устройства в виде строки.</value>
     public string PID { get; set; }
-    public int Number { get; set; }
-    public object ConnectionDetails
-    {
-      get
-      { 
-        return COMPort; 
-      }
-
-      set
-      {
-        COMPort = (SerialPort)value;
-      }
-    }
-
-    public DeviceType DeviceType => throw new NotImplementedException();
 
     /// <summary>
     /// Подключается к устройству через COM-порт.

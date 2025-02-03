@@ -20,6 +20,7 @@ namespace NewCore.Device
     public Functions Functions => new Functions(this);
 
     public override Task<bool> Initialize()
+
     {
       throw new NotImplementedException();
     }
