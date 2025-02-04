@@ -1,7 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:CustomControls="clr-namespace:UI.Components" 
+                    xmlns:SliderConcerter="clr-namespace:UI"
                     >
+    
+    <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->
     
@@ -620,7 +623,57 @@
         <Setter Property="Background" Value="Transparent"/>
     </Style>
 
+    
+    <!-- Стиль для Slider -->
+    <Style x:Key="CustomSliderStyle" TargetType="Slider">
+        <Setter Property="Background" Value="{StaticResource IsCheckedColorSolidColorBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource IsCheckedColorSolidColorBrush}" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid Height="20">
+                        <!-- Общий трек -->
+                        <Rectangle x:Name="TrackBackground"
+                                   Height="4"
+                                   Fill="{TemplateBinding Background}"
+                                   VerticalAlignment="Center"
+                                   Width="{TemplateBinding ActualWidth}" />
 
+                        <!-- Активная часть трека -->
+                        <Rectangle x:Name="TrackForeground"
+                                   Height="4"
+                                   Fill="{TemplateBinding Foreground}"
+                                   VerticalAlignment="Center">
+                            <Rectangle.Width>
+                                <MultiBinding Converter="{StaticResource SliderValueToWidthConverter}">
+                                    <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    <Binding Path="Minimum" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    <Binding Path="Maximum" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource TemplatedParent}" />
+                                </MultiBinding>
+                            </Rectangle.Width>
+                        </Rectangle>
+
+                        <!-- Ползунок -->
+                        <Track x:Name="PART_Track">
+                            <Track.Thumb>
+                                <Thumb x:Name="Thumb">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="16" Height="16"
+                                                     Fill="{StaticResource ActiveBorderSolidColorBrush}"
+                                                     VerticalAlignment="Center" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 
 

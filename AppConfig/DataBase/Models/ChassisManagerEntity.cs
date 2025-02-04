@@ -34,6 +34,7 @@ namespace AppConfig.DataBase.Models
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
 
+
     /// <summary>
     /// Инициализация устройства.
     /// </summary>

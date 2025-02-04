@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Windows;
 using AppConfig.Data.Device;
+﻿using System.Windows;
 using AppConfig.Data.Execution;
 using AppConfig.Data.MeasurementError;
 using AppConfig.Data.Protocol;

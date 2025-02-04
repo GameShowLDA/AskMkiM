@@ -1,6 +1,5 @@
 ﻿using NewCore.Base;
 using NewCore.Device;
-using TestConsole;
 
 namespace TestConsole
 {
@@ -35,7 +34,7 @@ namespace TestConsole
             break;
 
           case 2:
-            // Работа с базой данных
+
             DBTest.Run();
             break;
 

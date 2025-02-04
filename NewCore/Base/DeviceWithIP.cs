@@ -15,6 +15,7 @@ namespace NewCore.Base
     public DeviceType DeviceType => throw new NotImplementedException();
 
     public abstract Task<bool> Initialize();
+
     public DeviceWithIP(IPAddress iPAddress)
     {
       IPAddress = iPAddress;

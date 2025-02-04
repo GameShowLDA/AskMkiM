@@ -51,7 +51,7 @@
       GPIB_VERSION,
     }
 
-    /// <summary>
+    /// <summary>a
     /// Словарь для получения синтаксиса команды по ее типу.
     /// </summary>
     private static readonly Dictionary<SystemCommand, string> CommandSyntax = new Dictionary<SystemCommand, string>

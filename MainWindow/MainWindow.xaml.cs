@@ -52,6 +52,7 @@ namespace MainWindowProgram
     {
       this.Closing += MainWindow_Closing;
       this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+      this.SizeChanged += MainWindow_SizeChanged;
 
       AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
       Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
