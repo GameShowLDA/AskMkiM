@@ -39,8 +39,6 @@ namespace AppConfig.DataBase.Models
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.BreakdownTester;
 
-    public DeviceEnum.ConnectionType ConnectionType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
     /// <summary>
     /// Метод инициализации пробойной установки.
     /// </summary>

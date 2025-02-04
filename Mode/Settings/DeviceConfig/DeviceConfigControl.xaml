@@ -14,7 +14,9 @@
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Chassis:ChassisManagerControl x:Name="chassisManager"/>
-        <Border Grid.Column="1" Background="Red" Name="deviceBorder"/>
+        <Chassis:ChassisManagerControl x:Name="chassisManager" Background="White"/>
+        <Border Grid.Column="1" Background="Blue" Name="deviceBorder"/>
+        <Border Grid.Column="2" Background="Red" Name="setingsBorder"/>
+
     </Grid>
 </UserControl>

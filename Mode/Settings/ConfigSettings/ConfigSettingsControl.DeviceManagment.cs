@@ -3,20 +3,12 @@ using System.Net;
 using System.Windows;
 using System.Windows.Media.Effects;
 using Core.Abstract;
+using Core.Communication;
+using Core.ConfigCollector;
 using Core.Enum;
 using Core.Model;
-using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Config.ProtocolConfig;
-using static AppConfig.Config.LoopConfig;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
-using static Utilities.Models.ShowMessageModel;
-using static Utilities.LoggerUtility;
-using static AppConfig.Config.MeasurementErrorConfig;
-using Core.ConfigCollector;
 using Mode.Base.SearchDevices;
-using Core.Communication;
+using static Utilities.LoggerUtility;
 
 namespace Mode.Settings.ConfigSettings
 {
@@ -144,7 +136,6 @@ namespace Mode.Settings.ConfigSettings
       ConfigCollector.SetFastMeter(model);
       SetNewTreeViewItem(fastMeterContent, model);
     }
-
 
     /// <summary>
     /// Устанавливает Быстрый измеритель.

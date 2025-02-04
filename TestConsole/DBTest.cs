@@ -65,8 +65,7 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
-      using var dbContext = new AppDbContext(optionsBuilder.Options);
+      using var dbContext = AppConfig.Config.SystemStateManager.Context;
 
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();

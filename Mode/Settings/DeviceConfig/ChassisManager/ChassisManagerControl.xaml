@@ -14,11 +14,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Background="Red">
+        <Border Background="Red" x:Name="addChassisButton"
+                MouseEnter="addChassisButton_MouseEnter"
+                MouseLeave="addChassisButton_MouseLeave"
+                PreviewMouseDown="addChassisButton_PreviewMouseDown"
+                >
 
             <!-- Кнопка добавления системы -->
             <CustomControls:PlusButtonControl 
-                 x:Name="addAccurateMeterButton" 
                  Grid.Column="1" 
                  FontSize="4" 
                  Height="40" 
@@ -27,7 +30,7 @@
                 
                 />
         </Border>
-        
+
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding Systems}">
                 <ItemsControl.ItemTemplate>
@@ -35,10 +38,11 @@
                         <Button Content="{Binding Name}" 
                                 Margin="5"
                                 Padding="10"
-                                Command="{Binding SelectSystemCommand}"/>
+                                Click="OnSystemSelected"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
     </Grid>
 </UserControl>
+    

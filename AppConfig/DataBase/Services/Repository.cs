@@ -14,8 +14,8 @@ namespace AppConfig.DataBase.Services
   /// <typeparam name="T">Тип сущности</typeparam>
   public class Repository<T> : ICRUD<T> where T : class
   {
-    private readonly AppDbContext _context;
-    private readonly DbSet<T> _dbSet;
+    internal readonly AppDbContext _context;
+    internal readonly DbSet<T> _dbSet;
 
     internal Repository(AppDbContext context)
     {

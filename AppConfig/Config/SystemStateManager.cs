@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using AppConfig.DataBase;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace AppConfig.Config
 {
@@ -26,6 +29,9 @@ namespace AppConfig.Config
     /// </summary>
     static internal bool IsLocked { get; set; }
 
+
+    static internal readonly DbContextOptionsBuilder<AppDbContext> OptionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+    static public AppDbContext Context => new AppDbContext(OptionsBuilder.Options);
     #endregion
 
     #region Set.
@@ -87,7 +93,6 @@ namespace AppConfig.Config
     /// </summary>
     /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
     static public async Task<bool> GetAdminRights() => await Task.Run(() => IsAdmin);
-
     #endregion
   }
 }

@@ -4,244 +4,162 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig.DeviceManager"
-              xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
+             xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
              mc:Ignorable="d" 
-             d:DesignHeight="450" 
              Width="Auto">
-    <UserControl.Resources>
-        <!-- Стиль для отключения выделения элементов в ListView, наследующий базовый стиль -->
-        <Style 
-            x:Key="NonSelectableListViewItemStyle" 
-            TargetType="ListViewItem" 
-            BasedOn="{StaticResource {x:Type ListViewItem}}">
-            <Setter Property="Focusable" Value="false" />
-            <Setter Property="IsHitTestVisible" Value="false" />
-        </Style>
-
-        <Style TargetType="TextBox" x:Key="NonChangingBorderTextBox">
-            <Setter Property="BorderBrush" Value="White"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Name="border"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ScrollViewer x:Name="PART_ContentHost"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
 
     <Border CornerRadius="0,0,0,0" Width="Auto">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <!-- Контент с прокруткой -->
+                <RowDefinition Height="Auto"/>
+                <!-- Кнопки снизу -->
+            </Grid.RowDefinitions>
 
-            <Grid x:Name="ButtonsPanel" Background="Transparent" Grid.Column="0" Width="300" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                <Grid x:Name="ButtonsPanel" Background="Transparent" Width="300">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <StackPanel Background="Transparent"  Margin="2" Grid.Row="1">
+                    <StackPanel Background="Transparent" Margin="2" Grid.Row="0">
 
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="managerShassyButton" 
-                                Grid.Column="0">
-                            <TextBlock Text="Менеджер Шасси" 
-                                TextWrapping="Wrap" 
-                                TextAlignment="Center"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center"/>
-                        </Button>
-                        <CustomControls:PlusButtonControl x:Name="addManagerShassyButton" 
-                                                          Grid.Column="1" 
-                                                          FontSize="3" 
-                                                          Width="25"
-                                                          Height="25"
-                                                          Margin="5,0,0,0" 
-                                                          />
-                    </Grid>
-                    <StackPanel x:Name="managerShassyContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
-
-
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="deviceBusCommutationButton" 
-                                >
-                            <TextBlock Text="Устройство коммутации шин" 
-                                TextWrapping="Wrap" 
-                                TextAlignment="Center"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center"/>
-                        </Button>
-                        <CustomControls:PlusButtonControl x:Name="addDeviceBusCommutationButton" 
-                                                          Grid.Column="1" 
-                                                                                         FontSize="3" 
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0" 
-                                                          />
-                    </Grid>
-                    <StackPanel x:Name="deviceBusCommutationContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
-
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="moduleRelayButton" 
-                                >
-                            <TextBlock Text="Модуль коммутации реле" 
-                                TextWrapping="Wrap" 
-                                TextAlignment="Center"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center"/>
-                        </Button>
-                        <CustomControls:PlusButtonControl x:Name="addModuleRelayButton" 
-                                                          Grid.Column="1" 
-                                                                                         FontSize="3" 
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0" 
-                                                          />
-                    </Grid>
-                    <StackPanel x:Name="moduleRelayContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
-
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="moduleVoltageCurrentSourceButton" 
-                                >
-                            <TextBlock Text="Модуль ист. напряжения и тока" 
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="deviceBusCommutationButton" Style="{StaticResource ConfigHeaderButtonStyle}">
+                                <TextBlock Text="Устройство коммутации шин" 
                                            TextWrapping="Wrap" 
                                            TextAlignment="Center"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Center"/>
-                        </Button>
-                        <CustomControls:PlusButtonControl x:Name="addModuleVoltageCurrentSourceButton" 
-                                                          Grid.Column="1" 
-                                                                                          FontSize="3" 
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0" 
-                                                          />
-                    </Grid>
-                    <StackPanel  x:Name="moduleVoltageCurrentSourceContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
+                            </Button>
+                            <CustomControls:PlusButtonControl x:Name="addDeviceBusCommutationButton"
+                                                              Grid.Column="1"
+                                                              FontSize="5"
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Margin="5,0,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="deviceBusCommutationContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
 
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="accurateMeterButton" 
-                                Content="Измеритель (точный)" 
-                                />
-                        <CustomControls:PlusButtonControl x:Name="addAccurateMeterButton" 
-                                                          Grid.Column="1" 
-                                                                                          FontSize="3" 
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0" 
-                                                          />
-                    </Grid>
-                    <StackPanel  x:Name="accurateMeterContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="moduleRelayButton" Style="{StaticResource ConfigHeaderButtonStyle}">
+                                <TextBlock Text="Модуль коммутации реле" 
+                                           TextWrapping="Wrap" 
+                                           TextAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"/>
+                            </Button>
+                            <CustomControls:PlusButtonControl x:Name="addModuleRelayButton"
+                                                              Grid.Column="1"
+                                                              FontSize="5"
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Margin="5,0,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="moduleRelayContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
 
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="moduleVoltageCurrentSourceButton" Style="{StaticResource ConfigHeaderButtonStyle}">
+                                <TextBlock Text="Модуль ист. напряжения и тока" 
+                                           TextWrapping="Wrap" 
+                                           TextAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"/>
+                            </Button>
+                            <CustomControls:PlusButtonControl x:Name="addModuleVoltageCurrentSourceButton"
+                                                              Grid.Column="1"
+                                                              FontSize="5"
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Margin="5,0,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="moduleVoltageCurrentSourceContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
 
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="fastMeterButton" 
-                                Content="Измеритель (быстрый)" 
-                                />
-                        <CustomControls:PlusButtonControl x:Name="addFastMeterButton" 
-                                                          Grid.Column="1" 
-                                                                                          FontSize="3" 
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0" 
-                                                          />
-                    </Grid>
-                    <StackPanel  x:Name="fastMeterContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="accurateMeterButton" Content="Измеритель (точный)" Style="{StaticResource ConfigHeaderButtonStyle}"/>
+                            <CustomControls:PlusButtonControl x:Name="addAccurateMeterButton"
+                                                              Grid.Column="1"
+                                                                                          FontSize="5"
+                             Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                             Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                             Style="{StaticResource PlusButtonStyle}"
+                                                              Margin="5,0,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="accurateMeterContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
 
-                    <Grid Margin="5,5,5,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="breakdownButton" 
-            Content="Пробойная установка" 
-            />
-                        <CustomControls:PlusButtonControl x:Name="addBrakedownButton" 
-                                      Grid.Column="1" 
-                                                                     FontSize="3" 
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0" 
-                                      />
-                    </Grid>
-                    <StackPanel  x:Name="breakdownContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
-                </StackPanel>
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="fastMeterButton" Content="Измеритель (быстрый)" Style="{StaticResource ConfigHeaderButtonStyle}"/>
+                            <CustomControls:PlusButtonControl x:Name="addFastMeterButton"
+                                                              Grid.Column="1"
+                                                                                         FontSize="5"
+                             Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                             Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                             Style="{StaticResource PlusButtonStyle}"
+                                                              Margin="5,0,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="fastMeterContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
 
-                <StackPanel Margin="0,40,0,0" Grid.Row="2">
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="breakdownButton" Content="Пробойная установка" Style="{StaticResource ConfigHeaderButtonStyle}"/>
+                            <CustomControls:PlusButtonControl x:Name="addBrakedownButton"
+                                                              Grid.Column="1"
+                                                                                     FontSize="5"
+                             Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                             Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                             Style="{StaticResource PlusButtonStyle}"
+                                                              Margin="5,0,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="breakdownContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
 
-                    <Button 
-                        Name="AutoConfig" 
-                        Height="Auto" 
-                        Margin="5" 
-                        Grid.Row="2" 
-                        >
-                        <TextBlock 
-                            Text="Автоматическая конфигурация" 
-                            TextWrapping="Wrap"  
-                            Margin="10,5" 
-                            TextAlignment="Center" />
-                    </Button>
+            <!-- Кнопки остаются внизу -->
+            <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                <Button Name="AutoConfig" Margin="5" Style="{StaticResource CustomButtonStyle}" 
+                        Background="{StaticResource SecondarySolidColorBrush}" >
+                    <TextBlock Text="Автоматическая конфигурация" 
+                               TextWrapping="Wrap"  
+                               Margin="5" 
+                               TextAlignment="Center"/>
+                </Button>
 
-                    <Button 
-                        Name="Save"  
-                        Margin="5"  
-                        Grid.Row="3" 
-                        >
-                        <TextBlock 
-                            Text="Сохранить" 
-                            TextWrapping="Wrap" 
-                            Margin="5" 
-                            TextAlignment="Center"/>
-                    </Button>
-                </StackPanel>
-
-            </Grid>
+                <Button Name="Save" Margin="5" Style="{StaticResource CustomButtonStyle}" 
+                        Background="{StaticResource SecondarySolidColorBrush}" >
+                    <TextBlock Text="Сохранить" 
+                               TextWrapping="Wrap" 
+                               Margin="5" 
+                               TextAlignment="Center"/>
+                </Button>
+            </StackPanel>
 
         </Grid>
     </Border>
