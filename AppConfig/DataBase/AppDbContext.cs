@@ -1,4 +1,5 @@
 ﻿using AppConfig.Config;
+using AppConfig.DataBase.Configurations;
 using AppConfig.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,7 +50,14 @@ namespace AppConfig.DataBase
     /// </summary>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-      optionsBuilder.UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+      if (!optionsBuilder.IsConfigured)
+      {
+        string basePath = Path.Combine(
+            Path.GetDirectoryName(AppContext.BaseDirectory), // `bin/Debug/net8.0-windows/`
+            FileLocations.ConfigFilePath
+        );
+        optionsBuilder.UseSqlite($"Data Source={basePath}");
+      }
     }
 
     /// <summary>
@@ -57,7 +65,18 @@ namespace AppConfig.DataBase
     /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+      //modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+      modelBuilder.ApplyConfiguration(new ChassisManagerConfiguration());
+      modelBuilder.ApplyConfiguration(new RelaySwitchModuleConfiguration());
+      modelBuilder.ApplyConfiguration(new PowerSourceModuleConfiguration());
+      modelBuilder.ApplyConfiguration(new SwitchingDeviceConfiguration());
+      modelBuilder.ApplyConfiguration(new BreakdownTesterConfiguration());
+      modelBuilder.ApplyConfiguration(new FastMeterConfiguration());
+      modelBuilder.ApplyConfiguration(new PrecisionMeterConfiguration());
+
+      base.OnModelCreating(modelBuilder);
     }
+
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
   }
 }

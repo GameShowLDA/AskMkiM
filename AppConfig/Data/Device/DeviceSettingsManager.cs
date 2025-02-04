@@ -1,6 +1,7 @@
 ﻿using AppConfig.Config;
 using AppConfig.DataBase;
 using AppConfig.DataBase.Services;
+using Microsoft.EntityFrameworkCore;
 using static Utilities.LoggerUtility;
 
 namespace AppConfig.Data.Device
@@ -15,7 +16,10 @@ namespace AppConfig.Data.Device
     {
       try
       {
-        using var dbContext = new AppDbContext();
+
+        DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+        using var dbContext = new AppDbContext(optionsBuilder.Options);
         var deviceConfig = new DeviceConfig
         {
           ChassisManagers = new ChassisManagerRepository(dbContext).GetAll(),

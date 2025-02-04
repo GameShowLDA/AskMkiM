@@ -57,18 +57,7 @@ namespace NewCore.Base
     /// <value>PID устройства в виде строки.</value>
     public string PID { get; set; }
     public int Number { get; set; }
-    public object ConnectionDetails
-    {
-      get
-      { 
-        return COMPort; 
-      }
-
-      set
-      {
-        COMPort = (SerialPort)value;
-      }
-    }
+    public string ConnectionDetails { get; set; }
 
     public DeviceType DeviceType => throw new NotImplementedException();
 

@@ -10,7 +10,7 @@ namespace NewCore.Base
     public ConnectionType ConnectionType { get; set; } = ConnectionType.IP;
     public IPAddress IPAddress { get; set; }
     public int Number { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public object ConnectionDetails { get => IPAddress; set => IPAddress = (IPAddress)value; }
+    public string ConnectionDetails { get; set; }
 
     public DeviceType DeviceType => throw new NotImplementedException();
 

@@ -32,7 +32,7 @@ namespace NewCore.Base
     /// <summary>
     /// Универсальное свойство для хранения данных подключения (IP или COM)
     /// </summary>
-    object ConnectionDetails { get; set; }
+    string ConnectionDetails { get; set; }
 
     /// <summary>
     /// Тип устройства.

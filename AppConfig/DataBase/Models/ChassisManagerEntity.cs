@@ -8,6 +8,7 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class ChassisManagerEntity : IChassisManager
   {
+    public int Id { get; set; }
     /// <summary>
     /// Название устройства.
     /// </summary>
@@ -26,7 +27,7 @@ namespace AppConfig.DataBase.Models
     /// <summary>
     /// Данные соединения (IP-адрес или COM-порт).
     /// </summary>
-    public object ConnectionDetails { get; set; }
+    public string ConnectionDetails { get; set; }
 
     /// <summary>
     /// Тип устройства (менеджер шасси).

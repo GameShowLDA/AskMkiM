@@ -13,6 +13,7 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class SwitchingDeviceEntity : ISwitchingDevice
   {
+    public int Id { get; set; }
     /// <summary>
     /// Номер менеджера шасси, к которому подключено устройство коммутации.
     /// </summary>
@@ -36,7 +37,7 @@ namespace AppConfig.DataBase.Models
     /// <summary>
     /// Детали подключения устройства (IP-адрес, COM-порт и т. д.).
     /// </summary>
-    public object ConnectionDetails { get; set; }
+    public string ConnectionDetails { get; set; }
 
     /// <summary>
     /// Тип устройства, всегда SwitchingDevice.
