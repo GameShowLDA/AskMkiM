@@ -50,10 +50,10 @@ namespace AppConfig.DataBase
     /// </summary>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-      if (!optionsBuilder.IsConfigured)
+      if (optionsBuilder.IsConfigured == false)
       {
         string basePath = Path.Combine(
-            Path.GetDirectoryName(AppContext.BaseDirectory), // `bin/Debug/net8.0-windows/`
+            Path.GetDirectoryName(AppContext.BaseDirectory),
             FileLocations.ConfigFilePath
         );
         optionsBuilder.UseSqlite($"Data Source={basePath}");

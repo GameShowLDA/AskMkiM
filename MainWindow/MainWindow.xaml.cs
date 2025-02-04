@@ -81,7 +81,6 @@ namespace MainWindowProgram
     private async Task StartConfigAsync()
     {
       await ReadAllSettingsAsync();
-      //await InicializeDB();
     }
 
     private void SetUsbMonitoring()
@@ -93,13 +92,5 @@ namespace MainWindowProgram
     {
       AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
-    //static public async Task InicializeDB()
-    //{
-    //  var dbContextFactory = new DbContextFactory();
-    //  using (var scope = dbContextFactory.CreateDbContext(new string[0]))
-    //  {
-    //    await scope.Database.MigrateAsync();
-    //  }
-    //}
   }
 }

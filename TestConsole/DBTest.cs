@@ -65,9 +65,9 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
       using var dbContext = new AppDbContext(optionsBuilder.Options);
+
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();
       var powerSourceModules = await dbContext.PowerSourceModules.ToListAsync();
@@ -93,6 +93,7 @@ namespace TestConsole
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
         .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Удаление всех данных...");
 
@@ -115,6 +116,7 @@ namespace TestConsole
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
         .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Добавление тестовых данных...");
 

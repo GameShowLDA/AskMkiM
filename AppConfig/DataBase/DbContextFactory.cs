@@ -8,10 +8,8 @@ namespace AppConfig.DataBase
   {
     public AppDbContext CreateDbContext(string[] args)
     {
-      string basePath = Path.Combine(
-            Path.GetDirectoryName(AppContext.BaseDirectory), // `bin/Debug/net8.0-windows/`
-            FileLocations.ConfigFilePath
-        );
+      string basePath =  FileLocations.ConfigFilePath;
+
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite($"Data Source={basePath}");
 

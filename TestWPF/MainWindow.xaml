@@ -4,9 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestWPF"
+        xmlns:ChassisManager ="clr-namespace:Mode.Settings.DeviceConfig;assembly=Mode"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button Content="окно поиска" Width="100" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center" PreviewMouseDown="Button_PreviewMouseDown"></Button>
-    </Grid>
+    <ChassisManager:DeviceConfigControl Background="Green" HorizontalAlignment="Left" Name="Test"/>
 </Window>

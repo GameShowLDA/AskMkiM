@@ -1,16 +1,9 @@
-﻿using System.Net;
-using System.Windows;
-using AppConfig.Data.Device;
-﻿using System.Windows;
-using AppConfig.Data.Execution;
+﻿using AppConfig.Data.Execution;
 using AppConfig.Data.MeasurementError;
 using AppConfig.Data.Protocol;
 using AppConfig.Data.Theme;
 using AppConfig.DataBase;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Services;
 using Microsoft.EntityFrameworkCore;
-using Utilities.USB;
 using static Utilities.LoggerUtility;
 
 namespace AppConfig
@@ -35,7 +28,6 @@ namespace AppConfig
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
         var db = InicializeDB();
-
 
         await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, db);
       }

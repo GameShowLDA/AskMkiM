@@ -10,7 +10,7 @@ namespace AppConfig.DataBase.Services
   /// <summary>
   /// Репозиторий для управления менеджерами шасси
   /// </summary>
-  internal class ChassisManagerRepository : Repository<ChassisManagerEntity>
+  public class ChassisManagerRepository : Repository<ChassisManagerEntity>
   {
     public ChassisManagerRepository(AppDbContext context) : base(context) { }
   }

@@ -20,7 +20,8 @@ namespace AppConfig.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     Number = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConnectionDetails = table.Column<string>(type: "TEXT", nullable: false)
+                    ConnectionDetails = table.Column<string>(type: "TEXT", nullable: false),
+                    ConnectionType = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

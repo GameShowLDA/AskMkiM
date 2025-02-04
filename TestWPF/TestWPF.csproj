@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppConfig\AppConfig.csproj" />
+    <ProjectReference Include="..\Mode\Mode.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
   </ItemGroup>
 

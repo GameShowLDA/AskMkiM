@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppConfig.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250203104054_InitialCreate")]
+    [Migration("20250204094940_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,6 +28,9 @@ namespace AppConfig.Migrations
                     b.Property<string>("ConnectionDetails")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("ConnectionType")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()
