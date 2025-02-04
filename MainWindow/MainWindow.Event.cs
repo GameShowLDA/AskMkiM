@@ -7,13 +7,14 @@ using static Utilities.LoggerUtility;
 using Mode.Metrology.KC;
 using Mode.Metrology.IE;
 using Mode.Metrology.CI;
+using System.Windows.Controls;
 
 namespace MainWindowProgram
 {
   public partial class MainWindow
   {
 
-    #region Кнопки управления главным окном.
+    #region Основные события управления окном.
 
     /// <summary>
     /// Обработчик нажатия на кнопку "Максимизировать", изменяет состояние окна между нормальным и максимизированным.
@@ -52,6 +53,31 @@ namespace MainWindowProgram
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private void mainMenu_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => this.DragMove();
+
+    /// <summary>
+    /// Обработчик перетаскивания окна при нажатии и удерживании левой кнопки мыши на верхней панели.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => this.DragMove();
+
+    private async void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      var maxWidth = this.ActualWidth - mainMenu.ActualWidth - 50;
+      var minWidth = 50 + ButtonsPanel.ActualWidth + mainMenu.ActualWidth;
+
+      double minFontSize = 11;
+      double maxFontSize = 15;
+      double minWindowWidth = 300;
+      double maxWindowWidth = 800;
+
+      double fontSize = minFontSize + (maxFontSize - minFontSize) *
+                        ((maxWidth - minWindowWidth) / (maxWindowWidth - minWindowWidth));
+
+      fontSize = Math.Clamp(fontSize, minFontSize, maxFontSize);
+
+      mainMenu.FontSize = fontSize;
+    }
 
     #endregion
 
@@ -212,6 +238,7 @@ namespace MainWindowProgram
       keyManagementWindow.ShowDialog();
       this.Effect = null;
     }
+    private void Gpt_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new UI.Controls.GPT.GPTPunchControl(), "GptManagement").ConfigureAwait(true);
 
     /// <summary>
     /// Добавляет элемент управления для отправки команды в multiEditors.
@@ -287,9 +314,11 @@ namespace MainWindowProgram
       else
       {
         LogInformation("Закрытие приложения.");
-        await Core.Communication.CommunicationManager.ResetAllSystem();
-        await Task.Delay(500);
-        await Core.ManagerShassy.Function.StopPowerAsync(ConfigCollector.GetManagerShassyIp());
+
+        // TODO : Раскоментить
+        // await Core.ManagerShassy.Function.StopPowerAsync(ConfigCollector.GetManagerShassyIp());
+        // await Task.Delay(1000);
+        // await Core.Communication.CommunicationManager.ResetAllSystem();
       }
     }
 

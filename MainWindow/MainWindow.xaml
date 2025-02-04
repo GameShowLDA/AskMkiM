@@ -19,7 +19,7 @@
         WindowState="Maximized"
         >
     <Window.Resources>
-        
+
         <Style TargetType="DefaultGUI:WindowButtons">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
@@ -70,6 +70,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
         </Style>
+
     </Window.Resources>
 
 
@@ -80,11 +81,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TopPanel">
+        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}" MouseLeftButtonDown="TopPanel_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MinWidth="50"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -219,9 +219,6 @@
 
                 </MenuItem>
 
-
-
-
                 <MenuItem 
                     Header="Справка"
                     Name="Help"
@@ -261,6 +258,18 @@
         PreviewMouseDown="USB_Handler"
         />
 
+                    <MenuItem 
+                    Header="Управление" 
+                    Name="DeviceManagment"
+                    >
+                        <MenuItem 
+                            Header="GPT" 
+                            Name="GptManagment"
+                            PreviewMouseDown="Gpt_Handler"
+                            >
+                        </MenuItem>
+                    </MenuItem>
+
                 </MenuItem>
             </Menu>
 
@@ -275,6 +284,7 @@
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top" 
                 Grid.Column="2" 
+                Name="ButtonsPanel"
                 Background="{StaticResource SecondarySolidColorBrush}"
                 >
 

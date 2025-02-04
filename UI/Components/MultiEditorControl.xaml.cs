@@ -217,11 +217,7 @@ namespace UI.Components
       if (openPages.Contains(tabButton) && userControls.Contains(control))
       {
         int index = ContentPanel.Children.IndexOf(control);
-        if (index == 0)
-        {
-          index++;
-        }
-        else
+        if (index > 0)
         {
           index--;
         }
