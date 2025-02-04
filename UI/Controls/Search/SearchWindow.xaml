@@ -9,7 +9,7 @@
         Loaded="Window_Loaded"
         SizeChanged="Window_SizeChanged">
 
-    <Grid x:Name="MainGrid">
+        <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30"/>
             <ColumnDefinition Width="*"/>
@@ -55,7 +55,7 @@
                 <ColumnDefinition Width="50*"/>
                 <ColumnDefinition Width="50*"/>
             </Grid.ColumnDefinitions>
-            <Button Content="b/c" Height="25" Width="25"/>
+            <Elements:ReplaseWordButton Height="25" Width="25"/>
             <Button Content="ab/ac" Height="25" Width="25" Grid.Column="1"/>
         </Grid>
 
@@ -73,10 +73,55 @@
                            Cursor="Hand"
                            />
             <Elements:WholeWordToggleButton Height="25" Width="25" Grid.Column="1" Cursor="Hand"/>
-            <ComboBox Grid.Column="4" Margin="2" VerticalAlignment="Stretch">
-                <ComboBoxItem Content="Текущий документ" Tag="document" IsSelected="True"/>
-                <ComboBoxItem Content="Все открытые документы" Tag="allDocuments"/>
+
+            <ComboBox x:Name="searchParameters" Grid.Column="4" Margin="2" VerticalAlignment="Stretch" SelectedIndex="0">
+
+                <ComboBoxItem Content="Текущий документ" Tag="FindInThisFile"/>
+                <ComboBoxItem Content="Все открытые документы" Tag="FindInOpenedFiles" />
+                <ComboBoxItem Content="Найти в файле" Tag="FindInFile" />
+                <ComboBox.Template>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <!-- Текстовое поле -->
+                            <TextBox x:Name="PART_EditableTextBox"
+                                 Text="{Binding Path=Text, RelativeSource={RelativeSource TemplatedParent}}"
+                                 IsReadOnly="True"
+                                 Background="Transparent"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 Padding="{TemplateBinding Padding}"
+                                 BorderThickness="0"
+                                 Cursor="Hand" />
+
+                            <!-- Нижняя граница -->
+                            <Rectangle Height="2" VerticalAlignment="Bottom" Fill="White" />
+                            <!-- Кнопка раскрытия -->
+                            <ToggleButton x:Name="ToggleButton"
+                                Width="20"
+                                Height="20"
+                                HorizontalAlignment="Right"
+                                Content="▼"
+                                Foreground="Black"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Focusable="False"
+                                IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+
+                            <!-- Выпадающий список -->
+                            <Popup x:Name="PART_Popup"
+                                 Placement="Bottom"
+                                 IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                 Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}}">
+                                <Border BorderThickness="0">
+                                    <ScrollViewer>
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </ComboBox.Template>
             </ComboBox>
         </Grid>
     </Grid>
+
 </Window>
