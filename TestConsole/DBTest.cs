@@ -1,6 +1,8 @@
-﻿using AppConfig.DataBase;
+﻿using AppConfig;
+using AppConfig.DataBase;
 using AppConfig.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -63,7 +65,9 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      using var dbContext = new AppDbContext();
+      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+      using var dbContext = new AppDbContext(optionsBuilder.Options);
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();
       var powerSourceModules = await dbContext.PowerSourceModules.ToListAsync();
@@ -87,7 +91,9 @@ namespace TestConsole
     /// </summary>
     private static async Task DeleteAllDataAsync()
     {
-      using var dbContext = new AppDbContext();
+      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
+        .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+      using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Удаление всех данных...");
 
       dbContext.ChassisManagers.RemoveRange(dbContext.ChassisManagers);
@@ -107,7 +113,9 @@ namespace TestConsole
     /// </summary>
     private static async Task AddRandomDataAsync()
     {
-      using var dbContext = new AppDbContext();
+      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
+        .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+      using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Добавление тестовых данных...");
 
       var random = new Random();

@@ -1,8 +1,15 @@
+﻿using System.Net;
+using System.Windows;
+using AppConfig.Data.Device;
 ﻿using System.Windows;
 using AppConfig.Data.Execution;
 using AppConfig.Data.MeasurementError;
 using AppConfig.Data.Protocol;
 using AppConfig.Data.Theme;
+using AppConfig.DataBase;
+using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Services;
+using Microsoft.EntityFrameworkCore;
 using Utilities.USB;
 using static Utilities.LoggerUtility;
 
@@ -22,12 +29,15 @@ namespace AppConfig
     {
       try
       {
+
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
         var themeTask = ThemeSettingsManager.ReadThemeModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
+        var db = InicializeDB();
 
-        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask);
+
+        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, db);
       }
       catch (Exception ex)
       {
@@ -38,6 +48,15 @@ namespace AppConfig
         var methodName = method.Name;
 
         LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
+      }
+    }
+
+    static public async Task InicializeDB()
+    {
+      var dbContextFactory = new DbContextFactory();
+      using (var scope = dbContextFactory.CreateDbContext(new string[0]))
+      {
+        await scope.Database.MigrateAsync();
       }
     }
   }

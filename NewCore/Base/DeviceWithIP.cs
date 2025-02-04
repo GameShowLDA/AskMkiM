@@ -9,6 +9,11 @@ namespace NewCore.Base
     public string Description { get; set; }
     public ConnectionType ConnectionType { get; set; } = ConnectionType.IP;
     public IPAddress IPAddress { get; set; }
+    public int Number { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public string ConnectionDetails { get; set; }
+
+    public DeviceType DeviceType => throw new NotImplementedException();
+
     public abstract Task<bool> Initialize();
 
     public DeviceWithIP(IPAddress iPAddress)

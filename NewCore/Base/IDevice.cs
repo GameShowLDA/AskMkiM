@@ -24,6 +24,20 @@ namespace NewCore.Base
     /// </summary>
     string Description { get; set; }
 
+    /// <summary>
+    /// Номер утсройства.
+    /// </summary>
+    int Number { get; set; }
+
+    /// <summary>
+    /// Универсальное свойство для хранения данных подключения (IP или COM)
+    /// </summary>
+    string ConnectionDetails { get; set; }
+
+    /// <summary>
+    /// Тип устройства.
+    /// </summary>
+    DeviceType DeviceType { get; }
 
     /// <summary>
     /// Проверяет соединение с устройством.

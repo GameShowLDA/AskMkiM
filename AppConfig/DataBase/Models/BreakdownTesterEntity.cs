@@ -8,6 +8,7 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class BreakdownTesterEntity : IBreakdownTester
   {
+    public int Id { get; set; }
     /// <summary>
     /// Номер менеджера шасси, к которому подключена пробойная установка.
     /// </summary>
@@ -31,7 +32,7 @@ namespace AppConfig.DataBase.Models
     /// <summary>
     /// Детали подключения установки (IP-адрес, COM-порт и т. д.).
     /// </summary>
-    public object ConnectionDetails { get; set; }
+    public string ConnectionDetails { get; set; }
 
     /// <summary>
     /// Тип устройства, всегда BreakdownTester.
