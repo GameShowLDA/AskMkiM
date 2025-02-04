@@ -9,7 +9,7 @@ namespace NewCore.Base
     public string Description { get; set; }
     public ConnectionType ConnectionType { get; set; } = ConnectionType.IP;
     public IPAddress IPAddress { get; set; }
-    public abstract Task<bool> IsConnectedAsync();
+    public abstract Task<bool> Initialize();
 
     public DeviceWithIP(IPAddress iPAddress)
     {

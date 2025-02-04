@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using AppConfig.Data.Device;
 using AppConfig.Data.Execution;
 using AppConfig.Data.MeasurementError;
 using AppConfig.Data.Protocol;
@@ -27,9 +26,8 @@ namespace AppConfig
         var themeTask = ThemeSettingsManager.ReadThemeModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-        var deviceTask = DeviceSettingsManager.ReadDeviceConfigAsync();
 
-        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, deviceTask);
+        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask);
       }
       catch (Exception ex)
       {

@@ -24,11 +24,6 @@ namespace NewCore.Base
     /// </summary>
     string Description { get; set; }
 
-    /// <summary>
-    /// Получает или задает тип соединения устройства.
-    /// Тип соединения указывает на способ подключения устройства к системе (например, IP или COM).
-    /// </summary>
-    ConnectionType ConnectionType { get; set; }
 
     /// <summary>
     /// Проверяет соединение с устройством.

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppConfig\AppConfig.csproj" />
     <ProjectReference Include="..\NewCore\NewCore.csproj" />
   </ItemGroup>
 

@@ -64,8 +64,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="12*"/>
                 <ColumnDefinition Width="12*"/>
-                <ColumnDefinition Width="12*"/>
-                <ColumnDefinition Width="12*"/>
                 <ColumnDefinition Width="52*"/>
             </Grid.ColumnDefinitions>
 
@@ -74,9 +72,7 @@
                            Foreground="Black"
                            Cursor="Hand"
                            />
-            <Button Content="АБ" Height="25" Width="25" Grid.Column="1"/>
-            <Button Content="*" Height="25" Width="25" Grid.Column="2"/>
-            <Button Content="AB" Height="25" Width="25" Grid.Column="3"/>
+            <Elements:WholeWordToggleButton Height="25" Width="25" Grid.Column="1" Cursor="Hand"/>
             <ComboBox Grid.Column="4" Margin="2" VerticalAlignment="Stretch">
                 <ComboBoxItem Content="Текущий документ" Tag="document" IsSelected="True"/>
                 <ComboBoxItem Content="Все открытые документы" Tag="allDocuments"/>
