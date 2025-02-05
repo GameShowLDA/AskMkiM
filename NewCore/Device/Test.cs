@@ -14,18 +14,15 @@ namespace NewCore.Device
   /// <summary>
   /// Класс ManagerChassis представляет устройство с подключением по IP-адресу.
   /// </summary>
-  public class ManagerChassis : DeviceWithIP, IChassisManager
+  public class Test : DeviceWithIP, IChassisManager
   {
-    public ManagerChassis(IPAddress ip) : base(ip) { }
-    public ManagerChassis() { }
+    public Test(IPAddress ip) : base(ip) { }
+    public Test() { }
 
-    public string Name { get => "Менеджер шасси";}
+    public string Name { get => "Тест 2";}
     public string Description { get => "Добавить описание сюда";}
     
-    /// <summary>
-    /// Предоставляет доступ к функциям устройства.
-    /// </summary>
-    public Functions Functions => new Functions(this);
+ 
 
     /// <summary>
     /// Проверяет соединение с устройством.
@@ -39,18 +36,7 @@ namespace NewCore.Device
     {
       try
       {
-        var (isConnected, answer) = await Functions.Initialize();
-
-        if (!isConnected)
-        {
-          LogWarning($"Соединение с устройством не установлено. ({answer})");
-        }
-        else
-        {
-          LogInformation("Соединение с устройством успешно установлено.");
-        }
-
-        return isConnected;
+        return true;
       }
       catch (Exception ex)
       {

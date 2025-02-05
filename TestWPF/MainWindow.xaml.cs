@@ -1,18 +1,11 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using AppConfig;
 using AppConfig.DataBase;
 using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Services;
 using Microsoft.EntityFrameworkCore;
+using static Utilities.LoggerUtility;
 
 namespace TestWPF
 {
@@ -23,9 +16,24 @@ namespace TestWPF
   {
     public MainWindow()
     {
-      SettingsFileReader.ReadAllSettingsAsync().ConfigureAwait(true);
-      InitializeComponent();
+      Task.Run(async () =>
+      {
+        try
+        {
+          await StartConfigAsync();
+        }
+        catch (InvalidOperationException exception)
+        {
+          LogError($"Ошибка загрузки темы программы: {exception}");
+          return;
+        }
+        catch (Exception ex)
+        {
+          LogError($"Ошибка выполнения программы: {ex}");
+        }
+      }).Wait();
 
+      InitializeComponent();
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       var service = new ChassisManagerRepository(dbContext);
@@ -34,9 +42,14 @@ namespace TestWPF
       {
         Test.AddSystem(item);
       }
-
       // TestDataSeeder.GenerateTestDataAndSaveToDB();
     }
+
+    private async Task StartConfigAsync()
+    {
+      await SettingsFileReader.ReadAllSettingsAsync();
+    }
+
 
     private void Button_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {

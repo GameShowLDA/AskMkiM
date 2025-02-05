@@ -89,27 +89,27 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
               break;
 
             case FastMeterEntity fastMeter:
-              Console.WriteLine($"Это быстрый измеритель: {fastMeter.Name}");
+              new FastMeterRepository(AppConfig.Config.SystemStateManager.Context).Delete(fastMeter.Id);
               break;
 
             case PowerSourceModuleEntity powerSource:
-              Console.WriteLine($"Это источник питания: {powerSource.Name}");
+              new PowerSourceModuleRepository(AppConfig.Config.SystemStateManager.Context).Delete(powerSource.Id);
               break;
 
             case PrecisionMeterEntity precisionMeter:
-              Console.WriteLine($"Это точный измеритель: {precisionMeter.Name}");
+              new PrecisionMeterRepository(AppConfig.Config.SystemStateManager.Context).Delete(precisionMeter.Id);
               break;
 
             case RelaySwitchModuleEntity relaySwitch:
-              Console.WriteLine($"Это релейный коммутатор: {relaySwitch.Name}");
+              new RelaySwitchModuleRepository(AppConfig.Config.SystemStateManager.Context).Delete(relaySwitch.Id);
               break;
 
             case SwitchingDeviceEntity switchingDevice:
-              Console.WriteLine($"Это устройство коммутации: {switchingDevice.Name}");
+              new SwitchingDeviceRepository(AppConfig.Config.SystemStateManager.Context).Delete(switchingDevice.Id);
               break;
 
             case ChassisManagerEntity chassisManager:
-              Console.WriteLine($"Это менеджер шасси: {chassisManager.Name}");
+              new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Delete(chassisManager.Id);
               break;
 
             default:

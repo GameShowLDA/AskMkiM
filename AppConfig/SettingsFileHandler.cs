@@ -24,12 +24,13 @@ namespace AppConfig
       {
 
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
-        var themeTask = ThemeSettingsManager.ReadThemeModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
         var db = InicializeDB();
 
-        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, db);
+        await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
+        await ThemeSettingsManager.ReadThemeModeAsync();
+        //await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, db);
       }
       catch (Exception ex)
       {

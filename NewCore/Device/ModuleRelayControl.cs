@@ -1,5 +1,7 @@
 ﻿using NewCore.Base;
+using NewCore.Enum;
 using NewCore.Function.ModuleRelayControl;
+using NewCore.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +12,20 @@ using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
-  public class ModuleRelayControl : DeviceWithIP
+  public class ModuleRelayControl : DeviceWithIP, IRelaySwitchModule
   {
-    public ModuleRelayControl(IPAddress ip) : base(ip)
-    {
-      Name = "Модуль коммутации реле";
-      Description = "Предназначен для коммутации измерительных шин автоматизированной системы контроля к высоковольтным цепям объектов контроля, таких как кабели, жгуты, кабельные сети. Коммутация происходит за счет замыкания реле на шину";
-    }
+    public ModuleRelayControl(IPAddress iPAddress) : base(iPAddress) { }
+    public ModuleRelayControl() { }
 
     public Functions Functions => new Functions(this);
+    
+    public int Number { get; set; }
+    public string ConnectionDetails { get; set ; }
+
+    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
+
+    public int NumberChassis { get; set ; }
+    public int PointCount { get; set; }
 
     /// <summary>
     /// Проверяет соединение с устройством.

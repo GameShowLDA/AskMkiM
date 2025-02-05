@@ -14,8 +14,11 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AppConfig.DataBase;
 using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Services;
 using Microsoft.EntityFrameworkCore;
+using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceManager;
+using NewCore.Base;
 using NewCore.Interface;
 using static AppConfig.Config.SystemStateManager;
 
@@ -30,13 +33,13 @@ namespace Mode.Settings.DeviceConfig
     {
       InitializeComponent();
       chassisManager.SystemSelected += (sender, system) => SelectedChassis(system);
+      chassisManager.NewSystem += (sender, system) => NewSystem();
     }
 
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
     {
       deviceBorder.Child = deviceManagerControl;
     }
-
     private void SelectedChassis(ChassisManagerEntity system)
     {
       var devices = new DeviceManagerControl();
@@ -47,6 +50,20 @@ namespace Mode.Settings.DeviceConfig
       LoadRelaySwitchModules(system, devices);
       LoadSwitchingDevices(system, devices);
       deviceBorder.Child = devices;
+    }
+
+    public void ToggleThirdColumn(bool isVisible)
+    {
+      if (isVisible)
+      {
+        Column3.Width = new GridLength(1, GridUnitType.Star);
+        settingsBorder.Visibility = Visibility.Visible;
+      }
+      else
+      {
+        Column3.Width = new GridLength(0);
+        settingsBorder.Visibility = Visibility.Collapsed;
+      }
     }
 
     /// <summary>
@@ -144,11 +161,33 @@ namespace Mode.Settings.DeviceConfig
         devicesControl.AddDevice(device);
       }
     }
-
-
     public void AddSystem(ChassisManagerEntity data)
     {
       chassisManager.AddSystem(data);
+    }
+
+    private void NewSystem()
+    {
+      var setting = new ChassisManagerSettings();
+      setting.RequestClose += Setting_RequestClose;
+      setting.DeviceSaved += ChassisManagerSettings_DeviceSaved;
+      deviceBorder.Child = setting;
+      chassisManager.Visibility = Visibility.Collapsed;
+    }
+
+    private void ChassisManagerSettings_DeviceSaved(object sender, IChassisManager device)
+    {
+      // ChassisManagerEntity chassisManagerEntity = (ChassisManagerEntity)device;
+      // new ChassisManagerRepository(Context).Create(chassisManagerEntity);
+
+      deviceBorder.Child = null;
+      chassisManager.Visibility = Visibility.Visible;
+    }
+
+    private void Setting_RequestClose(object? sender, EventArgs e)
+    {
+      deviceBorder.Child = null;
+      chassisManager.Visibility = Visibility.Visible;
     }
   }
 }

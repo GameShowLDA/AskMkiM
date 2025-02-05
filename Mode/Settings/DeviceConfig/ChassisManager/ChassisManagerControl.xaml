@@ -14,24 +14,22 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Background="Red" x:Name="addChassisButton"
+        <Border Background="{StaticResource ActiveForegroundSolidColorBrush}" x:Name="addChassisButton"
                 MouseEnter="addChassisButton_MouseEnter"
                 MouseLeave="addChassisButton_MouseLeave"
                 PreviewMouseDown="addChassisButton_PreviewMouseDown"
                 >
 
-            <!-- Кнопка добавления системы -->
             <CustomControls:PlusButtonControl 
                  Grid.Column="1" 
-                 FontSize="4" 
                  Height="40" 
                  Width="40" 
-                 Padding="5" 
-                
+                 Padding="5"
+                 FontSize="4" 
                 />
         </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
             <ItemsControl ItemsSource="{Binding Systems}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

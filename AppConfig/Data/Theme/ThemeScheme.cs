@@ -16,33 +16,42 @@ namespace AppConfig.Data.Theme
     /// <param name="themeManager">Менеджер для работы с файлами темы.</param>
     public static async Task<ThemeModel> LoadSettingsColor(ThemeFileManager themeManager)
     {
-      ThemeModel themeModel = await themeManager.ReadFileAsync();
-      bool hasError = false;
-
-      if (themeModel != null)
+      try
       {
-        foreach (var property in themeModel.GetType().GetProperties())
+        ThemeModel themeModel = await themeManager.ReadFileAsync();
+        bool hasError = false;
+
+        if (themeModel != null)
         {
-          var propertyValue = property.GetValue(themeModel);
-          if (propertyValue == null)
+          foreach (var property in themeModel.GetType().GetProperties())
           {
-            hasError = true;
+            var propertyValue = property.GetValue(themeModel);
+            if (propertyValue == null)
+            {
+              hasError = true;
+            }
           }
         }
-      }
-      else
-      {
-        hasError = true;
-      }
+        else
+        {
+          hasError = true;
+        }
 
-      if (hasError)
-      {
-        themeModel = GetDarkTheme();
-        await themeManager.RewriteFileAsync(themeModel);
-      }
+        if (hasError)
+        {
+          themeModel = GetDarkTheme();
+          await themeManager.RewriteFileAsync(themeModel);
+        }
 
-      ApplyThemeToResources(themeModel);
-      return themeModel;
+        ApplyThemeToResources(themeModel);
+
+        return themeModel;
+      }
+      catch (Exception ex)
+      {
+        LogError(ex.Message);
+        throw;
+      }
     }
 
     /// <summary>
@@ -51,6 +60,7 @@ namespace AppConfig.Data.Theme
     /// <param name="themeModel">Модель темы с цветами.</param>
     private static void ApplyThemeToResources(ThemeModel themeModel)
     {
+      
       var resourceDictionary = new ResourceDictionary
       {
         Source = new Uri("pack://application:,,,/UI;component/Style.xaml")

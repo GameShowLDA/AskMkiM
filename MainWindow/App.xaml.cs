@@ -16,7 +16,7 @@ namespace MainWindowProgram
     }
 
     // Обработчик необработанных исключений в главном потоке (UI)
-    static internal void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    static internal new void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
     {
       Exception ex = e.Exception;
       LogError("Необработанное исключение в Dispatcher: " + ex.Message);

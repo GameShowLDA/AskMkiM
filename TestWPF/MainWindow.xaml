@@ -6,6 +6,6 @@
         xmlns:local="clr-namespace:TestWPF"
         xmlns:ChassisManager ="clr-namespace:Mode.Settings.DeviceConfig;assembly=Mode"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <ChassisManager:DeviceConfigControl Background="Green" HorizontalAlignment="Left" Name="Test"/>
+        Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}">
+    <ChassisManager:DeviceConfigControl  Name="Test"/>
 </Window>

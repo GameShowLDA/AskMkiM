@@ -31,6 +31,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// Событие, вызываемое при выборе системы.
     /// </summary>
     public event EventHandler<ChassisManagerEntity> SystemSelected;
+    public event EventHandler NewSystem;
 
     public ChassisManagerControl()
     {
@@ -65,17 +66,20 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
 
     private void addChassisButton_MouseEnter(object sender, MouseEventArgs e)
     {
-      addChassisButton.Background = Brushes.Green;
+      addChassisButton.Background = (Brush)Application.Current.Resources["IsCheckedColorSolidColorBrush"];
+      addChassisButton.Cursor = Cursors.Hand;
     }
 
     private void addChassisButton_MouseLeave(object sender, MouseEventArgs e)
     {
-      addChassisButton.Background = Brushes.Red;
+      addChassisButton.Background = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+      addChassisButton.Cursor = Cursors.Wait;
     }
 
     private void addChassisButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      MessageBox.Show("тест 1");
+      NewSystem?.Invoke(this, e);
+
     }
   }
 }
