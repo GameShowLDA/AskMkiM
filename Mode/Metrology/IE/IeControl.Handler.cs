@@ -2,8 +2,8 @@
 using Mode.Base.SearchDevices;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Data.MeasurementError.MeasurementErrorModel;
 using static AppConfig.Config.MeasurementErrorConfig;
+using static AppConfig.Data.MeasurementError.MeasurementErrorModel;
 
 namespace Mode.Metrology.IE
 {

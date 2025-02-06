@@ -1,7 +1,4 @@
 ﻿using NewCore.Communication;
-using NewCore.Device;
-using System;
-using System.Threading.Tasks;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 

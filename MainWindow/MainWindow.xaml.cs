@@ -1,7 +1,4 @@
-﻿using AppConfig.DataBase;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -85,7 +82,7 @@ namespace MainWindowProgram
 
     private void SetUsbMonitoring()
     {
-      usbMonitorService.Start(); 
+      usbMonitorService.Start();
     }
 
     private void OnAdminRightsChangedHandler(object sender, bool newRights)

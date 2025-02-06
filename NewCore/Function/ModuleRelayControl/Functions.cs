@@ -1,6 +1,5 @@
-﻿using NewCore.Communication;
-using System.Diagnostics;
-using System.Net;
+﻿using System.Diagnostics;
+using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 

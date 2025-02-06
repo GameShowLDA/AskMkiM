@@ -1,16 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows;
 using AppConfig.DataBase.Models;
-using Core.ConfigCollector;
-using Core.Model;
-using static Utilities.LoggerUtility;
-using NewCore.Base;
 using AppConfig.DataBase.Services;
-using NewCore.Device;
-using System.Net;
-using Core.Abstract;
-using NewCore.Interface;
+using NewCore.Base;
 
 namespace Mode.Settings.DeviceConfig.DeviceManager
 {
@@ -73,7 +66,7 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
 
       button.MouseLeave += (s, a) =>
       {
-          button.Content = model.Name + " " + model.Number;
+        button.Content = model.Name + " " + model.Number;
       };
 
       button.PreviewMouseLeftButtonDown += (s, a) =>

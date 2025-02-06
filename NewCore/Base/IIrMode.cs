@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NewCore.Base
+﻿namespace NewCore.Base
 {
   /// <summary>
   /// Интерфейс IIrMode предоставляет асинхронные методы для управления режимом сопротивления изоляции на пробойно-поверочном устройстве (ППУ).

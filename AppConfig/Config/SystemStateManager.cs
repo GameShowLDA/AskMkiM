@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using AppConfig.DataBase;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace AppConfig.Config
 {

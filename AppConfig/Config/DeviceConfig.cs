@@ -1,10 +1,4 @@
-﻿using AppConfig.DataBase.Models;
 ﻿using NewCore.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AppConfig.Config
 {

@@ -1,13 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using Core.ConfigCollector;
 using Microsoft.Win32;
+using Mode.Metrology.CI;
+using Mode.Metrology.IE;
+using Mode.Metrology.KC;
 using static AppConfig.Config.SystemStateManager;
 using static Utilities.LoggerUtility;
-using Mode.Metrology.KC;
-using Mode.Metrology.IE;
-using Mode.Metrology.CI;
-using System.Windows.Controls;
 
 namespace MainWindowProgram
 {

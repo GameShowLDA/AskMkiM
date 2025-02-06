@@ -51,11 +51,11 @@ namespace Mode.Base.SearchDevices
       DataElectricModel tempModel = null;
       Application.Current.Dispatcher.Invoke(() =>
       {
-        tempModel = new DataElectricModel(); 
+        tempModel = new DataElectricModel();
       });
 
       measurementDataModel = tempModel;
-      
+
       StackPanel contentStack = CreateContentStack();
       AddMeasurementBorders(measurementDataModel, contentStack);
 

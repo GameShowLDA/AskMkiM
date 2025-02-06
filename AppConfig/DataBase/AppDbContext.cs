@@ -1,5 +1,4 @@
-﻿using AppConfig.Config;
-using AppConfig.DataBase.Configurations;
+﻿using AppConfig.DataBase.Configurations;
 using AppConfig.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
 

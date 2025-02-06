@@ -1,24 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Core.Communication;
 using Core.ConfigCollector;
 using Core.Model;
 using Mode.Base.SearchDevices;
-using Mode.Models;
-using static Core.ModuleRelayControl.Enums;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Config.ProtocolConfig;
-using static AppConfig.Config.LoopConfig;
 using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
-using static Utilities.Models.ShowMessageModel;
-using static Utilities.LoggerUtility;
-using static AppConfig.Config.MeasurementErrorConfig;
-using Core.Communication;
+using static Core.ModuleRelayControl.Enums;
 
 namespace Mode.TestSuite.NodeMethod
 {
@@ -136,7 +123,7 @@ namespace Mode.TestSuite.NodeMethod
         }
 
       }
-      catch (InvalidOperationException ex)
+      catch (InvalidOperationException)
       {
         Completed = false;
         return false;

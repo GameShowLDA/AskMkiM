@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using NewCore.Base;
 using NewCore.Function.ManagerChassis;
 using NewCore.Interface;
@@ -19,9 +14,9 @@ namespace NewCore.Device
     public ManagerChassis(IPAddress ip) : base(ip) { }
     public ManagerChassis() { }
 
-    public string Name { get => "Менеджер шасси";}
-    public string Description { get => "Добавить описание сюда";}
-    
+    public string Name { get => "Менеджер шасси"; }
+    public string Description { get => "Добавить описание сюда"; }
+
     /// <summary>
     /// Предоставляет доступ к функциям устройства.
     /// </summary>

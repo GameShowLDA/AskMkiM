@@ -5,7 +5,6 @@ using System.Windows.Media;
 using Core.Abstract;
 using Core.Enum;
 using Core.Model;
-using static AppConfig.FileLocations;
 
 namespace Mode.Settings.ConfigSettings
 {

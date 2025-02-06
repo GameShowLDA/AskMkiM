@@ -1,13 +1,8 @@
-﻿using System.IO;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using System.Windows.Threading;
-using ICSharpCode.AvalonEdit;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 
@@ -168,7 +163,7 @@ namespace UI.Components
       {
         return System.IO.Path.GetFileName(path).ToString();
       }
-      catch (Exception ex)
+      catch (Exception)
       {
         return string.Empty;
       }

@@ -1,10 +1,5 @@
 ﻿using NewCore.Device;
 using NewCore.Function.GPT.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
@@ -23,7 +18,7 @@ namespace NewCore.Function.GPT
     /// Устанавливает режим сопротивления изоляции на пробойке.
     /// </summary>
     /// <param name="model">Модель пробойки.</param>
-     public async Task SetModeAsync()
+    public async Task SetModeAsync()
     {
       LogInformation("Устанавливаем режим СИ на GPT-79904");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ACW";
@@ -35,7 +30,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в кВ).</param>
-    public  async Task SetVoltageAsync(double value)
+    public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение ACW: {value:F3} кВ");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} {value:F3}".Replace(',', '.');
@@ -47,7 +42,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetHighCurrentLimitAsync(double value)
+    public async Task SetHighCurrentLimitAsync(double value)
     {
       LogInformation($"Устанавливаем высокий предел тока ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} {value:F3}";
@@ -59,7 +54,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetLowCurrentLimitAsync(double value)
+    public async Task SetLowCurrentLimitAsync(double value)
     {
       LogInformation($"Устанавливаем низкий предел тока ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} {value:F3}".Replace(',', '.');
@@ -71,7 +66,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в секундах).</param>
-    public  async Task SetTestTimeAsync(double value)
+    public async Task SetTestTimeAsync(double value)
     {
       LogInformation($"Устанавливаем время теста ACW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_TTIME)} {value:F1}";
@@ -83,7 +78,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="frequency">Частота (50 или 60 Гц).</param>
-    public  async Task SetFrequencyAsync(int frequency)
+    public async Task SetFrequencyAsync(int frequency)
     {
       if (frequency != 50 && frequency != 60)
         throw new ArgumentException("Частота должна быть 50 или 60 Гц.");
@@ -98,7 +93,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetOffsetAsync(double value)
+    public async Task SetOffsetAsync(double value)
     {
       LogInformation($"Устанавливаем смещение ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_REF)} {value:F3}";
@@ -110,7 +105,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetArcCurrentAsync(double value)
+    public async Task SetArcCurrentAsync(double value)
     {
       LogInformation($"Устанавливаем текущее значение тока ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_ARCCURRENT)} {value:F3}";
@@ -122,7 +117,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <returns>Объект с текущими параметрами ACW.</returns>
-    public  async Task<AcwConfiguration> ReadConfigurationAsync()
+    public async Task<AcwConfiguration> ReadConfigurationAsync()
     {
       LogInformation("Считываем конфигурацию ACW...");
 
@@ -185,7 +180,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="response">Строка ответа.</param>
     /// <returns>Значение напряжения (в кВ).</returns>
-    private  double ParseVoltage(string response)
+    private double ParseVoltage(string response)
     {
       var value = response.Replace("kV", "").Trim().Replace(".", ",");
       return double.Parse(value);
@@ -196,7 +191,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="response">Строка ответа.</param>
     /// <returns>Значение тока (в мА).</returns>
-    private  double ParseCurrent(string response)
+    private double ParseCurrent(string response)
     {
       var value = response.Replace("mA", "").Trim().Replace(".", ",");
       return double.Parse(value);
@@ -207,7 +202,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="response">Строка ответа.</param>
     /// <returns>Значение времени (в секундах).</returns>
-    private  double ParseTime(string response)
+    private double ParseTime(string response)
     {
       var value = response.Replace("S", "").Trim().Replace(".", ",");
       return double.Parse(value);
@@ -218,7 +213,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="response">Строка ответа.</param>
     /// <returns>Значение частоты (в Гц).</returns>
-    private  int ParseFrequency(string response)
+    private int ParseFrequency(string response)
     {
       // Предполагается, что ответ имеет формат "MANU:ACW:FREQUENCY XX"
       var value = response.Replace("Hz", "").Trim().Replace(".", ",");
@@ -230,7 +225,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <returns>Результат теста (в мА).</returns>
-    public  async Task<double> MeasureCurrentAsync()
+    public async Task<double> MeasureCurrentAsync()
     {
       // TODO : Реализация измерения ACW
 

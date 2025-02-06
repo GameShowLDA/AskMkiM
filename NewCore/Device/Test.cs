@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using NewCore.Base;
-using NewCore.Function.ManagerChassis;
 using NewCore.Interface;
 using static Utilities.LoggerUtility;
 
@@ -19,10 +13,10 @@ namespace NewCore.Device
     public Test(IPAddress ip) : base(ip) { }
     public Test() { }
 
-    public string Name { get => "Тест 2";}
-    public string Description { get => "Добавить описание сюда";}
-    
- 
+    public string Name { get => "Тест 2"; }
+    public string Description { get => "Добавить описание сюда"; }
+
+
 
     /// <summary>
     /// Проверяет соединение с устройством.

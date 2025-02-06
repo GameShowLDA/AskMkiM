@@ -1,6 +1,4 @@
-﻿using NewCore.Device;
-
-namespace NewCore.Function.DeviceBusCommutation
+﻿namespace NewCore.Function.DeviceBusCommutation
 {
   /// <summary>
   /// Класс <see cref="Functions"/> предоставляет доступ к различным менеджерам для управления устройствами и функциями УКШ (Устройства Коммутации Шин).

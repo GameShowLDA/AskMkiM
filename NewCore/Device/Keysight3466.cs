@@ -1,16 +1,16 @@
-﻿using Agilent.CommandExpert.ScpiNet.Ag3466x_2_08;
-using NewCore.Base;
-using NewCore.Function.KeysightLibrary;
-using System.Net;
+﻿using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using Agilent.CommandExpert.ScpiNet.Ag3466x_2_08;
+using NewCore.Base;
+using NewCore.Function.KeysightLibrary;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
   public class Keysight3466 : DeviceWithIP
   {
-    public Keysight3466(IPAddress ip) : base(ip) 
+    public Keysight3466(IPAddress ip) : base(ip)
     {
       Name = "Keysight 3466";
       Description = "Реализовать описание в NewCore.Device.Keysight3466";

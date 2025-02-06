@@ -1,6 +1,6 @@
-﻿using NewCore.Base;
+﻿using System.Net;
+using NewCore.Base;
 using NewCore.Function.ModuleVoltageCurrentSource;
-using System.Net;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Device

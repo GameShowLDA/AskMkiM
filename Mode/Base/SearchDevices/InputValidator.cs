@@ -1,24 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Config.ProtocolConfig;
-using static AppConfig.Config.LoopConfig;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
-using static Utilities.Models.ShowMessageModel;
-using static Utilities.LoggerUtility;
-using static Utilities.DelegateManager;
-using Utilities.Models;
 using Core.ConfigCollector;
-using static AppConfig.Enums.ValidationEnum;
 using Mode.Models;
+using Utilities.Models;
+using static AppConfig.Enums.ValidationEnum;
+using static Utilities.DelegateManager;
+using static Utilities.LoggerUtility;
+using static Utilities.Models.ShowMessageModel;
 
 
 namespace Mode.Base.SearchDevices
