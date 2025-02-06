@@ -31,19 +31,22 @@ namespace UI.Components.SearchControls
     {
       if (value)
       {
-        ToggleButton.Foreground = Brushes.Red;
-        Border.BorderBrush = Brushes.Red;
+        var color = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+        ToggleButton.Foreground = color;
+        Border.BorderBrush = color;
       }
       else
       {
-        ToggleButton.Foreground = Brushes.Black;
-        Border.BorderBrush = Brushes.Black;
+        var color = (Brush)Application.Current.Resources["ForegroundSolidColorBrush"];
+        ToggleButton.Foreground = color;
+        Border.BorderBrush = color;
       }
     }
 
     private bool GetChecked()
     {
-      if (ToggleButton.Foreground == Brushes.Red)
+      var color = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+      if (ToggleButton.Foreground == color)
       {
         return true;
       }

@@ -6,12 +6,13 @@
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="25">
-    <Border x:Name="Border"  BorderThickness="0,2,0,2"  BorderBrush="Black">
+    <Border x:Name="Border"  BorderThickness="0,2,0,2"  BorderBrush="{StaticResource ForegroundSolidColorBrush}">
         <Button x:Name="ToggleButton"
              Content="Abl"
              FontSize="16"
              FontWeight="Bold"
              Background="Transparent"
+             Foreground="{StaticResource ForegroundSolidColorBrush}"
              BorderThickness="0"
              Padding="0"
              HorizontalAlignment="Center"

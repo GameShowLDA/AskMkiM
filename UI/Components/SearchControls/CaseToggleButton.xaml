@@ -13,6 +13,7 @@
                 FontSize="16"
                 FontWeight="Bold"
                 Background="Transparent"
+                Foreground="{StaticResource ForegroundSolidColorBrush}"
                 BorderThickness="0"
                 Padding="0"
                 HorizontalAlignment="Center"

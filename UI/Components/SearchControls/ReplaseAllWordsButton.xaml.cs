@@ -16,23 +16,22 @@ using System.Windows.Shapes;
 namespace UI.Components.SearchControls
 {
   /// <summary>
-  /// Логика взаимодействия для ReplaseWordButton.xaml
+  /// Логика взаимодействия для ReplaseAllWordsButton.xaml
   /// </summary>
-  public partial class ReplaseWordButton : UserControl
+  public partial class ReplaseAllWordsButton : UserControl
   {
-    public ReplaseWordButton()
+    public ReplaseAllWordsButton()
     {
       InitializeComponent();
     }
-
     private void Border_MouseEnter(object sender, MouseEventArgs e)
     {
-      replaceWord.Opacity = 1.0;
+      replaceAllWords.Opacity = 1.0;
     }
 
     private void Border_MouseLeave(object sender, MouseEventArgs e)
     {
-      replaceWord.Opacity = 0.7;
+      replaceAllWords.Opacity = 0.7;
     }
   }
 }

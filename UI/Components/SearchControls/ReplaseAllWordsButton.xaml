@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UI.Components.SearchControls.ReplaseWordButton"
+﻿<UserControl x:Class="UI.Components.SearchControls.ReplaseAllWordsButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="25">
-    <Border Background="{StaticResource SecondarySolidColorBrush}" Opacity="0.7" CornerRadius="4" MouseEnter="Border_MouseEnter" MouseLeave="Border_MouseLeave" Name="replaceWord">
+    <Border Background="{StaticResource SecondarySolidColorBrush}" Opacity="0.7" CornerRadius="4" MouseEnter="Border_MouseEnter" MouseLeave="Border_MouseLeave" Name="replaceAllWords">
         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -16,18 +16,18 @@
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="b" FontSize="11" FontWeight="Bold" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center"  VerticalAlignment="Top"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="ab" FontSize="9" FontWeight="Bold" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center"  VerticalAlignment="Top"/>
             <Path Stroke="{StaticResource ActiveBorderSolidColorBrush}" Fill="Transparent"
-            Data="M -1 5 
-            L 2 8 L 5 5 
-            M 2 8 L 2 2
+            Data="M -1 4 
+            L 2 6 L 5 4 
+            M 2 6 L 2 2
             A 2,2 0 0,1 4,0 
-            H 10" 
-              Grid.ColumnSpan="2" Margin="4,5,8,8" Grid.RowSpan="2" StrokeThickness="2"/>
+            H 8" 
+              Grid.ColumnSpan="2" Margin="4,7,8,6" Grid.RowSpan="2" StrokeThickness="2"/>
             <Rectangle Grid.Row="1" Grid.Column="0" Width="8" Height="8"></Rectangle>
             <TextBlock Grid.Row="1" Grid.Column="0" 
-                   Text="C" 
-                   FontSize="10" 
+                   Text="AC" 
+                   FontSize="9" 
                    FontWeight="Bold" 
                    Foreground="{StaticResource ForegroundSolidColorBrush}" 
                    VerticalAlignment="Center" 

@@ -16,23 +16,23 @@ using System.Windows.Shapes;
 namespace UI.Components.SearchControls
 {
   /// <summary>
-  /// Логика взаимодействия для ReplaseWordButton.xaml
+  /// Логика взаимодействия для ExitButton.xaml
   /// </summary>
-  public partial class ReplaseWordButton : UserControl
+  public partial class ExitButton : UserControl
   {
-    public ReplaseWordButton()
+    public ExitButton()
     {
       InitializeComponent();
+      BackgroundBorder.Background = Brushes.Transparent;
+    }
+    private void BackgroundBorder_MouseEnter(object sender, MouseEventArgs e)
+    {
+      BackgroundBorder.Background = Brushes.Red;
     }
 
-    private void Border_MouseEnter(object sender, MouseEventArgs e)
+    private void BackgroundBorder_MouseLeave(object sender, MouseEventArgs e)
     {
-      replaceWord.Opacity = 1.0;
-    }
-
-    private void Border_MouseLeave(object sender, MouseEventArgs e)
-    {
-      replaceWord.Opacity = 0.7;
+      BackgroundBorder.Background = Brushes.Transparent;
     }
   }
 }
