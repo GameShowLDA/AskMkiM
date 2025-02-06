@@ -592,8 +592,7 @@
         <Setter Property="Background" Value="{DynamicResource MainPanelBackgroundColor}"/>
     </Style>
 
-    <!--Style x:Key="WindowsButtonStyle" TargetType="CustomControls:WindowButtons"-->
-    <Style x:Key="WindowsButtonStyle" TargetType="Button">
+    <Style x:Key="WindowsButtonStyle" TargetType="CustomControls:WindowButtons">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource WindowButtonForegroundColor}"/>
         <Style.Triggers>

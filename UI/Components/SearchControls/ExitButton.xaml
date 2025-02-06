@@ -53,7 +53,7 @@
                 <Storyboard>
                     <ColorAnimation Storyboard.TargetName="CrossLine1" 
                                     Storyboard.TargetProperty="Fill.Color"
-                                    To="{DynamicResource WindowButtonActiveForegroundColor}" 
+                                    To="{StaticResource WindowButtonActiveForegroundColor}" 
                                     Duration="0:0:0.2"/>
                     <ColorAnimation Storyboard.TargetName="CrossLine2" 
                                     Storyboard.TargetProperty="Fill.Color"

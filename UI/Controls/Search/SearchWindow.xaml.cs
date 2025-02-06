@@ -15,7 +15,7 @@ namespace UI.Controls.Search
 
     private const double MinWindowHeight = 80;  // Высота окна без строки 2
     private const double ExpandedWindowHeight = 120; // Высота окна со строкой 2
-
+    private bool _allowClose;
     public SearchWindow()
     {
       InitializeComponent();
@@ -143,6 +143,17 @@ namespace UI.Controls.Search
           textBox.Text = defaultText;
         }
       };
+    }
+
+
+    private void exitButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      CloseDialog();
+    }
+    public void CloseDialog()
+    {
+      _allowClose = true;
+      this.Close();
     }
   }
 }
