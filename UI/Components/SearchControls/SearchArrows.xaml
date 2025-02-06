@@ -1,0 +1,90 @@
+﻿<UserControl x:Class="UI.Components.SearchControls.SearchArrows"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components.SearchControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="20" d:DesignWidth="20">
+    <Grid>
+        <ComboBox x:Name="searchArrowsComboBox"
+                  Width="45"
+                  Height="20"
+                  SelectedIndex="0"
+                  Foreground="{StaticResource ForegroundSolidColorBrush}"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  Margin="0 13 0 0">
+            
+            <!-- Шаблон для стрелок в выпадающем списке -->
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <Path Stroke="{StaticResource ForegroundSolidColorBrush}"
+                          Fill="Transparent"
+                          Data="{Binding}"
+                          StrokeThickness="2"
+                          Width="20"
+                          Height="20"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+
+            <!-- Шаблон для отображения выбранного элемента -->
+            <ComboBox.Template>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <!-- Отображение выбранной стрелки -->
+                        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Content="{Binding Path=SelectedItem, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                          ContentTemplate="{TemplateBinding ItemTemplate}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center"
+                          Margin="5,3"
+                          Cursor="Hand"
+                          MouseEnter="PART_ContentPresenter_MouseEnter"
+                          MouseLeave="PART_ContentPresenter_MouseLeave"
+                          PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown" />
+
+
+                        <!-- Кнопка раскрытия списка -->
+                        <ToggleButton x:Name="ComboBoxToggleButton"
+                          Width="20"
+                          Height="20"
+                          HorizontalAlignment="Right"
+                          Content="▼"
+                          Foreground="{StaticResource ForegroundSolidColorBrush}"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          Focusable="False"
+                          Cursor="Hand"
+                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/> 
+
+                        <!-- Выпадающий список -->
+                        <Popup x:Name="PART_Popup"
+                   Placement="Bottom"
+                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                   Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                   StaysOpen="False">
+                            <Border BorderThickness="0" Background="{StaticResource SecondarySolidColorBrush}">
+                                <ScrollViewer>
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </ComboBox.Template>
+
+            <!-- Данные для стрелок -->
+            <ComboBox.ItemsSource>
+                <x:Array Type="Geometry">
+                    <Geometry>M 2 10 L 18 10 M 14 6 L 18 10 L 14 14</Geometry> <!-- Вправо -->
+                    <Geometry>M 18 10 L 2 10 M 6 6 L 2 10 L 6 14</Geometry>     <!-- Влево -->
+                    <Geometry>M 10 2 A 8 8 0 1 1 9.9 2 M 10 0 L 10 6</Geometry> <!-- Круг -->
+                </x:Array>
+            </ComboBox.ItemsSource>
+
+        </ComboBox>
+    </Grid>
+</UserControl>

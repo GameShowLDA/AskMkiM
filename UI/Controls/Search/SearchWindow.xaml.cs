@@ -155,5 +155,62 @@ namespace UI.Controls.Search
       _allowClose = true;
       this.Close();
     }
+
+    private void searchArrows_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      if (sender is SearchArrows searchArrows)
+      {
+        var comboBox = FindChild<ComboBox>(searchArrows);
+
+        if (comboBox != null)
+        {
+          comboBox.Focus();
+          comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
+          e.Handled = true; // Предотвращаем дальнейшую обработку события
+        }
+      }
+    }
+
+    private static T FindChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+      for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+      {
+        var child = VisualTreeHelper.GetChild(parent, i);
+        if (child is T typedChild)
+        {
+          return typedChild;
+        }
+        var result = FindChild<T>(child);
+        if (result != null)
+        {
+          return result;
+        }
+      }
+      return null;
+    }
+
+    private void searchArrows_MouseEnter(object sender, MouseEventArgs e)
+    {
+      var searchArrows = (SearchArrows)sender;
+      var parent = (FrameworkElement)searchArrows.Parent;
+      var toggleButton = searchArrows.FindName("ComboBoxToggleButton") as ToggleButton;
+      var color = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+
+      searchArrows.Foreground = color; 
+      if (toggleButton != null)
+        toggleButton.Foreground = color;
+    }
+
+    private void searchArrows_MouseLeave(object sender, MouseEventArgs e)
+    {
+      var searchArrows = (SearchArrows)sender;
+      var parent = (FrameworkElement)searchArrows.Parent;
+      var toggleButton = parent.FindName("ComboBoxToggleButton") as ToggleButton;
+      var color = (Brush)Application.Current.Resources["ForegroundSolidColorBrush"];
+
+      searchArrows.Foreground = color;
+      if (toggleButton != null)
+        toggleButton.Foreground = color;
+    }
   }
 }
