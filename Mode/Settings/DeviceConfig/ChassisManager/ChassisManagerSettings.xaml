@@ -76,27 +76,31 @@
                 >
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
                     </Grid.ColumnDefinitions>
+
                     <TextBlock 
-                        Name="textNumber"
+                        Name="textDevice"
                         Grid.Column="0" 
-                        Text="Номер:" 
+                        Text="Устройство:" 
                         FontSize="20" 
                         Foreground="{StaticResource ForegroundSolidColorBrush}" 
                         Margin="0,15"  
                         Padding="20,0,0,0" 
-                        FontWeight="Bold"
+                        FontWeight="Bold"/>
+
+                    <ComboBox 
+                        Name="deviceModelComboBox"  
+                        Grid.Column="1" 
+                        Height="30" 
+                        MinWidth="100"
+                        Width="auto" 
+                        Margin="15" 
+                        Style="{StaticResource CustomComboBoxStyle}"
+                        HorizontalAlignment="Left"
+                        SelectionChanged="DeviceModelComboBox_SelectionChanged"
                         />
-                    <TextBox Grid.Column="1" Margin="5" 
-                             Name="deviceNumber"
-                        Style="{StaticResource NonChangingBorderTextBox}" 
-                        PreviewTextInput="TextBox_PreviewTextInput"
-                        TextChanged="TextBox_TextChanged"
-                        DataObject.Pasting="TextBox_Pasting"/>
-
-
                 </Grid>
 
             </Border>
@@ -113,7 +117,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Grid>
+                <Grid Name="DefaultSettingDevice">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -121,52 +125,53 @@
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition></ColumnDefinition>
-                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-
                         <TextBlock 
-                            Name="textDevice"
-                            Grid.Column="0" 
-                            Text="Устройство:" 
-                            FontSize="20" 
-                            Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                            Margin="0,15"  
-                            Padding="20,0,0,0" 
-                            FontWeight="Bold"/>
+                             Name="textNumber"
+                             Grid.Column="0" 
+                             Text="Номер:" 
+                             FontSize="20" 
+                             Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                             Margin="0,15"  
+                             Padding="20,0,0,0" 
+                             FontWeight="Bold"
+                             />
+                        <TextBox Grid.Column="1" Margin="5" 
+                            Name="deviceNumber"
+                            MinWidth="100"
+                            Style="{StaticResource NonChangingBorderTextBox}" 
+                            PreviewTextInput="TextBox_PreviewTextInput"
+                            TextChanged="TextBox_TextChanged"
+                            DataObject.Pasting="TextBox_Pasting"/>
+                     </Grid>
+                     <Grid  Grid.Column="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock 
+                        Name="textConnectionType"
+                        Text="Тип подключения:" 
+                        FontSize="20" 
+                        Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                        Margin="0,15"  
+                        Padding="20,0,0,0" 
+                        FontWeight="Bold"/>
 
                         <ComboBox 
-                        Name="deviceModelComboBox"  
-                        Grid.Column="1" 
-                        Height="30" 
-                        Width="auto" 
-                        Margin="15" 
+                        Name="connectionTypeComboBox"
+                        Grid.Column="1"
+                        Height="30"
+                        Width="auto"
+                        Margin="15"
                         Style="{StaticResource CustomComboBoxStyle}"
-                        SelectionChanged="DeviceModelComboBox_SelectionChanged"
-                        />
+                        SelectionChanged="ConnectionTypeComboBox_SelectionChanged">
+                            <ComboBoxItem Content="IP" Name="IpItem"/>
+                            <ComboBoxItem Content="COM" Name="ComItem"/>
+                        </ComboBox>
                     </Grid>
-
-                    <TextBlock 
-                Name="textConnectionType"
-                Grid.Column="2" 
-                Text="Тип подключения:" 
-                FontSize="20" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                Margin="0,15"  
-                Padding="20,0,0,0" 
-                FontWeight="Bold"/>
-
-                    <ComboBox 
-                Name="connectionTypeComboBox"
-                Grid.Column="3"
-                Height="30"
-                Width="auto"
-                Margin="15"
-                Style="{StaticResource CustomComboBoxStyle}"
-                SelectionChanged="ConnectionTypeComboBox_SelectionChanged">
-                        <ComboBoxItem Content="IP" Name="IpItem"/>
-                        <ComboBoxItem Content="COM" Name="ComItem"/>
-                    </ComboBox>
                 </Grid>
 
             </Grid>
@@ -232,7 +237,7 @@
                 </Grid>
 
                 <!--НАСТРОЙКИ COM-->
-                <Grid Grid.Row="1" Background="Transparent" Name="ComSettin">
+                <Grid Grid.Row="1" Background="Transparent" Name="ComSettings">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>

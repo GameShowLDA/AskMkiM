@@ -7,9 +7,8 @@ namespace NewCore.Base
   {
     public string Name { get; set; }
     public string Description { get; set; }
-    public ConnectionType ConnectionType { get; set; } = ConnectionType.IP;
     public IPAddress IPAddress { get; set; }
-    public int Number { get ; set ; }
+    public int Number { get; set; }
     public string ConnectionDetails { get; set; }
 
     public DeviceType DeviceType => throw new NotImplementedException();

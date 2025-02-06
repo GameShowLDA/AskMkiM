@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore;
-using AppConfig.DataBase;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace AppConfig.DataBase
 {
@@ -8,7 +7,7 @@ namespace AppConfig.DataBase
   {
     public AppDbContext CreateDbContext(string[] args)
     {
-      string basePath =  FileLocations.ConfigFilePath;
+      string basePath = FileLocations.ConfigFilePath;
 
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite($"Data Source={basePath}");

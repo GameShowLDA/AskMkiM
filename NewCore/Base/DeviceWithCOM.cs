@@ -1,11 +1,5 @@
-﻿using NewCore.Enum;
-using System;
-using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
+﻿using System.IO.Ports;
 using System.Management;
-using System.Text;
-using System.Threading.Tasks;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 
@@ -32,12 +26,6 @@ namespace NewCore.Base
     /// </summary>
     /// <value>Описание устройства в виде строки.</value>
     public string Description { get; set; }
-
-    /// <summary>
-    /// Получает или задает тип подключения устройства.
-    /// </summary>
-    /// <value>Тип подключения, по умолчанию установлено значение <see cref="ConnectionType.COM"/>.</value>
-    public ConnectionType ConnectionType { get; set; } = ConnectionType.COM;
 
     /// <summary>
     /// Получает или задает COM-порт, используемый для подключения устройства.

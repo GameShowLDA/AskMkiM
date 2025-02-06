@@ -1,10 +1,5 @@
 ﻿using NewCore.Enum;
 using NewCore.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AppConfig.DataBase.Models
 {

@@ -1,5 +1,4 @@
-﻿using NLog;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using static Utilities.LoggerUtility;
 
@@ -60,7 +59,7 @@ namespace AppConfig.Data.Theme
     /// <param name="themeModel">Модель темы с цветами.</param>
     private static void ApplyThemeToResources(ThemeModel themeModel)
     {
-      
+
       var resourceDictionary = new ResourceDictionary
       {
         Source = new Uri("pack://application:,,,/UI;component/Style.xaml")

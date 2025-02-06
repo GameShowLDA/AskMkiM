@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using Core.GptLibrary.Command;
+﻿using Core.GptLibrary.Command;
 using Core.GptLibrary.Data;
 using static Core.GptLibrary.Command.FunctionCommandManager;
 using static Core.GptLibrary.Command.ManualCommandManager;

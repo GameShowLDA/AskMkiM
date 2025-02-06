@@ -1,5 +1,4 @@
 ﻿using Agilent.CommandExpert.ScpiNet.Ag3466x_2_08;
-using System;
 
 namespace NewCore.Function.KeysightLibrary
 {

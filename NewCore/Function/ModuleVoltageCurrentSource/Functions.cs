@@ -1,6 +1,4 @@
 ﻿using NewCore.Communication;
-using NewCore.Device;
-using System.Net;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 

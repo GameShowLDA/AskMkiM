@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AppConfig.DataBase.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using AppConfig.DataBase.Models;
 
 namespace AppConfig.DataBase.Configurations
 {

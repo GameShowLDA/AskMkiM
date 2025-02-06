@@ -2,10 +2,6 @@
 using AppConfig.DataBase;
 using AppConfig.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TestConsole
 {

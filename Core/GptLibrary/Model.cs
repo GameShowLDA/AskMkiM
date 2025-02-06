@@ -1,7 +1,6 @@
 ﻿using System.IO.Ports;
 using System.Text;
 using Core.Abstract;
-using YamlDotNet.Core.Tokens;
 using static Utilities.LoggerUtility;
 
 namespace Core.GptLibrary

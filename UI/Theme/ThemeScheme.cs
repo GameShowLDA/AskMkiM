@@ -1,5 +1,4 @@
-﻿using NLog;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using static Utilities.LoggerUtility;
 

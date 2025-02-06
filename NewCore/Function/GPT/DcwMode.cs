@@ -1,10 +1,5 @@
 ﻿using NewCore.Device;
 using NewCore.Function.GPT.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
@@ -32,7 +27,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в кВ).</param>
-    public async Task SetVoltageAsync( double value)
+    public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение DCW: {value:F3} кВ");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {value:F3}".Replace(',', '.');
@@ -44,7 +39,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public async Task SetHighCurrentLimitAsync( double value)
+    public async Task SetHighCurrentLimitAsync(double value)
     {
       LogInformation($"Устанавливаем высокий предел тока DCW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CHISET)} {value:F3}";
@@ -56,7 +51,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public async Task SetLowCurrentLimitAsync( double value)
+    public async Task SetLowCurrentLimitAsync(double value)
     {
       var query1 = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
       LogInformation($"Отправляем команду (Вариант 1): {query1}");
@@ -70,7 +65,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в секундах).</param>
-    public async Task SetTestTimeAsync( double value)
+    public async Task SetTestTimeAsync(double value)
     {
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
@@ -82,7 +77,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public async Task SetOffsetAsync( double value)
+    public async Task SetOffsetAsync(double value)
     {
       LogInformation($"Устанавливаем смещение DCW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_REF)} {value:F3}";
@@ -94,7 +89,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public async Task SetArcCurrentAsync( double value)
+    public async Task SetArcCurrentAsync(double value)
     {
       LogInformation($"Устанавливаем текущее значение тока DCW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_ARCCURRENT)} {value:F3}";

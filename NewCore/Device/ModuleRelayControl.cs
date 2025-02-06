@@ -1,13 +1,8 @@
-﻿using NewCore.Base;
+﻿using System.Net;
+using NewCore.Base;
 using NewCore.Enum;
 using NewCore.Function.ModuleRelayControl;
 using NewCore.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
@@ -18,13 +13,13 @@ namespace NewCore.Device
     public ModuleRelayControl() { }
 
     public Functions Functions => new Functions(this);
-    
+
     public int Number { get; set; }
-    public string ConnectionDetails { get; set ; }
+    public string ConnectionDetails { get; set; }
 
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
 
-    public int NumberChassis { get; set ; }
+    public int NumberChassis { get; set; }
     public int PointCount { get; set; }
 
     /// <summary>

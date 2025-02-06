@@ -1,25 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
+﻿using System.IO.Ports;
 using System.Management;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Services;
 using NewCore.Base;
 using NewCore.Device;
-using NewCore.Enum;
 using NewCore.Interface;
 
 namespace Mode.Settings.DeviceConfig.ChassisManager
@@ -44,23 +33,87 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     {
       if (deviceModelComboBox.SelectedItem is string selectedModel)
       {
-        var models = ReflectionHelper.GetAllImplementations<IChassisManager>();
-        var instance = models
-            .Select(t => Activator.CreateInstance(t) as IChassisManager)
-            .FirstOrDefault(inst => inst != null && inst.Name == selectedModel);
-
-
-        if (instance != null)
+        if (deviceModelMap.TryGetValue(selectedModel, out Type selectedType))
         {
-          if (int.TryParse(textNumber.Text, out int number))
+          try
           {
-            instance.Number = number;
+            var instance = Activator.CreateInstance(selectedType);
 
+            if (instance != null)
+            {
+              var data = instance as IChassisManager;
+              if (data == null)
+              {
+                MessageBox.Show($"Класс {selectedType.Name} не реализует IChassisManager.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+              }
+
+              if (int.TryParse(deviceNumber.Text, out int number))
+              {
+                data.Number = number;
+              }
+              else
+              {
+                throw new Exception("Реализовать подсветку ошибки для номера устройства");
+              }
+
+              if (instance is DeviceWithIP deviceWithIP)
+              {
+                if (int.TryParse(ipPart3TextBox.Text, out int ipPart))
+                {
+                  deviceWithIP.IPAddress = IPAddress.Parse($"192.168.{ipPart}.0");
+                  data.ConnectionDetails = deviceWithIP.IPAddress.ToString();
+                }
+                else
+                {
+                  throw new Exception("Реализовать подсветку ошибки для IP-адреса");
+                }
+              }
+              else if (instance is DeviceWithCOM deviceWithCOM)
+              {
+                // TODO :  Тут должен быть не сериал ПОрт а что-то другое
+
+                if (!string.IsNullOrEmpty(comPortComboBox.Text))
+                {
+                  deviceWithCOM.COMPort = new SerialPort(comPortComboBox.Text)
+                  {
+                    BaudRate = 9600,
+                    Parity = Parity.None,
+                    DataBits = 8,
+                    StopBits = StopBits.One
+                  };
+                  data.ConnectionDetails = deviceWithCOM.COMPort.PortName;
+                }
+                else
+                {
+                  throw new Exception("Реализовать подсветку ошибки для COM-порта");
+                }
+              }
+              else
+              {
+                MessageBox.Show("Устройство не принадлежит к известным типам (DeviceWithIP или DeviceWithCOM).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+              }
+
+              // Вызываем событие сохранения с конкретным экземпляром устройства
+              new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create((ChassisManagerEntity)data);
+              DeviceSaved?.Invoke(this, data);
+
+            }
+            else
+            {
+              MessageBox.Show($"Не удалось создать экземпляр класса {selectedType.Name}.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
           }
-          DeviceSaved?.Invoke(this, instance);
+          catch (Exception ex)
+          {
+            MessageBox.Show($"Ошибка при создании устройства {selectedType.Name}: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          }
         }
       }
     }
+
+
 
     private void IpPart_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
@@ -90,7 +143,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         string selectedType = selectedItem.Content.ToString();
         if (selectedType.ToLower().Contains("ip"))
         {
-          ComSettin.Visibility = Visibility.Collapsed;
+          ComSettings.Visibility = Visibility.Collapsed;
           BaudRateSettings.Visibility = Visibility.Collapsed;
           FlowControlSettings.Visibility = Visibility.Collapsed;
           ParitySettings.Visibility = Visibility.Collapsed;
@@ -101,9 +154,9 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         }
         else
         {
-          IpSettings.Visibility = Visibility.Collapsed;
           LoadComPorts();
-          ComSettin.Visibility = Visibility.Visible;
+          IpSettings.Visibility = Visibility.Collapsed;
+          ComSettings.Visibility = Visibility.Visible;
         }
       }
     }
@@ -182,7 +235,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       InitializeComponent();
       LoadDeviceModels();
       IpSettings.Visibility = Visibility.Collapsed;
-      ComSettin.Visibility = Visibility.Collapsed;
+      ComSettings.Visibility = Visibility.Collapsed;
       BaudRateSettings.Visibility = Visibility.Collapsed;
       FlowControlSettings.Visibility = Visibility.Collapsed;
       ParitySettings.Visibility = Visibility.Collapsed;
@@ -190,6 +243,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       DataBitsSettings.Visibility = Visibility.Collapsed;
       VidSettings.Visibility = Visibility.Collapsed;
       PidSettings.Visibility = Visibility.Collapsed;
+      DefaultSettingDevice.Visibility = Visibility.Collapsed;
     }
 
     /// <summary>
@@ -221,9 +275,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         {
           Type baseClass = DetermineBaseClass(selectedType);
 
-          MessageBox.Show($"Выбрана модель: {selectedModel}\nБазовый класс: {baseClass.Name}",
-                          "Выбор устройства", MessageBoxButton.OK, MessageBoxImage.Information);
-
           if (baseClass == typeof(DeviceWithIP))
           {
             ComItem.Visibility = Visibility.Collapsed;
@@ -234,6 +285,8 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
             IpItem.Visibility = Visibility.Collapsed;
             ComItem.Visibility = Visibility.Visible;
           }
+
+          DefaultSettingDevice.Visibility = Visibility.Visible;
         }
         catch (InvalidOperationException ex)
         {

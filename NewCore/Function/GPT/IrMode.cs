@@ -2,12 +2,6 @@
 using NewCore.Device;
 using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
@@ -276,7 +270,7 @@ namespace NewCore.Function.GPT
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     /// <returns>Объект с текущими настройками IR.</returns>
-    public async Task<IrConfiguration> ReadConfigurationAsync() 
+    public async Task<IrConfiguration> ReadConfigurationAsync()
     {
       try
       {

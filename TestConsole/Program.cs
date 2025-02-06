@@ -1,7 +1,4 @@
-﻿using NewCore.Base;
-using NewCore.Device;
-
-namespace TestConsole
+﻿namespace TestConsole
 {
   internal class Program
   {
