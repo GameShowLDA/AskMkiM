@@ -6,21 +6,16 @@
         Title="SearchWindow" Height="Auto" Width="410"
         MinWidth="410"
         MaxWidth="410"
-        WindowStyle="SingleBorderWindow"
+        WindowStyle="None"
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
         AllowsTransparency="False"
         SizeChanged="Window_SizeChanged"
         ShowInTaskbar="False"
-        Background="{StaticResource PrimarySolidColorBrush}"
-        Margin="5">
+        Background="{StaticResource SecondarySolidColorBrush}"
+        >
 
-
-    <Window.Effect>
-        <DropShadowEffect Color="Red" Direction="566" ShadowDepth="5" Opacity="0.5" />
-    </Window.Effect>
-
-    <Grid x:Name="MainGrid" >
+      <Grid x:Name="MainGrid" >
         
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30"/>
@@ -176,5 +171,4 @@
             </ComboBox>
         </Grid>
     </Grid>
-
 </Window>
