@@ -37,6 +37,12 @@ namespace AppConfig
     /// </summary>
     static public event Action<bool> AdminRightsChanged;
 
+
+    /// <summary>
+    /// Событие, которое вызывается, когда активное окно типа TextEditor.
+    /// </summary>
+    static public event Action<bool> TextEditorActive;
+
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
     /// </summary>
@@ -113,6 +119,15 @@ namespace AppConfig
     static public void RaiseInfoMessage(string message, bool clearMessage = false)
     {
       InfoMessageEvent?.Invoke(message, clearMessage);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTextEditorActive(bool isTextEditor)
+    {
+      TextEditorActive?.Invoke(isTextEditor);
     }
   }
 }

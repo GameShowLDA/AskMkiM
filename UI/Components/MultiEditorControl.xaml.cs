@@ -3,6 +3,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
@@ -10,6 +11,13 @@ using System.Windows.Threading;
 using ICSharpCode.AvalonEdit;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
+using PrintDialog = System.Windows.Controls.PrintDialog;
+using UserControl = System.Windows.Controls.UserControl;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using AppConfig;
+using System.Text.RegularExpressions;
 
 namespace UI.Components
 {
@@ -20,6 +28,16 @@ namespace UI.Components
   {
     List<OpenFileButton> openPages = new List<OpenFileButton>();
     List<UserControl> userControls = new List<UserControl>();
+
+    Dictionary<string, string> filePaths = new Dictionary<string, string>();
+    Dictionary<int, bool> foundWordStartPositions = new Dictionary<int, bool>();
+
+    string _searchText;
+    bool? _fullWords;
+    bool? _register;
+    int _searchParameters;
+
+    public event Action SelectFileForSearch;
 
     private int _clickCount = 0;
     private DispatcherTimer _clickTimer;
@@ -90,6 +108,7 @@ namespace UI.Components
             var index = openPages.IndexOf(page);
             var userControl = userControls[index];
             ShowControl(userControl, page);
+
             return;
           }
         }
@@ -138,6 +157,10 @@ namespace UI.Components
         textEditor.Text = fileContent;
 
         AddControl(nameFile, textEditor);
+        if (!filePaths.ContainsKey(nameFile))
+        {
+          filePaths.Add(nameFile, path);
+        }
       }
       catch (Exception ex)
       {
@@ -150,7 +173,15 @@ namespace UI.Components
     /// </summary>
     public void CreateNewFile()
     {
-      AddControl("Новый", new TextEditorUI() /*{ Text  = "Новый файл"}*/);
+      var controlName = "Новый";
+      var counter = 0;
+      if (filePaths.ContainsKey(controlName))
+      {
+        counter++;
+        controlName += $"{counter}";
+      }
+      AddControl(controlName, new TextEditorUI() /*{ Text  = "Новый файл"}*/);
+      filePaths.Add(controlName, string.Empty);
     }
 
     /// <summary>
@@ -205,6 +236,8 @@ namespace UI.Components
       }
 
       ActivePage(openPage);
+
+      EventAggregator.RaiseTextEditorActive(control is TextEditorUI);
     }
 
     /// <summary>
@@ -216,21 +249,47 @@ namespace UI.Components
     {
       if (openPages.Contains(tabButton) && userControls.Contains(control))
       {
+        var result = MessageBoxResult.No;
+        var saveFileResult = false;
         int index = ContentPanel.Children.IndexOf(control);
-        if (index > 0)
+        if (control is TextEditorUI)
         {
-          index--;
+          SaveFileDialog(ref result, ref saveFileResult, index);
         }
-
-        openPages.Remove(tabButton);
-        userControls.Remove(control);
-
-        TopPanel.Children.Remove(tabButton);
-        ContentPanel.Children.Remove(control);
-
-        if (ContentPanel.Children.Count > 0)
+        if (saveFileResult == true || !(control is TextEditorUI) || result == MessageBoxResult.No)
         {
-          ShowControl(userControls[index], openPages[index]);
+          if (index > 0)
+          {
+            index--;
+          }
+
+          openPages.Remove(tabButton);
+          userControls.Remove(control);
+
+          TopPanel.Children.Remove(tabButton);
+          ContentPanel.Children.Remove(control);
+
+          if (ContentPanel.Children.Count > 0)
+          {
+            ShowControl(userControls[index], openPages[index]);
+          }
+        }
+      }
+    }
+
+    private void SaveFileDialog(ref MessageBoxResult result, ref bool saveFileResult, int index)
+    {
+      var needToSave = CompareFiles(openPages[index]);
+      if (needToSave)
+      {
+        result = MessageBox.Show(
+            $"Сохранить файл {openPages[index].Text} перед закрытием?",
+            "Подтверждение",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+        if (result == MessageBoxResult.Yes)
+        {
+          saveFileResult = SaveFile(openPages[index]);
         }
       }
     }
@@ -249,5 +308,238 @@ namespace UI.Components
         }
       }
     }
+
+    private bool CompareFiles(OpenFileButton openPage)
+    {
+      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null)
+      {
+        var fileName = activeTab.Text;
+        if (filePaths[fileName] == string.Empty)
+        {
+          return true;
+        }
+        else
+        {
+          var filePath = filePaths[fileName];
+          var content = File.ReadAllText(filePath);
+          int index = openPages.IndexOf(activeTab);
+
+          if (userControls[index] is TextEditorUI)
+          {
+            var textEditor = userControls[index] as TextEditorUI;
+            return content != textEditor.Text;
+          }
+
+          return false;
+        }
+      }
+      return false;
+    }
+
+    public bool SaveFile()
+    {
+      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      return SaveFile(activeTab);
+    }
+
+    private bool SaveFile(OpenFileButton activeTab)
+    {
+      if (activeTab != null)
+      {
+        var fileName = activeTab.Text;
+        if (filePaths[fileName] == string.Empty)
+        {
+          return SaveFileAs();
+        }
+        else
+        {
+          var filePath = filePaths[fileName];
+          return SaveDataFromTextEditor(activeTab, filePath);
+        }
+      }
+      return false;
+    }
+
+    // TODO: добавить сохранение файлов при закрытии приложения
+    public bool SaveFileAs()
+    {
+      using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+      {
+        var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        if (activeTab != null)
+        {
+          saveFileDialog.Filter = "Text Files (*.txt)|*.txt|RTF Files (*.rtf)|*.rtf";
+          saveFileDialog.Title = "Сохранить файл как";
+          saveFileDialog.FileName = activeTab.Text;
+          saveFileDialog.FileName = Path.GetFileNameWithoutExtension(activeTab.Text);
+          if (saveFileDialog.ShowDialog() == DialogResult.OK)
+          {
+            string filePath = saveFileDialog.FileName;
+            SaveDataFromTextEditor(activeTab, filePath);
+            RenamePage(activeTab, filePath);
+            var fileName = Path.GetFileName(filePath);
+            if (!filePaths.ContainsKey(fileName))
+            {
+              filePaths.Add(fileName, filePath);
+            }
+            else
+            {
+              filePaths[fileName] = filePath;
+            }
+            return true;
+          }
+          else
+          {
+            return false;
+          }
+        }
+        return false;
+      }
+    }
+
+    private bool SaveDataFromTextEditor(OpenFileButton activeTab, string filePath)
+    {
+      string fileData = string.Empty;
+
+      int index = openPages.IndexOf(activeTab);
+      if (userControls[index] is TextEditorUI)
+      {
+        var textEditor = userControls[index] as TextEditorUI;
+        fileData = textEditor.Text;
+        File.WriteAllText(filePath, fileData);
+        //LoggerService.LogInformation($"Файл {filePath} сохранен");
+        MessageBox.Show($"Файл {filePath} сохранен");
+        return true;
+      }
+      return false;
+    }
+
+    private void RenamePage(OpenFileButton activeTab, string filePath)
+    {
+      var acivePage = openPages.FirstOrDefault(p => p == activeTab);
+      if (acivePage != null)
+      {
+        activeTab.Header.Text = System.IO.Path.GetFileName(filePath);
+      }
+    }
+
+    #region Печать файлов
+
+    public void PrintFile()
+    {
+      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      PrintDialog printDialog = new PrintDialog();
+      FlowDocument flowDocument = new FlowDocument();
+
+
+      if (printDialog.ShowDialog() == true)
+      {
+        int index = openPages.IndexOf(activeTab);
+
+        if (userControls[index] is TextEditorUI)
+        {
+          var textEditor = userControls[index] as TextEditorUI;
+          flowDocument.Blocks.Add(new Paragraph(new Run(textEditor.Text)));
+          IDocumentPaginatorSource idocument = flowDocument;
+          printDialog.PrintDocument(idocument.DocumentPaginator, "Печать документа");
+        }
+      }
+    }
+
+    #endregion
+
+    #region Поиск по тексту
+
+    // TODO: поиск по тексту делать тут
+    public void SearchData(string searchText, bool? fullWords, bool? register, int searchParameters)
+    {
+      InitializeSearch(searchText, fullWords, register, searchParameters);
+
+      switch (searchParameters)
+      {
+        //найти в текущем документе
+        case 0:
+          FindInThisFile();
+          break;
+        //во всех открытых файлах
+        case 1:
+          FindInOpnedFiles();
+          break;
+        //найти в файле
+        case 2:
+          FindInFile();
+          break;
+      }
+    }
+
+    private void InitializeSearch(string searchText, bool? fullWords, bool? register, int searchParameters)
+    {
+      if (_searchText == null
+              || (!string.Equals(_searchText, searchText) || _fullWords != fullWords || _register != register || _searchParameters != searchParameters))
+      {
+        _searchText = searchText;
+        _fullWords = fullWords;
+        _register = register;
+        _searchParameters = searchParameters;
+        if (foundWordStartPositions.Count > 0)
+        {
+          foundWordStartPositions.Clear();
+        }
+      }
+    }
+
+    private void FindWordIndexes(TextEditorUI textEditor, string text)
+    {
+      var regex = $@"{Regex.Escape(_searchText)}";
+      if (_fullWords != true)
+      {
+        regex = $@"\b{Regex.Escape(_searchText)}\b";
+      }
+      if (_register != true)
+      {
+        FindMatches(text, regex, RegexOptions.IgnoreCase);
+      }
+      else
+      {
+        FindMatches(text, regex, RegexOptions.None);
+      }
+    }
+
+    private void FindMatches(string text, string regex, RegexOptions options)
+    {
+      foreach (Match match in Regex.Matches(text, regex, options))
+      {
+        foundWordStartPositions.Add(match.Index, false);
+      }
+    }
+
+    private void FindInThisFile()
+    {
+      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      int index = openPages.IndexOf(activeTab);
+      TextEditorUI textEditor = new TextEditorUI();
+      if (userControls[index] is TextEditorUI)
+      {
+        textEditor = userControls[index] as TextEditorUI;
+      }
+      var text = textEditor.Text;
+      if (string.IsNullOrEmpty(textEditor.Text))
+      {
+        return;
+      }
+      FindWordIndexes(textEditor, text);
+    }
+
+    private void FindInOpnedFiles()
+    {
+      MessageBox.Show("найти в открытых файлах", "заглушка");
+    }
+    public void FindInFile()
+    {
+      SelectFileForSearch?.Invoke();
+    }
+
+    #endregion
   }
 }

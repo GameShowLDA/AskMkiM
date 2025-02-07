@@ -74,6 +74,26 @@ namespace MainWindowProgram
         });
       }
     }
-
+    private void OnTextEditorActive(bool isVisible)
+    {
+      if (isVisible)
+      {
+        fileActionsSeparator.Visibility = Visibility.Visible;
+        saveMenuItem.Visibility = Visibility.Visible;
+        saveAsMenuItem.Visibility = Visibility.Visible;
+        printMenuItem.Visibility = Visibility.Visible;
+        searchMenuItem.Visibility = Visibility.Visible;
+        compareMenuItem.Visibility = Visibility.Visible;
+      }
+      else
+      {
+        fileActionsSeparator.Visibility = Visibility.Collapsed;
+        saveMenuItem.Visibility = Visibility.Collapsed;
+        saveAsMenuItem.Visibility = Visibility.Collapsed;
+        printMenuItem.Visibility = Visibility.Collapsed;
+        searchMenuItem.Visibility = Visibility.Collapsed;
+        compareMenuItem.Visibility = Visibility.Collapsed;
+      }
+    }
   }
 }

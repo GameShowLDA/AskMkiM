@@ -8,6 +8,7 @@ using Mode.Metrology.KC;
 using Mode.Metrology.IE;
 using Mode.Metrology.CI;
 using System.Windows.Controls;
+using UI.Controls.Search;
 
 namespace MainWindowProgram
 {
@@ -84,21 +85,41 @@ namespace MainWindowProgram
     #region Файл.
 
     /// <summary>
+    /// Обработчик нажатия на кнопку "Архив", открывает окно работы с архивами.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private void Archive_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      //var allArchives = new TableAllArchivesControl();
+      //AddControl(allArchives, "Архив");
+      //allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
+    }
+
+
+
+    /// <summary>
     /// Обработчик нажатия на кнопку "Открыть", открывает диалоговое окно для выбора текстового файла и загружает его в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void Open_PreviewMouseDownAsync(object sender, MouseButtonEventArgs e)
+    private void Open_PreviewMouseDownAsync(object sender, MouseButtonEventArgs e)
+    {
+      OpenFile();
+    }
+
+    private async void OpenFile()
     {
       if (await GetIsLocked())
       {
         MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-        LogWarning("Попытка открыть файл, когда приложение заблокировано.");
+        //LoggerService.LogWarning("Попытка открыть файл, когда приложение заблокировано.");
       }
       else
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
+          Filter = "All files (*.*)|*.*|Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf",
           Title = "Выберите текстовый файл"
         };
 
@@ -106,7 +127,7 @@ namespace MainWindowProgram
         {
           string filePath = openFileDialog.FileName;
           multiEditors.OpenFile(filePath);
-          LogInformation($"Файл открыт: {filePath}");
+          //LoggerService.LogInformation($"Файл открыт: {filePath}");
         }
       }
     }
@@ -128,6 +149,43 @@ namespace MainWindowProgram
         multiEditors.CreateNewFile();
         LogInformation("Создан новый файл.");
       }
+    }
+
+
+    private void SaveMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      multiEditors.SaveFile();
+    }
+
+    private void SaveAsMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      multiEditors.SaveFileAs();
+    }
+
+    private void PrintMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      multiEditors.PrintFile();
+    }
+
+    private void SearchMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      var searchWindow = new SearchWindow();
+      searchWindow.Owner = this;
+      searchWindow.SearchText += (searchData, fullWords, register, searchParameters) =>
+      {
+        multiEditors.SearchData(searchData, fullWords, register, searchParameters);
+      };
+      multiEditors.SelectFileForSearch += OpenFileFromEvent;
+      searchWindow.ShowWindow();
+    }
+    private void OpenFileFromEvent()
+    {
+      OpenFile();
+    }
+
+    private void CompareMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      MessageBox.Show("Нажата кнопка \"Сравнить\"", "Заглушка");
     }
 
     /// <summary>

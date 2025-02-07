@@ -56,6 +56,7 @@ namespace MainWindowProgram
 
       AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
       Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
+      TextEditorActive += OnTextEditorActive;
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler; // Подписываемся на событие

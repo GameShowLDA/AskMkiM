@@ -34,6 +34,25 @@ namespace UI.Components.SearchControls
       }
     }
 
+
+    private void ComboBoxToggleButton_MouseEnter(object sender, MouseEventArgs e)
+    {
+      var toggleButton = sender as ToggleButton;
+
+      var activeColor = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+      if (toggleButton != null)
+        toggleButton.Foreground = activeColor;
+    }
+
+    private void ComboBoxToggleButton_MouseLeave(object sender, MouseEventArgs e)
+    {
+      var toggleButton = sender as ToggleButton;
+
+      var defaultColor = (Brush)Application.Current.Resources["ForegroundSolidColorBrush"];
+      if (toggleButton != null)
+        toggleButton.Foreground = defaultColor;
+    }
+
     private void PART_ContentPresenter_MouseEnter(object sender, MouseEventArgs e)
     {
       var presenter = (ContentPresenter)sender;
@@ -98,7 +117,5 @@ namespace UI.Components.SearchControls
 
       return null;
     }
-
   }
-
 }

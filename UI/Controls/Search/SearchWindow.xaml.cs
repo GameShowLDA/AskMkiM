@@ -2,10 +2,18 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using UI.Components.SearchControls;
+using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
+using ComboBox = System.Windows.Controls.ComboBox;
+using MessageBox = System.Windows.MessageBox;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Windows.Point;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace UI.Controls.Search
 {
@@ -16,18 +24,88 @@ namespace UI.Controls.Search
     private const double MinWindowHeight = 80;  // Высота окна без строки 2
     private const double ExpandedWindowHeight = 120; // Высота окна со строкой 2
     private bool _allowClose;
+    private Window _parentWindow;
+    private bool IsLoaded;
+    public event Action<string, bool?, bool?, int> SearchText;
+
     public SearchWindow()
     {
       InitializeComponent();
+      this.Loaded += Window_Loaded;
       DefaultGotAndLostEvent(SearchTextBox, SearchTextBox.Tag.ToString());
       DefaultGotAndLostEvent(ReplaceTextBox, ReplaceTextBox.Tag.ToString());
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+      _parentWindow = Window.GetWindow(this)?.Owner;
+      if (_parentWindow != null)
+      {
+        // Подписываемся на события изменения позиции и размера родительского окна
+        _parentWindow.LocationChanged += ParentWindow_LocationChanged;
+        _parentWindow.SizeChanged += ParentWindow_SizeChanged;
+        _parentWindow.StateChanged += ParentWindow_StateChanged;
+        // Устанавливаем начальное положение окна
+        UpdatePosition();
+      }
+      this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
     }
+
+    #region Отслеживание родительского окна
+
+    private void ParentWindow_LocationChanged(object sender, EventArgs e)
+    {
+      UpdatePosition();
+    }
+
+    private void ParentWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      UpdatePosition();
+    }
+    private void ParentWindow_StateChanged(object sender, EventArgs e)
+    {
+      UpdatePosition();
+    }
+
+    private void UpdatePosition()
+    {
+      if (_parentWindow == null || !this.IsLoaded)
+        return;
+
+      // Определяем монитор, на котором находится родительское окно
+      var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
+      Screen screen = Screen.FromHandle(parentWindowHandle);
+      System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
+
+      // Получаем координаты правого верхнего угла родительского окна в экранных координатах
+      Point parentRightTop;
+      if (_parentWindow.WindowState == WindowState.Maximized)
+      {
+        // Если окно развернуто, используем размеры рабочей области монитора
+        parentRightTop = new Point(workingArea.Right, workingArea.Top);
+      }
+      else
+      {
+        // Иначе используем экранные координаты родительского окна
+        parentRightTop = _parentWindow.PointToScreen(new Point(_parentWindow.ActualWidth - 15, 0));
+      }
+
+      // Вычисляем новое положение дочернего окна
+      double newLeft = parentRightTop.X - this.Width; // Правый край совпадает с правым краем родителя
+      double newTop = parentRightTop.Y + 60; // Отступ сверху
+
+      // Ограничиваем положение дочернего окна в пределах рабочей области монитора
+      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width)); // Ограничение по горизонтали
+      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height)); // Ограничение по вертикали
+
+      // Устанавливаем новое положение
+      this.Left = newLeft;
+      this.Top = newTop;
+    }
+
+    #endregion
 
     private async void ToggleArrow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -149,6 +227,12 @@ namespace UI.Controls.Search
     private void exitButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       CloseDialog();
+    }
+    public void ShowWindow()
+    {
+      this.Activate();
+      this.Focus();
+      this.Show();
     }
     public void CloseDialog()
     {

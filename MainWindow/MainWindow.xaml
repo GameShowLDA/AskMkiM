@@ -107,6 +107,56 @@
                     BorderBrush="#FF303843" 
                     OpacityMask="#FF303843"
                     >
+                    <MenuItem 
+               Header="Архив" 
+               PreviewMouseDown="Archive_PreviewMouseDown"
+               />
+
+                    <Separator 
+               Background="{StaticResource ActiveBorderSolidColorBrush}" 
+               Visibility="Collapsed"
+               x:Name="fileActionsSeparator"
+               />
+                    <MenuItem 
+               Header="Сохранить" 
+               x:Name="saveMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SaveMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Сохранить как" 
+               x:Name="saveAsMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SaveAsMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               
+               Header="Печать" 
+               x:Name="printMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="PrintMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Поиск" 
+               x:Name="searchMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SearchMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Сравнить" 
+               x:Name="compareMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="CompareMenuItem_PreviewMouseDown"
+               />
+
+                    <Separator 
+               Background="{StaticResource ActiveBorderSolidColorBrush}" 
+               />
+
 
                     <MenuItem 
                         Header="Открыть" 

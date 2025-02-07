@@ -10,11 +10,11 @@
         <ComboBox x:Name="searchArrowsComboBox"
                   Width="45"
                   Height="20"
-                  SelectedIndex="0"
+                  SelectedIndex="2"
                   Foreground="{StaticResource ForegroundSolidColorBrush}"
                   Background="Transparent"
                   BorderThickness="0"
-                  Margin="0 13 0 0">
+                  Margin="-4,-1,-21,1">
             
             <!-- Шаблон для стрелок в выпадающем списке -->
             <ComboBox.ItemTemplate>
@@ -58,7 +58,9 @@
                           BorderThickness="0"
                           Focusable="False"
                           Cursor="Hand"
-                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/> 
+                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                          MouseEnter="ComboBoxToggleButton_MouseEnter"
+                          MouseLeave="ComboBoxToggleButton_MouseLeave"/> 
 
                         <!-- Выпадающий список -->
                         <Popup x:Name="PART_Popup"
@@ -81,7 +83,7 @@
                 <x:Array Type="Geometry">
                     <Geometry>M 2 10 L 18 10 M 14 6 L 18 10 L 14 14</Geometry> <!-- Вправо -->
                     <Geometry>M 18 10 L 2 10 M 6 6 L 2 10 L 6 14</Geometry>     <!-- Влево -->
-                    <Geometry>M 10 2 A 8 8 0 1 1 9.9 2 M 10 0 L 10 6</Geometry> <!-- Круг -->
+                    <Geometry>M 6 5 A 5 5 0 1 1 4.99 5.5 Z M 11 12 L 16 16.3 </Geometry>
                 </x:Array>
             </ComboBox.ItemsSource>
 
