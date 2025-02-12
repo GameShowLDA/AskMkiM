@@ -1,6 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Rendering;
 using UI.Components;
 
 namespace UI.Controls.TextEditor
@@ -19,6 +23,18 @@ namespace UI.Controls.TextEditor
     public void SetMultiEditorControl(MultiEditorControl multiEditorControl)
     {
       _multiEditorControl = multiEditorControl;
+    }
+
+    public TextDocument Document => textEditor.Document;
+    public TextArea TextArea => textEditor.TextArea;
+    public void ScrollToLine(int line)
+    {
+      textEditor.ScrollToLine(line);
+    }
+
+    public void Select(int startOffset, int length)
+    {
+      textEditor.Select(startOffset, length);
     }
 
     private void textEditor_DragEnter(object sender, DragEventArgs e)

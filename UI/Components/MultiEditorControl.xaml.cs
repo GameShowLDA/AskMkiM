@@ -18,6 +18,12 @@ using UserControl = System.Windows.Controls.UserControl;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using AppConfig;
 using System.Text.RegularExpressions;
+using UI.Components.SearchControls;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
+using System;
+using System.Collections.Generic;
 
 namespace UI.Components
 {
@@ -32,11 +38,17 @@ namespace UI.Components
     Dictionary<string, string> filePaths = new Dictionary<string, string>();
     List<int> foundWordStartPositions = new List<int>();
 
+    private List<SearchResult> foundResults = new List<SearchResult>();
+    private int currentIndex = -1;
+    private TextMarkerService textMarkerService;
+
     string _searchText;
     bool? _wholeWord;
     bool? _caseWord;
     string _searchArea;
     int _searchParameters;
+
+    bool hasChanged;
 
     public event Action SelectFileForSearch;
 
@@ -58,6 +70,19 @@ namespace UI.Components
       };
 
       this.KeyDown += MultiWindowControl_KeyDown;
+    }
+
+    private void InitializeTextMarkerService()
+    {
+      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      int index = openPages.IndexOf(activeTab);
+      if (userControls[index] is TextEditorUI)
+      {
+        var textEditor = userControls[index] as TextEditorUI;
+        textMarkerService = new TextMarkerService(textEditor.Document);
+        textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
+        textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
+      }
     }
 
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -456,8 +481,9 @@ namespace UI.Components
     public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       InitializeSearch(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      InitializeTextMarkerService();
 
-      switch (searchArea)
+      /*switch (searchArea)
       {
         //найти в текущем документе
         case 0:
@@ -471,6 +497,25 @@ namespace UI.Components
         case 2:
           FindInFile();
           break;
+      }*/
+      if (hasChanged)
+      {
+        FindAllOccurrences(searchText);
+      }
+      else
+      {
+        if (searchParameters == "FindNext")
+        {
+          NextOccurrence();
+        }
+        if (searchParameters == "FindPrevious")
+        {
+          PreviousOccurrence();
+        }
+        if (searchParameters == "FindAll")
+        {
+          MessageBox.Show("Когда-нибудь тут будет нормальная реализация", "Заглушка");
+        }
       }
     }
 
@@ -496,10 +541,11 @@ namespace UI.Components
         _caseWord = caseWord;
         _searchParameters = searchParameters;
         _searchArea = searchArea;
-        if (foundWordStartPositions.Count > 0)
-        {
-          foundWordStartPositions.Clear();
-        }
+        hasChanged = true;
+      }
+      else
+      {
+        hasChanged = false;
       }
     }
 
@@ -553,6 +599,95 @@ namespace UI.Components
     public void FindInFile()
     {
       SelectFileForSearch?.Invoke();
+    }
+
+    private void FindAllOccurrences(string searchText)
+    {
+      ClearHighlights();  // Очищаем предыдущие подсветки
+      foundResults.Clear();
+      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      int pageIndex = openPages.IndexOf(activeTab);
+      // TODO: задавать тут область поиска текста
+      string fullText = string.Empty;
+
+      if (userControls[pageIndex] is TextEditorUI textEditor)
+      {
+        fullText = textEditor.Text;
+      }
+      int index = 0;
+
+      while ((index = fullText.IndexOf(searchText, index, StringComparison.OrdinalIgnoreCase)) != -1)
+      {
+        foundResults.Add(new SearchResult(index, searchText.Length));
+        HighlightText(index, searchText.Length);
+        index += searchText.Length;
+      }
+
+      if (foundResults.Count > 0)
+      {
+        currentIndex = 0;
+        GoToOccurrence(currentIndex);
+      }
+      else
+      {
+        MessageBox.Show("Текст не найден.");
+      }
+    }
+
+    private void HighlightText(int startOffset, int length)
+    {
+      var marker = textMarkerService.Create(startOffset, length);
+      marker.BackgroundColor = Colors.Yellow;
+      marker.ForegroundColor = Colors.Black;
+    }
+
+    // Переход к следующему вхождению
+    private void NextOccurrence()
+    {
+      if (foundResults.Count == 0)
+      {
+        return;
+      }
+
+      currentIndex = (currentIndex + 1) % foundResults.Count;
+      GoToOccurrence(currentIndex);
+    }
+
+    // Переход к предыдущему вхождению
+    private void PreviousOccurrence()
+    {
+      if (foundResults.Count == 0) return;
+
+      currentIndex = (currentIndex - 1 + foundResults.Count) % foundResults.Count;
+      GoToOccurrence(currentIndex);
+    }
+
+    // Переход к определенному вхождению
+    private void GoToOccurrence(int index)
+    {
+      if (index >= 0 && index < foundResults.Count)
+      {
+        var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        int pageIndex = openPages.IndexOf(activeTab);
+
+        if (userControls[pageIndex] is TextEditorUI textEditor)
+        {
+          var result = foundResults[index];
+          int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
+          textEditor.ScrollToLine(lineNumber);
+          textEditor.Select(result.StartOffset, result.Length);
+          textEditor.Focus();
+        }
+      }
+    }
+
+
+    // Очистка подсветки
+    private void ClearHighlights()
+    {
+      textMarkerService.RemoveAll();
+      foundResults.Clear();
+      currentIndex = -1;
     }
 
     #endregion
