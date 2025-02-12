@@ -11,13 +11,13 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="0" x:Name="Column3"/>
         </Grid.ColumnDefinitions>
 
         <Chassis:ChassisManagerControl x:Name="chassisManager" Grid.Column="0"/>
         <Border Grid.Column="1" Background="{StaticResource PrimarySolidColorBrush}" Name="deviceBorder"/>
-        <Border Grid.Column="2" Background="{StaticResource PrimarySolidColorBrush}" Name="settingsBorder"
-                Visibility="Collapsed"/>
+        <Border Grid.Column="2" Background="{StaticResource PrimarySolidColorBrush}" Name="settingsBorder" Visibility="Collapsed"/>
+        
     </Grid>
 </UserControl>

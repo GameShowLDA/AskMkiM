@@ -112,7 +112,6 @@ namespace Mode.Settings.ConfigSettings.CustomControls
       return model;
     }
 
-
     /// <summary>
     /// Устанавливает описание устройства.
     /// </summary>

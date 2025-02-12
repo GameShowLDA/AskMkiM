@@ -19,9 +19,6 @@
     <Reference Include="Ag3466x_2_08">
       <HintPath>..\Dll\Ag3466x_2_08.dll</HintPath>
     </Reference>
-    <Reference Include="PresentationFramework">
-      <HintPath>..\Dll\PresentFramew\PresentationFramework.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

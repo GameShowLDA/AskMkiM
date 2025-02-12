@@ -20,15 +20,13 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
   {
 
     public event EventHandler RequestClose;
-    public event EventHandler<IChassisManager> DeviceSaved;
+    public event EventHandler<ChassisManagerEntity> DeviceSaved;
     private Dictionary<string, Type> deviceModelMap = new Dictionary<string, Type>();
 
     private void exit_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       RequestClose?.Invoke(this, EventArgs.Empty);
     }
-
-
     private void save_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       if (deviceModelComboBox.SelectedItem is string selectedModel)
@@ -71,8 +69,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
               }
               else if (instance is DeviceWithCOM deviceWithCOM)
               {
-                // TODO :  Тут должен быть не сериал ПОрт а что-то другое
-
                 if (!string.IsNullOrEmpty(comPortComboBox.Text))
                 {
                   deviceWithCOM.COMPort = new SerialPort(comPortComboBox.Text)
@@ -95,10 +91,16 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
                 return;
               }
 
-              // Вызываем событие сохранения с конкретным экземпляром устройства
-              new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create((ChassisManagerEntity)data);
-              DeviceSaved?.Invoke(this, data);
+              var chassisEntity = new ChassisManagerEntity
+              {
+                Name = data.Name,
+                Description = data.Description,
+                Number = data.Number,
+                ConnectionDetails = data.ConnectionDetails,
+              };
 
+              new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create(chassisEntity);
+              DeviceSaved?.Invoke(this, chassisEntity);
             }
             else
             {
@@ -112,8 +114,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         }
       }
     }
-
-
 
     private void IpPart_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
@@ -134,7 +134,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         }
       }
     }
-
 
     private void ConnectionTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -166,7 +165,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       string[] ports = SerialPort.GetPortNames().OrderBy(p => p).ToArray();
       comPortComboBox.ItemsSource = ports;
     }
-
     private void ComPortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (comPortComboBox.SelectedItem is string selectedPort)
@@ -229,7 +227,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       return "Не найден";
     }
 
-
     public ChassisManagerSettings()
     {
       InitializeComponent();
@@ -262,7 +259,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       deviceModelComboBox.ItemsSource = deviceModelMap.Keys; // Отображаем только имена в ComboBox
     }
 
-
     /// <summary>
     /// Обрабатывает выбор устройства в ComboBox.
     /// </summary>
@@ -294,8 +290,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         }
       }
     }
-
-
     private Type DetermineBaseClass(Type selectedType)
     {
       bool inheritsIP = typeof(DeviceWithIP).IsAssignableFrom(selectedType);
@@ -318,13 +312,10 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         throw new InvalidOperationException($"Ошибка: Класс {selectedType.Name} не наследует ни DeviceWithIP, ни DeviceWithCOM.");
       }
     }
-
-
     private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
       e.Handled = !Regex.IsMatch(e.Text, "^[0-9]+$");
     }
-
     private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
       if (sender is TextBox textBox)
@@ -339,7 +330,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         }
       }
     }
-
     private void TextBox_Pasting(object sender, DataObjectPastingEventArgs e)
     {
       if (e.DataObject.GetDataPresent(typeof(string)))
@@ -355,6 +345,5 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         e.CancelCommand();
       }
     }
-
   }
 }
