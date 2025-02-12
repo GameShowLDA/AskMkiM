@@ -95,5 +95,9 @@ namespace MainWindowProgram
         compareMenuItem.Visibility = Visibility.Collapsed;
       }
     }
+    private void OnSearchWindowClosing(bool isOpen)
+    {
+      _isOpen = isOpen;
+    }
   }
 }

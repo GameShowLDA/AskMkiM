@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppConfig;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,16 +25,20 @@ namespace UI.Components.SearchControls
     public SearchArrows()
     {
       InitializeComponent();
+      InitializeArrows();
     }
 
-    private void PART_ContentPresenter_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void InitializeArrows()
     {
-      if (searchArrowsComboBox != null)
+      var arrows = new List<ArrowItem>
       {
-        searchArrowsComboBox.IsDropDownOpen = !searchArrowsComboBox.IsDropDownOpen;
-      }
-    }
+        new ArrowItem { Name = "FindNext", Description="Найти далее", GeometryData = Geometry.Parse("M 2 10 L 18 10 M 14 6 L 18 10 L 14 14") },
+        new ArrowItem { Name = "FindPrevious", Description="Найти предыдущий", GeometryData = Geometry.Parse("M 18 10 L 2 10 M 6 6 L 2 10 L 6 14") },
+        new ArrowItem { Name = "FindAll", Description="Найти все", GeometryData = Geometry.Parse("M 6 5 A 5 5 0 1 1 4.99 5.5 Z M 11 12 L 16 16.3") }
+      };
 
+      searchArrowsComboBox.ItemsSource = arrows;
+    }
 
     private void ComboBoxToggleButton_MouseEnter(object sender, MouseEventArgs e)
     {
@@ -56,35 +61,21 @@ namespace UI.Components.SearchControls
     private void PART_ContentPresenter_MouseEnter(object sender, MouseEventArgs e)
     {
       var presenter = (ContentPresenter)sender;
-
-      // Находим стрелку (Path) внутри ContentPresenter
       var path = FindChild<Path>(presenter);
 
       var activeColor = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
       if (path != null)
         path.Stroke = activeColor;
-
-      // Находим ToggleButton по имени
-      var toggleButton = FindChild<ToggleButton>(presenter.Parent, "ComboBoxToggleButton");
-      if (toggleButton != null)
-        toggleButton.Foreground = activeColor;
     }
 
     private void PART_ContentPresenter_MouseLeave(object sender, MouseEventArgs e)
     {
       var presenter = (ContentPresenter)sender;
-
-      // Находим стрелку (Path) внутри ContentPresenter
       var path = FindChild<Path>(presenter);
 
       var defaultColor = (Brush)Application.Current.Resources["ForegroundSolidColorBrush"];
       if (path != null)
         path.Stroke = defaultColor;
-
-      // Находим ToggleButton по имени
-      var toggleButton = FindChild<ToggleButton>(presenter.Parent, "ComboBoxToggleButton");
-      if (toggleButton != null)
-        toggleButton.Foreground = defaultColor;
     }
 
 
@@ -116,6 +107,15 @@ namespace UI.Components.SearchControls
       }
 
       return null;
+    }
+
+    private void PART_ContentPresenter_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      var arrowType = searchArrowsComboBox.SelectedItem as ArrowItem;
+      if (arrowType != null)
+      {
+        EventAggregator.RaiseSearchButtonPressed(arrowType.Name);
+      }
     }
   }
 }

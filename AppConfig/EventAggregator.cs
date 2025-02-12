@@ -39,9 +39,19 @@ namespace AppConfig
 
 
     /// <summary>
-    /// Событие, которое вызывается, когда активное окно типа TextEditor.
+    /// Событие, которое вызывается, когда активно окно типа TextEditor.
     /// </summary>
     static public event Action<bool> TextEditorActive;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
+    /// </summary>
+    static public event Action<bool> SearchWindowClosing;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
+    /// </summary>
+    static public event Action<string> SearchButtonPressed;
 
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
@@ -128,6 +138,24 @@ namespace AppConfig
     static public void RaiseTextEditorActive(bool isTextEditor)
     {
       TextEditorActive?.Invoke(isTextEditor);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchWindowClosing(bool isOpen)
+    {
+      SearchWindowClosing?.Invoke(isOpen);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка поиска.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchButtonPressed(string searchParameters)
+    {
+      SearchButtonPressed?.Invoke(searchParameters);
     }
   }
 }

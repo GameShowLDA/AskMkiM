@@ -21,8 +21,6 @@ namespace UI.Components.SearchControls
   /// </summary>
   public partial class CaseToggleButton : UserControl
   {
-
-
     public CaseToggleButton()
     {
       InitializeComponent();

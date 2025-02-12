@@ -30,11 +30,12 @@ namespace UI.Components
     List<UserControl> userControls = new List<UserControl>();
 
     Dictionary<string, string> filePaths = new Dictionary<string, string>();
-    Dictionary<int, bool> foundWordStartPositions = new Dictionary<int, bool>();
+    List<int> foundWordStartPositions = new List<int>();
 
     string _searchText;
-    bool? _fullWords;
-    bool? _register;
+    bool? _wholeWord;
+    bool? _caseWord;
+    string _searchArea;
     int _searchParameters;
 
     public event Action SelectFileForSearch;
@@ -452,11 +453,11 @@ namespace UI.Components
     #region Поиск по тексту
 
     // TODO: поиск по тексту делать тут
-    public void SearchData(string searchText, bool? fullWords, bool? register, int searchParameters)
+    public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      InitializeSearch(searchText, fullWords, register, searchParameters);
+      InitializeSearch(searchText, wholeWord, caseWord, searchArea, searchParameters);
 
-      switch (searchParameters)
+      switch (searchArea)
       {
         //найти в текущем документе
         case 0:
@@ -473,15 +474,28 @@ namespace UI.Components
       }
     }
 
-    private void InitializeSearch(string searchText, bool? fullWords, bool? register, int searchParameters)
+    /// <summary>
+    /// Инициализирует параметры поиска по тектсу.
+    /// </summary>
+    /// <param name="searchText">Текст, который мы ищем.</param>
+    /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
+    /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
+    /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
+    /// <param name="searchArea">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
+    private void InitializeSearch(string searchText, bool? wholeWord, bool? caseWord, int searchParameters, string searchArea)
     {
       if (_searchText == null
-              || (!string.Equals(_searchText, searchText) || _fullWords != fullWords || _register != register || _searchParameters != searchParameters))
+              || (!string.Equals(_searchText, searchText)
+              || _wholeWord != wholeWord
+              || _caseWord != caseWord
+              || _searchArea != searchArea
+              || _searchParameters != searchParameters))
       {
         _searchText = searchText;
-        _fullWords = fullWords;
-        _register = register;
+        _wholeWord = wholeWord;
+        _caseWord = caseWord;
         _searchParameters = searchParameters;
+        _searchArea = searchArea;
         if (foundWordStartPositions.Count > 0)
         {
           foundWordStartPositions.Clear();
@@ -492,11 +506,12 @@ namespace UI.Components
     private void FindWordIndexes(TextEditorUI textEditor, string text)
     {
       var regex = $@"{Regex.Escape(_searchText)}";
-      if (_fullWords != true)
+      if (_wholeWord == true)
       {
+        // TODO: неправильно работает 
         regex = $@"\b{Regex.Escape(_searchText)}\b";
       }
-      if (_register != true)
+      if (_caseWord != true)
       {
         FindMatches(text, regex, RegexOptions.IgnoreCase);
       }
@@ -510,7 +525,7 @@ namespace UI.Components
     {
       foreach (Match match in Regex.Matches(text, regex, options))
       {
-        foundWordStartPositions.Add(match.Index, false);
+        foundWordStartPositions.Add(match.Index);
       }
     }
 

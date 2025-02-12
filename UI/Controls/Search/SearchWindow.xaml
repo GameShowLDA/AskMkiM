@@ -40,13 +40,14 @@
                       PreviewMouseDown="ToggleArrow_PreviewMouseDown"/>
 
         <TextBox
-             x:Name="SearchTextBox"  Grid.Column="1" Grid.Row="0" Margin="2 3" Text="Найти..." Tag="Найти..." 
+             x:Name="SearchTextBox"  Grid.Column="1" Grid.Row="0" Margin="2 3" Text="Найти..." Tag="Найти..." BorderThickness="0"
              VerticalContentAlignment="Bottom"
              HorizontalContentAlignment="Left"
              Background="Transparent"
              BorderBrush="Transparent"
              Foreground="{StaticResource ForegroundSolidColorBrush}"
-            FontSize="14"
+             FontSize="14"
+             CaretBrush="{StaticResource ForegroundSolidColorBrush}"
          />
 
         <UIC:WindowButtons
@@ -76,13 +77,14 @@
 
         <!-- Строка 2 (По умолчанию скрыта) -->
         <TextBox
-            x:Name="ReplaceTextBox"  Grid.Column="1" Grid.Row="1" Margin="2 3" Text="Заменить..." Tag="Заменить..."
+            x:Name="ReplaceTextBox"  Grid.Column="1" Grid.Row="1" Margin="2 3" Text="Заменить..." Tag="Заменить..." BorderThickness="0"
             VerticalContentAlignment="Bottom"
             HorizontalContentAlignment="Left"
             Background="Transparent"
             BorderBrush="Transparent"
             Foreground="{StaticResource ForegroundSolidColorBrush}"
             FontSize="14"
+            CaretBrush="{StaticResource ForegroundSolidColorBrush}"
             />
 
         <Rectangle Width="Auto" Grid.Column="1" Grid.Row="1" Margin="2 0" 
@@ -108,14 +110,14 @@
                 <ColumnDefinition Width="52*"/>
             </Grid.ColumnDefinitions>
 
-            <Elements:CaseToggleButton Grid.Row="2" Grid.Column="0" 
+            <Elements:CaseToggleButton x:Name="caseButton" Grid.Row="2" Grid.Column="0" 
                            Width="25" Height="25"
                            Foreground="Black"
                            Cursor="Hand"
                            />
-            <Elements:WholeWordToggleButton Height="25" Width="25" Grid.Column="1" Cursor="Hand"/>
+            <Elements:WholeWordToggleButton x:Name="wholeWordButton" Height="25" Width="25" Grid.Column="1" Cursor="Hand"/>
 
-            <ComboBox x:Name="searchParameters" Grid.Column="2" Margin="2" VerticalAlignment="Stretch" SelectedIndex="1">
+            <ComboBox x:Name="searchAreaParameters" Grid.Column="2" Margin="2" VerticalAlignment="Stretch" SelectedIndex="0">
 
                 <ComboBoxItem Content="Текущий документ" Tag="FindInThisFile"/>
                 <ComboBoxItem Content="Все открытые документы" Tag="FindInOpenedFiles" />

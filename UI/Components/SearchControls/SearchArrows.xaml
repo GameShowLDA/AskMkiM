@@ -10,7 +10,8 @@
         <ComboBox x:Name="searchArrowsComboBox"
                   Width="45"
                   Height="20"
-                  SelectedIndex="2"
+                  SelectedValuePath="GeometryData"
+                  SelectedIndex="1"
                   Foreground="{StaticResource ForegroundSolidColorBrush}"
                   Background="Transparent"
                   BorderThickness="0"
@@ -21,7 +22,8 @@
                 <DataTemplate>
                     <Path Stroke="{StaticResource ForegroundSolidColorBrush}"
                           Fill="Transparent"
-                          Data="{Binding}"
+                          Data="{Binding GeometryData}"
+                          ToolTip="{Binding Description}"
                           StrokeThickness="2"
                           Width="20"
                           Height="20"
@@ -44,7 +46,8 @@
                           Cursor="Hand"
                           MouseEnter="PART_ContentPresenter_MouseEnter"
                           MouseLeave="PART_ContentPresenter_MouseLeave"
-                          PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown" />
+                          PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown"
+                        />
 
 
                         <!-- Кнопка раскрытия списка -->
@@ -77,16 +80,6 @@
                     </Grid>
                 </ControlTemplate>
             </ComboBox.Template>
-
-            <!-- Данные для стрелок -->
-            <ComboBox.ItemsSource>
-                <x:Array Type="Geometry">
-                    <Geometry>M 2 10 L 18 10 M 14 6 L 18 10 L 14 14</Geometry> <!-- Вправо -->
-                    <Geometry>M 18 10 L 2 10 M 6 6 L 2 10 L 6 14</Geometry>     <!-- Влево -->
-                    <Geometry>M 6 5 A 5 5 0 1 1 4.99 5.5 Z M 11 12 L 16 16.3 </Geometry>
-                </x:Array>
-            </ComboBox.ItemsSource>
-
         </ComboBox>
     </Grid>
 </UserControl>

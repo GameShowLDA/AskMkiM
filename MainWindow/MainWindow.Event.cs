@@ -14,6 +14,7 @@ namespace MainWindowProgram
 {
   public partial class MainWindow
   {
+    public bool _isOpen;
 
     #region Основные события управления окном.
 
@@ -169,14 +170,18 @@ namespace MainWindowProgram
 
     private void SearchMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      var searchWindow = new SearchWindow();
-      searchWindow.Owner = this;
-      searchWindow.SearchText += (searchData, fullWords, register, searchParameters) =>
+      if (_isOpen == false)
       {
-        multiEditors.SearchData(searchData, fullWords, register, searchParameters);
-      };
-      multiEditors.SelectFileForSearch += OpenFileFromEvent;
-      searchWindow.ShowWindow();
+        var searchWindow = new SearchWindow();
+        searchWindow.Owner = this;
+        searchWindow.SearchText += (searchText, wholeWord, caseWord, searchArea, searchParameters) =>
+        {
+          multiEditors.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+        };
+        multiEditors.SelectFileForSearch += OpenFileFromEvent;
+        searchWindow.ShowWindow();
+        _isOpen = true;
+      }
     }
     private void OpenFileFromEvent()
     {
