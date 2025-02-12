@@ -48,7 +48,19 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         return;
 
       Systems.Add(chassisManager);
+
+      if (FindName("systemPanel") is StackPanel panel)
+      {
+        Button systemButton = new Button
+        {
+          Content = $"Имя: {chassisManager.Name}, Номер: {chassisManager.Number}",
+          DataContext = chassisManager
+        };
+        systemButton.Click += OnSystemSelected;
+        panel.Children.Add(systemButton);
+      }
     }
+
 
     /// <summary>
     /// Вызывается при нажатии кнопки.

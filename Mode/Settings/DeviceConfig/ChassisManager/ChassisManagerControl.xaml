@@ -33,10 +33,12 @@
             <ItemsControl ItemsSource="{Binding Systems}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Content="{Binding Name}" 
-                                Margin="5"
-                                Padding="10"
-                                Click="OnSystemSelected"/>
+                        <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnSystemSelected">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                            </StackPanel>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

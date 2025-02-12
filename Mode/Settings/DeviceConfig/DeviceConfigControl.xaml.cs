@@ -159,13 +159,11 @@ namespace Mode.Settings.DeviceConfig
       chassisManager.Visibility = Visibility.Collapsed;
     }
 
-    private void ChassisManagerSettings_DeviceSaved(object sender, IChassisManager device)
+    private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
     {
-      // ChassisManagerEntity chassisManagerEntity = (ChassisManagerEntity)device;
-      // new ChassisManagerRepository(Context).Create(chassisManagerEntity);
-
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;
+      chassisManager.AddSystem(device);
     }
 
     private void Setting_RequestClose(object? sender, EventArgs e)

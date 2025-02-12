@@ -6,15 +6,13 @@
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig.DeviceManager"
              xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
              mc:Ignorable="d" 
-             Width="Auto">
-
+             Width="Auto"
+             Height="Auto">
     <Border CornerRadius="0,0,0,0" Width="Auto">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <!-- Контент с прокруткой -->
                 <RowDefinition Height="Auto"/>
-                <!-- Кнопки снизу -->
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
@@ -46,6 +44,10 @@
                                                               Style="{StaticResource PlusButtonStyle}"
                                                               Padding="5" Margin="5,0,0,0" 
                                                               BorderThickness="3,3,3,3" 
+                                                              Cursor="Hand"
+                                                              MouseEnter="PlusButton_MouseEnter"
+                                                              MouseLeave="PlusButton_MouseLeave"
+                                                              PreviewMouseDown="addDeviceBusCommutationButton_PreviewMouseDown"
                                                               />
                         </Grid>
                         <StackPanel x:Name="deviceBusCommutationContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
@@ -64,12 +66,16 @@
                             </Button>
                             <CustomControls:PlusButtonControl x:Name="addModuleRelayButton"
                                                               Grid.Column="1"
-                                                                                            FontSize="4" 
-                                Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Style="{StaticResource PlusButtonStyle}"
-                                Padding="5" Margin="5,0,0,0" 
-                                BorderThickness="3,3,3,3" 
+                                                              FontSize="4" 
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Padding="5" Margin="5,0,0,0" 
+                                                              BorderThickness="3,3,3,3" 
+                                                              Cursor="Hand"
+                                                              MouseEnter="PlusButton_MouseEnter"
+                                                              MouseLeave="PlusButton_MouseLeave"
+                                                              PreviewMouseDown="addModuleRelayButton_PreviewMouseDown"
                                                               />
                         </Grid>
                         <StackPanel x:Name="moduleRelayContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
@@ -88,12 +94,16 @@
                             </Button>
                             <CustomControls:PlusButtonControl x:Name="addModuleVoltageCurrentSourceButton"
                                                               Grid.Column="1"
-                                                                         FontSize="4" 
-                                Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Style="{StaticResource PlusButtonStyle}"
-                                Padding="5" Margin="5,0,0,0" 
-                                BorderThickness="3,3,3,3" 
+                                                              FontSize="4" 
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Padding="5" Margin="5,0,0,0" 
+                                                              BorderThickness="3,3,3,3" 
+                                                              Cursor="Hand"
+                                                              MouseEnter="PlusButton_MouseEnter"
+                                                              MouseLeave="PlusButton_MouseLeave"
+                                                              PreviewMouseDown="addModuleVoltageCurrentSourceButton_PreviewMouseDown"
                                                               />
                         </Grid>
                         <StackPanel x:Name="moduleVoltageCurrentSourceContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
@@ -106,12 +116,16 @@
                             <Button x:Name="accurateMeterButton" Content="Измеритель (точный)" Style="{StaticResource ConfigHeaderButtonStyle}"/>
                             <CustomControls:PlusButtonControl x:Name="addAccurateMeterButton"
                                                               Grid.Column="1"
-                                                                                              FontSize="4" 
-                                Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Style="{StaticResource PlusButtonStyle}"
-                                Padding="5" Margin="5,0,0,0" 
-                                BorderThickness="3,3,3,3" 
+                                                              FontSize="4" 
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Padding="5" Margin="5,0,0,0" 
+                                                              BorderThickness="3,3,3,3" 
+                                                              Cursor="Hand"
+                                                              MouseEnter="PlusButton_MouseEnter"
+                                                              MouseLeave="PlusButton_MouseLeave"
+                                                              PreviewMouseDown="addAccurateMeterButton_PreviewMouseDown"
                                                               />
                         </Grid>
                         <StackPanel x:Name="accurateMeterContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
@@ -124,12 +138,16 @@
                             <Button x:Name="fastMeterButton" Content="Измеритель (быстрый)" Style="{StaticResource ConfigHeaderButtonStyle}"/>
                             <CustomControls:PlusButtonControl x:Name="addFastMeterButton"
                                                               Grid.Column="1"
-                                                                                              FontSize="4" 
-                                Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Style="{StaticResource PlusButtonStyle}"
-                                Padding="5" Margin="5,0,0,0" 
-                                BorderThickness="3,3,3,3" 
+                                                              FontSize="4" 
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Padding="5" Margin="5,0,0,0" 
+                                                              BorderThickness="3,3,3,3" 
+                                                              Cursor="Hand"
+                                                              MouseEnter="PlusButton_MouseEnter"
+                                                              MouseLeave="PlusButton_MouseLeave"
+                                                              PreviewMouseDown="addFastMeterButton_PreviewMouseDown"
                                                               />
                         </Grid>
                         <StackPanel x:Name="fastMeterContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
@@ -142,12 +160,16 @@
                             <Button x:Name="breakdownButton" Content="Пробойная установка" Style="{StaticResource ConfigHeaderButtonStyle}"/>
                             <CustomControls:PlusButtonControl x:Name="addBrakedownButton"
                                                               Grid.Column="1"
-                                                                                              FontSize="4" 
-                                Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
-                                Style="{StaticResource PlusButtonStyle}"
-                                Padding="5" Margin="5,0,0,0" 
-                                BorderThickness="3,3,3,3" 
+                                                              FontSize="4" 
+                                                              Width="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Height="{Binding ActualHeight, ElementName=deviceBusCommutationButton}" 
+                                                              Style="{StaticResource PlusButtonStyle}"
+                                                              Padding="5" Margin="5,0,0,0" 
+                                                              BorderThickness="3,3,3,3" 
+                                                              Cursor="Hand"
+                                                              MouseEnter="PlusButton_MouseEnter"
+                                                              MouseLeave="PlusButton_MouseLeave"
+                                                              PreviewMouseDown="addBrakedownButton_PreviewMouseDown"
                                                               />
                         </Grid>
                         <StackPanel x:Name="breakdownContent" Margin="8,0,8,5" Height="Auto" Background="#303843"/>
@@ -155,7 +177,6 @@
                 </Grid>
             </ScrollViewer>
 
-            <!-- Кнопки остаются внизу -->
             <StackPanel Grid.Row="1" Margin="0,10,0,0">
                 <Button Name="AutoConfig" Margin="5" Style="{StaticResource CustomButtonStyle}" 
                         Background="{StaticResource SecondarySolidColorBrush}" >
@@ -173,7 +194,6 @@
                                TextAlignment="Center"/>
                 </Button>
             </StackPanel>
-
         </Grid>
     </Border>
 </UserControl>
