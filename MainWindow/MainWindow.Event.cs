@@ -180,6 +180,7 @@ namespace MainWindowProgram
         };
         multiEditors.SelectFileForSearch += OpenFileFromEvent;
         searchWindow.ShowWindow();
+        searchWindow.ClearHighlights += multiEditors.OnSearchWindowClosing;
         _isOpen = true;
       }
     }

@@ -78,6 +78,26 @@ namespace UI.Components.SearchControls
         path.Stroke = defaultColor;
     }
 
+    private void ComboBoxBorder_MouseEnter(object sender, MouseEventArgs e)
+    {
+      var border = (Border)sender;
+      var path = FindChild<Path>(border);
+
+      var activeColor = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+      if (path != null)
+        path.Stroke = activeColor;
+    }
+
+    private void ComboBoxBorder_MouseLeave(object sender, MouseEventArgs e)
+    {
+      var border = (Border)sender;
+      var path = FindChild<Path>(border);
+
+      var defaultColor = (Brush)Application.Current.Resources["ForegroundSolidColorBrush"];
+      if (path != null)
+        path.Stroke = defaultColor;
+    }
+
 
     // Метод для поиска дочернего элемента по имени
     private T FindChild<T>(DependencyObject parent, string childName = null) where T : FrameworkElement

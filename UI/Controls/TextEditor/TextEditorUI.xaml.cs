@@ -6,6 +6,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
 using UI.Components;
+using UI.Components.SearchControls;
 
 namespace UI.Controls.TextEditor
 {
@@ -15,14 +16,26 @@ namespace UI.Controls.TextEditor
   public partial class TextEditorUI : UserControl
   {
     MultiEditorControl _multiEditorControl;
+    private TextMarkerService textMarkerService;
+    public ICSharpCode.AvalonEdit.TextEditor TextEditor => textEditor;
+
     public TextEditorUI()
     {
       InitializeComponent();
+      textMarkerService = new TextMarkerService(textEditor.Document, textEditor);
+
+      textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
+      textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
     }
 
     public void SetMultiEditorControl(MultiEditorControl multiEditorControl)
     {
       _multiEditorControl = multiEditorControl;
+    }
+
+    public void ClearHighlights()
+    {
+      textMarkerService.RemoveAll();
     }
 
     public TextDocument Document => textEditor.Document;

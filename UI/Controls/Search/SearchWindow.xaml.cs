@@ -29,6 +29,7 @@ namespace UI.Controls.Search
     private Window _parentWindow;
     private bool IsLoaded;
     public event Action<string, bool?, bool?, int, string> SearchText;
+    public event Action ClearHighlights;
 
     public SearchWindow()
     {
@@ -133,6 +134,7 @@ namespace UI.Controls.Search
     }
     public void CloseDialog()
     {
+      ClearHighlights?.Invoke();
       EventAggregator.RaiseSearchWindowClosing(false);
       _allowClose = true;
       this.Close();
@@ -305,7 +307,6 @@ namespace UI.Controls.Search
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
       var caseWord = caseButton.IsChecked;
-      // в мультиэдитор через событие обращаться?
 
       SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }

@@ -36,17 +36,17 @@ namespace UI.Components
     List<UserControl> userControls = new List<UserControl>();
 
     Dictionary<string, string> filePaths = new Dictionary<string, string>();
-    List<int> foundWordStartPositions = new List<int>();
 
     private List<SearchResult> foundResults = new List<SearchResult>();
     private int currentIndex = -1;
     private TextMarkerService textMarkerService;
 
     string _searchText;
+    string _fullText;
     bool? _wholeWord;
     bool? _caseWord;
-    string _searchArea;
-    int _searchParameters;
+    string _searchParameters;
+    int _searchArea;
 
     bool hasChanged;
 
@@ -78,8 +78,9 @@ namespace UI.Components
       int index = openPages.IndexOf(activeTab);
       if (userControls[index] is TextEditorUI)
       {
-        var textEditor = userControls[index] as TextEditorUI;
-        textMarkerService = new TextMarkerService(textEditor.Document);
+        var textEditorUI = userControls[index] as TextEditorUI;
+        var textEditor = textEditorUI.TextEditor;
+        textMarkerService = new TextMarkerService(textEditor.Document, textEditor);
         textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
         textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
       }
@@ -140,8 +141,6 @@ namespace UI.Components
         }
       }
 
-
-
       tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
       tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
       tabButton.MouseDown += (s, e) =>
@@ -187,6 +186,7 @@ namespace UI.Components
         {
           filePaths.Add(nameFile, path);
         }
+        InitializeTextMarkerService();
       }
       catch (Exception ex)
       {
@@ -208,6 +208,7 @@ namespace UI.Components
       }
       AddControl(controlName, new TextEditorUI() /*{ Text  = "Новый файл"}*/);
       filePaths.Add(controlName, string.Empty);
+      InitializeTextMarkerService();
     }
 
     /// <summary>
@@ -363,6 +364,8 @@ namespace UI.Components
       return false;
     }
 
+    #region Сохранение файлов
+
     public bool SaveFile()
     {
       var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
@@ -441,6 +444,8 @@ namespace UI.Components
       return false;
     }
 
+    #endregion
+
     private void RenamePage(OpenFileButton activeTab, string filePath)
     {
       var acivePage = openPages.FirstOrDefault(p => p == activeTab);
@@ -480,27 +485,15 @@ namespace UI.Components
     // TODO: поиск по тексту делать тут
     public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      InitializeSearch(searchText, wholeWord, caseWord, searchArea, searchParameters);
-      InitializeTextMarkerService();
-
-      /*switch (searchArea)
+      var fullText = GetText();
+      if (!string.Equals(searchText, _searchText))
       {
-        //найти в текущем документе
-        case 0:
-          FindInThisFile();
-          break;
-        //во всех открытых файлах
-        case 1:
-          FindInOpnedFiles();
-          break;
-        //найти в файле
-        case 2:
-          FindInFile();
-          break;
-      }*/
+        ClearHighlights();
+      }
+      InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
       if (hasChanged)
       {
-        FindAllOccurrences(searchText);
+        FindAllOccurrences(fullText, searchText, wholeWord, caseWord, searchArea);
       }
       else
       {
@@ -519,92 +512,8 @@ namespace UI.Components
       }
     }
 
-    /// <summary>
-    /// Инициализирует параметры поиска по тектсу.
-    /// </summary>
-    /// <param name="searchText">Текст, который мы ищем.</param>
-    /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
-    /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
-    /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
-    /// <param name="searchArea">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
-    private void InitializeSearch(string searchText, bool? wholeWord, bool? caseWord, int searchParameters, string searchArea)
+    private string GetText()
     {
-      if (_searchText == null
-              || (!string.Equals(_searchText, searchText)
-              || _wholeWord != wholeWord
-              || _caseWord != caseWord
-              || _searchArea != searchArea
-              || _searchParameters != searchParameters))
-      {
-        _searchText = searchText;
-        _wholeWord = wholeWord;
-        _caseWord = caseWord;
-        _searchParameters = searchParameters;
-        _searchArea = searchArea;
-        hasChanged = true;
-      }
-      else
-      {
-        hasChanged = false;
-      }
-    }
-
-    private void FindWordIndexes(TextEditorUI textEditor, string text)
-    {
-      var regex = $@"{Regex.Escape(_searchText)}";
-      if (_wholeWord == true)
-      {
-        // TODO: неправильно работает 
-        regex = $@"\b{Regex.Escape(_searchText)}\b";
-      }
-      if (_caseWord != true)
-      {
-        FindMatches(text, regex, RegexOptions.IgnoreCase);
-      }
-      else
-      {
-        FindMatches(text, regex, RegexOptions.None);
-      }
-    }
-
-    private void FindMatches(string text, string regex, RegexOptions options)
-    {
-      foreach (Match match in Regex.Matches(text, regex, options))
-      {
-        foundWordStartPositions.Add(match.Index);
-      }
-    }
-
-    private void FindInThisFile()
-    {
-      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      int index = openPages.IndexOf(activeTab);
-      TextEditorUI textEditor = new TextEditorUI();
-      if (userControls[index] is TextEditorUI)
-      {
-        textEditor = userControls[index] as TextEditorUI;
-      }
-      var text = textEditor.Text;
-      if (string.IsNullOrEmpty(textEditor.Text))
-      {
-        return;
-      }
-      FindWordIndexes(textEditor, text);
-    }
-
-    private void FindInOpnedFiles()
-    {
-      MessageBox.Show("найти в открытых файлах", "заглушка");
-    }
-    public void FindInFile()
-    {
-      SelectFileForSearch?.Invoke();
-    }
-
-    private void FindAllOccurrences(string searchText)
-    {
-      ClearHighlights();  // Очищаем предыдущие подсветки
-      foundResults.Clear();
       var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
       int pageIndex = openPages.IndexOf(activeTab);
       // TODO: задавать тут область поиска текста
@@ -614,18 +523,70 @@ namespace UI.Components
       {
         fullText = textEditor.Text;
       }
-      int index = 0;
+      return fullText;
+    }
 
-      while ((index = fullText.IndexOf(searchText, index, StringComparison.OrdinalIgnoreCase)) != -1)
+    /// <summary>
+    /// Инициализирует параметры поиска по тектсу.
+    /// </summary>
+    /// <param name="searchText">Текст, который мы ищем.</param>
+    /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
+    /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
+    /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
+    /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
+    private void InitializeSearch(string fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      if ((!string.Equals(_fullText, fullText))
+              || (!string.Equals(_searchText, searchText)
+              || _wholeWord != wholeWord
+              || _caseWord != caseWord
+              || _searchArea != searchArea))
       {
-        foundResults.Add(new SearchResult(index, searchText.Length));
-        HighlightText(index, searchText.Length);
-        index += searchText.Length;
+        _fullText = fullText;
+        _searchText = searchText;
+        _wholeWord = wholeWord;
+        _caseWord = caseWord;
+        _searchArea = searchArea;
+        _searchParameters = searchParameters;
+        hasChanged = true;
       }
+      else
+      {
+        hasChanged = false;
+      }
+    }
 
+    public void FindInFile()
+    {
+      SelectFileForSearch?.Invoke();
+    }
+
+    // TODO: доработать поиск с учетом регистра и полных слов
+    private void FindAllOccurrences(string fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea)
+    {
+      ClearHighlights();
+
+      if (string.IsNullOrEmpty(searchText))
+      {
+        MessageBox.Show("Введите текст для поиска.");
+        return;
+      }
+      RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
+      searchText = Regex.Escape(searchText);
+      string pattern = wholeWord == true ? $@"\b{searchText}\b" : searchText;
+      MatchCollection matches = Regex.Matches(fullText, pattern, options);
+
+      foreach (Match match in matches)
+      {
+        foundResults.Add(new SearchResult(match.Index, match.Length));
+      }
+      
       if (foundResults.Count > 0)
       {
-        currentIndex = 0;
+        if (currentIndex == -1)
+        {
+          currentIndex = 0;
+        }
         GoToOccurrence(currentIndex);
       }
       else
@@ -637,32 +598,39 @@ namespace UI.Components
     private void HighlightText(int startOffset, int length)
     {
       var marker = textMarkerService.Create(startOffset, length);
-      marker.BackgroundColor = Colors.Yellow;
+      marker.BackgroundColor = (Color)Application.Current.Resources["ActiveColor"];
       marker.ForegroundColor = Colors.Black;
     }
 
-    // Переход к следующему вхождению
+    /// <summary>
+    /// Переход к следующему вхождению.
+    /// </summary>
     private void NextOccurrence()
     {
       if (foundResults.Count == 0)
       {
         return;
       }
-
+      textMarkerService.RemoveAll();
       currentIndex = (currentIndex + 1) % foundResults.Count;
       GoToOccurrence(currentIndex);
     }
 
-    // Переход к предыдущему вхождению
+    /// <summary>
+    /// Переход к предыдущему вхождению.
+    /// </summary>
     private void PreviousOccurrence()
     {
       if (foundResults.Count == 0) return;
 
+      textMarkerService.RemoveAll();
       currentIndex = (currentIndex - 1 + foundResults.Count) % foundResults.Count;
       GoToOccurrence(currentIndex);
     }
 
-    // Переход к определенному вхождению
+    /// <summary>
+    /// Переход к определееному вхождению.
+    /// </summary>
     private void GoToOccurrence(int index)
     {
       if (index >= 0 && index < foundResults.Count)
@@ -673,6 +641,7 @@ namespace UI.Components
         if (userControls[pageIndex] is TextEditorUI textEditor)
         {
           var result = foundResults[index];
+          HighlightText(result.StartOffset, result.Length);
           int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
           textEditor.ScrollToLine(lineNumber);
           textEditor.Select(result.StartOffset, result.Length);
@@ -681,13 +650,29 @@ namespace UI.Components
       }
     }
 
-
-    // Очистка подсветки
+    /// <summary>
+    /// Очистка подстветки.
+    /// </summary>
     private void ClearHighlights()
     {
       textMarkerService.RemoveAll();
       foundResults.Clear();
       currentIndex = -1;
+    }
+
+    /// <summary>
+    /// Очистка подстветки.
+    /// </summary>
+    public void OnSearchWindowClosing()
+    {
+      ClearHighlights();
+      _fullText = string.Empty;
+      _searchText = string.Empty;
+      _wholeWord = false;
+      _caseWord = false;
+      _searchArea = 0;
+      _searchParameters = string.Empty;
+      hasChanged = true;
     }
 
     #endregion

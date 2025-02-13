@@ -11,11 +11,13 @@
                   Width="45"
                   Height="20"
                   SelectedValuePath="GeometryData"
-                  SelectedIndex="1"
+                  SelectedIndex="0"
                   Foreground="{StaticResource ForegroundSolidColorBrush}"
                   Background="Transparent"
                   BorderThickness="0"
-                  Margin="-4,-1,-21,1">
+                  Margin="-4,-1,-21,1"
+                  PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown"
+                  >
             
             <!-- Шаблон для стрелок в выпадающем списке -->
             <ComboBox.ItemTemplate>
@@ -37,6 +39,12 @@
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
                         <!-- Отображение выбранной стрелки -->
+                        <Border
+                            x:Name="ComboBoxBorder"
+                                Background="Transparent"
+                            MouseEnter="ComboBoxBorder_MouseEnter"
+                            MouseLeave="ComboBoxBorder_MouseLeave"
+                                Cursor="Hand">
                         <ContentPresenter x:Name="PART_ContentPresenter"
                           Content="{Binding Path=SelectedItem, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
                           ContentTemplate="{TemplateBinding ItemTemplate}"
@@ -44,10 +52,8 @@
                           VerticalAlignment="Center"
                           Margin="5,3"
                           Cursor="Hand"
-                          MouseEnter="PART_ContentPresenter_MouseEnter"
-                          MouseLeave="PART_ContentPresenter_MouseLeave"
-                          PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown"
                         />
+                        </Border>
 
 
                         <!-- Кнопка раскрытия списка -->
@@ -78,6 +84,11 @@
                             </Border>
                         </Popup>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ComboBoxToggleButton" Property="Foreground" Value="{StaticResource SecondarySolidColorBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </ComboBox.Template>
         </ComboBox>

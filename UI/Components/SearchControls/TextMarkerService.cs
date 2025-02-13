@@ -1,21 +1,21 @@
-﻿using ICSharpCode.AvalonEdit.Document;
+﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
+using UI.Controls.TextEditor;
 
 namespace UI.Components.SearchControls
 {
   public class TextMarkerService : IBackgroundRenderer, IVisualLineTransformer
   {
     private readonly TextSegmentCollection<TextMarker> markers;
+    private readonly TextEditor textEditor;
 
-    public TextMarkerService(TextDocument document)
+    public TextMarkerService(TextDocument document, TextEditor textEditor)
     {
       markers = new TextSegmentCollection<TextMarker>(document);
+      this.textEditor = textEditor;
     }
 
     public IEnumerable<TextMarker> TextMarkers => markers;
@@ -44,12 +44,34 @@ namespace UI.Components.SearchControls
       if (context == null || elements == null)
         return;
 
-      foreach (var marker in markers.FindOverlappingSegments(context.VisualLine.FirstDocumentLine.Offset, context.VisualLine.LastDocumentLine.EndOffset - context.VisualLine.FirstDocumentLine.Offset))
+      // Получаем текущее выделение
+      var selection = textEditor.TextArea.Selection;
+      if (selection.IsEmpty)
+        return;
+
+      int selectionStart = selection.Segments.Min(s => s.StartOffset);
+      int selectionEnd = selection.Segments.Max(s => s.EndOffset);
+
+      // Начальный offset текущей строки
+      int lineStartOffset = context.VisualLine.FirstDocumentLine.Offset;
+
+      foreach (var marker in markers.FindOverlappingSegments(lineStartOffset,
+          context.VisualLine.LastDocumentLine.EndOffset - lineStartOffset))
       {
         foreach (var element in elements)
         {
-          if (marker.ForegroundColor != null)
-            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
+          // Вычисляем реальный offset элемента в документе
+          int elementStart = lineStartOffset + element.VisualColumn;
+          int elementEnd = elementStart + element.DocumentLength;
+
+          // Проверяем, попадает ли элемент в выделенный диапазон
+          if (elementEnd > selectionStart && elementStart < selectionEnd)
+          {
+            if (marker.ForegroundColor != null)
+            {
+              element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
+            }
+          }
         }
       }
     }
@@ -73,6 +95,7 @@ namespace UI.Components.SearchControls
     public void RemoveAll()
     {
       markers.Clear();
+      textEditor.TextArea.TextView.Redraw();
     }
   }
 }
