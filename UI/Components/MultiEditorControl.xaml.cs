@@ -201,9 +201,13 @@ namespace UI.Components
     {
       var controlName = "Новый";
       var counter = 0;
-      if (filePaths.ContainsKey(controlName))
+      while (filePaths.ContainsKey(controlName))
       {
         counter++;
+        if (controlName != "Новый")
+        {
+          controlName = controlName.Remove(controlName.Length - (counter - 1).ToString().Length, (counter - 1).ToString().Length);
+        }
         controlName += $"{counter}";
       }
       AddControl(controlName, new TextEditorUI() /*{ Text  = "Новый файл"}*/);
@@ -289,6 +293,8 @@ namespace UI.Components
           {
             index--;
           }
+          EventAggregator.RaiseTextEditorClosing(control is TextEditorUI);
+
 
           openPages.Remove(tabButton);
           userControls.Remove(control);
@@ -483,8 +489,21 @@ namespace UI.Components
     #region Поиск по тексту
 
     // TODO: поиск по тексту делать тут
+    /// <summary>
+    /// Выполняет поиск по тектсу.
+    /// </summary>
+    /// <param name="searchText">Текст, который мы ищем.</param>
+    /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
+    /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
+    /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
+    /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
+      if (searchArea == 2)
+      {
+        FindInFile();
+        searchArea = 0;
+      }
       var fullText = GetText();
       if (!string.Equals(searchText, _searchText))
       {
@@ -580,7 +599,7 @@ namespace UI.Components
       {
         foundResults.Add(new SearchResult(match.Index, match.Length));
       }
-      
+
       if (foundResults.Count > 0)
       {
         if (currentIndex == -1)

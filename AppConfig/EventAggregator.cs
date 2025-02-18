@@ -44,6 +44,11 @@ namespace AppConfig
     static public event Action<bool> TextEditorActive;
 
     /// <summary>
+    /// Событие, которое вызывается, когда активно окно типа TextEditor.
+    /// </summary>
+    static public event Action<bool> TextEditorClosing;
+
+    /// <summary>
     /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
     /// </summary>
     static public event Action<bool> SearchWindowClosing;
@@ -138,6 +143,15 @@ namespace AppConfig
     static public void RaiseTextEditorActive(bool isTextEditor)
     {
       TextEditorActive?.Invoke(isTextEditor);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTextEditorClosing(bool isTextEditor)
+    {
+      TextEditorClosing?.Invoke(isTextEditor);
     }
 
     /// <summary>

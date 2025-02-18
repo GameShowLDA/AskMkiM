@@ -38,6 +38,7 @@ namespace UI.Controls.Search
       DefaultGotAndLostEvent(SearchTextBox, SearchTextBox.Tag.ToString());
       DefaultGotAndLostEvent(ReplaceTextBox, ReplaceTextBox.Tag.ToString());
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
+      EventAggregator.TextEditorClosing += OnSearchWindowClosing;
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -253,7 +254,7 @@ namespace UI.Controls.Search
         {
           comboBox.Focus();
           comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
-          e.Handled = true; // Предотвращаем дальнейшую обработку события
+          e.Handled = true;
         }
       }
     }
@@ -307,8 +308,20 @@ namespace UI.Controls.Search
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
       var caseWord = caseButton.IsChecked;
+      if (searchArea == 2)
+      {
+        searchAreaParameters.SelectedIndex = 0;
+      }
 
       SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void OnSearchWindowClosing(bool isOpen)
+    {
+      if (isOpen)
+      {
+        CloseDialog();
+      }
     }
   }
 }

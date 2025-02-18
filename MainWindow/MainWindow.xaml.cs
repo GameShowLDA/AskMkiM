@@ -57,6 +57,7 @@ namespace MainWindowProgram
       AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
       Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
       TextEditorActive += OnTextEditorActive;
+      TextEditorClosing += OnTextEditorClosing;
       SearchWindowClosing += OnSearchWindowClosing;
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;

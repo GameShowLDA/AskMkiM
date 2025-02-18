@@ -106,10 +106,10 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private void Open_PreviewMouseDownAsync(object sender, MouseButtonEventArgs e)
     {
-      OpenFile();
+      OpenFile().Wait();
     }
 
-    private async void OpenFile()
+    private async Task OpenFile()
     {
       if (await GetIsLocked())
       {
@@ -186,7 +186,7 @@ namespace MainWindowProgram
     }
     private void OpenFileFromEvent()
     {
-      OpenFile();
+      OpenFile().Wait();
     }
 
     private void CompareMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)

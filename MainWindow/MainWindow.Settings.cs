@@ -74,9 +74,9 @@ namespace MainWindowProgram
         });
       }
     }
-    private void OnTextEditorActive(bool isVisible)
+    private void OnTextEditorActive(bool isTextEditor)
     {
-      if (isVisible)
+      if (isTextEditor)
       {
         fileActionsSeparator.Visibility = Visibility.Visible;
         saveMenuItem.Visibility = Visibility.Visible;
@@ -85,7 +85,11 @@ namespace MainWindowProgram
         searchMenuItem.Visibility = Visibility.Visible;
         compareMenuItem.Visibility = Visibility.Visible;
       }
-      else
+    }
+
+    private void OnTextEditorClosing(bool isTextEditor)
+    {
+      if (isTextEditor)
       {
         fileActionsSeparator.Visibility = Visibility.Collapsed;
         saveMenuItem.Visibility = Visibility.Collapsed;
@@ -95,6 +99,7 @@ namespace MainWindowProgram
         compareMenuItem.Visibility = Visibility.Collapsed;
       }
     }
+
     private void OnSearchWindowClosing(bool isOpen)
     {
       _isOpen = isOpen;
