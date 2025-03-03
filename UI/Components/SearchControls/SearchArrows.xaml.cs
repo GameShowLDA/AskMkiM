@@ -1,6 +1,7 @@
 ﻿using AppConfig;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -131,11 +132,49 @@ namespace UI.Components.SearchControls
 
     private void PART_ContentPresenter_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      var arrowType = searchArrowsComboBox.SelectedItem as ArrowItem;
-      if (arrowType != null)
+      if (searchArrowsComboBox.IsDropDownOpen)
       {
-        EventAggregator.RaiseSearchButtonPressed(arrowType.Name);
+        Debug.WriteLine("Выпадающий список открыт, отменяем поиск.");
+        return;
       }
+
+      if (searchArrowsComboBox.SelectedItem is ArrowItem selectedArrow)
+      {
+        var arrowType = searchArrowsComboBox.SelectedItem as ArrowItem;
+        if (arrowType != null)
+        {
+          Debug.WriteLine($"Запуск поиска для: {selectedArrow.Name}");
+          EventAggregator.RaiseSearchButtonPressed(selectedArrow.Name);
+        }
+      }
+    }
+
+    private void searchArrowsComboBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      var clickedElement = e.OriginalSource as FrameworkElement;
+
+      if (clickedElement is ComboBoxItem)
+      {
+        Debug.WriteLine("Клик по элементу списка. Прерываем обработку.");
+        return;
+      }
+
+      if (clickedElement is Border border)
+      {
+        // Если кликнули по Border, проверяем, есть ли внутри него Path (стрелка)
+        var path = FindChild<Path>(border);
+        if (path != null)
+        {
+          // Перенаправляем событие на Path, чтобы обработать как клик по стрелке
+          e.Handled = true;
+          PART_ContentPresenter_PreviewMouseDown(sender, e);
+        }
+      }
+    }
+
+    private void searchArrowsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+
     }
   }
 }

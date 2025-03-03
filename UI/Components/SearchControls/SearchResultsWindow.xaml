@@ -1,0 +1,24 @@
+﻿<Window x:Class="UI.Components.SearchControls.SearchResultsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI.Components.SearchControls"
+        mc:Ignorable="d"
+        Title="Результаты поиска" Height="450" Width="600">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ListView x:Name="ResultsListView">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="5">
+                            <TextBlock Text="{Binding FileName}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding LineNumber}" Foreground="Gray"/>
+                            <TextBlock Text="{Binding LineText}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
+    </Grid>
+</Window>

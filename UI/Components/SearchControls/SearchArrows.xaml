@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="20">
-    <Grid>
+    <Grid Background="Transparent">
         <ComboBox x:Name="searchArrowsComboBox"
                   Width="45"
                   Height="20"
@@ -16,9 +16,10 @@
                   Background="Transparent"
                   BorderThickness="0"
                   Margin="-4,-1,-21,1"
-                  PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown"
-                  >
-            
+                  PreviewMouseDown="searchArrowsComboBox_PreviewMouseDown"
+                  SelectionChanged="searchArrowsComboBox_SelectionChanged"
+                  > 
+
             <!-- Шаблон для стрелок в выпадающем списке -->
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -45,14 +46,16 @@
                             MouseEnter="ComboBoxBorder_MouseEnter"
                             MouseLeave="ComboBoxBorder_MouseLeave"
                                 Cursor="Hand">
-                        <ContentPresenter x:Name="PART_ContentPresenter"
-                          Content="{Binding Path=SelectedItem, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                          ContentTemplate="{TemplateBinding ItemTemplate}"
-                          HorizontalAlignment="Left"
-                          VerticalAlignment="Center"
-                          Margin="5,3"
-                          Cursor="Hand"
-                        />
+                            <ContentPresenter x:Name="PART_ContentPresenter"
+                                 Content="{Binding Path=SelectedItem, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                 ContentTemplate="{TemplateBinding ItemTemplate}"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Center"
+                                 Margin="5,3"
+                                 Cursor="Hand"
+                                 Focusable="False"
+                          PreviewMouseDown="PART_ContentPresenter_PreviewMouseDown"
+                            />
                         </Border>
 
 
@@ -67,9 +70,10 @@
                           BorderThickness="0"
                           Focusable="False"
                           Cursor="Hand"
+                          Tag="ListElements"
                           IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                           MouseEnter="ComboBoxToggleButton_MouseEnter"
-                          MouseLeave="ComboBoxToggleButton_MouseLeave"/> 
+                          MouseLeave="ComboBoxToggleButton_MouseLeave"/>
 
                         <!-- Выпадающий список -->
                         <Popup x:Name="PART_Popup"

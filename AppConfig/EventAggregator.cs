@@ -59,6 +59,11 @@ namespace AppConfig
     static public event Action<string> SearchButtonPressed;
 
     /// <summary>
+    /// Событие, которое вызывается, когда происходиити переключение активного окна.
+    /// </summary>
+    public static event Action<bool> ActiveEditorChanged;
+
+    /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
     /// </summary>
     static internal bool AdminRightsFlag
@@ -170,6 +175,15 @@ namespace AppConfig
     static public void RaiseSearchButtonPressed(string searchParameters)
     {
       SearchButtonPressed?.Invoke(searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда происходит смена активного окна.
+    /// </summary>
+    /// <param name="isTextEditor"></param>
+    public static void RaiseActiveEditorChanged(bool isTextEditor)
+    {
+      ActiveEditorChanged?.Invoke(isTextEditor);
     }
   }
 }

@@ -1,14 +1,10 @@
 ﻿using System.IO;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using System.Windows.Threading;
-using ICSharpCode.AvalonEdit;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using Application = System.Windows.Application;
@@ -19,11 +15,9 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using AppConfig;
 using System.Text.RegularExpressions;
 using UI.Components.SearchControls;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Rendering;
-using System;
-using System.Collections.Generic;
+using System.Text;
+using ICSharpCode.AvalonEdit;
+using System.Windows.Controls;
 
 namespace UI.Components
 {
@@ -36,23 +30,24 @@ namespace UI.Components
     List<UserControl> userControls = new List<UserControl>();
 
     Dictionary<string, string> filePaths = new Dictionary<string, string>();
+    Dictionary<string, Dictionary<int, string>> foundInOpenedFiles = new Dictionary<string, Dictionary<int, string>>();
 
     private List<SearchResult> foundResults = new List<SearchResult>();
     private int currentIndex = -1;
     private TextMarkerService textMarkerService;
 
     string _searchText;
-    string _fullText;
+    Dictionary<string, string> _fullText = new Dictionary<string, string>();
     bool? _wholeWord;
     bool? _caseWord;
     string _searchParameters;
     int _searchArea;
+    int _textEditor;
 
     bool hasChanged;
 
-    public event Action SelectFileForSearch;
-
     private int _clickCount = 0;
+    private int _editorCount = 0;
     private DispatcherTimer _clickTimer;
 
     public MultiEditorControl()
@@ -268,7 +263,9 @@ namespace UI.Components
 
       ActivePage(openPage);
 
-      EventAggregator.RaiseTextEditorActive(control is TextEditorUI);
+      bool isTextEditor = control is TextEditorUI;
+      EventAggregator.RaiseTextEditorActive(isTextEditor);
+      EventAggregator.RaiseActiveEditorChanged(isTextEditor);
     }
 
     /// <summary>
@@ -501,47 +498,144 @@ namespace UI.Components
     {
       if (searchArea == 2)
       {
-        FindInFile();
+        //FindInFile();
         searchArea = 0;
       }
-      var fullText = GetText();
+      var fullText = GetText(searchArea);
       if (!string.Equals(searchText, _searchText))
       {
         ClearHighlights();
       }
-      InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+      //if (searchArea == 1) // Поиск по всем открытым документам
+      //{
+      //  FindAll(searchText, wholeWord, caseWord, searchArea);
+      //}
+      InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters); // тут какой то косяк опять
+
       if (hasChanged)
       {
-        FindAllOccurrences(fullText, searchText, wholeWord, caseWord, searchArea);
+        if (searchParameters == "FindAll")
+        {
+          FindAll(searchText, wholeWord, caseWord, searchArea);
+        }
+        else
+        {
+          FindAllOccurrences(fullText.Values.First(), searchText, wholeWord, caseWord, searchArea);
+        }
       }
       else
       {
         if (searchParameters == "FindNext")
         {
-          NextOccurrence();
+          NextOccurrence(searchArea);
         }
         if (searchParameters == "FindPrevious")
         {
-          PreviousOccurrence();
+          PreviousOccurrence(searchArea);
         }
         if (searchParameters == "FindAll")
         {
-          MessageBox.Show("Когда-нибудь тут будет нормальная реализация", "Заглушка");
+          FindAll(searchText, wholeWord, caseWord, searchArea);
         }
       }
     }
 
-    private string GetText()
+    private void FindAll(string searchText, bool? wholeWord, bool? caseWord, int searchArea)
     {
-      var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      int pageIndex = openPages.IndexOf(activeTab);
-      // TODO: задавать тут область поиска текста
-      string fullText = string.Empty;
-
-      if (userControls[pageIndex] is TextEditorUI textEditor)
+      List<OpenFileButton> searchPages = SetSearchAreaPages(searchArea);
+      var foundResultsDictionary = new Dictionary<int, string>();
+      if (foundInOpenedFiles.Count > 0)
       {
-        fullText = textEditor.Text;
+        foundInOpenedFiles.Clear();
       }
+      foreach (var page in searchPages)
+      {
+        int pageIndex = openPages.IndexOf(page);
+        if (userControls[pageIndex] is TextEditorUI textEditor)
+        {
+          if (!foundInOpenedFiles.ContainsKey(page.Text))
+          {
+            var pageText = textEditor.Text;
+            foundResultsDictionary = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
+            foundInOpenedFiles.Add(page.Text, foundResultsDictionary);
+          }
+        }
+      }
+      if (foundInOpenedFiles.Count > 0)
+      {
+        if (foundResultsDictionary.Count > 0)
+        {
+          DisplaySearchResults(foundInOpenedFiles);
+        }
+      }
+      else
+      {
+        MessageBox.Show("Текст не найден в открытых документах.");
+      }
+    }
+
+    private List<OpenFileButton> SetSearchAreaPages(int searchArea)
+    {
+      var searchPages = new List<OpenFileButton>();
+      if (searchArea == 0 || searchArea == 2)
+      {
+        var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        var pageIndex = openPages.IndexOf(activeTab);
+        searchPages.Add(openPages[pageIndex]);
+      }
+      else
+      {
+        searchPages = openPages;
+      }
+
+      return searchPages;
+    }
+
+    private void DisplaySearchResults(Dictionary<string, Dictionary<int, string>> results)
+    {
+      if (results == null || results.Count == 0)
+      {
+        MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        return;
+      }
+      var resultsWindow = new SearchResultsWindow();
+      resultsWindow.ShowResults(results);
+      resultsWindow.Show();
+    }
+
+
+    private Dictionary<string, string> GetText(int searchArea)
+    {
+      OpenFileButton? activeTab;
+      int pageIndex = -1;
+      Dictionary<string, string> fullText = new Dictionary<string, string>();
+
+      if (searchArea == 0 || searchArea == 2)
+      {
+        activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        pageIndex = openPages.IndexOf(activeTab);
+        if (pageIndex != -1 && userControls[pageIndex] is TextEditorUI textEditor)
+        {
+          fullText.Add("activeTab", textEditor.Text);
+        }
+      }
+      else
+      {
+        var foundResultsDictionary = new Dictionary<int, string>();
+        foreach (var page in openPages)
+        {
+          pageIndex = openPages.IndexOf(page);
+          if (userControls[pageIndex] is TextEditorUI textEditor)
+          {
+            if (!fullText.ContainsKey(page.Text))
+            {
+              var pageText = textEditor.Text;
+              fullText.Add(page.Text, pageText);
+            }
+          }
+        }
+      }
+
       return fullText;
     }
 
@@ -553,9 +647,9 @@ namespace UI.Components
     /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
     /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
-    private void InitializeSearch(string fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    private void InitializeSearch(Dictionary<string, string> fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      if ((!string.Equals(_fullText, fullText))
+      if ((!Enumerable.SequenceEqual(_fullText, fullText))
               || (!string.Equals(_searchText, searchText)
               || _wholeWord != wholeWord
               || _caseWord != caseWord
@@ -575,14 +669,12 @@ namespace UI.Components
       }
     }
 
-    public void FindInFile()
-    {
-      SelectFileForSearch?.Invoke();
-    }
 
-    // TODO: доработать поиск с учетом регистра и полных слов
     private void FindAllOccurrences(string fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea)
     {
+      // если в текущем документе, то отпраляем активную вкладку
+      // если в файле, то открываем файл и для поиска отправляем его
+      // если во всех выбранных, то берем openPages
       ClearHighlights();
 
       if (string.IsNullOrEmpty(searchText))
@@ -602,9 +694,13 @@ namespace UI.Components
 
       if (foundResults.Count > 0)
       {
-        if (currentIndex == -1)
+        if (currentIndex == -1 && _searchParameters == "FindNext")
         {
           currentIndex = 0;
+        }
+        if (currentIndex == -1 && _searchParameters == "FindPrevious")
+        {
+          currentIndex = (currentIndex + foundResults.Count) % foundResults.Count;
         }
         GoToOccurrence(currentIndex);
       }
@@ -613,6 +709,34 @@ namespace UI.Components
         MessageBox.Show("Текст не найден.");
       }
     }
+
+    private Dictionary<int, string> FindOccurrencesByLine(string fullText, string searchText, bool? wholeWord, bool? caseWord)
+    {
+      var result = new Dictionary<int, string>();
+
+      if (string.IsNullOrEmpty(searchText))
+      {
+        MessageBox.Show("Введите текст для поиска.");
+        return result;
+      }
+
+      RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
+      searchText = Regex.Escape(searchText);
+      string pattern = wholeWord == true ? $@"\b{searchText}\b" : searchText;
+
+      string[] lines = fullText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+      for (int i = 0; i < lines.Length; i++)
+      {
+        if (Regex.IsMatch(lines[i], pattern, options))
+        {
+          result[i + 1] = lines[i]; // Добавляем в словарь (нумерация строк с 1)
+        }
+      }
+
+      return result;
+    }
+
 
     private void HighlightText(int startOffset, int length)
     {
@@ -624,31 +748,89 @@ namespace UI.Components
     /// <summary>
     /// Переход к следующему вхождению.
     /// </summary>
-    private void NextOccurrence()
+    private void NextOccurrence(int searchArea)
     {
-      if (foundResults.Count == 0)
+      if (foundResults.Count > 0)
       {
-        return;
+        currentIndex++;
+        textMarkerService.RemoveAll();
+        if (currentIndex >= foundResults.Count)
+        {
+          // Если мы дошли до конца текущего документа, переходим на следующий
+          int index = -1;
+          if (searchArea == 1)
+          {
+            index = SwitchToNextDocument();
+            if (index > -1)
+            {
+              FindAllOccurrences(_fullText.Values.ElementAt(index), _searchText, _wholeWord, _caseWord, searchArea);
+            }
+            if (index == -1)
+            {
+              MessageBox.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен");
+              return;
+            }
+          }
+          // foundResults переопределять
+          currentIndex = 0;
+        }
+
+        GoToOccurrence(currentIndex);
       }
-      textMarkerService.RemoveAll();
-      currentIndex = (currentIndex + 1) % foundResults.Count;
-      GoToOccurrence(currentIndex);
     }
+
+    private int SwitchToNextDocument()
+    {
+      int currentIndex = openPages.FindIndex(p => p.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      var nextIndex = currentIndex + 1;
+
+      if (currentIndex >= 0 && currentIndex < openPages.Count - 1)
+      {
+        var nextPage = openPages[nextIndex];
+        while (!(userControls[nextIndex] is TextEditorUI))
+        {
+          nextIndex++;
+          nextPage = openPages[nextIndex];
+        }
+        _textEditor++;
+        Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+        ShowControl(userControls[nextIndex], nextPage);
+        return _textEditor;
+      }
+      if (nextIndex > openPages.Count)
+      {
+        var nextPage = openPages[0];
+        ShowControl(userControls[0], nextPage);
+        return 0;
+      }
+      return -1;
+    }
+
+
 
     /// <summary>
     /// Переход к предыдущему вхождению.
     /// </summary>
-    private void PreviousOccurrence()
+    private void PreviousOccurrence(int searchArea)
     {
       if (foundResults.Count == 0) return;
 
       textMarkerService.RemoveAll();
       currentIndex = (currentIndex - 1 + foundResults.Count) % foundResults.Count;
+      if (currentIndex >= foundResults.Count)
+      {
+        // Если мы дошли до конца текущего документа, переходим на следующий
+        if (searchArea == 1)
+        {
+          SwitchToNextDocument();
+        }
+        currentIndex = 0;
+      }
       GoToOccurrence(currentIndex);
     }
 
     /// <summary>
-    /// Переход к определееному вхождению.
+    /// Переход к определенному вхождению.
     /// </summary>
     private void GoToOccurrence(int index)
     {
@@ -685,7 +867,7 @@ namespace UI.Components
     public void OnSearchWindowClosing()
     {
       ClearHighlights();
-      _fullText = string.Empty;
+      _fullText = new Dictionary<string, string>();
       _searchText = string.Empty;
       _wholeWord = false;
       _caseWord = false;
@@ -693,6 +875,7 @@ namespace UI.Components
       _searchParameters = string.Empty;
       hasChanged = true;
     }
+
 
     #endregion
   }

@@ -85,19 +85,28 @@ namespace MainWindowProgram
         searchMenuItem.Visibility = Visibility.Visible;
         compareMenuItem.Visibility = Visibility.Visible;
       }
+      else
+      {
+        HideTextEditorActions();
+      }
     }
 
     private void OnTextEditorClosing(bool isTextEditor)
     {
       if (isTextEditor)
       {
-        fileActionsSeparator.Visibility = Visibility.Collapsed;
-        saveMenuItem.Visibility = Visibility.Collapsed;
-        saveAsMenuItem.Visibility = Visibility.Collapsed;
-        printMenuItem.Visibility = Visibility.Collapsed;
-        searchMenuItem.Visibility = Visibility.Collapsed;
-        compareMenuItem.Visibility = Visibility.Collapsed;
+        HideTextEditorActions();
       }
+    }
+
+    private void HideTextEditorActions()
+    {
+      fileActionsSeparator.Visibility = Visibility.Collapsed;
+      saveMenuItem.Visibility = Visibility.Collapsed;
+      saveAsMenuItem.Visibility = Visibility.Collapsed;
+      printMenuItem.Visibility = Visibility.Collapsed;
+      searchMenuItem.Visibility = Visibility.Collapsed;
+      compareMenuItem.Visibility = Visibility.Collapsed;
     }
 
     private void OnSearchWindowClosing(bool isOpen)

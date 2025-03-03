@@ -85,6 +85,5 @@ namespace UI.Components.Invoke
         }
       });
     }
-
   }
 }

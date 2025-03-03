@@ -30,15 +30,15 @@ namespace UI.Controls.Search
     private bool IsLoaded;
     public event Action<string, bool?, bool?, int, string> SearchText;
     public event Action ClearHighlights;
+    public event Action SelectFileForSearch;
 
     public SearchWindow()
     {
       InitializeComponent();
       this.Loaded += Window_Loaded;
-      DefaultGotAndLostEvent(SearchTextBox, SearchTextBox.Tag.ToString());
-      DefaultGotAndLostEvent(ReplaceTextBox, ReplaceTextBox.Tag.ToString());
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
       EventAggregator.TextEditorClosing += OnSearchWindowClosing;
+      EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -321,6 +321,54 @@ namespace UI.Controls.Search
       if (isOpen)
       {
         CloseDialog();
+      }
+    }
+
+    private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+      SearchPlaceholder.Visibility = Visibility.Collapsed;
+    }
+
+    private void SearchTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+      if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
+      {
+        SearchPlaceholder.Visibility = Visibility.Visible;
+      }
+    }
+
+    private void ReplaceTextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+      ReplcePlaceholder.Visibility = Visibility.Collapsed;
+    }
+
+    private void ReplaceTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+      if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
+      {
+        ReplcePlaceholder.Visibility = Visibility.Visible;
+      }
+    }
+
+    private void PART_EditableTextBox_SelectionChanged(object sender, RoutedEventArgs e)
+    {
+      var selected = searchAreaParameters.SelectedValue as ComboBoxItem;
+      if (selected.Tag.ToString() == "FindInFile")
+      {
+        SelectFileForSearch?.Invoke();
+      }
+    }
+
+    private void OnActiveEditorChanged(bool isTextEditor)
+    {
+      if (isTextEditor)
+      {
+        this.Visibility = Visibility.Visible;
+        this.Activate();
+      }
+      else
+      {
+        this.Visibility = Visibility.Hidden;
       }
     }
   }

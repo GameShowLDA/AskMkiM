@@ -105,6 +105,12 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    private void CloseEditor_Click(object sender, RoutedEventArgs e)
+    {
+      var parent = this.Parent as Panel;
+      parent?.Children.Remove(this); // Удаляем себя из StackPanel
+    }
+
     public string Text { get { return textEditor.Text; } set { textEditor.Text = value; } }
   }
 }
