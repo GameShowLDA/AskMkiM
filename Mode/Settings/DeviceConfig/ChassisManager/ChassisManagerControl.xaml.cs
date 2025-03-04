@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppConfig.DataBase.Models;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace Mode.Settings.DeviceConfig.ChassisManager
 {
@@ -12,7 +13,8 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
   /// </summary>
   public partial class ChassisManagerControl : UserControl
   {
-    public ObservableCollection<ChassisManagerEntity> Systems { get; set; } = new();
+    public ObservableCollection<ChassisManagerEntity> SystemsChassis { get; set; } = new();
+    public ObservableCollection<RackEntity> SystemsRack { get; set; } = new();
 
     /// <summary>
     /// Выбранная система.
@@ -26,16 +28,34 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     public static readonly DependencyProperty SelectedSystemProperty =
         DependencyProperty.Register(nameof(SelectedSystem), typeof(ChassisManagerEntity), typeof(ChassisManagerControl), new PropertyMetadata(null));
 
+
+    /// <summary>
+    /// Выбранная система.
+    /// </summary>
+    public RackEntity SelectedRack
+    {
+      get { return (RackEntity)GetValue(SelectedRackProperty); }
+      set { SetValue(SelectedRackProperty, value); }
+    }
+
+    public static readonly DependencyProperty SelectedRackProperty =
+       DependencyProperty.Register(nameof(SelectedRack), typeof(RackEntity), typeof(ChassisManagerControl), new PropertyMetadata(null));
+
+
     /// <summary>
     /// Событие, вызываемое при выборе системы.
     /// </summary>
     public event EventHandler<ChassisManagerEntity> SystemSelected;
+    public event EventHandler<RackEntity> RackSelected;
+
     public event EventHandler NewSystem;
+    public event EventHandler NewRack;
 
     public ChassisManagerControl()
     {
       InitializeComponent();
       DataContext = this;
+      addRackButton.Visibility = Visibility.Collapsed;
     }
 
     /// <summary>
@@ -47,18 +67,23 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       if (chassisManager == null)
         return;
 
-      Systems.Add(chassisManager);
+      SystemsChassis.Add(chassisManager);
+      addChassisButton.Visibility = Visibility.Collapsed;
+      addRackButton.Visibility = Visibility.Visible;
+    }
 
-      if (FindName("systemPanel") is StackPanel panel)
-      {
-        Button systemButton = new Button
-        {
-          Content = $"Имя: {chassisManager.Name}, Номер: {chassisManager.Number}",
-          DataContext = chassisManager
-        };
-        systemButton.Click += OnSystemSelected;
-        panel.Children.Add(systemButton);
-      }
+    /// <summary>
+    /// Добавляет систему в список для отображения.
+    /// </summary>
+    /// <param name="chassisManager">Экземпляр ChassisManagerEntity</param>
+    public void AddRack(RackEntity rack)
+    {
+      if (rack == null)
+        return;
+
+      SystemsRack.Add(rack);
+      addChassisButton.Visibility = Visibility.Collapsed;
+      addRackButton.Visibility = Visibility.Visible;
     }
 
 
@@ -75,22 +100,40 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       }
     }
 
+    /// <summary>
+    /// Вызывается при нажатии кнопки.
+    /// Устанавливает выбранную систему и вызывает событие.
+    /// </summary>
+    private void OnRackSelected(object sender, RoutedEventArgs e)
+    {
+      if (sender is Button button && button.DataContext is RackEntity system)
+      {
+        SelectedRack = system;
+        RackSelected?.Invoke(this, system);
+      }
+    }
+
     private void addChassisButton_MouseEnter(object sender, MouseEventArgs e)
     {
-      addChassisButton.Background = (Brush)Application.Current.Resources["IsCheckedColorSolidColorBrush"];
-      addChassisButton.Cursor = Cursors.Hand;
+      (sender as Border).Background = (Brush)Application.Current.Resources["IsCheckedColorSolidColorBrush"];
+      (sender as Border).Cursor = Cursors.Hand;
     }
 
     private void addChassisButton_MouseLeave(object sender, MouseEventArgs e)
     {
-      addChassisButton.Background = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
-      addChassisButton.Cursor = Cursors.Wait;
+      (sender as Border).Background = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+      (sender as Border).Cursor = Cursors.Wait;
     }
 
     private void addChassisButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       NewSystem?.Invoke(this, e);
+      addChassisButton.Visibility = Visibility.Collapsed;
+    }
 
+    private void addRackButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      NewRack?.Invoke(this, e);
     }
   }
 }

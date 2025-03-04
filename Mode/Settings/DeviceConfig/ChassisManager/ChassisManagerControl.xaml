@@ -6,43 +6,99 @@
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig.ChassisManager"
              xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="300">
+             d:DesignHeight="450" d:DesignWidth="300" Background="{StaticResource SecondarySolidColorBrush}">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Background="{StaticResource ActiveForegroundSolidColorBrush}" x:Name="addChassisButton"
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <Border Background="{StaticResource ActiveForegroundSolidColorBrush}" x:Name="addChassisButton"
                 MouseEnter="addChassisButton_MouseEnter"
                 MouseLeave="addChassisButton_MouseLeave"
                 PreviewMouseDown="addChassisButton_PreviewMouseDown"
                 >
 
-            <CustomControls:PlusButtonControl 
+                <CustomControls:PlusButtonControl 
                  Grid.Column="1" 
                  Height="40" 
                  Width="40" 
                  Padding="5"
                  FontSize="4" 
                 />
-        </Border>
+            </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
-            <ItemsControl ItemsSource="{Binding Systems}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnSystemSelected">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
-                            </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
+                <ItemsControl ItemsSource="{Binding SystemsChassis}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnSystemSelected">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <Separator Grid.Row="1" Margin="5,10">
+            <Separator.Style>
+                <Style TargetType="Separator">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="BorderBrush" Value="White"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style>
+            </Separator.Style>
+        </Separator>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Background="{StaticResource ActiveForegroundSolidColorBrush}" x:Name="addRackButton"
+                MouseEnter="addChassisButton_MouseEnter"
+                MouseLeave="addChassisButton_MouseLeave"
+                PreviewMouseDown="addRackButton_PreviewMouseDown"
+                >
+
+                <CustomControls:PlusButtonControl 
+                     Grid.Column="1" 
+                     Height="40" 
+                     Width="40" 
+                     Padding="5"
+                     FontSize="4" 
+                    />
+            </Border>
+
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
+                <ItemsControl ItemsSource="{Binding SystemsRack}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnRackSelected">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>
     

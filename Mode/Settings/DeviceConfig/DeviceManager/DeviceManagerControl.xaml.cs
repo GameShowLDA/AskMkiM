@@ -10,6 +10,9 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
   /// </summary>
   public partial class DeviceManagerControl : UserControl
   {
+    public event EventHandler AddBreakdownEvent;
+    public event EventHandler ExitEvent;
+    public event EventHandler DeviceBusCommutationSelected;
     public DeviceManagerControl()
     {
       InitializeComponent();
@@ -26,7 +29,7 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
 
     private void addDeviceBusCommutationButton_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-
+      DeviceBusCommutationSelected?.Invoke(sender, e);
     }
 
     private void addModuleRelayButton_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -51,7 +54,12 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
 
     private void addBrakedownButton_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+      AddBreakdownEvent?.Invoke(this, EventArgs.Empty);
+    }
 
+    private void Exit_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      ExitEvent?.Invoke(this, EventArgs.Empty);
     }
   }
 }

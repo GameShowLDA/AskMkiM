@@ -16,5 +16,7 @@ namespace NewCore.Interface
     /// Количество точек модуля.
     /// </summary>
     public int PointCount { get; set; }
+
+    public int NumberRack { get; set; }
   }
 }

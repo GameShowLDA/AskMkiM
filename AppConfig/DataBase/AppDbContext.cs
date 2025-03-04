@@ -44,6 +44,8 @@ namespace AppConfig.DataBase
     /// </summary>
     public DbSet<BreakdownTesterEntity> BreakdownTesters { get; set; }
 
+    public DbSet<RackEntity> Rack { get; set; }
+
     /// <summary>
     /// Конфигурация базы данных
     /// </summary>
@@ -64,7 +66,6 @@ namespace AppConfig.DataBase
     /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      //modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
       modelBuilder.ApplyConfiguration(new ChassisManagerConfiguration());
       modelBuilder.ApplyConfiguration(new RelaySwitchModuleConfiguration());
       modelBuilder.ApplyConfiguration(new PowerSourceModuleConfiguration());
@@ -72,6 +73,7 @@ namespace AppConfig.DataBase
       modelBuilder.ApplyConfiguration(new BreakdownTesterConfiguration());
       modelBuilder.ApplyConfiguration(new FastMeterConfiguration());
       modelBuilder.ApplyConfiguration(new PrecisionMeterConfiguration());
+      modelBuilder.ApplyConfiguration(new RackConfiguration());
 
       base.OnModelCreating(modelBuilder);
     }

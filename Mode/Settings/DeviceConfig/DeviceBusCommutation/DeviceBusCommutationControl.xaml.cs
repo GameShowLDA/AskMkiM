@@ -12,17 +12,25 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NewCore.Interface;
 
 namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
 {
-    /// <summary>
-    /// Логика взаимодействия для DeviceBusCommutationControl.xaml
-    /// </summary>
-    public partial class DeviceBusCommutationControl : UserControl
+  /// <summary>
+  /// Логика взаимодействия для DeviceBusCommutationControl.xaml
+  /// </summary>
+  public partial class DeviceBusCommutationControl : UserControl
+  {
+    public DeviceBusCommutationControl()
     {
-        public DeviceBusCommutationControl()
-        {
-            InitializeComponent();
-        }
+      InitializeComponent();
+      InitializeSettings();
     }
+
+    private void InitializeSettings()
+    {
+      DefaultSettingControl.IsIpPart3Enabled = false;
+      DefaultSettingControl.LoadDeviceModels<ISwitchingDevice>();
+    }
+  }
 }

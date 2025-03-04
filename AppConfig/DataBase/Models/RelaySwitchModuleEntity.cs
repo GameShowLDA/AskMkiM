@@ -15,6 +15,11 @@ namespace AppConfig.DataBase.Models
     public int NumberChassis { get; set; }
 
     /// <summary>
+    /// Номер менеджера шасси, к которому подключен модуль.
+    /// </summary>
+    public int NumberRack { get; set; }
+
+    /// <summary>
     /// Количество точек коммутации в модуле.
     /// </summary>
     public int PointCount { get; set; }

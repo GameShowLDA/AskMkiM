@@ -2,6 +2,7 @@
 using AppConfig.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppConfig.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250213144827_RackCreateTable")]
+    partial class RackCreateTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
@@ -177,9 +180,6 @@ namespace AppConfig.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Number")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

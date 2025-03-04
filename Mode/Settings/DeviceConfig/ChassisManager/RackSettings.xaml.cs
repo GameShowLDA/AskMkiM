@@ -1,12 +1,23 @@
-﻿using System.IO.Ports;
-using System.Management;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.Ports;
+using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Services;
+using Microsoft.IdentityModel.Tokens;
 using Mode.Settings.DeviceConfig.Base;
 using NewCore.Base;
 using NewCore.Device;
@@ -15,9 +26,9 @@ using NewCore.Interface;
 namespace Mode.Settings.DeviceConfig.ChassisManager
 {
   /// <summary>
-  /// Представляет элемент управления для настройки устройств ChassisManager.
+  /// Логика взаимодействия для RackSettings.xaml
   /// </summary>
-  public partial class ChassisManagerSettings : UserControl, IDataProcessor
+  public partial class RackSettings : UserControl, IDataProcessor
   {
     /// <summary>
     /// Событие, вызываемое при запросе на закрытие окна настроек.
@@ -29,45 +40,79 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// Событие, вызываемое при запросе на сохранение настроек.
     /// Может использоваться для обработки логики отмены или сохранения данных перед закрытием.
     /// </summary>
-    public event EventHandler<ChassisManagerEntity> RequestSave;
+    public event EventHandler<RackEntity> RequestSave;
 
-    /// <summary>
-    /// Конструктор класса ChassisManagerSettings. 
-    /// Инициализирует элементы управления и загружает модели устройств.
-    /// </summary>
-    public ChassisManagerSettings()
+    private ComboBox _chassisBox;
+
+    public RackSettings()
     {
       InitializeComponent();
       LoadDeviceModels();
+      DefaultSettingControl.IsIpPart3Enabled = true;
+      DefaultSettingControl.IpPart4Content = 0;
+      DefaultSettingControl.IsRackNumberEnabled = false;
+      DefaultSettingControl.LoadDeviceModels<IRack>();
+
       DefaultSettingControl.RequestClose += (s, a) => RequestClose?.Invoke(s, a);
       DefaultSettingControl.RequestSave += DefaultSettingControl_RequestSave;
-      DefaultSettingControl.IsChassisNumberEnabled = false;
-      DefaultSettingControl.LoadDeviceModels<IChassisManager>();
-
     }
 
     private void DefaultSettingControl_RequestSave(object? sender, EventArgs e)
     {
       if (DefaultSettingControl.DeviceModelSelectionBox.SelectedItem is string selectedModel)
       {
-        BaseHandler<IChassisManager>.ProcessDeviceData(selectedModel, DefaultSettingControl.DeviceModelMap, this);
+        BaseHandler<IRack>.ProcessDeviceData(selectedModel, DefaultSettingControl.DeviceModelMap, this);
       }
     }
 
     /// <summary>
-    /// Загружает модели устройств, реализующие IChassisManager, в ComboBox, 
+    /// Загружает модели устройств, реализующие IRack, в ComboBox, 
     /// используя свойство Name вместо названия класса.
     /// </summary>
     private void LoadDeviceModels()
     {
-      var models = ReflectionHelper.GetAllImplementations<IChassisManager>();
+      var models = ReflectionHelper.GetAllImplementations<IRack>();
 
       DefaultSettingControl.DeviceModelMap = models
-          .Select(t => Activator.CreateInstance(t) as IChassisManager)
+          .Select(t => Activator.CreateInstance(t) as IRack)
           .Where(instance => instance != null)
           .ToDictionary(instance => instance.Name, instance => instance.GetType());
 
       DefaultSettingControl.DeviceModelSelectionBox.ItemsSource = DefaultSettingControl.DeviceModelMap.Keys;
+
+      var data = new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      DefaultSettingControl.ChassisModelsComboBox.ItemsSource = data.Select(d => d.Number).ToList();
+    }
+
+    /// <summary>
+    /// Поиск элемента по Tag внутри UserControl
+    /// </summary>
+    private T FindControl<T>(DependencyObject parent, string tag) where T : FrameworkElement
+    {
+      if (parent == null)
+      {
+        Console.WriteLine("⚠️ FindControl: Parent == null!");
+        return null;
+      }
+
+      int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+      Console.WriteLine($"🔍 FindControl: Проверяю {parent.GetType().Name}, Количество детей: {childrenCount}");
+
+      for (int i = 0; i < childrenCount; i++)
+      {
+        var child = VisualTreeHelper.GetChild(parent, i);
+
+        if (child is T control && control.Tag?.ToString() == tag)
+        {
+          Console.WriteLine($"✅ Найден {typeof(T).Name} с Tag={tag}");
+          return control;
+        }
+
+        var result = FindControl<T>(child, tag);
+        if (result != null) return result;
+      }
+
+      return null;
     }
 
     public bool HandleData(object instance)
@@ -78,15 +123,12 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         {
           try
           {
-            var data = instance as IChassisManager;
+            var data = instance as IRack;
             if (data == null)
             {
-              MessageBox.Show($"Класс {selectedType.Name} не реализует IChassisManager.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              MessageBox.Show($"Класс {selectedType.Name} не реализует IRack.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
               return false;
             }
-
-            var connectionDetails = BaseHandler<IChassisManager>.GetConnectionDetails(DefaultSettingControl, instance);
-            data.ConnectionDetails = connectionDetails;
 
             if (int.TryParse(DefaultSettingControl.DeviceNumberInput.Text, out int number))
             {
@@ -96,7 +138,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
             {
               throw new Exception("Реализовать подсветку ошибки для номера устройства");
             }
-
 
             if (instance is DeviceWithIP deviceWithIP)
             {
@@ -114,14 +155,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
             {
               if (!string.IsNullOrEmpty(DefaultSettingControl.COMPortSelectionBox.Text))
               {
-                deviceWithCOM.COMPort = new SerialPort(DefaultSettingControl.COMPortSelectionBox.Text)
-                {
-                  BaudRate = 9600,
-                  Parity = Parity.None,
-                  DataBits = 8,
-                  StopBits = StopBits.One
-                };
-                data.ConnectionDetails = deviceWithCOM.COMPort.PortName;
+                data.ConnectionDetails = BaseHandler<IRack>.GetConnectionDetails(DefaultSettingControl, instance);
               }
               else
               {
@@ -134,15 +168,28 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
               return false;
             }
 
-            var chassisEntity = new ChassisManagerEntity
+            int numberChassis;
+
+            if (!string.IsNullOrEmpty(_chassisBox.SelectedItem.ToString()))
+            {
+              numberChassis = int.Parse(_chassisBox.SelectedItem.ToString());
+            }
+            else
+            {
+              MessageBox.Show("Выбранный тестер не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              return false;
+            }
+
+            var chassisEntity = new RackEntity
             {
               Name = data.Name,
               Description = data.Description,
               Number = data.Number,
               ConnectionDetails = data.ConnectionDetails,
+              NumberChassis = numberChassis
             };
 
-            new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create(chassisEntity);
+            new RackRepository(AppConfig.Config.SystemStateManager.Context).Create(chassisEntity);
             RequestSave?.Invoke(this, chassisEntity);
             return true;
 
@@ -157,4 +204,5 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       return false;
     }
   }
+
 }

@@ -42,6 +42,13 @@ namespace TestWPF
       {
         Test.AddSystem(item);
       }
+
+      var Racks = new RackRepository(dbContext).GetAll();
+      foreach (var item in Racks)
+      { 
+        Test.AddRack(item);
+      }
+
       // TestDataSeeder.GenerateTestDataAndSaveToDB();
     }
 

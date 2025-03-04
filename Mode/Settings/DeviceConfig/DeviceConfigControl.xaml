@@ -5,19 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig"
              xmlns:Chassis="clr-namespace:Mode.Settings.DeviceConfig.ChassisManager"
+             xmlns:Test ="clr-namespace:Mode.Settings.DeviceConfig.Base.BaseSettings"
              mc:Ignorable="d"
              MinWidth="800" MinHeight="600">
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="0" x:Name="Column3"/>
+            <ColumnDefinition Width="Auto" x:Name="Column1"/>
+            <ColumnDefinition Width="*" x:Name="Column2"/>
+            <ColumnDefinition Width="Auto" x:Name="Column3"/>
         </Grid.ColumnDefinitions>
 
         <Chassis:ChassisManagerControl x:Name="chassisManager" Grid.Column="0"/>
-        <Border Grid.Column="1" Background="{StaticResource PrimarySolidColorBrush}" Name="deviceBorder"/>
-        <Border Grid.Column="2" Background="{StaticResource PrimarySolidColorBrush}" Name="settingsBorder" Visibility="Collapsed"/>
+        
+        <Border Grid.Column="1" 
+            Name="deviceBorder"
+            >
+        </Border>
+
+        <Border Grid.Column="2" Name="settingsBorder" Visibility="Collapsed"/>
         
     </Grid>
 </UserControl>

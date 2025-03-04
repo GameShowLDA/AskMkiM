@@ -1,8 +1,10 @@
-﻿using System.Windows;
+﻿using System.Drawing;
+using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceManager;
+using NewCore.Base;
 using NewCore.Interface;
 using static AppConfig.Config.SystemStateManager;
 
@@ -16,9 +18,12 @@ namespace Mode.Settings.DeviceConfig
     public DeviceConfigControl()
     {
       InitializeComponent();
-      chassisManager.SystemSelected += (sender, system) => SelectedChassis(system);
       chassisManager.NewSystem += (sender, system) => NewSystem();
+      chassisManager.NewRack += ChassisManager_NewRack;
+      chassisManager.SystemSelected += (sender, system) => SelectedChassis(system);
     }
+
+
 
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
     {
@@ -27,6 +32,7 @@ namespace Mode.Settings.DeviceConfig
     private void SelectedChassis(ChassisManagerEntity system)
     {
       var devices = new DeviceManagerControl();
+
       LoadBreakdownTesters(system, devices);
       LoadFastMeters(system, devices);
       LoadPrecisionMeters(system, devices);
@@ -34,17 +40,59 @@ namespace Mode.Settings.DeviceConfig
       LoadRelaySwitchModules(system, devices);
       LoadSwitchingDevices(system, devices);
       deviceBorder.Child = devices;
+
+      devices.AddBreakdownEvent += Devices_AddBreakdownEvent;
+      devices.DeviceBusCommutationSelected += Devices_DeviceBusCommutationSelected;
+      devices.ExitEvent += Devices_ExitEvent; ;
+    }
+
+    private void Devices_DeviceBusCommutationSelected(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(true);
+      var dbcControl = new DeviceBusCommutation.DeviceBusCommutationControl();
+      settingsBorder.Child = dbcControl;
+    }
+
+    private void Devices_ExitEvent(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      deviceBorder.Child = null;
+      settingsBorder.Child = null;
+    }
+
+    private void Devices_AddBreakdownEvent(object? sender, EventArgs e)
+    {
+      // ToggleThirdColumn(true);
+      // var breakDownControl = new BreakdownTester.BreakdownTesterSettings();
+      // settingsBorder.Child = breakDownControl;
+      // breakDownControl.ClosedEvent += BreakDownControl_ClosedEvent;
+      // breakDownControl.DeviceSaved += BreakDownControl_DeviceSaved;
+    }
+
+    private void BreakDownControl_DeviceSaved(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      settingsBorder.Child = null;
+      MessageBox.Show("Пробойная установка добавлена в конфигурацию!");
+    }
+
+    private void BreakDownControl_ClosedEvent(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      settingsBorder.Child = null;
     }
 
     public void ToggleThirdColumn(bool isVisible)
     {
       if (isVisible)
       {
+        Column1.Width = new GridLength(0);
         Column3.Width = new GridLength(1, GridUnitType.Star);
         settingsBorder.Visibility = Visibility.Visible;
       }
       else
       {
+        Column1.Width = new GridLength(1, GridUnitType.Auto);
         Column3.Width = new GridLength(0);
         settingsBorder.Visibility = Visibility.Collapsed;
       }
@@ -150,13 +198,57 @@ namespace Mode.Settings.DeviceConfig
       chassisManager.AddSystem(data);
     }
 
+    public void AddRack(RackEntity data)
+    { 
+      chassisManager.AddRack(data);
+    }
+
     private void NewSystem()
     {
-      var setting = new ChassisManagerSettings();
+      var setting = new ChassisManagerSettings
+      {
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        VerticalAlignment = VerticalAlignment.Stretch,
+        Margin = new Thickness(0),
+        Width = Double.NaN,    // Автоматическая ширина
+        Height = Double.NaN    // Автоматическая высота
+      };
       setting.RequestClose += Setting_RequestClose;
-      setting.DeviceSaved += ChassisManagerSettings_DeviceSaved;
+      setting.RequestSave += ChassisManagerSettings_DeviceSaved;
+
       deviceBorder.Child = setting;
+      deviceBorder.UpdateLayout();
+      setting.UpdateLayout();
       chassisManager.Visibility = Visibility.Collapsed;
+      settingsBorder.Visibility = Visibility.Collapsed;
+    }
+
+    private void ChassisManager_NewRack(object? sender, EventArgs e)
+    {
+      var setting = new RackSettings
+      {
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        VerticalAlignment = VerticalAlignment.Stretch,
+        Margin = new Thickness(0),
+        Width = Double.NaN,    // Автоматическая ширина
+        Height = Double.NaN,    // Автоматическая высота
+      };
+
+      setting.RequestClose += Setting_RequestClose;
+      setting.RequestSave += Setting_RequestSave; ;
+
+      deviceBorder.Child = setting;
+      deviceBorder.UpdateLayout();
+      setting.UpdateLayout();
+      chassisManager.Visibility = Visibility.Collapsed;
+      settingsBorder.Visibility = Visibility.Collapsed;
+    }
+
+    private void Setting_RequestSave(object? sender, RackEntity device)
+    {
+      deviceBorder.Child = null;
+      chassisManager.Visibility = Visibility.Visible;
+      chassisManager.AddRack(device);
     }
 
     private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
