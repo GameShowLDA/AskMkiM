@@ -65,6 +65,7 @@ namespace UI.Components
       };
 
       this.KeyDown += MultiWindowControl_KeyDown;
+      EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
     }
 
     private void InitializeTextMarkerService()
@@ -598,7 +599,10 @@ namespace UI.Components
         MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
-      var resultsWindow = new SearchResultsWindow();
+      var resultsWindow = new SearchResultsWindow
+      {
+        Owner = Application.Current.MainWindow,
+      };
       resultsWindow.ShowResults(results);
       resultsWindow.Show();
     }
@@ -876,6 +880,34 @@ namespace UI.Components
       hasChanged = true;
     }
 
+    private void OnFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
+    {
+      var foundPage = openPages.FirstOrDefault(page => page.Text == fileName);
+      if (foundPage != null)
+      {
+        textMarkerService.RemoveAll();
+        int pageIndex = openPages.IndexOf(foundPage);
+        if (userControls[pageIndex] is TextEditorUI textEditor)
+        {
+          ShowControl(textEditor, foundPage);
+          textEditor.ScrollToLine(lineNumber);
+          Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+              int startOffset = textEditor.Document.GetOffset(lineNumber, 1);
+              HighlightText(startOffset, lineLength);
+              Window mainWindow = Application.Current.MainWindow;
+
+              mainWindow.Topmost = true;  // Делаем главное окно поверх всех
+              mainWindow.Topmost = false; // Возвращаем обратно (чтобы не блокировало другие окна)
+
+              mainWindow.Activate();
+              mainWindow.Focus();
+              Keyboard.Focus(mainWindow);
+              textEditor.Focus();
+            }, System.Windows.Threading.DispatcherPriority.Render);
+        }
+      }
+    }
 
     #endregion
   }

@@ -129,16 +129,20 @@ namespace UI.Controls.Search
     }
     public void ShowWindow()
     {
+      if (!this.IsVisible)
+      {
+        this.Show();
+      }
       this.Activate();
       this.Focus();
-      this.Show();
     }
     public void CloseDialog()
     {
       ClearHighlights?.Invoke();
       EventAggregator.RaiseSearchWindowClosing(false);
       _allowClose = true;
-      this.Close();
+      this.Hide();
+      //this.Close();
     }
 
     private void OnCaseChanged(object sender, EventArgs e)
@@ -363,12 +367,15 @@ namespace UI.Controls.Search
     {
       if (isTextEditor)
       {
-        this.Visibility = Visibility.Visible;
-        this.Activate();
+        if (!this.IsVisible)
+        {
+          this.Show();  // Если окно скрыто, показываем его заново
+        }
+        this.Activate(); // Делаем активным
       }
       else
       {
-        this.Visibility = Visibility.Hidden;
+        this.Hide();  // Вместо Close() просто скрываем окно
       }
     }
   }

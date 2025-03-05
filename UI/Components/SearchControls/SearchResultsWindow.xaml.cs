@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using AppConfig;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace UI.Components.SearchControls
 {
@@ -20,20 +22,29 @@ namespace UI.Components.SearchControls
       {
         foreach (var occurrence in file.Value)
         {
-          var item = new SearchResultItem
+          items.Add(new SearchResultItem
           {
             FileName = file.Key,
             LineNumber = occurrence.Key,
             LineText = occurrence.Value
-          };
-
-          Console.WriteLine($"Добавлен элемент: {item.FileName} | {item.LineNumber} | {item.LineText}");
-          items.Add(item);
+          });
         }
       }
 
-      ResultsListView.ItemsSource = null;
-      ResultsListView.ItemsSource = items;
+      ResultsDataGrid.ItemsSource = items;
+    }
+
+    private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      var row = (sender as DataGrid).SelectedItem as SearchResultItem;
+      if (row != null)
+      {
+        var fileName = row.FileName;
+        var lineNumber = row.LineNumber;
+        var lineLength = row.LineText.Length;
+        
+        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, lineLength);
+      }
     }
   }
 }

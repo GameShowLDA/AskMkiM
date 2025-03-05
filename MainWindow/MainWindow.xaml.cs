@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UI.Components.SearchControls;
 using Utilities.USB;
 using static AppConfig.EventAggregator;
 using static AppConfig.SettingsFileReader;
@@ -94,6 +95,15 @@ namespace MainWindowProgram
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
       AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+    }
+
+    private void Window_Activated(object sender, EventArgs e)
+    {
+      if (Application.Current.Windows.OfType<SearchResultsWindow>().FirstOrDefault() is SearchResultsWindow resultsWindow)
+      {
+        resultsWindow.Topmost = true;
+        resultsWindow.Topmost = false; 
+      }
     }
   }
 }
