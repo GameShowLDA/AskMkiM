@@ -64,11 +64,6 @@ namespace AppConfig
     public static event Action<bool> ActiveEditorChanged;
 
     /// <summary>
-    /// Событие, которое вызывается, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
-    /// </summary>
-    public static event Action<string, int, int> FoundTextSelectRow;
-
-    /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
     /// </summary>
     static internal bool AdminRightsFlag
@@ -189,15 +184,6 @@ namespace AppConfig
     public static void RaiseActiveEditorChanged(bool isTextEditor)
     {
       ActiveEditorChanged?.Invoke(isTextEditor);
-    }
-
-    /// <summary>
-    /// Метод для вызова события, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
-    /// </summary>
-    /// <param name="isTextEditor"></param>
-    public static void RaiseFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
-    {
-      FoundTextSelectRow?.Invoke(fileName, lineNumber, lineLength);
     }
   }
 }

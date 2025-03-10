@@ -11,5 +11,10 @@ namespace UI.Components.SearchControls
     public string FileName { get; set; }
     public int LineNumber { get; set; }
     public string LineText { get; set; }
+
+    public override string ToString()
+    {
+      return $"{FileName} - {LineNumber}: {LineText}";
+    }
   }
 }
