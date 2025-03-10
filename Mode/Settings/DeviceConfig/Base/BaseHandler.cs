@@ -12,8 +12,8 @@ using static Utilities.LoggerUtility;
 using System.Management;
 using NewCore.Device;
 using Mode.Settings.DeviceConfig.Base.HandlerDevice;
-using Mode.Settings.DeviceConfig.Base.BaseSettings;
 using System.Windows.Controls;
+using Mode.Settings.DeviceConfig.DeviceBusCommutation;
 
 namespace Mode.Settings.DeviceConfig.Base
 {
@@ -137,7 +137,7 @@ namespace Mode.Settings.DeviceConfig.Base
       );
     }
 
-    static internal string GetConnectionDetails(BaseSettingsControl DefaultSettingControl, object instance)
+    static internal string GetConnectionDetails(DeviceBusCommutationWindow DefaultSettingControl, object instance)
     {
       if (instance is DeviceWithIP deviceWithIP)
       {
@@ -161,7 +161,7 @@ namespace Mode.Settings.DeviceConfig.Base
     /// <param name="DefaultSettingControl"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    static IPAddress GetIPAddress(BaseSettingsControl DefaultSettingControl)
+    static IPAddress GetIPAddress(DeviceBusCommutationWindow DefaultSettingControl)
     {
       IPAddress ipAddress = null;
 
@@ -177,7 +177,7 @@ namespace Mode.Settings.DeviceConfig.Base
       return ipAddress;
     }
 
-    static SerialPortCustom GetSerialPort(BaseSettingsControl DefaultSettingControl)
+    static SerialPortCustom GetSerialPort(DeviceBusCommutationWindow DefaultSettingControl)
     {
       string portName = DefaultSettingControl.COMPortSelectionBox.Text;
       ComboBoxItem selectedItem = DefaultSettingControl.BaudRateComboBoxControl.SelectedItem as ComboBoxItem;
