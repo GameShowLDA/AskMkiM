@@ -21,6 +21,8 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
   /// </summary>
   public partial class DeviceBusCommutationControl : UserControl
   {
+    public event EventHandler RequestSave;
+    public event EventHandler RequestClose;
     public DeviceBusCommutationControl()
     {
       InitializeComponent();
@@ -31,6 +33,18 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
     {
       DefaultSettingControl.IsIpPart3Enabled = false;
       DefaultSettingControl.LoadDeviceModels<ISwitchingDevice>();
+      DefaultSettingControl.RequestSave += DefaultSettingControl_RequestSave;
+      DefaultSettingControl.RequestClose += DefaultSettingControl_RequestClose;
+    }
+
+    private void DefaultSettingControl_RequestClose(object? sender, EventArgs e)
+    {
+      RequestClose?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void DefaultSettingControl_RequestSave(object? sender, EventArgs e)
+    {
+      RequestSave?.Invoke(this, EventArgs.Empty);
     }
   }
 }

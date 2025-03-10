@@ -18,6 +18,11 @@
     static public string DataSaveDirectory => ".\\Saves";
 
     /// <summary>
+    /// Директория для сохранения текста из консоли.
+    /// </summary>
+    static public string ConsoleSaveDirectory => ".\\Saves\\Console";
+
+    /// <summary>
     /// Путь к YAML-файлу для настроек холостого режима.
     /// </summary>
     static public string ExecutionConfigPath => ".\\Settings\\_execution_config.yaml";

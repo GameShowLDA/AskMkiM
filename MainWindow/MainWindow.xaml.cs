@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ConsoleUtilities;
 using Utilities.USB;
 using static AppConfig.EventAggregator;
 using static AppConfig.SettingsFileReader;
@@ -17,32 +17,46 @@ namespace MainWindowProgram
     MessageHandler messageHandler = new MessageHandler(infoBlock: _infoBlock);
     static private USBMonitorService usbMonitorService = new USBMonitorService(Application.Current.Dispatcher);
 
+    private readonly ConsoleManager _consoleManager;
+
     public MainWindow()
     {
       InitializeComponent();
+      _consoleManager = ConsoleManager.Instance;
       SetEvent();
 
       Task.Run(async () =>
+      {
+        try
         {
-          try
-          {
-            await StartConfigAsync();
-          }
-          catch (InvalidOperationException exception)
-          {
-            LogError($"Ошибка загрузки темы программы: {exception}");
-            return;
-          }
-          catch (Exception ex)
-          {
-            string errorDetails = GetErrorDetails(ex);
-            LogError($"Ошибка выполнения программы: {errorDetails}");
-            MessageBox.Show($"Ошибка: {errorDetails}");
-          }
-        });
+          await StartConfigAsync();
+        }
+        catch (InvalidOperationException exception)
+        {
+          LogError($"Ошибка загрузки темы программы: {exception}");
+          return;
+        }
+        catch (Exception ex)
+        {
+          string errorDetails = GetErrorDetails(ex);
+          LogError($"Ошибка выполнения программы: {errorDetails}");
+          MessageBox.Show($"Ошибка: {errorDetails}");
+        }
+      });
 
       SettingsGUI();
       SetUsbMonitoring();
+
+      this.PreviewKeyDown += OnKeyDown;
+    }
+
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3) // Ctrl + Ё
+      {
+        _consoleManager.ToggleConsole();
+        e.Handled = true;
+      }
     }
 
     private void SetEvent()
@@ -55,7 +69,7 @@ namespace MainWindowProgram
       Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
-      usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler; // Подписываемся на событие
+      usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
     }
 
     private void SettingsGUI()
@@ -68,11 +82,7 @@ namespace MainWindowProgram
 
     private string GetErrorDetails(Exception ex)
     {
-      StackTrace trace = new StackTrace(ex, true);
-      StackFrame frame = trace.GetFrame(0);
-      string fileName = frame?.GetFileName() ?? "Неизвестный файл";
-      int lineNumber = frame?.GetFileLineNumber() ?? -1;
-      return $"{ex.Message} (Файл: {fileName}, строка: {lineNumber})";
+      return $"{ex.Message}";
     }
 
     private async Task StartConfigAsync()

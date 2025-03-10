@@ -6,7 +6,7 @@ namespace AppConfig.DataBase.Models
   /// <summary>
   /// Класс, представляющий сущность менеджера шасси.
   /// </summary>
-  public class ChassisManagerEntity : IChassisManager
+  public class ChassisManagerEntity : IChassisManager, IHeadUnit
   {
     public int Id { get; set; }
     /// <summary>

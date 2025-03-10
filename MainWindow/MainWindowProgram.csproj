@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppConfig\AppConfig.csproj" />
+    <ProjectReference Include="..\ConsoleUtilities\ConsoleUtilities.csproj" />
     <ProjectReference Include="..\Mode\Mode.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
   </ItemGroup>

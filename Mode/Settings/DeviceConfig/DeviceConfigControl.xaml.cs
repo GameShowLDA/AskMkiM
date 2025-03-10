@@ -3,7 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
 using Mode.Settings.DeviceConfig.ChassisManager;
+using Mode.Settings.DeviceConfig.DeviceBusCommutation;
 using Mode.Settings.DeviceConfig.DeviceManager;
+using Mode.Settings.DeviceConfig.WindowSettings;
 using NewCore.Base;
 using NewCore.Interface;
 using static AppConfig.Config.SystemStateManager;
@@ -23,8 +25,6 @@ namespace Mode.Settings.DeviceConfig
       chassisManager.SystemSelected += (sender, system) => SelectedChassis(system);
     }
 
-
-
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
     {
       deviceBorder.Child = deviceManagerControl;
@@ -32,6 +32,7 @@ namespace Mode.Settings.DeviceConfig
     private void SelectedChassis(ChassisManagerEntity system)
     {
       var devices = new DeviceManagerControl();
+      devices.SetHeadUnit(system);
 
       LoadBreakdownTesters(system, devices);
       LoadFastMeters(system, devices);
@@ -43,14 +44,28 @@ namespace Mode.Settings.DeviceConfig
 
       devices.AddBreakdownEvent += Devices_AddBreakdownEvent;
       devices.DeviceBusCommutationSelected += Devices_DeviceBusCommutationSelected;
-      devices.ExitEvent += Devices_ExitEvent; ;
+      devices.ExitEvent += Devices_ExitEvent;
+
     }
 
-    private void Devices_DeviceBusCommutationSelected(object? sender, EventArgs e)
+    private void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e)
     {
-      ToggleThirdColumn(true);
-      var dbcControl = new DeviceBusCommutation.DeviceBusCommutationControl();
-      settingsBorder.Child = dbcControl;
+      //ToggleThirdColumn(true);
+      //var dbcControl = new DeviceBusCommutation.DeviceBusCommutationControl();
+      //settingsBorder.Child = dbcControl;
+      //dbcControl.RequestClose += DbcControl_RequestClose;
+
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
+      deviceSettingsWindow.SetSettings(sender, e);
+      deviceSettingsWindow.ShowDialog();
+      this.Effect = null;
+    }
+
+    private void DbcControl_RequestClose(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      settingsBorder.Child = null;
     }
 
     private void Devices_ExitEvent(object? sender, EventArgs e)
@@ -60,7 +75,7 @@ namespace Mode.Settings.DeviceConfig
       settingsBorder.Child = null;
     }
 
-    private void Devices_AddBreakdownEvent(object? sender, EventArgs e)
+    private void Devices_AddBreakdownEvent(object? sender, IHeadUnit e)
     {
       // ToggleThirdColumn(true);
       // var breakDownControl = new BreakdownTester.BreakdownTesterSettings();
@@ -199,7 +214,7 @@ namespace Mode.Settings.DeviceConfig
     }
 
     public void AddRack(RackEntity data)
-    { 
+    {
       chassisManager.AddRack(data);
     }
 

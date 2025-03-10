@@ -12,7 +12,7 @@ namespace AppConfig.DataBase.Models
   /// <summary>
   /// Класс, представляющий сущность стойка коммутационная.
   /// </summary>
-  public class RackEntity : IRack
+  public class RackEntity : IRack, IHeadUnit
   {
     public int Id { get; set; }
 
