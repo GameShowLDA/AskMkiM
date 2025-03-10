@@ -154,6 +154,18 @@
                         PreviewMouseDown="CI_Handler" 
                         />
 
+                </MenuItem>
+
+                <MenuItem 
+                    Header="Сервис"
+                    Name="Services"
+                    >
+
+                    <MenuItem 
+                        Header="Режим МКР" 
+                        Name="ModeMkrMenuItem"
+                        PreviewMouseDown="Mkr_Handler" 
+                    />
 
                 </MenuItem>
 

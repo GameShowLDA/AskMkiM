@@ -7,6 +7,7 @@ using static Utilities.LoggerUtility;
 using Mode.Metrology.KC;
 using Mode.Metrology.IE;
 using Mode.Metrology.CI;
+using Mode.ServicesTest.MKR;
 
 namespace MainWindowProgram
 {
@@ -141,6 +142,8 @@ namespace MainWindowProgram
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiControl(), "Режим СИ");
+
+    private async void Mkr_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MkrControl(), "Режим МКР");
 
     #endregion
 

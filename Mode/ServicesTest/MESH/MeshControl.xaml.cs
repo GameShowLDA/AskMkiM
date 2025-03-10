@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Mode.ServerTest.MESH
+namespace Mode.ServicesTest.MESH
 {
   /// <summary>
   /// Логика взаимодействия для MeshControl.xaml

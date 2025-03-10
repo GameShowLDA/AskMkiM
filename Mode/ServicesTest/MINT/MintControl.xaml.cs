@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Mode.ServerTest.MINT
+namespace Mode.ServicesTest.MINT
 {
   /// <summary>
   /// Логика взаимодействия для MintControl.xaml

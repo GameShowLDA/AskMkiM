@@ -4,9 +4,172 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mode.ServicesTest.MKR"
+             xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox;assembly=UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    <Border CornerRadius="0,0,0,0">
+        <Grid>
+            <!-- 
+                Две колонки:
+                1) Левая узкая (панель с управлением)
+                2) Правая основная, где InvokeRichTextBoxUI.
+            -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая часть (панель управления) -->
+            <StackPanel Margin="20" Grid.Column="0" VerticalAlignment="Top">
+
+                <!-- Ваш локальный ComboBox + подпись "Номер:" во внутреннем Grid -->
+                <Border Style="{StaticResource ConfigAdditionalBlockStyle}" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Номер:"
+                                   FontSize="20"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0" 
+                                   Padding="10,0,0,0"
+                                   Foreground="{StaticResource ForegroundSolidColorBrush}" />
+
+                        <ComboBox x:Name="SerialNumComboBox"
+                                  Grid.Column="1"
+                                  Margin="10"
+                                  Height="30"
+                                  Width="120"
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  ItemsSource="{Binding ComboBoxItems}"
+                                  SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}" 
+                                  SelectionChanged="SerialNumComboBox_SelectionChanged"
+                                  />
+                    </Grid>
+                </Border>
+
+                <!-- Кнопка "Сброс устройства" (пока без изменения стиля) -->
+                <Button x:Name="BtnMkrReset"
+                        Content="Сброс устройства"
+                        Width="200"
+                        Height="35"
+                        Margin="0,0,0,15"
+                        Style="{StaticResource MetrologyButtonStyle}"
+                        PreviewMouseDown="BtnMkrReset_PreviewMouseDown"
+                        IsEnabled="False"/>
+
+                <!-- Кнопка "ЗАПУСТИТЬ"/"ОСТАНОВИТЬ" —
+                     заменяем логику "Подключение измерителя"/"Отключение измерителя" -->
+                <Button x:Name="BtnConnect"
+                        Content="ЗАПУСТИТЬ"
+                        Width="200"
+                        Height="35"
+                        Margin="0,0,0,15"
+                        Style="{StaticResource MetrologyButtonStyle}"
+                        PreviewMouseDown="BtnConnect_PreviewMouseDown"
+                        IsEnabled="False" />
+
+                <!-- Группа RadioButton для шины A (по аналогии с исходным проектом) -->
+                <GroupBox Header="Шина A" Margin="0,0,0,10">
+                    <WrapPanel>
+                        <RadioButton Content="A1" GroupName="BusA" Name="A1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A2" GroupName="BusA" Name="A2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A3" GroupName="BusA" Name="A3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A4" GroupName="BusA" Name="A4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="Откл. A" GroupName="BusA" Name="offA" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                    </WrapPanel>
+                </GroupBox>
+
+                <!-- Группа RadioButton для шины B -->
+                <GroupBox Header="Шина B" Margin="0,0,0,10">
+                    <WrapPanel>
+                        <RadioButton Content="B1" GroupName="BusB" Name="B1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B2" GroupName="BusB" Name="B2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B3" GroupName="BusB" Name="B3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B4" GroupName="BusB" Name="B4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="Откл. B" GroupName="BusB" Name="offB" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                    </WrapPanel>
+                </GroupBox>
+
+                <!-- Поисковая строка и список точек (из исходного кода) -->
+                <TextBox x:Name="SearchBox"
+                         Margin="0,0,0,10"
+                         Height="30"
+                         TextChanged="SearchBox_TextChanged"
+                         IsEnabled="False"/>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              MaxHeight="250">
+                    <ItemsControl x:Name="PointsListBox"
+                                  IsEnabled="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="2">
+                                    <Button Width="80" Height="30" PreviewMouseDown="Point_PreviewMouseDown">
+                                        <Button.ContextMenu>
+                                            <ContextMenu StaysOpen="True" MouseLeave="ContextMenu_MouseLeave">
+                                                <MenuItem Header="Шина A">
+                                                    <MenuItem.Icon>
+                                                        <CheckBox IsChecked="{Binding A}" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                                <MenuItem Header="Шина B">
+                                                    <MenuItem.Icon>
+                                                        <CheckBox IsChecked="{Binding B}" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Content" Value="{Binding PointNumber}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding A}" Value="True">
+                                                        <Setter Property="Background" Value="Aqua"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding B}" Value="True">
+                                                        <Setter Property="Background" Value="Plum"/>
+                                                    </DataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding A}" Value="True"/>
+                                                            <Condition Binding="{Binding B}" Value="True"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Background" Value="DarkViolet"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Примерно так можно вставить легенду, если нужно -->
+                <!-- Или, если легенда не поместится, пока оставляем не реализованной -->
+
+            </StackPanel>
+
+            <!-- Правая часть (основное поле лога, заменяем TextBlock на InvokeRichTextBoxUI) -->
+            <Grid Grid.Column="1">
+                <InvokeConrols:InvokeRichTextBoxUI 
+                    x:Name="protocolTextBox"
+                    Margin="10"
+                    IsReadOnly="True"
+                    />
+            </Grid>
+        </Grid>
+    </Border>
 </UserControl>
