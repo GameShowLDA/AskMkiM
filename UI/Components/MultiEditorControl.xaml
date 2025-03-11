@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components"
+             xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -11,8 +12,22 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="{StaticResource SecondarySolidColorBrush}"  Orientation="Horizontal" MouseLeftButtonDown="TopPanel_MouseLeftButtonDown"/>
-        <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
+        <StackPanel x:Name="TopPanel" 
+                    Grid.Row="0" 
+                    Background="{StaticResource SecondarySolidColorBrush}"  
+                    Orientation="Horizontal" 
+                    MouseLeftButtonDown="TopPanel_MouseLeftButtonDown"/>
+        <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}">
+            <avalonEdit:TextEditor x:Name="TextEditor"
+                ShowLineNumbers="True"
+                FontSize="16"
+                Background="{StaticResource PrimarySolidColorBrush}"
+                Foreground="{StaticResource ForegroundSolidColorBrush}"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto"
+                WordWrap="False"
+                Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+        </DockPanel>
         
     </Grid>
 </UserControl>
