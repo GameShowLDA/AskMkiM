@@ -183,8 +183,8 @@ namespace MainWindowProgram
         searchWindow.SelectFileForSearch += OpenFileFromEvent;
 
         searchWindow.ShowWindow();
-        //searchWindow.ClearHighlights -= multiEditors.OnSearchWindowClosing;
-        //searchWindow.ClearHighlights += multiEditors.OnSearchWindowClosing;
+        searchWindow.ClearHighlights -= MultiWindow.OnSearchWindowClosing;
+        searchWindow.ClearHighlights += MultiWindow.OnSearchWindowClosing;
 
         _isOpen = true;
       }

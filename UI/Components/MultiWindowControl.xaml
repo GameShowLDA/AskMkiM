@@ -31,7 +31,22 @@
 
         <!-- Окно результатов поиска -->
         <Border x:Name="SearchResults" Grid.Row="3" Background="LightGray" Visibility="Collapsed">
-            <TextBlock Text="Здесь будут результаты поиска..." Margin="10"/>
+            <DataGrid x:Name="ResultsDataGrid"
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          CanUserDeleteRows="False"
+          IsReadOnly="True"
+          ClipboardCopyMode="None"
+          SelectionMode="Single"
+          HeadersVisibility="Column"
+          Background="Transparent"
+          PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Документ" Binding="{Binding FileName}" Width="200"/>
+                    <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
+                    <DataGridTextColumn Header="Текст" Binding="{Binding LineText}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
 
         <!-- Кнопка "Результаты поиска" (когда панель скрыта) -->

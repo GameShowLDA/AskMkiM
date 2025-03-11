@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppConfig;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UI.Components.SearchControls;
 using UI.Controls.Search;
 
 namespace UI.Components
@@ -149,5 +151,57 @@ namespace UI.Components
       }
       MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
+
+    public void OnSearchWindowClosing()
+    {
+      MultiEditor.OnSearchWindowClosing();
+    }
+
+    public void ShowSearchResults(Dictionary<string, Dictionary<int, string>> results)
+    {
+      List<SearchResultItem> items = new List<SearchResultItem>();
+
+      foreach (var file in results)
+      {
+        foreach (var occurrence in file.Value)
+        {
+          items.Add(new SearchResultItem
+          {
+            FileName = file.Key,
+            LineNumber = occurrence.Key,
+            LineText = occurrence.Value
+          });
+        }
+      }
+
+      ResultsDataGrid.ItemsSource = items;
+      SearchResultsRow.Height = new GridLength(200);
+      SearchResults.Visibility = Visibility.Visible;
+      ShowResultsPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      var row = (sender as DataGrid).SelectedItem as SearchResultItem;
+      if (row != null)
+      {
+        var fileName = row.FileName;
+        var lineNumber = row.LineNumber;
+        var lineLength = row.LineText.Length;
+
+        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, lineLength);
+      }
+    }
+
+    public override void OnApplyTemplate()
+    {
+      base.OnApplyTemplate();
+
+      if (MultiEditor != null)
+      {
+        MultiEditor.SearchResultsReady += ShowSearchResults;
+      }
+    }
+
   }
 }

@@ -50,6 +50,8 @@ namespace UI.Components
     private int _editorCount = 0;
     private DispatcherTimer _clickTimer;
 
+    public event Action<Dictionary<string, Dictionary<int, string>>> SearchResultsReady;
+
     public MultiEditorControl()
     {
       InitializeComponent();
@@ -592,20 +594,33 @@ namespace UI.Components
       return searchPages;
     }
 
-    private void DisplaySearchResults(Dictionary<string, Dictionary<int, string>> results)
+    //private void DisplaySearchResults(Dictionary<string, Dictionary<int, string>> results)
+    //{
+    //  if (results == null || results.Count == 0)
+    //  {
+    //    MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+    //    return;
+    //  }
+    //  var resultsWindow = new SearchResultsWindow
+    //  {
+    //    Owner = Application.Current.MainWindow,
+    //  };
+    //  resultsWindow.ShowResults(results);
+    //  resultsWindow.Show();
+    //}
+
+
+
+    public void DisplaySearchResults(Dictionary<string, Dictionary<int, string>> results)
     {
       if (results == null || results.Count == 0)
       {
         MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
-      var resultsWindow = new SearchResultsWindow
-      {
-        Owner = Application.Current.MainWindow,
-      };
-      resultsWindow.ShowResults(results);
-      resultsWindow.Show();
+      SearchResultsReady?.Invoke(results);
     }
+
 
 
     private Dictionary<string, string> GetText(int searchArea)
