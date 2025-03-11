@@ -106,7 +106,7 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 
     private void CancelButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-
+      RequestClose?.Invoke(this, e);
     }
   }
 }

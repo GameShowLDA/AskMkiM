@@ -84,14 +84,16 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
       IPAddressContainer.Visibility = Visibility.Visible;
       IpPart1.Text = "192";
       IpPart2.Text = "168";
-      IpPart3.Text = _headUnit.Number.ToString();
-      IpPart4.Text = DeviceNumberTextBox.Text;
-    }
-
-    public T GetDevice<T>() where T : class, IDevice
-    {
-      MessageBox.Show("Тест данных");
-      return default;
+      if (_headUnit == null)
+      {
+        IpPart3.Text = DeviceNumberTextBox.Text;
+        IpPart4.Text = "0";
+      }
+      else
+      {
+        IpPart3.Text = _headUnit.Number.ToString();
+        IpPart4.Text = DeviceNumberTextBox.Text;
+      }
     }
   }
 }

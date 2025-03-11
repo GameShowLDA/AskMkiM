@@ -23,7 +23,7 @@ namespace Mode.Settings.DeviceConfig.Base
   static internal class BaseHandler<T> where T : class, IDevice
   {
 
-   static private Dictionary<string, Parity> ValuePairs = new Dictionary<string, Parity>()
+   static public Dictionary<string, Parity> ValuePairs = new Dictionary<string, Parity>()
    {
      { "Чет", Parity.Even },
      { "Нечет", Parity.Odd },
@@ -32,14 +32,14 @@ namespace Mode.Settings.DeviceConfig.Base
      { "Пробел", Parity.Space }
    };
 
-    static private Dictionary<string, StopBits> StopBitsPairs = new Dictionary<string, StopBits>()
+    static public Dictionary<string, StopBits> StopBitsPairs = new Dictionary<string, StopBits>()
     {
        { "1", StopBits.One },
        { "1.5", StopBits.OnePointFive },
        { "2", StopBits.Two }
     };
 
-    private static readonly Dictionary<Type, Type> _interfaceMappings = new()
+    public static readonly Dictionary<Type, Type> _interfaceMappings = new()
     {
         { typeof(BreakdownTesterEntity), typeof(IBreakdownTester) },
         { typeof(ChassisManagerEntity), typeof(IChassisManager) },
@@ -165,9 +165,12 @@ namespace Mode.Settings.DeviceConfig.Base
     {
       IPAddress ipAddress = null;
 
-      if (int.TryParse(DefaultSettingControl.IPAddressPart3Input.Text, out int ipPart3) && int.TryParse(DefaultSettingControl.IPAddressPart4Input.Text, out int ipPart4))
+      if (DefaultSettingControl.Property.IpPart1Value != -1 && 
+        DefaultSettingControl.Property.IpPart2Value != -1 &&  
+        DefaultSettingControl.Property.IpPart3Value != -1 && 
+        DefaultSettingControl.Property.IpPart4Value != -1)
       {
-        ipAddress = IPAddress.Parse($"192.168.{ipPart3}.{ipPart4}");
+        ipAddress = IPAddress.Parse($"{DefaultSettingControl.Property.IpPart1Value}.{DefaultSettingControl.Property.IpPart2Value}.{DefaultSettingControl.Property.IpPart3Value}.{DefaultSettingControl.Property.IpPart4Value}");
       }
       else
       {
@@ -179,28 +182,18 @@ namespace Mode.Settings.DeviceConfig.Base
 
     static SerialPortCustom GetSerialPort(DeviceBusCommutationWindow DefaultSettingControl)
     {
-      string portName = DefaultSettingControl.COMPortSelectionBox.Text;
-      ComboBoxItem selectedItem = DefaultSettingControl.BaudRateComboBoxControl.SelectedItem as ComboBoxItem;
-      if (selectedItem != null && int.TryParse(selectedItem.Content.ToString(), out int baudRate))
-      {
-      }
-      else
+      string portName = DefaultSettingControl.Property.PortName;
+      int baudRate; 
+      if ((baudRate = DefaultSettingControl.Property.BaudRateValue) == -1)
       {
         throw new ArgumentException("Системная ошибка преобразования значения.");
-      } 
-
-
-      Parity parity = new Parity();
-      ValuePairs.TryGetValue(DefaultSettingControl.ParityComboBoxControl.SelectedItem.ToString(), out parity);
-
-      StopBits stopBit = new StopBits();
-      StopBitsPairs.TryGetValue(DefaultSettingControl.StopBitsComboBoxControl.SelectedItem.ToString(), out stopBit);
-
-      selectedItem = DefaultSettingControl.BaudRateComboBoxControl.SelectedItem as ComboBoxItem;
-      if (selectedItem != null && int.TryParse(selectedItem.Content.ToString(), out int dataBits))
-      {
       }
-      else
+      
+      Parity parity = DefaultSettingControl.Property.ParityValue;
+      StopBits stopBit = DefaultSettingControl.Property.StopBitsValue;
+
+      int dataBits;
+      if ((dataBits = DefaultSettingControl.Property.DataBitsValue) == -1)
       {
         throw new ArgumentException("Системная ошибка преобразования значения.");
       }

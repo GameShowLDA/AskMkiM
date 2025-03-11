@@ -20,9 +20,7 @@ namespace Mode.Settings.DeviceConfig
     public DeviceConfigControl()
     {
       InitializeComponent();
-      chassisManager.NewSystem += (sender, system) => NewSystem();
-      chassisManager.NewRack += ChassisManager_NewRack;
-      chassisManager.SystemSelected += (sender, system) => SelectedChassis(system);
+      chassisManager.NewSystem += (s, a) => NewSystem();
     }
 
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
@@ -220,22 +218,14 @@ namespace Mode.Settings.DeviceConfig
 
     private void NewSystem()
     {
-      var setting = new ChassisManagerSettings
-      {
-        HorizontalAlignment = HorizontalAlignment.Stretch,
-        VerticalAlignment = VerticalAlignment.Stretch,
-        Margin = new Thickness(0),
-        Width = Double.NaN,    // Автоматическая ширина
-        Height = Double.NaN    // Автоматическая высота
-      };
-      setting.RequestClose += Setting_RequestClose;
-      setting.RequestSave += ChassisManagerSettings_DeviceSaved;
+      ChassisManagerWindow chassisManagerWindow = new ChassisManagerWindow();
+      chassisManagerWindow.SetSettings();
+      chassisManagerWindow.RequestClose += Setting_RequestClose;
+      chassisManagerWindow.RequestSave += ChassisManagerSettings_DeviceSaved;
 
-      deviceBorder.Child = setting;
-      deviceBorder.UpdateLayout();
-      setting.UpdateLayout();
-      chassisManager.Visibility = Visibility.Collapsed;
-      settingsBorder.Visibility = Visibility.Collapsed;
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      chassisManagerWindow.ShowDialog();
+      this.Effect = null;
     }
 
     private void ChassisManager_NewRack(object? sender, EventArgs e)
@@ -268,8 +258,14 @@ namespace Mode.Settings.DeviceConfig
 
     private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
     {
+      // TODO : Добавить в список устройств
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;
+      if (device == null)
+      {
+        return;
+      }
+
       chassisManager.AddSystem(device);
     }
 

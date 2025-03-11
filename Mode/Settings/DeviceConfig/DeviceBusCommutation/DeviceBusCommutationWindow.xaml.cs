@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Interface;
 
 namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
@@ -25,6 +26,8 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
       InitializeComponent();
     }
 
+    public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
+
     public void SetSettings(object? sender, IHeadUnit e)
     {
       deviceSettingsWindow.NameDevice = "Устройство коммутации шин";
@@ -32,7 +35,6 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
       deviceSettingsWindow.SetHeadUnit(e);
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
-        deviceSettingsWindow.GetDevice<ISwitchingDevice>();
         this.Close();
       };
     }

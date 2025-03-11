@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig"
              xmlns:Chassis="clr-namespace:Mode.Settings.DeviceConfig.ChassisManager"
-             xmlns:Test ="clr-namespace:Mode.Settings.DeviceConfig.Base.BaseSettings"
              mc:Ignorable="d"
              MinWidth="800" MinHeight="600">
 
@@ -16,7 +15,9 @@
             <ColumnDefinition Width="Auto" x:Name="Column3"/>
         </Grid.ColumnDefinitions>
 
-        <Chassis:ChassisManagerControl x:Name="chassisManager" Grid.Column="0"/>
+
+        <Chassis:ChassisManagerControl x:Name="chassisManager"/>
+        
         
         <Border Grid.Column="1" 
             Name="deviceBorder"
@@ -24,6 +25,6 @@
         </Border>
 
         <Border Grid.Column="2" Name="settingsBorder" Visibility="Collapsed"/>
-        
+
     </Grid>
 </UserControl>

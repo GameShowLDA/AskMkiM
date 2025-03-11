@@ -128,7 +128,6 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     private void addChassisButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       NewSystem?.Invoke(this, e);
-      addChassisButton.Visibility = Visibility.Collapsed;
     }
 
     private void addRackButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
