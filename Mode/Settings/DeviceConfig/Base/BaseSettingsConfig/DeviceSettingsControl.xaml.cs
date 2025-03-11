@@ -79,6 +79,15 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
       };
     }
 
+    public Type GetBaseDeviceType()
+    {
+      if (DeviceModelSelectionBox.SelectedItem is not string selectedModel ||
+            !DeviceModelMap.TryGetValue(selectedModel, out Type selectedType))
+        return null;
+
+      return GetBaseDeviceType(selectedType);
+    }
+
     private void ShowIP()
     {
       IPAddressContainer.Visibility = Visibility.Visible;
@@ -94,6 +103,20 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
         IpPart3.Text = _headUnit.Number.ToString();
         IpPart4.Text = DeviceNumberTextBox.Text;
       }
+    }
+
+    /// <summary>
+    /// Создаёт и возвращает экземпляр выбранного пользователем устройства.
+    /// </summary>
+    /// <returns>Экземпляр конкретного класса устройства, выбранного в DeviceModelSelectionBox.</returns>
+    public object CreateSelectedDeviceInstance()
+    {
+      if (DeviceModelSelectionBox.SelectedItem == null)
+        throw new InvalidOperationException("Не выбрана модель устройства!");
+
+      Type selectedType = DeviceModelMap[DeviceModelSelectionBox.SelectedItem.ToString()];
+
+      return Activator.CreateInstance(selectedType);
     }
   }
 }

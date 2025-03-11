@@ -1,5 +1,7 @@
 ﻿using AppConfig.DataBase.Models;
+using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using NewCore.Base;
 using NewCore.Interface;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
   /// <summary>
   /// Логика взаимодействия для ChassisManagerWindow.xaml
   /// </summary>
-  public partial class ChassisManagerWindow : Window
+  public partial class ChassisManagerWindow : Window, IDataProcessor
   {
     public EventHandler RequestClose;
     public EventHandler<ChassisManagerEntity> RequestSave;
@@ -30,15 +32,36 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     }
 
     public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
+
+  
+    public void ProcessData(IDevice device, DeviceSettingsControl control)
+    {
+      return;
+    }
+
     public void SetSettings()
     {
       deviceSettingsWindow.NameDevice = "Тест АСКМ";
       deviceSettingsWindow.LoadDeviceModels<IChassisManager>();
+
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
-        RequestSave?.Invoke(s, null);
+        var processor = new DeviceSettingsProcessorBase();
+
+        // Создание экземпляра выбранного устройства
+        var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
+
+        // Обработка устройства
+        var deviceEntity = processor.ProcessDevice(
+            selectedDevice: baseDevice as IDevice,
+            control: deviceSettingsWindow,
+            additionalDataProcessor: this
+        );
+
+        RequestSave?.Invoke(s, deviceEntity as ChassisManagerEntity);
         this.Close();
       };
+
 
       deviceSettingsWindow.RequestClose += (s, a) =>
       {

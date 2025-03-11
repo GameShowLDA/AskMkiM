@@ -166,6 +166,18 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 
     public string PortName => COMPortSelectionBox.Text;
 
+    public int NumberDevice
+    {
+      get
+      {
 
+        if (int.TryParse(DeviceNumberTextBox.Text, out int number))
+        {
+          return number;
+        }
+
+        return -1;
+      }
+    }
   }
 }

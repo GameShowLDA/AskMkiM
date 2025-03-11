@@ -230,23 +230,23 @@ namespace Mode.Settings.DeviceConfig
 
     private void ChassisManager_NewRack(object? sender, EventArgs e)
     {
-      var setting = new RackSettings
-      {
-        HorizontalAlignment = HorizontalAlignment.Stretch,
-        VerticalAlignment = VerticalAlignment.Stretch,
-        Margin = new Thickness(0),
-        Width = Double.NaN,    // Автоматическая ширина
-        Height = Double.NaN,    // Автоматическая высота
-      };
+      //var setting = new RackSettings
+      //{
+      //  HorizontalAlignment = HorizontalAlignment.Stretch,
+      //  VerticalAlignment = VerticalAlignment.Stretch,
+      //  Margin = new Thickness(0),
+      //  Width = Double.NaN,    // Автоматическая ширина
+      //  Height = Double.NaN,    // Автоматическая высота
+      //};
 
-      setting.RequestClose += Setting_RequestClose;
-      setting.RequestSave += Setting_RequestSave; ;
+      //setting.RequestClose += Setting_RequestClose;
+      //setting.RequestSave += Setting_RequestSave; ;
 
-      deviceBorder.Child = setting;
-      deviceBorder.UpdateLayout();
-      setting.UpdateLayout();
-      chassisManager.Visibility = Visibility.Collapsed;
-      settingsBorder.Visibility = Visibility.Collapsed;
+      //deviceBorder.Child = setting;
+      //deviceBorder.UpdateLayout();
+      //setting.UpdateLayout();
+      //chassisManager.Visibility = Visibility.Collapsed;
+      //settingsBorder.Visibility = Visibility.Collapsed;
     }
 
     private void Setting_RequestSave(object? sender, RackEntity device)
