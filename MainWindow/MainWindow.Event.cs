@@ -127,7 +127,7 @@ namespace MainWindowProgram
         if (openFileDialog.ShowDialog() == true)
         {
           string filePath = openFileDialog.FileName;
-          multiEditors.OpenFile(filePath);
+          MultiWindow.OpenFileInEditor(filePath);
           //LoggerService.LogInformation($"Файл открыт: {filePath}");
         }
       }
@@ -147,7 +147,7 @@ namespace MainWindowProgram
       }
       else
       {
-        multiEditors.CreateNewFile();
+        MultiWindow.CreateNewFile();
         LogInformation("Создан новый файл.");
       }
     }
@@ -155,17 +155,17 @@ namespace MainWindowProgram
 
     private void SaveMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      multiEditors.SaveFile();
+      MultiWindow.SaveFile();
     }
 
     private void SaveAsMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      multiEditors.SaveFileAs();
+      MultiWindow.SaveFileAs();
     }
 
     private void PrintMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      multiEditors.PrintFile();
+      MultiWindow.PrintFile();
     }
 
     private void SearchMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -183,8 +183,8 @@ namespace MainWindowProgram
         searchWindow.SelectFileForSearch += OpenFileFromEvent;
 
         searchWindow.ShowWindow();
-        searchWindow.ClearHighlights -= multiEditors.OnSearchWindowClosing;
-        searchWindow.ClearHighlights += multiEditors.OnSearchWindowClosing;
+        //searchWindow.ClearHighlights -= multiEditors.OnSearchWindowClosing;
+        //searchWindow.ClearHighlights += multiEditors.OnSearchWindowClosing;
 
         _isOpen = true;
       }
@@ -192,7 +192,7 @@ namespace MainWindowProgram
 
     private void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      multiEditors.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      MultiWindow.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     private void OpenFileFromEvent()

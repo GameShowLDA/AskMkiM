@@ -365,8 +365,8 @@
             </StackPanel>
         </Grid>
 
-        <Components:MultiEditorControl
-            x:Name="multiEditors" 
+        <Components:MultiWindowControl 
+            x:Name="MultiWindow" 
             Grid.Row="1"
             />
 

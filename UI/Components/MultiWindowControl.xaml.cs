@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UI.Controls.Search;
 
 namespace UI.Components
 {
@@ -30,21 +31,12 @@ namespace UI.Components
     /// </summary>
     public void OpenFileInEditor(string filePath)
     {
-      if (EditorsContainer == null) return; // Предотвращает ошибку
-
-      var newEditor = new MultiEditorControl();
-      newEditor.OpenFile(filePath);
-
-      EditorsContainer.Children.Add(newEditor);
-    }
-
-
-    /// <summary>
-    /// Удаляет конкретный MultiEditorControl.
-    /// </summary>
-    public void CloseEditor(MultiEditorControl editor)
-    {
-      EditorsContainer.Children.Remove(editor);
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.OpenFile(filePath);
     }
 
     /// <summary>
@@ -60,6 +52,102 @@ namespace UI.Components
       {
         SearchResultsRow.Height = new GridLength(newHeight);
       }
+    }
+
+    /// <summary>
+    /// Показывает панель результатов поиска.
+    /// </summary>
+    public void ShowSearchResults(string searchText)
+    {
+      SearchResultsRow.Height = new GridLength(200);
+      SearchResults.Visibility = Visibility.Visible;
+      ShowResultsPanel.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Скрывает панель результатов поиска.
+    /// </summary>
+    public void HideSearchResults()
+    {
+      SearchResultsRow.Height = new GridLength(0);
+      SearchResults.Visibility = Visibility.Collapsed;
+      ShowResultsPanel.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
+    /// Разворачивает панель результатов при клике на кнопку "Результаты поиска".
+    /// </summary>
+    private void ShowResultsPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      ShowSearchResults("Последний запрос");
+    }
+
+    public void AddControl(string name, UserControl userControl)
+    {
+      MultiEditor.AddControl(name, userControl);
+    }
+
+    public void CreateNewFile()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.CreateNewFile();
+    }
+
+    public void SaveFile()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.SaveFile();
+    }
+
+    public void SaveFileAs()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.SaveFileAs();
+    }
+
+    public void PrintFile()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.PrintFile();
+    }
+
+    public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
+    /// Обработчик поиска текста в активном редакторе.
+    /// </summary>
+    private void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+      MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
   }
 }

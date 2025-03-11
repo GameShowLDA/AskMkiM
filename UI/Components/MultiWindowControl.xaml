@@ -22,11 +22,9 @@
         <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Gray" Orientation="Horizontal"/>
 
         <!-- Контейнер для редакторов -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="EditorsContainer"/>
-        </ScrollViewer>
+        <local:MultiEditorControl x:Name="MultiEditor" Grid.Row="1"/>
 
-        <!-- Разделитель -->
+            <!-- Разделитель -->
         <GridSplitter Grid.Row="2" Height="5" Background="Gray"
                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
                       ShowsPreview="True" DragDelta="GridSplitter_DragDelta"/>
@@ -34,6 +32,13 @@
         <!-- Окно результатов поиска -->
         <Border x:Name="SearchResults" Grid.Row="3" Background="LightGray" Visibility="Collapsed">
             <TextBlock Text="Здесь будут результаты поиска..." Margin="10"/>
+        </Border>
+
+        <!-- Кнопка "Результаты поиска" (когда панель скрыта) -->
+        <Border x:Name="ShowResultsPanel" Grid.Row="3" Height="30" Background="Gray"
+                Visibility="Collapsed" MouseDown="ShowResultsPanel_MouseDown">
+            <TextBlock Text="Результаты поиска для: ..." FontSize="14" Foreground="White"
+                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Border>
     </Grid>
 </UserControl>

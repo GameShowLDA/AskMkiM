@@ -70,7 +70,7 @@ namespace MainWindowProgram
       {
         await Dispatcher.InvokeAsync(() =>
         {
-          multiEditors.AddControl(name, userControl);
+          MultiWindow.AddControl(name, userControl);
         });
       }
     }
