@@ -162,9 +162,15 @@
                     >
 
                     <MenuItem 
-                        Header="Режим МКР" 
-                        Name="ModeMkrMenuItem"
+                        Header="Модуль МКР350" 
+                        Name="ModuleMkrMenuItem"
                         PreviewMouseDown="Mkr_Handler" 
+                    />
+
+                    <MenuItem 
+                        Header="Модуль УКШ  " 
+                        Name="ModuleUkshMenuItem"
+                        PreviewMouseDown="Uksh_Handler" 
                     />
 
                 </MenuItem>

@@ -8,6 +8,7 @@ using Mode.Metrology.KC;
 using Mode.Metrology.IE;
 using Mode.Metrology.CI;
 using Mode.ServicesTest.MKR;
+using Mode.ServicesTest.UKSH;
 
 namespace MainWindowProgram
 {
@@ -143,7 +144,9 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiControl(), "Режим СИ");
 
-    private async void Mkr_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MkrControl(), "Режим МКР");
+    private async void Mkr_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MkrControl(), "Модуль МКР350");
+
+    private async void Uksh_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new UkshControl(), "Модуль УКШ");
 
     #endregion
 
