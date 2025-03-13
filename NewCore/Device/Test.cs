@@ -8,14 +8,13 @@ namespace NewCore.Device
   /// <summary>
   /// Класс ManagerChassis представляет устройство с подключением по IP-адресу.
   /// </summary>
-  public class Test : DeviceWithIP, IChassisManager
+  public class Test : DeviceWithIP, IRack
   {
-    public Test(IPAddress ip) : base(ip) { }
     public Test() { }
 
-    public string Name { get => "Тест 2"; }
+    public string Name { get => "Стойка СКМ"; }
     public string Description { get => "Добавить описание сюда"; }
-
+    public int NumberChassis { get; set; }
 
 
     /// <summary>

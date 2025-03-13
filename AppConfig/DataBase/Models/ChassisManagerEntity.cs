@@ -1,4 +1,5 @@
-﻿using NewCore.Enum;
+﻿using NewCore.Base;
+using NewCore.Enum;
 using NewCore.Interface;
 
 namespace AppConfig.DataBase.Models
@@ -6,7 +7,7 @@ namespace AppConfig.DataBase.Models
   /// <summary>
   /// Класс, представляющий сущность менеджера шасси.
   /// </summary>
-  public class ChassisManagerEntity : IChassisManager
+  public class ChassisManagerEntity : IChassisManager, IHeadUnit
   {
     public int Id { get; set; }
     /// <summary>
@@ -30,10 +31,9 @@ namespace AppConfig.DataBase.Models
     public string ConnectionDetails { get; set; }
 
     /// <summary>
-    /// Тип устройства (менеджер шасси).
+    /// Тип устройства (тестер АСКМ).
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
-
 
     /// <summary>
     /// Инициализация устройства.

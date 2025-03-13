@@ -47,7 +47,10 @@ namespace NewCore.Base
     public int Number { get; set; }
     public string ConnectionDetails { get; set; }
 
-    public DeviceType DeviceType => throw new NotImplementedException();
+    public DeviceType DeviceType { get; set; }
+
+    public bool IsAttachableDevice { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Подключается к устройству через COM-порт.

@@ -5,11 +5,7 @@ namespace NewCore.Interface
   /// <summary>
   /// Интерфейс для модуля источника напряжения и тока
   /// </summary>
-  public interface IPowerSourceModule : IDevice
+  public interface IPowerSourceModule : IAttachableDevice
   {
-    /// <summary>
-    /// Номер менеджера шасси.
-    /// </summary>
-    public int NumberChassis { get; set; }
   }
 }

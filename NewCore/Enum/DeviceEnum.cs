@@ -8,9 +8,14 @@
     public enum DeviceType
     {
       /// <summary>
-      /// Менеджер шасси
+      /// Тестер АСКМ
       /// </summary>
       ChassisManager,
+
+      /// <summary>
+      /// Стойка СКМ
+      /// </summary>
+      Rack,
 
       /// <summary>
       /// Модуль коммутации реле

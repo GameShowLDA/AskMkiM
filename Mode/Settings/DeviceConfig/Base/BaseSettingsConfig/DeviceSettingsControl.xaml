@@ -1,0 +1,525 @@
+﻿<UserControl x:Class="Mode.Settings.DeviceConfig.Base.BaseSettingsConfig.DeviceSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Mode.Settings.DeviceConfig.Base.BaseSettingsConfig"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" 
+             d:DesignWidth="800"
+             >
+    <UserControl.Resources>
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Track Name="PART_Track" IsDirectionReversed="true">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineUpCommand" 
+                                          Background="Transparent" 
+                                          BorderThickness="0" 
+                                          Height="10"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Name="Thumb" 
+                                   Background="{StaticResource PrimarySolidColorBrush}" 
+                                   BorderThickness="0"
+                                   Cursor="ScrollNS">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="Transparent" 
+                                                BorderThickness="0"
+                                                CornerRadius="10"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineDownCommand" 
+                                          Background="Transparent" 
+                                          BorderThickness="0" 
+                                          Height="10"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DropShadowEffect x:Key="ShadowEffect" 
+                         BlurRadius="20" 
+                         ShadowDepth="0" 
+                         Opacity="0.5" 
+                         Color="Black"/>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource SecondarySolidColorBrush}" 
+            CornerRadius="15"
+            Padding="20,10"
+            Margin="10"
+            Effect="{DynamicResource ShadowEffect}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Name="Header" Text="Настройка устройства:  Имя устройства" VerticalAlignment="Center" HorizontalAlignment="Center"
+      Foreground="{StaticResource ForegroundSolidColorBrush}" FontSize="25" FontWeight="Bold"/>
+
+            <ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!--Модель устройства-->
+                    <Border Grid.Row="0" Background="{StaticResource PrimarySolidColorBrush}"
+                        CornerRadius="10" Margin="0,10"
+                        Name="DeviceModelContainer"
+                        >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="Модель устройства" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                   FontSize="20" FontWeight="Bold" Margin="7,0"
+                                   />
+                            </Border>
+
+                            <ComboBox Grid.Row="1" 
+                                  Name="DeviceModelSelectionBox" 
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  HorizontalAlignment="Stretch"
+                                  Margin="20,0"
+                                  Height="40"
+                                  SelectionChanged="DeviceModelSelectionBox_SelectionChanged"
+                        >
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!--Номер устройства-->
+                    <Border Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}" 
+                        CornerRadius="10" Margin="0,10"
+                        Name="DeviceNumberContainer"
+                        >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="Номер устройства" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                       FontSize="20" FontWeight="Bold" Margin="7,0"
+                                       />
+                            </Border>
+
+                            <Border Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" Margin="5,5">
+                                <TextBox Background="Transparent" 
+                                     BorderThickness="0" VerticalAlignment="Center" 
+                                     FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                     PreviewTextInput="NumberDevice_PreviewTextInput"
+                                     TextChanged="NumberDevice_TextChanged"
+                                     Name="DeviceNumberTextBox"
+                                     />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!--Тип подлючения устройства-->
+                    <Border Grid.Row="2" 
+                        Background="{StaticResource PrimarySolidColorBrush}" 
+                        CornerRadius="10" Margin="0,10"
+                        Name="ConnectionTypeContainer"
+                        >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="Тип подключения устройства" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                             FontSize="20" FontWeight="Bold" Margin="7,0"
+                             />
+                            </Border>
+
+                            <ComboBox Grid.Row="1" 
+                                  Name="ConnectionTypeSelectionBox" 
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  HorizontalAlignment="Stretch"
+                                  Margin="20,0"
+                                  Height="40"
+                                  SelectionChanged="ConnectionTypeSelectionBox_SelectionChanged"
+                                  >
+
+                                <ComboBoxItem IsEnabled="False" Content="Выбор типа подключения:" IsSelected="True" Foreground="Gray"/>
+                                <ComboBoxItem Content="IP" Name="ConnectionTypeIPItem"/>
+                                <ComboBoxItem Content="COM" Name="ConnectionTypeCOMItem"/>
+
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!--IP address устройства-->
+                    <Border Grid.Row="3" Background="{StaticResource PrimarySolidColorBrush}" 
+                        CornerRadius="10" Margin="0,10"
+                        Name="IPAddressContainer"
+                        >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="IP Address" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                       FontSize="20" FontWeight="Bold" Margin="7,0"
+                                       />
+                            </Border>
+
+                            <Grid Grid.Row="1" Height="40" Margin="10,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
+                                    <TextBox Background="Transparent" 
+                                         BorderThickness="0" VerticalAlignment="Center" 
+                                         HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                         Name="IpPart1"
+                                         />
+                                </Border>
+
+                                <TextBlock Grid.Column="1" Text="." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                       VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                       />
+
+
+                                <Border Grid.Column="2" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
+                                    <TextBox Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
+                                         HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                         Name="IpPart2"
+                                         />
+                                </Border>
+                                <TextBlock Grid.Column="3" Text="." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                       VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                       />
+
+
+                                <Border Grid.Column="4" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
+                                    <TextBox Background="Transparent" BorderThickness="0" VerticalAlignment="Center" 
+                                         HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                         Name="IpPart3"
+                                         />
+                                </Border>
+                                <TextBlock Grid.Column="5" Text="." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                       VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                       />
+
+
+                                <Border Grid.Column="6" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
+                                    <TextBox Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
+                                         HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                         Name="IpPart4"
+                                         />
+                                </Border>
+
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+
+                    <!--COM устройства-->
+                    <Border Grid.Row="4" Background="{StaticResource PrimarySolidColorBrush}" 
+                        CornerRadius="10" Margin="0,10"
+                        Name="COMContainer"
+                        >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="COM PORT" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                       FontSize="20" FontWeight="Bold" Margin="7,0"
+                                       />
+                            </Border>
+
+                            <Border Grid.Row="1">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+
+                                    <Grid Margin="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!--Выбор COM-->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="COM-порт:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                   FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                            <ComboBox Grid.Column="1"
+                                                  x:Name="COMPortSelectionBox"
+                                                  MinWidth="100"
+                                                  Style="{StaticResource CustomComboBoxStyle}"
+                                                  VerticalAlignment="Center"
+                                                  />
+                                        </Grid>
+
+                                        <!--VID-->
+                                        <Grid Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+
+                                            <TextBlock Text="VID:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                   FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                            <Border Grid.Column="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
+                                                <TextBox Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
+                                         HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!--PID-->
+                                        <Grid Grid.Column="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+
+                                            <TextBlock Text="PID:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                   FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                            <Border Grid.Column="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
+                                                <TextBox Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
+                                                     HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid Grid.Row="1" Margin="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!--Бит в секунlу-->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Text="Бит в секунду:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                       FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                                <ComboBox Grid.Column="1"
+                                                      SelectedIndex="3"
+                                                      MinWidth="100"
+                                                      x:Name="BaudRateSelectionBox"
+                                                      Style="{StaticResource CustomComboBoxStyle}"
+                                                      VerticalAlignment="Center"
+                                                      >
+                                                    <ComboBoxItem>1200</ComboBoxItem>
+                                                    <ComboBoxItem>2400</ComboBoxItem>
+                                                    <ComboBoxItem>4800</ComboBoxItem>
+                                                    <ComboBoxItem>9600</ComboBoxItem>
+                                                    <ComboBoxItem>14400</ComboBoxItem>
+                                                    <ComboBoxItem>19200</ComboBoxItem>
+                                                    <ComboBoxItem>38400</ComboBoxItem>
+                                                    <ComboBoxItem>57600</ComboBoxItem>
+                                                    <ComboBoxItem>115200</ComboBoxItem>
+                                                </ComboBox>
+                                            </Grid>
+
+                                            <!--Стоповые биты-->
+                                            <Grid Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Text="Стоповые биты:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                                <ComboBox Grid.Column="1"
+                                                SelectedIndex="0"
+                                                Style="{StaticResource CustomComboBoxStyle}"
+                                                VerticalAlignment="Center"
+                                                x:Name="StopBitsSelectionBox"
+                                                >
+                                                    <ComboBoxItem>1</ComboBoxItem>
+                                                    <ComboBoxItem>1.5</ComboBoxItem>
+                                                    <ComboBoxItem>2</ComboBoxItem>
+                                                </ComboBox>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid Grid.Row="2" Margin="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!--Биты данных-->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Text="Биты данных:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                       FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+
+                                                <ComboBox Grid.Column="1"
+                                                    SelectedIndex="4"
+                                                    MinWidth="100"
+                                                    x:Name="DataBitsSelectionBox"
+                                                    Style="{StaticResource CustomComboBoxStyle}"
+                                                    VerticalAlignment="Center"
+                                                    >
+                                                    <ComboBoxItem>4</ComboBoxItem>
+                                                    <ComboBoxItem>5</ComboBoxItem>
+                                                    <ComboBoxItem>6</ComboBoxItem>
+                                                    <ComboBoxItem>7</ComboBoxItem>
+                                                    <ComboBoxItem>8</ComboBoxItem>
+                                                </ComboBox>
+                                            </Grid>
+
+                                            <!--Чётность-->
+                                            <Grid Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Text="Чётность:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                            FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                                <ComboBox Grid.Column="1"
+                                                      SelectedIndex="2"
+                                                      Style="{StaticResource CustomComboBoxStyle}"
+                                                      VerticalAlignment="Center"
+                                                      x:Name="ParitySelectionBox"
+                                                      >
+                                                    <ComboBoxItem>Чет</ComboBoxItem>
+                                                    <ComboBoxItem>Нечет</ComboBoxItem>
+                                                    <ComboBoxItem>Нет</ComboBoxItem>
+                                                    <ComboBoxItem>Маркер</ComboBoxItem>
+                                                    <ComboBoxItem>Пробел</ComboBoxItem>
+                                                </ComboBox>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid Grid.Row="3" Margin="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!--Управление потоком-->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Text="Управление потоком:" Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                                                       FontSize="20" FontWeight="Bold" Margin="7,0"/>
+
+                                                <ComboBox Grid.Column="1"
+                                                      SelectedIndex="2"
+                                                      MinWidth="100"
+                                                      Style="{StaticResource CustomComboBoxStyle}"
+                                                      VerticalAlignment="Center"
+                                                      x:Name="FlowControlSelectionBox"     
+                                                      >
+                                                    <ComboBoxItem>Xon/Xoff</ComboBoxItem>
+                                                    <ComboBoxItem>Аппаратное</ComboBoxItem>
+                                                    <ComboBoxItem>Нет</ComboBoxItem>
+                                                </ComboBox>
+                                            </Grid>
+
+                                        </Grid>
+                                    </Grid>
+
+                                </Grid>
+                            </Border>
+
+                        </Grid>
+                    </Border>
+
+                    <ContentControl x:Name="AdditionalSettingsContainer" Grid.Row="5" Margin="0,10,0,10"/>
+                </Grid>
+
+            </ScrollViewer>
+
+            <Grid Grid.Row="2" Margin="0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Name="CancelButton" Grid.Column="0" Content="Отменить" 
+                    Style="{StaticResource ConfigButtonStyle}" 
+                    Margin="0,10" Width="250" 
+                    HorizontalAlignment="Left"
+                    PreviewMouseDown="CancelButton_PreviewMouseDown"
+                    />
+
+                <Button Name="SaveButton" Grid.Column="1" Content="Сохранить" 
+             Style="{StaticResource ConfigButtonStyle}" 
+             Width="250" HorizontalAlignment="Left" 
+             Margin="20,0"
+             PreviewMouseDown="SaveButton_PreviewMouseDown"       
+             />
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

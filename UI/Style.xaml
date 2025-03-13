@@ -8,12 +8,14 @@
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->
 
+    <Color x:Key="LightPrimaryColor">#6a7689</Color>
     <Color x:Key="PrimaryColor">#465060</Color>
     <Color x:Key="SecondaryColor">#303843</Color>
     <Color x:Key="ForegroundColor">#f3f0f9</Color>
     <Color x:Key="ActiveColor">#1ca3e9</Color>
     <Color x:Key="IsCheckedColor">#1f242b</Color>
 
+    <SolidColorBrush x:Key="LightPrimarySolidColorBrush" Color="{DynamicResource LightPrimaryColor}"/>
     <SolidColorBrush x:Key="PrimarySolidColorBrush" Color="{DynamicResource PrimaryColor}"/>
     <SolidColorBrush x:Key="SecondarySolidColorBrush" Color="{DynamicResource SecondaryColor}"/>
     <SolidColorBrush x:Key="ForegroundSolidColorBrush" Color="{DynamicResource ForegroundColor}"/>
@@ -274,6 +276,39 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="ConfigButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{StaticResource PrimarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                        CornerRadius="15" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                <!-- Меняем фон на красный -->
+                <Setter Property="Foreground" Value="{StaticResource PrimarySolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 
     <Style x:Key="CustomButtonStyle" TargetType="Button">
         <Setter Property="Height" Value="50"/>

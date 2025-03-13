@@ -1,11 +1,13 @@
 ﻿using System.IO.Ports;
 using NewCore.Base;
 using NewCore.Function.GPT;
+using NewCore.Interface;
 
 namespace NewCore.Device
 {
-  public class GPT79904 : DeviceWithCOM
+  public class GPT79904 : DeviceWithCOM, IBreakdownTester
   {
+    public GPT79904() { }
     public GPT79904(string VID, string PID)
     {
       string portName = FindComPort(VID, PID);
@@ -17,10 +19,10 @@ namespace NewCore.Device
         RtsEnable = true,
         Handshake = Handshake.None
       };
-
-      Name = "GPT79904";
-      Description = "Реализовать описание в NewCore.Device.GPT79904";
     }
+
+    public string Name { get => "GPT79904"; }
+    public string Description { get => "Реализовать описание в NewCore.Device.GPT79904"; }
 
     public IIrMode IrMode => new IrMode(this);
 
@@ -28,5 +30,7 @@ namespace NewCore.Device
     public AcwMode AcwMode => new AcwMode(this);
     // TODO : нужен интерфейс
     public DcwMode DcwMode => new DcwMode(this);
+
+    public int NumberChassis { get ; set ; }
   }
 }

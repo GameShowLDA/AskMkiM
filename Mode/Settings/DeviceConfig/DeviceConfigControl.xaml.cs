@@ -1,9 +1,14 @@
-﻿using System.Windows;
+﻿using System.Drawing;
+using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.ChassisManager;
+using Mode.Settings.DeviceConfig.DeviceBusCommutation;
 using Mode.Settings.DeviceConfig.DeviceManager;
-using NewCore.Interface;
+using Mode.Settings.DeviceConfig.FastMeter;
+using Mode.Settings.DeviceConfig.WindowSettings;
+using NewCore.Base;
 using static AppConfig.Config.SystemStateManager;
 
 namespace Mode.Settings.DeviceConfig
@@ -16,8 +21,12 @@ namespace Mode.Settings.DeviceConfig
     public DeviceConfigControl()
     {
       InitializeComponent();
-      chassisManager.SystemSelected += (sender, system) => SelectedChassis(system);
-      chassisManager.NewSystem += (sender, system) => NewSystem();
+      chassisManager.NewSystem += (s, a) => NewSystem();
+      chassisManager.SystemSelected += (s,a) => SelectedChassis(a);
+
+      var data = new ChassisManagerRepository(Context).GetAll().First();
+      AddSystem(data);
+
     }
 
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
@@ -27,6 +36,8 @@ namespace Mode.Settings.DeviceConfig
     private void SelectedChassis(ChassisManagerEntity system)
     {
       var devices = new DeviceManagerControl();
+      devices.SetHeadUnit(system);
+
       LoadBreakdownTesters(system, devices);
       LoadFastMeters(system, devices);
       LoadPrecisionMeters(system, devices);
@@ -34,21 +45,85 @@ namespace Mode.Settings.DeviceConfig
       LoadRelaySwitchModules(system, devices);
       LoadSwitchingDevices(system, devices);
       deviceBorder.Child = devices;
+
+      devices.AddBreakdownEvent += Devices_AddBreakdownEvent;
+      devices.DeviceBusCommutationSelected += (s,a) => Devices_DeviceBusCommutationSelected(s,a, system, devices);
+      devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
+      devices.ExitEvent += Devices_ExitEvent;
+
+    }
+
+    private void Devices_FastMeterEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
+    {
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      FastMeterWindow fastMeterWindow = new FastMeterWindow();
+      fastMeterWindow.SetSettings(sender, e);
+      fastMeterWindow.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      fastMeterWindow.ShowDialog();
+      this.Effect = null;
+    }
+
+    private void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
+    {
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
+      deviceSettingsWindow.SetSettings(sender, e);
+      deviceSettingsWindow.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
+      deviceSettingsWindow.ShowDialog();
+      this.Effect = null;
+    }
+
+    private void DbcControl_RequestClose(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      settingsBorder.Child = null;
+    }
+
+    private void Devices_ExitEvent(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      deviceBorder.Child = null;
+      settingsBorder.Child = null;
+    }
+
+    private void Devices_AddBreakdownEvent(object? sender, IHeadUnit e)
+    {
+      // ToggleThirdColumn(true);
+      // var breakDownControl = new BreakdownTester.BreakdownTesterSettings();
+      // settingsBorder.Child = breakDownControl;
+      // breakDownControl.ClosedEvent += BreakDownControl_ClosedEvent;
+      // breakDownControl.DeviceSaved += BreakDownControl_DeviceSaved;
+    }
+
+    private void BreakDownControl_DeviceSaved(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      settingsBorder.Child = null;
+      MessageBox.Show("Пробойная установка добавлена в конфигурацию!");
+    }
+
+    private void BreakDownControl_ClosedEvent(object? sender, EventArgs e)
+    {
+      ToggleThirdColumn(false);
+      settingsBorder.Child = null;
     }
 
     public void ToggleThirdColumn(bool isVisible)
     {
       if (isVisible)
       {
+        Column1.Width = new GridLength(0);
         Column3.Width = new GridLength(1, GridUnitType.Star);
         settingsBorder.Visibility = Visibility.Visible;
       }
       else
       {
+        Column1.Width = new GridLength(1, GridUnitType.Auto);
         Column3.Width = new GridLength(0);
         settingsBorder.Visibility = Visibility.Collapsed;
       }
     }
+
 
     /// <summary>
     /// Загружает все пробойные установки, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.
@@ -150,19 +225,61 @@ namespace Mode.Settings.DeviceConfig
       chassisManager.AddSystem(data);
     }
 
+    public void AddRack(RackEntity data)
+    {
+      chassisManager.AddRack(data);
+    }
+
     private void NewSystem()
     {
-      var setting = new ChassisManagerSettings();
-      setting.RequestClose += Setting_RequestClose;
-      setting.DeviceSaved += ChassisManagerSettings_DeviceSaved;
-      deviceBorder.Child = setting;
-      chassisManager.Visibility = Visibility.Collapsed;
+      ChassisManagerWindow chassisManagerWindow = new ChassisManagerWindow();
+      chassisManagerWindow.SetSettings();
+      chassisManagerWindow.RequestClose += Setting_RequestClose;
+      chassisManagerWindow.RequestSave += ChassisManagerSettings_DeviceSaved;
+
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      chassisManagerWindow.ShowDialog();
+      this.Effect = null;
+    }
+
+    private void ChassisManager_NewRack(object? sender, EventArgs e)
+    {
+      //var setting = new RackSettings
+      //{
+      //  HorizontalAlignment = HorizontalAlignment.Stretch,
+      //  VerticalAlignment = VerticalAlignment.Stretch,
+      //  Margin = new Thickness(0),
+      //  Width = Double.NaN,    // Автоматическая ширина
+      //  Height = Double.NaN,    // Автоматическая высота
+      //};
+
+      //setting.RequestClose += Setting_RequestClose;
+      //setting.RequestSave += Setting_RequestSave; ;
+
+      //deviceBorder.Child = setting;
+      //deviceBorder.UpdateLayout();
+      //setting.UpdateLayout();
+      //chassisManager.Visibility = Visibility.Collapsed;
+      //settingsBorder.Visibility = Visibility.Collapsed;
+    }
+
+    private void Setting_RequestSave(object? sender, RackEntity device)
+    {
+      deviceBorder.Child = null;
+      chassisManager.Visibility = Visibility.Visible;
+      chassisManager.AddRack(device);
     }
 
     private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
     {
+      // TODO : Добавить в список устройств
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;
+      if (device == null)
+      {
+        return;
+      }
+
       chassisManager.AddSystem(device);
     }
 

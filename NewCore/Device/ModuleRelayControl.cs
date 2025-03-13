@@ -15,6 +15,7 @@ namespace NewCore.Device
     public Functions Functions => new Functions(this);
 
     public int Number { get; set; }
+    public int NumberRack { get; set; }
     public string ConnectionDetails { get; set; }
 
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;

@@ -5,12 +5,8 @@ namespace NewCore.Interface
   /// <summary>
   /// Интерфейс для точного измерителя
   /// </summary>
-  public interface IPrecisionMeter : IDevice
+  public interface IPrecisionMeter : IAttachableDevice
   {
-    /// <summary>
-    /// Номер менеджера шасси.
-    /// </summary>
-    public int NumberChassis { get; set; }
   }
 
 }

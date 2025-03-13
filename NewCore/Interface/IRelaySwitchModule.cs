@@ -5,16 +5,13 @@ namespace NewCore.Interface
   /// <summary>
   /// Интерфейс для модуля коммутации реле
   /// </summary>
-  public interface IRelaySwitchModule : IDevice
+  public interface IRelaySwitchModule : IAttachableDevice
   {
-    /// <summary>
-    /// Номер менеджера шасси.
-    /// </summary>
-    public int NumberChassis { get; set; }
-
     /// <summary>
     /// Количество точек модуля.
     /// </summary>
     public int PointCount { get; set; }
+
+    public int NumberRack { get; set; }
   }
 }

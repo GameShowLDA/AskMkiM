@@ -14,7 +14,7 @@ namespace NewCore.Device
     public ManagerChassis(IPAddress ip) : base(ip) { }
     public ManagerChassis() { }
 
-    public string Name { get => "Менеджер шасси"; }
+    public string Name { get => "Тестер АСКМ"; }
     public string Description { get => "Добавить описание сюда"; }
 
     /// <summary>

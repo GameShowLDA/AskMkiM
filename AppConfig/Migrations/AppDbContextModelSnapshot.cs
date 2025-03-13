@@ -158,6 +158,35 @@ namespace AppConfig.Migrations
                     b.ToTable("PrecisionMeters");
                 });
 
+            modelBuilder.Entity("AppConfig.DataBase.Models.RackEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConnectionDetails")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Rack");
+                });
+
             modelBuilder.Entity("AppConfig.DataBase.Models.RelaySwitchModuleEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -180,6 +209,9 @@ namespace AppConfig.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NumberRack")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PointCount")

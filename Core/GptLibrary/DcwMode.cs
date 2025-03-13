@@ -64,6 +64,7 @@ namespace Core.GptLibrary
     {
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
+      query = query.Replace(",", ".");
       await model.WriteLineAsync(query);
     }
 

@@ -204,7 +204,8 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Config_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.ConfigSettings.ConfigSettingsControl(), "Конфигурация оборудования");
+    private void Config_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.DeviceConfig.DeviceConfigControl(), "Конфигурация оборудования");
+    //private void Config_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.ConfigSettings.ConfigSettingsControl(), "Конфигурация оборудования");
 
     /// <summary>
     /// Добавляет элемент управления для настроек погрешностей измерения в multiEditors.
