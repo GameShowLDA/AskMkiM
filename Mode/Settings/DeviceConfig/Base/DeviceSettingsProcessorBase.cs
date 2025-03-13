@@ -21,23 +21,23 @@ namespace Mode.Settings.DeviceConfig.Base
     /// <param name="control">Элемент управления с настройками.</param>
     /// <param name="additionalDataProcessor">Внешний обработчик специфичных данных.</param>
     /// <returns>Заполненная модель устройства (реализующая интерфейс IDevice).</returns>
-    public IDevice ProcessDevice(
+    public T ProcessDevice<T>(
         IDevice selectedDevice,
         DeviceSettingsControl control,
-        IDataProcessor additionalDataProcessor = null)
+        IDataProcessor additionalDataProcessor = null) where T : class, IDevice 
     {
-      // Создание конкретной модели устройства
       string connectString = BaseHandler<IDevice>.GetConnectionDetails(control, selectedDevice);
 
-      var deviceModel = CreateDeviceModelByInterface(selectedDevice);
-
+      var deviceModel = CreateDeviceModelByInterface(selectedDevice) as T;
       deviceModel.Name = selectedDevice.Name;
       deviceModel.Description = selectedDevice.Description;
       deviceModel.ConnectionDetails = connectString;
       deviceModel.Number = BaseHandler<IDevice>.GetNumber(control);
+      SetChassisNumber(deviceModel, control);
 
       return deviceModel;
     }
+
 
     /// <summary>
     /// Создание конкретной модели по интерфейсу устройства.
@@ -53,52 +53,23 @@ namespace Mode.Settings.DeviceConfig.Base
         ISwitchingDevice => new SwitchingDeviceEntity(),
         IChassisManager => new ChassisManagerEntity(),
         IFastMeter => new FastMeterEntity(),
+        IRack => new RackEntity(),
 
         _ => throw new ArgumentException("Неизвестный тип устройства", nameof(device))
       };
     }
 
     /// <summary>
-    /// Заполнение данных подключения устройства на основе типа подключения.
+    /// Определяет номер шасси, если устройство его поддерживает, и выводит в консоль.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="connectionType">Тип подключения устройства (typeof(DeviceWithIP) или typeof(DeviceWithCOM)).</param>
-    /// <param name="control">Элемент управления с настройками.</param>
-    protected void FillConnectionSettings(IDevice model, Type connectionType, DeviceSettingsControl control)
+    /// <param name="deviceModel">Объект устройства.</param>
+    private void SetChassisNumber(IDevice deviceModel, DeviceSettingsControl control)
     {
-      if (connectionType == typeof(DeviceWithIP))
-        FillIpSettings(model, control);
-      else if (connectionType == typeof(DeviceWithCOM))
-        FillComSettings(model, control);
-      else
-        throw new ArgumentException("Неизвестный тип подключения", nameof(connectionType));
-    }
-
-    /// <summary>
-    /// Заполнение данных IP-подключения.
-    /// </summary>
-    protected virtual void FillIpSettings(IDevice model, DeviceSettingsControl control)
-    {
-      
-    }
-
-    /// <summary>
-    /// Заполнение данных COM-подключения.
-    /// </summary>
-    protected virtual void FillComSettings(IDevice model, DeviceSettingsControl control)
-    {
-     
-    }
-
-    /// <summary>
-    /// Валидация итоговой модели устройства.
-    /// </summary>
-    protected virtual void ValidateDeviceModel(IDevice model)
-    {
-      if (string.IsNullOrWhiteSpace(model.Name))
-        throw new InvalidOperationException("Название устройства не может быть пустым!");
-
-      // Другие проверки общие для всех устройств.
+      if (deviceModel.DeviceType != NewCore.Enum.DeviceEnum.DeviceType.ChassisManager)
+      { 
+        IAttachableDevice attachableDevice = (IAttachableDevice)deviceModel;
+        attachableDevice.NumberChassis = control.NumberChassis;
+      }
     }
   }
 }

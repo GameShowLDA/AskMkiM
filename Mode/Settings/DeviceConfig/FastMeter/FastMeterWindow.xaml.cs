@@ -18,16 +18,16 @@ using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Base;
 using NewCore.Interface;
 
-namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
+namespace Mode.Settings.DeviceConfig.FastMeter
 {
   /// <summary>
-  /// Логика взаимодействия для DeviceBusCommutationWindow.xaml
+  /// Логика взаимодействия для FastMeterWindow.xaml
   /// </summary>
-  public partial class DeviceBusCommutationWindow : Window, IDataProcessor
+  public partial class FastMeterWindow : Window, IDataProcessor
   {
     public EventHandler RequestClose;
-    public EventHandler<SwitchingDeviceEntity> RequestSave;
-    public DeviceBusCommutationWindow()
+    public EventHandler<FastMeterEntity> RequestSave;
+    public FastMeterWindow()
     {
       InitializeComponent();
     }
@@ -36,13 +36,13 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
 
     public void ProcessData(IDevice device, DeviceSettingsControl control)
     {
-      return;
+      throw new NotImplementedException();
     }
 
     public void SetSettings(object? sender, IHeadUnit e)
     {
-      deviceSettingsWindow.NameDevice = "Устройство коммутации шин";
-      deviceSettingsWindow.LoadDeviceModels<ISwitchingDevice>();
+      deviceSettingsWindow.NameDevice = "Измеритель (быстрый)";
+      deviceSettingsWindow.LoadDeviceModels<IFastMeter>();
       deviceSettingsWindow.SetHeadUnit(e);
 
       deviceSettingsWindow.SaveEvent += (s, a) =>
@@ -50,7 +50,7 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        SwitchingDeviceEntity deviceEntity = processor.ProcessDevice<SwitchingDeviceEntity>(
+        FastMeterEntity deviceEntity = processor.ProcessDevice<FastMeterEntity>(
           selectedDevice: baseDevice as IDevice,
           control: deviceSettingsWindow,
           additionalDataProcessor: this
@@ -58,10 +58,10 @@ namespace Mode.Settings.DeviceConfig.DeviceBusCommutation
 
         if (deviceEntity != null)
         {
-          new SwitchingDeviceRepository(AppConfig.Config.SystemStateManager.Context).Create(deviceEntity);
+          new FastMeterRepository(AppConfig.Config.SystemStateManager.Context).Create(deviceEntity);
         }
 
-        RequestSave?.Invoke(s, deviceEntity as SwitchingDeviceEntity);
+        RequestSave?.Invoke(s, deviceEntity as FastMeterEntity);
 
         this.Close();
       };

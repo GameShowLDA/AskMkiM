@@ -2,12 +2,13 @@
 using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceBusCommutation;
 using Mode.Settings.DeviceConfig.DeviceManager;
+using Mode.Settings.DeviceConfig.FastMeter;
 using Mode.Settings.DeviceConfig.WindowSettings;
 using NewCore.Base;
-using NewCore.Interface;
 using static AppConfig.Config.SystemStateManager;
 
 namespace Mode.Settings.DeviceConfig
@@ -21,6 +22,11 @@ namespace Mode.Settings.DeviceConfig
     {
       InitializeComponent();
       chassisManager.NewSystem += (s, a) => NewSystem();
+      chassisManager.SystemSelected += (s,a) => SelectedChassis(a);
+
+      var data = new ChassisManagerRepository(Context).GetAll().First();
+      AddSystem(data);
+
     }
 
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
@@ -41,21 +47,28 @@ namespace Mode.Settings.DeviceConfig
       deviceBorder.Child = devices;
 
       devices.AddBreakdownEvent += Devices_AddBreakdownEvent;
-      devices.DeviceBusCommutationSelected += Devices_DeviceBusCommutationSelected;
+      devices.DeviceBusCommutationSelected += (s,a) => Devices_DeviceBusCommutationSelected(s,a, system, devices);
+      devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
       devices.ExitEvent += Devices_ExitEvent;
 
     }
 
-    private void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e)
+    private void Devices_FastMeterEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
     {
-      //ToggleThirdColumn(true);
-      //var dbcControl = new DeviceBusCommutation.DeviceBusCommutationControl();
-      //settingsBorder.Child = dbcControl;
-      //dbcControl.RequestClose += DbcControl_RequestClose;
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      FastMeterWindow fastMeterWindow = new FastMeterWindow();
+      fastMeterWindow.SetSettings(sender, e);
+      fastMeterWindow.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      fastMeterWindow.ShowDialog();
+      this.Effect = null;
+    }
 
+    private void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
+    {
       this.Effect = new System.Windows.Media.Effects.BlurEffect();
       DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
       deviceSettingsWindow.SetSettings(sender, e);
+      deviceSettingsWindow.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
       deviceSettingsWindow.ShowDialog();
       this.Effect = null;
     }
@@ -110,6 +123,7 @@ namespace Mode.Settings.DeviceConfig
         settingsBorder.Visibility = Visibility.Collapsed;
       }
     }
+
 
     /// <summary>
     /// Загружает все пробойные установки, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.

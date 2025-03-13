@@ -7,6 +7,5 @@ namespace NewCore.Interface
   /// </summary>
   public interface IChassisManager : IDevice
   {
-
   }
 }

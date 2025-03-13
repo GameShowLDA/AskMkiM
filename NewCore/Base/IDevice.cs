@@ -7,6 +7,8 @@ namespace NewCore.Base
   /// </summary>
   public interface IDevice
   {
+    int Id { get; set; }
+
     /// <summary>
     /// Получает или задает имя устройства.
     /// Имя используется для идентификации устройства в системе.

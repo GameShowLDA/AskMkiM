@@ -5,12 +5,7 @@ namespace NewCore.Interface
   /// <summary>
   /// Интерфейс для устройства коммутации.
   /// </summary>
-  public interface ISwitchingDevice : IDevice
+  public interface ISwitchingDevice : IAttachableDevice
   {
-    /// <summary>
-    /// Номер менеджера шасси.
-    /// </summary>
-    public int NumberChassis { get; set; }
-
   }
 }

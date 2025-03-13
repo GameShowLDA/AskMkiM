@@ -83,17 +83,9 @@
                                TextAlignment="Center"/>
                 </Button>
 
-                <Button Name="Save" Margin="5" Style="{StaticResource CustomButtonStyle}" 
-                        Background="{StaticResource SecondarySolidColorBrush}" >
-                    <TextBlock Text="Сохранить" 
-                               TextWrapping="Wrap" 
-                               Margin="5" 
-                               TextAlignment="Center"/>
-                </Button>
-
                 <Button Name="Exit" Margin="5" Style="{StaticResource CustomButtonStyle}" 
                     Background="{StaticResource SecondarySolidColorBrush}" PreviewMouseDown="Exit_PreviewMouseDown">
-                    <TextBlock Text="Отмена" 
+                    <TextBlock Text="Выйти" 
                             TextWrapping="Wrap" 
                             Margin="5" 
                             TextAlignment="Center"/>

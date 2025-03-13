@@ -29,6 +29,9 @@ namespace NewCore.Base
     /// </summary>
     public int Number { get; set; }
 
+    public int Id { get; set; }
+
+
     /// <summary>
     /// Строка с данными о подключении (возвращает строковое представление IP-адреса).
     /// </summary>
@@ -42,6 +45,7 @@ namespace NewCore.Base
     /// Тип устройства.
     /// </summary>
     public DeviceType DeviceType { get; set; }
+    public bool IsAttachableDevice { get; set; }
 
     /// <summary>
     /// Выполняет инициализацию устройства.

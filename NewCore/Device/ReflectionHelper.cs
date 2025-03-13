@@ -4,7 +4,7 @@ namespace NewCore.Device
 {
   public class ReflectionHelper
   {
-    // <summary>
+    /// <summary>
     /// Получает все классы, реализующие интерфейс <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">Тип интерфейса.</typeparam>

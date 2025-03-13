@@ -507,9 +507,9 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Name="CancelButton" Grid.Column="0" Content="Отменить" 
-             Style="{StaticResource ConfigButtonStyle}" 
-             Margin="0,10" Width="250" 
-             HorizontalAlignment="Left"
+                    Style="{StaticResource ConfigButtonStyle}" 
+                    Margin="0,10" Width="250" 
+                    HorizontalAlignment="Left"
                     PreviewMouseDown="CancelButton_PreviewMouseDown"
                     />
 

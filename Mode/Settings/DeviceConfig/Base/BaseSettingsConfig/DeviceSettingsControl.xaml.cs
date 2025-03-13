@@ -14,7 +14,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NewCore.Base;
 using NewCore.Device;
-using NewCore.Interface;
 
 namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 {

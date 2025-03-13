@@ -122,11 +122,13 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="{Binding}" Foreground="White" FontSize="18" VerticalAlignment="Center" Style="{StaticResource HoverFontSizeStyle}"/>
+                                <TextBlock Text="{Binding DisplayName}" Foreground="White" FontSize="18" VerticalAlignment="Center"/>
 
                                 <!-- Кнопка удаления с крестиком -->
                                 <Border Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource HoverOpacityBorderStyle}">
-                                    <Button Style="{StaticResource RemoveButtonStyle}" Click="RemoveDeviceButton_Click" Margin="8,0"/>
+                                    <Button Style="{StaticResource RemoveButtonStyle}" Click="RemoveDeviceButton_Click"
+                                            CommandParameter="{Binding}" />
+
                                 </Border>
                             </Grid>
                         </Border>

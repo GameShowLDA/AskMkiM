@@ -4,17 +4,24 @@ using System.Net.Sockets;
 using Agilent.CommandExpert.ScpiNet.Ag3466x_2_08;
 using NewCore.Base;
 using NewCore.Function.KeysightLibrary;
+using NewCore.Interface;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
-  public class Keysight3466 : DeviceWithIP
+  public class Keysight3466Old : DeviceWithIP, IFastMeter
   {
-    public Keysight3466(IPAddress ip) : base(ip)
+    public Keysight3466Old() 
     {
       Name = "Keysight 3466";
       Description = "Реализовать описание в NewCore.Device.Keysight3466";
       ConnectAsync().ConfigureAwait(true);
+    }
+    public Keysight3466Old(IPAddress ip) : base(ip)
+    {
+      Name = "Keysight 3466";
+      Description = "Реализовать описание в NewCore.Device.Keysight3466";
+      TryConnectAsync(ip.ToString()).ConfigureAwait(true);
     }
 
     private string ConnectionString;
@@ -25,6 +32,8 @@ namespace NewCore.Device
     public CurrentMeasurement CurrentMeasurement => new(ag3466X);
     public ResistanceMeasurement ResistanceMeasurement => new(ag3466X);
     public VoltageMeasurement VoltageMeasurement => new(ag3466X);
+
+    public int NumberChassis { get; set; }
 
     public override Task<bool> Initialize()
     {
@@ -52,7 +61,7 @@ namespace NewCore.Device
     /// Асинхронно подключается к измерительному прибору.
     /// </summary>
     /// <returns>Возвращает true, если подключение успешно, иначе false.</returns>
-    public async Task<Keysight3466> ConnectAsync()
+    public async Task<Keysight3466Old> ConnectAsync()
     {
       try
       {
@@ -152,7 +161,19 @@ namespace NewCore.Device
           await connectTask;
 
           ConnectionString = $"TCPIP0::{address}::inst0::INSTR";
-          ag3466X = new Ag3466x(ConnectionString);
+
+          try
+          {
+            LogInformation("Создание объекта Ag3466x...");
+            ag3466X = new Ag3466x(ConnectionString);
+            LogInformation("Ag3466x успешно создан.");
+          }
+          catch (Exception ex)
+          {
+            LogError($"Ошибка при создании Ag3466x: {ex}");
+            return false;
+          }
+
           var connectInstrumentTask = Task.Run(() => ag3466X.Connect());
           if (await Task.WhenAny(connectInstrumentTask, Task.Delay(1000)) != connectInstrumentTask)
           {

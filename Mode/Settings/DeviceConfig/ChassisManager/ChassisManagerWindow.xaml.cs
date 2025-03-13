@@ -1,4 +1,5 @@
 ﻿using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Base;
@@ -47,16 +48,18 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
-
-        // Создание экземпляра выбранного устройства
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        // Обработка устройства
-        var deviceEntity = processor.ProcessDevice(
+        ChassisManagerEntity deviceEntity = processor.ProcessDevice<ChassisManagerEntity>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this
         );
+
+        if (deviceEntity != null)
+        {
+         new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create(deviceEntity);
+        } 
 
         RequestSave?.Invoke(s, deviceEntity as ChassisManagerEntity);
         this.Close();

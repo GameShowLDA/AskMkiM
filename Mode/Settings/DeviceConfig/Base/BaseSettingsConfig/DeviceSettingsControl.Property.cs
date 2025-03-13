@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NewCore.Interface;
 using System.Windows;
 using System.Windows.Controls;
 using System.IO.Ports;
@@ -29,6 +28,21 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
       set
       {
         Header.Text = $"Настройка устройства: \"{value}\"";
+      }
+    }
+
+    public int NumberChassis
+    {
+      get
+      {
+        if (_headUnit != null)
+        {
+          return _headUnit.Number;
+        }
+        else 
+        {
+          return -1;
+        }
       }
     }
 

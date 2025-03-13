@@ -7,11 +7,7 @@ using NewCore.Base;
 
 namespace NewCore.Interface
 {
-  public interface IRack : IDevice
+  public interface IRack : IAttachableDevice
   {
-    /// <summary>
-    /// Номер менеджера шасси.
-    /// </summary>
-    public int NumberChassis { get; set; }
   }
 }
