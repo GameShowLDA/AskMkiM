@@ -97,13 +97,6 @@ namespace MainWindowProgram
       AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
 
-    private void Window_Activated(object sender, EventArgs e)
-    {
-      if (Application.Current.Windows.OfType<SearchResultsWindow>().FirstOrDefault() is SearchResultsWindow resultsWindow)
-      {
-        resultsWindow.Topmost = true;
-        resultsWindow.Topmost = false; 
-      }
-    }
+    
   }
 }

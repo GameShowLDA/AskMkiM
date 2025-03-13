@@ -46,43 +46,55 @@ namespace UI.Components
     /// </summary>
     private void GridSplitter_DragDelta(object sender, DragDeltaEventArgs e)
     {
-      if (SearchResultsRow == null) return; // Предотвращает исключение
-
-      double newHeight = SearchResultsRow.Height.Value - e.VerticalChange;
-
-      if (newHeight > 50) // Минимальная высота области результатов поиска
+      if (SearchResultsRow == null)
       {
-        SearchResultsRow.Height = new GridLength(newHeight);
+        return;
+      }
+
+      double totalHeight = ActualHeight; 
+      double editorsHeight = MultiEditor.ActualHeight; 
+      double minEditorsHeight = 100;
+      double splitterHeight = MultiWindowSplitter.ActualHeight;
+      SearchResultsRow.MinHeight = 35;
+
+      double maxSearchResultsHeight = totalHeight - minEditorsHeight - splitterHeight;
+      double newSearchHeight = totalHeight - editorsHeight - splitterHeight;
+
+      if (newSearchHeight > maxSearchResultsHeight)
+      {
+        newSearchHeight = maxSearchResultsHeight;
+      }
+
+      SearchResultsRow.Height = new GridLength(newSearchHeight, GridUnitType.Pixel);
+    }
+
+    /// <summary>
+    /// Скрывает или отображает панель результатов поиска при нажатии на кнопку "свернуть".
+    /// </summary>
+    private void minimizeButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      if (ResultsDataGrid.Visibility == Visibility.Visible)
+      {
+        SearchResultsRow.Height = new GridLength(35);
+        ResultsDataGrid.Visibility = Visibility.Collapsed;
+        MultiWindowSplitter.Visibility = Visibility.Collapsed;
+      }
+      else
+      {
+        SearchResultsRow.Height = new GridLength(200);
+        ResultsDataGrid.Visibility = Visibility.Visible;
+        MultiWindowSplitter.Visibility = Visibility.Visible;
       }
     }
 
-    /// <summary>
-    /// Показывает панель результатов поиска.
-    /// </summary>
-    public void ShowSearchResults(string searchText)
-    {
-      SearchResultsRow.Height = new GridLength(200);
-      SearchResults.Visibility = Visibility.Visible;
-      ShowResultsPanel.Visibility = Visibility.Collapsed;
-    }
-
-    /// <summary>
-    /// Скрывает панель результатов поиска.
-    /// </summary>
-    public void HideSearchResults()
+    private void exitButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       SearchResultsRow.Height = new GridLength(0);
+      SearchResultsRow.MinHeight = 0;
       SearchResults.Visibility = Visibility.Collapsed;
-      ShowResultsPanel.Visibility = Visibility.Visible;
+      MultiWindowSplitter.Visibility = Visibility.Collapsed;
     }
 
-    /// <summary>
-    /// Разворачивает панель результатов при клике на кнопку "Результаты поиска".
-    /// </summary>
-    private void ShowResultsPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-      ShowSearchResults("Последний запрос");
-    }
 
     public void AddControl(string name, UserControl userControl)
     {
@@ -139,25 +151,12 @@ namespace UI.Components
       MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
-    /// <summary>
-    /// Обработчик поиска текста в активном редакторе.
-    /// </summary>
-    private void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
-    {
-      if (MultiEditor == null)
-      {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        return;
-      }
-      MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
-    }
-
     public void OnSearchWindowClosing()
     {
       MultiEditor.OnSearchWindowClosing();
     }
 
-    public void ShowSearchResults(Dictionary<string, Dictionary<int, string>> results)
+    public void ShowSearchResults(string searchText, Dictionary<string, Dictionary<int, string>> results)
     {
       List<SearchResultItem> items = new List<SearchResultItem>();
 
@@ -173,11 +172,11 @@ namespace UI.Components
           });
         }
       }
-
       ResultsDataGrid.ItemsSource = items;
+      searchResultsTextBlock.Text = $"Результаты поиска по \"{searchText}\". Найдено {items.Count} строк";
+      MultiWindowSplitter.Visibility = Visibility.Visible;
       SearchResultsRow.Height = new GridLength(200);
       SearchResults.Visibility = Visibility.Visible;
-      ShowResultsPanel.Visibility = Visibility.Collapsed;
     }
 
     private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -201,6 +200,11 @@ namespace UI.Components
       {
         MultiEditor.SearchResultsReady += ShowSearchResults;
       }
+    }
+
+    private void ResultsDataGrid_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+    {
+      e.Handled = true;
     }
 
   }

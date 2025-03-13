@@ -4,56 +4,141 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components"
+             xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
+             xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
              mc:Ignorable="d" 
+             Background="Transparent"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <!-- Верхняя панель -->
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <!-- Контейнер редакторов -->
-            <RowDefinition Height="5"/>
+            <RowDefinition Height="*" MinHeight="100"/>
             <!-- Разделитель -->
-            <RowDefinition Height="0" x:Name="SearchResultsRow"/>
+            <RowDefinition Height="5"/>
             <!-- Окно поиска -->
+            <RowDefinition Height="0" x:Name="SearchResultsRow"/>
         </Grid.RowDefinitions>
 
         <!-- Верхняя панель -->
-        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Gray" Orientation="Horizontal"/>
+        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Transparent" Orientation="Horizontal"/>
 
         <!-- Контейнер для редакторов -->
         <local:MultiEditorControl x:Name="MultiEditor" Grid.Row="1"/>
 
-            <!-- Разделитель -->
-        <GridSplitter Grid.Row="2" Height="5" Background="Gray"
+        <!-- Разделитель -->
+        <GridSplitter x:Name="MultiWindowSplitter" Grid.Row="2" Height="5" Background="{StaticResource IsCheckedColorSolidColorBrush}"
                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                      ShowsPreview="True" DragDelta="GridSplitter_DragDelta"/>
+                      ShowsPreview="True" DragDelta="GridSplitter_DragDelta" Visibility="Collapsed"/>
 
         <!-- Окно результатов поиска -->
-        <Border x:Name="SearchResults" Grid.Row="3" Background="LightGray" Visibility="Collapsed">
-            <DataGrid x:Name="ResultsDataGrid"
-          AutoGenerateColumns="False"
-          CanUserAddRows="False"
-          CanUserDeleteRows="False"
-          IsReadOnly="True"
-          ClipboardCopyMode="None"
-          SelectionMode="Single"
-          HeadersVisibility="Column"
-          Background="Transparent"
-          PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Документ" Binding="{Binding FileName}" Width="200"/>
-                    <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
-                    <DataGridTextColumn Header="Текст" Binding="{Binding LineText}" Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+        <Border x:Name="SearchResults"
+        Grid.Row="3"
+        Background="Transparent"
+        Visibility="Collapsed"
+        BorderThickness="1"
+        BorderBrush="Gray"
+        CornerRadius="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <!-- Верхняя панель с кнопками -->
+                    <RowDefinition Height="30"/>
+                    <!-- Фиксированная шапка DataGrid -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Прокручиваемая область DataGrid -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        <!-- Кнопка "Результаты поиска" (когда панель скрыта) -->
-        <Border x:Name="ShowResultsPanel" Grid.Row="3" Height="30" Background="Gray"
-                Visibility="Collapsed" MouseDown="ShowResultsPanel_MouseDown">
-            <TextBlock Text="Результаты поиска для: ..." FontSize="14" Foreground="White"
-                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <!-- Верхняя панель с заголовком и кнопками -->
+                <Grid Background="{StaticResource SecondarySolidColorBrush}" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="30"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock x:Name="searchResultsTextBlock" Text="Результаты поиска"
+                       Foreground="{StaticResource ForegroundSolidColorBrush}"
+                       FontSize="15"
+                       VerticalAlignment="Center"
+                       Margin="10,0,0,0"/>
+
+                    <local:WindowButtons 
+                        Style="{StaticResource WindowsButtonStyle}"
+                        x:Name="minimizeButton"
+                        ChoiceElement="Minimize"  
+                        Grid.Column="1"
+                        Width="30"
+                        Height="30"
+                        HorizontalAlignment="Right"
+                        PreviewMouseDown="minimizeButton_PreviewMouseDown"
+                        />
+
+                    <local:WindowButtons 
+                        Style="{StaticResource WindowsButtonStyle}"
+                        x:Name="exitButton"
+                        ChoiceElement="Exit"  
+                        Grid.Column="2"
+                        Width="30"
+                        Height="30"
+                        HorizontalAlignment="Right"
+                        PreviewMouseDown="exitButton_PreviewMouseDown"
+                        />
+
+                </Grid>
+
+                <!-- Фиксированная шапка DataGrid -->
+                <DataGrid x:Name="ResultsHeaderGrid"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    IsReadOnly="True"
+                    HeadersVisibility="Column"
+                    RowHeaderWidth="0"
+                    Background="Transparent"
+                    Grid.Row="1"
+                    BorderThickness="0"
+                    ScrollViewer.CanContentScroll="True"
+                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                          CanUserResizeColumns="False"
+                          CanUserReorderColumns="False"
+                          >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Документ" Binding="{Binding FileName}" Width="200"/>
+                        <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
+                        <DataGridTextColumn Header="Текст" Binding="{Binding LineText}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <DataGrid x:Name="ResultsDataGrid"
+                          Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        IsReadOnly="True"
+                        HeadersVisibility="None"
+                        RowHeaderWidth="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        VerticalAlignment="Stretch"
+                        EnableRowVirtualization="False"
+                        PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick"
+                        ScrollViewer.CanContentScroll="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding FileName}" Width="200" />
+                        <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
+                        <DataGridTextColumn Binding="{Binding LineText}" Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>
