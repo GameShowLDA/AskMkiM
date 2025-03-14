@@ -523,7 +523,10 @@ namespace UI.Components
         }
         else
         {
-          FindAllOccurrences(fullText.Values.First(), searchText, wholeWord, caseWord, searchArea);
+          var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+          var pageIndex = openPages.IndexOf(activeTab);
+          var pageName = openPages[pageIndex].Text;
+          FindAllOccurrences(fullText[pageName], searchText, wholeWord, caseWord, searchArea);
         }
       }
       else
@@ -560,7 +563,10 @@ namespace UI.Components
           {
             var pageText = textEditor.Text;
             foundResultsDictionary = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
-            foundInOpenedFiles.Add(page.Text, foundResultsDictionary);
+            if (foundResultsDictionary.Count > 0)
+            {
+              foundInOpenedFiles.Add(page.Text, foundResultsDictionary);
+            }
           }
         }
       }
@@ -668,11 +674,16 @@ namespace UI.Components
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     private void InitializeSearch(Dictionary<string, string> fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
+      bool significantSearchParametersChanged = !string.Equals(_searchParameters, searchParameters)
+        && !((string.Equals(_searchParameters, "FindPrevious") && string.Equals(searchParameters, "FindNext"))
+        || (string.Equals(_searchParameters, "FindNext") && string.Equals(searchParameters, "FindPrevious")));
+
       if ((!Enumerable.SequenceEqual(_fullText, fullText))
-              || (!string.Equals(_searchText, searchText)
+              || (!string.Equals(_searchText, searchText))
+              || significantSearchParametersChanged
               || _wholeWord != wholeWord
               || _caseWord != caseWord
-              || _searchArea != searchArea))
+              || _searchArea != searchArea)
       {
         _fullText = fullText;
         _searchText = searchText;
@@ -816,11 +827,26 @@ namespace UI.Components
         ShowControl(userControls[nextIndex], nextPage);
         return _textEditor;
       }
-      if (nextIndex > openPages.Count)
+      if (nextIndex > openPages.Count - 1)
       {
-        var nextPage = openPages[0];
-        ShowControl(userControls[0], nextPage);
-        return 0;
+        nextIndex = 0;
+        _textEditor = -1;
+        var nextPage = openPages[nextIndex];
+        while (!(userControls[nextIndex] is TextEditorUI))
+        {
+          nextIndex++;
+          nextPage = openPages[nextIndex];
+        }
+        if (nextIndex >= openPages.Count)
+        {
+          return -1;
+        }
+        else
+        {
+          _textEditor++;
+          ShowControl(userControls[nextIndex], nextPage);
+          return _textEditor;
+        }
       }
       return -1;
     }

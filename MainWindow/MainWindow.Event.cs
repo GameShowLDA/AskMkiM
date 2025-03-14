@@ -197,7 +197,7 @@ namespace MainWindowProgram
 
     private void OpenFileFromEvent()
     {
-      OpenFile().Wait();
+      OpenFile().ConfigureAwait(false);
     }
 
     private void CompareMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
