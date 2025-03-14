@@ -46,7 +46,7 @@ namespace Mode.ServicesTest.MINT
       // Вызываем UpdateMintUI(false, skipLog: true), как в Uksh
       // чтобы зафиксировать, что пока всё выключено
       // (то есть "устройство не инициализировано").
-      _ = UpdateMintUI(false, skipLog: true);
+      //_ = UpdateMintUI(false, skipLog: true);
     }
   }
 }

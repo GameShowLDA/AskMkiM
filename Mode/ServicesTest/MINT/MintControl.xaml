@@ -53,7 +53,8 @@
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"
-                        PreviewMouseDown="BtnMintReset_PreviewMouseDown" />
+                        PreviewMouseDown="BtnMintReset_PreviewMouseDown"
+                        IsEnabled="False"/>
 
                 <!-- (3) Регулятор напряжения ПИН -->
                 <StackPanel Orientation="Vertical" Margin="0,0,0,15">
@@ -70,11 +71,13 @@
                                 TickFrequency="1"
                                 IsSnapToTickEnabled="True"
                                 Margin="0,0,10,0"
-                                ValueChanged="SliderMintPinVoltage_ValueChanged" />
+                                ValueChanged="SliderMintPinVoltage_ValueChanged" 
+                                IsEnabled="False"/>
                         <TextBox x:Name="TextMintPinVoltage"
                                  Grid.Column="1"
                                  PreviewTextInput="TextMintPinVoltage_PreviewTextInput"
-                                 TextChanged="TextMintPinVoltage_TextChanged" />
+                                 TextChanged="TextMintPinVoltage_TextChanged" 
+                                 IsEnabled="False"/>
                     </Grid>
                 </StackPanel>
 
@@ -93,11 +96,13 @@
                                 TickFrequency="1"
                                 IsSnapToTickEnabled="True"
                                 Margin="0,0,10,0"
-                                ValueChanged="SliderMintPitAmperage_ValueChanged" />
+                                ValueChanged="SliderMintPitAmperage_ValueChanged" 
+                                IsEnabled="False"/>
                         <TextBox x:Name="TextMintPitAmperage"
                                  Grid.Column="1"
                                  PreviewTextInput="TextMintPitAmperage_PreviewTextInput"
-                                 TextChanged="TextMintPitAmperage_TextChanged" />
+                                 TextChanged="TextMintPitAmperage_TextChanged" 
+                                 IsEnabled="False"/>
                     </Grid>
                 </StackPanel>
 
@@ -107,18 +112,21 @@
                                  Content="k"
                                  GroupName="MintGroundGroup"
                                  Margin="0,0,10,0"
-                                 PreviewMouseDown="RbMintK_PreviewMouseDown" />
+                                 PreviewMouseDown="RbMintK_PreviewMouseDown" 
+                                 IsEnabled="False"/>
                     <RadioButton x:Name="RbMintKplus"
                                  Content="k+"
                                  GroupName="MintGroundGroup"
                                  Margin="0,0,10,0"
-                                 PreviewMouseDown="RbMintKplus_PreviewMouseDown" />
+                                 PreviewMouseDown="RbMintKplus_PreviewMouseDown" 
+                                 IsEnabled="False"/>
                     <Button x:Name="BtnMintGround"
                             Content="Заземлить шину"
                             Width="150"
                             Height="35"
                             Style="{StaticResource MetrologyButtonStyle}"
-                            PreviewMouseDown="BtnMintGround_PreviewMouseDown" />
+                            PreviewMouseDown="BtnMintGround_PreviewMouseDown" 
+                            IsEnabled="False"/>
                 </StackPanel>
 
                 <!-- (6) Источник питания (12В / 48В) -->
@@ -130,12 +138,14 @@
                                  Content="12В"
                                  GroupName="MintPowerSourceGroup"
                                  Checked="RbMintPower12v_Checked"
-                                 Margin="0,5,10,0" />
+                                 Margin="0,5,10,0" 
+                                 IsEnabled="False"/>
                     <RadioButton x:Name="RbMintPower48v"
                                  Content="48В"
                                  GroupName="MintPowerSourceGroup"
                                  Checked="RbMintPower48v_Checked"
-                                 Margin="0,5,0,0"/>
+                                 Margin="0,5,0,0"
+                                 IsEnabled="False"/>
                 </StackPanel>
 
                 <!-- (7) Кнопки ПИТ и ПИН (вертикально) -->
@@ -146,13 +156,15 @@
                             Height="35"
                             Margin="0,0,0,10"
                             Style="{StaticResource MetrologyButtonStyle}"
-                            PreviewMouseDown="BtnMintPit_PreviewMouseDown" />
+                            PreviewMouseDown="BtnMintPit_PreviewMouseDown" 
+                            IsEnabled="False"/>
                     <Button x:Name="BtnMintPin"
                             Content="Подключение ПИН"
                             Width="200"
                             Height="35"
                             Style="{StaticResource MetrologyButtonStyle}"
-                            PreviewMouseDown="BtnMintPin_PreviewMouseDown" />
+                            PreviewMouseDown="BtnMintPin_PreviewMouseDown"
+                            IsEnabled="False"/>
                 </StackPanel>
             </StackPanel>
 

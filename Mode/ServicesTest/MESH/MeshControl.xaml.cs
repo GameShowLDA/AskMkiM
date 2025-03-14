@@ -41,7 +41,7 @@ namespace Mode.ServicesTest.MESH
 
       // Сразу вызываем UpdateMeshUI(false, skipLog:true), 
       // чтобы зафиксировать стартовое состояние (кнопка питания отключена)
-      _ = UpdateMeshUI(false, true);
+      //_ = UpdateMeshUI(false, true);
     }
   }
 }

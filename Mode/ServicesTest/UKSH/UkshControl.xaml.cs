@@ -56,7 +56,6 @@ namespace Mode.ServicesTest.UKSH
       IcRelays.ItemsSource = Relays;
 
       FilterRelays("");   // показать все
-      UpdateUkshUI(false, skipLog: true); // начальное состояние
     }
 
     private void InitializeRelays()

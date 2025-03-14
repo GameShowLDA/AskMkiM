@@ -41,7 +41,7 @@ namespace Mode.ServicesTest.MKR
     /// <summary>
     /// Сбрасывает устройство, приводя всё к начальному состоянию.
     /// </summary>
-    public async Task ResetDeviceAsync()
+    public async Task ResetMkrDevice()
     {
       // Если было подключено — отключаем
       if (isConnected)
@@ -71,7 +71,7 @@ namespace Mode.ServicesTest.MKR
     /// </summary>
     /// <param name="enable">True - включить, False - выключить.</param>
     /// <param name="skipLog">Если true, не выводить лог.</param>
-    public async Task UpdateStateMKRAsync(bool enable, bool skipLog = false)
+    public async Task UpdateMkrUI(bool enable, bool skipLog = false)
     {
       isMkrInitialized = enable;
 

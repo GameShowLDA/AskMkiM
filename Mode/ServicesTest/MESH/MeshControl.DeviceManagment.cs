@@ -19,8 +19,8 @@ namespace Mode.ServicesTest.MESH
 
       CmbMeshDevice.SelectedItem = "<пусто>";
       // Устройство не выбрано => кнопка питания неактивна
-      BtnMeshPower.IsEnabled = false;
-      BtnMeshPower.Content = "Включение питания";
+      //BtnMeshPower.IsEnabled = false;
+      //BtnMeshPower.Content = "Включение питания";
     }
 
     /// <summary>

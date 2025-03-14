@@ -28,10 +28,10 @@ namespace Mode.ServicesTest.MKR
       if (string.IsNullOrEmpty(selectedItem) || selectedItem == "<пусто>")
       {
         // Если выбран "<пусто>", сбрасываем устройство
-        await ResetDeviceAsync();
+        await ResetMkrDevice();
         isMkrInitialized = false;
         currentDeviceName = string.Empty;
-        await UpdateStateMKRAsync(false, skipLog: true);
+        await UpdateMkrUI(false, skipLog: true);
         await ShowMessageAsync("Устройство отключено");
       }
       else
@@ -39,11 +39,11 @@ namespace Mode.ServicesTest.MKR
         // Если выбран другой элемент, сбрасываем предыдущее состояние (если было) и разблокируем все кнопки
         if (isMkrInitialized)
         {
-          await ResetDeviceAsync();
+          await ResetMkrDevice();
         }
         isMkrInitialized = true;
         currentDeviceName = selectedItem;
-        await UpdateStateMKRAsync(true, skipLog: false);
+        await UpdateMkrUI(true, skipLog: false);
       }
     }
 
@@ -52,7 +52,7 @@ namespace Mode.ServicesTest.MKR
     /// </summary>
     private async void BtnMkrReset_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      await ResetDeviceAsync();
+      await ResetMkrDevice();
     }
 
     /// <summary>
