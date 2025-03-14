@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mode.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,27 @@ namespace Mode.ServicesTest.MESH
   /// </summary>
   public partial class MeshControl : UserControl
   {
+    private bool isMeshInitialized = false;
+    private string currentDeviceName = string.Empty;
+
+    // ViewModel для ComboBox
+    private ViewModel comboBoxViewModel;
+
     public MeshControl()
     {
       InitializeComponent();
+
+      // Инициализируем ViewModel
+      comboBoxViewModel = new ViewModel();
+      // Привязываем к DataContext, чтобы ComboBoxItems / SelectedComboBoxItem стали доступны
+      this.DataContext = comboBoxViewModel;
+
+      // Начальная настройка UI (не инициализировано)
+      InitializeMeshUI();
+
+      // Сразу вызываем UpdateMeshUI(false, skipLog:true), 
+      // чтобы зафиксировать стартовое состояние (кнопка питания отключена)
+      _ = UpdateMeshUI(false, true);
     }
   }
 }

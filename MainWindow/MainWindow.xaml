@@ -168,10 +168,21 @@
                     />
 
                     <MenuItem 
-                        Header="Модуль УКШ  " 
+                        Header="Модуль УКШ" 
                         Name="ModuleUkshMenuItem"
                         PreviewMouseDown="Uksh_Handler" 
                     />
+
+                    <MenuItem 
+                        Header="Модуль МИНТ" 
+                        Name="ModuleMintMenuItem"
+                        PreviewMouseDown="Mint_Handler" />
+
+                    <MenuItem 
+                        Header="Модуль МеШ" 
+                        Name="ModuleMeshMenuItem"
+                        PreviewMouseDown="Mesh_Handler" />
+
 
                 </MenuItem>
 

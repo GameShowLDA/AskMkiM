@@ -9,6 +9,8 @@ using Mode.Metrology.IE;
 using Mode.Metrology.CI;
 using Mode.ServicesTest.MKR;
 using Mode.ServicesTest.UKSH;
+using Mode.ServicesTest.MINT;
+using Mode.ServicesTest.MESH;
 
 namespace MainWindowProgram
 {
@@ -147,6 +149,10 @@ namespace MainWindowProgram
     private async void Mkr_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MkrControl(), "Модуль МКР350");
 
     private async void Uksh_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new UkshControl(), "Модуль УКШ");
+
+    private async void Mint_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MintControl(), "Модуль МИНТ");
+
+    private async void Mesh_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MeshControl(), "Модуль МеШ");
 
     #endregion
 
