@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mode.ServicesTest.MKR
+﻿namespace Mode.ServicesTest.MKR
 {
+  /// <summary>
+  /// Управляет состоянием устройства МКР, включая его инициализацию, сброс параметров и обновление пользовательского интерфейса.
+  /// </summary>
   public partial class MkrControl
   {
     /// <summary>
     /// Подключает или отключает устройство (вместо ToggleModuleButton).
+    /// Возвращает текущее состояние подключения: <c>true</c> – устройство подключено, <c>false</c> – отключено.
     /// </summary>
+    /// <returns>Состояние подключения устройства.</returns>
     public async Task<bool> AttemptDeviceConnectionAsync()
     {
       if (!isMkrInitialized)
@@ -23,43 +22,42 @@ namespace Mode.ServicesTest.MKR
 
       if (isConnected)
       {
-        // Условно "ЗАПУСТИЛИ"
         BtnConnect.Content = "ОСТАНОВИТЬ";
         await ShowMessageAsync($"Подключение измерителя: {currentDeviceName}");
       }
       else
       {
-        // "ОСТАНОВИЛИ"
         BtnConnect.Content = "ЗАПУСТИТЬ";
         await ShowMessageAsync($"Отключение измерителя: {currentDeviceName}");
       }
 
-      // Возвращаем текущее состояние
       return isConnected;
     }
 
     /// <summary>
-    /// Сбрасывает устройство, приводя всё к начальному состоянию.
+    /// Сбрасывает устройство, приводя его к начальному состоянию.
+    /// Осуществляется отключение подключения, сброс состояния радиокнопок и точек.
     /// </summary>
     public async Task ResetMkrDevice()
     {
-      // Если было подключено — отключаем
       if (isConnected)
       {
         await AttemptDeviceConnectionAsync();
       }
 
-      offA.IsChecked = true;
-      offB.IsChecked = true;
+      RbOffA.IsChecked = true;
+      RbOffB.IsChecked = true;
 
-      // Сброс точек
-      foreach (var point in points)
+      // Сброс состояния точек с использованием DeferRefresh для минимизации обновлений UI.
+      using (pointsView.DeferRefresh())
       {
-        point.A = false;
-        point.B = false;
+        foreach (var point in points)
+        {
+          point.A = false;
+          point.B = false;
+        }
       }
 
-      // Логирование
       if (!string.IsNullOrEmpty(currentDeviceName))
         await ShowMessageAsync($"Сброс {currentDeviceName}");
       else
@@ -67,10 +65,16 @@ namespace Mode.ServicesTest.MKR
     }
 
     /// <summary>
-    /// Включает/выключает доступность некоторых кнопок и полей.
+    /// Включает или отключает доступность элементов управления в зависимости от состояния устройства.
+    /// Обновляет состояние кнопок, поля поиска, списка точек и ComboBox.
     /// </summary>
-    /// <param name="enable">True - включить, False - выключить.</param>
-    /// <param name="skipLog">Если true, не выводить лог.</param>
+    /// <param name="enable">
+    /// Если <c>true</c>, элементы управления становятся доступными (устройство инициализировано);
+    /// если <c>false</c>, они отключаются.
+    /// </param>
+    /// <param name="skipLog">
+    /// Если <c>true</c>, логирование изменений состояния не производится.
+    /// </param>
     public async Task UpdateMkrUI(bool enable, bool skipLog = false)
     {
       isMkrInitialized = enable;
@@ -78,13 +82,12 @@ namespace Mode.ServicesTest.MKR
       BtnMkrReset.IsEnabled = enable;
       BtnConnect.IsEnabled = enable;
 
-      ToggleRadioButtonState("BusA", enable);
-      ToggleRadioButtonState("BusB", enable);
+      ToggleRadioButtonState(enable);
 
       SearchBox.IsEnabled = enable;
       PointsListBox.IsEnabled = enable;
 
-      // Если подключено, ComboBox отключаем
+      // Если устройство подключено, отключаем выбор устройства в ComboBox.
       SerialNumComboBox.IsEnabled = !isConnected;
 
       if (!skipLog)
@@ -93,10 +96,9 @@ namespace Mode.ServicesTest.MKR
         {
           await ShowMessageAsync($"Инициализация {currentDeviceName}");
         }
-        else
+        else if (!string.IsNullOrEmpty(currentDeviceName))
         {
-          if (!string.IsNullOrEmpty(currentDeviceName))
-            await ShowMessageAsync($"Отключение {currentDeviceName}");
+          await ShowMessageAsync($"Отключение {currentDeviceName}");
         }
       }
     }

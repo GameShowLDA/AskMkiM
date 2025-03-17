@@ -37,7 +37,7 @@
                                   Grid.Column="1"
                                   Margin="10"
                                   Height="30"
-                                  Width="120"
+                                  Width="180"
                                   Style="{StaticResource CustomComboBoxStyle}"
                                   SelectionChanged="CmbUkshInit_SelectionChanged" />
                     </Grid>
@@ -46,7 +46,7 @@
                 <!-- Кнопка "Сброс устройства" -->
                 <Button x:Name="BtnUkshReset"
                         Content="Сброс устройства"
-                        Width="200"
+                        Width="310"
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"
@@ -56,7 +56,7 @@
                 <!-- Кнопка "ЗАПУСТИТЬ" -->
                 <Button x:Name="BtnUkshStart"
                         Content="ЗАПУСТИТЬ"
-                        Width="200"
+                        Width="310"
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"
@@ -86,7 +86,7 @@
              <DataTemplate>
                  <Grid Margin="2">
                      <!-- Кнопка для конкретного реле -->
-                     <Button Width="80" Height="30"
+                     <Button Width="90" Height="30"
      PreviewMouseDown="BtnRelay_PreviewMouseDown">
 
                          <!-- Стилизация кнопки: по умолчанию светло-серая, 

@@ -10,6 +10,7 @@ namespace Mode.Models
   public class RelayModel : INotifyPropertyChanged
   {
     public short RelayNum { get; private set; }
+    public string RelayNumString { get; private set; }
     private bool _isOn;
     public bool IsOn
     {
@@ -26,6 +27,7 @@ namespace Mode.Models
     public RelayModel(short number)
     {
       RelayNum = number;
+      RelayNumString = number.ToString();
     }
     public event PropertyChangedEventHandler PropertyChanged;
     private void OnPropertyChanged(string propName)

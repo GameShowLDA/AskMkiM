@@ -146,13 +146,45 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiControl(), "Режим СИ");
 
-    private async void Mkr_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MkrControl(), "Модуль МКР350");
+    #endregion
 
-    private async void Uksh_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new UkshControl(), "Модуль УКШ");
+    #region Сервис
 
-    private async void Mint_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MintControl(), "Модуль МИНТ");
+    /// <summary>
+    /// Обработчик события нажатия, который добавляет в контейнер multiEditors пользовательский элемент управления для МКР350.
+    /// Создает новый экземпляр <see cref="MkrControl"/> и вызывает асинхронный метод <see cref="AddControlAsync"/> с наименованием "Модуль МКР350".
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void Mkr_Handler(object sender, MouseButtonEventArgs e)
+        => await AddControlAsync(new MkrControl(), "Модуль МКР350");
 
-    private async void Mesh_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new MeshControl(), "Модуль МеШ");
+    /// <summary>
+    /// Обработчик события нажатия, который добавляет в контейнер multiEditors пользовательский элемент управления для модуля УКШ.
+    /// Создает новый экземпляр <see cref="UkshControl"/> и вызывает асинхронный метод <see cref="AddControlAsync"/> с наименованием "Модуль УКШ".
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void Uksh_Handler(object sender, MouseButtonEventArgs e)
+        => await AddControlAsync(new UkshControl(), "Модуль УКШ");
+
+    /// <summary>
+    /// Обработчик события нажатия, который добавляет в контейнер multiEditors пользовательский элемент управления для модуля МИНТ.
+    /// Создает новый экземпляр <see cref="MintControl"/> и вызывает асинхронный метод <see cref="AddControlAsync"/> с наименованием "Модуль МИНТ".
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void Mint_Handler(object sender, MouseButtonEventArgs e)
+        => await AddControlAsync(new MintControl(), "Модуль МИНТ");
+
+    /// <summary>
+    /// Обработчик события нажатия, который добавляет в контейнер multiEditors пользовательский элемент управления для модуля МеШ.
+    /// Создает новый экземпляр <see cref="MeshControl"/> и вызывает асинхронный метод <see cref="AddControlAsync"/> с наименованием "Модуль МеШ".
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void Mesh_Handler(object sender, MouseButtonEventArgs e)
+        => await AddControlAsync(new MeshControl(), "Модуль МеШ");
 
     #endregion
 

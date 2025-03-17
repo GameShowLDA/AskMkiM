@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
 using System.Globalization;
@@ -11,11 +6,17 @@ using System.Text.RegularExpressions;
 
 namespace Mode.ServicesTest.MINT
 {
+  /// <summary>
+  /// Обработчики событий для управления устройством MINT.
+  /// </summary>
   public partial class MintControl
   {
     /// <summary>
-    /// ComboBox: если "<пусто>", сбрасываем, иначе инициализируем
+    /// Обрабатывает изменение выбранного элемента в ComboBox для выбора устройства.
+    /// Если выбран элемент "<пусто>" или пустая строка, выполняется сброс параметров устройства.
     /// </summary>
+    /// <param name="sender">ComboBox, содержащий список устройств.</param>
+    /// <param name="e">Аргументы события изменения выбора.</param>
     private async void CmbMintDevice_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       var selectedItem = CmbMintDevice.SelectedItem as string;
@@ -23,21 +24,18 @@ namespace Mode.ServicesTest.MINT
       {
         if (isDeviceInitialized)
         {
-          // Сброс параметров
           ResetMintParameters();
           await ShowMessageAsync("Устройство отключено");
         }
         isDeviceInitialized = false;
         currentDeviceName = string.Empty;
 
-        // Переводим UI в самое начало
+        // Переводим UI в исходное состояние.
         InitializeMintUI();
-        // Можно вызвать UpdateMintUI(false, skipLog:true) чтобы всё отключить.
         await UpdateMintUI(false, skipLog: true);
       }
       else
       {
-        // Если уже инициализировано другое устройство, сброс
         if (isDeviceInitialized && currentDeviceName != selectedItem)
         {
           ResetMintParameters();
@@ -45,18 +43,18 @@ namespace Mode.ServicesTest.MINT
         }
         isDeviceInitialized = true;
         currentDeviceName = selectedItem;
-
-        // Включаем всё и логируем
         await UpdateMintUI(true, skipLog: false);
       }
     }
 
     /// <summary>
-    /// Кнопка "Сброс устройства"
+    /// Обрабатывает нажатие кнопки "Сброс устройства".
+    /// Выполняет сброс параметров и выводит соответствующее сообщение.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается Button.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnMintReset_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      // Сброс параметров
       ResetMintParameters();
       if (!string.IsNullOrEmpty(currentDeviceName))
         await ShowMessageAsync($"Сброс {currentDeviceName}");
@@ -64,7 +62,14 @@ namespace Mode.ServicesTest.MINT
         await ShowMessageAsync("Сброс устройства (не выбрано имя)");
     }
 
-    // ----------- Слайдер/ТекстБокс для ПИН -----------
+    #region Регулятор напряжения ПИН
+
+    /// <summary>
+    /// Обрабатывает изменение значения слайдера для напряжения ПИН.
+    /// Обновляет текстовое поле и выводит сообщение с новым значением.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается Slider.</param>
+    /// <param name="e">Аргументы события изменения значения.</param>
     private async void SliderMintPinVoltage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       if (isDeviceInitialized)
@@ -75,11 +80,16 @@ namespace Mode.ServicesTest.MINT
       }
     }
 
-    private void TextMintPinVoltage_TextChanged(object sender, TextChangedEventArgs e)
+    /// <summary>
+    /// Обновляет значение слайдера напряжения ПИН на основе текста из TextMintPinVoltage.
+    /// Ограничивает значение в диапазоне 0–100.
+    /// </summary>
+    private void UpdateSliderFromTextBox()
     {
       if (isDeviceInitialized)
       {
-        if (double.TryParse(TextMintPinVoltage.Text.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double val))
+        if (double.TryParse(TextMintPinVoltage.Text.Replace(',', '.'),
+                            NumberStyles.Float, CultureInfo.InvariantCulture, out double val))
         {
           if (val < 0) val = 0;
           if (val > 100) val = 100;
@@ -88,14 +98,53 @@ namespace Mode.ServicesTest.MINT
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие потери фокуса TextMintPinVoltage.
+    /// Вызывает обновление значения слайдера.
+    /// </summary>
+    /// <param name="sender">TextBox для ввода напряжения ПИН.</param>
+    /// <param name="e">Аргументы события.</param>
+    private void TextMintPinVoltage_LostFocus(object sender, RoutedEventArgs e)
+    {
+      UpdateSliderFromTextBox();
+    }
+
+    /// <summary>
+    /// Обрабатывает нажатие клавиши в TextMintPinVoltage.
+    /// При нажатии клавиши Enter обновляет значение слайдера.
+    /// </summary>
+    /// <param name="sender">TextBox для ввода напряжения ПИН.</param>
+    /// <param name="e">Аргументы события нажатия клавиши.</param>
+    private void TextMintPinVoltage_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.Enter)
+      {
+        UpdateSliderFromTextBox();
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает предварительный ввод в TextMintPinVoltage.
+    /// Разрешает ввод только цифр, точки и запятой.
+    /// </summary>
+    /// <param name="sender">TextBox для ввода напряжения ПИН.</param>
+    /// <param name="e">Аргументы события ввода текста.</param>
     private void TextMintPinVoltage_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-      // Разрешаем только цифры, точку, запятую
       if (!Regex.IsMatch(e.Text, @"^[0-9\.,]+$"))
         e.Handled = true;
     }
 
-    // ----------- Слайдер/ТекстБокс для ПИТ -----------
+    #endregion
+
+    #region Регулятор силы тока ПИТ
+
+    /// <summary>
+    /// Обрабатывает изменение значения слайдера для силы тока ПИТ.
+    /// Обновляет текстовое поле и выводит сообщение с новым значением.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается Slider.</param>
+    /// <param name="e">Аргументы события изменения значения.</param>
     private async void SliderMintPitAmperage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       if (isDeviceInitialized)
@@ -106,11 +155,16 @@ namespace Mode.ServicesTest.MINT
       }
     }
 
-    private void TextMintPitAmperage_TextChanged(object sender, TextChangedEventArgs e)
+    /// <summary>
+    /// Обновляет значение слайдера силы тока ПИТ на основе текста из TextMintPitAmperage.
+    /// Ограничивает значение в диапазоне 0–100.
+    /// </summary>
+    private void UpdateSliderFromTextBox_Pit()
     {
       if (isDeviceInitialized)
       {
-        if (double.TryParse(TextMintPitAmperage.Text.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double val))
+        if (double.TryParse(TextMintPitAmperage.Text.Replace(',', '.'),
+                            NumberStyles.Float, CultureInfo.InvariantCulture, out double val))
         {
           if (val < 0) val = 0;
           if (val > 100) val = 100;
@@ -119,23 +173,75 @@ namespace Mode.ServicesTest.MINT
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие потери фокуса TextMintPitAmperage.
+    /// Вызывает обновление значения слайдера.
+    /// </summary>
+    /// <param name="sender">TextBox для ввода силы тока ПИТ.</param>
+    /// <param name="e">Аргументы события.</param>
+    private void TextMintPitAmperage_LostFocus(object sender, RoutedEventArgs e)
+    {
+      UpdateSliderFromTextBox_Pit();
+    }
+
+    /// <summary>
+    /// Обрабатывает нажатие клавиши в TextMintPitAmperage.
+    /// При нажатии клавиши Enter обновляет значение слайдера.
+    /// </summary>
+    /// <param name="sender">TextBox для ввода силы тока ПИТ.</param>
+    /// <param name="e">Аргументы события нажатия клавиши.</param>
+    private void TextMintPitAmperage_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.Enter)
+      {
+        UpdateSliderFromTextBox_Pit();
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает предварительный ввод в TextMintPitAmperage.
+    /// Разрешает ввод только цифр, точки и запятой.
+    /// </summary>
+    /// <param name="sender">TextBox для ввода силы тока ПИТ.</param>
+    /// <param name="e">Аргументы события ввода текста.</param>
     private void TextMintPitAmperage_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-      if (!Regex.IsMatch(e.Text, @"^[0-9\.,]+$"))
+      if (!Regex.IsMatch(e.Text, @"^[0-9]+$"))
         e.Handled = true;
     }
 
-    // ----------- Радио-кнопки k/k+ и заземление -----------
+    #endregion
+
+    #region Радио-кнопки и заземление
+
+    /// <summary>
+    /// Обрабатывает нажатие на радио-кнопку выбора шины "k".
+    /// Активирует кнопку заземления.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается RadioButton.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private void RbMintK_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       BtnMintGround.IsEnabled = true;
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие на радио-кнопку выбора шины "k+".
+    /// Активирует кнопку заземления.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается RadioButton.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private void RbMintKplus_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       BtnMintGround.IsEnabled = true;
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки заземления шины.
+    /// Переключает состояние заземления, обновляет текст кнопки и выводит сообщение.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается Button.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnMintGround_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       btnMintGroundStatus = !btnMintGroundStatus;
@@ -149,59 +255,87 @@ namespace Mode.ServicesTest.MINT
         BtnMintGround.Content = "Заземлить шину";
         await ShowMessageAsync($"Отключение заземления шины {(RbMintK.IsChecked == true ? "k" : "k+")}");
       }
-
-      // Вызываем UpdateMintUI: если заземлено, нужно отключить кнопки?
       await UpdateMintUI(isDeviceInitialized && !IsAnyModuleConnected(), skipLog: true);
     }
 
-    // ----------- Источник питания -----------
+    #endregion
+
+    #region Источник питания
+
+    /// <summary>
+    /// Обрабатывает выбор источника питания 12В.
+    /// Выводит сообщение и обновляет состояние UI.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается RadioButton.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void RbMintPower12v_Checked(object sender, RoutedEventArgs e)
     {
       await ShowMessageAsync("Выбран источник питания: 12В");
       await UpdateMintUI(isDeviceInitialized, skipLog: true);
     }
 
-
+    /// <summary>
+    /// Обрабатывает выбор источника питания 48В.
+    /// Выводит сообщение и обновляет состояние UI.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается RadioButton.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void RbMintPower48v_Checked(object sender, RoutedEventArgs e)
     {
       await ShowMessageAsync("Выбран источник питания: 48В");
       await UpdateMintUI(isDeviceInitialized, skipLog: true);
     }
 
+    #endregion
 
-    // ----------- Кнопки ПИН / ПИТ -----------
+    #region Кнопки подключения модулей ПИН/ПИТ
+
+    /// <summary>
+    /// Обрабатывает нажатие кнопки подключения/отключения модуля ПИН.
+    /// Переключает состояние подключения и обновляет UI.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается Button.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnMintPin_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       isMintPinConnected = !isMintPinConnected;
       BtnMintPin.Content = isMintPinConnected ? "Отключение ПИН" : "Подключение ПИН";
       await ShowMessageAsync(isMintPinConnected ? "Подключение ПИН" : "Отключение ПИН");
-
-      // После подключения ПИН — возможно частично блокируем UI
       await UpdateMintUI(isDeviceInitialized, skipLog: true);
     }
 
-
+    /// <summary>
+    /// Обрабатывает нажатие кнопки подключения/отключения модуля ПИТ.
+    /// Переключает состояние подключения и обновляет UI.
+    /// </summary>
+    /// <param name="sender">Источник события, ожидается Button.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnMintPit_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       isMintPitConnected = !isMintPitConnected;
       BtnMintPit.Content = isMintPitConnected ? "Отключение ПИТ" : "Подключение ПИТ";
       await ShowMessageAsync(isMintPitConnected ? "Подключение ПИТ" : "Отключение ПИТ");
-
       await UpdateMintUI(isDeviceInitialized, skipLog: true);
     }
 
+    #endregion
+
     /// <summary>
-    /// Проверяем, подключен ли хотя бы один модуль (ПИТ или ПИН).
-    /// Если да — часть UI должна блокироваться.
+    /// Проверяет, подключен ли хотя бы один модуль (ПИН или ПИТ).
     /// </summary>
+    /// <returns>
+    /// <c>true</c>, если хотя бы один модуль подключен; иначе <c>false</c>.
+    /// </returns>
     private bool IsAnyModuleConnected()
     {
       return isMintPinConnected || isMintPitConnected;
     }
 
     /// <summary>
-    /// Вывод лога в protocolTextBox
+    /// Асинхронно выводит сообщение в элемент протокола (protocolTextBox).
     /// </summary>
+    /// <param name="text">Текст сообщения.</param>
+    /// <returns>Задача, представляющая завершение асинхронной операции.</returns>
     private Task ShowMessageAsync(string text)
     {
       protocolTextBox?.ShowMessageAsync($"{text}\n");

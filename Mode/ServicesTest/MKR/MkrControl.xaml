@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Mode.ServicesTest.MKR"
              xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox;assembly=UI"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="470" d:DesignWidth="800">
     <Border CornerRadius="0,0,0,0">
         <Grid>
             <!-- 
@@ -42,7 +42,7 @@
                                   Grid.Column="1"
                                   Margin="10"
                                   Height="30"
-                                  Width="120"
+                                  Width="180"
                                   Style="{StaticResource CustomComboBoxStyle}"
                                   ItemsSource="{Binding ComboBoxItems}"
                                   SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}" 
@@ -54,7 +54,7 @@
                 <!-- Кнопка "Сброс устройства" (пока без изменения стиля) -->
                 <Button x:Name="BtnMkrReset"
                         Content="Сброс устройства"
-                        Width="200"
+                        Width="310"
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"
@@ -65,7 +65,7 @@
                      заменяем логику "Подключение измерителя"/"Отключение измерителя" -->
                 <Button x:Name="BtnConnect"
                         Content="ЗАПУСТИТЬ"
-                        Width="200"
+                        Width="310"
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"
@@ -73,24 +73,24 @@
                         IsEnabled="False" />
 
                 <!-- Группа RadioButton для шины A (по аналогии с исходным проектом) -->
-                <GroupBox Header="Шина A" Margin="0,0,0,10">
+                <GroupBox Header="Шина A" Foreground="White" Margin="0,0,0,10">
                     <WrapPanel>
-                        <RadioButton Content="A1" GroupName="BusA" Name="A1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="A2" GroupName="BusA" Name="A2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="A3" GroupName="BusA" Name="A3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="A4" GroupName="BusA" Name="A4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="Откл. A" GroupName="BusA" Name="offA" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A1" Foreground="White" GroupName="BusA" Name="RbA1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A2" Foreground="White" GroupName="BusA" Name="RbA2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A3" Foreground="White" GroupName="BusA" Name="RbA3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="A4" Foreground="White" GroupName="BusA" Name="RbA4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="Откл. A" Foreground="White" GroupName="BusA" Name="RbOffA" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
                     </WrapPanel>
                 </GroupBox>
 
                 <!-- Группа RadioButton для шины B -->
-                <GroupBox Header="Шина B" Margin="0,0,0,10">
+                <GroupBox Header="Шина B" Foreground="White" Margin="0,0,0,10">
                     <WrapPanel>
-                        <RadioButton Content="B1" GroupName="BusB" Name="B1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="B2" GroupName="BusB" Name="B2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="B3" GroupName="BusB" Name="B3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="B4" GroupName="BusB" Name="B4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="Откл. B" GroupName="BusB" Name="offB" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B1" Foreground="White" GroupName="BusB" Name="RbB1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B2" Foreground="White" GroupName="BusB" Name="RbB2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B3" Foreground="White" GroupName="BusB" Name="RbB3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="B4" Foreground="White" GroupName="BusB" Name="RbB4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="Откл. B" Foreground="White" GroupName="BusB" Name="RbOffB" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
                     </WrapPanel>
                 </GroupBox>
 
@@ -114,9 +114,9 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="2">
-                                    <Button Width="80" Height="30" PreviewMouseDown="Point_PreviewMouseDown">
+                                    <Button Width="90" Height="30" PreviewMouseDown="Point_PreviewMouseDown">
                                         <Button.ContextMenu>
-                                            <ContextMenu StaysOpen="True" MouseLeave="ContextMenu_MouseLeave">
+                                            <ContextMenu StaysOpen="True" MouseLeave="ContextMenu_MouseLeave" Background="#303843" BorderBrush="#303843">
                                                 <MenuItem Header="Шина A">
                                                     <MenuItem.Icon>
                                                         <CheckBox IsChecked="{Binding A}" />
@@ -133,6 +133,7 @@
                                             <Style TargetType="Button">
                                                 <Setter Property="Content" Value="{Binding PointNumber}"/>
                                                 <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="White"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding A}" Value="True">
                                                         <Setter Property="Background" Value="Aqua"/>
@@ -159,6 +160,23 @@
 
                 <!-- Примерно так можно вставить легенду, если нужно -->
                 <!-- Или, если легенда не поместится, пока оставляем не реализованной -->
+
+                <GroupBox Grid.Column="2" Header="Легенда" Foreground="White" Margin="0,10,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1" Fill="Aqua"/>
+                            <TextBlock Text=" - подключённой к шине A" Margin="5,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1" Fill="Plum"/>
+                            <TextBlock Text=" - подключённой к шине B" Margin="5,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1" Fill="DarkViolet"/>
+                            <TextBlock Text=" - подключённой к шинам A и B" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
 
             </StackPanel>
 

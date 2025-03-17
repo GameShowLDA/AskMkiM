@@ -38,7 +38,7 @@
                                   Grid.Column="1"
                                   Margin="10"
                                   Height="30"
-                                  Width="120"
+                                  Width="180"
                                   Style="{StaticResource CustomComboBoxStyle}"
                                   ItemsSource="{Binding ComboBoxItems}"
                                   SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}"
@@ -49,7 +49,7 @@
                 <!-- Кнопка "Включение питания" -->
                 <Button x:Name="BtnMeshPower"
                         Content="ЗАПУСТИТЬ"
-                        Width="200"
+                        Width="310"
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"

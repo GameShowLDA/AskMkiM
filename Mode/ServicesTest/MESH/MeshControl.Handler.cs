@@ -1,75 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Mode.ServicesTest.MESH
 {
-  public partial class MeshControl
+  /// <summary>
+  /// Логика взаимодействия для MeshControl.xaml.
+  /// Контрол предназначен для управления устройством MESH, включая выбор устройства и переключение питания.
+  /// </summary>
+  public partial class MeshControl : UserControl
   {
-    // Допустим, сделаем флаг isPowerOn
+    /// <summary>
+    /// Флаг, указывающий, что питание устройства включено.
+    /// </summary>
     private bool isPowerOn = false;
 
     /// <summary>
-    /// Обработчик изменения выбора устройства в ComboBox.
+    /// Обрабатывает изменение выбранного элемента в ComboBox для выбора устройства MESH.
+    /// Если выбран пустой элемент ("<пусто>") или пустая строка, происходит сброс параметров устройства,
+    /// обновление пользовательского интерфейса и вывод сообщения о том, что устройство отключено.
+    /// В противном случае устройство инициализируется и обновляется UI для включения возможности управления.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается ComboBox с выбором устройства.</param>
+    /// <param name="e">Аргументы события изменения выбора.</param>
     private async void CmbMeshDevice_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       var selectedItem = CmbMeshDevice.SelectedItem as string;
       if (string.IsNullOrEmpty(selectedItem) || selectedItem == "<пусто>")
       {
-        // Если уже было инициализировано устройство, сбрасываем
+        // Если устройство ранее было инициализировано, выполняется его сброс.
         if (isMeshInitialized)
         {
           InitializeMeshUI();
-          //await ShowMessageAsync($"Сброс устройства: {currentDeviceName}");
           await ShowMessageAsync("Устройство отключено");
         }
         isMeshInitialized = false;
         currentDeviceName = string.Empty;
 
-        // Обновляем UI - всё выключено
+        // Обновляем пользовательский интерфейс: все элементы управления переводятся в состояние "выключено".
         await UpdateMeshUI(false, skipLog: true);
       }
       else
       {
         isMeshInitialized = true;
         currentDeviceName = selectedItem;
-        // Обновляем UI, включаем кнопку питания
+
+        // Обновляем пользовательский интерфейс: включаем необходимые элементы управления, включая кнопку питания.
         await UpdateMeshUI(true, skipLog: false);
       }
     }
 
     /// <summary>
-    /// Кнопка "Включение питания" (Toggle-режим)
+    /// Обрабатывает нажатие на кнопку "Включение питания" в режиме Toggle.
+    /// Переключает состояние питания, обновляет текст кнопки, блокирует или разблокирует выбор устройства
+    /// и выводит соответствующее сообщение в лог.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается Button для управления питанием.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnMeshPower_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      // Переключаем isPowerOn
+      // Переключаем состояние питания.
       isPowerOn = !isPowerOn;
 
-      // Меняем текст кнопки
+      // Обновляем текст кнопки в зависимости от состояния питания.
       BtnMeshPower.Content = isPowerOn ? "ОСТАНОВИТЬ" : "ЗАПУСТИТЬ";
 
-      // Лог
+      // Выводим сообщение о включении или отключении питания.
       await ShowMessageAsync(isPowerOn
           ? $"Включение питания ({currentDeviceName})"
           : $"Отключение питания ({currentDeviceName})");
 
-      // Если хотите блокировать ComboBox, пока питание включено,
-      // добавьте что-то вроде:
+      // Блокируем ComboBox выбора устройства, если питание включено.
       CmbMeshDevice.IsEnabled = !isPowerOn;
 
-      // Можно ещё раз позвать UpdateMeshUI, если хотим ещё что-то включать/выключать.
-      // Пока достаточно логики здесь.
+      // При необходимости можно дополнительно обновить пользовательский интерфейс.
     }
 
     /// <summary>
-    /// Метод для вывода лога (заменяет Helpers.WriteInfo).
+    /// Асинхронно выводит заданное сообщение в лог посредством элемента protocolTextBox.
     /// </summary>
+    /// <param name="text">Текст сообщения, которое требуется вывести в лог.</param>
+    /// <returns>Задача, представляющая завершение асинхронной операции.</returns>
     private Task ShowMessageAsync(string text)
     {
       protocolTextBox?.ShowMessageAsync($"{text}\n");

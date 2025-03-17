@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mode.ServicesTest.MESH
+﻿namespace Mode.ServicesTest.MESH
 {
+  /// <summary>
+  /// Управляет состоянием устройства МеШ, включая его инициализацию, сброс параметров и обновление пользовательского интерфейса.
+  /// </summary>
   public partial class MeshControl
   {
     /// <summary>
-    /// Начальная настройка: устройство не инициализ., ComboBox на "<пусто>", 
-    /// кнопка питания отключена и т.д.
+    /// Выполняет начальную настройку пользовательского интерфейса для устройства MESH.
+    /// Устанавливает, что устройство не инициализировано, ComboBox выбран в состоянии "<пусто>".
+    /// Кнопка питания может быть отключена по умолчанию (если требуется).
     /// </summary>
     private void InitializeMeshUI()
     {
@@ -18,29 +16,29 @@ namespace Mode.ServicesTest.MESH
       currentDeviceName = string.Empty;
 
       CmbMeshDevice.SelectedItem = "<пусто>";
-      // Устройство не выбрано => кнопка питания неактивна
-      //BtnMeshPower.IsEnabled = false;
-      //BtnMeshPower.Content = "Включение питания";
+      // По умолчанию устройство не выбрано, поэтому можно отключить кнопку питания.
+      // BtnMeshPower.IsEnabled = false;
+      // BtnMeshPower.Content = "Включение питания";
     }
 
     /// <summary>
-    /// Обновляет UI: если enable=true, значит устройство выбрано и мы активируем кнопки,
-    /// иначе - блокируем часть элементов. 
+    /// Обновляет состояние пользовательского интерфейса в зависимости от выбранного состояния устройства.
+    /// Если <paramref name="enable"/> равно true, устройство считается инициализированным и активируются необходимые элементы управления;
+    /// иначе, часть элементов блокируется.
+    /// Если <paramref name="skipLog"/> равно false, выводится сообщение о смене состояния устройства.
     /// </summary>
+    /// <param name="enable">Если true, устройство выбрано и инициализировано.</param>
+    /// <param name="skipLog">Если true, логирование состояния не производится.</param>
     public async Task UpdateMeshUI(bool enable, bool skipLog)
     {
-      // Основной флаг
+      // Основной флаг инициализации устройства.
       isMeshInitialized = enable;
 
-      // Кнопка питания доступна, только если устройство инициализировано
+      // Кнопка питания становится доступной только при инициализации устройства.
       BtnMeshPower.IsEnabled = enable;
 
-      // ComboBox логично оставить активным, когда устройство не инициализировано, 
-      // чтобы пользователь мог что-то выбрать.
-      // Но если уже инициализировали, при желании можно и оставить ComboBox активным, 
-      // так как не указано, что при включённом питании нужно его блокировать. 
-      // Если нужно - добавляем аналитику, как done in Uksh.
-      // Пока оставим ComboBox без блокировки, т.к. не сказано иного.
+      // ComboBox оставляем активным для выбора устройства, если оно не инициализировано.
+      // (При необходимости можно добавить блокировку, как реализовано в других контролах.)
 
       if (!skipLog)
       {
@@ -48,10 +46,9 @@ namespace Mode.ServicesTest.MESH
         {
           await ShowMessageAsync($"Инициализация устройства: {currentDeviceName}");
         }
-        else
+        else if (!string.IsNullOrEmpty(currentDeviceName))
         {
-          if (!string.IsNullOrEmpty(currentDeviceName))
-            await ShowMessageAsync($"Отключение устройства: {currentDeviceName}");
+          await ShowMessageAsync($"Отключение устройства: {currentDeviceName}");
         }
       }
     }

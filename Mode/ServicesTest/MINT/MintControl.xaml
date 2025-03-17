@@ -37,7 +37,7 @@
                                   Grid.Column="1"
                                   Margin="10"
                                   Height="30"
-                                  Width="120"
+                                  Width="180"
                                   Style="{StaticResource CustomComboBoxStyle}"
                                   ItemsSource="{Binding ComboBoxItems}"
                                   SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}"
@@ -49,7 +49,7 @@
                 <!-- (2) Кнопка "Сброс устройства" -->
                 <Button x:Name="BtnMintReset"
                         Content="Сброс устройства"
-                        Width="200"
+                        Width="310"
                         Height="35"
                         Margin="0,0,0,15"
                         Style="{StaticResource MetrologyButtonStyle}"
@@ -58,66 +58,73 @@
 
                 <!-- (3) Регулятор напряжения ПИН -->
                 <StackPanel Orientation="Vertical" Margin="0,0,0,15">
-                    <Label Content="Напряжение ПИН (V):" />
+                    <Label Content="Напряжение ПИН (V):" Foreground="White" />
                     <Grid Margin="0,5,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="60" />
                         </Grid.ColumnDefinitions>
                         <Slider x:Name="SliderMintPinVoltage"
-                                Grid.Column="0"
-                                Minimum="0"
-                                Maximum="100"
-                                TickFrequency="1"
-                                IsSnapToTickEnabled="True"
-                                Margin="0,0,10,0"
-                                ValueChanged="SliderMintPinVoltage_ValueChanged" 
-                                IsEnabled="False"/>
+                            Grid.Column="0"
+                            Minimum="0"
+                            Maximum="100"
+                            TickFrequency="0.01"
+                            SmallChange="0.01"
+                            IsSnapToTickEnabled="True"
+                            Margin="0,0,10,0"
+                            ValueChanged="SliderMintPinVoltage_ValueChanged" 
+                            IsEnabled="False"/>
+
                         <TextBox x:Name="TextMintPinVoltage"
-                                 Grid.Column="1"
-                                 PreviewTextInput="TextMintPinVoltage_PreviewTextInput"
-                                 TextChanged="TextMintPinVoltage_TextChanged" 
-                                 IsEnabled="False"/>
+                             Grid.Column="1"
+                             PreviewTextInput="TextMintPinVoltage_PreviewTextInput"
+                             LostFocus="TextMintPinVoltage_LostFocus"
+                             KeyDown="TextMintPinVoltage_KeyDown"
+                             IsEnabled="False"/>
                     </Grid>
                 </StackPanel>
 
                 <!-- (4) Регулятор силы тока ПИТ -->
                 <StackPanel Orientation="Vertical" Margin="0,0,0,15">
-                    <Label Content="Сила тока ПИТ (mA):" />
+                    <Label Content="Сила тока ПИТ (mA):" Foreground="White" />
                     <Grid Margin="0,5,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="60" />
                         </Grid.ColumnDefinitions>
                         <Slider x:Name="SliderMintPitAmperage"
-                                Grid.Column="0"
-                                Minimum="0"
-                                Maximum="100"
-                                TickFrequency="1"
-                                IsSnapToTickEnabled="True"
-                                Margin="0,0,10,0"
-                                ValueChanged="SliderMintPitAmperage_ValueChanged" 
-                                IsEnabled="False"/>
+                            Grid.Column="0"
+                            Minimum="0"
+                            Maximum="100"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            Margin="0,0,10,0"
+                            ValueChanged="SliderMintPitAmperage_ValueChanged" 
+                            IsEnabled="False"/>
                         <TextBox x:Name="TextMintPitAmperage"
-                                 Grid.Column="1"
-                                 PreviewTextInput="TextMintPitAmperage_PreviewTextInput"
-                                 TextChanged="TextMintPitAmperage_TextChanged" 
-                                 IsEnabled="False"/>
+                             Grid.Column="1"
+                             PreviewTextInput="TextMintPitAmperage_PreviewTextInput"
+                             LostFocus="TextMintPitAmperage_LostFocus"
+                             KeyDown="TextMintPitAmperage_KeyDown"
+                             IsEnabled="False"/>
                     </Grid>
                 </StackPanel>
+
 
                 <!-- (5) "k"/"k+" и кнопка заземления -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                     <RadioButton x:Name="RbMintK"
                                  Content="k"
+                                 Foreground="White"
                                  GroupName="MintGroundGroup"
-                                 Margin="0,0,10,0"
+                                 Margin="0,10,10,0"
                                  PreviewMouseDown="RbMintK_PreviewMouseDown" 
                                  IsEnabled="False"/>
                     <RadioButton x:Name="RbMintKplus"
                                  Content="k+"
+                                 Foreground="White"
                                  GroupName="MintGroundGroup"
-                                 Margin="0,0,10,0"
+                                 Margin="0,10,10,0"
                                  PreviewMouseDown="RbMintKplus_PreviewMouseDown" 
                                  IsEnabled="False"/>
                     <Button x:Name="BtnMintGround"
@@ -132,16 +139,19 @@
                 <!-- (6) Источник питания (12В / 48В) -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                     <Label Content="Источник питания:"
+                           Foreground="White"
                            VerticalAlignment="Center"
                            Margin="0,0,10,0" />
                     <RadioButton x:Name="RbMintPower12v"
                                  Content="12В"
+                                 Foreground="White"
                                  GroupName="MintPowerSourceGroup"
                                  Checked="RbMintPower12v_Checked"
                                  Margin="0,5,10,0" 
                                  IsEnabled="False"/>
                     <RadioButton x:Name="RbMintPower48v"
                                  Content="48В"
+                                 Foreground="White"
                                  GroupName="MintPowerSourceGroup"
                                  Checked="RbMintPower48v_Checked"
                                  Margin="0,5,0,0"

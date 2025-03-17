@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 using Mode.Models;
-using Mode.ServicesTest.Helpers;
 
 namespace Mode.ServicesTest.UKSH
 {
+  /// <summary>
+  /// Реализация обработчиков событий для элемента управления UKSH.
+  /// </summary>
   public partial class UkshControl
   {
     /// <summary>
-    /// Обработчик выбора устройства (CmbUkshInit).
+    /// Обрабатывает изменение выбранного элемента в ComboBox (CmbUkshInit).
+    /// Если шина уже подключена, изменение не производится. При выборе пустого элемента происходит сброс устройства.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается ComboBox.</param>
+    /// <param name="e">Аргументы события изменения выбора.</param>
     private async void CmbUkshInit_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      // Если шина подключена, менять нельзя
       if (isShinaConnected)
         return;
 
@@ -46,17 +45,24 @@ namespace Mode.ServicesTest.UKSH
     }
 
     /// <summary>
-    /// Обработчик кнопки "Сброс устройства".
+    /// Обрабатывает нажатие на кнопку "Сброс устройства".
+    /// Если устройство не инициализировано, действие не выполняется.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается Button.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnUkshReset_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (!isUkshInitialized) return;
+      if (!isUkshInitialized)
+        return;
       await ResetUkshDevice();
     }
 
     /// <summary>
-    /// Обработчик кнопки "ЗАПУСТИТЬ" (по аналогии с MkrControl).
+    /// Обрабатывает нажатие на кнопку "ЗАПУСТИТЬ"/"ОСТАНОВИТЬ".
+    /// Переключает состояние подключения шины, обновляя элементы управления и выводя сообщение.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается Button.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnUkshStart_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       if (!isUkshInitialized)
@@ -65,7 +71,6 @@ namespace Mode.ServicesTest.UKSH
         return;
       }
 
-      // Пример логики: при "ЗАПУСТИТЬ" подключаем шину, при "ОСТАНОВИТЬ" отключаем
       isShinaConnected = !isShinaConnected;
       if (isShinaConnected)
       {
@@ -88,23 +93,31 @@ namespace Mode.ServicesTest.UKSH
     }
 
     /// <summary>
-    /// Обработчик изменения текста в поле поиска реле.
+    /// Обрабатывает изменение текста в поле поиска реле.
+    /// Выполняет фильтрацию списка реле по введенному тексту.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается TextBox.</param>
+    /// <param name="e">Аргументы события изменения текста.</param>
     private void TbSearchRelays_TextChanged(object sender, TextChangedEventArgs e)
     {
-      if (!isUkshInitialized) return;
+      if (!isUkshInitialized)
+        return;
       string text = TbSearchRelays.Text.Trim();
       FilterRelays(text);
     }
 
     /// <summary>
-    /// Обработчик нажатия на кнопку реле (BtnRelay_PreviewMouseDown).
+    /// Обрабатывает нажатие на кнопку реле.
+    /// Переключает состояние реле и выводит соответствующее сообщение.
     /// </summary>
+    /// <param name="sender">Источник события, ожидается Button с привязанной моделью RelayModel.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void BtnRelay_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (!isUkshInitialized) return;
+      if (!isUkshInitialized)
+        return;
 
-      if (sender is Button btn && btn.DataContext is Mode.Models.RelayModel relay)
+      if (sender is Button btn && btn.DataContext is RelayModel relay)
       {
         relay.IsOn = !relay.IsOn;
         await ShowMessageAsync(relay.IsOn
@@ -114,8 +127,10 @@ namespace Mode.ServicesTest.UKSH
     }
 
     /// <summary>
-    /// Асинхронный метод вывода сообщения в InvokeRichTextBoxUI.
+    /// Асинхронно выводит сообщение в лог (например, в protocolTextBox).
     /// </summary>
+    /// <param name="text">Текст сообщения.</param>
+    /// <returns>Задача, представляющая асинхронную операцию.</returns>
     private Task ShowMessageAsync(string text)
     {
       protocolTextBox?.ShowMessageAsync($"{text}\n");
