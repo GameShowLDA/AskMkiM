@@ -126,6 +126,12 @@
                         EnableRowVirtualization="False"
                         PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick"
                         ScrollViewer.CanContentScroll="True">
+                    <DataGrid.Resources>
+                        <!-- Скрываем автоматическую прокрутку для каждой строки -->
+                        <Style TargetType="DataGridRow">
+                            <EventSetter Event="RequestBringIntoView" Handler="ResultsDataGrid_RequestBringIntoView"/>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTextColumn Binding="{Binding FileName}" Width="200" />
                         <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />

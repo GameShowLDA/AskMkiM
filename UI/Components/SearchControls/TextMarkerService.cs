@@ -44,37 +44,34 @@ namespace UI.Components.SearchControls
       if (context == null || elements == null)
         return;
 
-      // Получаем текущее выделение
-      var selection = textEditor.TextArea.Selection;
-      if (selection.IsEmpty)
-        return;
-
-      int selectionStart = selection.Segments.Min(s => s.StartOffset);
-      int selectionEnd = selection.Segments.Max(s => s.EndOffset);
-
-      // Начальный offset текущей строки
+      // Вычисляем границы текущей строки
       int lineStartOffset = context.VisualLine.FirstDocumentLine.Offset;
+      int lineEndOffset = context.VisualLine.LastDocumentLine.EndOffset;
 
-      foreach (var marker in markers.FindOverlappingSegments(lineStartOffset,
-          context.VisualLine.LastDocumentLine.EndOffset - lineStartOffset))
+      // Для каждого маркера, который пересекается с текущей строкой
+      foreach (var marker in markers.FindOverlappingSegments(lineStartOffset, lineEndOffset - lineStartOffset))
       {
+        // Для каждого элемента строки
         foreach (var element in elements)
         {
-          // Вычисляем реальный offset элемента в документе
+          // Определяем реальные границы элемента в документе
           int elementStart = lineStartOffset + element.VisualColumn;
           int elementEnd = elementStart + element.DocumentLength;
 
-          // Проверяем, попадает ли элемент в выделенный диапазон
-          if (elementEnd > selectionStart && elementStart < selectionEnd)
+          // Если элемент пересекается с диапазоном маркера, применяем цвет
+          if (elementEnd > marker.StartOffset && elementStart < marker.EndOffset)
           {
             if (marker.ForegroundColor != null)
             {
               element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
             }
+            // Можно также установить фон, если нужно:
+            element.TextRunProperties.SetBackgroundBrush(new SolidColorBrush(marker.BackgroundColor));
           }
         }
       }
     }
+
 
     /// <summary>
     /// Создание нового маркера для подсветки текста

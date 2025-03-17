@@ -367,10 +367,10 @@ namespace UI.Controls.Search
     {
       if (isTextEditor)
       {
-        if (!this.IsVisible)
-        {
+        //if (!this.IsVisible)
+        //{
           this.Show();  // Если окно скрыто, показываем его заново
-        }
+        //}
         this.Activate(); // Делаем активным
       }
       else

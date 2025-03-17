@@ -18,6 +18,7 @@ namespace UI.Controls.TextEditor
     MultiEditorControl _multiEditorControl;
     private TextMarkerService textMarkerService;
     public ICSharpCode.AvalonEdit.TextEditor TextEditor => textEditor;
+    public TextMarkerService MarkerService { get; set; }
 
     public TextEditorUI()
     {

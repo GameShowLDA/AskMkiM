@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UI.Components.SearchControls;
 using UI.Controls.Search;
+using static Utilities.LoggerUtility;
 
 namespace UI.Components
 {
@@ -36,6 +37,7 @@ namespace UI.Components
       if (MultiEditor == null)
       {
         MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
         return;
       }
       MultiEditor.OpenFile(filePath);
@@ -106,6 +108,7 @@ namespace UI.Components
       if (MultiEditor == null)
       {
         MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
         return;
       }
       MultiEditor.CreateNewFile();
@@ -115,7 +118,8 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); 
+        LogError("Редактор не инициализирован");
         return;
       }
       MultiEditor.SaveFile();
@@ -126,6 +130,7 @@ namespace UI.Components
       if (MultiEditor == null)
       {
         MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
         return;
       }
       MultiEditor.SaveFileAs();
@@ -136,6 +141,7 @@ namespace UI.Components
       if (MultiEditor == null)
       {
         MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
         return;
       }
       MultiEditor.PrintFile();
@@ -146,8 +152,11 @@ namespace UI.Components
       if (MultiEditor == null)
       {
         MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+
         return;
       }
+      LogInformation("Начат поиск по тексту");
       MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
@@ -173,7 +182,9 @@ namespace UI.Components
         }
       }
       ResultsDataGrid.ItemsSource = items;
-      searchResultsTextBlock.Text = $"Результаты поиска по \"{searchText}\". Найдено {items.Count} строк";
+      var searchResultsText = $"Результаты поиска по \"{searchText}\". Найдено {items.Count} строк";
+      searchResultsTextBlock.Text = searchResultsText;
+      LogInformation(searchResultsText);
       MultiWindowSplitter.Visibility = Visibility.Visible;
       SearchResultsRow.Height = new GridLength(200);
       SearchResults.Visibility = Visibility.Visible;
@@ -189,6 +200,7 @@ namespace UI.Components
         var lineLength = row.LineText.Length;
 
         EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, lineLength);
+        LogInformation("Сработало событие нажатия на строку dataGrid с результатами поиска");
       }
     }
 
@@ -206,6 +218,5 @@ namespace UI.Components
     {
       e.Handled = true;
     }
-
   }
 }

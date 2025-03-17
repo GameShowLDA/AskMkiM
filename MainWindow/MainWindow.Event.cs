@@ -114,7 +114,7 @@ namespace MainWindowProgram
       if (await GetIsLocked())
       {
         MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-        //LoggerService.LogWarning("Попытка открыть файл, когда приложение заблокировано.");
+        LogWarning("Попытка открыть файл, когда приложение заблокировано.");
       }
       else
       {
@@ -128,7 +128,7 @@ namespace MainWindowProgram
         {
           string filePath = openFileDialog.FileName;
           MultiWindow.OpenFileInEditor(filePath);
-          //LoggerService.LogInformation($"Файл открыт: {filePath}");
+          LogInformation($"Файл открыт: {filePath}");
         }
       }
     }
@@ -175,7 +175,6 @@ namespace MainWindowProgram
         var searchWindow = new SearchWindow();
         searchWindow.Owner = this;
 
-        // Удаляем старые подписки перед добавлением новой
         searchWindow.SearchText -= SearchWindow_SearchTextHandler;
         searchWindow.SearchText += SearchWindow_SearchTextHandler;
 
@@ -187,6 +186,7 @@ namespace MainWindowProgram
         searchWindow.ClearHighlights += MultiWindow.OnSearchWindowClosing;
 
         _isOpen = true;
+        LogInformation("Открыто окно поиска");
       }
     }
 
