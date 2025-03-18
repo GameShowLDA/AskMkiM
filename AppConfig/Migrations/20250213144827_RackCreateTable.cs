@@ -4,34 +4,34 @@
 
 namespace AppConfig.Migrations
 {
+  /// <inheritdoc />
+  public partial class RackCreateTable : Migration
+  {
     /// <inheritdoc />
-    public partial class RackCreateTable : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.CreateTable(
-                name: "Rack",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Number = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConnectionDetails = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rack", x => x.Id);
-                });
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Rack");
-        }
+      migrationBuilder.CreateTable(
+          name: "Rack",
+          columns: table => new
+          {
+            Id = table.Column<int>(type: "INTEGER", nullable: false)
+                  .Annotation("Sqlite:Autoincrement", true),
+            Name = table.Column<string>(type: "TEXT", nullable: false),
+            Description = table.Column<string>(type: "TEXT", nullable: false),
+            Number = table.Column<int>(type: "INTEGER", nullable: false),
+            ConnectionDetails = table.Column<string>(type: "TEXT", nullable: false)
+          },
+          constraints: table =>
+          {
+            table.PrimaryKey("PK_Rack", x => x.Id);
+          });
     }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.DropTable(
+          name: "Rack");
+    }
+  }
 }

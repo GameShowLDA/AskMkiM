@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Net;
+﻿using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
@@ -12,12 +11,12 @@ namespace NewCore.Communication
     /// <summary>
     /// Порт для входящих сообщений.
     /// </summary>
-    private static readonly string PortInput = "8800";
+    private static readonly int _portInput = 8800;
 
     /// <summary>
     /// Порт для отправки сообщений.
     /// </summary>
-    private static readonly string PortOutput = "8888";
+    private static readonly int _portOutput = 8888;
 
     /// <summary>
     /// Общий сокет для отправки сообщений.
@@ -33,13 +32,16 @@ namespace NewCore.Communication
     /// <returns>Возвращает ответ от устройства, если <paramref name="awaitResponse"/> равно true; в противном случае возвращает пустую строку. В случае ошибки возвращает сообщение об ошибке.</returns>
     public static async Task<string> SendCommandAsync(IPAddress ip, DeviceCommand command, int timeout = 0)
     {
+      int lastNumber = GetLastOctet(ip);
       try
       {
-        IPEndPoint endPoint = new IPEndPoint(ip, Convert.ToInt32(PortOutput));
+        IPEndPoint endPoint = new IPEndPoint(ip, _portOutput + lastNumber);
+        LogInformation($"Отправка команды на {endPoint}");
         byte[] messageBuffer = Encoding.UTF8.GetBytes(command.ToString());
         await socket.SendToAsync(new ArraySegment<byte>(messageBuffer), SocketFlags.None, endPoint);
 
-        return timeout > 0 ? await GetMessageDeviceAsync(timeout) : string.Empty;
+
+        return timeout > 0 ? await GetMessageDeviceAsync(timeout, lastNumber) : string.Empty;
       }
       catch (SocketException ex)
       {
@@ -65,14 +67,11 @@ namespace NewCore.Communication
     /// </summary>
     /// <param name="timeout">Время в миллисекундах.</param>
     /// <returns>Возвращает ответ от устройства.</returns>
-    private static async Task<string> GetMessageDeviceAsync(int timeout)
+    private static async Task<string> GetMessageDeviceAsync(int timeout, int lastNumber)
     {
-      if (!int.TryParse(PortInput, out int port))
-      {
-        return LogError($"Неверный формат порта.");
-      }
+      int portInput = _portInput + lastNumber;
 
-      using (UdpClient responseClient = new UdpClient(port))
+      using (UdpClient responseClient = new UdpClient(portInput))
       {
         try
         {
@@ -140,15 +139,9 @@ namespace NewCore.Communication
     {
       try
       {
-        if (!int.TryParse(PortOutput, NumberStyles.Integer, CultureInfo.InvariantCulture, out int port))
-        {
-          LogError("Некорректное значение порта.");
-          return;
-        }
-
         // Широковещательный адрес для локальной сети
         IPAddress broadcastAddress = IPAddress.Parse("255.255.255.255");
-        IPEndPoint ep = new IPEndPoint(broadcastAddress, port);
+        IPEndPoint ep = new IPEndPoint(broadcastAddress, _portOutput);
 
         // Делаем сокет способным отправлять широковещательные сообщения
         socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
@@ -178,5 +171,37 @@ namespace NewCore.Communication
         throw;
       }
     }
+
+    /// <summary>
+    /// Возвращает последний октет из IPv4-адреса (например, для "192.168.1.10" вернёт 10).
+    /// </summary>
+    /// <param name="ip">IPv4-адрес в формате <see cref="IPAddress"/>.</param>
+    /// <returns>Числовое значение последнего октета.</returns>
+    /// <exception cref="ArgumentException">Выбрасывается, если адрес не является IPv4.</exception>
+    public static int GetLastOctet(IPAddress ip)
+    {
+      // Преобразуем IP-адрес в строку и разбиваем по точкам
+      string ipString = ip.ToString();
+      string[] parts = ipString.Split('.');
+
+      // Если частей ровно 4, считаем, что это IPv4
+      if (parts.Length == 4)
+      {
+        // Преобразуем последний элемент в int
+        if (int.TryParse(parts[3], out int lastOctet))
+        {
+          return lastOctet;
+        }
+        else
+        {
+          throw new ArgumentException("Последний октет не удалось преобразовать в число.");
+        }
+      }
+      else
+      {
+        throw new ArgumentException("Адрес не является IPv4-адресом.");
+      }
+    }
+
   }
 }

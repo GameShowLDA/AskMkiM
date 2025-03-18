@@ -23,6 +23,7 @@ namespace MainWindowProgram
     {
       InitializeComponent();
       _consoleManager = ConsoleManager.Instance;
+      _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
       SetEvent();
 
       Task.Run(async () =>
@@ -45,9 +46,22 @@ namespace MainWindowProgram
       });
 
       SettingsGUI();
-      SetUsbMonitoring();
-
+      ProcessCommandLineArgs();
       this.PreviewKeyDown += OnKeyDown;
+    }
+
+    private void _consoleManager_AdminModeChanged(object? sender, bool e)
+    {
+      if (e)
+      {
+        StopUsbMonitoring();
+        OnAdminRightsChangedHandler(null, true);
+      }
+      else
+      {
+        OnAdminRightsChangedHandler(null, false);
+        SetUsbMonitoring(false);
+      }
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)
@@ -58,6 +72,22 @@ namespace MainWindowProgram
         e.Handled = true;
       }
     }
+
+    private void ProcessCommandLineArgs()
+    {
+      string[] args = App.CommandLineArgs;
+
+      if (!args.Contains("admin"))
+      {
+        SetUsbMonitoring(false);
+      }
+      else
+      {
+        LogInformation("Запущен в режиме администратора через аргумент командной строки.");
+        SetUsbMonitoring(true);
+      }
+    }
+
 
     private void SetEvent()
     {
@@ -90,9 +120,21 @@ namespace MainWindowProgram
       await ReadAllSettingsAsync();
     }
 
-    private void SetUsbMonitoring()
+    private void SetUsbMonitoring(bool admin)
     {
-      usbMonitorService.Start();
+      if (!admin)
+      {
+        usbMonitorService.Start();
+      }
+      else
+      {
+        usbMonitorService.AdminRights = admin;
+      }
+    }
+
+    private void StopUsbMonitoring()
+    {
+      usbMonitorService.Stop();
     }
 
     private void OnAdminRightsChangedHandler(object sender, bool newRights)

@@ -1,9 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Services;
-using NewCore.Base;
+﻿using AppConfig.DataBase.Models;
+using NewCore.Base.Device;
 
 namespace Mode.Settings.DeviceConfig.DeviceManager
 {

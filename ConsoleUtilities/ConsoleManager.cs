@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace ConsoleUtilities
 {
@@ -8,13 +7,24 @@ namespace ConsoleUtilities
     private static ConsoleManager _instance;
     public static ConsoleManager Instance => _instance ??= new ConsoleManager();
 
+    /// <summary>
+    /// Событие изменения режима администратора вручную.
+    /// </summary>
+    public event EventHandler<bool> AdminModeChanged;
+
     private bool _isConsoleVisible = false;
     private readonly CommandHandler _commandHandler;
 
     private ConsoleManager()
     {
       _commandHandler = new CommandHandler();
+      _commandHandler.AdminModeChanged += _commandHandler_AdminModeChanged;
       HideConsoleOnStart();
+    }
+
+    private void _commandHandler_AdminModeChanged(object? sender, bool e)
+    {
+      AdminModeChanged?.Invoke(sender, e);
     }
 
     private void HideConsoleOnStart()

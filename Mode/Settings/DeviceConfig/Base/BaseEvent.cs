@@ -1,15 +1,9 @@
-﻿using System.IO.Ports;
-using System.Management;
-using System.Net;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Services;
-using NewCore.Base;
+using NewCore.Base.Device;
 using NewCore.Device;
-using NewCore.Interface;
 
 namespace Mode.Settings.DeviceConfig.Base
 {

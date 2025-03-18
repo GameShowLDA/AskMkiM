@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
 
 namespace NewCore.Function.Keysight3466new
 {
-  public class ResistanceMeasurement
+  public class ResistanceMeasurement : IResistanceMeasurement
   {
     private readonly KeysightDevice _device;
-    private readonly KeysightCommunication _communication;
+    private readonly ICommunication _communication;
 
     public ResistanceMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.KeysightCommunication;
+      _communication = device.CommunicationManager;
     }
 
     /// <summary>

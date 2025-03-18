@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Services;
-using NewCore.Base;
-using NewCore.Interface;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.Controls
 {

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
-using System.IO.Ports;
-using NewCore.Base;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Additionally;
 
 namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
@@ -39,7 +35,7 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           return _headUnit.Number;
         }
-        else 
+        else
         {
           return -1;
         }
@@ -164,7 +160,10 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       get
       {
-        BaseHandler<IDevice>.ValuePairs.TryGetValue(ParitySelectionBox.SelectedItem.ToString(), out Parity parity);
+        var comboBoxItem = ParitySelectionBox.SelectedItem as ComboBoxItem;
+        var data = comboBoxItem?.Content?.ToString();
+
+        BaseHandler<IDevice>.ValuePairs.TryGetValue(data, out Parity parity);
         return parity;
       }
     }
@@ -173,7 +172,9 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       get
       {
-        BaseHandler<IDevice>.StopBitsPairs.TryGetValue(StopBitsSelectionBox.SelectedItem.ToString(), out StopBits stopBit);
+        var comboBoxItem = StopBitsSelectionBox.SelectedItem as ComboBoxItem;
+        var data = comboBoxItem?.Content?.ToString();
+        BaseHandler<IDevice>.StopBitsPairs.TryGetValue(data, out StopBits stopBit);
         return stopBit;
       }
     }

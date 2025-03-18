@@ -1,22 +1,10 @@
-﻿using AppConfig.DataBase.Models;
+﻿using System.Windows;
+using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
-using NewCore.Base;
-using NewCore.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.ChassisManager
 {
@@ -34,7 +22,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
 
     public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
 
-  
+
     public void ProcessData(IDevice device, DeviceSettingsControl control)
     {
       return;
@@ -58,8 +46,8 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
 
         if (deviceEntity != null)
         {
-         new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create(deviceEntity);
-        } 
+          new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create(deviceEntity);
+        }
 
         RequestSave?.Invoke(s, deviceEntity as ChassisManagerEntity);
         this.Close();

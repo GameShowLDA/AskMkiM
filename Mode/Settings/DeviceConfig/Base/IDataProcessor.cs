@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
-using NewCore.Base;
-using NewCore.Interface;
+﻿using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using NewCore.Base.Device;
 
 namespace Mode.Settings.DeviceConfig.Base
 {

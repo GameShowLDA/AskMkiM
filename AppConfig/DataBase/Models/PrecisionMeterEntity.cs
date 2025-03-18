@@ -1,5 +1,5 @@
-﻿using NewCore.Enum;
-using NewCore.Interface;
+﻿using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
 {
@@ -38,6 +38,9 @@ namespace AppConfig.DataBase.Models
     /// Тип устройства, всегда PrecisionMeter.
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.PrecisionMeter;
+
+    public string DeviceClass { get; set; }
+
 
     /// <summary>
     /// Метод инициализации точного измерителя.

@@ -1,4 +1,5 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.Function.DBC;
+using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 
@@ -7,7 +8,7 @@ namespace NewCore.Function.DeviceBusCommutation
   /// <summary>
   /// Класс для управления шинами и коммутацией устройств через УКШ (Устройство Коммутации Шин).
   /// </summary>
-  public class BusManager
+  public class BusManager : IBusDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.

@@ -14,7 +14,7 @@ namespace TestConsole
       IPAddress iPAddress = IPAddress.Parse("192.168.1.16");
 
       NewCore.Device.KeysightDevice keysight3466 = new NewCore.Device.KeysightDevice(iPAddress);
-      if (await keysight3466.Initialize())
+      if (await keysight3466.ConnectionManager.InitializeAsync())
       {
         Console.WriteLine($"Подключен к: {keysight3466.Name}");
 
@@ -23,7 +23,7 @@ namespace TestConsole
         await Resistance(keysight3466);
         await Voltage(keysight3466);
 
-        keysight3466.Connection.Disconnect();
+        keysight3466.ConnectionManager.Disconnect();
       }
       else
       {
@@ -33,29 +33,29 @@ namespace TestConsole
 
     static private async Task Continuity(KeysightDevice keysight3466)
     {
-      await keysight3466.ContinuityMeasurement.SetContinuityModeAsync();
-      var data = await keysight3466.ContinuityMeasurement.CheckContinuityAsync();
+      await keysight3466.ContinuityManager.SetContinuityModeAsync();
+      var data = await keysight3466.ContinuityManager.CheckContinuityAsync();
       Console.WriteLine($"Результат прозвонки: {data}");
     }
 
     static private async Task Resistance(KeysightDevice keysight3466)
     {
-      await keysight3466.ResistanceMeasurement.SetResistanceModeAsync();
-      var data = await keysight3466.ResistanceMeasurement.MeasureResistanceAsync();
+      await keysight3466.ResistanceManager.SetResistanceModeAsync();
+      var data = await keysight3466.ResistanceManager.MeasureResistanceAsync();
       Console.WriteLine($"Результат сопротивления: {data}");
     }
 
     static private async Task Capacitance(KeysightDevice keysight3466)
     {
-      await keysight3466.CapacitanceMeasurement.SetCapacitanceModeAsync();
-      var data = await keysight3466.CapacitanceMeasurement.MeasureCapacitanceAsync();
+      await keysight3466.CapacitanceManager.SetCapacitanceModeAsync();
+      var data = await keysight3466.CapacitanceManager.MeasureCapacitanceAsync();
       Console.WriteLine($"Результат ёмкости: {data}");
     }
 
     static private async Task Voltage(KeysightDevice keysight3466)
     {
-      await keysight3466.VoltageMeasurement.SetDCVoltageModeAsync();
-      var data = await keysight3466.VoltageMeasurement.MeasureDCVoltageAsync();
+      await keysight3466.DcVoltageManager.SetDCVoltageModeAsync();
+      var data = await keysight3466.DcVoltageManager.MeasureDCVoltageAsync();
       Console.WriteLine($"Результат напяжения(постоянное): {data}");
     }
   }

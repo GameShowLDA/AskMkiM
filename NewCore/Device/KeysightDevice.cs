@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using NewCore.Base;
+﻿using System.Net;
+using System.Net.Sockets;
+using NewCore.Base.Device;
+using NewCore.Base.Function.FastMeter;
+using NewCore.Base.Interface.Main;
 using NewCore.Function.Keysight3466new;
-using NewCore.Interface;
 
 namespace NewCore.Device
 {
@@ -16,13 +13,17 @@ namespace NewCore.Device
     public int NumberChassis { get; set; }
 
     public bool IsConnected { get; set; }
+    public ICapacitanceMeasurement CapacitanceManager { get; set; }
+    public IConnection ConnectionManager { get; set; }
+    public IContinuityMeasurement ContinuityManager { get; set; }
+    public IAcVoltageMeasurement AcVoltageManager { get; set; }
+    public IDcVoltageMeasurement DcVoltageManager { get; set; }
+    public IResistanceMeasurement ResistanceManager { get; set; }
+    public ICommunication CommunicationManager { get; set; }
 
-    public KeysightCommunication KeysightCommunication;
-    public KeysightConnection Connection; 
-    public ContinuityMeasurement ContinuityMeasurement;
-    public ResistanceMeasurement ResistanceMeasurement;
-    public CapacitanceMeasurement CapacitanceMeasurement;
-    public VoltageMeasurement VoltageMeasurement;
+    internal readonly int Port = 5025;
+    internal TcpClient Client;
+    internal NetworkStream Stream;
 
     public KeysightDevice(IPAddress ip) : this()
     {
@@ -33,16 +34,17 @@ namespace NewCore.Device
     {
       Name = "Keysight 3466 new";
       Description = "Реализовать описание в NewCore.Device.KeysightDevice";
+      DeviceClass = GetType().FullName;
+
       IsConnected = false;
 
-      KeysightCommunication = new KeysightCommunication(this);
-      Connection = new KeysightConnection(this);
-      ContinuityMeasurement = new ContinuityMeasurement(this);
-      ResistanceMeasurement = new ResistanceMeasurement(this);
-      CapacitanceMeasurement = new CapacitanceMeasurement(this);
-      VoltageMeasurement = new VoltageMeasurement(this);
+      CapacitanceManager = new CapacitanceMeasurement(this);
+      CommunicationManager = new KeysightCommunication(this);
+      ConnectionManager = new KeysightConnection(this);
+      ContinuityManager = new ContinuityMeasurement(this);
+      ResistanceManager = new ResistanceMeasurement(this);
+      AcVoltageManager = new AcVoltageMeasurement(this);
+      DcVoltageManager = new DcVoltageMeasurement(this);
     }
-
-    public override Task<bool> Initialize() => Connection.ConnectAsync();
   }
 }

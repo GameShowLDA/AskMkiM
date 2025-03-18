@@ -21,5 +21,14 @@ namespace MainWindowProgram
       LogError("Необработанное исключение в Dispatcher: " + ex.Message);
       e.Handled = true;
     }
+
+    public static string[] CommandLineArgs { get; private set; }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+      base.OnStartup(e);
+      CommandLineArgs = e.Args; // Сохраняем аргументы
+    }
+
   }
 }

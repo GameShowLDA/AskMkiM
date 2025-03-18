@@ -1,5 +1,8 @@
-﻿using NewCore.Enum;
-using NewCore.Interface;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
+using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
 {
@@ -39,10 +42,42 @@ namespace AppConfig.DataBase.Models
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.SwitchingDevice;
 
+    public string DeviceClass { get; set; }
+
+    [NotMapped]
+    public IBusDeviceBusCommutation BusManager { get; set; }
+
+    [NotMapped]
+    public ICapacitorDeviceBusCommutation CapacitorManager { get; set; }
+
+    [NotMapped]
+    public IConnectorDeviceBusCommutation ConnectorManager { get; set; }
+
+    [NotMapped]
+    public IRelayDeviceBusCommutation RelayManager { get; set; }
+
+    [NotMapped]
+    public IResistorDeviceBusCommutation ResistorManager { get; set; }
+
+    [NotMapped]
+    public IStateDeviceBusCommutation StateManager { get; set; }
+    [NotMapped]
+    public ISelfTestChecker SelfTestManager { get; set; }
+
+
     /// <summary>
     /// Метод инициализации устройства коммутации.
     /// </summary>
     /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public Task<bool> Initialize() => Task.FromResult(true);
+    public async Task<bool> Initialize()
+    {
+      if (IPAddress.TryParse(ConnectionDetails, out IPAddress address))
+      {
+        var connect = await NewCore.Communication.DeviceCommandSender.PingAsync("УКШ", address);
+        return connect;
+      }
+
+      throw new NotFiniteNumberException();
+    }
   }
 }

@@ -1,4 +1,5 @@
-﻿using NewCore.Device;
+﻿using NewCore.Base.Function.Breakdown;
+using NewCore.Device;
 using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
@@ -9,7 +10,7 @@ namespace NewCore.Function.GPT
   /// <summary>
   /// Класс для работы с режимом ACW.
   /// </summary>
-  public class AcwMode
+  public class AcwMode : IAcwModeBreakdown
   {
     public AcwMode(GPT79904 gpt79904) => _gptModel = gpt79904;
     GPT79904 _gptModel { get; set; }

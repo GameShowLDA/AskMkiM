@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
+﻿using System.IO.Ports;
 using System.Net;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Services;
-using NewCore.Base;
-using NewCore.Interface;
 using System.Windows;
-using static Utilities.LoggerUtility;
-using System.Management;
-using NewCore.Device;
-using Mode.Settings.DeviceConfig.Base.HandlerDevice;
-using System.Windows.Controls;
-using Mode.Settings.DeviceConfig.DeviceBusCommutation;
+using AppConfig.DataBase.Models;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using NewCore.Base;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.Base
 {

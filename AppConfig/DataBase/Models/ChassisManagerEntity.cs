@@ -1,6 +1,8 @@
-﻿using NewCore.Base;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using NewCore.Base.Function.ManagerChassis;
+using NewCore.Base.Interface.Additionally;
+using NewCore.Base.Interface.Main;
 using NewCore.Enum;
-using NewCore.Interface;
 
 namespace AppConfig.DataBase.Models
 {
@@ -34,6 +36,14 @@ namespace AppConfig.DataBase.Models
     /// Тип устройства (тестер АСКМ).
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
+
+    public string DeviceClass { get; set; }
+
+    [NotMapped]
+    public IStateManagerChassis StateManager { get; set; }
+
+    [NotMapped]
+    public IPowerManagerChassis PowerManager { get; set; }
 
     /// <summary>
     /// Инициализация устройства.
