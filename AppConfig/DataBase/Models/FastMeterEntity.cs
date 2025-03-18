@@ -1,5 +1,8 @@
-﻿using NewCore.Enum;
-using NewCore.Interface;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
+using NewCore.Base.Function.FastMeter;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
 {
@@ -39,10 +42,47 @@ namespace AppConfig.DataBase.Models
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.FastMeter;
 
+    public string DeviceClass { get; set; }
+
+    [NotMapped]
+    public IAcVoltageMeasurement AcVoltageManager { get; set; }
+
+    [NotMapped]
+
+    public ICapacitanceMeasurement CapacitanceManager { get; set; }
+
+    [NotMapped]
+
+    public ICommunication CommunicationManager { get; set; }
+
+    [NotMapped]
+
+    public IConnection ConnectionManager { get; set; }
+    [NotMapped]
+
+    public IContinuityMeasurement ContinuityManager { get; set; }
+
+    [NotMapped]
+
+    public IDcVoltageMeasurement DcVoltageManager { get; set; }
+
+    [NotMapped]
+
+    public IResistanceMeasurement ResistanceManager { get; set; }
+
     /// <summary>
     /// Метод инициализации быстрого измерителя.
     /// </summary>
     /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public Task<bool> Initialize() => Task.FromResult(true);
+    public async Task<bool> Initialize()
+    {
+      if (IPAddress.TryParse(ConnectionDetails, out IPAddress address))
+      {
+        var connect = await NewCore.Communication.DeviceCommandSender.PingAsync("Мультиметр", address);
+        return connect;
+      }
+
+      throw new NotFiniteNumberException();
+    }
   }
 }

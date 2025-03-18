@@ -1,8 +1,9 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.Function.DBC;
+using NewCore.Communication;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class ConnectorManager
+  public class ConnectorManager : IConnectorDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.

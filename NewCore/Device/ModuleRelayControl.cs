@@ -1,18 +1,21 @@
 ﻿using System.Net;
-using NewCore.Base;
+using NewCore.Base.Device;
+using NewCore.Base.Function.ModuleRelayControl;
+using NewCore.Base.Interface.Main;
 using NewCore.Enum;
 using NewCore.Function.ModuleRelayControl;
-using NewCore.Interface;
-using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
   public class ModuleRelayControl : DeviceWithIP, IRelaySwitchModule
   {
-    public ModuleRelayControl(IPAddress iPAddress) : base(iPAddress) { }
-    public ModuleRelayControl() { }
-
-    public Functions Functions => new Functions(this);
+    public ModuleRelayControl() 
+    {
+      BusManager = new BusManager(this);
+      MeterManager = new MeterManager(this);
+      PointManager = new PointManager(this);
+      StateManager = new StateManager(this);
+    }
 
     public int Number { get; set; }
     public int NumberRack { get; set; }
@@ -22,37 +25,9 @@ namespace NewCore.Device
 
     public int NumberChassis { get; set; }
     public int PointCount { get; set; }
-
-    /// <summary>
-    /// Проверяет соединение с устройством.
-    /// </summary>
-    /// <returns>
-    /// Возвращает <see cref="bool"/>, указывающий на наличие соединения:
-    /// <c>true</c> — если соединение установлено, <c>false</c> — в противном случае.
-    /// </returns>
-    /// <exception cref="Exception">Выбрасывается, если произошла непредвиденная ошибка при проверке соединения.</exception>
-    public override async Task<bool> Initialize()
-    {
-      try
-      {
-        var (isConnected, answer) = await Functions.Initialize();
-
-        if (!isConnected)
-        {
-          LogWarning($"Соединение с устройством не установлено. ({answer})");
-        }
-        else
-        {
-          LogInformation("Соединение с устройством успешно установлено.");
-        }
-
-        return isConnected;
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при проверке соединения: {ex.Message}");
-        return false;
-      }
-    }
+    public IBusManager BusManager { get; set; }
+    public IMeterManager MeterManager { get; set; }
+    public IPointManager PointManager { get; set; }
+    public IStateManager StateManager { get; set; }
   }
 }

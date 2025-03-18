@@ -4,26 +4,26 @@
 
 namespace AppConfig.Migrations
 {
+  /// <inheritdoc />
+  public partial class RackCraeteColumn : Migration
+  {
     /// <inheritdoc />
-    public partial class RackCraeteColumn : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "NumberChassis",
-                table: "Rack",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "NumberChassis",
-                table: "Rack");
-        }
+      migrationBuilder.AddColumn<int>(
+          name: "NumberChassis",
+          table: "Rack",
+          type: "INTEGER",
+          nullable: false,
+          defaultValue: 0);
     }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.DropColumn(
+          name: "NumberChassis",
+          table: "Rack");
+    }
+  }
 }

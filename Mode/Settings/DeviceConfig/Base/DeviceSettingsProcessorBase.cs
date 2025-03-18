@@ -1,13 +1,8 @@
 ﻿using AppConfig.DataBase.Models;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
-using NewCore.Base;
-using NewCore.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Additionally;
+using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.Base
 {
@@ -24,7 +19,7 @@ namespace Mode.Settings.DeviceConfig.Base
     public T ProcessDevice<T>(
         IDevice selectedDevice,
         DeviceSettingsControl control,
-        IDataProcessor additionalDataProcessor = null) where T : class, IDevice 
+        IDataProcessor additionalDataProcessor = null) where T : class, IDevice
     {
       string connectString = BaseHandler<IDevice>.GetConnectionDetails(control, selectedDevice);
 
@@ -33,6 +28,7 @@ namespace Mode.Settings.DeviceConfig.Base
       deviceModel.Description = selectedDevice.Description;
       deviceModel.ConnectionDetails = connectString;
       deviceModel.Number = BaseHandler<IDevice>.GetNumber(control);
+      deviceModel.DeviceClass = selectedDevice.DeviceClass;
       SetChassisNumber(deviceModel, control);
 
       return deviceModel;
@@ -66,7 +62,7 @@ namespace Mode.Settings.DeviceConfig.Base
     private void SetChassisNumber(IDevice deviceModel, DeviceSettingsControl control)
     {
       if (deviceModel.DeviceType != NewCore.Enum.DeviceEnum.DeviceType.ChassisManager)
-      { 
+      {
         IAttachableDevice attachableDevice = (IAttachableDevice)deviceModel;
         attachableDevice.NumberChassis = control.NumberChassis;
       }

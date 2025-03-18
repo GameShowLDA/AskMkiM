@@ -1,4 +1,5 @@
-﻿using NewCore.Device;
+﻿using NewCore.Base.Function.Breakdown;
+using NewCore.Device;
 using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
@@ -10,7 +11,7 @@ namespace NewCore.Function.GPT
   /// Класс для управления системными настройками устройства.
   /// Все методы являются заглушками и просто выводят команду в консоль.
   /// </summary>
-  public class SystemSettings
+  public class SystemSettings : ISystemSettingsBreakdown
   {
 
     public SystemSettings(GPT79904 gpt79904) => _gptModel = gpt79904;

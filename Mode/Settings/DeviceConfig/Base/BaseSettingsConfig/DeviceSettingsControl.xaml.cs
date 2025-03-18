@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Ports;
+using System.Management;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using NewCore.Base;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Device;
 
 namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
@@ -116,6 +108,112 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
       Type selectedType = DeviceModelMap[DeviceModelSelectionBox.SelectedItem.ToString()];
 
       return Activator.CreateInstance(selectedType);
+    }
+
+    /// <summary>
+    /// Отображает доступные COM порты.
+    /// </summary>
+    private void PopulateCOMPorts()
+    {
+      // Получаем список доступных COM-портов
+      string[] portNames = SerialPort.GetPortNames();
+
+      // Привязываем список к ComboBox
+      COMPortSelectionBox.ItemsSource = portNames;
+
+      // Если список не пуст, выбираем первый порт по умолчанию
+      if (portNames.Any())
+      {
+        COMPortSelectionBox.SelectedIndex = 0;
+      }
+    }
+
+    /// <summary>
+    /// Получает значения VID и PID для указанного COM-порта и отображает их в текстовых полях.
+    /// </summary>
+    /// <param name="comPort">Имя COM-порта, например "COM3".</param>
+    private void GetVidPidForPort(string comPort)
+    {
+      string query = $"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%({comPort})%'";
+
+      using (var searcher = new ManagementObjectSearcher(query))
+      {
+        foreach (ManagementObject device in searcher.Get())
+        {
+          // Получаем строку DeviceID, где обычно содержатся VID и PID
+          string deviceId = device["DeviceID"] as string;
+          if (!string.IsNullOrEmpty(deviceId))
+          {
+            // Ищем шаблон "VID_XXXX&PID_XXXX"
+            Regex regex = new Regex(@"VID_([0-9A-F]{4})&PID_([0-9A-F]{4})", RegexOptions.IgnoreCase);
+            Match match = regex.Match(deviceId);
+            if (match.Success)
+            {
+              // Извлекаем VID и PID
+              string vid = match.Groups[1].Value;
+              string pid = match.Groups[2].Value;
+
+              // Записываем данные в TextBox-ы
+              VIDData.Text = vid;
+              PIDData.Text = pid;
+              return;
+            }
+          }
+        }
+      }
+
+      VIDData.Text = "N/A";
+      PIDData.Text = "N/A";
+    }
+
+    /// <summary>
+    /// Применяет COM-настройки из выбранной модели устройства к элементам управления.
+    /// Если свойство присутствует в модели, ищет его значение среди вариантов ComboBox и выбирает его.
+    /// Если свойства нет или значение не найдено – оставляет значение по умолчанию.
+    /// </summary>
+    /// <param name="deviceModel">Экземпляр модели устройства, выбранного пользователем.</param>
+    private void ApplyCOMSettingsFromModel(object deviceModel)
+    {
+      Type modelType = deviceModel.GetType();
+
+      // Обновляем настройки COM: BaudRate, StopBits, DataBits, Parity, FlowControl
+      SetComboBoxValueFromProperty(modelType, deviceModel, "BaudRate", BaudRateSelectionBox);
+      SetComboBoxValueFromProperty(modelType, deviceModel, "StopBits", StopBitsSelectionBox);
+      SetComboBoxValueFromProperty(modelType, deviceModel, "DataBits", DataBitsSelectionBox);
+      SetComboBoxValueFromProperty(modelType, deviceModel, "Parity", ParitySelectionBox);
+      SetComboBoxValueFromProperty(modelType, deviceModel, "FlowControl", FlowControlSelectionBox);
+    }
+
+    /// <summary>
+    /// Проверяет, содержит ли указанная модель устройства свойство с именем propertyName,
+    /// и если да, получает его значение, пытается установить его в ComboBox.
+    /// </summary>
+    /// <param name="modelType">Тип модели устройства.</param>
+    /// <param name="deviceModel">Экземпляр модели устройства.</param>
+    /// <param name="propertyName">Имя свойства, например "BaudRate".</param>
+    /// <param name="comboBox">ComboBox для установки значения.</param>
+    private void SetComboBoxValueFromProperty(Type modelType, object deviceModel, string propertyName, ComboBox comboBox)
+    {
+      var property = modelType.GetProperty(propertyName);
+      if (property != null)
+      {
+        var valueObj = property.GetValue(deviceModel);
+        if (valueObj != null)
+        {
+          string value = valueObj.ToString();
+          // Поиск подходящего элемента в ComboBox
+          foreach (var item in comboBox.Items)
+          {
+            // Если элемент – строка или ComboBoxItem, то сравниваем их содержимое
+            string itemContent = item is ComboBoxItem cbItem ? cbItem.Content.ToString() : item.ToString();
+            if (string.Equals(itemContent, value, StringComparison.OrdinalIgnoreCase))
+            {
+              comboBox.SelectedItem = item;
+              return;
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -1,5 +1,8 @@
-﻿using NewCore.Enum;
-using NewCore.Interface;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using NewCore.Base;
+using NewCore.Base.Function.Breakdown;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
 {
@@ -34,10 +37,25 @@ namespace AppConfig.DataBase.Models
     /// </summary>
     public string ConnectionDetails { get; set; }
 
+    public string DeviceClass { get; set; }
+
+
     /// <summary>
     /// Тип устройства, всегда BreakdownTester.
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.BreakdownTester;
+
+    [NotMapped]
+    public IAcwModeBreakdown AcwManger { get; set; }
+
+    [NotMapped]
+    public IDcwModeBreakdown DcwManger { get; set; }
+
+    [NotMapped]
+    public IIrModeBreakdown IrManger { get; set; }
+
+    [NotMapped]
+    public ISystemSettingsBreakdown SystemManger { get; set; }
 
     /// <summary>
     /// Метод инициализации пробойной установки.

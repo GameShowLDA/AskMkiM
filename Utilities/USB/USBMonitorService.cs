@@ -4,110 +4,125 @@ using static Utilities.LoggerUtility;
 
 namespace Utilities.USB
 {
+  /// <summary>
+  /// Сервис мониторинга USB-устройств и проверки USB-ключей.
+  /// </summary>
   public class USBMonitorService
   {
-    private ManagementEventWatcher insertWatcher;
-    private ManagementEventWatcher removeWatcher;
-    private Dispatcher dispatcher;
-    private USBKeyValidator usbKeyValidator;
+    private readonly ManagementEventWatcher _insertWatcher;
+    private readonly ManagementEventWatcher _removeWatcher;
+    private readonly Dispatcher _dispatcher;
+    private readonly USBKeyValidator _usbKeyValidator;
 
-    // Добавляем событие
+    /// <summary>
+    /// Событие изменения прав администратора.
+    /// </summary>
     public event EventHandler<bool> AdminRightsChanged;
 
-    // Свойство для отслеживания прав администратора
-    private bool adminRights;
+    private bool _adminRights;
+    /// <summary>
+    /// Текущее состояние прав администратора.
+    /// </summary>
     public bool AdminRights
     {
-      get { return adminRights; }
-      private set
+      get => _adminRights;
+      set
       {
-        if (adminRights != value)
-        {
-          adminRights = value;
-          OnAdminRightsChanged(adminRights); // Срабатывает событие при изменении
-        }
+        if (_adminRights == value) return;
+        _adminRights = value;
+        AdminRightsChanged?.Invoke(this, _adminRights);
       }
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="USBMonitorService"/>.
+    /// </summary>
     public USBMonitorService(Dispatcher dispatcher)
     {
-      this.dispatcher = dispatcher;
-      this.usbKeyValidator = new USBKeyValidator();
-      InitializeWatchers();
+      _dispatcher = dispatcher;
+      _usbKeyValidator = new USBKeyValidator();
+      _insertWatcher = CreateWatcher("__InstanceCreationEvent", OnUSBInserted);
+      _removeWatcher = CreateWatcher("__InstanceDeletionEvent", OnUSBRemoved);
     }
 
-    private void InitializeWatchers()
+    /// <summary>
+    /// Создаёт наблюдателя за событиями USB.
+    /// </summary>
+    private ManagementEventWatcher CreateWatcher(string eventType, EventArrivedEventHandler handler)
     {
-      WqlEventQuery insertQuery = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
-      insertWatcher = new ManagementEventWatcher(insertQuery);
-      insertWatcher.EventArrived += (s, e) => OnUSBInserted();
-
-      WqlEventQuery removeQuery = new WqlEventQuery("SELECT * FROM __InstanceDeletionEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
-      removeWatcher = new ManagementEventWatcher(removeQuery);
-      removeWatcher.EventArrived += (s, e) => OnUSBRemoved();
+      var query = new WqlEventQuery($"SELECT * FROM {eventType} WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
+      var watcher = new ManagementEventWatcher(query);
+      watcher.EventArrived += handler;
+      return watcher;
     }
 
+    /// <summary>
+    /// Запускает мониторинг USB-устройств.
+    /// </summary>
     public void Start()
     {
-      insertWatcher.Start();
-      removeWatcher.Start();
+      _insertWatcher.Start();
+      _removeWatcher.Start();
       LogInformation("USB мониторинг запущен.");
       CheckExistingUSBDevices();
     }
 
+    /// <summary>
+    /// Останавливает мониторинг USB-устройств.
+    /// </summary>
     public void Stop()
     {
-      insertWatcher.Stop();
-      removeWatcher.Stop();
+      _insertWatcher.Stop();
+      _removeWatcher.Stop();
       LogInformation("USB мониторинг остановлен.");
     }
 
-    private void OnUSBInserted()
+    /// <summary>
+    /// Обработчик события подключения USB-устройства.
+    /// </summary>
+    private void OnUSBInserted(object sender, EventArrivedEventArgs e)
     {
-      dispatcher.Invoke(async () =>
+      _dispatcher.Invoke(() =>
       {
         LogInformation("USB устройство подключено.");
-        if (usbKeyValidator.IsValidUSBKey())
-        {
-          AdminRights = true; // Устанавливаем права
-          LogInformation("Действительный USB ключ обнаружен. Права администратора установлены.");
-        }
-        else
-        {
-          LogInformation("Подключенное устройство не является действительным USB ключом.");
-        }
+        UpdateAdminRights();
       });
     }
 
-    private void OnUSBRemoved()
+    /// <summary>
+    /// Обработчик события отключения USB-устройства.
+    /// </summary>
+    private void OnUSBRemoved(object sender, EventArrivedEventArgs e)
     {
-      dispatcher.Invoke(async () =>
+      _dispatcher.Invoke(() =>
       {
         LogInformation("USB устройство отключено.");
-        AdminRights = false; // Сбрасываем права
+        AdminRights = false;
       });
     }
 
+    /// <summary>
+    /// Проверяет наличие действительного USB-ключа среди подключенных устройств.
+    /// </summary>
     private void CheckExistingUSBDevices()
     {
-      dispatcher.Invoke(async () =>
-      {
-        LogInformation("Проверка уже подключенных USB устройств.");
-        if (usbKeyValidator.IsValidUSBKey())
-        {
-          AdminRights = true; // Устанавливаем права
-          LogInformation("Действительный USB ключ обнаружен среди уже подключенных устройств. Права администратора установлены.");
-        }
-        else
-        {
-          LogInformation("Среди уже подключенных устройств нет действительных USB ключей.");
-        }
-      });
+      _dispatcher.Invoke(UpdateAdminRights);
     }
 
-    protected virtual void OnAdminRightsChanged(bool newRights)
+    /// <summary>
+    /// Обновляет статус прав администратора на основе наличия USB-ключа.
+    /// </summary>
+    private void UpdateAdminRights()
     {
-      AdminRightsChanged?.Invoke(this, newRights); // Генерация события
+      if (_usbKeyValidator.IsValidUSBKey())
+      {
+        AdminRights = true;
+        LogInformation("Действительный USB ключ обнаружен. Права администратора установлены.");
+      }
+      else
+      {
+        LogInformation("Подключенное устройство не является действительным USB ключом.");
+      }
     }
   }
 }

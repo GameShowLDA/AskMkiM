@@ -299,6 +299,7 @@
                                                   MinWidth="100"
                                                   Style="{StaticResource CustomComboBoxStyle}"
                                                   VerticalAlignment="Center"
+                                                  SelectionChanged="COMPortSelectionBox_SelectionChanged"
                                                   />
                                         </Grid>
 
@@ -314,7 +315,7 @@
                                                    FontSize="20" FontWeight="Bold" Margin="7,0"/>
 
                                             <Border Grid.Column="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
-                                                <TextBox Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
+                                                <TextBox x:Name="VIDData" Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
                                          HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"/>
                                             </Border>
                                         </Grid>
@@ -331,7 +332,7 @@
                                                    FontSize="20" FontWeight="Bold" Margin="7,0"/>
 
                                             <Border Grid.Column="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" >
-                                                <TextBox Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
+                                                <TextBox x:Name="PIDData" Background="Transparent"  BorderThickness="0" VerticalAlignment="Center" 
                                                      HorizontalAlignment="Center" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"/>
                                             </Border>
                                         </Grid>

@@ -1,5 +1,7 @@
-﻿using NewCore.Enum;
-using NewCore.Interface;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using NewCore.Base.Function.ModuleRelayControl;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
 {
@@ -48,6 +50,20 @@ namespace AppConfig.DataBase.Models
     /// Тип устройства, всегда RelaySwitchModule.
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.RelaySwitchModule;
+
+    public string DeviceClass { get; set; }
+
+    [NotMapped]
+    public IBusManager BusManager { get; set; }
+
+    [NotMapped]
+    public IMeterManager MeterManager { get; set; }
+
+    [NotMapped]
+    public IPointManager PointManager { get; set; }
+
+    [NotMapped]
+    public IStateManager StateManager { get; set; }
 
     /// <summary>
     /// Метод инициализации модуля.

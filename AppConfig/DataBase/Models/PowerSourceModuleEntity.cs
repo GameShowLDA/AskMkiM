@@ -1,5 +1,7 @@
-﻿using NewCore.Enum;
-using NewCore.Interface;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using NewCore.Base.Function.ModuleVoltageCurrentSource;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
 {
@@ -38,6 +40,18 @@ namespace AppConfig.DataBase.Models
     /// Тип устройства, всегда PowerSourceModule.
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.PowerSourceModule;
+
+    public string DeviceClass { get; set; }
+
+    [NotMapped]
+    public IBusManager BusManager { get; set; }
+    [NotMapped]
+    public ICurrentManager CurrentManager { get; set; }
+    [NotMapped]
+    public IStateManager StateManager { get; set; }
+    [NotMapped]
+    public IVoltageManager VoltageManager { get; set; }
+
 
     /// <summary>
     /// Метод инициализации модуля источника питания.

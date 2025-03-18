@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using AppConfig.DataBase;
-using AppConfig;
-using System.Diagnostics;
-using NLog;
 
 namespace ConsoleUtilities
 {
@@ -22,6 +12,11 @@ namespace ConsoleUtilities
 
     private readonly Dictionary<string, Action<string[]>> _commands;
 
+    /// <summary>
+    /// Событие изменения режима администратора вручную.
+    /// </summary>
+    public event EventHandler<bool> AdminModeChanged;
+
     public CommandHandler()
     {
       Console.TreatControlCAsInput = true; // Позволяет обрабатывать Ctrl
@@ -33,6 +28,8 @@ namespace ConsoleUtilities
                 { "showtable", args => ShowTable(args) },
                 { "save", args => SaveConsoleLog() },
                 { "clearlogs", args => ClearLogs() },
+                { "setAdmin", args => SetAdminMode(true) },
+                { "delAdmin", args => SetAdminMode(false) },
             };
 
       // Перехватываем весь вывод в консоль
@@ -305,6 +302,21 @@ namespace ConsoleUtilities
       catch (Exception ex)
       {
         Console.WriteLine($"Ошибка выполнения команды: {ex.Message}");
+      }
+    }
+
+    private void SetAdminMode(bool enable)
+    {
+      if (enable)
+      {
+        Utilities.LoggerUtility.LogInformation("Включение режима администратора.");
+        AdminModeChanged?.Invoke(null, true);
+
+      }
+      else
+      {
+        Utilities.LoggerUtility.LogInformation("Отключение режима администратора.");
+        AdminModeChanged?.Invoke(null, false);
       }
     }
   }

@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using NewCore.Base;
+using NewCore.Base.Device;
 
 namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
@@ -33,6 +33,12 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
         ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
+
+        if (baseClass == typeof(DeviceWithCOM))
+        {
+          object deviceModel = Activator.CreateInstance(selectedType);
+          ApplyCOMSettingsFromModel(deviceModel);
+        }
       }
       catch (InvalidOperationException ex)
       {
@@ -64,6 +70,7 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
         else if (selectedType.Contains("com"))
         {
           COMContainer.Visibility = Visibility.Visible;
+          PopulateCOMPorts();
         }
       }
     }
@@ -107,6 +114,14 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void CancelButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       RequestClose?.Invoke(this, e);
+    }
+
+    private void COMPortSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      if (COMPortSelectionBox.SelectedItem is string selectedPort)
+      {
+        GetVidPidForPort(selectedPort);
+      }
     }
   }
 }

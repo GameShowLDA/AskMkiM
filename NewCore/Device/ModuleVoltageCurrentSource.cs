@@ -1,50 +1,29 @@
 ﻿using System.Net;
-using NewCore.Base;
+using NewCore.Base.Device;
+using NewCore.Base.Function.ModuleVoltageCurrentSource;
+using NewCore.Base.Interface.Main;
 using NewCore.Function.ModuleVoltageCurrentSource;
-using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
-  public class ModuleVoltageCurrentSource : DeviceWithIP
+  public class ModuleVoltageCurrentSource : DeviceWithIP, IPowerSourceModule
   {
 
-    public ModuleVoltageCurrentSource(IPAddress iPAddress) : base(iPAddress)
+    public ModuleVoltageCurrentSource()
     {
       Name = "Модуль источника напряжения и тока";
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
+      BusManager = new BusManager(this);
+      CurrentManager = new CurrentManager(this);
+      StateManager = new StateManager(this);
+      VoltageManager = new VoltageManager(this);
+      DeviceClass = GetType().FullName;
     }
-    public Functions Functions => new Functions(this);
 
-    /// <summary>
-    /// Проверяет соединение с устройством.
-    /// </summary>
-    /// <returns>
-    /// Возвращает <see cref="bool"/>, указывающий на наличие соединения:
-    /// <c>true</c> — если соединение установлено, <c>false</c> — в противном случае.
-    /// </returns>
-    /// <exception cref="Exception">Выбрасывается, если произошла непредвиденная ошибка при проверке соединения.</exception>
-    public override async Task<bool> Initialize()
-    {
-      try
-      {
-        var (isConnected, answer) = await Functions.Initialize();
-
-        if (!isConnected)
-        {
-          LogWarning($"Соединение с устройством не установлено. ({answer})");
-        }
-        else
-        {
-          LogInformation("Соединение с устройством успешно установлено.");
-        }
-
-        return isConnected;
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при проверке соединения: {ex.Message}");
-        return false;
-      }
-    }
+    public int NumberChassis { get; set; }
+    public IBusManager BusManager { get; set; }
+    public ICurrentManager CurrentManager { get; set; }
+    public IStateManager StateManager { get; set; }
+    public IVoltageManager VoltageManager { get; set; }
   }
 }

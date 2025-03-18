@@ -1,4 +1,5 @@
-﻿using NewCore.Device;
+﻿using NewCore.Base.Function.Breakdown;
+using NewCore.Device;
 using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
@@ -6,7 +7,7 @@ using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.GPT
 {
-  public class DcwMode
+  public class DcwMode : IDcwModeBreakdown
   {
     public DcwMode(GPT79904 gpt79904) => _gptModel = gpt79904;
     GPT79904 _gptModel { get; set; }

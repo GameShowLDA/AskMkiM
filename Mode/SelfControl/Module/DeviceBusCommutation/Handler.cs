@@ -26,7 +26,9 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
       deviceBusCommutation = Core.DeviceBusCommutation.Model.CreateFromObject(deviceModel);
-      meter = new Core.KeysightLibrary.Model();
+
+      // TODO : Переопределить мультиметр
+      // meter = new Core.KeysightLibrary.Model();
     }
 
     #region StartDelegate

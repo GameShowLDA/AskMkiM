@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppConfig\AppConfig.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 
 </Project>

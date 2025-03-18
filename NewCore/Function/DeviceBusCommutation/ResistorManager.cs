@@ -1,9 +1,10 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.Function.DBC;
+using NewCore.Communication;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class ResistorManager
+  public class ResistorManager : IResistorDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.

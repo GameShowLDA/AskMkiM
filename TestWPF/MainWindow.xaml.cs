@@ -45,7 +45,7 @@ namespace TestWPF
 
       var Racks = new RackRepository(dbContext).GetAll();
       foreach (var item in Racks)
-      { 
+      {
         Test.AddRack(item);
       }
 

@@ -103,27 +103,27 @@ namespace Mode.Settings.ConfigSettings.CustomControls
     /// <returns>Задача, представляющая асинхронную операцию, которая возвращает созданную модель измерителя.</returns>
     private async Task<MeterBase> CollectData()
     {
-      DeviceEnum.Type type = DeviceEnum.Type.AccurateMeter;
       string numberDevice = number.Text;
 
-      MeterBase model;
+      // TODO : Переопределить мультиметр
 
-      if (number.Text.Contains("34465"))
-      {
-        var modelKeysight = await Core.KeysightLibrary.Model.CreateAsync();
-        bool moduleActive = true;
-        if (modelKeysight.IPAddress == null)
-        {
-          moduleActive = false;
-        }
-        model = MeterBase.CreateMeter<Core.KeysightLibrary.Model>(type, modelKeysight.Name, modelKeysight.Description, modelKeysight.IPAddress, numberDevice, moduleActive);
-      }
-      else
-      {
-        model = MeterBase.CreateMeter<Core.KeysightLibrary.Model>(type, number.Text, null, null, numberDevice, false);
-      }
+      // if (number.Text.Contains("34465"))
+      // {
+      //   var modelKeysight = await Core.KeysightLibrary.Model.CreateAsync();
+      //   bool moduleActive = true;
+      //   if (modelKeysight.IPAddress == null)
+      //   {
+      //     moduleActive = false;
+      //   }
+      //   model = MeterBase.CreateMeter<Core.KeysightLibrary.Model>(type, modelKeysight.Name, modelKeysight.Description, modelKeysight.IPAddress, numberDevice, moduleActive);
+      // }
+      // else
+      // {
+      //   model = MeterBase.CreateMeter<Core.KeysightLibrary.Model>(type, number.Text, null, null, numberDevice, false);
+      // }
 
-      return model;
+      // return model;
+      return null;
     }
 
     /// <summary>

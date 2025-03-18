@@ -1,10 +1,11 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.Function.DBC;
+using NewCore.Communication;
 using static Utilities.LoggerUtility;
 
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class CapacitorManager
+  public class CapacitorManager : ICapacitorDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.

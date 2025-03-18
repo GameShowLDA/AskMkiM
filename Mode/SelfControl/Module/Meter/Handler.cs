@@ -53,7 +53,9 @@ namespace Mode.SelfControl.Module.Meter
     internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
-      meter = Core.KeysightLibrary.Model.CreateFromObject(deviceModel);
+
+      // TODO : Переопределить мультиметр
+      // meter = Core.KeysightLibrary.Model.CreateFromObject(deviceModel);
     }
 
     internal StartDelegate GetStartDelegate()
@@ -89,7 +91,9 @@ namespace Mode.SelfControl.Module.Meter
       {
         return;
       }
-      meter = await Core.KeysightLibrary.Model.CreateAsync();
+
+      // TODO : Переопределить мультиметр
+      // meter = await Core.KeysightLibrary.Model.CreateAsync();
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль мультиметра", goodText.Item2));
 
       if (!await GetIsIdleModeEnabled())

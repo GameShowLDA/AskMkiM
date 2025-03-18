@@ -1,8 +1,10 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.DeviceResponses;
+using NewCore.Base.Function.DBC;
+using NewCore.Communication;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class StateManager
+  public class StateManager : IStateDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.
@@ -34,11 +36,35 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <returns>Возвращает ответ, получен ли ответ от инициализации.</returns>
     public async Task<(bool Connect, string Answer)> Initialize()
     {
-      DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
+      DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
       string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 2000).ConfigureAwait(true);
 
-      // TODO : Тут ошибка, я не знаю ответ от УКШ...
-      return result == "1.0.1" ? (true, string.Empty) : (false, result);
+      BaseResponse baseResponse = BaseResponse.FromJson(result);
+      if (baseResponse != null)
+      {
+        if (baseResponse.NumberChassis == _deviceBusCommutation.NumberChassis &&
+      baseResponse.NumberDevice == _deviceBusCommutation.Number)
+        {
+          return (true, result);
+        }
+        else
+        {
+          string errorMessage = string.Empty;
+
+          if (baseResponse.NumberChassis != _deviceBusCommutation.NumberChassis)
+          {
+            errorMessage += $"Несовпадение по NumberChassis: ожидается {_deviceBusCommutation.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+          }
+          if (baseResponse.NumberDevice != _deviceBusCommutation.Number)
+          {
+            errorMessage += $"Несовпадение по NumberDevice: ожидается {_deviceBusCommutation.Number}, получено {baseResponse.NumberDevice}.";
+          }
+
+          return (false, errorMessage.Trim());
+        }
+      }
+
+      return (false, result);
     }
   }
 }

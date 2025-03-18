@@ -1,14 +1,14 @@
-﻿using System.Drawing;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Services;
+using Mode.Settings.DeviceConfig.BreakDown;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceBusCommutation;
 using Mode.Settings.DeviceConfig.DeviceManager;
 using Mode.Settings.DeviceConfig.FastMeter;
-using Mode.Settings.DeviceConfig.WindowSettings;
-using NewCore.Base;
+using Mode.Settings.DeviceConfig.ModuleVoltageCurrentSource;
+using NewCore.Base.Interface.Additionally;
 using static AppConfig.Config.SystemStateManager;
 
 namespace Mode.Settings.DeviceConfig
@@ -22,11 +22,17 @@ namespace Mode.Settings.DeviceConfig
     {
       InitializeComponent();
       chassisManager.NewSystem += (s, a) => NewSystem();
-      chassisManager.SystemSelected += (s,a) => SelectedChassis(a);
+      chassisManager.SystemSelected += (s, a) => SelectedChassis(a);
 
-      var data = new ChassisManagerRepository(Context).GetAll().First();
-      AddSystem(data);
+      try
+      {
+        var data = new ChassisManagerRepository(Context).GetAll().First();
+        AddSystem(data);
+      }
+      catch
+      {
 
+      }
     }
 
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
@@ -46,11 +52,11 @@ namespace Mode.Settings.DeviceConfig
       LoadSwitchingDevices(system, devices);
       deviceBorder.Child = devices;
 
-      devices.AddBreakdownEvent += Devices_AddBreakdownEvent;
-      devices.DeviceBusCommutationSelected += (s,a) => Devices_DeviceBusCommutationSelected(s,a, system, devices);
+      devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
+      devices.DeviceBusCommutationSelected += (s, a) => Devices_DeviceBusCommutationSelected(s, a, system, devices);
+      devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
       devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
       devices.ExitEvent += Devices_ExitEvent;
-
     }
 
     private void Devices_FastMeterEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
@@ -59,6 +65,16 @@ namespace Mode.Settings.DeviceConfig
       FastMeterWindow fastMeterWindow = new FastMeterWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      fastMeterWindow.ShowDialog();
+      this.Effect = null;
+    }
+
+    private void Devices_PowerModuleEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
+    {
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      ModuleVoltageCurrentSourceWindow fastMeterWindow = new ModuleVoltageCurrentSourceWindow();
+      fastMeterWindow.SetSettings(sender, e);
+      fastMeterWindow.RequestSave += (s, a) => LoadPowerSources(system, devices);
       fastMeterWindow.ShowDialog();
       this.Effect = null;
     }
@@ -86,13 +102,14 @@ namespace Mode.Settings.DeviceConfig
       settingsBorder.Child = null;
     }
 
-    private void Devices_AddBreakdownEvent(object? sender, IHeadUnit e)
+    private void Devices_AddBreakdownEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
     {
-      // ToggleThirdColumn(true);
-      // var breakDownControl = new BreakdownTester.BreakdownTesterSettings();
-      // settingsBorder.Child = breakDownControl;
-      // breakDownControl.ClosedEvent += BreakDownControl_ClosedEvent;
-      // breakDownControl.DeviceSaved += BreakDownControl_DeviceSaved;
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      BreakDownWindow fastMeterWindow = new BreakDownWindow();
+      fastMeterWindow.SetSettings(sender, e);
+      fastMeterWindow.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
+      fastMeterWindow.ShowDialog();
+      this.Effect = null;
     }
 
     private void BreakDownControl_DeviceSaved(object? sender, EventArgs e)

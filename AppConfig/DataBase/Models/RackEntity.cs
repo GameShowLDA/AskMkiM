@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
-using NewCore.Base;
+﻿using NewCore.Base.Interface.Additionally;
+using NewCore.Base.Interface.Main;
 using NewCore.Enum;
-using NewCore.Interface;
 
 namespace AppConfig.DataBase.Models
 {
@@ -46,6 +40,9 @@ namespace AppConfig.DataBase.Models
     /// Тип устройства (стойка СКМ).
     /// </summary>
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.Rack;
+
+    public string DeviceClass { get; set; }
+
 
     public Task<bool> Initialize() => Task.FromResult(true);
   }

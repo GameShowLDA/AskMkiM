@@ -76,7 +76,9 @@ namespace Mode.Metrology.KC
         measurementDataModel.LastModuleRelayControl = secondPoint.ModuleRelayControl;
 
         deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
-        meter = new Core.KeysightLibrary.Model();
+
+        // TODO : Переопределить мультиметр
+        // meter = new Core.KeysightLibrary.Model();
 
         if (!await AttemptDeviceConnection())
         {
