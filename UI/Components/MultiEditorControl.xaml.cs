@@ -21,6 +21,7 @@ using ICSharpCode.AvalonEdit;
 using System.Windows.Controls;
 using ICSharpCode.AvalonEdit.Rendering;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
+using System.Windows.Media.Effects;
 
 namespace UI.Components
 {
@@ -599,10 +600,30 @@ namespace UI.Components
         foundInOpenedFiles.Clear();
       }
 
-      SearchProgressBar.Visibility = Visibility.Visible;
-      SearchProgressBar.Minimum = 0;
-      SearchProgressBar.Maximum = searchPages.Count;
-      SearchProgressBar.Value = 0;
+      ProgressWindow progressWindow = null;
+
+      // Создаем и показываем окно прогресса на UI-потоке
+      await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = Application.Current.MainWindow, // Центрирование относительно главного окна
+          WindowStartupLocation = WindowStartupLocation.CenterOwner,
+          ShowInTaskbar = false,
+          Topmost = true
+        };
+        progressWindow.Show();
+      });
+
+      // Искусственная задержка, чтобы окно прогресса успело отрендериться
+      await Task.Delay(150);
+
+      // Применяем блюр и блокируем основное окно
+      await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        Application.Current.MainWindow.Effect = new BlurEffect { Radius = 5 };
+        Application.Current.MainWindow.IsEnabled = false;
+      });
 
       object lockObj = new object();
 
@@ -624,21 +645,24 @@ namespace UI.Components
             }
           }
         }
-
-        Dispatcher.Invoke(() =>
-        {
-          SearchProgressBar.Value += 1;
-        });
       })).ToList();
 
       await Task.WhenAll(tasks);
 
-      // TODO: заменить на красивый прогресс бар
-      SearchProgressBar.Visibility = Visibility.Collapsed;
+      // После завершения поиска снимаем блюр и закрываем окно прогресса
+      await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        if (progressWindow != null)
+        {
+          progressWindow.Close();
+        }
+        Application.Current.MainWindow.Effect = null;
+        Application.Current.MainWindow.IsEnabled = true;
+      });
 
       if (foundInOpenedFiles.Count > 0)
       {
-        var lastFoundResultsDictionary = foundInOpenedFiles.Values.LastOrDefault(); // например, берем последние
+        var lastFoundResultsDictionary = foundInOpenedFiles.Values.LastOrDefault();
         if (lastFoundResultsDictionary?.Count > 0)
         {
           DisplaySearchResults(searchText, foundInOpenedFiles);
@@ -651,6 +675,7 @@ namespace UI.Components
         return;
       }
     }
+
 
     private List<OpenFileButton> SetSearchAreaPages(int searchArea)
     {

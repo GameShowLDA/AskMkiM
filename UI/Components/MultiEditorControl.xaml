@@ -18,12 +18,5 @@
                     Orientation="Horizontal" 
                     MouseLeftButtonDown="TopPanel_MouseLeftButtonDown"/>
         <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
-        <ProgressBar x:Name="SearchProgressBar"
-             Minimum="0"
-             Maximum="100"
-             Value="0"
-             Height="20"
-             Visibility="Collapsed"/>
-
     </Grid>
 </UserControl>
