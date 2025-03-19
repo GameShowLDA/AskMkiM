@@ -24,11 +24,36 @@ namespace MainWindowProgram
 
     public static string[] CommandLineArgs { get; private set; }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
       base.OnStartup(e);
       CommandLineArgs = e.Args; // Сохраняем аргументы
+
+      SplashWindow loadWindow = new SplashWindow();
+      loadWindow.Show();
+
+      MainWindow mainWindow = null;
+
+      // 2. Создаем MainWindow в UI-потоке
+      await Dispatcher.InvokeAsync(() =>
+      {
+        mainWindow = new MainWindow();
+        mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow
+      });
+
+      // 3. Инициализируем MainWindow (в фоне)
+      await mainWindow.InitializeAsync();
+
+      // 4. Ждём завершения анимации SplashWindow
+      await loadWindow.WaitForCloseAsync(); // Ждёт плавное исчезновение
+
+      // 5. Только теперь показываем основное окно
+      await Dispatcher.InvokeAsync(() =>
+      {
+        mainWindow.Visibility = Visibility.Visible;
+      });
     }
+
 
   }
 }

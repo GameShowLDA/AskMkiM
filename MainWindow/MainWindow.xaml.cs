@@ -23,10 +23,15 @@ namespace MainWindowProgram
     {
       InitializeComponent();
       _consoleManager = ConsoleManager.Instance;
+      this.Visibility = Visibility.Hidden;
+    }
+
+    public async Task InitializeAsync()
+    {
       _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
       SetEvent();
 
-      Task.Run(async () =>
+      await Task.Run(async () =>
       {
         try
         {
@@ -66,7 +71,7 @@ namespace MainWindowProgram
 
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
-      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3) // Ctrl + Ё
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3) 
       {
         _consoleManager.ToggleConsole();
         e.Handled = true;
