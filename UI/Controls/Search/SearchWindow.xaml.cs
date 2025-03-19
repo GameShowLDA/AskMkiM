@@ -39,6 +39,7 @@ namespace UI.Controls.Search
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
       EventAggregator.TextEditorClosing += OnSearchWindowClosing;
       EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
+      EventAggregator.SearchTextRequested += OnSearchTextRequested;
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -142,7 +143,6 @@ namespace UI.Controls.Search
       EventAggregator.RaiseSearchWindowClosing(false);
       _allowClose = true;
       this.Hide();
-      //this.Close();
     }
 
     private void OnCaseChanged(object sender, EventArgs e)
@@ -307,7 +307,6 @@ namespace UI.Controls.Search
     #endregion
     private void OnSearchButtonPressed(string searchParameters)
     {
-      //TODO: получить все параметры из окна и передать их в метод поиска в мультиэдиторе
       var searchText = SearchTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
@@ -325,6 +324,7 @@ namespace UI.Controls.Search
       if (isOpen)
       {
         CloseDialog();
+        EventAggregator.SearchTextRequested -= OnSearchTextRequested;
       }
     }
 
@@ -367,15 +367,25 @@ namespace UI.Controls.Search
     {
       if (isTextEditor)
       {
-        //if (!this.IsVisible)
-        //{
-          this.Show();  // Если окно скрыто, показываем его заново
-        //}
-        this.Activate(); // Делаем активным
+        if (!this.IsVisible)
+        {
+          this.Show();
+          EventAggregator.RaiseSearchWindowActivated(true);
+        }
+        this.Activate(); 
       }
       else
       {
-        this.Hide();  // Вместо Close() просто скрываем окно
+        this.Hide();
+      }
+    }
+
+    private void OnSearchTextRequested(string selectedText)
+    {
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        SearchTextBox.Text = selectedText;
+        SearchTextBox.Focus();
       }
     }
   }

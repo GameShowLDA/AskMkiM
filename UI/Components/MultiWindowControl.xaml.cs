@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UI.Components.SearchControls;
 using UI.Controls.Search;
+using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components
@@ -95,6 +96,12 @@ namespace UI.Components
       SearchResultsRow.MinHeight = 0;
       SearchResults.Visibility = Visibility.Collapsed;
       MultiWindowSplitter.Visibility = Visibility.Collapsed;
+    }
+
+
+    public TextEditorUI GetActiveTextEditor()
+    {
+      return MultiEditor.GetActiveTextEditor();
     }
 
 

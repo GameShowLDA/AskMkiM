@@ -38,7 +38,6 @@ namespace UI.Components
 
     private List<SearchResult> foundResults = new List<SearchResult>();
     private int currentIndex = -1;
-    //private TextMarkerService textMarkerService;
 
     string _searchText;
     Dictionary<UserControl, string> _fullText = new Dictionary<UserControl, string>();
@@ -74,22 +73,19 @@ namespace UI.Components
 
       this.KeyDown += MultiWindowControl_KeyDown;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
+      EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
     }
 
     private void InitializeTextMarkerService(TextEditorUI textEditorUI)
     {
-      // Если для этого редактора уже создан MarkerService, выходим
       if (textEditorUI.MarkerService != null)
         return;
 
       var textEditor = textEditorUI.TextEditor;
-      // Создаём новый экземпляр маркер-сервиса
       var markerService = new TextMarkerService(textEditor.Document, textEditor);
-      // Добавляем сервис как рендерер и трансформер
       textEditor.TextArea.TextView.BackgroundRenderers.Add(markerService);
       textEditor.TextArea.TextView.LineTransformers.Add(markerService);
 
-      // Сохраняем ссылку, чтобы не создавать повторно
       textEditorUI.MarkerService = markerService;
     }
 
@@ -108,6 +104,21 @@ namespace UI.Components
         _clickCount = 0;
         CreateNewFile();
       }
+    }
+
+    public TextEditorUI GetActiveTextEditor()
+    {
+      var activePage = openPages.FirstOrDefault(page =>
+                        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activePage != null)
+      {
+        int index = openPages.IndexOf(activePage);
+        if (userControls[index] is TextEditorUI activeEditor)
+        {
+          return activeEditor;
+        }
+      }
+      return null;
     }
 
     /// <summary>
@@ -584,6 +595,7 @@ namespace UI.Components
         }
       }
     }
+
 
     private async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea)
     {

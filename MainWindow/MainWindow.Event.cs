@@ -9,12 +9,15 @@ using Mode.Metrology.IE;
 using Mode.Metrology.CI;
 using System.Windows.Controls;
 using UI.Controls.Search;
+using UI.Components;
+using UI.Controls.TextEditor;
+using AppConfig;
 
 namespace MainWindowProgram
 {
   public partial class MainWindow
   {
-    public bool _isOpen;
+    public bool _isSearchWindowOpen;
 
     #region Основные события управления окном.
 
@@ -170,7 +173,7 @@ namespace MainWindowProgram
 
     private void SearchMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (_isOpen == false)
+      if (_isSearchWindowOpen == false)
       {
         var searchWindow = new SearchWindow();
         searchWindow.Owner = this;
@@ -181,11 +184,19 @@ namespace MainWindowProgram
         searchWindow.SelectFileForSearch -= OpenFileFromEvent;
         searchWindow.SelectFileForSearch += OpenFileFromEvent;
 
+        TextEditorUI activeEditor = MultiWindow.GetActiveTextEditor();
+        string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          EventAggregator.RaiseSearchTextRequested(selectedText);
+        }
+
         searchWindow.ShowWindow();
         searchWindow.ClearHighlights -= MultiWindow.OnSearchWindowClosing;
         searchWindow.ClearHighlights += MultiWindow.OnSearchWindowClosing;
 
-        _isOpen = true;
+        _isSearchWindowOpen = true;
         LogInformation("Открыто окно поиска");
       }
     }

@@ -24,6 +24,7 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
+      Initialize();
       SetEvent();
 
       Task.Run(async () =>
@@ -60,6 +61,7 @@ namespace MainWindowProgram
       TextEditorActive += OnTextEditorActive;
       TextEditorClosing += OnTextEditorClosing;
       SearchWindowClosing += OnSearchWindowClosing;
+      SearchWindowAtivated += OnSearchWindowActivated;
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler; // Подписываемся на событие
@@ -97,6 +99,9 @@ namespace MainWindowProgram
       AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
 
-    
+    private void OnSearchWindowActivated(bool isOpen)
+    {
+      _isSearchWindowOpen = isOpen;
+    }
   }
 }

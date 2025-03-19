@@ -54,9 +54,19 @@ namespace AppConfig
     static public event Action<bool> SearchWindowClosing;
 
     /// <summary>
-    /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
+    /// Событие, которое вызывается, когда окно типа searchWindow вновь активируется.
+    /// </summary>
+    static public event Action<bool> SearchWindowAtivated;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
     /// </summary>
     static public event Action<string> SearchButtonPressed;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
+    /// </summary>
+    public static event Action<string> SearchTextRequested;
 
     /// <summary>
     /// Событие, которое вызывается, когда происходиити переключение активного окна.
@@ -171,6 +181,23 @@ namespace AppConfig
     static public void RaiseSearchWindowClosing(bool isOpen)
     {
       SearchWindowClosing?.Invoke(isOpen);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchWindowActivated(bool isActivated)
+    {
+      SearchWindowAtivated?.Invoke(isActivated);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
+    /// </summary>
+    public static void RaiseSearchTextRequested(string selectedText)
+    {
+      SearchTextRequested?.Invoke(selectedText);
     }
 
     /// <summary>

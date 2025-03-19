@@ -78,6 +78,7 @@ namespace MainWindowProgram
     {
       if (isTextEditor)
       {
+        isTextEditorActive = true; 
         fileActionsSeparator.Visibility = Visibility.Visible;
         saveMenuItem.Visibility = Visibility.Visible;
         saveAsMenuItem.Visibility = Visibility.Visible;
@@ -101,6 +102,7 @@ namespace MainWindowProgram
 
     private void HideTextEditorActions()
     {
+      isTextEditorActive = false;
       fileActionsSeparator.Visibility = Visibility.Collapsed;
       saveMenuItem.Visibility = Visibility.Collapsed;
       saveAsMenuItem.Visibility = Visibility.Collapsed;
@@ -111,7 +113,7 @@ namespace MainWindowProgram
 
     private void OnSearchWindowClosing(bool isOpen)
     {
-      _isOpen = isOpen;
+      _isSearchWindowOpen = isOpen;
     }
   }
 }
