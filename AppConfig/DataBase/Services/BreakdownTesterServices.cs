@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Repositories;
-using Microsoft.EntityFrameworkCore;
+﻿using AppConfig.DataBase.Repositories;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
-using NewCore.Device;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {

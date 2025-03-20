@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace NewCore.Base.Function.ModuleVoltageCurrentSource
+﻿namespace NewCore.Base.Function.ModuleVoltageCurrentSource
 {
   /// <summary>
   /// Интерфейс для управления состоянием модуля источника напряжения/тока.

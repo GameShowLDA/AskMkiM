@@ -1,11 +1,5 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
-using UI.Components.Invoke;
-using UI.Controls.TextEditor;
 
 namespace UI.Controls.GPT.Mode
 {

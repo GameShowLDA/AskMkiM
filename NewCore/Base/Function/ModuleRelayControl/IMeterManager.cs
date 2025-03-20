@@ -1,7 +1,4 @@
-﻿using System.Net;
-using System.Threading.Tasks;
-
-namespace NewCore.Base.Function.ModuleRelayControl
+﻿namespace NewCore.Base.Function.ModuleRelayControl
 {
   /// <summary>
   /// Интерфейс для управления измерителем в модуле МКР.

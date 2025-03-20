@@ -2,18 +2,17 @@
 using System.Net;
 using System.Windows;
 using System.Windows.Media;
-using Core.Abstract;
-using Core.ConfigCollector;
-using Core.Model;
+using AppConfig.DataBase.Services;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
-using static Core.Enum.DeviceEnum;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
-namespace Mode.SelfControl.Module.Meter
+namespace Mode.SelfControl.NewModule.Meter
 {
   /// <summary>
   /// Класс Handler выполняет самоконтроль мультиметра, осуществляет проверку сопротивления и ёмкости.
@@ -23,8 +22,8 @@ namespace Mode.SelfControl.Module.Meter
     ProtocolUI ProtocolSelfCheckControl;
     private readonly Tuple<string, Color> goodText = SuccessMessage;
     private readonly Tuple<string, Color> errorText = ErrorMessage;
-    private MeterBase meter;
-    private Core.DeviceBusCommutation.Model deviceBusCommutation;
+    private IFastMeter meter;
+    private ISwitchingDevice deviceBusCommutation;
 
     /// <summary>
     /// Словарь номиналов резисторов.
@@ -61,13 +60,12 @@ namespace Mode.SelfControl.Module.Meter
     /// </summary>
     /// <param name="protocolSelfCheck">Объект для управления протоколом самоконтроля.</param>
     /// <param name="deviceModel">Модель устройства для создания объекта коммутации шин.</param>
-    internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
+    internal Handler(ProtocolUI protocolSelfCheck, ISwitchingDevice deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
-      // Получаем модель устройства коммутации шин из конфигуратора.
-      deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
-      // TODO : Переопределить мультиметр
-      // meter = await Core.KeysightLibrary.Model.CreateAsync();
+      deviceBusCommutation = deviceModel;
+      var chassisNumber = deviceBusCommutation.NumberChassis;
+      meter = new FastMeterServices().GetDevicesByNumberChassis(chassisNumber).FirstOrDefault();
     }
 
     /// <summary>
@@ -107,23 +105,19 @@ namespace Mode.SelfControl.Module.Meter
     /// </summary>
     private async Task RunSelfCheck(CancellationToken token)
     {
-      deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
       if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(
-            new List<DeviceModel> { meter, deviceBusCommutation },
+            new List<IDevice> { meter, deviceBusCommutation },
             ProtocolSelfCheckControl.ShowMessageAsync))
       {
         return;
       }
-
-      // TODO : Переопределить мультиметр
-      // meter = await Core.KeysightLibrary.Model.CreateAsync();
 
       await ProtocolSelfCheckControl.ShowMessageAsync(
         new ShowMessageModel("\r\nСамоконтроль мультиметра", goodText.Item2));
 
       if (!await GetIsIdleModeEnabled())
       {
-        await Core.DeviceBusCommutation.Functions.ConnectXs9ToXs4(deviceBusCommutation.IPAddress);
+        await deviceBusCommutation.ConnectorManager.ConnectBreakdownTester();
       }
 
       await CheckResistance(token);
@@ -131,7 +125,7 @@ namespace Mode.SelfControl.Module.Meter
 
       if (!await GetIsIdleModeEnabled())
       {
-        await Core.DeviceBusCommutation.Functions.DisconnectXs9ToXs4(deviceBusCommutation.IPAddress);
+        await deviceBusCommutation.ConnectorManager.DisconnectBreakdownTester();
       }
     }
 
@@ -144,15 +138,16 @@ namespace Mode.SelfControl.Module.Meter
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
       await ProtocolSelfCheckControl.ShowMessageAsync(
         new ShowMessageModel("\tКонтроль сопротивления", goodText.Item2));
-      meter.MeasureResistance();
+
+      await meter.ResistanceManager.MeasureResistanceAsync();
+
       await Task.Delay(1, token);
       for (int i = 1; i <= 8; i++)
       {
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
         if (!await GetIsIdleModeEnabled())
         {
-          await Core.DeviceBusCommutation.Functions.ConnectResistor(
-            IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
+          await deviceBusCommutation.ResistorManager.ConnectResistor(i.ToString(CultureInfo.InvariantCulture));
         }
 
         resistanceValue.TryGetValue(i, out double meaning);
@@ -162,9 +157,8 @@ namespace Mode.SelfControl.Module.Meter
 
         if (!await GetIsIdleModeEnabled())
         {
-          result = meter.MeasureResistance();
-          await Core.DeviceBusCommutation.Functions.DisconnectResistor(
-            IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
+          result = await meter.ResistanceManager.MeasureResistanceAsync();
+          await deviceBusCommutation.ResistorManager.DisconnectResistor(i.ToString(CultureInfo.InvariantCulture));
         }
 
         if (result >= first && result <= last)
@@ -206,8 +200,7 @@ namespace Mode.SelfControl.Module.Meter
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
         if (!await GetIsIdleModeEnabled())
         {
-          await Core.DeviceBusCommutation.Functions.ConnectCapacitor(
-            deviceBusCommutation.IPAddress, i.ToString(CultureInfo.InvariantCulture));
+          await deviceBusCommutation.CapacitorManager.ConnectCapacitor(i.ToString(CultureInfo.InvariantCulture));
         }
 
         capacitanceValue.TryGetValue(i, out double meaning);
@@ -217,9 +210,8 @@ namespace Mode.SelfControl.Module.Meter
 
         if (!await GetIsIdleModeEnabled())
         {
-          result = meter.MeasureCapacitance();
-          await Core.DeviceBusCommutation.Functions.DisconnectCapacitor(
-            IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
+          result = await meter.CapacitanceManager.MeasureCapacitanceAsync();
+          await deviceBusCommutation.CapacitorManager.DisconnectCapacitor(i.ToString(CultureInfo.InvariantCulture));
         }
 
         if (result >= first && result <= last)

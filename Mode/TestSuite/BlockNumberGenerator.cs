@@ -1,14 +1,14 @@
-﻿using Core.ConfigCollector;
+﻿using NewCore.Base.Interface.Main;
 
 namespace Mode.TestSuite
 {
   static internal class BlockNumberGenerator
   {
-    public static List<Core.ModuleRelayControl.Model> GetBlockModelsBetween(
-        Core.ModuleRelayControl.Model first,
-        Core.ModuleRelayControl.Model last)
+    public static List<IRelaySwitchModule> GetBlockModelsBetween(
+        IRelaySwitchModule first,
+        IRelaySwitchModule last)
     {
-      List<Core.ModuleRelayControl.Model> allBlocks = ConfigCollector.GetMkrModels();
+      List<IRelaySwitchModule> allBlocks = ConfigCollector.GetMkrModels();
 
       // Найти индексы начального и конечного блоков
       int startIndex = allBlocks.FindIndex(block => block.Number == first.Number);

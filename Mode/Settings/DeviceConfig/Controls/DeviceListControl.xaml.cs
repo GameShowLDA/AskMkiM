@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
@@ -71,7 +69,7 @@ namespace Mode.Settings.DeviceConfig.Controls
     /// Отчищает список устройств.
     /// </summary>
     public void ClearItems()
-    { 
+    {
       Devices.Clear();
     }
 

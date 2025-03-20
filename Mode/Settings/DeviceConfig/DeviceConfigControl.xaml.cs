@@ -2,7 +2,6 @@
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Repositories;
-using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.BreakDown;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceBusCommutation;
@@ -11,7 +10,6 @@ using Mode.Settings.DeviceConfig.FastMeter;
 using Mode.Settings.DeviceConfig.ModuleRelayControl;
 using Mode.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
-using static AppConfig.Config.SystemStateManager;
 
 namespace Mode.Settings.DeviceConfig
 {
@@ -69,7 +67,7 @@ namespace Mode.Settings.DeviceConfig
       devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
       devices.DeviceBusCommutationSelected += (s, a) => Devices_DeviceBusCommutationSelected(s, a, system, devices);
       devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
-      devices.ModuleRelayEvent += (s,a) => Devices_ModuleRalayEvent(s, a, system, devices);
+      devices.ModuleRelayEvent += (s, a) => Devices_ModuleRalayEvent(s, a, system, devices);
       devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
       devices.ExitEvent += Devices_ExitEvent;
     }

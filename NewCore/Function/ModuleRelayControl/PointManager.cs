@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
-using System.Threading.Tasks;
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;

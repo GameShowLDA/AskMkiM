@@ -1,4 +1,4 @@
-﻿using Core.ConfigCollector;
+﻿using AppConfig.DataBase.Services;
 using Mode.Base.SearchDevices;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
@@ -60,7 +60,7 @@ namespace Mode.Metrology.IE
       {
         result = await Task.Run(() =>
         {
-          return meter.MeasureCapacitance();
+          return meter.CapacitanceManager.MeasureCapacitanceAsync();
         });
       }
       else
@@ -111,10 +111,8 @@ namespace Mode.Metrology.IE
         measurementDataModel.FirstModuleRelayControl = firstPoint.ModuleRelayControl;
         measurementDataModel.LastModuleRelayControl = secondPoint.ModuleRelayControl;
 
-        deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
-
-        // TODO : Переопределить мультиметр
-        // meter = new Core.KeysightLibrary.Model();
+        deviceBusCommutation = new SwitchingDeviceServices().GetDevicesByNumberChassis(firstPoint.ManagerShassy.Number).FirstOrDefault();
+        meter = new FastMeterServices().GetDevicesByNumberChassis(firstPoint.ManagerShassy.Number).FirstOrDefault();
 
         if (!await AttemptDeviceConnection())
         {

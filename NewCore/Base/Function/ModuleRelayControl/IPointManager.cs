@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using static NewCore.Enum.DeviceEnum;
+﻿using static NewCore.Enum.DeviceEnum;
 
 namespace NewCore.Base.Function.ModuleRelayControl
 {

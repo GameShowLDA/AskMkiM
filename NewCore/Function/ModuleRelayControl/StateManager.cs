@@ -1,10 +1,7 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
-using NewCore.Device;
 
 namespace NewCore.Function.ModuleRelayControl
 {

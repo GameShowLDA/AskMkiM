@@ -1,4 +1,5 @@
-﻿using UI.Components.Invoke;
+﻿using NewCore.Base.Interface.Main;
+using UI.Components.Invoke;
 
 namespace Mode.Models
 {
@@ -43,17 +44,17 @@ namespace Mode.Models
     /// <summary>
     /// Модель менеджера шасси, используемая для работы с устройством.
     /// </summary>
-    internal Core.ManagerShassy.Model ManagerShassy { get; set; }
+    internal IChassisManager ManagerShassy { get; set; }
 
     /// <summary>
     /// Модель первого модуля реле для подключения измерительных точек.
     /// </summary>
-    internal Core.ModuleRelayControl.Model FirstModuleRelayControl { get; set; }
+    internal IRelaySwitchModule FirstModuleRelayControl { get; set; }
 
     /// <summary>
     /// Модель второго модуля реле для подключения измерительных точек.
     /// </summary>
-    internal Core.ModuleRelayControl.Model LastModuleRelayControl { get; set; }
+    internal IRelaySwitchModule LastModuleRelayControl { get; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DataPointModel"/> с заданными элементами управления.

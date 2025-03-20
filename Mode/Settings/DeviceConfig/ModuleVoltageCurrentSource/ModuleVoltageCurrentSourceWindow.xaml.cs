@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;

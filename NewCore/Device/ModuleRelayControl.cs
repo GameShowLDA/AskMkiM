@@ -1,5 +1,4 @@
-﻿using System.Net;
-using NewCore.Base.Device;
+﻿using NewCore.Base.Device;
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;

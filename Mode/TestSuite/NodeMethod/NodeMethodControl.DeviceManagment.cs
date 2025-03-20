@@ -1,4 +1,4 @@
-﻿using Core.Model;
+﻿using NewCore.Base.Device;
 
 namespace Mode.TestSuite.NodeMethod
 {
@@ -14,7 +14,7 @@ namespace Mode.TestSuite.NodeMethod
     public async Task<bool> AttemptDeviceConnection()
     {
       return await ProtocolSelfCheckControl.AttemptDeviceConnection(
-          new List<DeviceModel>
+          new List<IDevice>
           {
                     testDataModel.ManagerShassy,
                     testDataModel.FirstModuleRelayControl,
@@ -30,7 +30,7 @@ namespace Mode.TestSuite.NodeMethod
     /// </summary>
     /// <param name="models">Список моделей устройств для подключения.</param>
     /// <returns>Задача, представляющая асинхронную операцию. Возвращает true, если подключение успешно, иначе false.</returns>
-    public async Task<bool> AttemptDeviceConnection(List<DeviceModel> models)
+    public async Task<bool> AttemptDeviceConnection(List<IDevice> models)
     {
       return await ProtocolSelfCheckControl.AttemptDeviceConnection(models, ShowMessageAsync);
     }

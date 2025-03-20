@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using NewCore.Base;
 using NewCore.Base.Function.Breakdown;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;

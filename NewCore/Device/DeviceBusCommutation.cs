@@ -48,6 +48,6 @@ namespace NewCore.Device
     /// <summary>
     /// Устанавливает или возвращает номер шасси.
     /// </summary>
-    public int NumberChassis { get ; set ; }
+    public int NumberChassis { get; set; }
   }
 }

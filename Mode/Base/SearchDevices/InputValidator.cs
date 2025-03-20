@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.Net;
 using System.Windows.Media;
-using Core.ConfigCollector;
 using Mode.Models;
+using NewCore.Base.Interface.Main;
 using Utilities.Models;
 using static AppConfig.Enums.ValidationEnum;
 using static Utilities.DelegateManager;
@@ -28,12 +28,9 @@ namespace Mode.Base.SearchDevices
     /// Кортеж, содержащий результат проверки (IsSuccess), объект <see cref="PointModel"/>,
     /// модель менеджера шасси (<see cref="Core.ManagerShassy.Model"/>) и модель модуля реле (<see cref="Core.ModuleRelayControl.Model"/>).
     /// </returns>
-    internal async Task<(bool IsSuccess, PointModel PointModel, Core.ManagerShassy.Model ManagerShassy, Core.ModuleRelayControl.Model ModuleRelayControl)> ValidateMeasurementPointAsync(MessageDelegate messageDelegate, string pointText)
+    internal async Task<(bool IsSuccess, PointModel PointModel, IChassisManager ManagerShassy, IRelaySwitchModule ModuleRelayControl)> ValidateMeasurementPointAsync(MessageDelegate messageDelegate, string pointText)
     {
-      Core.ManagerShassy.Model managerModel;
-      Core.ModuleRelayControl.Model moduleRelayModel;
-
-      var validationResult = ValidateMeasurePointAsync(pointText, out moduleRelayModel, out managerModel);
+      var validationResult = ValidateMeasurePointAsync(pointText, out var moduleRelayModel, out var managerModel);
       if (validationResult == ValidationDataResult.Success)
       {
         PointModel pointModel = ParsePoint(pointText);
@@ -79,7 +76,7 @@ namespace Mode.Base.SearchDevices
     /// </summary>
     /// <param name="pointText">Текст точки измерения для проверки.</param>
     /// <returns>Результат валидации.</returns>
-    private static ValidationDataResult ValidateMeasurePointAsync(string pointText, out Core.ModuleRelayControl.Model moduleRelay, out Core.ManagerShassy.Model managerShassy)
+    private static ValidationDataResult ValidateMeasurePointAsync(string pointText, out IRelaySwitchModule moduleRelay, out IChassisManager managerShassy)
     {
       moduleRelay = null;
       managerShassy = null;
@@ -166,7 +163,7 @@ namespace Mode.Base.SearchDevices
     /// </summary>
     /// <param name="point">Объект PointModel для проверки.</param>
     /// <returns>True, если менеджер шасси задан, иначе False.</returns>
-    private static bool ValidateManagerShassyNumber(PointModel point, out Core.ManagerShassy.Model managerShassy)
+    private static bool ValidateManagerShassyNumber(PointModel point, out IChassisManager managerShassy)
     {
       managerShassy = null;
       var managerShassyNumber = ConfigCollector.GetManagerShassyNumber();

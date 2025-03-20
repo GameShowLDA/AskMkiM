@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core.Model;
+using NewCore.Base.Device;
 using Utilities.Models;
 using static AppConfig.Config.ProtocolConfig;
 using static Utilities.DelegateManager;
@@ -79,7 +79,7 @@ namespace UI.Controls.Protocol
     /// <summary>
     /// Список моделей устройств, используемых в действиях.
     /// </summary>
-    List<DeviceModel> DeviceModels;
+    List<IDevice> DeviceModels;
 
     #endregion
 
@@ -322,6 +322,6 @@ namespace UI.Controls.Protocol
     /// <param name="deviceModels">Список моделей устройств для подключения.</param>
     /// <param name="messageDelegate">Делегат для обработки сообщений о состоянии подключения.</param>
     /// <returns>True, если все устройства успешно подключены, иначе False.</returns>
-    public async Task<bool> AttemptDeviceConnection(List<DeviceModel> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
+    public async Task<bool> AttemptDeviceConnection(List<IDevice> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
   }
 }

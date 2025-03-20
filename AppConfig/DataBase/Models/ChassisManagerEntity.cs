@@ -16,7 +16,7 @@ namespace AppConfig.DataBase.Models
 
     /// <inheritdoc />
     public string Name { get; set; }
-    
+
     /// <inheritdoc />
     public string Description { get; set; }
 

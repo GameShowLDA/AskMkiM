@@ -1,8 +1,13 @@
-﻿using Core.Communication;
-using Core.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Mode.Metrology.Base;
+using NewCore.Base.Device;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
+using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Metrology.CI
 {
@@ -18,7 +23,7 @@ namespace Mode.Metrology.CI
     /// </returns>
     public async Task<bool> AttemptDeviceConnection() =>
       await ProtocolSelfCheckControl.AttemptDeviceConnection(
-        new List<DeviceModel>()
+        new List<IDevice>()
         {
           measurementDataModel.ManagerShassy,
           measurementDataModel.FirstModuleRelayControl,
@@ -42,13 +47,13 @@ namespace Mode.Metrology.CI
     /// </returns>
     public async Task ConfigureDevices(CancellationToken cancellationToken)
     {
-      await CommunicationManager.ResetAllSystem();
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
       cancellationToken.ThrowIfCancellationRequested();
       await ShowMessageAsync(new ShowMessageModel("Подключение шин УКШ", goodText.Item2));
       if (!await GetIsIdleModeEnabled())
       {
-        await Core.DeviceBusCommutation.Functions.ConnectToBreakdownTester(deviceBusCommutation.IPAddress);
+        await deviceBusCommutation.ConnectorManager.ConnectBreakdownTester();
       }
 
       cancellationToken.ThrowIfCancellationRequested();
@@ -57,7 +62,7 @@ namespace Mode.Metrology.CI
       {
         await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(
           measurementDataModel.FirstModuleRelayControl,
-          Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB1,
+          SwitchingBusNew.AB1,
           ShowMessageAsync);
       }
 
@@ -68,7 +73,7 @@ namespace Mode.Metrology.CI
         {
           await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(
             measurementDataModel.LastModuleRelayControl,
-            Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB1,
+            SwitchingBusNew.AB1,
             ShowMessageAsync);
         }
       }
@@ -87,7 +92,7 @@ namespace Mode.Metrology.CI
       cancellationToken.ThrowIfCancellationRequested();
       if (!await GetIsIdleModeEnabled())
       {
-        await Core.GptLibrary.IrMode.SetModeAsync(gptLibrary as Core.GptLibrary.Model);
+        await gptLibrary.IrManger.SetModeAsync();
       }
 
       if (!await GetIsIdleModeEnabled())
@@ -98,7 +103,7 @@ namespace Mode.Metrology.CI
           time = 2;
         }
 
-        await Core.GptLibrary.IrMode.SetTimeAsync(gptLibrary as Core.GptLibrary.Model, time);
+        await gptLibrary.IrManger.SetTimeAsync(time);
       }
     }
   }

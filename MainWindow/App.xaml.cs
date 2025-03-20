@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram

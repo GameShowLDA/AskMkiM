@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NewCore.Base.DeviceResponses;
+﻿using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
-using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
 {

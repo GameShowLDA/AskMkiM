@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using NewCore.Base.Interface.Main;
 
 namespace UI.Controls.GPT
 {
@@ -12,7 +13,7 @@ namespace UI.Controls.GPT
     /// <summary>
     /// Статическая модель GPT, используемая для подключения и проверки связи.
     /// </summary>
-    static internal Core.GptLibrary.Model ModelGPT { get; set; }
+    static internal IBreakdownTester ModelGPT { get; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="GPTPunchControl"/>.
@@ -32,6 +33,7 @@ namespace UI.Controls.GPT
     {
       ModelGPT = new Core.GptLibrary.Model();
       ModelGPT.Connect();
+
       if (ModelGPT.CheckConnection())
       {
         ConnectMenuItem.Visibility = Visibility.Collapsed;

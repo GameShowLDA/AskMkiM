@@ -1,6 +1,4 @@
-﻿
-using AppConfig.DataBase.Repositories;
-using AppConfig.DataBase.Services;
+﻿using AppConfig.DataBase.Services;
 using TestConsole.MINT;
 
 namespace TestConsole

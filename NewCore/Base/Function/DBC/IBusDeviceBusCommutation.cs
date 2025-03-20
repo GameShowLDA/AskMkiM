@@ -1,6 +1,4 @@
-﻿using static NewCore.Enum.DeviceEnum;
-
-namespace NewCore.Base.Function.DBC
+﻿namespace NewCore.Base.Function.DBC
 {
   /// <summary>
   /// Интерфейс для управления шинами у УКШ.

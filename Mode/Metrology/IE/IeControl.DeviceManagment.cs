@@ -1,10 +1,12 @@
-﻿using Core.Model;
-using Mode.Metrology.Base;
+﻿using Mode.Metrology.Base;
+using NewCore.Base.Device;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
+using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Metrology.IE
 {
+  /// <inheritdoc />
   public partial class IeControl
   {
     /// <summary>
@@ -12,7 +14,7 @@ namespace Mode.Metrology.IE
     /// </summary>
     public async Task<bool> AttemptDeviceConnection() => await ProtocolSelfCheckControl.AttemptDeviceConnection
     (
-        new List<DeviceModel>()
+        new List<IDevice>()
         {
           measurementDataModel.ManagerShassy,
           measurementDataModel.FirstModuleRelayControl,
@@ -42,7 +44,7 @@ namespace Mode.Metrology.IE
       await ShowMessageAsync(new ShowMessageModel("Подключение шин МКР", goodText.Item2));
       if (!await GetIsIdleModeEnabled())
       {
-        await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.FirstModuleRelayControl, Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB2, ShowMessageAsync);
+        await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.FirstModuleRelayControl, SwitchingBusNew.AB2, ShowMessageAsync);
       }
 
       await ShowMessageAsync(new ShowMessageModel($"\tМКР{measurementDataModel.FirstPointModel.ModuleNumber} Замыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
@@ -52,7 +54,7 @@ namespace Mode.Metrology.IE
         cancellationToken.ThrowIfCancellationRequested();
         if (!await GetIsIdleModeEnabled())
         {
-          await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.LastModuleRelayControl, Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB2, ShowMessageAsync);
+          await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.LastModuleRelayControl, SwitchingBusNew.AB2, ShowMessageAsync);
         }
 
         await ShowMessageAsync(new ShowMessageModel($"\tМКР{measurementDataModel.LastPointModel.ModuleNumber} Замыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
@@ -71,7 +73,7 @@ namespace Mode.Metrology.IE
       cancellationToken.ThrowIfCancellationRequested();
       if (!await GetIsIdleModeEnabled())
       {
-        meter.SetResistanceMode();
+        await meter.ResistanceManager.SetResistanceModeAsync();
       }
     }
   }

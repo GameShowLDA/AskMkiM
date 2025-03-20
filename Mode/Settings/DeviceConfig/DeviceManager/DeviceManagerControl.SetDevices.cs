@@ -66,7 +66,7 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
           break;
 
         case PrecisionMeterEntity precisionMeter:
-          PrecisionMeterControl.ClearItems();  
+          PrecisionMeterControl.ClearItems();
           break;
 
         case RelaySwitchModuleEntity relaySwitch:

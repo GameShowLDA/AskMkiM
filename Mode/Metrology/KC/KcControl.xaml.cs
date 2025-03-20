@@ -1,8 +1,8 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Media;
-using Core.Abstract;
 using Mode.Base.SearchDevices;
 using Mode.Models;
+using NewCore.Base.Interface.Main;
 using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
@@ -19,8 +19,8 @@ namespace Mode.Metrology.KC
 
     private DataElectricModel measurementDataModel;
 
-    private Core.DeviceBusCommutation.Model deviceBusCommutation;
-    private MeterBase meter;
+    private ISwitchingDevice deviceBusCommutation;
+    private IFastMeter meter;
 
     private bool completed;
 

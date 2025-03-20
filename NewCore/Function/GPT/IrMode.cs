@@ -1,5 +1,4 @@
-﻿using NewCore.Base;
-using NewCore.Base.Function.Breakdown;
+﻿using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
 using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;

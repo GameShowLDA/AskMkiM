@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Repositories;
-using AppConfig.Interface;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using static Utilities.LoggerUtility;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NewCore.Base.Interface.Main;
-using Utilities.Models;
+﻿using NewCore.Base.Interface.Main;
 using static Utilities.LoggerUtility;
 
 

@@ -3,7 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core.ConfigCollector;
+using AppConfig.DataBase.Services;
+using NewCore.Base.Interface.Main;
 using static AppConfig.Config.ExecutionConfig;
 using static AppConfig.Config.SystemStateManager;
 using static AppConfig.EventAggregator;
@@ -21,7 +22,7 @@ namespace UI.Components
     /// <summary>
     /// Модель конфигурации устройства, к которому осуществляется подключение.
     /// </summary>
-    private Core.ManagerShassy.Model model;
+    private IChassisManager model;
 
     /// <summary>
     /// Флаг, указывающий, активно ли подключение системы (true - подключено, false - отключено).
@@ -137,7 +138,7 @@ namespace UI.Components
     /// <returns>Асинхронная задача.</returns>
     public async Task PowerButtonClick()
     {
-      model = ConfigCollector.GetManagerShassy();
+      model = new ChassisManagerServices().GetAll().FirstOrDefault();
 
       if (model == null)
       {
@@ -186,7 +187,7 @@ namespace UI.Components
         topPanel = new TopPanelControl();
       }
 
-      await Core.ManagerShassy.Function.StartPowerAsync(model.IPAddress);
+      await model.PowerManager.StartPowerAsync();
       await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
 
       if (!await TryConnectAsync())
@@ -201,11 +202,11 @@ namespace UI.Components
     private async Task StopPowerSequenceAsync()
     {
       active = false;
-      await Core.Communication.CommunicationManager.ResetAllSystem();
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
       await Task.Delay(1000);
 
-      await Core.ManagerShassy.Function.StopPowerAsync(model.IPAddress);
+      await model.PowerManager.StopPowerAsync();
       await Task.Delay(1000);
 
       SetDisconnectedState("Подключить систему", Error);
@@ -216,7 +217,7 @@ namespace UI.Components
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await Core.ManagerShassy.Function.Initialize(model.IPAddress);
+      var result = await model.StateManager.Initialize();
 
       if (result.Item1)
       {
@@ -246,7 +247,7 @@ namespace UI.Components
         }
         else
         {
-          await Core.ManagerShassy.Function.StartPowerAsync(model.IPAddress);
+          await model.PowerManager.StartPowerAsync();
           await ShowCountdownMessageAsync(3, "Повторная попытка через");
         }
 

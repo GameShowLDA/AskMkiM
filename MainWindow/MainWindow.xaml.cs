@@ -102,7 +102,7 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия клавиши.</param>
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
-      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3) 
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
       {
         _consoleManager.ToggleConsole();
         e.Handled = true;

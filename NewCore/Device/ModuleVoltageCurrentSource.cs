@@ -1,5 +1,4 @@
-﻿using System.Net;
-using NewCore.Base.Device;
+﻿using NewCore.Base.Device;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.ModuleVoltageCurrentSource;

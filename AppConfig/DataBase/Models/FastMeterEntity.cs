@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Net;
 using NewCore.Base.Function.FastMeter;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;

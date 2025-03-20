@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using static AppConfig.Config.ExecutionConfig;
 
 namespace Mode.Settings.Execution

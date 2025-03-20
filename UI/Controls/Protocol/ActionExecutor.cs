@@ -1,9 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core;
-using Core.Communication;
-using Core.Model;
+using NewCore.Base.Device;
 using UI.Management;
 using Utilities.Models;
 using WindowsInput;
@@ -564,7 +562,7 @@ namespace UI.Controls.Protocol
       {
         if (!await GetIsIdleModeEnabled())
         {
-          await CommunicationManager.ResetAllSystem();
+          await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
         }
 
         await SetIsLocked(false);
@@ -605,7 +603,7 @@ namespace UI.Controls.Protocol
     /// <param name="deviceModels">Список моделей устройств.</param>
     /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
     /// <returns>True, если подключение успешно.</returns>
-    internal async Task<bool> AttemptDeviceConnection(List<DeviceModel> deviceModels, MessageDelegate messageDelegate)
+    internal async Task<bool> AttemptDeviceConnection(List<IDevice> deviceModels, MessageDelegate messageDelegate)
     {
       if (await GetIsIdleModeEnabled())
       {

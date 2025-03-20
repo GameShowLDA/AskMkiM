@@ -1,5 +1,9 @@
-﻿using Core.Communication;
-using Core.ConfigCollector;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AppConfig.DataBase.Services;
 using Mode.Base.SearchDevices;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
@@ -78,17 +82,16 @@ namespace Mode.Metrology.CI
 
       if (!await GetIsIdleModeEnabled())
       {
-        await Core.GptLibrary.IrMode.SetVoltageAsync(gptLibrary as Core.GptLibrary.Model, voltage);
+        await gptLibrary.IrManger.SetVoltageAsync(voltage);
       }
 
-      double result = !await GetIsIdleModeEnabled()
-                      ? await Core.GptLibrary.IrMode.MeasureResistanceAsync(gptLibrary as Core.GptLibrary.Model)
+      double result = !await AppConfig.Config.ExecutionConfig.GetIsIdleModeEnabled()
+                      ? await gptLibrary.IrManger.MeasureResistanceAsync()
                       : resistance;
       await ShowMessageAsync(new ShowMessageModel($"\tРезультат измерения при {voltage}В", null, $"{result} МОм"));
       await Task.Delay(1000);
 
-      gptLibrary.Disconnect();
-      await CommunicationManager.ResetAllSystem();
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
 
     /// <summary>
@@ -128,8 +131,8 @@ namespace Mode.Metrology.CI
         measurementDataModel.FirstModuleRelayControl = firstPoint.ModuleRelayControl;
         measurementDataModel.LastModuleRelayControl = secondPoint.ModuleRelayControl;
 
-        deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
-        gptLibrary = Core.GptLibrary.Model.CreateAsync();
+        deviceBusCommutation = new SwitchingDeviceServices().GetDevicesByNumberChassis(firstPoint.ManagerShassy.Number).FirstOrDefault();
+        gptLibrary = new BreakdownTesterServices().GetDevicesByNumberChassis(firstPoint.ManagerShassy.Number).FirstOrDefault();
 
         if (!await AttemptDeviceConnection())
         {

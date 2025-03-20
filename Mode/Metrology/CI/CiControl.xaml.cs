@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Mode.Base.SearchDevices;
 using Mode.Models;
+using NewCore.Base.Interface.Main;
 using UI.Components.Invoke;
 using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
@@ -20,8 +21,8 @@ namespace Mode.Metrology.CI
 
     private DataElectricModel measurementDataModel;
 
-    private Core.DeviceBusCommutation.Model deviceBusCommutation;
-    private Core.Abstract.BreakdownBase gptLibrary;
+    private ISwitchingDevice deviceBusCommutation;
+    private IBreakdownTester gptLibrary;
 
     InvokeBorder TimeBorder = new InvokeBorder();
     InvokeTextBox TimeData = new InvokeTextBox();

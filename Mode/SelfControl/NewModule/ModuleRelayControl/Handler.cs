@@ -1,18 +1,17 @@
-﻿using System.Globalization;
-using System.Net;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
-using Core.ConfigCollector;
-using Core.Model;
+using AppConfig.DataBase.Services;
+using Mode.SelfControl.Module.ModuleRelayControl;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
-using static Core.Enum.DeviceEnum;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
-namespace Mode.SelfControl.Module.ModuleRelayControl
+namespace Mode.SelfControl.NewModule.ModuleRelayControl
 {
   /// <summary>
   /// Класс Handler реализует логику самоконтроля для устройств модуля реле. 
@@ -24,17 +23,17 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     ProtocolUI ProtocolSelfCheckControl;
     private readonly Tuple<string, Color> goodText = SuccessMessage;
     private readonly Tuple<string, Color> errorText = ErrorMessage;
-    private Core.ModuleRelayControl.Model moduleRelayControl;
+    private IRelaySwitchModule moduleRelayControl;
 
     /// <summary>
     /// Конструктор, принимающий объект ProtocolSelfCheckControl и модель устройства.
     /// </summary>
     /// <param name="protocolSelfCheck">Объект управления протоколом самоконтроля.</param>
     /// <param name="deviceModel">Модель устройства, используемая для создания объекта модуля реле.</param>
-    internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
+    internal Handler(ProtocolUI protocolSelfCheck, IRelaySwitchModule deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
-      moduleRelayControl = Core.ModuleRelayControl.Model.CreateFromObject(deviceModel);
+      moduleRelayControl = deviceModel;
     }
 
     #region StartDelegate
@@ -59,8 +58,10 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     {
       if (!await GetIsIdleModeEnabled())
       {
-        var managerShassy = ConfigCollector.GetManagerShassy();
-        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<DeviceModel>()
+        var chassisNumber = moduleRelayControl.NumberChassis;
+        var managerShassy = new ChassisManagerServices().GetById(chassisNumber);
+
+        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>()
         {
           managerShassy,
           moduleRelayControl,
@@ -72,7 +73,7 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР", goodText.Item2));
 
-      await Core.ModuleRelayControl.Functions.ConnectMeterAsync(moduleRelayControl.IPAddress);
+      await moduleRelayControl.MeterManager.ConnectMeterAsync();
       await PerformClosureCycle(token);
 
       ProtocolSelfCheckControl.PauseButtonVisibility = Visibility.Collapsed;
@@ -99,7 +100,7 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
       {
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
         string answer = !await GetIsIdleModeEnabled()
-          ? await Core.ModuleRelayControl.Functions.CheckPoint(moduleRelayControl.IPAddress, point)
+          ? await moduleRelayControl.PointManager.CheckPoint(point)
           : !await GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
 
         SelfPointModel model;

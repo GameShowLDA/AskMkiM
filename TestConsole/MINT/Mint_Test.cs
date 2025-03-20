@@ -1,14 +1,8 @@
 ﻿using System.Net;
-using System.Reflection;
-using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
-using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
-using NewCore.Device;
-using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
-using static Utilities.LoggerUtility;
 
 
 namespace TestConsole.MINT

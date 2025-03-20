@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
@@ -272,7 +271,7 @@ namespace TestConsole
           LogDebug($"Реле {relay} успешно протестировано.");
         }
         else
-        { 
+        {
           LogError($"Ошибка реле {relay}.");
         }
 

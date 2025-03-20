@@ -1,17 +1,28 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
-using Core.Model;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using NewCore.Base.Device;
 
-namespace Mode.SelfControl.Module
+namespace Mode.SelfControl.NewModule
 {
   /// <summary>
-  /// Пользовательский интерфейс для выбора устройства.
-  /// Отображает список устройств и позволяет выбрать активное устройство.
+  /// Логика взаимодействия для ChoiсeDevice.xaml.
   /// </summary>
   public partial class ChoiсeDevice : UserControl
   {
     /// <summary>
-    /// Инициализирует компонент и настройки.
+    /// Инициализирует новый экземпляр класса <see cref="ChoiсeDevice"/>.
     /// </summary>
     public ChoiсeDevice()
     {
@@ -22,7 +33,7 @@ namespace Mode.SelfControl.Module
     /// <summary>
     /// Модель выбранного устройства.
     /// </summary>
-    DeviceModel deviceModels;
+    IDevice deviceModels;
 
     /// <summary>
     /// Делегат для события изменения выбранного устройства.
@@ -38,7 +49,7 @@ namespace Mode.SelfControl.Module
     /// Возвращает выбранное устройство.
     /// </summary>
     /// <returns>Выбранное устройство.</returns>
-    internal DeviceModel GetActiveDevice()
+    internal IDevice GetActiveDevice()
     {
       return deviceModels;
     }
@@ -57,7 +68,7 @@ namespace Mode.SelfControl.Module
     /// Добавляет устройство в список.
     /// </summary>
     /// <param name="deviceModel">Устройство для добавления.</param>
-    public void AddDevice(DeviceModel deviceModel)
+    public void AddDevice(IDevice deviceModel)
     {
       ListViewItem listViewItem = new ListViewItem()
       {
@@ -85,7 +96,7 @@ namespace Mode.SelfControl.Module
         var selectedItem = deviceList.SelectedItem as ListViewItem;
         toggleButton.Content = selectedItem.Content.ToString();
         toggleButton.IsChecked = false;
-        deviceModels = selectedItem.Tag as DeviceModel;
+        deviceModels = selectedItem.Tag as IDevice;
         DeviceSelected?.Invoke();
       }
     }

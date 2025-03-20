@@ -3,7 +3,7 @@
 namespace AppConfig.Config
 {
   /// <summary>
-  /// Класс конфигурации для <see cref="ExecutionConfig"/>.
+  /// Класс конфигурации выполнений режимов для <see cref="ExecutionConfig"/>.
   /// </summary>    /// <summary>
   /// Модель данных <see cref="MeasurementErrorModel"/> для режима ИЕ.
   /// </summary>

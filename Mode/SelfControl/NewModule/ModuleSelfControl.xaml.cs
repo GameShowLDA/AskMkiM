@@ -1,10 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using Core.ConfigCollector;
-using Core.Enum;
-using Core.Model;
+using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
+using static NewCore.Enum.DeviceEnum;
 
-namespace Mode.SelfControl.Module
+namespace Mode.SelfControl.NewModule
 {
   /// <summary>
   /// Представляет пользовательский интерфейс для самоконтроля модуля. 
@@ -27,22 +27,7 @@ namespace Mode.SelfControl.Module
     /// Инициализирует пользовательский интерфейс, загружая список устройств и настраивая обработку событий.
     /// </summary>
     public void InitializeUserControl()
-    {
-      List<DeviceModel> deviceModels = ConfigCollector.GetAllDevices();
-      choiceDevice.Height = 50;
-      choiceDevice.DeviceSelected += Start;
-
-      foreach (DeviceModel deviceModel in deviceModels)
-      {
-        if (deviceModel.DeviceType != DeviceEnum.Type.ManagerShassy)
-        {
-          choiceDevice.AddDevice(deviceModel);
-        }
-      }
-
-      ProtocolSelfCheckControl.AddContent(choiceDevice);
-      EventHandler();
-    }
+    { }
 
     /// <summary>
     /// Подписывается на события интерфейса для старта измерения и выхода из режима самоконтроля.
@@ -66,7 +51,7 @@ namespace Mode.SelfControl.Module
     /// </summary>
     private void Start()
     {
-      DeviceModel deviceModel = choiceDevice.GetActiveDevice();
+      IDevice deviceModel = choiceDevice.GetActiveDevice();
       if (deviceModel == null)
       {
         return;
@@ -74,28 +59,28 @@ namespace Mode.SelfControl.Module
 
       switch (deviceModel.DeviceType)
       {
-        case DeviceEnum.Type.DeviceBusCommutation:
-          DeviceBusCommutation.Handler deviceBusCommutation = new DeviceBusCommutation.Handler(ProtocolSelfCheckControl, deviceModel);
+        case DeviceType.SwitchingDevice:
+          DeviceBusCommutation.Handler deviceBusCommutation = new DeviceBusCommutation.Handler(ProtocolSelfCheckControl, (ISwitchingDevice)deviceModel);
           ProtocolSelfCheckControl.SetSettings(this, deviceBusCommutation.GetStartDelegate(), false, deviceBusCommutation.GetStopDelegate(), null, PreAction);
           ProtocolSelfCheckControl.Header = "Самоконтроль УКШ";
           break;
 
-        case DeviceEnum.Type.ModuleRelayControl:
-          ModuleRelayControl.Handler moduleRelayControl = new ModuleRelayControl.Handler(ProtocolSelfCheckControl, deviceModel);
+        case DeviceType.RelaySwitchModule:
+          ModuleRelayControl.Handler moduleRelayControl = new ModuleRelayControl.Handler(ProtocolSelfCheckControl, (IRelaySwitchModule)deviceModel);
           ProtocolSelfCheckControl.SetSettings(this, moduleRelayControl.GetStartDelegate(), false, moduleRelayControl.GetStopDelegate(), null, PreAction);
           ProtocolSelfCheckControl.Header = "Самоконтроль МКР";
           break;
 
-        case DeviceEnum.Type.ModuleVoltageCurrentSource:
-          ModuleVoltageCurrentSource.Handler moduleVoltageCurrentSource = new ModuleVoltageCurrentSource.Handler(ProtocolSelfCheckControl, deviceModel);
+        case DeviceType.PowerSourceModule:
+          ModuleVoltageCurrentSource.Handler moduleVoltageCurrentSource = new ModuleVoltageCurrentSource.Handler(ProtocolSelfCheckControl, (IPowerSourceModule)deviceModel);
           ProtocolSelfCheckControl.SetSettings(this, moduleVoltageCurrentSource.GetStartDelegate(), false, moduleVoltageCurrentSource.GetStopDelegate(), null, PreAction);
           ProtocolSelfCheckControl.Header = "Самоконтроль МИНТ";
           break;
 
-        case DeviceEnum.Type.AccurateMeter:
+        case DeviceType.PrecisionMeter:
           break;
 
-        case DeviceEnum.Type.FastMeter:
+        case DeviceType.FastMeter:
           break;
       }
     }
