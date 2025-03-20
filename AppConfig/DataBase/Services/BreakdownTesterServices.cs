@@ -31,7 +31,7 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<IBreakdownTester> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new BreakdownTesterRepository(Config.SystemStateManager.Context).GetDevicesByNumberChassis(numberChassis);
+      var data = new BreakdownTesterRepository().GetDevicesByNumberChassis(numberChassis);
       var result = data
       .OfType<IDevice>()
       .Select(GetDeviceInstance)

@@ -30,7 +30,7 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<IPowerSourceModule> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new PowerSourceModuleRepository(_context).GetDevicesByNumberChassis(numberChassis);
+      var data = new PowerSourceModuleRepository().GetDevicesByNumberChassis(numberChassis);
       var result = data
       .OfType<IDevice>()
       .Select(GetDeviceInstance)

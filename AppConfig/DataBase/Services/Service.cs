@@ -38,14 +38,72 @@ namespace AppConfig.DataBase.Services
     public void Create(T entity)
     {
       var repository = GetRepositoryForEntity(entity);
-      repository?.Create(entity);
+      switch (entity)
+      {
+        case RelaySwitchModuleEntity e:
+          ((RelaySwitchModuleRepository)repository).Create(e);
+          break;
+        case BreakdownTesterEntity e:
+          ((BreakdownTesterRepository)repository).Create(e);
+          break;
+        case ChassisManagerEntity e:
+          ((ChassisManagerRepository)repository).Create(e);
+          break;
+        case FastMeterEntity e:
+          ((FastMeterRepository)repository).Create(e);
+          break;
+        case PowerSourceModuleEntity e:
+          ((PowerSourceModuleRepository)repository).Create(e);
+          break;
+        case PrecisionMeterEntity e:
+          ((PrecisionMeterRepository)repository).Create(e);
+          break;
+        case RackEntity e:
+          ((RackRepository)repository).Create(e);
+          break;
+        case SwitchingDeviceEntity e:
+          ((SwitchingDeviceRepository)repository).Create(e);
+          break;
+        default:
+          Console.WriteLine($"Ошибка: Не удалось определить репозиторий для {typeof(T).Name}.");
+          break;
+      }
     }
 
     /// <inheritdoc />
     public void Delete(T entity)
     {
       var repository = GetRepositoryForEntity(entity);
-      repository?.Delete(entity.Id);
+      switch (entity)
+      {
+        case RelaySwitchModuleEntity e:
+          ((RelaySwitchModuleRepository)repository).Delete(e);
+          break;
+        case BreakdownTesterEntity e:
+          ((BreakdownTesterRepository)repository).Delete(e);
+          break;
+        case ChassisManagerEntity e:
+          ((ChassisManagerRepository)repository).Delete(e);
+          break;
+        case FastMeterEntity e:
+          ((FastMeterRepository)repository).Delete(e);
+          break;
+        case PowerSourceModuleEntity e:
+          ((PowerSourceModuleRepository)repository).Delete(e);
+          break;
+        case PrecisionMeterEntity e:
+          ((PrecisionMeterRepository)repository).Delete(e);
+          break;
+        case RackEntity e:
+          ((RackRepository)repository).Delete(e);
+          break;
+        case SwitchingDeviceEntity e:
+          ((SwitchingDeviceRepository)repository).Delete(e);
+          break;
+        default:
+          Console.WriteLine($"Ошибка: Не удалось определить репозиторий для {typeof(T).Name}.");
+          break;
+      }
     }
 
     /// <inheritdoc />
@@ -189,6 +247,10 @@ namespace AppConfig.DataBase.Services
       {
         return new Repository<FastMeterEntity>(_context).GetAll();
       }
+      else if (typeof(IChassisManager).IsAssignableFrom(type))
+      {
+        return new Repository<ChassisManagerEntity>(_context).GetAll();
+      }
 
       Console.WriteLine($"Неизвестный тип: {type}");
       return new List<IDevice>(); // Пустой список, если тип не поддерживается
@@ -204,14 +266,14 @@ namespace AppConfig.DataBase.Services
     {
       return entity switch
       {
-        IRelaySwitchModule => new RelaySwitchModuleRepository(_context),
-        IBreakdownTester => new BreakdownTesterRepository(_context),
-        IChassisManager => new ChassisManagerRepository(_context),
-        IFastMeter => new FastMeterRepository(_context),
-        IPowerSourceModule => new PowerSourceModuleRepository(_context),
-        IPrecisionMeter => new PrecisionMeterRepository(_context),
-        IRack => new RackRepository(_context),
-        ISwitchingDevice => new SwitchingDeviceRepository(_context),
+        IRelaySwitchModule => new RelaySwitchModuleRepository(),
+        IBreakdownTester => new BreakdownTesterRepository(),
+        IChassisManager => new ChassisManagerRepository(),
+        IFastMeter => new FastMeterRepository(),
+        IPowerSourceModule => new PowerSourceModuleRepository(),
+        IPrecisionMeter => new PrecisionMeterRepository(),
+        IRack => new RackRepository(),
+        ISwitchingDevice => new SwitchingDeviceRepository(),
         _ => null // Если не найден репозиторий, возвращаем null
       };
     }

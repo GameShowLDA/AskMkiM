@@ -31,8 +31,8 @@ namespace Mode.Settings.DeviceConfig
 
       try
       {
-        var data = new ChassisManagerServices().GetAll().First();
-        AddSystem((ChassisManagerEntity)data);
+        var data = new ChassisManagerRepository().GetAll().First();
+        AddSystem(data);
       }
       catch
       {
@@ -178,7 +178,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<BreakdownTesterEntity>(new BreakdownTesterEntity());
 
-      var breakdownTesters = new BreakdownTesterServices()
+      var breakdownTesters = new BreakdownTesterRepository()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in breakdownTesters)
@@ -196,7 +196,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<FastMeterEntity>(new FastMeterEntity());
 
-      var fastMeters = new FastMeterServices()
+      var fastMeters = new FastMeterRepository()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in fastMeters)
@@ -214,7 +214,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<PrecisionMeterEntity>(new PrecisionMeterEntity());
 
-      var precisionMeters = new PrecisionMeterServices()
+      var precisionMeters = new PrecisionMeterRepository()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in precisionMeters)
@@ -232,7 +232,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<PowerSourceModuleEntity>(new PowerSourceModuleEntity());
 
-      var powerSources = new PowerSourceModuleServices()
+      var powerSources = new PowerSourceModuleRepository()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in powerSources)
@@ -250,7 +250,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<RelaySwitchModuleEntity>(new RelaySwitchModuleEntity());
 
-      var relaySwitchModules = new RelaySwitchModuleServices().GetDevicesByNumberChassis(chassis.Number);
+      var relaySwitchModules = new RelaySwitchModuleRepository().GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in relaySwitchModules)
       {
@@ -267,7 +267,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<SwitchingDeviceEntity>(new SwitchingDeviceEntity());
 
-      var switchingDevices = new SwitchingDeviceServices()
+      var switchingDevices = new SwitchingDeviceRepository()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in switchingDevices)

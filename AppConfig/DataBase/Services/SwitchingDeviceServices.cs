@@ -30,7 +30,7 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<ISwitchingDevice> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new SwitchingDeviceRepository(_context).GetDevicesByNumberChassis(numberChassis);
+      var data = new SwitchingDeviceRepository().GetDevicesByNumberChassis(numberChassis);
       var result = data
       .OfType<IDevice>()
       .Select(GetDeviceInstance)

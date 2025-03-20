@@ -67,6 +67,5 @@ namespace MainWindowProgram
         mainWindow.Visibility = Visibility.Visible;
       });
     }
-
   }
 }

@@ -30,7 +30,7 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<IFastMeter> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new FastMeterRepository(_context).GetDevicesByNumberChassis(numberChassis);
+      var data = new FastMeterRepository().GetDevicesByNumberChassis(numberChassis);
       var result = data
       .OfType<IDevice>()
       .Select(GetDeviceInstance)

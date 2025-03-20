@@ -30,7 +30,7 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<IRelaySwitchModule> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new RelaySwitchModuleRepository(_context).GetDevicesByNumberChassis(numberChassis);
+      var data = new RelaySwitchModuleRepository().GetDevicesByNumberChassis(numberChassis);
       var result = data
       .OfType<IDevice>()
       .Select(GetDeviceInstance)

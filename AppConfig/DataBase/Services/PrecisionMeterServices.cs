@@ -30,7 +30,7 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<IPrecisionMeter> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new PrecisionMeterRepository(_context).GetDevicesByNumberChassis(numberChassis);
+      var data = new PrecisionMeterRepository().GetDevicesByNumberChassis(numberChassis);
       var result = data
       .OfType<IDevice>()
       .Select(GetDeviceInstance)
