@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using YamlDotNet.Core.Tokens;
 
 namespace UI.Controls.GPT.Mode
 {
@@ -26,7 +27,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await Core.GptLibrary.SystemSettings.ReadConfigurationAsync(GPTPunchControl.ModelGPT);
+        var systemData = await GPTPunchControl.ModelGPT.SystemManger.ReadConfigurationAsync();
 
         SetContrast(systemData.LcdContrast);
         SetBrightness(systemData.LcdBrightness);
@@ -140,7 +141,7 @@ namespace UI.Controls.GPT.Mode
         double contrast = double.Parse(contrastValue);
         OnValueChanged("LCD_CONTRAST", contrast);
 
-        await Core.GptLibrary.SystemSettings.SetLcdContrastAsync(GPTPunchControl.ModelGPT, contrast);
+        await GPTPunchControl.ModelGPT.SystemManger.SetLcdContrastAsync(contrast);
       }
     }
 
@@ -156,7 +157,7 @@ namespace UI.Controls.GPT.Mode
         double brightness = double.Parse(brightnessValue);
         OnValueChanged("LCD_BRIGHTNESS", brightness);
 
-        await Core.GptLibrary.SystemSettings.SetLcdBrightnessAsync(GPTPunchControl.ModelGPT, brightness);
+        await GPTPunchControl.ModelGPT.SystemManger.SetLcdBrightnessAsync(brightness);
       }
     }
 
@@ -172,7 +173,7 @@ namespace UI.Controls.GPT.Mode
         double value = soundState == "ON" ? 1 : 0;
         OnValueChanged("BUZZER_PSOUND", value);
 
-        await Core.GptLibrary.SystemSettings.SetBuzzerPrimarySound(GPTPunchControl.ModelGPT, value == 1 ? true : false);
+        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimarySound(value == 1 ? true : false);
       }
     }
 
@@ -188,7 +189,7 @@ namespace UI.Controls.GPT.Mode
         double value = soundState == "ON" ? 1 : 0;
         OnValueChanged("BUZZER_FSOUND", value);
 
-        await Core.GptLibrary.SystemSettings.SetBuzzerFeedbackSound(GPTPunchControl.ModelGPT, value == 1 ? true : false);
+        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackSound(value == 1 ? true : false);
       }
     }
 
@@ -200,8 +201,7 @@ namespace UI.Controls.GPT.Mode
     {
       double duration = SuccessSoundSlider.Value;
       OnValueChanged("BUZZER_PTIME", duration);
-
-      await Core.GptLibrary.SystemSettings.SetBuzzerPrimaryTime(GPTPunchControl.ModelGPT, duration);
+      await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimaryTime(duration);
     }
 
     /// <summary>
@@ -212,8 +212,7 @@ namespace UI.Controls.GPT.Mode
     {
       double duration = ErrorSoundSlider.Value;
       OnValueChanged("BUZZER_FTIME", duration);
-
-      await Core.GptLibrary.SystemSettings.SetBuzzerFeedbackTime(GPTPunchControl.ModelGPT, duration);
+      await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackTime(duration);
     }
 
     /// <summary>

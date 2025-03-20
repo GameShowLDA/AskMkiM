@@ -45,6 +45,10 @@ namespace MainWindowProgram
       this.Visibility = Visibility.Hidden;
     }
 
+    /// <summary>
+    /// Запускает асинхронную инициализацию окна.
+    /// </summary>
+    /// <returns></returns>
     public async Task InitializeAsync()
     {
       _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;

@@ -118,7 +118,7 @@ namespace UI.Controls.Protocol
     /// Устанавливает список моделей устройств для использования в действиях.
     /// </summary>
     /// <param name="deviceModels">Список моделей устройств <see cref="DeviceModel"/>.</param>
-    public void SetDevices(List<DeviceModel> deviceModels)
+    public void SetDevices(List<IDevice> deviceModels)
     {
       DeviceModels = deviceModels;
     }

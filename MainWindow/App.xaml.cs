@@ -37,6 +37,10 @@ namespace MainWindowProgram
     /// </summary>
     public static string[] CommandLineArgs { get; private set; }
 
+    /// <summary>
+    /// Запускает приложение.
+    /// </summary>
+    /// <param name="e"></param>
     protected override async void OnStartup(StartupEventArgs e)
     {
       base.OnStartup(e);

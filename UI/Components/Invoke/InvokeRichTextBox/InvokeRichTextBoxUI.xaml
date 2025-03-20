@@ -7,12 +7,16 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     
-    <Border CornerRadius="25" Style="{StaticResource RichBoxBorder}">
+    <Border CornerRadius="20" Style="{StaticResource RichBoxBorder}" Background="{StaticResource IsCheckedColorSolidColorBrush}" Margin="0">
         <RichTextBox Name="protocolTextBox"
         Background="Transparent"
         BorderThickness="0"
         Focusable="True">
+            
         </RichTextBox>
+        <Border.Effect>
+            <DropShadowEffect Color="{StaticResource ForegroundColor}" BlurRadius="15" ShadowDepth="4" Opacity="0.5"/>
+        </Border.Effect>
     </Border>
     
 </UserControl>

@@ -605,40 +605,43 @@ namespace UI.Controls.Protocol
     /// <returns>True, если подключение успешно.</returns>
     internal async Task<bool> AttemptDeviceConnection(List<IDevice> deviceModels, MessageDelegate messageDelegate)
     {
-      if (await GetIsIdleModeEnabled())
-      {
-        return true;
-      }
+      // TODO : Заглушка. Разобраться потом
+      return true;
 
-      var tasks = new List<Task<bool>>();
-
-      foreach (var task in deviceModels)
-      {
-        tasks.Add(DeviceChecker.CheckConnectDevice(task, messageDelegate));
-      }
-
-      try
-      {
-        bool[] results = await Task.WhenAll(tasks);
-        if (results.All(result => result))
-        {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Все устройства успешно подключены.", goodText.Item2));
-          LogInformation("Все устройства успешно подключены.");
-          return true;
-        }
-        else
-        {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Некоторые устройства не удалось подключить.", errorText.Item2));
-          LogError("Некоторые устройства не удалось подключить.");
-          return false;
-        }
-      }
-      catch (Exception ex)
-      {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Ошибка при подключении к устройствам: {ex.Message}", errorText.Item2));
-        LogError($"Ошибка при подключении к устройствам: {ex.Message}");
-        return false;
-      }
+      // if (await GetIsIdleModeEnabled())
+      // {
+      //   return true;
+      // }
+      // 
+      // var tasks = new List<Task<bool>>();
+      // 
+      // foreach (var task in deviceModels)
+      // {
+      //   tasks.Add(DeviceChecker.CheckConnectDevice(task, messageDelegate));
+      // }
+      // 
+      // try
+      // {
+      //   bool[] results = await Task.WhenAll(tasks);
+      //   if (results.All(result => result))
+      //   {
+      //     await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Все устройства успешно подключены.", goodText.Item2));
+      //     LogInformation("Все устройства успешно подключены.");
+      //     return true;
+      //   }
+      //   else
+      //   {
+      //     await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Некоторые устройства не удалось подключить.", errorText.Item2));
+      //     LogError("Некоторые устройства не удалось подключить.");
+      //     return false;
+      //   }
+      // }
+      // catch (Exception ex)
+      // {
+      //   await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Ошибка при подключении к устройствам: {ex.Message}", errorText.Item2));
+      //   LogError($"Ошибка при подключении к устройствам: {ex.Message}");
+      //   return false;
+      // }
     }
 
     #endregion

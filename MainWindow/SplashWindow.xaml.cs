@@ -3,13 +3,23 @@ using System.Windows.Media.Animation;
 
 namespace MainWindowProgram
 {
+  /// <summary>
+  /// Окно заставки (SplashScreen), отображаемое при запуске приложения.
+  /// </summary>
   public partial class SplashWindow : Window
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр окна заставки.
+    /// </summary>
     public SplashWindow()
     {
       InitializeComponent();
     }
 
+    /// <summary>
+    /// Асинхронно выполняет плавное закрытие окна с анимацией исчезновения.
+    /// </summary>
+    /// <returns>Задача, представляющая процесс закрытия окна.</returns>
     public async Task WaitForCloseAsync()
     {
       await Dispatcher.InvokeAsync(async () =>

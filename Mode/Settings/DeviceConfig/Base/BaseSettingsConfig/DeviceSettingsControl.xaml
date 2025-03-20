@@ -130,8 +130,10 @@
                             </Border>
 
                             <Border Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" Margin="5,5">
-                                <TextBox Background="Transparent" 
-                                     BorderThickness="0" VerticalAlignment="Center" 
+                                <TextBox 
+                                    Background="Transparent" 
+                                     BorderThickness="0" 
+                                    VerticalAlignment="Center" 
                                      FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
                                      PreviewTextInput="NumberDevice_PreviewTextInput"
                                      TextChanged="NumberDevice_TextChanged"

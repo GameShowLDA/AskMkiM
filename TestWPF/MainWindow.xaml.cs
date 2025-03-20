@@ -34,19 +34,6 @@ namespace TestWPF
       }).Wait();
 
       InitializeComponent();
-      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
-      using var dbContext = new AppDbContext(optionsBuilder.Options);
-      var data = new ChassisManagerServices().GetAll();
-      foreach (var item in data)
-      {
-        Test.AddSystem((ChassisManagerEntity)item);
-      }
-
-      var Racks = new RackServices().GetAll();
-      foreach (var item in Racks)
-      {
-        Test.AddRack((RackEntity)item);
-      }
     }
 
     private async Task StartConfigAsync()

@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Mode.Base.SearchDevices;
 using Mode.Models;
+using NewCore.Base.Interface.Main;
 using UI.Components.Invoke;
 using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
@@ -26,8 +26,8 @@ namespace Mode.TestSuite.NodeMethod
     InvokeBorder VoltageBorder = new InvokeBorder();
     InvokeTextBox VoltageData = new InvokeTextBox();
 
-    private Core.DeviceBusCommutation.Model deviceBusCommutation;
-    private Core.GptLibrary.Model gptLibrary;
+    private ISwitchingDevice deviceBusCommutation;
+    private IBreakdownTester gptLibrary;
 
     private static CheckBox checkBoxA;
     private static CheckBox checkBoxB;
@@ -58,33 +58,35 @@ namespace Mode.TestSuite.NodeMethod
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        LogInformation("Настройка элементов управления теста \"Метод узла\"");
+      // TODO: заглушка. Разобраться, что нужно сделать
 
-        ProtocolSelfCheckControl.SetSettings(this, ExecuteTestProcess, true, Stop);
-        ProtocolSelfCheckControl.Header = "Метод узла";
+      //try
+      //{
+      //  LogInformation("Настройка элементов управления теста \"Метод узла\"");
 
-        await ProtocolSelfCheckControl.ClearContent();
-        StackPanel contentStack = InputControlSettings.InitializeSettings(out testDataModel, InputControlSettings.ElectricParameter.InsulationResistance);
+      //  ProtocolSelfCheckControl.SetSettings(this, ExecuteTestProcess, true, Stop);
+      //  ProtocolSelfCheckControl.Header = "Метод узла";
 
-        AddVoltageParameterControls(contentStack);
-        InputControlSettings.DefaultGotAndLostEvent(VoltageData, "Напряжение");
+      //  await ProtocolSelfCheckControl.ClearContent();
+      //  StackPanel contentStack = InputControlSettings.InitializeSettings(out testDataModel, InputControlSettings.ElectricParameter.InsulationResistance);
 
-        InputControlSettings.DefaultGotAndLostEvent(TimeData, "Время измерения");
-        ProtocolSelfCheckControl.AddContent(contentStack);
+      //  AddVoltageParameterControls(contentStack);
+      //  InputControlSettings.DefaultGotAndLostEvent(VoltageData, "Напряжение");
 
-        AddTimeMeasurementControls(contentStack);
-        AddCustomGridsToStackPanel(contentStack);
+      //  InputControlSettings.DefaultGotAndLostEvent(TimeData, "Время измерения");
+      //  ProtocolSelfCheckControl.AddContent(contentStack);
 
-        await ConfigureProtocolSelfCheckControlAsync();
-        LogInformation("Настройка элементов управления теста \"Метод узла\" завершена");
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии КС в методе {methodName}: {ex.Message}");
-      }
+      //  AddTimeMeasurementControls(contentStack);
+      //  AddCustomGridsToStackPanel(contentStack);
+
+      //  await ConfigureProtocolSelfCheckControlAsync();
+      //  LogInformation("Настройка элементов управления теста \"Метод узла\" завершена");
+      //}
+      //catch (Exception ex)
+      //{
+      //  var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+      //  LogError($"Ошибка загрузки элемента метрологии КС в методе {methodName}: {ex.Message}");
+      //}
     }
 
     /// <summary>

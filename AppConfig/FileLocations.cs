@@ -1,5 +1,8 @@
 ﻿namespace AppConfig
 {
+  /// <summary>
+  /// Класс, содержащий пути к файлам.
+  /// </summary>
   static public class FileLocations
   {
     /// <summary>

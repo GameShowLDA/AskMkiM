@@ -1,9 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
-using Mode.Metrology.CI;
-using Mode.Metrology.IE;
-using Mode.Metrology.KC;
 using static AppConfig.Config.SystemStateManager;
 using static Utilities.LoggerUtility;
 
@@ -145,10 +142,10 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private void KC_Handler(object sender, MouseButtonEventArgs e)
     {
-      Application.Current.Dispatcher.Invoke(async () =>
-      {
-        await AddControlAsync(new KcControl(), "Режим КС");
-      });
+      //Application.Current.Dispatcher.Invoke(async () =>
+      //{
+      //  await AddControlAsync(new KcControl(), "Режим КС");
+      //});
     }
 
     /// <summary>
@@ -156,14 +153,14 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void IE_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new IeControl(), "Режим ИЕ");
+    private async void IE_Handler(object sender, MouseButtonEventArgs e) => throw new NotImplementedException(); // await AddControlAsync(new IeControl(), "Режим ИЕ");
 
     /// <summary>
     /// Добавляет пользовательский элемент управления режима СИ в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiControl(), "Режим СИ");
+    private async void CI_Handler(object sender, MouseButtonEventArgs e) => throw new NotImplementedException(); // await AddControlAsync(new CiControl(), "Режим СИ");
 
     #endregion
 
@@ -174,7 +171,7 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void Test_Self(object sender, MouseButtonEventArgs e) => await AddControlAsync(new Mode.SelfControl.Module.ModuleSelfControl(), "Самоконтроль модулей");
+    private async void Test_Self(object sender, MouseButtonEventArgs e) => throw new NotImplementedException(); // await AddControlAsync(new Mode.SelfControl.Module.ModuleSelfControl(), "Самоконтроль модулей");
 
     #endregion
 

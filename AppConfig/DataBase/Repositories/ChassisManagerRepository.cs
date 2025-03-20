@@ -12,5 +12,15 @@ namespace AppConfig.DataBase.Repositories
     /// </summary>
     /// <param name="context">Контекст подключения к БД.</param>
     public ChassisManagerRepository() : base(AppConfig.Config.SystemStateManager.Context) { }
+
+    /// <summary>
+    /// Получает список всех устройств, привязанных к определенному шасси.
+    /// </summary>
+    /// <param name="numberChassis">Номер шасси.</param>
+    /// <returns>Список быстрых измерителей.</returns>
+    public ChassisManagerEntity GetByNumber(int numberChassis)
+    {
+      return _dbSet.Find(numberChassis);
+    }
   }
 }

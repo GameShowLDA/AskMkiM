@@ -31,15 +31,17 @@ namespace UI.Controls.GPT
     /// <param name="e">Данные события мыши.</param>
     private void ConnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      ModelGPT = new Core.GptLibrary.Model();
-      ModelGPT.Connect();
+      // TODO: заглушка. Разобраться, что нужно сделать
 
-      if (ModelGPT.CheckConnection())
-      {
-        ConnectMenuItem.Visibility = Visibility.Collapsed;
-        DisconnectMenuItem.Visibility = Visibility.Visible;
-        Controller.Visibility = Visibility.Visible;
-      }
+      //ModelGPT = new Core.GptLibrary.Model();
+      //ModelGPT.Connect();
+
+      //if (ModelGPT.CheckConnection())
+      //{
+      //  ConnectMenuItem.Visibility = Visibility.Collapsed;
+      //  DisconnectMenuItem.Visibility = Visibility.Visible;
+      //  Controller.Visibility = Visibility.Visible;
+      //}
     }
 
     /// <summary>
@@ -50,13 +52,15 @@ namespace UI.Controls.GPT
     /// <param name="e">Данные события мыши.</param>
     private void DisconnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (ModelGPT.CheckConnection())
-      {
-        ModelGPT.Disconnect();
-        ConnectMenuItem.Visibility = Visibility.Visible;
-        DisconnectMenuItem.Visibility = Visibility.Collapsed;
-        Controller.Visibility = Visibility.Collapsed;
-      }
+      // TODO: заглушка. Разобраться, что нужно сделать
+
+      //if (ModelGPT.CheckConnection())
+      //{
+      //  ModelGPT.Disconnect();
+      //  ConnectMenuItem.Visibility = Visibility.Visible;
+      //  DisconnectMenuItem.Visibility = Visibility.Collapsed;
+      //  Controller.Visibility = Visibility.Collapsed;
+      //}
     }
   }
 }

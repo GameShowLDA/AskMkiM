@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="UI.Components.TextBoxPlaceholder"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression.blend/2008" 
+             mc:Ignorable="d"
+             d:DesignHeight="40" d:DesignWidth="250">
+
+    <Grid>
+        <TextBox x:Name="InputBox"
+                 Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Background="Transparent" 
+                 BorderThickness="0" 
+                 VerticalAlignment="Center" 
+                 FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                 GotFocus="InputBox_GotFocus"
+                 LostFocus="InputBox_LostFocus"/>
+    </Grid>
+</UserControl>

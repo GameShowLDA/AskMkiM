@@ -1,4 +1,5 @@
-﻿using UI.Components.Invoke;
+﻿using NewCore.Base.Interface.Main;
+using UI.Components.Invoke;
 
 namespace Mode.Models
 {
@@ -11,17 +12,17 @@ namespace Mode.Models
     /// <summary>
     /// Модель первого релейного управления.
     /// </summary>
-    internal Core.ModuleRelayControl.Model FirstModelRelayControl { get; set; }
+    internal IRelaySwitchModule FirstModelRelayControl { get; set; }
 
     /// <summary>
     /// Модель второго релейного управления.
     /// </summary>
-    internal Core.ModuleRelayControl.Model SecondModelRelayControl { get; set; }
+    internal IRelaySwitchModule SecondModelRelayControl { get; set; }
 
     /// <summary>
     /// Список моделей релейных модулей.
     /// </summary>
-    internal List<Core.ModuleRelayControl.Model> ModuleRelayControls = new List<Core.ModuleRelayControl.Model>();
+    internal List<IRelaySwitchModule> ModuleRelayControls = new List<IRelaySwitchModule>();
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TestDataModel"/> с заданными элементами управления.

@@ -20,7 +20,7 @@ namespace TestConsole
         Console.WriteLine("3. Работа с Keysight");
         Console.WriteLine("4. Самоконтроль УКШ");
         Console.WriteLine("5. Самоконтроль МИНТ");
-        Console.WriteLine("6. Какой-то хлам");
+        Console.WriteLine("6. Проверка ввода данных");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
@@ -60,10 +60,9 @@ namespace TestConsole
             break;
 
           case 6:
-            {
-              var data = new RelaySwitchModuleServices().GetAll();
-              break;
-            }
+
+            InputValidator.Validate();
+            break;
 
           case 0:
             // Выход из программы

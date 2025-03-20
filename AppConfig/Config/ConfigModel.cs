@@ -12,6 +12,7 @@ namespace AppConfig.Config
     /// <summary>
     /// Устанавливает текущую модель выполнения (ExecutionModel).
     /// </summary>
+    /// <param name="executionModel">Модель выполнения.</param>
     static public async Task SetExecutionModelAsync(ExecutionModel executionModel)
     {
       await ExecutionConfig.SetStopOnError(executionModel.StopOnError);
@@ -23,6 +24,7 @@ namespace AppConfig.Config
     /// <summary>
     /// Устанавливает текущую модель протокола (ProtocolModel).
     /// </summary>
+    /// <param name="executionModel">Модель протокола.</param>
     static public async Task SetProtocolModelAsync(ProtocolModel executionModel)
     {
       await ProtocolConfig.SetDeviceInfo(executionModel.ShowDeviceInfo);
@@ -35,6 +37,7 @@ namespace AppConfig.Config
     /// <summary>
     /// Устанавливает текущую модель погрешности измерений (MeasurementErrorModel).
     /// </summary>
+    /// <param name="measurementErrorModels">Модели погрешности измерений.</param>
     public static void SetMeasurementErrorModels(List<MeasurementErrorModel> measurementErrorModels)
     {
       foreach (var measurementErrorModel in measurementErrorModels)

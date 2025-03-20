@@ -16,7 +16,7 @@ namespace UI.Controls.GPT.Mode
     public AcwMode()
     {
       InitializeComponent();
-      Core.GptLibrary.AcwMode.SetModeAsync(GPTPunchControl.ModelGPT).ConfigureAwait(true);
+      GPTPunchControl.ModelGPT.AcwManger.SetModeAsync().ConfigureAwait(true);
       LoadConfigurationAsync().ConfigureAwait(true);
     }
 
@@ -28,7 +28,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await Core.GptLibrary.AcwMode.ReadConfigurationAsync(GPTPunchControl.ModelGPT);
+        var systemData = await GPTPunchControl.ModelGPT.AcwManger.ReadConfigurationAsync();
 
         VoltageSlider.Value = systemData.Voltage;
         ChiSlider.Value = systemData.HighCurrentLimit;
@@ -60,7 +60,7 @@ namespace UI.Controls.GPT.Mode
     private async void VoltageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double voltage = Math.Round(VoltageSlider.Value, 3);
-      await Core.GptLibrary.AcwMode.SetVoltageAsync(GPTPunchControl.ModelGPT, voltage);
+      await GPTPunchControl.ModelGPT.AcwManger.SetVoltageAsync(voltage);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ namespace UI.Controls.GPT.Mode
     private async void ChiSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double chi = Math.Round(ChiSlider.Value, 3);
-      await Core.GptLibrary.AcwMode.SetHighCurrentLimitAsync(GPTPunchControl.ModelGPT, chi);
+      await GPTPunchControl.ModelGPT.AcwManger.SetHighCurrentLimitAsync(chi);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ namespace UI.Controls.GPT.Mode
     private async void CloSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double clo = Math.Round(CloSlider.Value, 3);
-      await Core.GptLibrary.AcwMode.SetLowCurrentLimitAsync(GPTPunchControl.ModelGPT, clo);
+      await GPTPunchControl.ModelGPT.AcwManger.SetLowCurrentLimitAsync(clo);
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ namespace UI.Controls.GPT.Mode
     private async void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double time = Math.Round(TimeSlider.Value, 1);
-      await Core.GptLibrary.AcwMode.SetTestTimeAsync(GPTPunchControl.ModelGPT, time);
+      await GPTPunchControl.ModelGPT.AcwManger.SetTestTimeAsync(time);
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ namespace UI.Controls.GPT.Mode
     private async void RefSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double refValue = Math.Round(RefSlider.Value, 3);
-      await Core.GptLibrary.AcwMode.SetOffsetAsync(GPTPunchControl.ModelGPT, refValue);
+      await GPTPunchControl.ModelGPT.AcwManger.SetOffsetAsync(refValue);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ namespace UI.Controls.GPT.Mode
       if (ArcCurrentSlider != null)
       {
         double arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
-        await Core.GptLibrary.AcwMode.SetArcCurrentAsync(GPTPunchControl.ModelGPT, arcCurrent);
+        await GPTPunchControl.ModelGPT.AcwManger.SetArcCurrentAsync(arcCurrent);
       }
     }
 
@@ -129,7 +129,7 @@ namespace UI.Controls.GPT.Mode
           string frequencyText = selectedItem.Content.ToString();
           if (double.TryParse(frequencyText.Replace("Гц", "").Trim(), out double frequency))
           {
-            await Core.GptLibrary.AcwMode.SetFrequencyAsync(GPTPunchControl.ModelGPT, (int)frequency);
+            await GPTPunchControl.ModelGPT.AcwManger.SetFrequencyAsync((int)frequency);
             FrequencyValueText.Text = $"Частота ACW: {frequency} Гц";
           }
         }
@@ -148,7 +148,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await Core.GptLibrary.AcwMode.ReadConfigurationAsync(GPTPunchControl.ModelGPT);
+        var systemData = await GPTPunchControl.ModelGPT.AcwManger.ReadConfigurationAsync();
         LastReadTimeText.Text = $"Дата и время: {DateTime.Now}";
         VoltageValueText.Text = $"Напряжение ACW: {systemData.Voltage:F3} кВ";
         ChiValueText.Text = $"Высокий предел тока ACW: {systemData.HighCurrentLimit:F3} мА";
@@ -172,7 +172,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        double result = await Core.GptLibrary.AcwMode.MeasureCurrentAsync(GPTPunchControl.ModelGPT);
+        double result = await GPTPunchControl.ModelGPT.AcwManger.MeasureCurrentAsync();
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
       catch (Exception ex)

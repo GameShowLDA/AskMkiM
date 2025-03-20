@@ -1,7 +1,8 @@
-﻿using Mode.Base.SearchDevices;
+﻿using NewCore.Base.Interface.Main;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
 using static AppConfig.Config.SystemStateManager;
+using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.NodeMethod
 {
@@ -29,8 +30,10 @@ namespace Mode.TestSuite.NodeMethod
 
     private async Task Stop(CancellationToken token)
     {
-      gptLibrary.Disconnect();
-      await CommunicationManager.ResetAllSystem();
+      // TODO: заглушка. Разобраться, что нужно сделать
+
+      //gptLibrary.Disconnect();
+      //await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
 
     /// <summary>
@@ -47,7 +50,7 @@ namespace Mode.TestSuite.NodeMethod
         }
       }
 
-      await CommunicationManager.ResetAllSystem();
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       Completed = true;
       if (!await ValidateAndConnectDevice(token))
       {
@@ -66,7 +69,8 @@ namespace Mode.TestSuite.NodeMethod
       await ConnectAndTestPointsAsync(mkr, bus);
 
       Completed = false;
-      await CommunicationManager.ResetAllSystem();
+
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
 
     /// <summary>
@@ -76,70 +80,72 @@ namespace Mode.TestSuite.NodeMethod
     /// <returns>True, если подключение успешно, иначе false.</returns>
     public async Task<bool> ValidateAndConnectDevice(CancellationToken token)
     {
-      InputValidator inputValidator = new InputValidator();
-      try
-      {
-        token.ThrowIfCancellationRequested();
+      // TODO: заглушка. Разобраться, что нужно сделать
 
-        var firstPoint = await inputValidator.ValidateMeasurementPointAsync(ShowMessageAsync, testDataModel.FirstPointData.Text);
-        var secondPoint = await inputValidator.ValidateMeasurementPointAsync(ShowMessageAsync, testDataModel.LastPointData.Text);
+      //InputValidator inputValidator = new InputValidator();
+      //try
+      //{
+      //  token.ThrowIfCancellationRequested();
 
-        if (!firstPoint.IsSuccess || !secondPoint.IsSuccess)
-        {
-          return false;
-        }
+      //  var firstPoint = await inputValidator.ValidateMeasurementPointAsync(ShowMessageAsync, testDataModel.FirstPointData.Text);
+      //  var secondPoint = await inputValidator.ValidateMeasurementPointAsync(ShowMessageAsync, testDataModel.LastPointData.Text);
 
-        if (!inputValidator.ValidateUniqueMeasurementPointAsync(firstPoint.PointModel, secondPoint.PointModel))
-        {
-          return false;
-        }
+      //  if (!firstPoint.IsSuccess || !secondPoint.IsSuccess)
+      //  {
+      //    return false;
+      //  }
 
-        List<DeviceModel> deviceModels = new List<DeviceModel>();
+      //  if (!inputValidator.ValidateUniqueMeasurementPointAsync(firstPoint.PointModel, secondPoint.PointModel))
+      //  {
+      //    return false;
+      //  }
 
-        testDataModel.FirstPointModel = firstPoint.PointModel;
-        testDataModel.LastPointModel = secondPoint.PointModel;
+      //  List<DeviceModel> deviceModels = new List<DeviceModel>();
 
-        testDataModel.ManagerShassy = firstPoint.ManagerShassy;
-        testDataModel.FirstModuleRelayControl = firstPoint.ModuleRelayControl;
-        testDataModel.LastModuleRelayControl = secondPoint.ModuleRelayControl;
-        deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
-        gptLibrary = Core.GptLibrary.Model.CreateAsync();
-        deviceModels.Add(testDataModel.ManagerShassy);
-        deviceModels.Add(deviceBusCommutation);
-        deviceModels.Add(gptLibrary);
+      //  testDataModel.FirstPointModel = firstPoint.PointModel;
+      //  testDataModel.LastPointModel = secondPoint.PointModel;
 
-        var mkr = BlockNumberGenerator.GetBlockModelsBetween(testDataModel.FirstModuleRelayControl, testDataModel.LastModuleRelayControl);
-        foreach (var deviceModel in mkr)
-        {
-          deviceModels.Add(deviceModel);
-        }
+      //  testDataModel.ManagerShassy = firstPoint.ManagerShassy;
+      //  testDataModel.FirstModuleRelayControl = firstPoint.ModuleRelayControl;
+      //  testDataModel.LastModuleRelayControl = secondPoint.ModuleRelayControl;
+      //  deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
+      //  gptLibrary = Core.GptLibrary.Model.CreateAsync();
+      //  deviceModels.Add(testDataModel.ManagerShassy);
+      //  deviceModels.Add(deviceBusCommutation);
+      //  deviceModels.Add(gptLibrary);
 
-        if (!await AttemptDeviceConnection(deviceModels))
-        {
-          return false;
-        }
-      }
-      catch (InvalidOperationException)
-      {
-        Completed = false;
-        return false;
-      }
+      //  var mkr = BlockNumberGenerator.GetBlockModelsBetween(testDataModel.FirstModuleRelayControl, testDataModel.LastModuleRelayControl);
+      //  foreach (var deviceModel in mkr)
+      //  {
+      //    deviceModels.Add(deviceModel);
+      //  }
 
-      token.ThrowIfCancellationRequested();
-      if (await GetIsStepByStepModeEnabled())
-      {
-        ProtocolSelfCheckControl.ShowOnlyStopAndFinishButtons();
-      }
+      //  if (!await AttemptDeviceConnection(deviceModels))
+      //  {
+      //    return false;
+      //  }
+      //}
+      //catch (InvalidOperationException)
+      //{
+      //  Completed = false;
+      //  return false;
+      //}
 
-      if (!double.TryParse(testDataModel.ElectricParameterData.Text, out electricalParameter))
-      {
-        electricalParameter = 2000.0;
-      }
+      //token.ThrowIfCancellationRequested();
+      //if (await GetIsStepByStepModeEnabled())
+      //{
+      //  ProtocolSelfCheckControl.ShowOnlyStopAndFinishButtons();
+      //}
 
-      if (!int.TryParse(TimeData.Text, out time))
-      {
-        time = 1;
-      }
+      //if (!double.TryParse(testDataModel.ElectricParameterData.Text, out electricalParameter))
+      //{
+      //  electricalParameter = 2000.0;
+      //}
+
+      //if (!int.TryParse(TimeData.Text, out time))
+      //{
+      //  time = 1;
+      //}
 
       return true;
     }
@@ -149,33 +155,35 @@ namespace Mode.TestSuite.NodeMethod
     /// </summary>
     /// <param name="mkr">Список модулей МКР.</param>
     /// <param name="bus">Тип шины, к которой подключаются точки.</param>
-    public async Task ConnectPointsToOppositeBusAsync(List<Core.ModuleRelayControl.Model> mkr, BusPoint bus)
+    public async Task ConnectPointsToOppositeBusAsync(List<IRelaySwitchModule> mkr, BusPoint bus)
     {
-      for (int i = 0; i < mkr.Count; i++)
-      {
-        await Core.ModuleRelayControl.Functions.ConnectBusAsync(mkr[i].IPAddress, BusModuleRelayControl.AB1, true);
-        ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-        await ShowMessageAsync(new ShowMessageModel("Точки МКР номер", null, (i + 1).ToString(), goodText.Item2));
+      // TODO: заглушка. Разобраться, что нужно сделать
 
-        var points = GetPoints(mkr[i], i + 1);
-        if (!await GetIsIdleModeEnabled())
-        {
-          await Core.ModuleRelayControl.Functions.ConnectRelayGroupAsync(mkr[i].IPAddress, bus, points[0], points[points.Count - 1]);
-          await Task.Delay(1500);
-        }
+      //for (int i = 0; i < mkr.Count; i++)
+      //{
+      //  await Core.ModuleRelayControl.Functions.ConnectBusAsync(mkr[i].IPAddress, BusModuleRelayControl.AB1, true);
+      //  ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
+      //  await ShowMessageAsync(new ShowMessageModel("Точки МКР номер", null, (i + 1).ToString(), goodText.Item2));
 
-        foreach (var point in points)
-        {
-          ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-          await ShowMessageAsync(new ShowMessageModel($"\tПодключаем к шине {bus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
+      //  var points = GetPoints(mkr[i], i + 1);
+      //  if (!await GetIsIdleModeEnabled())
+      //  {
+      //    await Core.ModuleRelayControl.Functions.ConnectRelayGroupAsync(mkr[i].IPAddress, bus, points[0], points[points.Count - 1]);
+      //    await Task.Delay(1500);
+      //  }
 
-          if (!await GetIsIdleModeEnabled())
-          {
-            await Core.ModuleRelayControl.Functions.ConnectRelayAsync(mkr[i].IPAddress, bus, point);
-            await Task.Delay(200);
-          }
-        }
-      }
+      //  foreach (var point in points)
+      //  {
+      //    ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
+      //    await ShowMessageAsync(new ShowMessageModel($"\tПодключаем к шине {bus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
+
+      //    if (!await GetIsIdleModeEnabled())
+      //    {
+      //      await Core.ModuleRelayControl.Functions.ConnectRelayAsync(mkr[i].IPAddress, bus, point);
+      //      await Task.Delay(200);
+      //    }
+      //  }
+      //}
     }
 
     /// <summary>
@@ -183,63 +191,65 @@ namespace Mode.TestSuite.NodeMethod
     /// </summary>
     /// <param name="mkr">Список модулей МКР.</param>
     /// <param name="bus">Тип шины.</param>
-    public async Task ConnectAndTestPointsAsync(List<Core.ModuleRelayControl.Model> mkr, BusPoint bus)
+    public async Task ConnectAndTestPointsAsync(List<IRelaySwitchModule> mkr, BusPoint bus)
     {
-      await ShowMessageAsync(new ShowMessageModel($"Проверка точек", goodText.Item2) { CanBeDeleted = false });
+      // TODO: заглушка. Разобраться, что нужно сделать
 
-      if (!int.TryParse(VoltageData.Text, out int voltage))
-      {
-        throw new ArgumentException("Некорректное значение напряжения.");
-      }
+      //await ShowMessageAsync(new ShowMessageModel($"Проверка точек", goodText.Item2) { CanBeDeleted = false });
 
-      voltage = Math.Max(50, Math.Min(1000, voltage));
-      if (voltage % 50 != 0)
-      {
-        voltage = ((voltage / 50) + 1) * 50;
-      }
+      //if (!int.TryParse(VoltageData.Text, out int voltage))
+      //{
+      //  throw new ArgumentException("Некорректное значение напряжения.");
+      //}
 
-      VoltageData.Text = voltage.ToString();
+      //voltage = Math.Max(50, Math.Min(1000, voltage));
+      //if (voltage % 50 != 0)
+      //{
+      //  voltage = ((voltage / 50) + 1) * 50;
+      //}
 
-      BusPoint negativeBus = BusPoint.A;
-      if (bus == BusPoint.A)
-      {
-        negativeBus = BusPoint.B;
-      }
+      //VoltageData.Text = voltage.ToString();
 
-      if (!await GetIsIdleModeEnabled())
-      {
-        await Core.GptLibrary.IrMode.SetModeAsync(gptLibrary);
-        await Core.GptLibrary.IrMode.SetVoltageAsync(gptLibrary, voltage);
-        await Core.GptLibrary.IrMode.SetTimeAsync(gptLibrary, time);
-        await Core.DeviceBusCommutation.Functions.ConnectToBreakdownTester(deviceBusCommutation.IPAddress);
-      }
+      //BusPoint negativeBus = BusPoint.A;
+      //if (bus == BusPoint.A)
+      //{
+      //  negativeBus = BusPoint.B;
+      //}
 
-      for (int i = 0; i < mkr.Count; i++)
-      {
-        var points = GetPoints(mkr[i], i + 1);
-        foreach (var point in points)
-        {
-          ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-          if (!await GetIsIdleModeEnabled())
-          {
-            await Task.Delay(10);
+      //if (!await GetIsIdleModeEnabled())
+      //{
+      //  await Core.GptLibrary.IrMode.SetModeAsync(gptLibrary);
+      //  await Core.GptLibrary.IrMode.SetVoltageAsync(gptLibrary, voltage);
+      //  await Core.GptLibrary.IrMode.SetTimeAsync(gptLibrary, time);
+      //  await Core.DeviceBusCommutation.Functions.ConnectToBreakdownTester(deviceBusCommutation.IPAddress);
+      //}
 
-            await ShowMessageAsync(new ShowMessageModel($"\tОтключаем с шины {bus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
-            await Core.ModuleRelayControl.Functions.DisconnectRelayAsync(mkr[i].IPAddress, bus, point);
+      //for (int i = 0; i < mkr.Count; i++)
+      //{
+      //  var points = GetPoints(mkr[i], i + 1);
+      //  foreach (var point in points)
+      //  {
+      //    ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
+      //    if (!await GetIsIdleModeEnabled())
+      //    {
+      //      await Task.Delay(10);
 
-            await ShowMessageAsync(new ShowMessageModel($"\tПодключаем к шине {negativeBus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
-            await Core.ModuleRelayControl.Functions.ConnectRelayAsync(mkr[i].IPAddress, negativeBus, point);
+      //      await ShowMessageAsync(new ShowMessageModel($"\tОтключаем с шины {bus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
+      //      await Core.ModuleRelayControl.Functions.DisconnectRelayAsync(mkr[i].IPAddress, bus, point);
 
-            await TestPointWithPPUAsync(mkr[i], point);
+      //      await ShowMessageAsync(new ShowMessageModel($"\tПодключаем к шине {negativeBus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
+      //      await Core.ModuleRelayControl.Functions.ConnectRelayAsync(mkr[i].IPAddress, negativeBus, point);
 
-            await ShowMessageAsync(new ShowMessageModel($"\tОтключаем с шины {negativeBus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
-            await Core.ModuleRelayControl.Functions.DisconnectRelayAsync(mkr[i].IPAddress, negativeBus, point);
+      //      await TestPointWithPPUAsync(mkr[i], point);
 
-            await ShowMessageAsync(new ShowMessageModel($"\tПодключаем к шине {bus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
-            await Core.ModuleRelayControl.Functions.ConnectRelayAsync(mkr[i].IPAddress, bus, point);
-          }
-        }
-      }
+      //      await ShowMessageAsync(new ShowMessageModel($"\tОтключаем с шины {negativeBus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
+      //      await Core.ModuleRelayControl.Functions.DisconnectRelayAsync(mkr[i].IPAddress, negativeBus, point);
+
+      //      await ShowMessageAsync(new ShowMessageModel($"\tПодключаем к шине {bus.ToString()} точку МКР{(i + 1).ToString()} номер", null, point.ToString(), goodText.Item2) { CanBeDeleted = true });
+      //      await Core.ModuleRelayControl.Functions.ConnectRelayAsync(mkr[i].IPAddress, bus, point);
+      //    }
+      //  }
+      //}
     }
 
     /// <summary>
@@ -247,10 +257,10 @@ namespace Mode.TestSuite.NodeMethod
     /// </summary>
     /// <param name="mkr">Модуль МКР.</param>
     /// <param name="point">Точка для проверки.</param>
-    private async Task TestPointWithPPUAsync(Core.ModuleRelayControl.Model mkr, int point)
+    private async Task TestPointWithPPUAsync(IRelaySwitchModule mkr, int point)
     {
       await Task.Delay(100);
-      double result = await Core.GptLibrary.IrMode.MeasureResistanceAsync(gptLibrary);
+      double result = await gptLibrary.IrManger.MeasureResistanceAsync();
       bool error = result < electricalParameter ? true : false;
       await ShowMessageAsync(new ShowMessageModel($"\t\tРезультат проверки точки {point}", null, $"{result.ToString()} [{(error ? errorText.Item1.ToString() : goodText.Item1.ToString())}]", error ? errorText.Item2 : goodText.Item2) { CanBeDeleted = !error });
     }
@@ -261,10 +271,10 @@ namespace Mode.TestSuite.NodeMethod
     /// <param name="mkr">Модуль МКР.</param>
     /// <param name="moduleVoltageNumber">Номер модуля.</param>
     /// <returns>Список точек.</returns>
-    private List<int> GetPoints(Core.ModuleRelayControl.Model mkr, int moduleVoltageNumber)
+    private List<int> GetPoints(IRelaySwitchModule mkr, int moduleVoltageNumber)
     {
       int firstPoint = 1;
-      int lastPoint = mkr.CountPoints;
+      int lastPoint = mkr.PointCount;
       List<int> points = new List<int>();
 
       if (testDataModel.FirstPointModel.ModuleNumber == moduleVoltageNumber)
