@@ -5,13 +5,31 @@ using NewCore.Device;
 
 namespace NewCore.Function.Keysight3466new
 {
+  /// <summary>
+  /// Класс для управления подключением к прибору Keysight через TCP/IP.
+  /// </summary>
   public class KeysightConnection : IConnection
   {
+    /// <summary>
+    /// Экземпляр устройства Keysight.
+    /// </summary>
     private readonly KeysightDevice _device;
+
+    /// <summary>
+    /// Менеджер коммуникации для обмена SCPI-командами.
+    /// </summary>
     private readonly ICommunication _communication;
 
+    /// <summary>
+    /// Возвращает состояние подключения к прибору.
+    /// </summary>
     public bool IsConnected => _device.IsConnected;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="KeysightConnection"/>.
+    /// </summary>
+    /// <param name="device">Экземпляр устройства Keysight.</param>
+    /// <exception cref="ArgumentNullException">Выбрасывается, если переданный прибор <c>null</c>.</exception>
     public KeysightConnection(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
@@ -19,9 +37,10 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <summary>
-    /// Инициализация устройства.
+    /// Инициализирует подключение к прибору.
+    /// Проверяет доступность устройства с помощью команды "*IDN?".
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Возвращает <c>true</c>, если подключение успешно и устройство отвечает, иначе <c>false</c>.</returns>
     public async Task<bool> InitializeAsync()
     {
       if (await ConnectAsync())
@@ -37,8 +56,10 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <summary>
-    /// Подключается к прибору.
+    /// Подключается к прибору через TCP/IP.
     /// </summary>
+    /// <returns>Возвращает <c>true</c>, если подключение успешно, иначе <c>false</c>.</returns>
+    /// <exception cref="InvalidOperationException">Выбрасывается, если IP-адрес прибора не задан.</exception>
     public async Task<bool> ConnectAsync()
     {
       if (_device.IP == null)
@@ -71,6 +92,7 @@ namespace NewCore.Function.Keysight3466new
 
     /// <summary>
     /// Отключается от прибора.
+    /// Закрывает поток данных и TCP-соединение.
     /// </summary>
     public void Disconnect()
     {

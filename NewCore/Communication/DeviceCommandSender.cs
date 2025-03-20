@@ -6,6 +6,9 @@ using static Utilities.LoggerUtility;
 
 namespace NewCore.Communication
 {
+  /// <summary>
+  /// Статический класс для отправки команд устройствам.
+  /// </summary>
   static public class DeviceCommandSender
   {
     /// <summary>
@@ -39,7 +42,6 @@ namespace NewCore.Communication
         LogInformation($"Отправка команды на {endPoint}");
         byte[] messageBuffer = Encoding.UTF8.GetBytes(command.ToString());
         await socket.SendToAsync(new ArraySegment<byte>(messageBuffer), SocketFlags.None, endPoint);
-
 
         return timeout > 0 ? await GetMessageDeviceAsync(timeout, lastNumber) : string.Empty;
       }
@@ -133,7 +135,7 @@ namespace NewCore.Communication
     /// <summary>
     /// Отправляет сообщение широковещательно.
     /// </summary>
-    /// <param name="command"></param>
+    /// <param name="command">Команда для отправки.</param>
     /// <returns></returns>
     private static async Task SendBroadcastCommandAsync(DeviceCommand command)
     {
@@ -202,6 +204,5 @@ namespace NewCore.Communication
         throw new ArgumentException("Адрес не является IPv4-адресом.");
       }
     }
-
   }
 }

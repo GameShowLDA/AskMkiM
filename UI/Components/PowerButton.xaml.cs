@@ -103,7 +103,9 @@ namespace UI.Components
     private async void OnMouseEnter(object sender, MouseEventArgs e)
     {
       if (!taskInProgress || hasError)
+      {
         await AnimateOpacityAsync(1);
+      }
     }
 
     /// <summary>
@@ -112,17 +114,27 @@ namespace UI.Components
     private async void OnMouseLeave(object sender, MouseEventArgs e)
     {
       if (!taskInProgress || hasError)
+      {
         await AnimateOpacityAsync(0.5);
+      }
     }
 
     /// <summary>
     /// Обработка нажатия на кнопку, управление подключением или отключением системы.
     /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события мыши.</param>
     public async void OnPowerButtonClick(object sender, MouseButtonEventArgs e)
     {
       await PowerButtonClick();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки питания. Выполняет последовательность включения или выключения питания системы.
+    /// Если система не задана в конфигурации или включен холостой режим, выводит сообщение об ошибке.
+    /// Если задача уже выполняется, отменяет выполнение текущей задачи.
+    /// </summary>
+    /// <returns>Асинхронная задача.</returns>
     public async Task PowerButtonClick()
     {
       model = ConfigCollector.GetManagerShassy();
@@ -238,7 +250,10 @@ namespace UI.Components
           await ShowCountdownMessageAsync(3, "Повторная попытка через");
         }
 
-        if (exitLoop) break;
+        if (exitLoop)
+        {
+          break;
+        }
       }
       while (!await TryConnectAsync());
     }
@@ -264,6 +279,7 @@ namespace UI.Components
         GridBlock.Opacity += (targetOpacity - GridBlock.Opacity) * 0.1;
         await Task.Delay(10);
       }
+
       GridBlock.Opacity = targetOpacity;
     }
 
@@ -323,6 +339,7 @@ namespace UI.Components
     /// <summary>
     /// Устанавливает ссылку на верхнюю панель для вывода сообщений.
     /// </summary>
+    /// <param name="topPanel">Элемент управления верхней панелью.</param>
     public void SetTopPanel(TopPanelControl topPanel)
     {
       this.topPanel = topPanel;

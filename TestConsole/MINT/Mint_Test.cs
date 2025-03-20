@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Reflection;
+using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
@@ -78,7 +79,7 @@ namespace TestConsole.MINT
 
     private static ISwitchingDevice SelectDeviceBusCommutation()
     {
-      var dbc = new SwitchingDeviceRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      var dbc = new SwitchingDeviceServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -111,7 +112,7 @@ namespace TestConsole.MINT
     }
     private static IChassisManager SelectManagerChassis()
     {
-      var dbc = new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      var dbc = new ChassisManagerServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -144,7 +145,7 @@ namespace TestConsole.MINT
     }
     private static IPowerSourceModule SelectPowerSource()
     {
-      var dbc = new PowerSourceModuleRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      var dbc = new PowerSourceModuleServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -177,7 +178,7 @@ namespace TestConsole.MINT
     }
     private static IFastMeter SelectMeter()
     {
-      var dbc = new FastMeterRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      var dbc = new FastMeterServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {

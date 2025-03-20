@@ -13,7 +13,6 @@ namespace AppConfig
   /// </summary>
   static public class SettingsFileReader
   {
-
     /// <summary>
     /// Считывает настройки программы из файлов.
     /// </summary>
@@ -22,15 +21,13 @@ namespace AppConfig
     {
       try
       {
-
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-        var db = InicializeDB();
+        var db = InitializeDB();
 
         await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
         await ThemeSettingsManager.ReadThemeModeAsync();
-        //await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, db);
       }
       catch (Exception ex)
       {
@@ -44,7 +41,11 @@ namespace AppConfig
       }
     }
 
-    static public async Task InicializeDB()
+    /// <summary>
+    /// Инициализирует базу данных, применяя все ожидающие миграции.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию инициализации базы данных.</returns>
+    static public async Task InitializeDB()
     {
       var dbContextFactory = new DbContextFactory();
       using (var scope = dbContextFactory.CreateDbContext(new string[0]))

@@ -59,10 +59,9 @@ namespace AppConfig.Data.Theme
     /// <param name="themeModel">Модель темы с цветами.</param>
     private static void ApplyThemeToResources(ThemeModel themeModel)
     {
-
       var resourceDictionary = new ResourceDictionary
       {
-        Source = new Uri("pack://application:,,,/UI;component/Style.xaml")
+        Source = new Uri("pack://application:,,,/UI;component/Style.xaml"),
       };
 
       if (!Application.Current.Resources.MergedDictionaries.Contains(resourceDictionary))
@@ -133,7 +132,7 @@ namespace AppConfig.Data.Theme
         SecondaryColor = "#303843",
         ForegroundColor = "#f3f0f9",
         ActiveColor = "#1ca3e9",
-        IsCheckedColor = "#1f242b"
+        IsCheckedColor = "#1f242b",
       };
     }
 
@@ -149,7 +148,7 @@ namespace AppConfig.Data.Theme
         SecondaryColor = "#AEEEEE",
         ForegroundColor = "#002B36",
         ActiveColor = "#FF4081",
-        IsCheckedColor = "#B2EBF2"
+        IsCheckedColor = "#B2EBF2",
       };
     }
   }

@@ -10,58 +10,49 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class RelaySwitchModuleEntity : IRelaySwitchModule
   {
+    /// <inheritdoc />
     public int Id { get; set; }
-    /// <summary>
-    /// Номер менеджера шасси, к которому подключен модуль.
-    /// </summary>
+
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
 
-    /// <summary>
-    /// Номер менеджера шасси, к которому подключен модуль.
-    /// </summary>
+    /// <inheritdoc />
     public int NumberRack { get; set; }
 
-    /// <summary>
-    /// Количество точек коммутации в модуле.
-    /// </summary>
+    /// <inheritdoc />
     public int PointCount { get; set; }
 
-    /// <summary>
-    /// Название модуля.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание модуля.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Уникальный номер устройства.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Детали подключения модуля (IP-адрес, COM-порт и т. д.).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
-    /// <summary>
-    /// Тип устройства, всегда RelaySwitchModule.
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.RelaySwitchModule;
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IBusManager BusManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IMeterManager MeterManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IPointManager PointManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IStateManager StateManager { get; set; }
 

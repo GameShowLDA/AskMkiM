@@ -3,41 +3,50 @@ using System.Text;
 
 namespace ConsoleUtilities
 {
+  /// <summary>
+  /// Обрабатывает команды, вводимые в консоль, и выполняет соответствующие действия.
+  /// </summary>
   public class CommandHandler
   {
     private bool _isListening = true;
     private StringBuilder _inputBuffer = new StringBuilder();
-    private object _lock = new object();
+    private readonly object _lock = new object();
     private StringBuilder _consoleLog = new StringBuilder(); // Буфер для хранения вывода консоли
 
     private readonly Dictionary<string, Action<string[]>> _commands;
 
     /// <summary>
-    /// Событие изменения режима администратора вручную.
+    /// Событие изменения режима администратора.
     /// </summary>
     public event EventHandler<bool> AdminModeChanged;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="CommandHandler"/>.
+    /// Настраивает перехват вывода консоли и запускает прослушивание ввода.
+    /// </summary>
     public CommandHandler()
     {
-      Console.TreatControlCAsInput = true; // Позволяет обрабатывать Ctrl
+      Console.TreatControlCAsInput = true;
       _commands = new Dictionary<string, Action<string[]>>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "exit", args => ExitApplication() },
-                { "clear", args => ClearConsole() },
-                { "help", args => ShowHelp() },
-                { "showtable", args => ShowTable(args) },
-                { "save", args => SaveConsoleLog() },
-                { "clearlogs", args => ClearLogs() },
-                { "setAdmin", args => SetAdminMode(true) },
-                { "delAdmin", args => SetAdminMode(false) },
-            };
+      {
+        { "exit", args => ExitApplication() },
+        { "clear", args => ClearConsole() },
+        { "help", args => ShowHelp() },
+        { "showtable", args => ShowTable(args) },
+        { "save", args => SaveConsoleLog() },
+        { "clearlogs", args => ClearLogs() },
+        { "setAdmin", args => SetAdminMode(true) },
+        { "delAdmin", args => SetAdminMode(false) },
+      };
 
-      // Перехватываем весь вывод в консоль
       Console.SetOut(new ConsoleWriter(Console.Out, _consoleLog));
 
       StartInputListener();
     }
 
+    /// <summary>
+    /// Запускает асинхронный процесс прослушивания ввода с консоли.
+    /// </summary>
     private void StartInputListener()
     {
       Task.Run(async () =>
@@ -49,20 +58,29 @@ namespace ConsoleUtilities
       });
     }
 
+    /// <summary>
+    /// Асинхронно считывает нажатые клавиши и обрабатывает горячие клавиши.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию.</returns>
     private async Task ReadKeyWithHotkey()
     {
-      while (!Console.KeyAvailable) { await Task.Delay(1); }
+      while (!Console.KeyAvailable)
+      {
+        await Task.Delay(1);
+      }
 
       ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
       lock (_lock)
       {
+        // Обработка горячей клавиши: Ctrl + `
         if (keyInfo.Key == ConsoleKey.Oem3 && keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control))
         {
           ConsoleManager.Instance.ToggleConsole();
           return;
         }
 
+        // Если нажата клавиша Enter, выполняем команду
         if (keyInfo.Key == ConsoleKey.Enter)
         {
           string command = _inputBuffer.ToString().Trim();
@@ -72,6 +90,7 @@ namespace ConsoleUtilities
           return;
         }
 
+        // Обработка клавиши Backspace
         if (keyInfo.Key == ConsoleKey.Backspace && _inputBuffer.Length > 0)
         {
           _inputBuffer.Remove(_inputBuffer.Length - 1, 1);
@@ -79,6 +98,7 @@ namespace ConsoleUtilities
           return;
         }
 
+        // Если введен обычный символ, добавляем его в буфер и выводим на экран
         if (!char.IsControl(keyInfo.KeyChar))
         {
           _inputBuffer.Append(keyInfo.KeyChar);
@@ -87,10 +107,17 @@ namespace ConsoleUtilities
       }
     }
 
+    /// <summary>
+    /// Выполняет команду, введенную пользователем, определяя и вызывая соответствующее действие.
+    /// </summary>
+    /// <param name="command">Команда, введенная пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию выполнения команды.</returns>
     private async Task ExecuteCommand(string command)
     {
       if (string.IsNullOrWhiteSpace(command))
+      {
         return;
+      }
 
       string[] parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
       string commandName = parts[0];
@@ -108,7 +135,9 @@ namespace ConsoleUtilities
       }
     }
 
-
+    /// <summary>
+    /// Отображает список доступных команд в консоли.
+    /// </summary>
     private void ShowHelp()
     {
       Console.WriteLine("Доступные команды:");
@@ -118,6 +147,9 @@ namespace ConsoleUtilities
       }
     }
 
+    /// <summary>
+    /// Завершает работу приложения.
+    /// </summary>
     private void ExitApplication()
     {
       Console.WriteLine("Выход из программы...");
@@ -126,20 +158,20 @@ namespace ConsoleUtilities
     }
 
     /// <summary>
-    /// Очищает консоль и сбрасывает лог.
+    /// Очищает консоль и сбрасывает буфер логов.
     /// </summary>
     private void ClearConsole()
     {
       Console.Clear();
-      _consoleLog.Clear(); // Очищаем лог
+      _consoleLog.Clear();
     }
 
     /// <summary>
-    /// Удаляет все файлы логов.
+    /// Удаляет все файлы логов из каталога логов.
     /// </summary>
     private void ClearLogs()
     {
-      string logDirectory = Path.Combine(AppContext.BaseDirectory, "logs"); // Директория логов
+      string logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
 
       if (!Directory.Exists(logDirectory))
       {
@@ -172,6 +204,11 @@ namespace ConsoleUtilities
       }
     }
 
+    /// <summary>
+    /// Отображает содержимое указанной таблицы базы данных.
+    /// Если имя таблицы не указано, выводит список доступных таблиц.
+    /// </summary>
+    /// <param name="args">Массив аргументов, где первый элемент — имя таблицы.</param>
     private void ShowTable(string[] args)
     {
       using (var db = AppConfig.Config.SystemStateManager.Context)
@@ -182,21 +219,22 @@ namespace ConsoleUtilities
           Console.WriteLine("\nДоступные таблицы:");
 
           var tableNames = new List<string>
-            {
-                "breakdowntester",
-                "chassismanager",
-                "fastmeter",
-                "powersourcemodule",
-                "precisionmeter",
-                "rack",
-                "relayswitchmodule",
-                "switchingdevice"
-            };
+          {
+            "breakdowntester",
+            "chassismanager",
+            "fastmeter",
+            "powersourcemodule",
+            "precisionmeter",
+            "rack",
+            "relayswitchmodule",
+            "switchingdevice",
+          };
 
           foreach (var table in tableNames)
           {
             Console.WriteLine($" - {table}");
           }
+
           return;
         }
 
@@ -236,7 +274,7 @@ namespace ConsoleUtilities
     }
 
     /// <summary>
-    /// Сохраняет весь текст из консоли в файл.
+    /// Сохраняет текущий вывод консоли в текстовый файл.
     /// </summary>
     private void SaveConsoleLog()
     {
@@ -271,8 +309,10 @@ namespace ConsoleUtilities
     }
 
     /// <summary>
-    /// Выполняет неизвестную команду в cmd.
+    /// Выполняет указанную команду в командной строке (cmd) и выводит результат.
     /// </summary>
+    /// <param name="command">Команда для выполнения.</param>
+    /// <returns>Задача, представляющая асинхронную операцию выполнения команды.</returns>
     private async Task ExecuteInCmd(string command)
     {
       ProcessStartInfo psi = new ProcessStartInfo
@@ -282,7 +322,7 @@ namespace ConsoleUtilities
         RedirectStandardOutput = true,
         RedirectStandardError = true,
         UseShellExecute = false,
-        CreateNoWindow = true
+        CreateNoWindow = true,
       };
 
       try
@@ -294,9 +334,14 @@ namespace ConsoleUtilities
           string error = await process.StandardError.ReadToEndAsync();
 
           if (!string.IsNullOrWhiteSpace(output))
+          {
             Console.WriteLine(output);
+          }
+
           if (!string.IsNullOrWhiteSpace(error))
+          {
             Console.WriteLine($"Ошибка: {error}");
+          }
         }
       }
       catch (Exception ex)
@@ -305,13 +350,18 @@ namespace ConsoleUtilities
       }
     }
 
+    /// <summary>
+    /// Устанавливает режим администратора.
+    /// </summary>
+    /// <param name="enable">
+    /// Если <c>true</c>, включает режим администратора; если <c>false</c> — отключает.
+    /// </param>
     private void SetAdminMode(bool enable)
     {
       if (enable)
       {
         Utilities.LoggerUtility.LogInformation("Включение режима администратора.");
         AdminModeChanged?.Invoke(null, true);
-
       }
       else
       {
@@ -322,31 +372,47 @@ namespace ConsoleUtilities
   }
 
   /// <summary>
-  /// Перехватывает весь вывод в консоли и записывает его в StringBuilder.
+  /// Перехватывает вывод консоли, записывая его в дополнительный лог.
   /// </summary>
   public class ConsoleWriter : TextWriter
   {
     private readonly TextWriter _originalConsole;
     private readonly StringBuilder _consoleLog;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ConsoleWriter"/>.
+    /// </summary>
+    /// <param name="originalConsole">Исходный поток вывода консоли.</param>
+    /// <param name="consoleLog">Буфер для хранения логов консоли.</param>
     public ConsoleWriter(TextWriter originalConsole, StringBuilder consoleLog)
     {
       _originalConsole = originalConsole;
       _consoleLog = consoleLog;
     }
 
+    /// <summary>
+    /// Записывает символ в исходный поток и добавляет его в лог.
+    /// </summary>
+    /// <param name="value">Символ для записи.</param>
     public override void Write(char value)
     {
       _originalConsole.Write(value);
       _consoleLog.Append(value);
     }
 
+    /// <summary>
+    /// Записывает строку в исходный поток и добавляет её в лог.
+    /// </summary>
+    /// <param name="value">Строка для записи.</param>
     public override void Write(string value)
     {
       _originalConsole.Write(value);
       _consoleLog.Append(value);
     }
 
+    /// <summary>
+    /// Возвращает используемую кодировку.
+    /// </summary>
     public override Encoding Encoding => Encoding.UTF8;
   }
 }

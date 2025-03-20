@@ -6,9 +6,14 @@ using NewCore.Function.ModuleVoltageCurrentSource;
 
 namespace NewCore.Device
 {
+  /// <summary>
+  /// Класс, представляющий модуль источника напряжения и тока.
+  /// </summary>
   public class ModuleVoltageCurrentSource : DeviceWithIP, IPowerSourceModule
   {
-
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ModuleVoltageCurrentSource"/>.
+    /// </summary>
     public ModuleVoltageCurrentSource()
     {
       Name = "Модуль источника напряжения и тока";
@@ -20,10 +25,29 @@ namespace NewCore.Device
       DeviceClass = GetType().FullName;
     }
 
+    /// <summary>
+    /// Получает или задает номер шасси, к которому подключен модуль.
+    /// </summary>
     public int NumberChassis { get; set; }
+
+    /// <summary>
+    /// Менеджер управления шинами модуля.
+    /// </summary>
     public IBusManager BusManager { get; set; }
+
+    /// <summary>
+    /// Менеджер управления током модуля.
+    /// </summary>
     public ICurrentManager CurrentManager { get; set; }
+
+    /// <summary>
+    /// Менеджер управления состоянием модуля.
+    /// </summary>
     public IStateManager StateManager { get; set; }
+
+    /// <summary>
+    /// Менеджер управления напряжением модуля.
+    /// </summary>
     public IVoltageManager VoltageManager { get; set; }
   }
 }

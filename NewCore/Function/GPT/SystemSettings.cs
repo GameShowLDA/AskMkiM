@@ -13,14 +13,20 @@ namespace NewCore.Function.GPT
   /// </summary>
   public class SystemSettings : ISystemSettingsBreakdown
   {
-
+    /// <summary>
+    /// Создает экземпляр класса <see cref="SystemSettings"/>.
+    /// </summary>
+    /// <param name="gpt79904">Объект устройства GPT-79904.</param>
     public SystemSettings(GPT79904 gpt79904) => _gptModel = gpt79904;
+
+    /// <summary>
+    /// Экземпляр устройства GPT-79904.
+    /// </summary>
     GPT79904 _gptModel { get; set; }
 
     /// <summary>
     /// Устанавливает контрастность дисплея (от 1 до 8).
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Значение контрастности (1-8).</param>
     public async Task SetLcdContrastAsync(double value)
     {
@@ -31,7 +37,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает яркость дисплея (1 - темный, 2 - яркий).
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Значение яркости (1 или 2).</param>
     public async Task SetLcdBrightnessAsync(double value)
     {
@@ -42,7 +47,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Включает/выключает звук успешного теста.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="state">Состояние (ON или OFF).</param>
     public async Task SetBuzzerPrimarySound(bool state)
     {
@@ -54,7 +58,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Включает/выключает звук ошибочного теста.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="state">Состояние (ON или OFF).</param>
     public async Task SetBuzzerFeedbackSound(bool state)
     {
@@ -66,7 +69,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает продолжительность звука успешного теста (0.2 - 999.9 секунд).
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
     public async Task SetBuzzerPrimaryTime(double duration)
     {
@@ -77,7 +79,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает продолжительность звука ошибочного теста (0.2 - 999.9 секунд).
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
     public async Task SetBuzzerFeedbackTime(double duration)
     {

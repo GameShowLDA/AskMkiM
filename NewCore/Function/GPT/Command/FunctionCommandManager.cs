@@ -5,7 +5,6 @@
   /// </summary>
   static internal class FunctionCommandManager
   {
-
     /// <summary>
     /// Перечисление функциональных команд устройства.
     /// </summary>

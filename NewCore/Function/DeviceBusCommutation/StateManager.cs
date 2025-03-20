@@ -1,9 +1,18 @@
-﻿using NewCore.Base.DeviceResponses;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
+  /// <summary>
+  /// Класс для управления состоянием устройства коммутации шин.
+  /// </summary>
   public class StateManager : IStateDeviceBusCommutation
   {
     /// <summary>
@@ -17,23 +26,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
-    /// <summary>
-    /// Сброс всех реле на УКШ.
-    /// </summary>
-    /// <param name="_deviceBusCommutation.IPAddress">"Ip адрес УКШ.".</param>
-    /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
-    public async Task<bool> ResetAsync()
-    {
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 1000).ConfigureAwait(true);
-      return result == "2.0.1";
-    }
-
-    /// <summary>
-    /// Инициализация устройства коммутации шин.
-    /// </summary>
-    /// <param name="_deviceBusCommutation.IPAddress">"Ip адрес УКШ.".</param>
-    /// <returns>Возвращает ответ, получен ли ответ от инициализации.</returns>
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> Initialize()
     {
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
@@ -55,6 +48,7 @@ namespace NewCore.Function.DeviceBusCommutation
           {
             errorMessage += $"Несовпадение по NumberChassis: ожидается {_deviceBusCommutation.NumberChassis}, получено {baseResponse.NumberChassis}. ";
           }
+
           if (baseResponse.NumberDevice != _deviceBusCommutation.Number)
           {
             errorMessage += $"Несовпадение по NumberDevice: ожидается {_deviceBusCommutation.Number}, получено {baseResponse.NumberDevice}.";
@@ -65,6 +59,14 @@ namespace NewCore.Function.DeviceBusCommutation
       }
 
       return (false, result);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ResetAsync()
+    {
+      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
+      string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 1000).ConfigureAwait(true);
+      return result == "2.0.1";
     }
   }
 }

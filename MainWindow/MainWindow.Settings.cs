@@ -5,7 +5,6 @@ using static AppConfig.EventAggregator;
 using static AppConfig.SettingsFileReader;
 using static Utilities.LoggerUtility;
 
-
 namespace MainWindowProgram
 {
   public partial class MainWindow
@@ -74,6 +73,5 @@ namespace MainWindowProgram
         });
       }
     }
-
   }
 }

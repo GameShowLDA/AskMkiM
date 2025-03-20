@@ -5,24 +5,29 @@ using NewCore.Communication;
 
 namespace NewCore.Function.ManagerChassis
 {
+  /// <summary>
+  /// Класс для управления питанием шасси.
+  /// </summary>
   public class PowerManager : IPowerManagerChassis
   {
-    IChassisManager _chassisModel;
-    public PowerManager(IChassisManager managerChassis) => _chassisModel = managerChassis;
+    /// <summary>
+    /// Интерфейс управления шасси.
+    /// </summary>
+    private IChassisManager _chassisModel { get; set; }
 
     /// <summary>
-    /// Запускает питание на АСК-МКИ-М.
+    /// Инициализирует новый экземпляр класса <see cref="PowerManager"/>.
     /// </summary>
-    /// <returns> Возвращает объект типа Task.</returns>
+    /// <param name="managerChassis">Экземпляр менеджера шасси.</param>
+    public PowerManager(IChassisManager managerChassis) => _chassisModel = managerChassis;
+
+    /// <inheritdoc />
     public async Task StartPowerAsync()
     {
       await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_chassisModel.ConnectionDetails), new DeviceCommand(2, 1, 1));
     }
 
-    /// <summary>
-    /// Выключает питание на АСК-МКИ-М.
-    /// </summary>
-    /// <returns> Возвращает объект типа Task.</returns>
+    /// <inheritdoc />
     public async Task StopPowerAsync()
     {
       await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_chassisModel.ConnectionDetails), new DeviceCommand(2, 2, 1));

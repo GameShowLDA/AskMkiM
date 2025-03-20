@@ -11,44 +11,33 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class ChassisManagerEntity : IChassisManager, IHeadUnit
   {
+    /// <inheritdoc />
     public int Id { get; set; }
-    /// <summary>
-    /// Название устройства.
-    /// </summary>
-    public string Name { get; set; }
 
-    /// <summary>
-    /// Описание устройства.
-    /// </summary>
+    /// <inheritdoc />
+    public string Name { get; set; }
+    
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Номер устройства в системе.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Данные соединения (IP-адрес или COM-порт).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
-    /// <summary>
-    /// Тип устройства (тестер АСКМ).
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IStateManagerChassis StateManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IPowerManagerChassis PowerManager { get; set; }
-
-    /// <summary>
-    /// Инициализация устройства.
-    /// </summary>
-    /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public Task<bool> Initialize() => Task.FromResult(true);
   }
 }

@@ -11,78 +11,56 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class FastMeterEntity : IFastMeter
   {
+    /// <inheritdoc />
     public int Id { get; set; }
-    /// <summary>
-    /// Номер менеджера шасси, к которому подключен быстрый измеритель.
-    /// </summary>
+
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
 
-    /// <summary>
-    /// Название быстрого измерителя.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание быстрого измерителя.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Уникальный номер устройства.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Детали подключения измерителя (IP-адрес, COM-порт и т. д.).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
-    /// <summary>
-    /// Тип устройства, всегда FastMeter.
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.FastMeter;
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IAcVoltageMeasurement AcVoltageManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
-
     public ICapacitanceMeasurement CapacitanceManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
-
     public ICommunication CommunicationManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
-
     public IConnection ConnectionManager { get; set; }
-    [NotMapped]
 
+    /// <inheritdoc />
+    [NotMapped]
     public IContinuityMeasurement ContinuityManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
-
     public IDcVoltageMeasurement DcVoltageManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
-
     public IResistanceMeasurement ResistanceManager { get; set; }
-
-    /// <summary>
-    /// Метод инициализации быстрого измерителя.
-    /// </summary>
-    /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public async Task<bool> Initialize()
-    {
-      if (IPAddress.TryParse(ConnectionDetails, out IPAddress address))
-      {
-        var connect = await NewCore.Communication.DeviceCommandSender.PingAsync("Мультиметр", address);
-        return connect;
-      }
-
-      throw new NotFiniteNumberException();
-    }
   }
 }

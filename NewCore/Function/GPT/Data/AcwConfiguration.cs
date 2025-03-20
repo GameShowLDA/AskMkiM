@@ -1,17 +1,43 @@
 ﻿namespace NewCore.Function.GPT.Data
 {
   /// <summary>
-  /// Класс для хранения конфигурации ACW.
+  /// Класс для хранения конфигурации ACW (переменный ток высокого напряжения).
   /// </summary>
   public class AcwConfiguration
   {
-    public double Voltage { get; set; } // Напряжение (кВ)
-    public double HighCurrentLimit { get; set; } // Высокий предел тока (мА)
-    public double LowCurrentLimit { get; set; } // Низкий предел тока (мА)
-    public double TestTime { get; set; } // Время теста (сек)
-    public int Frequency { get; set; } // Частота (Гц)
-    public double Offset { get; set; } // Смещение (мА)
+    /// <summary>
+    /// Напряжение теста ACW (в кВ).
+    /// </summary>
+    public double Voltage { get; set; }
 
+    /// <summary>
+    /// Верхний предел тока ACW (в мА).
+    /// </summary>
+    public double HighCurrentLimit { get; set; }
+
+    /// <summary>
+    /// Нижний предел тока ACW (в мА).
+    /// </summary>
+    public double LowCurrentLimit { get; set; }
+
+    /// <summary>
+    /// Время теста ACW (в секундах).
+    /// </summary>
+    public double TestTime { get; set; }
+
+    /// <summary>
+    /// Частота теста ACW (в Гц). Должна быть 50 или 60 Гц.
+    /// </summary>
+    public int Frequency { get; set; }
+
+    /// <summary>
+    /// Смещение измерения ACW (в мА).
+    /// </summary>
+    public double Offset { get; set; }
+
+    /// <summary>
+    /// Ток дугового пробоя ACW (в мА).
+    /// </summary>
     public double ArcCurrent { get; set; }
   }
 }

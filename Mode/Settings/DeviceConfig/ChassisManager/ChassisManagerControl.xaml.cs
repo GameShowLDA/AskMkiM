@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,48 +9,81 @@ using AppConfig.DataBase.Models;
 namespace Mode.Settings.DeviceConfig.ChassisManager
 {
   /// <summary>
-  /// Логика взаимодействия для DeviceConfigControl.xaml
+  /// Логика взаимодействия для DeviceConfigControl.xaml.
   /// </summary>
   public partial class ChassisManagerControl : UserControl
   {
+    /// <summary>
+    /// Коллекция доступных систем шасси.
+    /// </summary>
     public ObservableCollection<ChassisManagerEntity> SystemsChassis { get; set; } = new();
+
+    /// <summary>
+    /// Коллекция доступных стоек.
+    /// </summary>
     public ObservableCollection<RackEntity> SystemsRack { get; set; } = new();
 
     /// <summary>
-    /// Выбранная система.
+    /// Выбранная система шасси.
     /// </summary>
     public ChassisManagerEntity SelectedSystem
     {
-      get { return (ChassisManagerEntity)GetValue(SelectedSystemProperty); }
-      set { SetValue(SelectedSystemProperty, value); }
+      get => (ChassisManagerEntity)GetValue(SelectedSystemProperty);
+      set => SetValue(SelectedSystemProperty, value);
     }
 
+    /// <summary>
+    /// Свойство зависимости для выбранной системы шасси.
+    /// </summary>
     public static readonly DependencyProperty SelectedSystemProperty =
-        DependencyProperty.Register(nameof(SelectedSystem), typeof(ChassisManagerEntity), typeof(ChassisManagerControl), new PropertyMetadata(null));
-
+        DependencyProperty.Register(
+            nameof(SelectedSystem),
+            typeof(ChassisManagerEntity),
+            typeof(ChassisManagerControl),
+            new PropertyMetadata(null));
 
     /// <summary>
-    /// Выбранная система.
+    /// Выбранная стойка.
     /// </summary>
     public RackEntity SelectedRack
     {
-      get { return (RackEntity)GetValue(SelectedRackProperty); }
-      set { SetValue(SelectedRackProperty, value); }
+      get => (RackEntity)GetValue(SelectedRackProperty);
+      set => SetValue(SelectedRackProperty, value);
     }
 
+    /// <summary>
+    /// Свойство зависимости для выбранной стойки.
+    /// </summary>
     public static readonly DependencyProperty SelectedRackProperty =
-       DependencyProperty.Register(nameof(SelectedRack), typeof(RackEntity), typeof(ChassisManagerControl), new PropertyMetadata(null));
-
+        DependencyProperty.Register(
+            nameof(SelectedRack),
+            typeof(RackEntity),
+            typeof(ChassisManagerControl),
+            new PropertyMetadata(null));
 
     /// <summary>
     /// Событие, вызываемое при выборе системы.
     /// </summary>
     public event EventHandler<ChassisManagerEntity> SystemSelected;
+
+    /// <summary>
+    /// Событие, вызываемое при выборе стойки.
+    /// </summary>
     public event EventHandler<RackEntity> RackSelected;
 
+    /// <summary>
+    /// Событие, вызываемое при добавлении новой системы.
+    /// </summary>
     public event EventHandler NewSystem;
+
+    /// <summary>
+    /// Событие, вызываемое при добавлении новой стойки.
+    /// </summary>
     public event EventHandler NewRack;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ChassisManagerControl"/>.
+    /// </summary>
     public ChassisManagerControl()
     {
       InitializeComponent();
@@ -60,11 +94,13 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Добавляет систему в список для отображения.
     /// </summary>
-    /// <param name="chassisManager">Экземпляр ChassisManagerEntity</param>
+    /// <param name="chassisManager">Экземпляр <see cref="ChassisManagerEntity"/>.</param>
     public void AddSystem(ChassisManagerEntity chassisManager)
     {
       if (chassisManager == null)
+      {
         return;
+      }
 
       SystemsChassis.Add(chassisManager);
       addChassisButton.Visibility = Visibility.Collapsed;
@@ -72,24 +108,26 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     }
 
     /// <summary>
-    /// Добавляет систему в список для отображения.
+    /// Добавляет стойку в список для отображения.
     /// </summary>
-    /// <param name="chassisManager">Экземпляр ChassisManagerEntity</param>
+    /// <param name="rack">Экземпляр <see cref="RackEntity"/>.</param>
     public void AddRack(RackEntity rack)
     {
       if (rack == null)
+      {
         return;
+      }
 
       SystemsRack.Add(rack);
       addChassisButton.Visibility = Visibility.Collapsed;
       addRackButton.Visibility = Visibility.Visible;
     }
 
-
     /// <summary>
-    /// Вызывается при нажатии кнопки.
-    /// Устанавливает выбранную систему и вызывает событие.
+    /// Обрабатывает выбор системы.
     /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void OnSystemSelected(object sender, RoutedEventArgs e)
     {
       if (sender is Button button && button.DataContext is ChassisManagerEntity system)
@@ -100,9 +138,10 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     }
 
     /// <summary>
-    /// Вызывается при нажатии кнопки.
-    /// Устанавливает выбранную систему и вызывает событие.
+    /// Обрабатывает выбор стойки.
     /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void OnRackSelected(object sender, RoutedEventArgs e)
     {
       if (sender is Button button && button.DataContext is RackEntity system)
@@ -112,23 +151,49 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
       }
     }
 
+    /// <summary>
+    /// Обрабатывает наведение курсора на кнопку добавления системы.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void addChassisButton_MouseEnter(object sender, MouseEventArgs e)
     {
-      (sender as Border).Background = (Brush)Application.Current.Resources["IsCheckedColorSolidColorBrush"];
-      (sender as Border).Cursor = Cursors.Hand;
+      if (sender is Border border)
+      {
+        border.Background = (Brush)Application.Current.Resources["IsCheckedColorSolidColorBrush"];
+        border.Cursor = Cursors.Hand;
+      }
     }
 
+    /// <summary>
+    /// Обрабатывает уход курсора с кнопки добавления системы.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void addChassisButton_MouseLeave(object sender, MouseEventArgs e)
     {
-      (sender as Border).Background = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
-      (sender as Border).Cursor = Cursors.Wait;
+      if (sender is Border border)
+      {
+        border.Background = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+        border.Cursor = Cursors.Wait;
+      }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие на кнопку добавления системы.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void addChassisButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       NewSystem?.Invoke(this, e);
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие на кнопку добавления стойки.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void addRackButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       NewRack?.Invoke(this, e);

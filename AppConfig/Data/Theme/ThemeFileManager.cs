@@ -3,6 +3,10 @@ using Utilities.FilesUtility;
 
 namespace AppConfig.Data.Theme
 {
+  /// <summary>
+  /// Менеджер файлов тем, реализующий функциональность загрузки и записи конфигурации темы.
+  /// Наследуется от <see cref="ConfigurationManagerBase{ThemeModel}"/>.
+  /// </summary>
   internal class ThemeFileManager : ConfigurationManagerBase<ThemeModel>
   {
     private readonly YamlUtility<ThemeModel> _yamlHelper;
@@ -27,6 +31,5 @@ namespace AppConfig.Data.Theme
     /// </summary>
     /// <param name="executionModel">Объект <see cref="ThemeModel"/> с новыми данными для записи в файл.</param>
     public override async Task RewriteFileAsync(ThemeModel executionModel) => await _yamlHelper.RewriteAsync(executionModel);
-
   }
 }

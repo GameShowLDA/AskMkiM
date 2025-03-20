@@ -9,41 +9,28 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class RackEntity : IRack, IHeadUnit
   {
+    /// <inheritdoc />
     public int Id { get; set; }
 
-    /// <summary>
-    /// Название устройства.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание устройства.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Номер устройства в системе.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Номер менеджера шасси.
-    /// </summary>
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
 
-    /// <summary>
-    /// Данные соединения (IP-адрес или COM-порт).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
-    /// <summary>
-    /// Тип устройства (стойка СКМ).
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.Rack;
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
-
-
-    public Task<bool> Initialize() => Task.FromResult(true);
   }
 }

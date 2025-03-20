@@ -52,6 +52,7 @@ namespace Core.ConfigCollector
     /// Возвращает объект менеджера шасси.
     /// </summary>
     /// <returns></returns>
+    /// <param name="number">Номер устройства.</param>
     static public ManagerShassy.Model GetManagerShassy(string number)
     {
       if (ManagerShassy.Number == number)
@@ -197,7 +198,6 @@ namespace Core.ConfigCollector
     /// <returns></returns>
     static public List<DeviceModel> GetAllDevices()
     {
-
       List<DeviceModel> deviceModels = new List<DeviceModel>();
       var managerShassy = GetManagerShassy();
       var deviceBusCommutation = GetDeviceBusCommutation();

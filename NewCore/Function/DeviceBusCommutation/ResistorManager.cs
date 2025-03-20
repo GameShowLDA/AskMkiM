@@ -1,9 +1,18 @@
-﻿using NewCore.Base.Function.DBC;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NewCore.Base.Function.DBC;
 using NewCore.Communication;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
+  /// <summary>
+  /// Менеджер управления коммутацией резисторов.
+  /// Обеспечивает подключение и отключение резисторов в системе.
+  /// </summary>
   public class ResistorManager : IResistorDeviceBusCommutation
   {
     /// <summary>
@@ -12,7 +21,7 @@ namespace NewCore.Function.DeviceBusCommutation
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="ResistorManager"/>.
+    /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public ResistorManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;

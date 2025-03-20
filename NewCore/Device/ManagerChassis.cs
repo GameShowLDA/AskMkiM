@@ -10,17 +10,23 @@ namespace NewCore.Device
   /// </summary>
   public class ManagerChassis : DeviceWithIP, IChassisManager
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ManagerChassis"/>.
+    /// </summary>
     public ManagerChassis()
     {
       StateManager = new StateManager(this);
       PowerManager = new PowerManager(this);
+
+      Name = "Тестер АСКМ";
+      Description = "Добавить описание сюда";
+      DeviceClass = GetType().FullName;
     }
 
-    public string Name { get => "Тестер АСКМ"; }
-    public string Description { get => "Добавить описание сюда"; }
-
-    public string DeviceClass { get => GetType().FullName; }
+    /// <inheritdoc />
     public IStateManagerChassis StateManager { get; set; }
+
+    /// <inheritdoc />
     public IPowerManagerChassis PowerManager { get; set; }
   }
 }

@@ -2,29 +2,37 @@
 
 namespace Mode.TestSuite.NodeMethod
 {
-  partial class NodeMethodControl
+  /// <summary>
+  /// Класс управления методами узла.
+  /// </summary>
+  public partial class NodeMethodControl
   {
     /// <summary>
-    /// Пытается подключиться к устройствам.
+    /// Пытается подключиться к устройствам, используя предопределенный список моделей устройств.
     /// </summary>
-    public async Task<bool> AttemptDeviceConnection() => await ProtocolSelfCheckControl.AttemptDeviceConnection
-    (
-    new List<DeviceModel>()
-      {
-      testDataModel.ManagerShassy,
-      testDataModel.FirstModuleRelayControl,
-      testDataModel.LastModuleRelayControl,
-      deviceBusCommutation,
-      gptLibrary,
-
-      }, ShowMessageAsync
-      );
+    /// <returns>Задача, представляющая асинхронную операцию. Возвращает true, если подключение успешно, иначе false.</returns>
+    public async Task<bool> AttemptDeviceConnection()
+    {
+      return await ProtocolSelfCheckControl.AttemptDeviceConnection(
+          new List<DeviceModel>
+          {
+                    testDataModel.ManagerShassy,
+                    testDataModel.FirstModuleRelayControl,
+                    testDataModel.LastModuleRelayControl,
+                    deviceBusCommutation,
+                    gptLibrary,
+          },
+          ShowMessageAsync);
+    }
 
     /// <summary>
-    /// Пытается подключиться к устройствам.
+    /// Пытается подключиться к указанному списку моделей устройств.
     /// </summary>
-    public async Task<bool> AttemptDeviceConnection(List<DeviceModel> models) => await ProtocolSelfCheckControl.AttemptDeviceConnection(models, ShowMessageAsync);
-
-
+    /// <param name="models">Список моделей устройств для подключения.</param>
+    /// <returns>Задача, представляющая асинхронную операцию. Возвращает true, если подключение успешно, иначе false.</returns>
+    public async Task<bool> AttemptDeviceConnection(List<DeviceModel> models)
+    {
+      return await ProtocolSelfCheckControl.AttemptDeviceConnection(models, ShowMessageAsync);
+    }
   }
 }

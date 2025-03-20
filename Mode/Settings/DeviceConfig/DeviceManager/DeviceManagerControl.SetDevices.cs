@@ -5,9 +5,13 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
 {
   public partial class DeviceManagerControl
   {
+    /// <summary>
+    /// Добавление устройства.
+    /// </summary>
+    /// <typeparam name="T">Тип устройства.</typeparam>
+    /// <param name="device">Модель устройства.</param>
     public void AddDevice<T>(T device) where T : IDevice
     {
-      var type = device.GetType();
       switch (device)
       {
         case BreakdownTesterEntity breakdownTester:
@@ -32,6 +36,45 @@ namespace Mode.Settings.DeviceConfig.DeviceManager
 
         case SwitchingDeviceEntity switchingDevice:
           SwitchingDeviceControl.AddDevice(switchingDevice);
+          break;
+
+        default:
+          Console.WriteLine("Неизвестный тип устройства.");
+          break;
+      }
+    }
+
+    /// <summary>
+    /// Добавление устройства.
+    /// </summary>
+    /// <typeparam name="T">Тип устройства.</typeparam>
+    /// <param name="typeDevices">Тип устройств.</param>
+    public void ClearDevice<T>(T typeDevices) where T : IDevice
+    {
+      switch (typeDevices)
+      {
+        case BreakdownTesterEntity breakdownTester:
+          BreakdownTesterControl.ClearItems();
+          break;
+
+        case FastMeterEntity fastMeter:
+          FastMeterControl.ClearItems();
+          break;
+
+        case PowerSourceModuleEntity powerSource:
+          PowerSourceModuleControl.ClearItems();
+          break;
+
+        case PrecisionMeterEntity precisionMeter:
+          PrecisionMeterControl.ClearItems();  
+          break;
+
+        case RelaySwitchModuleEntity relaySwitch:
+          RelaySwitchModuleControl.ClearItems();
+          break;
+
+        case SwitchingDeviceEntity switchingDevice:
+          SwitchingDeviceControl.ClearItems();
           break;
 
         default:

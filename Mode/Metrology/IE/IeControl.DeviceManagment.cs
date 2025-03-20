@@ -3,7 +3,6 @@ using Mode.Metrology.Base;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
 
-
 namespace Mode.Metrology.IE
 {
   public partial class IeControl
@@ -27,6 +26,7 @@ namespace Mode.Metrology.IE
     /// <summary>
     /// Настраивает устройства для измерения.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены, позволяющий прервать операцию конфигурации.</param>
     public async Task ConfigureDevices(CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
@@ -35,6 +35,7 @@ namespace Mode.Metrology.IE
       {
         await MetrologyDeviceCommunication.DeviceBusCommutationConnectBus(cancellationToken, ShowMessageAsync, deviceBusCommutation);
       }
+
       await ShowMessageAsync(new ShowMessageModel("\tЗамыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
 
       cancellationToken.ThrowIfCancellationRequested();
@@ -43,6 +44,7 @@ namespace Mode.Metrology.IE
       {
         await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.FirstModuleRelayControl, Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB2, ShowMessageAsync);
       }
+
       await ShowMessageAsync(new ShowMessageModel($"\tМКР{measurementDataModel.FirstPointModel.ModuleNumber} Замыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
 
       if (measurementDataModel.LastModuleRelayControl.IPAddress != measurementDataModel.FirstModuleRelayControl.IPAddress)
@@ -52,6 +54,7 @@ namespace Mode.Metrology.IE
         {
           await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.LastModuleRelayControl, Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB2, ShowMessageAsync);
         }
+
         await ShowMessageAsync(new ShowMessageModel($"\tМКР{measurementDataModel.LastPointModel.ModuleNumber} Замыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
       }
 
@@ -61,6 +64,7 @@ namespace Mode.Metrology.IE
       {
         await MetrologyDeviceCommunication.ModuleRelayControl_ConnectRelayAsync(measurementDataModel.FirstPointModel, measurementDataModel.LastPointModel, measurementDataModel.FirstModuleRelayControl, measurementDataModel.LastModuleRelayControl, ShowMessageAsync);
       }
+
       await ShowMessageAsync(new ShowMessageModel($"\tТочка {measurementDataModel.FirstPointModel.PointNumber}", null, $"[{goodText.Item1}]", goodText.Item2));
       await ShowMessageAsync(new ShowMessageModel($"\tТочка {measurementDataModel.LastPointModel.PointNumber}", null, $"[{goodText.Item1}]", goodText.Item2));
 

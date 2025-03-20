@@ -4,7 +4,7 @@ using NewCore.Base.Interface.Additionally;
 namespace NewCore.Base.Interface.Main
 {
   /// <summary>
-  /// Интерфейс для модуля коммутации реле
+  /// Интерфейс для модуля коммутации реле.
   /// </summary>
   public interface IRelaySwitchModule : IAttachableDevice
   {
