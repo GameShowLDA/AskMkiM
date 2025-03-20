@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components"
+             xmlns:SearchControls="clr-namespace:UI.Components.SearchControls"
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
              mc:Ignorable="d" 
@@ -44,8 +45,6 @@
                 <Grid.RowDefinitions>
                     <!-- Верхняя панель с кнопками -->
                     <RowDefinition Height="30"/>
-                    <!-- Фиксированная шапка DataGrid -->
-                    <RowDefinition Height="Auto"/>
                     <!-- Прокручиваемая область DataGrid -->
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -87,63 +86,19 @@
                         />
 
                 </Grid>
+                
+                <Grid Grid.Row="1" x:Name="searchDataGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel x:Name="SearchResultsTopPanel" 
+                                Grid.Row="0" 
+                                Background="{StaticResource SecondarySolidColorBrush}"  
+                                Orientation="Horizontal"/>
+                    <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
+                </Grid>
 
-                <!-- Фиксированная шапка DataGrid -->
-                <DataGrid x:Name="ResultsHeaderGrid"
-                    AutoGenerateColumns="False"
-                    CanUserAddRows="False"
-                    CanUserDeleteRows="False"
-                    IsReadOnly="True"
-                    HeadersVisibility="Column"
-                    RowHeaderWidth="0"
-                    Background="Transparent"
-                    Grid.Row="1"
-                    BorderThickness="0"
-                    ScrollViewer.CanContentScroll="True"
-                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                          CanUserResizeColumns="False"
-                          CanUserReorderColumns="False"
-                          >
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Документ" Binding="{Binding FileName}" Width="200"/>
-                        <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
-                        <DataGridTextColumn Header="Текст" Binding="{Binding LineText}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <DataGrid x:Name="ResultsDataGrid"
-                          Grid.Row="2"
-                        AutoGenerateColumns="False"
-                        CanUserAddRows="False"
-                        CanUserDeleteRows="False"
-                        IsReadOnly="True"
-                        HeadersVisibility="None"
-                        RowHeaderWidth="0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        VerticalAlignment="Stretch"
-                        EnableRowVirtualization="False"
-                        PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick"
-                        ScrollViewer.CanContentScroll="True">
-                    <DataGrid.Resources>
-                        <!-- Скрываем автоматическую прокрутку для каждой строки -->
-                        <Style TargetType="DataGridRow">
-                            <EventSetter Event="RequestBringIntoView" Handler="ResultsDataGrid_RequestBringIntoView"/>
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding FileName}" Width="200" />
-                        <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
-                        <DataGridTextColumn Binding="{Binding LineText}" Width="*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
             </Grid>
         </Border>
     </Grid>

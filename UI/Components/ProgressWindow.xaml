@@ -9,7 +9,8 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="white"
-        AllowsTransparency="True">
+        AllowsTransparency="True"
+        Topmost="True">
     <Border BorderBrush="Gray" 
             BorderThickness="1" 
             CornerRadius="5"

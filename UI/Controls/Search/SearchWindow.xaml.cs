@@ -40,6 +40,7 @@ namespace UI.Controls.Search
       EventAggregator.TextEditorClosing += OnSearchWindowClosing;
       EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
+      SearchTextBox.Focus();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -386,6 +387,7 @@ namespace UI.Controls.Search
       {
         SearchTextBox.Text = selectedText;
         SearchTextBox.Focus();
+        SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
       }
     }
   }

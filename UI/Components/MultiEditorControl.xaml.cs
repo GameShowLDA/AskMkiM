@@ -56,6 +56,7 @@ namespace UI.Components
     public event Action<string, Dictionary<string, Dictionary<int, string>>> SearchResultsReady;
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
 
+    private static ProgressWindow _progressWindow;
 
     public MultiEditorControl()
     {
@@ -597,7 +598,7 @@ namespace UI.Components
     }
 
 
-    private async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea)
+    public async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea)
     {
       if (string.IsNullOrEmpty(searchText))
       {
@@ -605,6 +606,7 @@ namespace UI.Components
         LogWarning("Поле для поиска не заполнено");
         return;
       }
+
       List<OpenFileButton> searchPages = SetSearchAreaPages(searchArea);
 
       if (foundInOpenedFiles.Count > 0)
@@ -612,65 +614,11 @@ namespace UI.Components
         foundInOpenedFiles.Clear();
       }
 
-      ProgressWindow progressWindow = null;
-
-      // Создаем и показываем окно прогресса на UI-потоке
-      await Application.Current.Dispatcher.InvokeAsync(() =>
-      {
-        progressWindow = new ProgressWindow
-        {
-          Owner = Application.Current.MainWindow, // Центрирование относительно главного окна
-          WindowStartupLocation = WindowStartupLocation.CenterOwner,
-          ShowInTaskbar = false,
-          Topmost = true
-        };
-        progressWindow.Show();
-      });
-
-      // Искусственная задержка, чтобы окно прогресса успело отрендериться
-      await Task.Delay(150);
-
-      // Применяем блюр и блокируем основное окно
-      await Application.Current.Dispatcher.InvokeAsync(() =>
-      {
-        Application.Current.MainWindow.Effect = new BlurEffect { Radius = 5 };
-        Application.Current.MainWindow.IsEnabled = false;
-      });
-
-      object lockObj = new object();
-
-      var tasks = searchPages.Select(page => Task.Run(() =>
-      {
-        string pageName = page.Dispatcher.Invoke(() => page.Text);
-
-        int pageIndex = openPages.IndexOf(page);
-        if (userControls[pageIndex] is TextEditorUI textEditor)
-        {
-          string pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
-          var foundResultsDictionary = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
-
-          if (foundResultsDictionary.Count > 0)
-          {
-            lock (lockObj)
-            {
-              foundInOpenedFiles[pageName] = foundResultsDictionary;
-            }
-          }
-        }
-      })).ToList();
-
+      ApplyBlurAndDisableMainWindow();
+      Dispatcher progressDispatcher = await ShowProgressWindowOnSeparateThread();
+      List<Task> tasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(tasks);
-
-      // После завершения поиска снимаем блюр и закрываем окно прогресса
-      await Application.Current.Dispatcher.InvokeAsync(() =>
-      {
-        if (progressWindow != null)
-        {
-          progressWindow.Close();
-        }
-        Application.Current.MainWindow.Effect = null;
-        Application.Current.MainWindow.IsEnabled = true;
-      });
+      await CloseProgressWindowAndRemoveBlur(progressDispatcher);
 
       if (foundInOpenedFiles.Count > 0)
       {
@@ -686,6 +634,110 @@ namespace UI.Components
         LogInformation("Текст не найден в открытых документах.");
         return;
       }
+    }
+
+    /// <summary>
+    /// Применяет эффект размытия к главному окну и блокирует его.
+    /// </summary>
+    private void ApplyBlurAndDisableMainWindow()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        Application.Current.MainWindow.Effect = new BlurEffect { Radius = 5 };
+        Application.Current.MainWindow.IsEnabled = false;
+      });
+    }
+
+    /// <summary>
+    /// Создает окно прогресса в отдельном STA-потоке без установки Owner,
+    /// но позиционирует его по центру главного окна, используя координаты, полученные на UI-потоке.
+    /// </summary>
+    private Task<Dispatcher> ShowProgressWindowOnSeparateThread()
+    {
+      var tcs = new TaskCompletionSource<Dispatcher>();
+
+      Rect mainWindowRect = Application.Current.Dispatcher.Invoke(() =>
+      {
+        Window mainWindow = Application.Current.MainWindow;
+        return new Rect(mainWindow.Left, mainWindow.Top, mainWindow.Width, mainWindow.Height);
+      });
+
+      Thread thread = new Thread(() =>
+      {
+        var progressWindow = new ProgressWindow
+        {
+          WindowStartupLocation = WindowStartupLocation.Manual,
+          Topmost = true
+        };
+
+        progressWindow.Left = mainWindowRect.Left + (mainWindowRect.Width - progressWindow.Width) / 2;
+        progressWindow.Top = mainWindowRect.Top + (mainWindowRect.Height - progressWindow.Height) / 2;
+
+        progressWindow.Show();
+
+        tcs.SetResult(Dispatcher.CurrentDispatcher);
+        Dispatcher.Run();
+      });
+      thread.SetApartmentState(ApartmentState.STA);
+      thread.IsBackground = true;
+      thread.Start();
+
+      return tcs.Task;
+    }
+
+
+    /// <summary>
+    /// Выполняет поиск для каждой вкладки в отдельном Task.
+    /// </summary>
+    private List<Task> ExecuteSearchTasks(List<OpenFileButton> searchPages, string searchText, bool? wholeWord, bool? caseWord)
+    {
+      object lockObj = new object();
+
+      return searchPages.Select(page => Task.Run(() =>
+      {
+        // Получаем имя вкладки через Dispatcher (на UI-потоке)
+        string pageName = page.Dispatcher.Invoke(() => page.Text);
+
+        int pageIndex = openPages.IndexOf(page);
+        if (userControls[pageIndex] is TextEditorUI textEditor)
+        {
+          // Получаем текст редактора через Dispatcher
+          string pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
+          var foundResultsDictionary = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
+
+          if (foundResultsDictionary.Count > 0)
+          {
+            lock (lockObj)
+            {
+              foundInOpenedFiles[pageName] = foundResultsDictionary;
+            }
+          }
+        }
+      })).ToList();
+    }
+
+    /// <summary>
+    /// Закрывает окно прогресса через Dispatcher отдельного потока и снимает блюр с главного окна.
+    /// </summary>
+    private async Task CloseProgressWindowAndRemoveBlur(Dispatcher progressDispatcher)
+    {
+      // Снимаем эффект размытия и разблокируем главное окно на UI-потоке
+      await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        Application.Current.MainWindow.Effect = null;
+        Application.Current.MainWindow.IsEnabled = true;
+      });
+
+      // Закрываем окно прогресса на отдельном потоке через его Dispatcher
+      await progressDispatcher.InvokeAsync(() =>
+      {
+        if (_progressWindow != null)
+        {
+          _progressWindow.Close();
+        }
+      });
+      // Останавливаем Dispatcher отдельного потока
+      progressDispatcher.InvokeShutdown();
     }
 
 

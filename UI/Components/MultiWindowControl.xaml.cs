@@ -9,15 +9,20 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components
 {
@@ -26,6 +31,10 @@ namespace UI.Components
   /// </summary>
   public partial class MultiWindowControl : UserControl
   {
+
+    List<OpenFileButton> openPages = new List<OpenFileButton>();
+    List<UserControl> userControls = new List<UserControl>();
+
     public MultiWindowControl()
     {
       InitializeComponent();
@@ -54,8 +63,8 @@ namespace UI.Components
         return;
       }
 
-      double totalHeight = ActualHeight; 
-      double editorsHeight = MultiEditor.ActualHeight; 
+      double totalHeight = ActualHeight;
+      double editorsHeight = MultiEditor.ActualHeight;
       double minEditorsHeight = 100;
       double splitterHeight = MultiWindowSplitter.ActualHeight;
       SearchResultsRow.MinHeight = 35;
@@ -76,16 +85,16 @@ namespace UI.Components
     /// </summary>
     private void minimizeButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (ResultsDataGrid.Visibility == Visibility.Visible)
+      if (searchDataGrid.Visibility == Visibility.Visible)
       {
         SearchResultsRow.Height = new GridLength(35);
-        ResultsDataGrid.Visibility = Visibility.Collapsed;
+        searchDataGrid.Visibility = Visibility.Collapsed;
         MultiWindowSplitter.Visibility = Visibility.Collapsed;
       }
       else
       {
         SearchResultsRow.Height = new GridLength(200);
-        ResultsDataGrid.Visibility = Visibility.Visible;
+        searchDataGrid.Visibility = Visibility.Visible;
         MultiWindowSplitter.Visibility = Visibility.Visible;
       }
     }
@@ -125,7 +134,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); 
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -174,10 +183,11 @@ namespace UI.Components
 
     public void ShowSearchResults(string searchText, Dictionary<string, Dictionary<int, string>> results)
     {
-      List<SearchResultItem> items = new List<SearchResultItem>();
-
+      int totalCount = 0;
       foreach (var file in results)
       {
+        List<SearchResultItem> items = new List<SearchResultItem>();
+        var searchResultsForFile = new SearchDataGrid();
         foreach (var occurrence in file.Value)
         {
           items.Add(new SearchResultItem
@@ -187,28 +197,18 @@ namespace UI.Components
             LineText = occurrence.Value
           });
         }
+        totalCount += items.Count;
+        var searchResultsText = $"Результаты поиска по \"{searchText}\" в файле \"{file.Key}\". Найдено {items.Count} строк";
+        LogInformation(searchResultsText);
+        AddControlInSearchArea(file.Key, searchResultsForFile);
+        searchResultsForFile.SetItemSourse(items);
       }
-      ResultsDataGrid.ItemsSource = items;
-      var searchResultsText = $"Результаты поиска по \"{searchText}\". Найдено {items.Count} строк";
-      searchResultsTextBlock.Text = searchResultsText;
-      LogInformation(searchResultsText);
+      
+      string overallSearchText = $"Результаты поиска по \"{searchText}\". Всего найдено {totalCount} строк";
+      searchResultsTextBlock.Text = overallSearchText;
       MultiWindowSplitter.Visibility = Visibility.Visible;
       SearchResultsRow.Height = new GridLength(200);
       SearchResults.Visibility = Visibility.Visible;
-    }
-
-    private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-      var row = (sender as DataGrid).SelectedItem as SearchResultItem;
-      if (row != null)
-      {
-        var fileName = row.FileName;
-        var lineNumber = row.LineNumber;
-        var lineLength = row.LineText.Length;
-
-        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, lineLength);
-        LogInformation("Сработало событие нажатия на строку dataGrid с результатами поиска");
-      }
     }
 
     public override void OnApplyTemplate()
@@ -221,9 +221,129 @@ namespace UI.Components
       }
     }
 
-    private void ResultsDataGrid_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+    /// <summary>
+    /// Добавляет элемент управления и кнопку в соответствующие панели.
+    /// </summary>
+    /// <param name="header">Заголовок для кнопки.</param>
+    /// <param name="control">Элемент управления для отображения.</param>
+    public void AddControlInSearchArea(string header, UserControl control, string description = null)
     {
-      e.Handled = true;
+      OpenFileButton tabButton = new OpenFileButton();
+      tabButton.Header.Text = header;
+      if (description != null)
+      {
+        tabButton.Description = description;
+
+        foreach (OpenFileButton page in openPages)
+        {
+          if (page.Description == description)
+          {
+            var index = openPages.IndexOf(page);
+            var userControl = userControls[index];
+            ShowControl(userControl, page);
+            return;
+          }
+        }
+      }
+      else
+      {
+        foreach (OpenFileButton page in openPages)
+        {
+          if (page.Header.Text == header)
+          {
+            var index = openPages.IndexOf(page);
+            var userControl = userControls[index];
+            ShowControl(userControl, page);
+
+            return;
+          }
+        }
+      }
+
+      tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
+      tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
+      tabButton.MouseDown += (s, e) =>
+      {
+        if (e.ChangedButton == MouseButton.Middle)
+        {
+          RemoveControl(tabButton, control);
+        }
+      };
+
+      openPages.Add(tabButton);
+      userControls.Add(control);
+
+      try
+      {
+        ContentPanel.Children.Add(control);
+        SearchResultsTopPanel.Children.Add(tabButton);
+      }
+      finally
+      {
+        ShowControl(control, tabButton);
+      }
+    }
+
+    /// <summary>
+    /// Отображает указанный элемент управления, скрывая остальные.
+    /// </summary>
+    /// <param name="control">Элемент управления для отображения.</param>
+    private void ActivePage(OpenFileButton control)
+    {
+      foreach (OpenFileButton child in SearchResultsTopPanel.Children)
+      {
+        if (control == child)
+        {
+          child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
+        }
+        else
+        {
+          child.Background = (Brush)Application.Current.Resources["SecondarySolidColorBrush"];
+        }
+      }
+    }
+
+    /// <summary>
+    /// Отображает указанный элемент управления, скрывая остальные.
+    /// </summary>
+    /// <param name="control">Элемент управления для отображения.</param>
+    private void ShowControl(UserControl control, OpenFileButton openPage)
+    {
+      foreach (UIElement child in ContentPanel.Children)
+      {
+        child.Visibility = child == control ? Visibility.Visible : Visibility.Collapsed;
+      }
+
+      ActivePage(openPage);
+    }
+
+    /// <summary>
+    /// Удаляет указанный элемент управления и соответствующую вкладку.
+    /// </summary>
+    /// <param name="tabButton">Вкладка для удаления.</param>
+    /// <param name="control">Элемент управления для удаления.</param>
+    private void RemoveControl(OpenFileButton tabButton, UserControl control)
+    {
+      if (openPages.Contains(tabButton) && userControls.Contains(control))
+      {
+        int index = ContentPanel.Children.IndexOf(control);
+
+        if (index > 0)
+        {
+          index--;
+        }
+
+        openPages.Remove(tabButton);
+        userControls.Remove(control);
+
+        SearchResultsTopPanel.Children.Remove(tabButton);
+        ContentPanel.Children.Remove(control);
+
+        if (ContentPanel.Children.Count > 0)
+        {
+          ShowControl(userControls[index], openPages[index]);
+        }
+      }
     }
   }
 }
