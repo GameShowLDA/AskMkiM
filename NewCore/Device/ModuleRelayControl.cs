@@ -7,27 +7,47 @@ using NewCore.Function.ModuleRelayControl;
 
 namespace NewCore.Device
 {
+  /// <summary>
+  /// Модуль коммутации реле, обеспечивающее подключение объектов контроля.
+  /// </summary>
   public class ModuleRelayControl : DeviceWithIP, IRelaySwitchModule
   {
-    public ModuleRelayControl() 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControl"/>.
+    /// </summary>
+    public ModuleRelayControl()
     {
       BusManager = new BusManager(this);
       MeterManager = new MeterManager(this);
       PointManager = new PointManager(this);
       StateManager = new StateManager(this);
+
+      DeviceType = DeviceEnum.DeviceType.ChassisManager;
+      Name = "Модуль коммутации реле 350";
+      Description = "Добавить описание сюда";
+      PointCount = 350;
+      DeviceClass = GetType().FullName;
     }
 
-    public int Number { get; set; }
+    /// <inheritdoc />
     public int NumberRack { get; set; }
-    public string ConnectionDetails { get; set; }
 
-    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
-
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
+
+    /// <inheritdoc />
     public int PointCount { get; set; }
+
+    /// <inheritdoc />
     public IBusManager BusManager { get; set; }
+
+    /// <inheritdoc />
     public IMeterManager MeterManager { get; set; }
+
+    /// <inheritdoc />
     public IPointManager PointManager { get; set; }
+
+    /// <inheritdoc />
     public IStateManager StateManager { get; set; }
   }
 }

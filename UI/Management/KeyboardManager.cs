@@ -6,12 +6,21 @@ using static AppConfig.EventAggregator;
 
 namespace UI.Management
 {
+  /// <summary>
+  /// Класс для управления обработкой нажатий клавиш в приложении.
+  /// Позволяет обрабатывать команды для пошагового режима выполнения.
+  /// </summary>
   internal class KeyboardManager
   {
     /// <summary>
     /// Ожидает нажатия клавиш для пошагового режима.
     /// </summary>
-    /// <returns>Возвращает 1 при выполнении без пошагового режима, 2 при выполнении пошагового режима без захода, 3 при выполнении пошагового режима с заходом.</returns>
+    /// <param name="commandBindings">Коллекция привязок команд.</param>
+    /// <param name="inputBindings">Коллекция привязок клавиш.</param>
+    /// <returns>Возвращает:
+    /// 1 - выполнение без пошагового режима,
+    /// 2 - выполнение пошагового режима без захода,
+    /// 3 - выполнение пошагового режима с заходом.</returns>
     static public async Task<byte> WaitForFunctionKeyPress(CommandBindingCollection commandBindings, InputBindingCollection inputBindings)
     {
       var keyPressTaskSource = new TaskCompletionSource<byte>();
@@ -33,7 +42,7 @@ namespace UI.Management
     }
 
     /// <summary>
-    /// Метод для добавления команд и привязок клавиш
+    /// Метод для добавления команд и привязок клавиш.
     /// </summary>
     private static void AddKeyBindings(CommandBindingCollection commandBindings, InputBindingCollection inputBindings, TaskCompletionSource<byte> keyPressTaskSource)
     {
@@ -66,7 +75,5 @@ namespace UI.Management
       inputBindings.Add(inputF10);
       inputBindings.Add(inputF11);
     }
-
-
   }
 }

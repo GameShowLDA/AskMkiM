@@ -4,15 +4,20 @@ using System.Windows;
 using System.Windows.Media;
 using Core.Abstract;
 using Core.ConfigCollector;
+using Core.Model;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
+using static Core.Enum.DeviceEnum;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.SelfControl.Module.Meter
 {
+  /// <summary>
+  /// Класс Handler выполняет самоконтроль мультиметра, осуществляет проверку сопротивления и ёмкости.
+  /// </summary>
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
@@ -20,50 +25,63 @@ namespace Mode.SelfControl.Module.Meter
     private readonly Tuple<string, Color> errorText = ErrorMessage;
     private MeterBase meter;
     private Core.DeviceBusCommutation.Model deviceBusCommutation;
+
     /// <summary>
-    /// Номинал резисторов.
+    /// Словарь номиналов резисторов.
     /// </summary>
     readonly Dictionary<int, double> resistanceValue = new Dictionary<int, double>()
     {
-      { 1 , 1.7},
-      { 2 , 100},
-      { 3 , 1000},
-      { 4 , 10000},
-      { 5 , 100000},
-      { 6 , 1000000},
-      { 7 , 10400000},
-      { 8 , 87000000},
+      { 1 , 1.7 },
+      { 2 , 100 },
+      { 3 , 1000 },
+      { 4 , 10000 },
+      { 5 , 100000 },
+      { 6 , 1000000 },
+      { 7 , 10400000 },
+      { 8 , 87000000 },
     };
 
     /// <summary>
-    /// Номинал конденсаторов.
+    /// Словарь номиналов конденсаторов.
     /// </summary>
     readonly Dictionary<int, double> capacitanceValue = new Dictionary<int, double>()
     {
-      { 1 , 0.001},
-      { 2 , 1.07},
-      { 3 , 6.2},
-      { 4 , 0.01},
-      { 5 , 100},
-      { 6 , 0.13},
+      { 1 , 0.001 },
+      { 2 , 1.07 },
+      { 3 , 6.2 },
+      { 4 , 0.01 },
+      { 5 , 100 },
+      { 6 , 0.13 },
     };
 
     bool returnMeasure = false;
 
+    /// <summary>
+    /// Конструктор Handler, принимающий ProtocolSelfCheckControl и модель устройства.
+    /// </summary>
+    /// <param name="protocolSelfCheck">Объект для управления протоколом самоконтроля.</param>
+    /// <param name="deviceModel">Модель устройства для создания объекта коммутации шин.</param>
     internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
-
+      // Получаем модель устройства коммутации шин из конфигуратора.
+      deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
       // TODO : Переопределить мультиметр
-      // meter = Core.KeysightLibrary.Model.CreateFromObject(deviceModel);
+      // meter = await Core.KeysightLibrary.Model.CreateAsync();
     }
 
+    /// <summary>
+    /// Возвращает делегат старта самоконтроля.
+    /// </summary>
     internal StartDelegate GetStartDelegate()
     {
       StartDelegate startDelegate = RunSelfCheck;
       return startDelegate;
     }
 
+    /// <summary>
+    /// Возвращает делегат остановки самоконтроля.
+    /// </summary>
     internal StopDelegate GetStopDelegate()
     {
       StopDelegate stopDelegate = StopAsync;
@@ -71,35 +89,43 @@ namespace Mode.SelfControl.Module.Meter
     }
 
     /// <summary>
-    /// Останавливает самоконтроль, отключая необходимые компоненты и отображая соответствующие сообщения.
+    /// Осуществляет завершение самоконтроля: финализирует протокол и выводит итоговое сообщение.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task StopAsync(CancellationToken cancellationToken)
     {
-      LogInformation($"Запущен метод завершения самоконтроля");
+      LogInformation("Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
-      LogInformation($"Завершён метод завершения самоконтроля");
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+        new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
+      LogInformation("Завершён метод завершения самоконтроля");
     }
 
     /// <summary>
-    /// Асинхронный метод для выполнения самоконтроля.
+    /// Выполняет самоконтроль мультиметра. Подключается к устройствам, устанавливает соединение с УКШ,
+    /// подключает цепи, выполняет проверки сопротивления и ёмкости.
     /// </summary>
     private async Task RunSelfCheck(CancellationToken token)
     {
       deviceBusCommutation = ConfigCollector.GetDeviceBusCommutation();
-      if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<Core.Model.DeviceModel> { meter, deviceBusCommutation }, ProtocolSelfCheckControl.ShowMessageAsync))
+      if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(
+            new List<DeviceModel> { meter, deviceBusCommutation },
+            ProtocolSelfCheckControl.ShowMessageAsync))
       {
         return;
       }
 
       // TODO : Переопределить мультиметр
       // meter = await Core.KeysightLibrary.Model.CreateAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль мультиметра", goodText.Item2));
+
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+        new ShowMessageModel("\r\nСамоконтроль мультиметра", goodText.Item2));
 
       if (!await GetIsIdleModeEnabled())
       {
         await Core.DeviceBusCommutation.Functions.ConnectXs9ToXs4(deviceBusCommutation.IPAddress);
       }
+
       await CheckResistance(token);
       await CheckCapacitance(token);
 
@@ -110,14 +136,14 @@ namespace Mode.SelfControl.Module.Meter
     }
 
     /// <summary>
-    /// Контроль сопротивления.
+    /// Производит проверку сопротивления для резисторов.
+    /// Измеряет сопротивление, сравнивает с допустимыми пределами и выводит результат.
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
     private async Task CheckResistance(CancellationToken token)
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tКонтроль сопротивления", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+        new ShowMessageModel("\tКонтроль сопротивления", goodText.Item2));
       meter.MeasureResistance();
       await Task.Delay(1, token);
       for (int i = 1; i <= 8; i++)
@@ -125,7 +151,8 @@ namespace Mode.SelfControl.Module.Meter
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
         if (!await GetIsIdleModeEnabled())
         {
-          await Core.DeviceBusCommutation.Functions.ConnectResistor(IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
+          await Core.DeviceBusCommutation.Functions.ConnectResistor(
+            IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
         }
 
         resistanceValue.TryGetValue(i, out double meaning);
@@ -136,15 +163,19 @@ namespace Mode.SelfControl.Module.Meter
         if (!await GetIsIdleModeEnabled())
         {
           result = meter.MeasureResistance();
-          await Core.DeviceBusCommutation.Functions.DisconnectResistor(IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
+          await Core.DeviceBusCommutation.Functions.DisconnectResistor(
+            IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
         }
+
         if (result >= first && result <= last)
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", goodText.Item2));
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", goodText.Item2));
         }
         else
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tРезистор №{i}:({first} - {last}) Ом", null, $"{result} Ом", errorText.Item2));
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", errorText.Item2));
           if (await GetIsStopOnErrorEnabled())
           {
             await ProtocolSelfCheckControl.PauseAsync();
@@ -156,25 +187,27 @@ namespace Mode.SelfControl.Module.Meter
             }
           }
         }
+
         await Task.Delay(1, token);
       }
     }
 
     /// <summary>
-    /// Контроль ёмкости.
+    /// Производит проверку ёмкости для конденсаторов.
+    /// Измеряет ёмкость, сравнивает с допустимыми пределами и выводит результат.
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
     private async Task CheckCapacitance(CancellationToken token)
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tКонтроль ёмкости", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+        new ShowMessageModel("\tКонтроль ёмкости", goodText.Item2));
       for (int i = 1; i <= 6; i++)
       {
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
         if (!await GetIsIdleModeEnabled())
         {
-          await Core.DeviceBusCommutation.Functions.ConnectCapacitor(deviceBusCommutation.IPAddress, i.ToString(CultureInfo.InvariantCulture));
+          await Core.DeviceBusCommutation.Functions.ConnectCapacitor(
+            deviceBusCommutation.IPAddress, i.ToString(CultureInfo.InvariantCulture));
         }
 
         capacitanceValue.TryGetValue(i, out double meaning);
@@ -185,16 +218,19 @@ namespace Mode.SelfControl.Module.Meter
         if (!await GetIsIdleModeEnabled())
         {
           result = meter.MeasureCapacitance();
-          await Core.DeviceBusCommutation.Functions.DisconnectCapacitor(IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
+          await Core.DeviceBusCommutation.Functions.DisconnectCapacitor(
+            IPAddress.Parse("192.168.0.20"), i.ToString(CultureInfo.InvariantCulture));
         }
 
         if (result >= first && result <= last)
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", goodText.Item2));
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", goodText.Item2));
         }
         else
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", errorText.Item2));
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", errorText.Item2));
         }
 
         await Task.Delay(200, token);

@@ -7,11 +7,10 @@ using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
-
 namespace Mode.Metrology.IE
 {
   /// <summary>
-  /// Логика взаимодействия для IeControl.xaml
+  /// Логика взаимодействия для IeControl.xaml.
   /// </summary>
   public partial class IeControl : UserControl
   {
@@ -24,6 +23,10 @@ namespace Mode.Metrology.IE
     private MeterBase meter;
 
     private bool completed;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="IeControl"/>.
+    /// </summary>
     public IeControl()
     {
       InitializeComponent();
@@ -61,4 +64,3 @@ namespace Mode.Metrology.IE
     }
   }
 }
-

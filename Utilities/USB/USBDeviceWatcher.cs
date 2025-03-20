@@ -7,7 +7,14 @@ namespace Utilities.USB
   /// </summary>
   internal class USBDeviceWatcher
   {
+    /// <summary>
+    /// Событие, возникающее при подключении USB-устройства.
+    /// </summary>
     public event EventHandler USBDeviceInserted;
+
+    /// <summary>
+    /// Событие, возникающее при отключении USB-устройства.
+    /// </summary>
     public event EventHandler USBDeviceRemoved;
 
     private ManagementEventWatcher insertWatcher;

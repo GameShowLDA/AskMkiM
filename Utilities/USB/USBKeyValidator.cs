@@ -45,10 +45,16 @@ namespace Utilities.USB
     private bool ValidateKeyFile(DriveInfo drive)
     {
       string filePath = GetKeyFilePath(drive);
-      if (!File.Exists(filePath)) return false;
+      if (!File.Exists(filePath))
+      {
+        return false;
+      }
 
       string decryptedData = DecryptKeyFile(filePath);
-      if (string.IsNullOrEmpty(decryptedData)) return false;
+      if (string.IsNullOrEmpty(decryptedData))
+      {
+        return false;
+      }
 
       return IsKeyValid(decryptedData, drive);
     }
@@ -90,7 +96,10 @@ namespace Utilities.USB
     private bool IsKeyValid(string decryptedData, DriveInfo drive)
     {
       string[] parts = decryptedData.Split(':');
-      if (parts.Length != 2) return false;
+      if (parts.Length != 2)
+      {
+        return false;
+      }
 
       string apiKey = parts[0];
       string deviceId = parts[1];

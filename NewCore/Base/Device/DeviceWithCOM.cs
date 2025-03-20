@@ -44,6 +44,7 @@ namespace NewCore.Base.Device
     /// </summary>
     /// <value>PID устройства в виде строки.</value>
     public string PID { get; set; }
+
     /// <summary>
     /// Получает или задает номер устройства.
     /// </summary>
@@ -122,10 +123,25 @@ namespace NewCore.Base.Device
 
       try
       {
-        if (COMPort.BaudRate == 0) COMPort.BaudRate = 9600; // Скорость передачи данных
-        if (COMPort.Parity == Parity.None) COMPort.Parity = Parity.None; // Четность
-        if (COMPort.DataBits == 0) COMPort.DataBits = 8; // Количество бит данных
-        if (COMPort.StopBits == StopBits.None) COMPort.StopBits = StopBits.One; // Стоповые биты
+        if (COMPort.BaudRate == 0)
+        {
+          COMPort.BaudRate = 9600; // Скорость передачи данных
+        }
+
+        if (COMPort.Parity == Parity.None)
+        {
+          COMPort.Parity = Parity.None; // Четность
+        }
+
+        if (COMPort.DataBits == 0)
+        {
+          COMPort.DataBits = 8; // Количество бит данных
+        }
+
+        if (COMPort.StopBits == StopBits.None)
+        {
+          COMPort.StopBits = StopBits.One; // Стоповые биты
+        }
 
         if (!COMPort.IsOpen)
         {
@@ -243,10 +259,12 @@ namespace NewCore.Base.Device
                 }
               }
             }
+
             LogError("Устройство не найдено по VID/PID");
             return false;
           }
         }
+
         return false;
       }
       catch (UnauthorizedAccessException ex)
@@ -264,7 +282,7 @@ namespace NewCore.Base.Device
     /// <summary>
     /// Чтение порта.
     /// </summary>
-    /// <returns>Ответ с устройства</returns>
+    /// <returns>Ответ с устройства.</returns>
     public virtual async Task<string> ReadLineAsync()
     {
       try

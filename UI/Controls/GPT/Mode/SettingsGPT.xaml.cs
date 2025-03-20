@@ -3,26 +3,31 @@ using System.Windows.Controls;
 
 namespace UI.Controls.GPT.Mode
 {
+  /// <summary>
+  /// Компонент для управления настройками устройства GPT.
+  /// При инициализации загружает текущую конфигурацию и устанавливает режим DCW.
+  /// </summary>
   public partial class SettingsGPT : UserControl
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="SettingsGPT"/>.
+    /// </summary>
     public SettingsGPT()
     {
       InitializeComponent();
       LoadConfigurationAsync().ConfigureAwait(true);
     }
 
-
     /// <summary>
-    /// Метод для загрузки конфигурации и заполнения элементов управления.
+    /// Асинхронно загружает конфигурацию устройства и обновляет элементы управления.
     /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию загрузки конфигурации.</returns>
     private async Task LoadConfigurationAsync()
     {
       try
       {
-        // Считываем текущую конфигурацию устройства
         var systemData = await Core.GptLibrary.SystemSettings.ReadConfigurationAsync(GPTPunchControl.ModelGPT);
 
-        // Заполняем элементы управления
         SetContrast(systemData.LcdContrast);
         SetBrightness(systemData.LcdBrightness);
         SetSuccessSound(systemData.BuzzerPrimarySound);
@@ -38,7 +43,9 @@ namespace UI.Controls.GPT.Mode
 
     /// <summary>
     /// Устанавливает значение контраста дисплея.
+    /// Перебирает элементы в ComboBox и выбирает тот, у которого содержимое совпадает с переданным значением.
     /// </summary>
+    /// <param name="contrastValue">Значение контраста дисплея.</param>
     private void SetContrast(int contrastValue)
     {
       foreach (ComboBoxItem item in ContrastComboBox.Items)
@@ -53,7 +60,9 @@ namespace UI.Controls.GPT.Mode
 
     /// <summary>
     /// Устанавливает значение яркости дисплея.
+    /// Перебирает элементы в ComboBox и выбирает тот, у которого первая часть содержимого совпадает с переданным значением.
     /// </summary>
+    /// <param name="brightnessValue">Значение яркости дисплея.</param>
     private void SetBrightness(int brightnessValue)
     {
       foreach (ComboBoxItem item in BrightnessComboBox.Items)
@@ -69,7 +78,9 @@ namespace UI.Controls.GPT.Mode
 
     /// <summary>
     /// Устанавливает состояние звука успешного теста.
+    /// Перебирает элементы ComboBox и выбирает тот, который соответствует переданному состоянию.
     /// </summary>
+    /// <param name="isEnabled">Если <c>true</c>, выбирается значение "ON", иначе "OFF".</param>
     private void SetSuccessSound(bool isEnabled)
     {
       foreach (ComboBoxItem item in SuccessSoundComboBox.Items)
@@ -84,7 +95,9 @@ namespace UI.Controls.GPT.Mode
 
     /// <summary>
     /// Устанавливает состояние звука ошибочного теста.
+    /// Перебирает элементы ComboBox и выбирает тот, который соответствует переданному состоянию.
     /// </summary>
+    /// <param name="isEnabled">Если <c>true</c>, выбирается значение "ON", иначе "OFF".</param>
     private void SetErrorSound(bool isEnabled)
     {
       foreach (ComboBoxItem item in ErrorSoundComboBox.Items)
@@ -100,6 +113,7 @@ namespace UI.Controls.GPT.Mode
     /// <summary>
     /// Устанавливает продолжительность звука успешного теста.
     /// </summary>
+    /// <param name="duration">Длительность сигнала (в секундах).</param>
     private void SetSuccessSoundDuration(double duration)
     {
       SuccessSoundSlider.Value = duration;
@@ -108,12 +122,16 @@ namespace UI.Controls.GPT.Mode
     /// <summary>
     /// Устанавливает продолжительность звука ошибочного теста.
     /// </summary>
+    /// <param name="duration">Длительность сигнала (в секундах).</param>
     private void SetErrorSoundDuration(double duration)
     {
       ErrorSoundSlider.Value = duration;
     }
 
-    // Обработчик изменения контраста
+    /// <summary>
+    /// Обрабатывает изменение выбранного элемента в ComboBox для контраста дисплея.
+    /// Вызывает изменение значения на устройстве.
+    /// </summary>
     private async void ContrastComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (ContrastComboBox.SelectedItem is ComboBoxItem selectedItem)
@@ -126,7 +144,10 @@ namespace UI.Controls.GPT.Mode
       }
     }
 
-    // Обработчик изменения яркости
+    /// <summary>
+    /// Обрабатывает изменение выбранного элемента в ComboBox для яркости дисплея.
+    /// Вызывает изменение значения на устройстве.
+    /// </summary>
     private async void BrightnessComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (BrightnessComboBox.SelectedItem is ComboBoxItem selectedItem)
@@ -139,7 +160,10 @@ namespace UI.Controls.GPT.Mode
       }
     }
 
-    // Обработчик изменения звука успешного теста
+    /// <summary>
+    /// Обрабатывает изменение выбранного элемента в ComboBox для звука успешного теста.
+    /// Вызывает изменение состояния звука на устройстве.
+    /// </summary>
     private async void SuccessSoundComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (SuccessSoundComboBox.SelectedItem is ComboBoxItem selectedItem)
@@ -152,7 +176,10 @@ namespace UI.Controls.GPT.Mode
       }
     }
 
-    // Обработчик изменения звука ошибочного теста
+    /// <summary>
+    /// Обрабатывает изменение выбранного элемента в ComboBox для звука ошибочного теста.
+    /// Вызывает изменение состояния звука на устройстве.
+    /// </summary>
     private async void ErrorSoundComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (ErrorSoundComboBox.SelectedItem is ComboBoxItem selectedItem)
@@ -165,7 +192,10 @@ namespace UI.Controls.GPT.Mode
       }
     }
 
-    // Обработчик изменения продолжительности звука успешного теста
+    /// <summary>
+    /// Обрабатывает изменение значения слайдера для продолжительности звука успешного теста.
+    /// Вызывает изменение продолжительности сигнала на устройстве.
+    /// </summary>
     private async void SuccessSoundSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double duration = SuccessSoundSlider.Value;
@@ -174,7 +204,10 @@ namespace UI.Controls.GPT.Mode
       await Core.GptLibrary.SystemSettings.SetBuzzerPrimaryTime(GPTPunchControl.ModelGPT, duration);
     }
 
-    // Обработчик изменения продолжительности звука ошибочного теста
+    /// <summary>
+    /// Обрабатывает изменение значения слайдера для продолжительности звука ошибочного теста.
+    /// Вызывает изменение продолжительности сигнала на устройстве.
+    /// </summary>
     private async void ErrorSoundSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double duration = ErrorSoundSlider.Value;
@@ -183,14 +216,22 @@ namespace UI.Controls.GPT.Mode
       await Core.GptLibrary.SystemSettings.SetBuzzerFeedbackTime(GPTPunchControl.ModelGPT, duration);
     }
 
-    // Метод для обработки изменений значений
+    /// <summary>
+    /// Вызывает обработчик изменения значения для указанного свойства.
+    /// </summary>
+    /// <param name="propertyName">Имя свойства.</param>
+    /// <param name="value">Новое значение свойства.</param>
     private void OnValueChanged(string propertyName, double value)
     {
-      // Здесь вы можете реализовать дальнейшую логику
       Console.WriteLine($"{propertyName}: {value}");
     }
 
-    // Метод для получения значения по имени свойства
+    /// <summary>
+    /// Получает значение свойства по его имени.
+    /// </summary>
+    /// <param name="propertyName">Имя свойства.</param>
+    /// <returns>Значение свойства.</returns>
+    /// <exception cref="ArgumentException">Выбрасывается, если свойство не найдено.</exception>
     public double GetValue(string propertyName)
     {
       return propertyName switch

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
@@ -10,15 +7,26 @@ using NewCore.Communication;
 
 namespace NewCore.Function.ModuleRelayControl
 {
+  /// <summary>
+  /// Управляет измерителем модуля коммутации реле (МКР).
+  /// </summary>
   public class MeterManager : IMeterManager
   {
-    IRelaySwitchModule _moduleRelayControl { get; set; }
+    /// <summary>
+    /// Экземпляр интерфейса модуля коммутации реле.
+    /// </summary>
+    private readonly IRelaySwitchModule _moduleRelayControl;
+
+    /// <summary>
+    /// Создаёт новый экземпляр класса <see cref="MeterManager"/>.
+    /// </summary>
+    /// <param name="moduleRelayControl">Экземпляр интерфейса модуля реле.</param>
     public MeterManager(IRelaySwitchModule moduleRelayControl) => _moduleRelayControl = moduleRelayControl;
 
     /// <summary>
     /// Включает измеритель модуля МКР.
     /// </summary>
-    /// <returns>Возвращает true, если команда отправлена успешно.</returns>
+    /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
     /// <remarks>
     /// Этот метод формирует и отправляет команду на включение измерителя модуля МКР по указанному IP-адресу.
     /// </remarks>
@@ -32,7 +40,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <summary>
     /// Отключает измеритель модуля МКР.
     /// </summary>
-    /// <returns>Возвращает true, если команда отправлена успешно.</returns>
+    /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
     /// <remarks>
     /// Этот метод формирует и отправляет команду на отключение измерителя модуля МКР по указанному IP-адресу.
     /// </remarks>
@@ -44,9 +52,12 @@ namespace NewCore.Function.ModuleRelayControl
     }
 
     /// <summary>
-    /// Получить ответ от измерителя о замыкании шин или точек.
+    /// Получает ответ от измерителя о наличии замыкания шин или точек.
     /// </summary>
-    /// <returns>true если есть замыкание, false если нет.</returns>
+    /// <returns><c>true</c>, если есть замыкание; <c>false</c>, если нет.</returns>
+    /// <remarks>
+    /// Этот метод отправляет команду на проверку состояния измерителя и анализирует его ответ.
+    /// </remarks>
     public async Task<bool> GetMeterResponseAsync()
     {
       DeviceCommand cmd = new DeviceCommand(7);

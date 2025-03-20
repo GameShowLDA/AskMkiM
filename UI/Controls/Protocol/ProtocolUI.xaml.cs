@@ -6,7 +6,8 @@ using static Utilities.LoggerUtility;
 namespace UI.Controls.Protocol
 {
   /// <summary>
-  /// Логика взаимодействия для ProtocolUI.xaml
+  /// Класс управления пользовательским интерфейсом протокола выполнения.
+  /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
   public partial class ProtocolUI : UserControl
   {
@@ -20,6 +21,7 @@ namespace UI.Controls.Protocol
       {
         return this.header.Dispatcher.Invoke(() => this.header.Text);
       }
+
       set
       {
         if (this.header.Dispatcher.CheckAccess())
@@ -33,6 +35,9 @@ namespace UI.Controls.Protocol
       }
     }
 
+    /// <summary>
+    /// Коллекция элементов, используемых в протоколе.
+    /// </summary>
     public ObservableCollection<object> Items { get; }
 
     /// <summary>
@@ -84,7 +89,6 @@ namespace UI.Controls.Protocol
       {
         LogError($"Ошибка отчистки содержимого: {ex}");
       }
-
     }
 
     /// <summary>

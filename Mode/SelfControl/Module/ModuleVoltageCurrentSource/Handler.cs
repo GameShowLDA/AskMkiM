@@ -16,6 +16,11 @@ using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.SelfControl.Module.ModuleVoltageCurrentSource
 {
+  /// <summary>
+  /// Класс Handler осуществляет самоконтроль для модуля источника напряжения и тока. 
+  /// Он инициализирует устройство, проверяет формирование дискретных уровней напряжения, коммутацию МИНТ, 
+  /// выполняет измерения напряжения, управляет подключением и отключением шин, и сбрасывает настройки источника.
+  /// </summary>
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
@@ -24,18 +29,31 @@ namespace Mode.SelfControl.Module.ModuleVoltageCurrentSource
     private Core.ModuleVoltageCurrentSource.Model moduleVoltageCurrentSource;
     private MeterBase meter;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр Handler, принимающий объект управления протоколом и модель устройства.
+    /// </summary>
+    /// <param name="protocolSelfCheck">Объект ProtocolSelfCheckControl для отображения сообщений и управления процессом самоконтроля.</param>
+    /// <param name="deviceModel">Модель устройства, используемая для создания модели модуля источника напряжения и тока.</param>
     internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
       moduleVoltageCurrentSource = Core.ModuleVoltageCurrentSource.Model.CreateFromObject(deviceModel);
     }
 
+    /// <summary>
+    /// Возвращает делегат для запуска процесса самоконтроля.
+    /// </summary>
+    /// <returns>Делегат StartDelegate, ссылающийся на метод RunSelfCheck.</returns>
     internal StartDelegate GetStartDelegate()
     {
       StartDelegate startDelegate = RunSelfCheck;
       return startDelegate;
     }
 
+    /// <summary>
+    /// Возвращает делегат для остановки процесса самоконтроля.
+    /// </summary>
+    /// <returns>Делегат StopDelegate, ссылающийся на метод StopAsync.</returns>
     internal StopDelegate GetStopDelegate()
     {
       StopDelegate stopDelegate = StopAsync;
@@ -69,16 +87,14 @@ namespace Mode.SelfControl.Module.ModuleVoltageCurrentSource
       {
         var managerShassy = ConfigCollector.GetManagerShassy();
 
-        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection((new List<DeviceModel>()
+        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<DeviceModel>()
         {
           managerShassy,
           moduleVoltageCurrentSource,
-
-        }), ProtocolSelfCheckControl.ShowMessageAsync))
+        }, ProtocolSelfCheckControl.ShowMessageAsync))
         {
           return;
         }
-
       }
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль МИНТ", goodText.Item2));
@@ -110,6 +126,7 @@ namespace Mode.SelfControl.Module.ModuleVoltageCurrentSource
       {
         await ResetVoltageCurrentSourceAsync();
       }
+
       LogInformation("Завершение проверки формирования дискрет напряжения");
     }
 
@@ -662,6 +679,7 @@ namespace Mode.SelfControl.Module.ModuleVoltageCurrentSource
         await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\t\tИзмеренное напряжение постоянного тока ({firstNorm} - {lastNorm})", null, dcVoltage.ToString(CultureInfo.CurrentCulture), errorText.Item2));
         Console.ForegroundColor = ConsoleColor.Red;
       }
+
       Console.Write(dcVoltage);
       Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine($"({firstNorm} - {lastNorm})");
@@ -678,6 +696,5 @@ namespace Mode.SelfControl.Module.ModuleVoltageCurrentSource
       await Core.ModuleVoltageCurrentSource.Functions.DisconnectBusToNegativeAsync(moduleVoltageCurrentSource.IPAddress, BusModuleVoltageCurrentSource.B1);
       await Core.DeviceBusCommutation.Functions.ConnectBusAsync(IPAddress.Parse("192.168.0.20"), MeterConnector.XS4, BusDeviceBusCommutation.AB1, true, false);
     }
-
   }
 }

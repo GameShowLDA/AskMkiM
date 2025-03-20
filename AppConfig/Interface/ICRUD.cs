@@ -15,22 +15,26 @@
     /// <summary>
     /// Получает сущность по ее идентификатору.
     /// </summary>
+    /// <param name="id">Уникальный номер сущности.</param>
     /// <returns>Объект типа <typeparamref name="T"/>.</returns>
     T GetById(int id);
 
     /// <summary>
     /// Создает новую сущность.
     /// </summary>
+    /// <param name="entity">Сущность для обновления.</param>
     void Create(T entity);
 
     /// <summary>
     /// Обновляет существующую сущность.
     /// </summary>
+    /// <param name="entity">Сущность для обновления.</param>
     void Update(T entity);
 
     /// <summary>
     /// Удаляет сущность.
     /// </summary>
-    void Delete(int id);
+    /// <param name="entity">Сущность для удаления.</param>
+    void Delete(T entity);
   }
 }

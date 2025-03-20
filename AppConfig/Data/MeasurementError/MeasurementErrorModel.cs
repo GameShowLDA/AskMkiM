@@ -1,5 +1,8 @@
 ﻿namespace AppConfig.Data.MeasurementError
 {
+  /// <summary>
+  /// Модель погрешности измерения, содержащая информацию о типе команды, процентной и числовой погрешностях.
+  /// </summary>
   public class MeasurementErrorModel
   {
     /// <summary>
@@ -28,28 +31,27 @@
       IE,
     }
 
-
     /// <summary>
-    /// Тип режима метрологии.
+    /// Тип команды, определяющий режим метрологии.
     /// </summary>
     public TypeCommand Type { get; set; }
 
     /// <summary>
-    /// Погрешность в процентах.
+    /// Погрешность измерения в процентах.
     /// </summary>
     public double PercentageError { get; set; }
 
     /// <summary>
-    /// Погрешность в числовом значении.
+    /// Погрешность измерения в числовом значении.
     /// </summary>
     public double NumericError { get; set; }
 
     /// <summary>
-    /// Конструктор для инициализации модели с заданными значениями.
+    /// Инициализирует новый экземпляр класса <see cref="MeasurementErrorModel"/> с заданными значениями.
     /// </summary>
-    /// <param name="percentageError">Погрешность в процентах.</param>
-    /// <param name="numericError">Погрешность в числовом значении.</param>
-    /// <param name="electricalParameter">Электрический параметр.</param>
+    /// <param name="typeCommand">Тип команды (режим метрологии).</param>
+    /// <param name="percentageError">Погрешность измерения в процентах.</param>
+    /// <param name="numericError">Погрешность измерения в числовом значении.</param>
     public MeasurementErrorModel(TypeCommand typeCommand, double percentageError, double numericError)
     {
       Type = typeCommand;
@@ -58,11 +60,8 @@
     }
 
     /// <summary>
-    /// Конструктор для инициализации модели с заданными значениями.
+    /// Инициализирует новый экземпляр класса <see cref="MeasurementErrorModel"/>.
     /// </summary>
-    /// <param name="percentageError">Погрешность в процентах.</param>
-    /// <param name="numericError">Погрешность в числовом значении.</param>
-    /// <param name="electricalParameter">Электрический параметр.</param>
     public MeasurementErrorModel() { }
   }
 }

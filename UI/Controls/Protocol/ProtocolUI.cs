@@ -13,12 +13,19 @@ using static Utilities.Models.ShowMessageModel;
 
 namespace UI.Controls.Protocol
 {
-  partial class ProtocolUI
+  /// <inheritdoc />
+  public partial class ProtocolUI
   {
     #region Поля.
 
+    /// <summary>
+    /// Последнее отображенное сообщение в протоколе.
+    /// </summary>
     ShowMessageModel LastModelMeassage;
 
+    /// <summary>
+    /// Возвращает текущий статус пошагового режима.
+    /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
     /// <summary>
@@ -67,7 +74,6 @@ namespace UI.Controls.Protocol
 
     #endregion
 
-
     #region Работа с оборудованием?
 
     /// <summary>
@@ -91,12 +97,14 @@ namespace UI.Controls.Protocol
     #region Основные настройки.
 
     /// <summary>
-    /// Устанавливает основные настройки для выполнения действий.
+    /// Устанавливает основные настройки выполнения действий.
     /// </summary>
     /// <param name="MainWindow">Главное окно приложения.</param>
-    /// <param name="StartDelegate">Делегат, вызываемый для начала действия.</param>
-    /// <param name="StopDelegate">Делегат, вызываемый для остановки действия.</param>
-    /// <param name="ReturnDelegate">Делегат, вызываемый для возврата к предыдущему состоянию.</param>
+    /// <param name="StartDelegate">Делегат запуска.</param>
+    /// <param name="isRepeatEnabled">Флаг разрешения повторного выполнения.</param>
+    /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
+    /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
+    /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
     public void SetSettings(UIElement MainWindow, StartDelegate StartDelegate, bool isRepeatEnabled, StopDelegate StopDelegate = null, ReturnDelegate ReturnDelegate = null, PreActionDelegate preActionDelegate = null)
     {
       _mainWindow = MainWindow;
@@ -139,6 +147,10 @@ namespace UI.Controls.Protocol
 
     #region Начало и конец.
 
+    /// <summary>
+    /// Прерывает выполнение текущего процесса.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
     public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate);
 
     /// <summary>
@@ -154,8 +166,10 @@ namespace UI.Controls.Protocol
     private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate);
 
     /// <summary>
-    /// Выполняет завершающие действия после завершения самоконтроля или режима.
+    /// Выполняет завершающие действия после завершения процесса.
     /// </summary>
+    /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
     public async Task FinalizeAsync(StopDelegate stopDelegate = null) => await ActionExecutor.FinalizeAsync(stopDelegate);
 
     #endregion
@@ -225,11 +239,8 @@ namespace UI.Controls.Protocol
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
-    /// <param name="header">Заголовок.</param>
-    /// <param name="headerColor">Цвет заголовка.</param>
-    /// <param name="description">Описание.</param>
-    /// <param name="descriptionColor">Цвет описания.</param>
-    /// <returns></returns>
+    /// <param name="showMessageModel">Модель сообщения.</param>
+    /// <returns>Возвращает режим по шагам.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
     {
       if (!await GetShowDetailedProtocol())
@@ -238,6 +249,7 @@ namespace UI.Controls.Protocol
         {
           await protocolTextBox.RemoveLastLinesAsync();
         }
+
         LastModelMeassage = showMessageModel;
       }
 
@@ -305,9 +317,11 @@ namespace UI.Controls.Protocol
     #endregion
 
     /// <summary>
-    /// Пытается подключиться к устройствам и возвращает ответ о попытке подключения.
+    /// Пытается подключиться к указанным устройствам и возвращает результат попытки подключения.
     /// </summary>
+    /// <param name="deviceModels">Список моделей устройств для подключения.</param>
+    /// <param name="messageDelegate">Делегат для обработки сообщений о состоянии подключения.</param>
+    /// <returns>True, если все устройства успешно подключены, иначе False.</returns>
     public async Task<bool> AttemptDeviceConnection(List<DeviceModel> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
-
   }
 }

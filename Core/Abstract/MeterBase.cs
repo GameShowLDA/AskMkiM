@@ -74,7 +74,6 @@ namespace Core.Abstract
     /// </summary>
     public abstract void SetResistanceMode();
 
-
     /// <summary>
     /// Устанавливает мультиметр в режим измерения ёмкости.
     /// </summary>

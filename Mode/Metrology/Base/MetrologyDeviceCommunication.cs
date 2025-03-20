@@ -8,18 +8,24 @@ using static Core.ModuleRelayControl.Enums;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 
-
 namespace Mode.Metrology.Base
 {
+  /// <summary>
+  /// Класс для организации коммуникации с устройствами метрологии,
+  /// включая подключение шин и точек МКР.
+  /// </summary>
   internal class MetrologyDeviceCommunication
   {
     static private readonly Tuple<string, Color> goodText = SuccessMessage;
     static private readonly Tuple<string, Color> errorText = ErrorMessage;
 
     /// <summary>
-    /// Производит подключение шин А2В2 на УКШ .
+    /// Производит подключение шин А2В2 на УКШ.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="token">Токен отмены операции.</param>
+    /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
+    /// <param name="model">Модель устройства для подключения шин.</param>
+    /// <returns>Задача асинхронного выполнения операции.</returns>
     static internal async Task DeviceBusCommutationConnectBus(CancellationToken token, MessageDelegate messageDelegate, Core.DeviceBusCommutation.Model model)
     {
       await DeviceBusCommutation_ConnectBusesAsync(BusDeviceBusCommutation.AB2, messageDelegate, model);
@@ -28,10 +34,12 @@ namespace Mode.Metrology.Base
     /// <summary>
     /// Подключает шин(у/ы) УКШ на разъём XS4.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="busDeviceBus">Тип шины устройства для подключения.</param>
+    /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
+    /// <param name="model">Модель устройства для подключения шин.</param>
+    /// <returns>Задача асинхронного выполнения операции.</returns>
     static private async Task DeviceBusCommutation_ConnectBusesAsync(BusDeviceBusCommutation busDeviceBus, MessageDelegate messageDelegate, Core.DeviceBusCommutation.Model model)
     {
-
       string result = !await GetIsIdleModeEnabled() ? await Core.DeviceBusCommutation.Functions.ConnectBusAsync(model.IPAddress, MeterConnector.XS4, busDeviceBus, true, false) : "8.0.1";
       if (result.Contains("8.0.1"))
       {
@@ -48,7 +56,8 @@ namespace Mode.Metrology.Base
     /// </summary>
     /// <param name="model">Экземпляр устройства МКР.</param>
     /// <param name="busModuleRelay">Шина подключения.</param>
-    /// <returns></returns>
+    /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
+    /// <returns>Задача асинхронного выполнения операции.</returns>
     static internal async Task ModuleRelayControl_ConnectBusesAsync(Core.ModuleRelayControl.Model model, BusModuleRelayControl busModuleRelay, MessageDelegate messageDelegate)
     {
       bool result = await GetIsIdleModeEnabled() || await Core.ModuleRelayControl.Functions.ConnectBusAsync(model.IPAddress, busModuleRelay, true);
@@ -65,7 +74,11 @@ namespace Mode.Metrology.Base
     /// <summary>
     /// Подключает точки МКР.
     /// </summary>
-    /// <param name="model">Экземпляр устройства МКР.</param>
+    /// <param name="firstModel">Первая точка измерения.</param>
+    /// <param name="secondModel">Вторая точка измерения.</param>
+    /// <param name="firstModelRelayControl">Модель устройства для первой точки МКР.</param>
+    /// <param name="secondModelRelayControl">Модель устройства для второй точки МКР.</param>
+    /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
     /// <returns>Задача асинхронного выполнения операции.</returns>
     static internal async Task ModuleRelayControl_ConnectRelayAsync(PointModel firstModel, PointModel secondModel, Core.ModuleRelayControl.Model firstModelRelayControl, Core.ModuleRelayControl.Model secondModelRelayControl, MessageDelegate messageDelegate)
     {

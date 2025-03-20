@@ -9,14 +9,10 @@ namespace NewCore.Base.Device
   /// </summary>
   public abstract class DeviceWithIP : IDevice
   {
-    /// <summary>
-    /// Название устройства.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание устройства.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
     /// <summary>
@@ -24,16 +20,14 @@ namespace NewCore.Base.Device
     /// </summary>
     public IPAddress IPAddress { get; set; }
 
-    /// <summary>
-    /// Номер устройства.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
+    /// <inheritdoc />
     public int Id { get; set; }
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
-
-
 
     /// <summary>
     /// Строка с данными о подключении (возвращает строковое представление IP-адреса).
@@ -44,10 +38,10 @@ namespace NewCore.Base.Device
       set => SetIPAddress(value);
     }
 
-    /// <summary>
-    /// Тип устройства.
-    /// </summary>
+    /// <inheritdoc />
     public DeviceType DeviceType { get; set; }
+
+    /// <inheritdoc />
     public bool IsAttachableDevice { get; set; }
 
     /// <summary>
@@ -80,7 +74,7 @@ namespace NewCore.Base.Device
     /// Устанавливает IP-адрес из строки.
     /// Если строка невалидна, возвращает <see cref="IPAddress.None"/>.
     /// </summary>
-    /// <returns>Объект <see cref="IPAddress"/>.</returns>
+    /// <param name="ipString">Строка ip-адреса.</param>
     internal void SetIPAddress(string ipString)
     {
       if (IPAddress.TryParse(ipString, out IPAddress ipAddress))

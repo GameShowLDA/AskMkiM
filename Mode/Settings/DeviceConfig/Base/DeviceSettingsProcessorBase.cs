@@ -6,24 +6,33 @@ using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.Base
 {
+  /// <summary>
+  /// Базовый класс для обработки настроек устройств и создания соответствующих моделей.
+  /// </summary>
   public class DeviceSettingsProcessorBase
   {
     /// <summary>
     /// Метод создания и обработки модели устройства.
     /// </summary>
     /// <param name="selectedDevice">Интерфейс выбранного устройства.</param>
-    /// <param name="connectionType">Тип подключения (DeviceWithIP или DeviceWithCom).</param>
     /// <param name="control">Элемент управления с настройками.</param>
     /// <param name="additionalDataProcessor">Внешний обработчик специфичных данных.</param>
     /// <returns>Заполненная модель устройства (реализующая интерфейс IDevice).</returns>
     public T ProcessDevice<T>(
         IDevice selectedDevice,
         DeviceSettingsControl control,
-        IDataProcessor additionalDataProcessor = null) where T : class, IDevice
+        IDataProcessor? additionalDataProcessor = null)
+      where T : class, IDevice
     {
       string connectString = BaseHandler<IDevice>.GetConnectionDetails(control, selectedDevice);
 
       var deviceModel = CreateDeviceModelByInterface(selectedDevice) as T;
+
+      if (deviceModel is null)
+      {
+        throw new ArgumentNullException(nameof(deviceModel));
+      }
+
       deviceModel.Name = selectedDevice.Name;
       deviceModel.Description = selectedDevice.Description;
       deviceModel.ConnectionDetails = connectString;
@@ -34,10 +43,11 @@ namespace Mode.Settings.DeviceConfig.Base
       return deviceModel;
     }
 
-
     /// <summary>
     /// Создание конкретной модели по интерфейсу устройства.
     /// </summary>
+    /// <param name="device">Выбранное устройство.</param>
+    /// <returns>Возвращает созданный экземпляр выбранного устройства.</returns>
     protected IDevice CreateDeviceModelByInterface(IDevice device)
     {
       return device switch

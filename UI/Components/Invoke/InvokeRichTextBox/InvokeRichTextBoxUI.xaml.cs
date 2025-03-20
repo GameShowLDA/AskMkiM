@@ -11,7 +11,7 @@ using static Utilities.LoggerUtility;
 namespace UI.Components.Invoke.InvokeRichTextBox
 {
   /// <summary>
-  /// Логика взаимодействия для InvokeRichTextBoxUI.xaml
+  /// Логика взаимодействия для InvokeRichTextBoxUI.xaml.
   /// </summary>
   public partial class InvokeRichTextBoxUI : UserControl
   {
@@ -33,6 +33,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
         Application.Current.Dispatcher.Invoke(() => readOnly = protocolTextBox.IsReadOnly);
         return readOnly;
       }
+
       set
       {
         Application.Current.Dispatcher.Invoke(new Action(() => protocolTextBox.IsReadOnly = value));
@@ -52,11 +53,17 @@ namespace UI.Components.Invoke.InvokeRichTextBox
       }
     }
 
+    /// <summary>
+    /// Прокручивает содержимое TextBox до конца.
+    /// </summary>
     public void ScrollToEnd()
     {
       Application.Current.Dispatcher.Invoke(new Action(() => protocolTextBox.ScrollToEnd()));
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="Ваш класс"/>.
+    /// </summary>
     public InvokeRichTextBoxUI()
     {
       InitializeComponent();
@@ -78,6 +85,10 @@ namespace UI.Components.Invoke.InvokeRichTextBox
       await AppendLineAsync(header, description, headerColor, descriptionColor);
     }
 
+    /// <summary>
+    /// Добавляет параграф с текстом в RichTextBox.
+    /// </summary>
+    /// <param name="paragraph">Параграф, который необходимо добавить.</param>
     public void AppendParagraph(Paragraph paragraph)
     {
       StringBuilder text = new StringBuilder();
@@ -88,10 +99,19 @@ namespace UI.Components.Invoke.InvokeRichTextBox
           text.Append(run.Text);
         }
       }
+
       LogInformation($"Отобразить текст: {text.ToString()}");
       protocolTextBox.Document.Blocks.Add(paragraph);
     }
 
+    /// <summary>
+    /// Асинхронно добавляет строку в RichTextBox.
+    /// </summary>
+    /// <param name="header">Заголовок.</param>
+    /// <param name="description">Описание.</param>
+    /// <param name="headerColor">Цвет заголовка.</param>
+    /// <param name="descriptionColor">Цвет описания.</param>
+    /// <returns>Асинхронная задача.</returns>
     public async Task AppendLineAsync(string header = null, string description = null, Color? headerColor = null, Color? descriptionColor = null)
     {
       (header, headerColor, descriptionColor) = SetDefaultValues(header, headerColor, descriptionColor);
@@ -277,6 +297,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
         {
           ChangeFontSize(-2);
         }
+
         e.Handled = true;
       }
     }
@@ -288,7 +309,9 @@ namespace UI.Components.Invoke.InvokeRichTextBox
     public void ChangeFontSize(double change)
     {
       if (_currentFontSize + change > 0)
-        _currentFontSize += change; // Update the current font size
+      {
+        _currentFontSize += change;
+      }
 
       foreach (Block block in protocolTextBox.Document.Blocks)
       {

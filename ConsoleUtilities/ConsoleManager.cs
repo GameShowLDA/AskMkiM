@@ -1,20 +1,32 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace ConsoleUtilities
 {
+  /// <summary>
+  /// Управляет видимостью и расположением консольного окна, а также взаимодействует с <see cref="CommandHandler"/>.
+  /// </summary>
   public class ConsoleManager
   {
     private static ConsoleManager _instance;
+
+    /// <summary>
+    /// Единственный экземпляр <see cref="ConsoleManager"/>.
+    /// </summary>
     public static ConsoleManager Instance => _instance ??= new ConsoleManager();
 
     /// <summary>
-    /// Событие изменения режима администратора вручную.
+    /// Событие, вызываемое при изменении режима администратора.
     /// </summary>
     public event EventHandler<bool> AdminModeChanged;
 
     private bool _isConsoleVisible = false;
     private readonly CommandHandler _commandHandler;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="ConsoleManager"/> и настраивает обработку команд.
+    /// При инициализации консольное окно скрывается.
+    /// </summary>
     private ConsoleManager()
     {
       _commandHandler = new CommandHandler();
@@ -22,11 +34,20 @@ namespace ConsoleUtilities
       HideConsoleOnStart();
     }
 
+    /// <summary>
+    /// Обработчик события изменения режима администратора, получаемый от <see cref="CommandHandler"/>.
+    /// Передает событие внешним подписчикам.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Логическое значение, указывающее, включен ли режим администратора.</param>
     private void _commandHandler_AdminModeChanged(object? sender, bool e)
     {
       AdminModeChanged?.Invoke(sender, e);
     }
 
+    /// <summary>
+    /// Скрывает консольное окно при старте приложения.
+    /// </summary>
     private void HideConsoleOnStart()
     {
       IntPtr hWnd = GetConsoleWindow();
@@ -36,6 +57,11 @@ namespace ConsoleUtilities
       }
     }
 
+    /// <summary>
+    /// Переключает видимость консольного окна.
+    /// Если окно скрыто, оно становится видимым, и наоборот.
+    /// При отображении окно располагается в нижней части экрана.
+    /// </summary>
     public void ToggleConsole()
     {
       IntPtr consoleHWnd = GetConsoleWindow();
@@ -56,6 +82,10 @@ namespace ConsoleUtilities
       }
     }
 
+    /// <summary>
+    /// Располагает консольное окно в нижней части экрана, растягивая его на всю ширину экрана и устанавливая высоту в половину от высоты экрана.
+    /// </summary>
+    /// <param name="consoleHWnd">Дескриптор консольного окна.</param>
     private void ArrangeConsole(IntPtr consoleHWnd)
     {
       int screenWidth = GetSystemMetrics(SM_CXSCREEN);

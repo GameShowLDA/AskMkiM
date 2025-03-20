@@ -1,10 +1,18 @@
-﻿using NewCore.Base.Function.DBC;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NewCore.Base.Function.DBC;
 using NewCore.Communication;
 using static Utilities.LoggerUtility;
 
-
 namespace NewCore.Function.DeviceBusCommutation
 {
+  /// <summary>
+  /// Менеджер управления подлючением конденсаторов.
+  /// Обеспечивает подключение и отключение конденсаторов в системе.
+  /// </summary>
   public class CapacitorManager : ICapacitorDeviceBusCommutation
   {
     /// <summary>
@@ -13,7 +21,7 @@ namespace NewCore.Function.DeviceBusCommutation
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="CapacitorManager"/>.
+    /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public CapacitorManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;

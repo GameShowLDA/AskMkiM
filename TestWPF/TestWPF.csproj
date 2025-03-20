@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NLog" Version="5.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AppConfig\AppConfig.csproj" />
     <ProjectReference Include="..\Mode\Mode.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />

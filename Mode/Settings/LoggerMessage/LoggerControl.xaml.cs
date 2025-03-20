@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -9,38 +10,38 @@ using System.Windows.Media;
 namespace Mode.Settings.LoggerMessage
 {
   /// <summary>
-  /// Логика взаимодействия для LoggerControl.xaml
+  /// Контрол для отображения логов и работы с лог-файлами.
   /// </summary>
   public partial class LoggerControl : UserControl
   {
     /// <summary>
-    /// Флаг, указывающий, был ли инициализирован контрол
+    /// Флаг, указывающий, был ли инициализирован контрол.
     /// </summary>
     private bool _isInitialized = false;
 
     /// <summary>
-    /// Исходный цвет фона
+    /// Исходный цвет фона.
     /// </summary>
     private readonly Brush _originalBackground;
 
     /// <summary>
-    /// Цвет фона при активном состоянии
+    /// Цвет фона при активном состоянии.
     /// </summary>
     private readonly Brush _activeBackground;
 
     /// <summary>
-    /// Конструктор класса LoggerControl
+    /// Инициализирует новый экземпляр класса <see cref="LoggerControl"/>.
     /// </summary>
     public LoggerControl()
     {
       InitializeComponent();
-      this.Loaded += LoggerControl_Loaded;
+      Loaded += LoggerControl_Loaded;
       _originalBackground = BackgroundRichBox.Background;
       _activeBackground = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
     }
 
     /// <summary>
-    /// Обработчик события загрузки контрола
+    /// Обработчик события загрузки контрола.
     /// </summary>
     private void LoggerControl_Loaded(object sender, RoutedEventArgs e)
     {
@@ -51,7 +52,7 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Инициализация логгера
+    /// Инициализация логгера.
     /// </summary>
     private void InitializeLogger()
     {
@@ -59,19 +60,19 @@ namespace Mode.Settings.LoggerMessage
       {
         LoadLatestLogs();
         _isInitialized = true;
-        this.Visibility = Visibility.Visible;  // Делаем контрол видимым после успешного ввода PIN-кода
+        Visibility = Visibility.Visible; // Делаем контрол видимым после успешного ввода PIN-кода
       }
       else
       {
-        // Если PIN-код неверный, оставляем контрол невидимым
-        this.Visibility = Visibility.Collapsed;
+        Visibility = Visibility.Collapsed;
         MessageBox.Show("Доступ запрещен. Неверный PIN-код.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
     /// <summary>
-    /// Запрос PIN-кода у пользователя
+    /// Запрашивает PIN-код у пользователя.
     /// </summary>
+    /// <returns>True, если PIN-код введён верно; иначе false.</returns>
     private bool RequestPinCode()
     {
       var pinWindow = new PinCodeWindow();
@@ -80,7 +81,7 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Загрузка последних логов
+    /// Загружает последние логи из файла.
     /// </summary>
     private void LoadLatestLogs()
     {
@@ -105,7 +106,7 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Обработчик события предварительного перетаскивания над контролом
+    /// Обрабатывает предварительное перетаскивание над контролом.
     /// </summary>
     private void LogTextBox_PreviewDragOver(object sender, DragEventArgs e)
     {
@@ -114,7 +115,7 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Обработчик события перетаскивания файла на контрол
+    /// Обрабатывает событие перетаскивания файла на контрол.
     /// </summary>
     private void LogTextBox_Drop(object sender, DragEventArgs e)
     {
@@ -122,10 +123,10 @@ namespace Mode.Settings.LoggerMessage
       if (e.Data.GetDataPresent(DataFormats.FileDrop))
       {
         string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-        if (files != null && files.Length > 0)
+        if (files?.Length > 0)
         {
           string filePath = files[0];
-          if (Path.GetExtension(filePath).ToLower(CultureInfo.CurrentCulture) == ".log")
+          if (Path.GetExtension(filePath).Equals(".log", StringComparison.OrdinalIgnoreCase))
           {
             LoadLogFile(filePath);
           }
@@ -135,12 +136,14 @@ namespace Mode.Settings.LoggerMessage
           }
         }
       }
+
       e.Handled = true;
     }
 
     /// <summary>
-    /// Загрузка файла лога
+    /// Загружает указанный лог-файл.
     /// </summary>
+    /// <param name="filePath">Путь к файлу лога.</param>
     private void LoadLogFile(string filePath)
     {
       try
@@ -155,6 +158,7 @@ namespace Mode.Settings.LoggerMessage
             ProcessLogLine(line);
           }
         }
+
         LogTextBox.ScrollToEnd();
         Debug.WriteLine($"Log file loaded successfully: {filePath}");
       }
@@ -166,8 +170,9 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Обработка строки лога
+    /// Обрабатывает строку лога и добавляет её в RichTextBox.
     /// </summary>
+    /// <param name="line">Строка лога.</param>
     private void ProcessLogLine(string line)
     {
       var parts = line.Split('\t');
@@ -181,26 +186,26 @@ namespace Mode.Settings.LoggerMessage
         var marker = parts[5];
 
         var paragraph = new Paragraph();
-        var timeRun = new Run($"[{time}] ");
-        var loggerRun = new Run($"{logger}: ");
+        var timeRun = new Run($"[{time}] ") { FontStyle = FontStyles.Italic };
+        var loggerRun = new Run($"{logger}: ") { FontWeight = FontWeights.Bold };
         var messageRun = new Run(message);
         var exceptionRun = new Run(exception);
         var markerRun = new Run(marker);
-
-        timeRun.FontStyle = FontStyles.Italic;
-        loggerRun.FontWeight = FontWeights.Bold;
 
         switch (level)
         {
           case "INFO":
             messageRun.Foreground = Brushes.White;
             break;
+
           case "WARN":
             messageRun.Foreground = Brushes.Yellow;
             break;
+
           case "ERROR":
             messageRun.Foreground = Brushes.Red;
             break;
+
           case "FATAL":
             messageRun.Foreground = Brushes.Red;
             messageRun.Background = Brushes.White;
@@ -210,11 +215,13 @@ namespace Mode.Settings.LoggerMessage
         paragraph.Inlines.Add(timeRun);
         paragraph.Inlines.Add(loggerRun);
         paragraph.Inlines.Add(messageRun);
+
         if (!string.IsNullOrWhiteSpace(exception))
         {
           paragraph.Inlines.Add(new LineBreak());
           paragraph.Inlines.Add(exceptionRun);
         }
+
         paragraph.Inlines.Add(new Run(" "));
         paragraph.Inlines.Add(markerRun);
         LogTextBox.Document.Blocks.Add(paragraph);
@@ -222,7 +229,7 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Обработчик события входа курсора в область перетаскивания
+    /// Обработчик события входа курсора в область перетаскивания.
     /// </summary>
     private void LogTextBox_PreviewDragEnter(object sender, DragEventArgs e)
     {
@@ -233,7 +240,7 @@ namespace Mode.Settings.LoggerMessage
     }
 
     /// <summary>
-    /// Обработчик события выхода курсора из области перетаскивания
+    /// Обработчик события выхода курсора из области перетаскивания.
     /// </summary>
     private void LogTextBox_PreviewDragLeave(object sender, DragEventArgs e)
     {

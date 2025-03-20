@@ -3,8 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace NewCore.Base.DeviceResponses
 {
-
-
+  /// <summary>
+  /// Базовый класс ответа от устройства.
+  /// </summary>
   public class BaseResponse
   {
     /// <summary>
@@ -38,6 +39,7 @@ namespace NewCore.Base.DeviceResponses
       {
         throw new ArgumentNullException(nameof(json), "JSON-строка не должна быть null или пустой.");
       }
+
       try
       {
         return JsonSerializer.Deserialize<BaseResponse>(json);

@@ -6,24 +6,42 @@ using NewCore.Base.Device;
 
 namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
-  partial class DeviceSettingsControl
+  /// <summary>
+  /// Частичный класс управления настройками устройства.
+  /// </summary>
+  public partial class DeviceSettingsControl
   {
+    /// <summary>
+    /// Обрабатывает изменение выбранной модели шасси.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
     private void ChassisModelComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-
     }
 
+    /// <summary>
+    /// Обрабатывает изменение выбранного номера стойки.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
     private void RacksNumberBorder_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-
     }
 
+    /// <summary>
+    /// Обрабатывает изменение выбранной модели устройства и обновляет интерфейс
+    /// в зависимости от типа подключения (IP или COM).
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
     private void DeviceModelSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-
       if (DeviceModelSelectionBox.SelectedItem is not string selectedModel ||
           !DeviceModelMap.TryGetValue(selectedModel, out Type selectedType))
+      {
         return;
+      }
 
       try
       {
@@ -48,10 +66,9 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
 
     /// <summary>
     /// Обрабатывает изменение типа подключения, настраивая доступные параметры.
-    /// При выборе IP скрывает COM-настройки и наоборот.
     /// </summary>
-    /// <param name="sender">Источник события (обычно ComboBox).</param>
-    /// <param name="e">Аргументы события, содержащие информацию об изменении выбора.</param>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
     private void ConnectionTypeSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (ConnectionTypeSelectionBox.SelectedItem is ComboBoxItem selectedItem)
@@ -75,21 +92,28 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
+    /// <summary>
+    /// Ограничивает ввод только числовыми значениями для номера устройства.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события ввода текста.</param>
     private void NumberDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
       e.Handled = !Regex.IsMatch(e.Text, "^[0-9]+$");
     }
 
+    /// <summary>
+    /// Обрабатывает изменение номера устройства и отображает контейнер типа подключения.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события изменения текста.</param>
     private void NumberDevice_TextChanged(object sender, TextChangedEventArgs e)
     {
       if (sender is TextBox textBox)
       {
-        if (int.TryParse(textBox.Text, out int number))
+        if (int.TryParse(textBox.Text, out int number) && number >= 1 && number <= 250)
         {
-          if (number >= 1 && number <= 250)
-          {
-            ConnectionTypeContainer.Visibility = Visibility.Visible;
-          }
+          ConnectionTypeContainer.Visibility = Visibility.Visible;
         }
       }
     }
@@ -98,6 +122,8 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// Обработчик изменений свойства <see cref="AdditionalSettings"/>.
     /// Обновляет содержимое контейнера дополнительных настроек.
     /// </summary>
+    /// <param name="d">Объект зависимости.</param>
+    /// <param name="e">Аргументы изменения свойства.</param>
     private static void OnAdditionalSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       if (d is DeviceSettingsControl control)
@@ -106,16 +132,31 @@ namespace Mode.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки сохранения.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события нажатия кнопки мыши.</param>
     private void SaveButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       SaveEvent?.Invoke(this, e);
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки отмены.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события нажатия кнопки мыши.</param>
     private void CancelButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       RequestClose?.Invoke(this, e);
     }
 
+    /// <summary>
+    /// Обрабатывает изменение выбранного COM-порта.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
     private void COMPortSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (COMPortSelectionBox.SelectedItem is string selectedPort)

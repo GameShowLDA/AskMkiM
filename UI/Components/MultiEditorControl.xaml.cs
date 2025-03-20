@@ -9,22 +9,40 @@ using UI.Controls.TextEditor;
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для MultiEditorControl.xaml
+  /// Логика взаимодействия для MultiEditorControl.xaml.
+  /// Компонент, представляющий собой панель с несколькими редакторами.
   /// </summary>
   public partial class MultiEditorControl : UserControl
   {
+    /// <summary>
+    /// Список вкладок (кнопок) для открытия файлов.
+    /// </summary>
     List<OpenFileButton> openPages = new List<OpenFileButton>();
+
+    /// <summary>
+    /// Список пользовательских элементов управления, соответствующих вкладкам.
+    /// </summary>
     List<UserControl> userControls = new List<UserControl>();
 
+    /// <summary>
+    /// Счетчик кликов для определения двойного клика.
+    /// </summary>
     private int _clickCount = 0;
+
+    /// <summary>
+    /// Таймер для обработки двойного клика.
+    /// </summary>
     private DispatcherTimer _clickTimer;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="MultiEditorControl"/>.
+    /// </summary>
     public MultiEditorControl()
     {
       InitializeComponent();
       _clickTimer = new DispatcherTimer
       {
-        Interval = TimeSpan.FromMilliseconds(300)
+        Interval = TimeSpan.FromMilliseconds(300),
       };
 
       _clickTimer.Tick += (s, e) =>
@@ -36,6 +54,12 @@ namespace UI.Components
       this.KeyDown += MultiWindowControl_KeyDown;
     }
 
+    /// <summary>
+    /// Обрабатывает событие нажатия левой кнопки мыши на верхней панели.
+    /// При двойном клике создаёт новый файл.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события мыши.</param>
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       _clickCount++;
@@ -56,7 +80,8 @@ namespace UI.Components
     /// Добавляет элемент управления и кнопку в соответствующие панели.
     /// </summary>
     /// <param name="header">Заголовок для кнопки.</param>
-    /// <param name="control">Элемент управления для отображения.</param>
+    /// <param name="control">Элемент управления для отображения.</param>.
+    /// <param name="description">Необязательное описание для вкладки.</param>
     public void AddControl(string header, UserControl control, string description = null)
     {
       OpenFileButton tabButton = new OpenFileButton();
@@ -90,8 +115,6 @@ namespace UI.Components
         }
       }
 
-
-
       tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
       tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
       tabButton.MouseDown += (s, e) =>
@@ -116,6 +139,10 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Открывает файл по указанному пути и отображает его содержимое в редакторе.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
     public void OpenFile(string path)
     {
       var nameFile = GetNameFile(path);
@@ -149,16 +176,17 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Получает имя файла по пути к файлу.
+    /// Получает имя файла из указанного пути.
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
+    /// <param name="path">Путь к файлу.</param>
+    /// <returns>Имя файла или пустую строку, если путь недопустим.</returns>
     private string GetNameFile(string path)
     {
       if (string.IsNullOrEmpty(path))
       {
         return string.Empty;
       }
+
       try
       {
         return System.IO.Path.GetFileName(path).ToString();
@@ -189,9 +217,10 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Отображает указанный элемент управления, скрывая остальные.
+    /// Отображает указанный элемент управления и активирует соответствующую вкладку.
     /// </summary>
     /// <param name="control">Элемент управления для отображения.</param>
+    /// <param name="openPage">Вкладка, которая будет активирована.</param>
     private void ShowControl(UserControl control, OpenFileButton openPage)
     {
       foreach (UIElement child in ContentPanel.Children)
@@ -230,6 +259,12 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие нажатия клавиш. 
+    /// Позволяет закрыть активную вкладку при нажатии Alt+System+X.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события клавиатуры.</param>
     private void MultiWindowControl_KeyDown(object sender, KeyEventArgs e)
     {
       Console.WriteLine($"e.Key = {e.Key}; e.SystemKey = {e.SystemKey}; Keyboard.Modifiers = {Keyboard.Modifiers}");

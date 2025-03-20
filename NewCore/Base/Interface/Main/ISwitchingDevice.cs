@@ -9,11 +9,6 @@ namespace NewCore.Base.Interface.Main
   public interface ISwitchingDevice : IAttachableDevice
   {
     /// <summary>
-    /// Задает или возвращает объект для управления шинами коммутации.
-    /// </summary>
-    public IBusDeviceBusCommutation BusManager { get; set; }
-
-    /// <summary>
     /// Задает или возвращает объект для управления конденсаторами.
     /// </summary>
     public ICapacitorDeviceBusCommutation CapacitorManager { get; set; }
@@ -37,6 +32,10 @@ namespace NewCore.Base.Interface.Main
     /// Задает или возвращает объект для управления состоянием устройства.
     /// </summary>
     public IStateDeviceBusCommutation StateManager { get; set; }
+
+    /// <summary>
+    /// Задаёт иди возвращает объект для самоконтроля устройства.
+    /// </summary>
     public ISelfTestChecker SelfTestManager { get; set; }
   }
 }

@@ -8,11 +8,10 @@ using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
-
 namespace Mode.Metrology.CI
 {
   /// <summary>
-  /// Логика взаимодействия для CiControl.xaml
+  /// Логика взаимодействия для CiControl.xaml.
   /// </summary>
   public partial class CiControl : UserControl
   {
@@ -31,6 +30,10 @@ namespace Mode.Metrology.CI
     InvokeTextBox VoltageData = new InvokeTextBox();
 
     private bool completed;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="CiControl"/>.
+    /// </summary>
     public CiControl()
     {
       InitializeComponent();
@@ -74,11 +77,11 @@ namespace Mode.Metrology.CI
       Grid timeGrid = new Grid();
       var timeColumn1 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Star)
+        Width = new GridLength(1, GridUnitType.Star),
       };
       var timeColumn2 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Auto)
+        Width = new GridLength(1, GridUnitType.Auto),
       };
 
       timeGrid.ColumnDefinitions.Add(timeColumn1);
@@ -96,7 +99,7 @@ namespace Mode.Metrology.CI
         Style = (Style)Application.Current.Resources["MetrologyTextBox"],
         Text = ",В.", // Единица измерения времени
         IsReadOnly = true, // Делаем поле только для чтения
-        IsTabStop = false
+        IsTabStop = false,
       };
 
       // Удаляем предыдущего родителя, если есть
@@ -134,11 +137,11 @@ namespace Mode.Metrology.CI
       Grid timeGrid = new Grid();
       var timeColumn1 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Star)
+        Width = new GridLength(1, GridUnitType.Star),
       };
       var timeColumn2 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Auto)
+        Width = new GridLength(1, GridUnitType.Auto),
       };
 
       timeGrid.ColumnDefinitions.Add(timeColumn1);
@@ -156,7 +159,7 @@ namespace Mode.Metrology.CI
         Style = (Style)Application.Current.Resources["MetrologyTextBox"],
         Text = ",сек.", // Единица измерения времени
         IsReadOnly = true, // Делаем поле только для чтения
-        IsTabStop = false
+        IsTabStop = false,
       };
 
       // Удаляем предыдущего родителя, если есть
@@ -211,6 +214,7 @@ namespace Mode.Metrology.CI
           return false;
         }
       }
+
       return true;
     }
 
@@ -231,6 +235,7 @@ namespace Mode.Metrology.CI
           return false;
         }
       }
+
       return true;
     }
 

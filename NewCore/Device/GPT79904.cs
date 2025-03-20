@@ -1,15 +1,19 @@
 ﻿using System.IO.Ports;
-using NewCore.Base;
 using NewCore.Base.Device;
 using NewCore.Base.Function.Breakdown;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.GPT;
-using NewCore.Function.GPT.Command;
 
 namespace NewCore.Device
 {
+  /// <summary>
+  /// Класс, представляющий пробойную установку GPT79904, работающую через последовательный порт (COM).
+  /// </summary>
   public class GPT79904 : DeviceWithCOM, IBreakdownTester
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="GPT79904"/>.
+    /// </summary>
     public GPT79904()
     {
       BaudRate = 115200;
@@ -22,28 +26,26 @@ namespace NewCore.Device
       IrManger = new IrMode(this);
       SystemManger = new SystemSettings(this);
     }
-    public GPT79904(string VID, string PID) : this()
-    {
-      string portName = FindComPort(VID, PID);
 
+    /// <inheritdoc />
+    public new string Name { get => "GPT79904"; }
 
-      COMPort = new SerialPort(portName, BaudRate, Parity, DataBits, StopBits)
-      {
-        ReadTimeout = 2000,
-        WriteTimeout = 2000,
-        DtrEnable = true,
-        RtsEnable = true,
-        Handshake = Handshake.None
-      };
-    }
+    /// <inheritdoc />
+    public new string Description { get => "Реализовать описание в NewCore.Device.GPT79904"; }
 
-    public string Name { get => "GPT79904"; }
-    public string Description { get => "Реализовать описание в NewCore.Device.GPT79904"; }
-
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
-    public IAcwModeBreakdown AcwManger { get ; set ; }
+
+    /// <inheritdoc />
+    public IAcwModeBreakdown AcwManger { get; set; }
+
+    /// <inheritdoc />
     public IDcwModeBreakdown DcwManger { get; set; }
+
+    /// <inheritdoc />
     public IIrModeBreakdown IrManger { get; set; }
-    public ISystemSettingsBreakdown SystemManger {  get ; set ; }
+
+    /// <inheritdoc />
+    public ISystemSettingsBreakdown SystemManger { get; set; }
   }
 }

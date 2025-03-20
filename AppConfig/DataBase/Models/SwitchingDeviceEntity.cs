@@ -11,59 +11,57 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class SwitchingDeviceEntity : ISwitchingDevice
   {
+    /// <inheritdoc />
     public int Id { get; set; }
-    /// <summary>
-    /// Номер менеджера шасси, к которому подключено устройство коммутации.
-    /// </summary>
+
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
 
-    /// <summary>
-    /// Название устройства коммутации.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание устройства коммутации.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Уникальный номер устройства.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Детали подключения устройства (IP-адрес, COM-порт и т. д.).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
-    /// <summary>
-    /// Тип устройства, всегда SwitchingDevice.
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.SwitchingDevice;
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IBusDeviceBusCommutation BusManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public ICapacitorDeviceBusCommutation CapacitorManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IConnectorDeviceBusCommutation ConnectorManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IRelayDeviceBusCommutation RelayManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IResistorDeviceBusCommutation ResistorManager { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IStateDeviceBusCommutation StateManager { get; set; }
+
+    /// <inheritdoc />
     [NotMapped]
     public ISelfTestChecker SelfTestManager { get; set; }
-
 
     /// <summary>
     /// Метод инициализации устройства коммутации.

@@ -7,12 +7,10 @@ using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
-
 namespace Mode.Metrology.KC
 {
-
   /// <summary>
-  /// Логика взаимодействия для KcControl.xaml
+  /// Логика взаимодействия для KcControl.xaml.
   /// </summary>
   public partial class KcControl : UserControl
   {
@@ -25,12 +23,15 @@ namespace Mode.Metrology.KC
     private MeterBase meter;
 
     private bool completed;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="KcControl"/>.
+    /// </summary>
     public KcControl()
     {
       InitializeComponent();
       InitializeSettingsAsync().ConfigureAwait(true);
     }
-
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.

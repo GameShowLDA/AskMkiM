@@ -7,6 +7,9 @@ namespace NewCore.Base.Device
   /// </summary>
   public interface IDevice
   {
+    /// <summary>
+    /// Порядковый номер устройства.
+    /// </summary>
     int Id { get; set; }
 
     /// <summary>
@@ -22,12 +25,12 @@ namespace NewCore.Base.Device
     string Description { get; set; }
 
     /// <summary>
-    /// Номер утсройства.
+    /// Номер устройства.
     /// </summary>
     int Number { get; set; }
 
     /// <summary>
-    /// Универсальное свойство для хранения данных подключения (IP или COM)
+    /// Универсальное свойство для хранения данных подключения (IP или COM).
     /// </summary>
     string ConnectionDetails { get; set; }
 
@@ -36,6 +39,9 @@ namespace NewCore.Base.Device
     /// </summary>
     DeviceType DeviceType { get; }
 
+    /// <summary>
+    /// Возвращает полный путь к экземпляру класса.
+    /// </summary>
     public string DeviceClass { get; set; }
   }
 }

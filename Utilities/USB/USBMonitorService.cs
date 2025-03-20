@@ -20,6 +20,7 @@ namespace Utilities.USB
     public event EventHandler<bool> AdminRightsChanged;
 
     private bool _adminRights;
+
     /// <summary>
     /// Текущее состояние прав администратора.
     /// </summary>
@@ -28,7 +29,11 @@ namespace Utilities.USB
       get => _adminRights;
       set
       {
-        if (_adminRights == value) return;
+        if (_adminRights == value)
+        {
+          return;
+        }
+
         _adminRights = value;
         AdminRightsChanged?.Invoke(this, _adminRights);
       }
@@ -37,6 +42,7 @@ namespace Utilities.USB
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="USBMonitorService"/>.
     /// </summary>
+    /// <param name="dispatcher">Диспетчер интерфейса, используемый для выполнения операций в UI-потоке.</param>
     public USBMonitorService(Dispatcher dispatcher)
     {
       _dispatcher = dispatcher;

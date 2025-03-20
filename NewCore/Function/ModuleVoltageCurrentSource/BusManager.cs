@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
@@ -10,71 +7,93 @@ using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 
-
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {
+  /// <summary>
+  /// Управляет подключением шин модуля источника напряжения и тока (МИНТ).
+  /// </summary>
   public class BusManager : IBusManager
   {
-    IPowerSourceModule _moduleVoltageCurrentSource { get; set; }
+    /// <summary>
+    /// Экземпляр интерфейса модуля источника напряжения и тока.
+    /// </summary>
+    private readonly IPowerSourceModule _moduleVoltageCurrentSource;
+
+    /// <summary>
+    /// Создаёт новый экземпляр класса <see cref="BusManager"/>.
+    /// </summary>
+    /// <param name="moduleVoltageCurrentSource">Экземпляр интерфейса модуля источника напряжения и тока.</param>
     public BusManager(IPowerSourceModule moduleVoltageCurrentSource) => _moduleVoltageCurrentSource = moduleVoltageCurrentSource;
 
     /// <summary>
-    /// Подключить шину МИНТ к положительному полюсу.
+    /// Подключает заданную шину МИНТ к положительному полюсу.
     /// </summary>
-    /// <param name="_moduleVoltageCurrentSource.IPAddress">Ip устройства.</param>
-    /// <param name="bus">Замыкаемая шина.</param>
-    /// <returns>Результат замыкания шины.</returns>
+    /// <param name="bus">Шина, которую необходимо подключить.</param>
+    /// <returns>Булево значение, указывающее успешность операции.</returns>
     public async Task<bool> ConnectBusToPositiveAsync(SwitchingBus bus)
     {
-      Tuple<int, int> partialComand;
-      BusParameters.TryGetValue(bus, out partialComand);
-      LogInformation($"МИНТ: Подключение шины {bus.ToString()} к + ({new DeviceCommand(5, partialComand.Item1, partialComand.Item2, 1).ToString()})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(5, partialComand.Item1, partialComand.Item2, 1));
+      if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
+      {
+        LogError($"Ошибка: Неизвестная шина {bus}");
+        return false;
+      }
+
+      LogInformation($"МИНТ: Подключение шины {bus} к + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1)})");
+      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1));
       return true;
     }
 
     /// <summary>
-    /// Подключить шину МИНТ к отрицательному полюсу.
+    /// Подключает заданную шину МИНТ к отрицательному полюсу.
     /// </summary>
-    /// <param name="_moduleVoltageCurrentSource.IPAddress">Ip устройства.</param>
-    /// <param name="bus">Замыкаемая шина.</param>
-    /// <returns>Результат замыкания шины.</returns>
+    /// <param name="bus">Шина, которую необходимо подключить.</param>
+    /// <returns>Булево значение, указывающее успешность операции.</returns>
     public async Task<bool> ConnectBusToNegativeAsync(SwitchingBus bus)
     {
-      Tuple<int, int> partialComand;
-      BusParameters.TryGetValue(bus, out partialComand);
-      LogInformation($"МИНТ: Подключение шины {bus.ToString()} к - ({new DeviceCommand(6, partialComand.Item1, partialComand.Item2, 1).ToString()})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(6, partialComand.Item1, partialComand.Item2, 1));
+      if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
+      {
+        LogError($"Ошибка: Неизвестная шина {bus}");
+        return false;
+      }
+
+      LogInformation($"МИНТ: Подключение шины {bus} к - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1)})");
+      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1));
       return true;
     }
 
     /// <summary>
-    /// Отключает шину МИНТ от положительного полюса.
+    /// Отключает заданную шину МИНТ от положительного полюса.
     /// </summary>
-    /// <param name="_moduleVoltageCurrentSource.IPAddress">Ip устройства.</param>
-    /// <param name="bus">Отключаемая шина.</param>
-    /// <returns>Результат замыкания шины.</returns>
+    /// <param name="bus">Шина, которую необходимо отключить.</param>
+    /// <returns>Булево значение, указывающее успешность операции.</returns>
     public async Task<bool> DisconnectBusToPositiveAsync(SwitchingBus bus)
     {
-      Tuple<int, int> partialComand;
-      BusParameters.TryGetValue(bus, out partialComand);
-      LogInformation($"МИНТ: Отключение шины {bus.ToString()} от + ({new DeviceCommand(5, partialComand.Item1, partialComand.Item2, 2).ToString()})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(5, partialComand.Item1, partialComand.Item2, 2));
+      if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
+      {
+        LogError($"Ошибка: Неизвестная шина {bus}");
+        return false;
+      }
+
+      LogInformation($"МИНТ: Отключение шины {bus} от + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2)})");
+      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2));
       return true;
     }
 
     /// <summary>
-    /// Отключает шину МИНТ от отрицательному полюса.
+    /// Отключает заданную шину МИНТ от отрицательного полюса.
     /// </summary>
-    /// <param name="_moduleVoltageCurrentSource.IPAddress">Ip устройства.</param>
-    /// <param name="bus">Отключаемая шина.</param>
-    /// <returns>Результат замыкания шины.</returns>
+    /// <param name="bus">Шина, которую необходимо отключить.</param>
+    /// <returns>Булево значение, указывающее успешность операции.</returns>
     public async Task<bool> DisconnectBusToNegativeAsync(SwitchingBus bus)
     {
-      Tuple<int, int> partialComand;
-      BusParameters.TryGetValue(bus, out partialComand);
-      LogInformation($"МИНТ: Отключение шины {bus.ToString()} от - ({new DeviceCommand(6, partialComand.Item1, partialComand.Item2, 2).ToString()})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(6, partialComand.Item1, partialComand.Item2, 2));
+      if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
+      {
+        LogError($"Ошибка: Неизвестная шина {bus}");
+        return false;
+      }
+
+      LogInformation($"МИНТ: Отключение шины {bus} от - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2)})");
+      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2));
       return true;
     }
   }

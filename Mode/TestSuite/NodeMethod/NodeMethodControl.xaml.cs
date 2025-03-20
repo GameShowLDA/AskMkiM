@@ -10,7 +10,6 @@ using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.TestSuite.NodeMethod
 {
-
   /// <summary>
   /// Логика взаимодействия для NodeMethodControl.xaml
   /// Элемент управления для теста "Метод Узла".
@@ -33,12 +32,18 @@ namespace Mode.TestSuite.NodeMethod
     private static CheckBox checkBoxA;
     private static CheckBox checkBoxB;
 
-
+    /// <summary>
+    /// Определяет, активна ли шина A.
+    /// </summary>
     public static bool IsBusAActive
     {
       get;
       set;
     }
+
+    /// <summary>
+    /// Конструктор класса <see cref="NodeMethodControl"/>.
+    /// </summary>
     public NodeMethodControl()
     {
       InitializeComponent();
@@ -93,6 +98,9 @@ namespace Mode.TestSuite.NodeMethod
       ProtocolSelfCheckControl.ShowOnlyStartButton();
     }
 
+    /// <summary>
+    /// Добавляет элементы управления для напряжения.
+    /// </summary>
     private void AddVoltageParameterControls(StackPanel contentStack)
     {
       LogInformation("Создание панели ввода времени измерения");
@@ -104,11 +112,11 @@ namespace Mode.TestSuite.NodeMethod
       Grid timeGrid = new Grid();
       var timeColumn1 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Star)
+        Width = new GridLength(1, GridUnitType.Star),
       };
       var timeColumn2 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Auto)
+        Width = new GridLength(1, GridUnitType.Auto),
       };
 
       timeGrid.ColumnDefinitions.Add(timeColumn1);
@@ -126,7 +134,7 @@ namespace Mode.TestSuite.NodeMethod
         Style = (Style)Application.Current.Resources["MetrologyTextBox"],
         Text = ",В.", // Единица измерения времени
         IsReadOnly = true, // Делаем поле только для чтения
-        IsTabStop = false
+        IsTabStop = false,
       };
 
       // Удаляем предыдущего родителя, если есть
@@ -147,13 +155,18 @@ namespace Mode.TestSuite.NodeMethod
       // Добавляем границу в StackPanel
       contentStack.Children.Add(VoltageBorder);
     }
+
+    /// <summary>
+    /// Добавляет элементы управления для выбора активной шины в переданный <see cref="StackPanel"/>.
+    /// </summary>
+    /// <param name="stackPanel">StackPanel, в который добавляются элементы управления.</param>
     public static void AddCustomGridsToStackPanel(StackPanel stackPanel)
     {
       void AddGrid(string busName, ref CheckBox checkBox, bool isChecked, string checkBoxName)
       {
         var grid = new Grid
         {
-          Margin = new Thickness(5)
+          Margin = new Thickness(5),
         };
 
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
@@ -166,7 +179,7 @@ namespace Mode.TestSuite.NodeMethod
           HorizontalAlignment = HorizontalAlignment.Left,
           Width = 20,
           Style = (Style)Application.Current.Resources["AnimatedSwitch"],
-          IsChecked = isChecked
+          IsChecked = isChecked,
         };
         checkBox.Checked += Switch_Checked;
         checkBox.Unchecked += Switch_Unchecked;
@@ -175,7 +188,7 @@ namespace Mode.TestSuite.NodeMethod
         {
           Text = busName,
           Foreground = (Brush)Application.Current.Resources["ForegroundSolidColorBrush"],
-          FontSize = 18
+          FontSize = 18,
         };
         Grid.SetColumn(textBlock, 1);
 
@@ -188,7 +201,6 @@ namespace Mode.TestSuite.NodeMethod
       AddGrid("Шина А", ref checkBoxA, true, "checkBoxA");
       AddGrid("Шина В", ref checkBoxB, false, "checkBoxB");
     }
-
 
     /// <summary>
     /// Добавляет элементы управления для ввода времени измерения в переданный StackPanel.
@@ -206,11 +218,11 @@ namespace Mode.TestSuite.NodeMethod
       Grid timeGrid = new Grid();
       var timeColumn1 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Star)
+        Width = new GridLength(1, GridUnitType.Star),
       };
       var timeColumn2 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Auto)
+        Width = new GridLength(1, GridUnitType.Auto),
       };
 
       timeGrid.ColumnDefinitions.Add(timeColumn1);
@@ -227,7 +239,7 @@ namespace Mode.TestSuite.NodeMethod
       {
         Style = (Style)Application.Current.Resources["MetrologyTextBox"],
         Text = ",сек.", // Единица измерения времени
-        IsReadOnly = true // Делаем поле только для чтения
+        IsReadOnly = true, // Делаем поле только для чтения
       };
 
       // Удаляем предыдущего родителя, если есть
@@ -257,7 +269,6 @@ namespace Mode.TestSuite.NodeMethod
       e.Handled = !IsTextAllowed(e.Text);
     }
 
-
     /// <summary>
     /// Обработчик события для ограничения ввода только цифрами.
     /// </summary>
@@ -283,6 +294,7 @@ namespace Mode.TestSuite.NodeMethod
           return false;
         }
       }
+
       return true;
     }
 
@@ -303,9 +315,13 @@ namespace Mode.TestSuite.NodeMethod
           return false;
         }
       }
+
       return true;
     }
 
+    /// <summary>
+    /// Обработчик события при активации переключателя шины.
+    /// </summary>
     private static void Switch_Checked(object sender, RoutedEventArgs e)
     {
       if (sender == checkBoxA && checkBoxB.IsChecked == true)
@@ -319,6 +335,9 @@ namespace Mode.TestSuite.NodeMethod
       }
     }
 
+    /// <summary>
+    /// Обработчик события при деактивации переключателя шины.
+    /// </summary>
     private static void Switch_Unchecked(object sender, RoutedEventArgs e)
     {
       if (sender == checkBoxA && checkBoxB.IsChecked == false)

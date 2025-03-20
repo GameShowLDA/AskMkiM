@@ -14,6 +14,11 @@ using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.SelfControl.Module.DeviceBusCommutation
 {
+  /// <summary>
+  /// Класс Handler реализует логику самоконтроля для устройств коммутации шин. 
+  /// Он подключается к устройствам, выполняет сброс системы, проверяет реле с использованием мультиметра,
+  /// отображает статусные сообщения и обрабатывает ошибки, связанные с реле.
+  /// </summary>
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
@@ -22,16 +27,27 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     private Core.DeviceBusCommutation.Model deviceBusCommutation;
     List<int> errorRelays;
     MeterBase meter;
+
+    /// <summary>
+    /// Инициализирует объект Handler, используя объект ProtocolSelfCheckControl и модель устройства.
+    /// </summary>
+    /// <param name="protocolSelfCheck">Объект для управления протоколом самоконтроля.</param>
+    /// <param name="deviceModel">Модель устройства для создания объекта коммутации шин.</param>
     internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
       deviceBusCommutation = Core.DeviceBusCommutation.Model.CreateFromObject(deviceModel);
 
-      // TODO : Переопределить мультиметр
+      // TODO: Переопределить мультиметр
       // meter = new Core.KeysightLibrary.Model();
     }
 
     #region StartDelegate
+
+    /// <summary>
+    /// Возвращает делегат, ссылающийся на метод RunSelfCheck, для запуска процесса самоконтроля.
+    /// </summary>
+    /// <returns>Делегат StartDelegate.</returns>
     internal StartDelegate GetStartDelegate()
     {
       StartDelegate startDelegate = RunSelfCheck;
@@ -39,8 +55,10 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     }
 
     /// <summary>
-    /// Асинхронный метод для выполнения самоконтроля.
+    /// Выполняет самоконтроль. Метод проверяет наличие модели устройства, подключается к устройствам,
+    /// сбрасывает систему, выполняет проверку реле для каждого блока, отображает результаты проверки и скрывает кнопку паузы.
     /// </summary>
+    /// <param name="token">Токен отмены операции.</param>
     private async Task RunSelfCheck(CancellationToken token)
     {
       if (deviceBusCommutation == null)
@@ -58,7 +76,7 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
       }
 
       await Core.DeviceBusCommutation.Functions.ResetAsync(deviceBusCommutation.IPAddress);
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Самоконтроль УКШ".ToUpper(CultureInfo.CurrentCulture), goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("САМООБНАРУЖЕНИЕ УКШ".ToUpper(CultureInfo.CurrentCulture), goodText.Item2));
 
       errorRelays = new List<int>();
 
@@ -92,11 +110,14 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     }
 
     /// <summary>
-    /// Асинхронно проверяет реле с использованием мультиметра для заданного числа шин и блока.
+    /// Проверяет реле с использованием мультиметра для заданного количества шин и блока.
+    /// Для каждой цепи выполняется подключение, проверка состояния, отключение и отображение статусного сообщения.
     /// </summary>
-    /// <param name="countBuses">Количество цепей (шины), которые необходимо проверить.</param>
-    /// <param name="numberBlock">Номер блока для проверки реле.</param>
-    /// <param name="relays">Список списков идентификаторов реле для каждой цепи.</param>
+    /// <param name="token">Токен отмены.</param>
+    /// <param name="countBuses">Количество цепей для проверки.</param>
+    /// <param name="numberBlock">Номер блока проверки реле.</param>
+    /// <param name="relays">Список списков номеров реле для каждой цепи.</param>
+    /// <returns>True, если обнаружены ошибки; иначе False.</returns>
     private async Task<bool> CheckRelaysWithMultimeterAsync(CancellationToken token, int countBuses, int numberBlock, List<List<int>> relays)
     {
       var time = 10;
@@ -119,13 +140,13 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
 
         LogInformation($"Начата проверка блока {numberBlock} - номер цепи {i} - ({relaysStr})");
 
-
         if (!await GetIsIdleModeEnabled())
         {
           foreach (var relay in relays[i - 1])
           {
             Core.DeviceBusCommutation.Functions.ConnectRelayIdleMode(relay);
           }
+
           await Core.DeviceBusCommutation.Functions.ConnectChainCircuit(IPAddress.Parse("192.168.0.20"), numberBlock, i);
         }
 
@@ -157,7 +178,6 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
           error = true;
         }
 
-
         LogInformation($"Закончена проверка блока {numberBlock} - номер цепи {i} - ({relaysStr})");
 
         if (!await GetIsIdleModeEnabled())
@@ -166,6 +186,7 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
           {
             Core.DeviceBusCommutation.Functions.DisconnectRelayIdleMode(relay);
           }
+
           await Core.DeviceBusCommutation.Functions.DisconnectChainCircuit(IPAddress.Parse("192.168.0.20"), numberBlock, i);
         }
 
@@ -173,26 +194,22 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
         {
           ProtocolSelfCheckControl.ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
           await ProtocolSelfCheckControl.PauseAsync();
-          //if (returnMeasure)
-          //{
-          //  i--;
-          //  returnMeasure = false;
-          //  ProtocolSelfCheckControl.ReturnMeasureResistanceButtonVisibility = Visibility.Collapsed;
-          //}
         }
 
         await Task.Delay(time);
       }
+
       return error;
     }
 
     /// <summary>
-    /// Проверка реле на залипание в собранной цепочке.
+    /// Проверяет реле в собранной цепочке, отключая и проверяя каждое реле, а затем подключая его обратно.
+    /// Если реле не проходит проверку, оно добавляется в список ошибок.
     /// </summary>
-    /// <param name="relays">Список реле.</param>
+    /// <param name="relays">Список номеров реле для проверки.</param>
     /// <param name="token">Токен отмены.</param>
-    /// <param name="time">Время задержки в миллисекундах</param>
-    /// <returns></returns>
+    /// <param name="time">Время задержки в миллисекундах для проверки.</param>
+    /// <returns>True, если обнаружены ошибки; иначе False.</returns>
     private async Task<bool> CheckRelays(List<int> relays, CancellationToken token, int time)
     {
       bool error = false;
@@ -222,12 +239,14 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
 
       return error;
     }
+
     /// <summary>
-    /// Отключает реле и проверяет его состояние.
+    /// Отключает указанное реле и проверяет его состояние с помощью мультиметра.
+    /// Если измеренное значение равно 9.9E+37, реле считается отключенным успешно; иначе, реле добавляется в список ошибок.
     /// </summary>
-    /// <param name="relay">Номер реле.</param>
-    /// <param name="time">Время задержки в миллисекундах.</param>
-    /// <returns>True, если реле отключено успешно, иначе False.</returns>
+    /// <param name="relay">Номер реле для проверки.</param>
+    /// <param name="time">Время задержки в миллисекундах для проведения измерения.</param>
+    /// <returns>True, если реле отключено успешно; иначе False.</returns>
     private async Task<bool> DisconnectRelayAndCheckStatus(int relay, int time)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tОтключение реле", null, relay.ToString(CultureInfo.CurrentCulture), goodText.Item2) { CanBeDeleted = true });
@@ -257,28 +276,21 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     }
 
     /// <summary>
-    /// Обрабатывает ошибку реле.
+    /// Обрабатывает ошибку, возникшую при проверке реле. Отображает кнопку возврата и приостанавливает процесс.
     /// </summary>
-    /// <param name="currentIndex">Текущий индекс реле.</param>
-    /// <returns>True, если нужно повторить проверку, иначе False.</returns>
+    /// <param name="currentIndex">Индекс реле, вызвавшего ошибку.</param>
+    /// <returns>True, если необходимо повторить проверку данного реле; иначе False.</returns>
     private async Task<bool> HandleRelayError(int currentIndex)
     {
       ProtocolSelfCheckControl.ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
       await ProtocolSelfCheckControl.PauseAsync();
-      //if (returnMeasure)
-      //{
-      //  returnMeasure = false;
-      //  ProtocolSelfCheckControl.ReturnMeasureResistanceButtonVisibility = Visibility.Collapsed;
-      //  return true;
-      //}
       return false;
     }
 
     /// <summary>
-    /// Подключает реле.
+    /// Подключает указанное реле и отображает сообщение о подключении.
     /// </summary>
-    /// <param name="relay">Номер реле.</param>
-    /// <returns></returns>
+    /// <param name="relay">Номер реле для подключения.</param>
     private async Task ConnectRelay(int relay)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tПодключение реле", null, relay.ToString(CultureInfo.CurrentCulture), goodText.Item2) { CanBeDeleted = true });
@@ -289,11 +301,11 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     }
 
     /// <summary>
-    /// Генерирует статусное сообщение на основе успешности проверки и режима ошибок.
+    /// Генерирует статусное сообщение для реле в зависимости от результата проверки и режима имитации ошибок.
     /// </summary>
-    /// <param name="success">Флаг успешного прохождения проверки.</param>
-    /// <param name="isErrorSimulationMode">Флаг режима имитации ошибок.</param>
-    /// <returns>Статусное сообщение.</returns>
+    /// <param name="success">Указывает, успешно ли прошло отключение реле.</param>
+    /// <param name="isErrorSimulationMode">Указывает, включен ли режим имитации ошибок.</param>
+    /// <returns>Статусное сообщение в виде строки.</returns>
     private async Task<string> GetStatusMessage(bool success, bool isErrorSimulationMode)
     {
       string statusMessage = await GetIsIdleModeEnabled()
@@ -309,6 +321,10 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     #endregion
 
     #region StopDelegate
+    /// <summary>
+    /// Возвращает делегат остановки самоконтроля, ссылающийся на метод StopAsync.
+    /// </summary>
+    /// <returns>Делегат StopDelegate.</returns>
     internal StopDelegate GetStopDelegate()
     {
       StopDelegate stopDelegate = StopAsync;
@@ -316,8 +332,9 @@ namespace Mode.SelfControl.Module.DeviceBusCommutation
     }
 
     /// <summary>
-    /// Останавливает самоконтроль, отключая необходимые компоненты и отображая соответствующие сообщения.
+    /// Завершает процесс самоконтроля, выполняет финализацию протокола и отображает итоговое сообщение.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task StopAsync(CancellationToken cancellationToken)
     {
       LogInformation($"Запущен метод завершения самоконтроля");

@@ -6,7 +6,7 @@ using System.Windows.Media;
 namespace Mode.Settings.SendCommand
 {
   /// <summary>
-  /// Логика взаимодействия для SendCommandControl.xaml
+  /// Логика взаимодействия для SendCommandControl.xaml.
   /// </summary>
   public partial class SendCommandControl : UserControl
   {
@@ -15,8 +15,15 @@ namespace Mode.Settings.SendCommand
     /// </summary>
     private enum InputState
     {
+      /// <summary>
+      /// Ожидание ввода IP-адреса.
+      /// </summary>
       WaitingForIp,
-      WaitingForCommand
+
+      /// <summary>
+      /// Ожидание ввода команды.
+      /// </summary>
+      WaitingForCommand,
     }
 
     /// <summary>
@@ -40,8 +47,8 @@ namespace Mode.Settings.SendCommand
     private string lastEnteredCommand;
 
     /// <summary>
-    /// Конструктор класса SendCommandControl.
-    /// Инициализирует компоненты и устанавливает начальное состояние.
+    /// Инициализирует новый экземпляр класса <see cref="SendCommandControl"/>.
+    /// Устанавливает начальное состояние и обновляет интерфейс.
     /// </summary>
     public SendCommandControl()
     {
@@ -51,7 +58,7 @@ namespace Mode.Settings.SendCommand
     }
 
     /// <summary>
-    /// Обработчик события нажатия клавиши в текстовом поле ввода.
+    /// Обрабатывает нажатие клавиши в текстовом поле ввода.
     /// Проверяет введенные данные и обновляет состояние в зависимости от текущего режима ввода.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
@@ -78,29 +85,31 @@ namespace Mode.Settings.SendCommand
               {
                 DisplayInfo("Error: Invalid IP address. Please enter a valid IP.");
               }
+
               break;
+
             case InputState.WaitingForCommand:
               if (IsValidCommand(text))
               {
-
+                // Логика обработки команды может быть добавлена здесь
               }
               else
               {
                 DisplayInfo("Error: Invalid command syntax. Please enter a valid command (x.x.x.x).");
               }
+
               break;
           }
+
           InputTextBox.Clear();
 
-          if (currentState == InputState.WaitingForIp)
+          if (currentState == InputState.WaitingForIp && !string.IsNullOrEmpty(lastEnteredIp))
           {
-            if (!string.IsNullOrEmpty(lastEnteredIp))
-              InputTextBox.Text = lastEnteredIp;
+            InputTextBox.Text = lastEnteredIp;
           }
-          else if (currentState == InputState.WaitingForCommand)
+          else if (currentState == InputState.WaitingForCommand && !string.IsNullOrEmpty(lastEnteredCommand))
           {
-            if (!string.IsNullOrEmpty(lastEnteredCommand))
-              InputTextBox.Text = lastEnteredCommand;
+            InputTextBox.Text = lastEnteredCommand;
           }
         }
 
@@ -117,14 +126,11 @@ namespace Mode.Settings.SendCommand
       {
         InputLabel.Content = "IP:";
         InputTextBox.ToolTip = "Enter IP Address";
-
       }
       else if (currentState == InputState.WaitingForCommand)
       {
         InputLabel.Content = "Command:";
         InputTextBox.ToolTip = "Enter Command";
-
-
       }
     }
 
@@ -132,20 +138,26 @@ namespace Mode.Settings.SendCommand
     /// Проверяет, является ли введенная строка корректным IP-адресом.
     /// </summary>
     /// <param name="ip">Строка для проверки.</param>
-    /// <returns>true, если IP-адрес корректен; иначе false.</returns>
+    /// <returns>True, если IP-адрес корректен; иначе false.</returns>
     private bool IsValidIp(string ip)
     {
       if (string.IsNullOrWhiteSpace(ip))
+      {
         return false;
+      }
 
       string[] parts = ip.Split('.');
       if (parts.Length != 4)
+      {
         return false;
+      }
 
       foreach (string part in parts)
       {
         if (!int.TryParse(part, out int num) || num < 0 || num > 255)
+        {
           return false;
+        }
       }
 
       lastEnteredIp = ip;
@@ -156,20 +168,26 @@ namespace Mode.Settings.SendCommand
     /// Проверяет, является ли введенная строка корректной командой.
     /// </summary>
     /// <param name="command">Строка для проверки.</param>
-    /// <returns>true, если команда корректна; иначе false.</returns>
+    /// <returns>True, если команда корректна; иначе false.</returns>
     private bool IsValidCommand(string command)
     {
       if (string.IsNullOrWhiteSpace(command))
+      {
         return false;
+      }
 
       string[] parts = command.Split('.');
       if (parts.Length != 4 && parts.Length != 5)
+      {
         return false;
+      }
 
       foreach (string part in parts)
       {
         if (!int.TryParse(part, out int num) || num < 0)
+        {
           return false;
+        }
       }
 
       lastEnteredCommand = command;

@@ -3,11 +3,19 @@ using NewCore.Device;
 
 namespace NewCore.Function.Keysight3466new
 {
+  /// <summary>
+  /// Класс для измерения переменного напряжения (AC Voltage) с использованием прибора Keysight.
+  /// </summary>
   public class AcVoltageMeasurement : IAcVoltageMeasurement
   {
     private readonly KeysightDevice _device;
     private readonly ICommunication _communication;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="AcVoltageMeasurement"/>.
+    /// </summary>
+    /// <param name="device">Экземпляр устройства Keysight.</param>
+    /// <exception cref="ArgumentNullException">Выбрасывается, если переданный прибор равен <c>null</c>.</exception>
     public AcVoltageMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
@@ -20,7 +28,9 @@ namespace NewCore.Function.Keysight3466new
     public async Task SetACVoltageModeAsync()
     {
       if (!_device.IsConnected)
+      {
         throw new InvalidOperationException("Прибор не подключен.");
+      }
 
       await _communication.SendCommandAsync("CONF:VOLT:AC");
     }
@@ -32,7 +42,9 @@ namespace NewCore.Function.Keysight3466new
     public async Task<double> MeasureACVoltageAsync()
     {
       if (!_device.IsConnected)
+      {
         throw new InvalidOperationException("Прибор не подключен.");
+      }
 
       string response = await _communication.QueryAsync("MEAS:VOLT:AC?");
       response = response.Trim().Replace("+", "");

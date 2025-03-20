@@ -14,7 +14,6 @@ namespace Mode.Settings.DeviceConfig.Base
   /// <typeparam name="T">Тип устройства, реализующего интерфейс IDevice.</typeparam>
   internal class BaseEvent<T> where T : class, IDevice
   {
-
     /// <summary>
     /// Событие для уведомления о закрытии окна или формы.
     /// </summary>
@@ -35,6 +34,7 @@ namespace Mode.Settings.DeviceConfig.Base
     /// <summary>
     /// Загружает доступные модели устройств и отображает их в ComboBox.
     /// </summary>
+    /// <param name="DeviceModelComboBox">ComboBox для выбора модели устройства.</param>
     internal void LoadDeviceModels(ComboBox DeviceModelComboBox)
     {
       var models = ReflectionHelper.GetAllImplementations<T>();
@@ -50,7 +50,6 @@ namespace Mode.Settings.DeviceConfig.Base
     /// <summary>
     /// Ограничивает ввод только числовыми значениями для частей IP-адреса.
     /// </summary>
-    /// <param name="sender">Источник события.</param>
     /// <param name="e">Данные события ввода текста.</param>
     internal void IpPartPreviewTextInput(TextCompositionEventArgs e)
     {
@@ -62,18 +61,14 @@ namespace Mode.Settings.DeviceConfig.Base
     /// Ограничивает значение диапазоном от 0 до 255.
     /// </summary>
     /// <param name="sender">Источник события (TextBox).</param>
-    /// <param name="e">Данные события изменения текста.</param>
     internal void IpPartTextChanged(object sender)
     {
       if (sender is TextBox textBox)
       {
-        if (int.TryParse(textBox.Text, out int value))
+        if (int.TryParse(textBox.Text, out int value) && value > 255)
         {
-          if (value > 255)
-          {
-            textBox.Text = "255";
-            textBox.CaretIndex = textBox.Text.Length; // Перемещаем курсор в конец
-          }
+          textBox.Text = "255";
+          textBox.CaretIndex = textBox.Text.Length; // Перемещаем курсор в конец
         }
       }
     }
@@ -82,8 +77,10 @@ namespace Mode.Settings.DeviceConfig.Base
     /// Обрабатывает изменение выбранной модели устройства и отображает
     /// соответствующие элементы управления в зависимости от типа устройства (IP или COM).
     /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Данные события изменения выбора.</param>
+    /// <param name="DeviceModelComboBox">ComboBox с моделями устройств.</param>
+    /// <param name="ComItem">Элемент управления COM.</param>
+    /// <param name="IpItem">Элемент управления IP.</param>
+    /// <param name="DefaultSettingDevice">Грид настроек устройства.</param>
     internal void DeviceModelComboBox_SelectionChanged(ComboBox DeviceModelComboBox, ComboBoxItem ComItem, ComboBoxItem IpItem, Grid DefaultSettingDevice)
     {
       if (DeviceModelComboBox.SelectedItem is string selectedModel &&
@@ -119,7 +116,9 @@ namespace Mode.Settings.DeviceConfig.Base
     /// </summary>
     /// <param name="selectedType">Тип выбранного устройства.</param>
     /// <returns>Тип базового класса устройства.</returns>
-    /// <exception cref="InvalidOperationException">Выбрасывается, если устройство наследует одновременно DeviceWithIP и DeviceWithCOM или ни один из них.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если устройство наследует одновременно DeviceWithIP и DeviceWithCOM или ни один из них.
+    /// </exception>
     private Type DetermineBaseClass(Type selectedType)
     {
       bool inheritsIP = typeof(DeviceWithIP).IsAssignableFrom(selectedType);
@@ -147,18 +146,14 @@ namespace Mode.Settings.DeviceConfig.Base
     /// Ограничивает ввод значений в TextBox до диапазона от 0 до 250.
     /// </summary>
     /// <param name="sender">Источник события (TextBox).</param>
-    /// <param name="e">Данные события изменения текста.</param>
     internal void TextBox_TextChanged(object sender)
     {
       if (sender is TextBox textBox)
       {
-        if (int.TryParse(textBox.Text, out int value))
+        if (int.TryParse(textBox.Text, out int value) && value > 250)
         {
-          if (value > 250)
-          {
-            textBox.Text = "250";
-            textBox.CaretIndex = textBox.Text.Length;
-          }
+          textBox.Text = "250";
+          textBox.CaretIndex = textBox.Text.Length;
         }
       }
     }
@@ -167,7 +162,6 @@ namespace Mode.Settings.DeviceConfig.Base
     /// Проверяет вставляемый текст на соответствие числовому формату.
     /// Отменяет вставку, если вставляемый текст содержит нечисловые символы.
     /// </summary>
-    /// <param name="sender">Источник события.</param>
     /// <param name="e">Данные события вставки объекта.</param>
     internal void TextBox_Pasting(DataObjectPastingEventArgs e)
     {

@@ -38,8 +38,9 @@ namespace Mode.TestSuite.NodeMethod
     }
 
     /// <summary>
-    /// Главный метод, который управляет процессом теста методом узла.
+    /// Запускает выполнение теста методом узла.
     /// </summary>
+    /// <param name="token">Токен отмены операции.</param>
     public async Task ExecuteTestProcess(CancellationToken token)
     {
       if (!await GetIsIdleModeEnabled())
@@ -62,6 +63,7 @@ namespace Mode.TestSuite.NodeMethod
       {
         bus = BusPoint.B;
       }
+
       var mkr = BlockNumberGenerator.GetBlockModelsBetween(testDataModel.FirstModuleRelayControl, testDataModel.LastModuleRelayControl);
 
       await ConnectPointsToOppositeBusAsync(mkr, bus);
@@ -72,11 +74,10 @@ namespace Mode.TestSuite.NodeMethod
     }
 
     /// <summary>
-    /// Проверка данных и подключение к устройствам.
+    /// Проверяет данные и выполняет подключение к устройствам.
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <param name="token">Токен отмены операции.</param>
+    /// <returns>True, если подключение успешно, иначе false.</returns>
     public async Task<bool> ValidateAndConnectDevice(CancellationToken token)
     {
       InputValidator inputValidator = new InputValidator();
@@ -91,11 +92,11 @@ namespace Mode.TestSuite.NodeMethod
         {
           return false;
         }
+
         if (!inputValidator.ValidateUniqueMeasurementPointAsync(firstPoint.PointModel, secondPoint.PointModel))
         {
           return false;
         }
-
 
         List<DeviceModel> deviceModels = new List<DeviceModel>();
 
@@ -121,7 +122,6 @@ namespace Mode.TestSuite.NodeMethod
         {
           return false;
         }
-
       }
       catch (InvalidOperationException)
       {
@@ -153,10 +153,8 @@ namespace Mode.TestSuite.NodeMethod
     /// </summary>
     /// <param name="mkr">Список модулей МКР.</param>
     /// <param name="bus">Тип шины, к которой подключаются точки.</param>
-    /// <param name="goodText">Текст для отображения в сообщениях.</param>
     public async Task ConnectPointsToOppositeBusAsync(List<Core.ModuleRelayControl.Model> mkr, BusPoint bus)
     {
-
       for (int i = 0; i < mkr.Count; i++)
       {
         await Core.ModuleRelayControl.Functions.ConnectBusAsync(mkr[i].IPAddress, BusModuleRelayControl.AB1, true);
@@ -185,15 +183,13 @@ namespace Mode.TestSuite.NodeMethod
     }
 
     /// <summary>
-    /// Подключает каждую точку к заданной шине, проверяет с помощью ППУ, и возвращает обратно.
+    /// Подключает каждую точку к заданной шине, проверяет с помощью ППУ и возвращает обратно.
     /// </summary>
     /// <param name="mkr">Список модулей МКР.</param>
-    /// <param name="bus">Тип шины, к которой подключаются точки.</param>
-    /// <param name="goodText">Текст для отображения в сообщениях.</param>
+    /// <param name="bus">Тип шины.</param>
     public async Task ConnectAndTestPointsAsync(List<Core.ModuleRelayControl.Model> mkr, BusPoint bus)
     {
       await ShowMessageAsync(new ShowMessageModel($"Проверка точек", goodText.Item2) { CanBeDeleted = false });
-
 
       if (!int.TryParse(VoltageData.Text, out int voltage))
       {
@@ -213,6 +209,7 @@ namespace Mode.TestSuite.NodeMethod
       {
         negativeBus = BusPoint.B;
       }
+
       if (!await GetIsIdleModeEnabled())
       {
         await Core.GptLibrary.IrMode.SetModeAsync(gptLibrary);
@@ -262,7 +259,12 @@ namespace Mode.TestSuite.NodeMethod
       await ShowMessageAsync(new ShowMessageModel($"\t\tРезультат проверки точки {point}", null, $"{result.ToString()} [{(error ? errorText.Item1.ToString() : goodText.Item1.ToString())}]", error ? errorText.Item2 : goodText.Item2) { CanBeDeleted = !error });
     }
 
-
+    /// <summary>
+    /// Получает список точек для тестирования.
+    /// </summary>
+    /// <param name="mkr">Модуль МКР.</param>
+    /// <param name="moduleVoltageNumber">Номер модуля.</param>
+    /// <returns>Список точек.</returns>
     private List<int> GetPoints(Core.ModuleRelayControl.Model mkr, int moduleVoltageNumber)
     {
       int firstPoint = 1;
@@ -287,14 +289,10 @@ namespace Mode.TestSuite.NodeMethod
       return points;
     }
 
-
     /// <summary>
     /// Асинхронно отображает сообщение.
     /// </summary>
-    /// <param name="header">Текст заголовка сообщения.</param>
-    /// <param name="headerColor">Цвет текста заголовка.</param>
-    /// <param name="description">Текст описания сообщения.</param>
-    /// <param name="descriptionColor">Цвет текста описания.</param>
+    /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel) => await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
   }

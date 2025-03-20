@@ -5,15 +5,32 @@ using NewCore.Communication;
 
 namespace NewCore.Function.ManagerChassis
 {
+  /// <summary>
+  /// Класс для управления состоянием шасси.
+  /// </summary>
   public class StateManager : IStateManagerChassis
   {
-    IChassisManager _chassisModel;
+    /// <summary>
+    /// Экземпляр менеджера шасси.
+    /// </summary>
+    private readonly IChassisManager _chassisModel;
+
+    /// <summary>
+    /// Создаёт новый экземпляр класса <see cref="StateManager"/>.
+    /// </summary>
+    /// <param name="managerChassis">Экземпляр менеджера шасси.</param>
     public StateManager(IChassisManager managerChassis) => _chassisModel = managerChassis;
 
     /// <summary>
-    /// Инициализация устройства коммутации шин.
+    /// Инициализирует устройство коммутации шин.
     /// </summary>
-    /// <returns>Кортеж с булевым результатом и строкой, содержащей ответ от инициализации при ошибке.</returns>
+    /// <returns>
+    /// Кортеж, содержащий:
+    /// <list type="bullet">
+    /// <item><c>bool Connect</c> - результат инициализации (успешно/неуспешно).</item>
+    /// <item><c>string Answer</c> - ответ от устройства при ошибке.</item>
+    /// </list>
+    /// </returns>
     public async Task<(bool Connect, string Answer)> Initialize()
     {
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
