@@ -7,7 +7,6 @@ namespace UI.Controls.Protocol
 {
   partial class ProtocolUI
   {
-
     #region Кнопки.
 
     /// <summary>
@@ -356,6 +355,7 @@ namespace UI.Controls.Protocol
           StepOverButton.Visibility = Visibility.Visible;
           StepIntoButton.Visibility = Visibility.Visible;
         }
+
         pauseButton.Visibility = Visibility.Visible;
         exitButton.Visibility = Visibility.Visible;
       });
@@ -375,6 +375,7 @@ namespace UI.Controls.Protocol
           StepOverButton.Visibility = Visibility.Visible;
           StepIntoButton.Visibility = Visibility.Visible;
         }
+
         pauseButton.Visibility = Visibility.Visible;
         exitButton.Visibility = Visibility.Visible;
       });

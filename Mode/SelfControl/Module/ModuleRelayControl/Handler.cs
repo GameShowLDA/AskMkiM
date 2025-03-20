@@ -1,16 +1,24 @@
-﻿using System.Windows;
+﻿using System.Globalization;
+using System.Net;
+using System.Windows;
 using System.Windows.Media;
 using Core.ConfigCollector;
 using Core.Model;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using static AppConfig.Config.ExecutionConfig;
+using static Core.Enum.DeviceEnum;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.SelfControl.Module.ModuleRelayControl
 {
+  /// <summary>
+  /// Класс Handler реализует логику самоконтроля для устройств модуля реле. 
+  /// Он подключается к устройствам, выполняет сброс системы, проверяет состояние реле, 
+  /// отображает результаты проверки и обрабатывает ошибки, связанные с реле.
+  /// </summary>
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
@@ -18,6 +26,11 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     private readonly Tuple<string, Color> errorText = ErrorMessage;
     private Core.ModuleRelayControl.Model moduleRelayControl;
 
+    /// <summary>
+    /// Конструктор, принимающий объект ProtocolSelfCheckControl и модель устройства.
+    /// </summary>
+    /// <param name="protocolSelfCheck">Объект управления протоколом самоконтроля.</param>
+    /// <param name="deviceModel">Модель устройства, используемая для создания объекта модуля реле.</param>
     internal Handler(ProtocolUI protocolSelfCheck, object deviceModel)
     {
       ProtocolSelfCheckControl = protocolSelfCheck;
@@ -25,6 +38,11 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     }
 
     #region StartDelegate
+
+    /// <summary>
+    /// Возвращает делегат, ссылающийся на метод RunSelfCheck, для запуска процесса самоконтроля.
+    /// </summary>
+    /// <returns>Делегат StartDelegate.</returns>
     internal StartDelegate GetStartDelegate()
     {
       StartDelegate startDelegate = RunSelfCheck;
@@ -32,20 +50,21 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     }
 
     /// <summary>
-    /// Асинхронный метод для настроек самоконтроля.
+    /// Асинхронный метод для выполнения настроек самоконтроля. Метод проверяет соединение с устройствами, 
+    /// подключается к ним, выводит информационное сообщение, подключает счетчик, выполняет цикл проверки замыканий,
+    /// а затем скрывает кнопку паузы и выводит итоговое сообщение.
     /// </summary>
+    /// <param name="token">Токен отмены операции.</param>
     private async Task RunSelfCheck(CancellationToken token)
     {
       if (!await GetIsIdleModeEnabled())
       {
         var managerShassy = ConfigCollector.GetManagerShassy();
-
-        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection((new List<DeviceModel>()
+        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<DeviceModel>()
         {
           managerShassy,
           moduleRelayControl,
-
-        }), ProtocolSelfCheckControl.ShowMessageAsync))
+        }, ProtocolSelfCheckControl.ShowMessageAsync))
         {
           return;
         }
@@ -69,7 +88,9 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     }
 
     /// <summary>
-    /// Выполняет цикл замыканий точек с проверкой их состояния.
+    /// Выполняет цикл замыканий точек и проверяет их состояние.
+    /// Для каждой точки отправляется запрос, затем в зависимости от режима получаются данные 
+    /// и формируется сообщение с результатом проверки.
     /// </summary>
     /// <param name="token">Токен отмены операции.</param>
     public async Task PerformClosureCycle(CancellationToken token)
@@ -77,32 +98,22 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
       for (int point = 1; point <= 350; point++)
       {
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-        string answer = !await GetIsIdleModeEnabled() ? await Core.ModuleRelayControl.Functions.CheckPoint(moduleRelayControl.IPAddress, point) : !await GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
+        string answer = !await GetIsIdleModeEnabled()
+          ? await Core.ModuleRelayControl.Functions.CheckPoint(moduleRelayControl.IPAddress, point)
+          : !await GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
 
         SelfPointModel model;
         if (await GetIsIdleModeEnabled())
         {
           Random random = new Random();
           bool isErrorSimulation = await GetIsErrorSimulationEnabled();
-          if (isErrorSimulation)
-          {
-            if (point % 10 == 0)
-            {
-              isErrorSimulation = true;
-            }
-            else
-            {
-              isErrorSimulation = false;
-            }
-          }
-
+          isErrorSimulation = isErrorSimulation && point % 10 == 0;
           model = new SelfPointModel
           {
             DisconnectBusB = isErrorSimulation ? random.Next(2) == 1 : true,
             DisconnectBusA = isErrorSimulation ? random.Next(2) == 1 : true,
             ConnectPoint = isErrorSimulation ? random.Next(2) == 1 : true,
           };
-
           model.SelfControl = model.DisconnectBusB && model.DisconnectBusA && model.ConnectPoint;
         }
         else
@@ -113,13 +124,12 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
         ShowMessageModel showMessageModel;
         if (model != null)
         {
-
           showMessageModel = new ShowMessageModel()
           {
             Header = $"\tТочка {point}",
             Message = model.SelfControl ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
             MessageColor = model.SelfControl ? goodText.Item2 : errorText.Item2,
-            ExecutionError = model.SelfControl ? false : true,
+            ExecutionError = !model.SelfControl,
           };
           showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
 
@@ -131,7 +141,7 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
               Header = $"\t\tПодключение точки",
               Message = model.ConnectPoint ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
               MessageColor = model.ConnectPoint ? goodText.Item2 : errorText.Item2,
-              CanBeDeleted = model.ConnectPoint ? true : false,
+              CanBeDeleted = model.ConnectPoint,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
 
@@ -140,7 +150,7 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
               Header = $"\t\tПроверка реле на шине А",
               Message = model.DisconnectBusA ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
               MessageColor = model.DisconnectBusA ? goodText.Item2 : errorText.Item2,
-              CanBeDeleted = model.DisconnectBusA ? true : false,
+              CanBeDeleted = model.DisconnectBusA,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
 
@@ -149,7 +159,7 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
               Header = $"\t\tПроверка реле на шине B",
               Message = model.DisconnectBusB ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
               MessageColor = model.DisconnectBusB ? goodText.Item2 : errorText.Item2,
-              CanBeDeleted = model.DisconnectBusB ? true : false,
+              CanBeDeleted = model.DisconnectBusB,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
           }
@@ -171,6 +181,11 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     #endregion
 
     #region StopDelegate
+
+    /// <summary>
+    /// Возвращает делегат остановки самоконтроля, указывающий на метод StopAsync.
+    /// </summary>
+    /// <returns>Делегат StopDelegate.</returns>
     internal StopDelegate GetStopDelegate()
     {
       StopDelegate stopDelegate = StopAsync;
@@ -178,22 +193,15 @@ namespace Mode.SelfControl.Module.ModuleRelayControl
     }
 
     /// <summary>
-    /// Останавливает самоконтроль, отключая необходимые компоненты и отображая соответствующие сообщения.
+    /// Останавливает самоконтроль, завершая процесс протокола и выводя итоговое сообщение.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task StopAsync(CancellationToken cancellationToken)
     {
-      LogInformation($"Запущен метод завершения самоконтроля");
+      LogInformation("Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-
-      ShowMessageModel showMessageModel = new ShowMessageModel()
-      {
-        Header = "\tСамоконтроль",
-        Message = $"[{goodText.Item1}]",
-        MessageColor = goodText.Item2,
-      };
-      await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
-
-      LogInformation($"Завершён метод завершения самоконтроля");
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
+      LogInformation("Завершён метод завершения самоконтроля");
     }
     #endregion
   }

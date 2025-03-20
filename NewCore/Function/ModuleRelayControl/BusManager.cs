@@ -12,11 +12,18 @@ using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.ModuleRelayControl
 {
+  /// <summary>
+  /// Управляет подключением и отключением шин модуля коммутации реле (МКР).
+  /// </summary>
   public class BusManager : IBusManager
   {
     IRelaySwitchModule _moduleRelayControl { get; set; }
-    public BusManager(IRelaySwitchModule moduleRelayControl) => _moduleRelayControl = moduleRelayControl;
 
+    /// <summary>
+    /// Создаёт новый экземпляр класса <see cref="BusManager"/>.
+    /// </summary>
+    /// <param name="moduleRelayControl">Экземпляр интерфейса модуля реле.</param>
+    public BusManager(IRelaySwitchModule moduleRelayControl) => _moduleRelayControl = moduleRelayControl;
 
     /// <summary>
     /// Подключить шину МКР.
@@ -61,7 +68,6 @@ namespace NewCore.Function.ModuleRelayControl
       await Communication.DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), new DeviceCommand(4, typeBus, typeVoltage, 2), 1000);
       return true;
     }
-
 
     /// <summary>
     /// Пытается получить номер шины на основе значения перечисления SwitchingBus.

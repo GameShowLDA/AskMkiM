@@ -10,48 +10,45 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class PowerSourceModuleEntity : IPowerSourceModule
   {
+    /// <inheritdoc />
     public int Id { get; set; }
-    /// <summary>
-    /// Номер менеджера шасси, к которому подключен модуль.
-    /// </summary>
+
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
 
-    /// <summary>
-    /// Название модуля источника питания.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание модуля источника питания.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Уникальный номер устройства.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Детали подключения модуля (IP-адрес, COM-порт и т. д.).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
-    /// <summary>
-    /// Тип устройства, всегда PowerSourceModule.
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.PowerSourceModule;
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IBusManager BusManager { get; set; }
+
+    /// <inheritdoc />
     [NotMapped]
     public ICurrentManager CurrentManager { get; set; }
+
+    /// <inheritdoc />
     [NotMapped]
     public IStateManager StateManager { get; set; }
+
+    /// <inheritdoc />
     [NotMapped]
     public IVoltageManager VoltageManager { get; set; }
-
 
     /// <summary>
     /// Метод инициализации модуля источника питания.

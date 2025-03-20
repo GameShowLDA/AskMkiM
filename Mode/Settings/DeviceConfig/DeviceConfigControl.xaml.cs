@@ -1,12 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.BreakDown;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceBusCommutation;
 using Mode.Settings.DeviceConfig.DeviceManager;
 using Mode.Settings.DeviceConfig.FastMeter;
+using Mode.Settings.DeviceConfig.ModuleRelayControl;
 using Mode.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
 using static AppConfig.Config.SystemStateManager;
@@ -14,10 +16,13 @@ using static AppConfig.Config.SystemStateManager;
 namespace Mode.Settings.DeviceConfig
 {
   /// <summary>
-  /// Логика взаимодействия для DeviceConfigControl.xaml
+  /// Логика взаимодействия для DeviceConfigControl.xaml.
   /// </summary>
   public partial class DeviceConfigControl : UserControl
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="DeviceConfigControl"/>.
+    /// </summary>
     public DeviceConfigControl()
     {
       InitializeComponent();
@@ -26,19 +31,28 @@ namespace Mode.Settings.DeviceConfig
 
       try
       {
-        var data = new ChassisManagerRepository(Context).GetAll().First();
-        AddSystem(data);
+        var data = new ChassisManagerServices().GetAll().First();
+        AddSystem((ChassisManagerEntity)data);
       }
       catch
       {
-
+        return;
       }
     }
 
+    /// <summary>
+    /// Устанавливает контрол управления устройствами.
+    /// </summary>
+    /// <param name="deviceManagerControl">Контрол для управления устройствами.</param>
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
     {
       deviceBorder.Child = deviceManagerControl;
     }
+
+    /// <summary>
+    /// Обрабатывает выбор шасси.
+    /// </summary>
+    /// <param name="system">Выбранное шасси.</param>
     private void SelectedChassis(ChassisManagerEntity system)
     {
       var devices = new DeviceManagerControl();
@@ -55,10 +69,14 @@ namespace Mode.Settings.DeviceConfig
       devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
       devices.DeviceBusCommutationSelected += (s, a) => Devices_DeviceBusCommutationSelected(s, a, system, devices);
       devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
+      devices.ModuleRelayEvent += (s,a) => Devices_ModuleRalayEvent(s, a, system, devices);
       devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
       devices.ExitEvent += Devices_ExitEvent;
     }
 
+    /// <summary>
+    /// Отображает окно быстрого измерителя.
+    /// </summary>
     private void Devices_FastMeterEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
     {
       this.Effect = new System.Windows.Media.Effects.BlurEffect();
@@ -69,6 +87,9 @@ namespace Mode.Settings.DeviceConfig
       this.Effect = null;
     }
 
+    /// <summary>
+    /// Отображает окно источника напряжения.
+    /// </summary>
     private void Devices_PowerModuleEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
     {
       this.Effect = new System.Windows.Media.Effects.BlurEffect();
@@ -79,6 +100,22 @@ namespace Mode.Settings.DeviceConfig
       this.Effect = null;
     }
 
+    /// <summary>
+    /// Отображает окно источника напряжения.
+    /// </summary>
+    private void Devices_ModuleRalayEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
+    {
+      this.Effect = new System.Windows.Media.Effects.BlurEffect();
+      ModuleRelayControlWindow fastMeterWindow = new ModuleRelayControlWindow();
+      fastMeterWindow.SetSettings(sender, e);
+      fastMeterWindow.RequestSave += (s, a) => LoadRelaySwitchModules(system, devices);
+      fastMeterWindow.ShowDialog();
+      this.Effect = null;
+    }
+
+    /// <summary>
+    /// Отображает окно коммутации шин.
+    /// </summary>
     private void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
     {
       this.Effect = new System.Windows.Media.Effects.BlurEffect();
@@ -89,12 +126,9 @@ namespace Mode.Settings.DeviceConfig
       this.Effect = null;
     }
 
-    private void DbcControl_RequestClose(object? sender, EventArgs e)
-    {
-      ToggleThirdColumn(false);
-      settingsBorder.Child = null;
-    }
-
+    /// <summary>
+    /// Обрабатывает выход из управления устройствами.
+    /// </summary>
     private void Devices_ExitEvent(object? sender, EventArgs e)
     {
       ToggleThirdColumn(false);
@@ -102,6 +136,9 @@ namespace Mode.Settings.DeviceConfig
       settingsBorder.Child = null;
     }
 
+    /// <summary>
+    /// Отображает окно пробойной установки.
+    /// </summary>
     private void Devices_AddBreakdownEvent(object? sender, IHeadUnit e, ChassisManagerEntity system, DeviceManagerControl devices)
     {
       this.Effect = new System.Windows.Media.Effects.BlurEffect();
@@ -112,19 +149,10 @@ namespace Mode.Settings.DeviceConfig
       this.Effect = null;
     }
 
-    private void BreakDownControl_DeviceSaved(object? sender, EventArgs e)
-    {
-      ToggleThirdColumn(false);
-      settingsBorder.Child = null;
-      MessageBox.Show("Пробойная установка добавлена в конфигурацию!");
-    }
-
-    private void BreakDownControl_ClosedEvent(object? sender, EventArgs e)
-    {
-      ToggleThirdColumn(false);
-      settingsBorder.Child = null;
-    }
-
+    /// <summary>
+    /// Показывает или скрывает третью колонку в интерфейсе.
+    /// </summary>
+    /// <param name="isVisible">Флаг видимости.</param>
     public void ToggleThirdColumn(bool isVisible)
     {
       if (isVisible)
@@ -141,7 +169,6 @@ namespace Mode.Settings.DeviceConfig
       }
     }
 
-
     /// <summary>
     /// Загружает все пробойные установки, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.
     /// </summary>
@@ -149,7 +176,9 @@ namespace Mode.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadBreakdownTesters(ChassisManagerEntity chassis, DeviceManagerControl devicesControl)
     {
-      var breakdownTesters = new AppConfig.DataBase.Services.BreakdownTesterRepository(Context)
+      devicesControl.ClearDevice<BreakdownTesterEntity>(new BreakdownTesterEntity());
+
+      var breakdownTesters = new BreakdownTesterServices()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in breakdownTesters)
@@ -165,7 +194,9 @@ namespace Mode.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadFastMeters(ChassisManagerEntity chassis, DeviceManagerControl devicesControl)
     {
-      var fastMeters = new AppConfig.DataBase.Services.FastMeterRepository(Context)
+      devicesControl.ClearDevice<FastMeterEntity>(new FastMeterEntity());
+
+      var fastMeters = new FastMeterServices()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in fastMeters)
@@ -181,7 +212,9 @@ namespace Mode.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadPrecisionMeters(ChassisManagerEntity chassis, DeviceManagerControl devicesControl)
     {
-      var precisionMeters = new AppConfig.DataBase.Services.PrecisionMeterRepository(Context)
+      devicesControl.ClearDevice<PrecisionMeterEntity>(new PrecisionMeterEntity());
+
+      var precisionMeters = new PrecisionMeterServices()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in precisionMeters)
@@ -197,7 +230,9 @@ namespace Mode.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadPowerSources(ChassisManagerEntity chassis, DeviceManagerControl devicesControl)
     {
-      var powerSources = new AppConfig.DataBase.Services.PowerSourceModuleRepository(Context)
+      devicesControl.ClearDevice<PowerSourceModuleEntity>(new PowerSourceModuleEntity());
+
+      var powerSources = new PowerSourceModuleServices()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in powerSources)
@@ -213,8 +248,9 @@ namespace Mode.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadRelaySwitchModules(ChassisManagerEntity chassis, DeviceManagerControl devicesControl)
     {
-      var relaySwitchModules = new AppConfig.DataBase.Services.RelaySwitchModuleRepository(Context)
-          .GetDevicesByNumberChassis(chassis.Number);
+      devicesControl.ClearDevice<RelaySwitchModuleEntity>(new RelaySwitchModuleEntity());
+
+      var relaySwitchModules = new RelaySwitchModuleServices().GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in relaySwitchModules)
       {
@@ -229,7 +265,9 @@ namespace Mode.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadSwitchingDevices(ChassisManagerEntity chassis, DeviceManagerControl devicesControl)
     {
-      var switchingDevices = new AppConfig.DataBase.Services.SwitchingDeviceRepository(Context)
+      devicesControl.ClearDevice<SwitchingDeviceEntity>(new SwitchingDeviceEntity());
+
+      var switchingDevices = new SwitchingDeviceServices()
           .GetDevicesByNumberChassis(chassis.Number);
 
       foreach (var device in switchingDevices)
@@ -237,16 +275,28 @@ namespace Mode.Settings.DeviceConfig
         devicesControl.AddDevice(device);
       }
     }
+
+    /// <summary>
+    /// Добавляет систему в список.
+    /// </summary>
+    /// <param name="data">Данные системы.</param>
     public void AddSystem(ChassisManagerEntity data)
     {
       chassisManager.AddSystem(data);
     }
 
+    /// <summary>
+    /// Добавляет стойку в список.
+    /// </summary>
+    /// <param name="data">Данные стойки.</param>
     public void AddRack(RackEntity data)
     {
       chassisManager.AddRack(data);
     }
 
+    /// <summary>
+    /// Создает новое шасси.
+    /// </summary>
     private void NewSystem()
     {
       ChassisManagerWindow chassisManagerWindow = new ChassisManagerWindow();
@@ -259,37 +309,11 @@ namespace Mode.Settings.DeviceConfig
       this.Effect = null;
     }
 
-    private void ChassisManager_NewRack(object? sender, EventArgs e)
-    {
-      //var setting = new RackSettings
-      //{
-      //  HorizontalAlignment = HorizontalAlignment.Stretch,
-      //  VerticalAlignment = VerticalAlignment.Stretch,
-      //  Margin = new Thickness(0),
-      //  Width = Double.NaN,    // Автоматическая ширина
-      //  Height = Double.NaN,    // Автоматическая высота
-      //};
-
-      //setting.RequestClose += Setting_RequestClose;
-      //setting.RequestSave += Setting_RequestSave; ;
-
-      //deviceBorder.Child = setting;
-      //deviceBorder.UpdateLayout();
-      //setting.UpdateLayout();
-      //chassisManager.Visibility = Visibility.Collapsed;
-      //settingsBorder.Visibility = Visibility.Collapsed;
-    }
-
-    private void Setting_RequestSave(object? sender, RackEntity device)
-    {
-      deviceBorder.Child = null;
-      chassisManager.Visibility = Visibility.Visible;
-      chassisManager.AddRack(device);
-    }
-
+    /// <summary>
+    /// Обрабатывает сохранение конфигурации шасси.
+    /// </summary>
     private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
     {
-      // TODO : Добавить в список устройств
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;
       if (device == null)
@@ -300,6 +324,9 @@ namespace Mode.Settings.DeviceConfig
       chassisManager.AddSystem(device);
     }
 
+    /// <summary>
+    /// Обрабатывает закрытие окна настроек.
+    /// </summary>
     private void Setting_RequestClose(object? sender, EventArgs e)
     {
       deviceBorder.Child = null;

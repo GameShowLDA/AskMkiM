@@ -6,36 +6,38 @@ using System.Windows.Media;
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для WindowButtons.xaml
+  /// Логика взаимодействия для WindowButtons.xaml.
   /// </summary>
   public partial class WindowButtons : UserControl
   {
     /// <summary>
-    /// Перечисление, представляющее варианты выбора для кнопок окна
+    /// Перечисление, представляющее варианты выбора для кнопок окна.
     /// </summary>
     public enum Choice
     {
       Exit,
       Minimize,
       Maximize,
-      None
+      None,
     }
 
     /// <summary>
-    /// Свойство, определяющее текущий выбранный элемент кнопки окна
+    /// Свойство, определяющее текущий выбранный элемент кнопки окна.
     /// </summary>
     public Choice ChoiceElement { get; set; }
 
     /// <summary>
-    /// Переопределенный метод для отрисовки содержимого элемента управления
+    /// Переопределенный метод для отрисовки содержимого элемента управления.
     /// </summary>
-    /// <param name="dc">Контекст отрисовки</param>
+    /// <param name="dc">Контекст отрисовки.</param>
     protected override void OnRender(DrawingContext dc)
     {
       base.OnRender(dc);
 
       if (ActualWidth <= 0 || ActualHeight <= 0)
+      {
         return;
+      }
 
       Pen pen = new Pen(Foreground, 1);
 
@@ -56,14 +58,13 @@ namespace UI.Components
       else if (ChoiceElement == Choice.Maximize)
       {
         dc.DrawRectangle(null, pen, new Rect(locationX, locationY, widthRect, heightRect));
-
       }
     }
 
     /// <summary>
-    /// Переопределенный метод, вызываемый при изменении размера элемента управления
+    /// Переопределенный метод, вызываемый при изменении размера элемента управления.
     /// </summary>
-    /// <param name="sizeInfo">Информация об изменении размера</param>
+    /// <param name="sizeInfo">Информация об изменении размера.</param>
     protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
     {
       base.OnRenderSizeChanged(sizeInfo);
@@ -72,7 +73,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Конструктор класса WindowButtons
+    /// Конструктор класса WindowButtons.
     /// </summary>
     public WindowButtons()
     {

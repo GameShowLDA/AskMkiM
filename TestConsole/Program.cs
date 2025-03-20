@@ -1,4 +1,6 @@
 ﻿
+using AppConfig.DataBase.Repositories;
+using AppConfig.DataBase.Services;
 using TestConsole.MINT;
 
 namespace TestConsole
@@ -20,11 +22,12 @@ namespace TestConsole
         Console.WriteLine("3. Работа с Keysight");
         Console.WriteLine("4. Самоконтроль УКШ");
         Console.WriteLine("5. Самоконтроль МИНТ");
+        Console.WriteLine("6. Какой-то хлам");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 5)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 6)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -58,6 +61,12 @@ namespace TestConsole
             await Mint_Test.RunAsync();
             break;
 
+          case 6:
+            {
+              var data = new RelaySwitchModuleServices().GetAll();
+              break;
+            }
+
           case 0:
             // Выход из программы
             Console.WriteLine("Выход из программы...");
@@ -69,5 +78,6 @@ namespace TestConsole
         }
       }
     }
+
   }
 }

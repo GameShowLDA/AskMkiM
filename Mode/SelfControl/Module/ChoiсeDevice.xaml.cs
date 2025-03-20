@@ -5,10 +5,14 @@ using Core.Model;
 namespace Mode.SelfControl.Module
 {
   /// <summary>
-  /// Логика взаимодействия для ChoiсeDevice.xaml
+  /// Пользовательский интерфейс для выбора устройства.
+  /// Отображает список устройств и позволяет выбрать активное устройство.
   /// </summary>
   public partial class ChoiсeDevice : UserControl
   {
+    /// <summary>
+    /// Инициализирует компонент и настройки.
+    /// </summary>
     public ChoiсeDevice()
     {
       InitializeComponent();
@@ -23,8 +27,6 @@ namespace Mode.SelfControl.Module
     /// <summary>
     /// Делегат для события изменения выбранного устройства.
     /// </summary>
-    /// <param name="sender">Объект, вызвавший событие.</param>
-    /// <param name="device">Выбранное устройство.</param>
     public delegate void DeviceSelectedEventHandler();
 
     /// <summary>
@@ -32,11 +34,18 @@ namespace Mode.SelfControl.Module
     /// </summary>
     public event DeviceSelectedEventHandler DeviceSelected;
 
+    /// <summary>
+    /// Возвращает выбранное устройство.
+    /// </summary>
+    /// <returns>Выбранное устройство.</returns>
     internal DeviceModel GetActiveDevice()
     {
       return deviceModels;
     }
 
+    /// <summary>
+    /// Инициализирует настройки компонента.
+    /// </summary>
     private void InitializeSettings()
     {
       deviceList.SelectionChanged += MkrListView_SelectionChanged;
@@ -44,6 +53,10 @@ namespace Mode.SelfControl.Module
       popup.Width = toggleButton.Width;
     }
 
+    /// <summary>
+    /// Добавляет устройство в список.
+    /// </summary>
+    /// <param name="deviceModel">Устройство для добавления.</param>
     public void AddDevice(DeviceModel deviceModel)
     {
       ListViewItem listViewItem = new ListViewItem()
@@ -60,6 +73,11 @@ namespace Mode.SelfControl.Module
       }
     }
 
+    /// <summary>
+    /// Обрабатывает изменение выбранного элемента в списке устройств.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void MkrListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (deviceList.SelectedItem != null)
@@ -67,7 +85,7 @@ namespace Mode.SelfControl.Module
         var selectedItem = deviceList.SelectedItem as ListViewItem;
         toggleButton.Content = selectedItem.Content.ToString();
         toggleButton.IsChecked = false;
-        deviceModels = (selectedItem.Tag) as DeviceModel;
+        deviceModels = selectedItem.Tag as DeviceModel;
         DeviceSelected?.Invoke();
       }
     }

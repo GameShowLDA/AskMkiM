@@ -11,7 +11,6 @@ namespace MainWindowProgram
 {
   public partial class MainWindow
   {
-
     #region Основные события управления окном.
 
     /// <summary>
@@ -97,7 +96,7 @@ namespace MainWindowProgram
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Title = "Выберите текстовый файл"
+          Title = "Выберите текстовый файл",
         };
 
         if (openFileDialog.ShowDialog() == true)
@@ -237,6 +236,12 @@ namespace MainWindowProgram
       keyManagementWindow.ShowDialog();
       this.Effect = null;
     }
+
+    /// <summary>
+    /// Добавляет элемент управления элемент управления для работы с ППУ.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
     private void Gpt_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new UI.Controls.GPT.GPTPunchControl(), "GptManagement").ConfigureAwait(true);
 
     /// <summary>

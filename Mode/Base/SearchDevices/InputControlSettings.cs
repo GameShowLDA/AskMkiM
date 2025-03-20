@@ -5,6 +5,9 @@ using static Utilities.LoggerUtility;
 
 namespace Mode.Base.SearchDevices
 {
+  /// <summary>
+  /// Предоставляет настройки для компонентов ввода при поиске устройств.
+  /// </summary>
   static internal class InputControlSettings
   {
     /// <summary>
@@ -39,13 +42,16 @@ namespace Mode.Base.SearchDevices
     {
       { ElectricParameter.Resistance, Tuple.Create("Сопротивление", "Ом") },
       { ElectricParameter.Capacitance, Tuple.Create("Ёмкость", "нФ") },
-      { ElectricParameter.InsulationResistance, Tuple.Create("Сопротивление изоляции", "МОм") }
+      { ElectricParameter.InsulationResistance, Tuple.Create("Сопротивление изоляции", "МОм") },
     };
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для измерения электрических параметров.</param>
+    /// <param name="electricParameter">Тип электрического параметра, для которого настраиваются элементы ввода.</param>
+    /// <returns>StackPanel с добавленными элементами управления.</returns>
     static internal StackPanel InitializeSettings(out DataElectricModel measurementDataModel, ElectricParameter electricParameter = ElectricParameter.None)
     {
       DataElectricModel tempModel = null;
@@ -64,7 +70,7 @@ namespace Mode.Base.SearchDevices
         AddResistanceControls(measurementDataModel, contentStack, electricParameter);
       }
 
-      // Вызов событий
+      // Вызов событий для настройки данных
       DataPointEvent(measurementDataModel, electricParameter);
       ResistancePointEvent(measurementDataModel, electricParameter);
 
@@ -75,6 +81,9 @@ namespace Mode.Base.SearchDevices
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
     /// </summary>
+    /// <param name="measurementDataModel">Модель тестовых данных для измерения.</param>
+    /// <param name="electricParameter">Тип электрического параметра, для которого настраиваются элементы ввода.</param>
+    /// <returns>StackPanel с добавленными элементами управления.</returns>
     static internal StackPanel InitializeSettings(out TestDataModel measurementDataModel, ElectricParameter electricParameter = ElectricParameter.None)
     {
       measurementDataModel = new TestDataModel();
@@ -84,6 +93,7 @@ namespace Mode.Base.SearchDevices
       return contentStack;
     }
 
+    /// <summary>
     /// Создает StackPanel для размещения элементов управления.
     /// Устанавливает отступы и определяет, на какой строке Grid он должен отображаться.
     /// </summary>
@@ -94,14 +104,12 @@ namespace Mode.Base.SearchDevices
       {
         LogInformation("Создание панели с элементами управления");
 
-        // Создание и настройка StackPanel
         StackPanel contentStack = new StackPanel
         {
-          Margin = new Thickness(10, 20, 10, 20)
+          Margin = new Thickness(10, 20, 10, 20),
         };
         Grid.SetRow(contentStack, 1);
 
-        // Возвращаем StackPanel
         return contentStack;
       }
       catch (Exception ex)
@@ -115,6 +123,7 @@ namespace Mode.Base.SearchDevices
     /// Добавляет элементы управления для первой и второй измерительных точек в переданный StackPanel.
     /// Настраивает стиль и текст для каждого поля ввода.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для измерения.</param>
     /// <param name="contentStack">StackPanel, в который добавляются элементы управления.</param>
     static private void AddMeasurementBorders(DataPointModel measurementDataModel, StackPanel contentStack)
     {
@@ -137,10 +146,12 @@ namespace Mode.Base.SearchDevices
     }
 
     /// <summary>
-    /// Добавляет элементы управления для ввода электрического параметра' и единицы измерения в переданный StackPanel.
+    /// Добавляет элементы управления для ввода электрического параметра и его единицы измерения в переданный StackPanel.
     /// Настраивает сетку для правильного расположения полей ввода и текста.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для измерения электрического параметра.</param>
     /// <param name="contentStack">StackPanel, в который добавляются элементы управления.</param>
+    /// <param name="electricParametr">Тип электрического параметра.</param>
     static private void AddResistanceControls(DataElectricModel measurementDataModel, StackPanel contentStack, ElectricParameter electricParametr)
     {
       LogInformation($"Создание панели ввода значения электрического параметра в {electricParametr}");
@@ -150,11 +161,11 @@ namespace Mode.Base.SearchDevices
       Grid resistanceGrid = new Grid();
       var resistanceColumn1 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Star)
+        Width = new GridLength(1, GridUnitType.Star),
       };
       var resistanceColumn2 = new ColumnDefinition
       {
-        Width = new GridLength(1, GridUnitType.Auto)
+        Width = new GridLength(1, GridUnitType.Auto),
       };
 
       resistanceGrid.ColumnDefinitions.Add(resistanceColumn1);
@@ -189,6 +200,8 @@ namespace Mode.Base.SearchDevices
     /// <summary>
     /// Настраивает события для введённых данных.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для измерения.</param>
+    /// <param name="electricParameter">Тип электрического параметра.</param>
     static private void DataPointEvent(DataPointModel measurementDataModel, ElectricParameter electricParameter = ElectricParameter.None)
     {
       FirstPointEvent(measurementDataModel);
@@ -198,6 +211,7 @@ namespace Mode.Base.SearchDevices
     /// <summary>
     /// Настраивает события для первой точки.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для измерения.</param>
     static private void FirstPointEvent(DataPointModel measurementDataModel)
     {
       DefaultGotAndLostEvent(measurementDataModel.FirstPointData, "Первая точка вида х.х.х");
@@ -207,14 +221,18 @@ namespace Mode.Base.SearchDevices
     /// <summary>
     /// Настраивает события для второй точки.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для измерения.</param>
     static private void SecondPointEvent(DataPointModel measurementDataModel)
     {
       DefaultGotAndLostEvent(measurementDataModel.LastPointData, "Вторая точка вида х.х.х");
       TextInputEvent(measurementDataModel.LastPointData);
     }
+
     /// <summary>
     /// Настраивает события для ввода электрического параметра.
     /// </summary>
+    /// <param name="measurementDataModel">Модель данных для электрического параметра.</param>
+    /// <param name="electricParameter">Тип электрического параметра.</param>
     static private void ResistancePointEvent(DataElectricModel measurementDataModel, ElectricParameter electricParameter)
     {
       ElectricParameterDescriptions.TryGetValue(electricParameter, out Tuple<string, string> value);
@@ -222,9 +240,17 @@ namespace Mode.Base.SearchDevices
       TextInputEvent(measurementDataModel.ElectricParameterData);
     }
 
+    /// <summary>
+    /// Проверяет, допустим ли вводимый текст.
+    /// </summary>
+    /// <param name="text">Вводимый текст.</param>
+    /// <returns><c>true</c>, если текст допустим; иначе, <c>false</c>.</returns>
     private static bool IsTextAllowed(string text)
     {
-      if (string.IsNullOrEmpty(text)) return false;
+      if (string.IsNullOrEmpty(text))
+      {
+        return false;
+      }
 
       return double.TryParse(text, out _) || text == "." || text == ",";
     }
@@ -232,7 +258,6 @@ namespace Mode.Base.SearchDevices
     /// <summary>
     /// Настраивает события GotFocus и LostFocus для TextBox.
     /// </summary>
-    /// <param name="border">Граница для настройки.</param>
     /// <param name="textBox">TextBox для настройки.</param>
     /// <param name="defaultText">Текст по умолчанию для TextBox.</param>
     static public void DefaultGotAndLostEvent(TextBox textBox, string defaultText)
@@ -243,7 +268,6 @@ namespace Mode.Base.SearchDevices
         {
           textBox.Text = string.Empty;
         }
-
       };
 
       textBox.LostFocus += (sender, e) =>
@@ -255,6 +279,11 @@ namespace Mode.Base.SearchDevices
       };
     }
 
+    /// <summary>
+    /// Настраивает событие для обработки ввода текста в TextBox.
+    /// При вводе запятой заменяет её на точку.
+    /// </summary>
+    /// <param name="textBox">TextBox для настройки.</param>
     static public void TextInputEvent(TextBox textBox)
     {
       textBox.PreviewTextInput += (sender, e) =>

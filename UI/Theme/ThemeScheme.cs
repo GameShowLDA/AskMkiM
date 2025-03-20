@@ -52,10 +52,8 @@ namespace UI.Theme
     {
       try
       {
-
         themeModel = GetLightTheme();
 
-        // Получаем ссылку на существующий ресурсный словарь
         var resourceDictionary = Application.Current.Resources.MergedDictionaries
           .FirstOrDefault(rd => rd.Source?.OriginalString == "/UI;component/Style.xaml");
 
@@ -75,7 +73,7 @@ namespace UI.Theme
           LogError("Ошибка: Ресурс не найден в MergedDictionaries.");
           resourceDictionary = new ResourceDictionary
           {
-            Source = new Uri("/UI;component/Style.xaml", UriKind.RelativeOrAbsolute)
+            Source = new Uri("/UI;component/Style.xaml", UriKind.RelativeOrAbsolute),
           };
           resourceDictionary["PrimaryColor"] = FromHex(themeModel.PrimaryColor);
           resourceDictionary["SecondaryColor"] = FromHex(themeModel.SecondaryColor);
@@ -92,7 +90,6 @@ namespace UI.Theme
         LogError($"Ошибка при создании ресурса: {ex.Message}");
       }
     }
-
 
     /// <summary>
     /// Преобразует строку шестнадцатеричного представления цвета в объект Color.
@@ -139,7 +136,7 @@ namespace UI.Theme
         SecondaryColor = "#303843",
         ForegroundColor = "#f3f0f9",
         ActiveColor = "#1ca3e9",
-        IsCheckedColor = "#1f242b"
+        IsCheckedColor = "#1f242b",
       };
     }
 
@@ -155,7 +152,7 @@ namespace UI.Theme
         SecondaryColor = "#AEEEEE",
         ForegroundColor = "#002B36",
         ActiveColor = "#FF4081",
-        IsCheckedColor = "#B2EBF2"
+        IsCheckedColor = "#B2EBF2",
       };
     }
   }

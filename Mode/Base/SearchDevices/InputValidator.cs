@@ -9,9 +9,11 @@ using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
-
 namespace Mode.Base.SearchDevices
 {
+  /// <summary>
+  /// Класс для проверки корректности ввода данных измерения.
+  /// </summary>
   internal class InputValidator
   {
     private readonly Tuple<string, Color> goodText = SuccessMessage;
@@ -22,8 +24,10 @@ namespace Mode.Base.SearchDevices
     /// </summary>
     /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
     /// <param name="pointText">Текст точки измерения для проверки.</param>
-    /// <param name="isFirstPoint">True, если это первая точка, иначе False.</param>
-    /// <returns>True, если точка корректна, иначе False.</returns>
+    /// <returns>
+    /// Кортеж, содержащий результат проверки (IsSuccess), объект <see cref="PointModel"/>,
+    /// модель менеджера шасси (<see cref="Core.ManagerShassy.Model"/>) и модель модуля реле (<see cref="Core.ModuleRelayControl.Model"/>).
+    /// </returns>
     internal async Task<(bool IsSuccess, PointModel PointModel, Core.ManagerShassy.Model ManagerShassy, Core.ModuleRelayControl.Model ModuleRelayControl)> ValidateMeasurementPointAsync(MessageDelegate messageDelegate, string pointText)
     {
       Core.ManagerShassy.Model managerModel;
@@ -46,7 +50,8 @@ namespace Mode.Base.SearchDevices
     /// Асинхронно проверяет корректность электрического параметра.
     /// </summary>
     /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
-    /// <returns>True, если параметр корректен, иначе False.</returns>
+    /// <param name="parameter">Проверяемый параметр.</param>
+    /// <returns>True, если параметр корректен; иначе False.</returns>
     internal async Task<bool> ValidateElectricalParameterAsync(MessageDelegate messageDelegate, string parameter)
     {
       LogInformation("Проверка сопротивления.");
@@ -58,6 +63,7 @@ namespace Mode.Base.SearchDevices
           LogError("Ошибка: Невозможно преобразовать данные измерения сопротивления.");
           return false;
         }
+
         return true;
       }
       catch (Exception ex)
@@ -113,9 +119,11 @@ namespace Mode.Base.SearchDevices
     }
 
     /// <summary>
-    /// Проверяет точки на уникальность.
+    /// Проверяет, что две точки измерения уникальны.
     /// </summary>
-    /// <returns>True, если сопротивление корректно, иначе False.</returns>
+    /// <param name="firstMeasurementPoint">Первая точка измерения.</param>
+    /// <param name="secondMeasurementPoint">Вторая точка измерения.</param>
+    /// <returns>True, если точки уникальны; иначе False.</returns>
     internal bool ValidateUniqueMeasurementPointAsync(PointModel firstMeasurementPoint, PointModel secondMeasurementPoint)
     {
       try
@@ -127,6 +135,7 @@ namespace Mode.Base.SearchDevices
           LogError("Ошибка: Вторая точка совпадает с первой.");
           return false;
         }
+
         return true;
       }
       catch (Exception ex)
@@ -148,6 +157,7 @@ namespace Mode.Base.SearchDevices
       {
         LogError($"Ошибка: некорректная точка измерения '{pointText}'.");
       }
+
       return point;
     }
 
@@ -169,6 +179,7 @@ namespace Mode.Base.SearchDevices
       {
         managerShassy = new Core.ManagerShassy.Model(IPAddress.Parse($"192.168.{point.DeviceNumber}.0"));
       }
+
       return true;
     }
 
@@ -196,6 +207,7 @@ namespace Mode.Base.SearchDevices
 
         moduleRelay = mkrList[point.ModuleNumber - 1];
       }
+
       return ValidationDataResult.Success;
     }
 
@@ -204,7 +216,7 @@ namespace Mode.Base.SearchDevices
     /// </summary>
     /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
     /// <param name="validationResult">Результат валидации.</param>
-    /// <param name="isFirstPoint">True, если это первая точка, иначе False.</param>
+    /// <param name="point">Текст точки измерения.</param>
     private async Task GetErrorMessage(MessageDelegate messageDelegate, ValidationDataResult validationResult, string point)
     {
       string errorMessage;

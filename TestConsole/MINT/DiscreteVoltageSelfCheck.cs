@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using AppConfig.DataBase.Services;
+using AppConfig.DataBase.Repositories;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using static Utilities.LoggerUtility;

@@ -18,5 +18,4 @@
     /// <returns>Задача, возвращающая строковый ответ от устройства.</returns>
     Task<string> QueryAsync(string command);
   }
-
 }

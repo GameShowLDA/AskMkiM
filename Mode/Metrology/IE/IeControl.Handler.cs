@@ -28,6 +28,7 @@ namespace Mode.Metrology.IE
     /// <summary>
     /// Главный метод, который управляет процессом измерения сопротивления изоляции.
     /// </summary>
+    /// <param name="token">Токен отмены, позволяющий прервать операцию конфигурации.</param>
     public async Task ExecuteMeasurementProcess(CancellationToken token)
     {
       Completed = true;
@@ -97,6 +98,7 @@ namespace Mode.Metrology.IE
         {
           return false;
         }
+
         if (!inputValidator.ValidateUniqueMeasurementPointAsync(firstPoint.PointModel, secondPoint.PointModel))
         {
           return false;
@@ -118,7 +120,6 @@ namespace Mode.Metrology.IE
         {
           return false;
         }
-
       }
       catch (InvalidOperationException)
       {
@@ -138,10 +139,7 @@ namespace Mode.Metrology.IE
     /// <summary>
     /// Асинхронно отображает сообщение.
     /// </summary>
-    /// <param name="header">Текст заголовка сообщения.</param>
-    /// <param name="headerColor">Цвет текста заголовка.</param>
-    /// <param name="description">Текст описания сообщения.</param>
-    /// <param name="descriptionColor">Цвет текста описания.</param>
+    /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel) => await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
   }

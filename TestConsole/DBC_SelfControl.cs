@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
@@ -41,27 +42,27 @@ namespace TestConsole
         switch (choice)
         {
           case 1:
-            await SelfCheckCircuitAsync(SelfTestType.BlockingRelay);
+            await SelfCheckCircuitAsync(TypeConnector.BlockingRelay);
             break;
 
           case 2:
-            await SelfCheckCircuitAsync(SelfTestType.Multimeter);
+            await SelfCheckCircuitAsync(TypeConnector.Multimeter);
             break;
 
           case 3:
-            await SelfCheckCircuitAsync(SelfTestType.ADC);
+            await SelfCheckCircuitAsync(TypeConnector.ADC);
             break;
 
           case 4:
-            await SelfCheckCircuitAsync(SelfTestType.ADCReversed);
+            await SelfCheckCircuitAsync(TypeConnector.ADCReversed);
             break;
 
           case 5:
-            await SelfCheckCircuitAsync(SelfTestType.PINT);
+            await SelfCheckCircuitAsync(TypeConnector.PINT);
             break;
 
           case 6:
-            await SelfCheckCircuitAsync(SelfTestType.Shunt);
+            await SelfCheckCircuitAsync(TypeConnector.Shunt);
             break;
 
           case 7:
@@ -71,7 +72,7 @@ namespace TestConsole
 
             LogInformation("Начинаем полный самоконтроль всех цепей...");
 
-            foreach (SelfTestType testType in Enum.GetValues(typeof(SelfTestType)))
+            foreach (TypeConnector testType in Enum.GetValues(typeof(TypeConnector)))
             {
               await Task.Delay(20);
               LogInformation($"Запуск проверки: {testType}");
@@ -103,7 +104,7 @@ namespace TestConsole
     /// </summary>
     /// <param name="testType">Тип цепи для проверки.</param>
     /// <returns>True, если проверка успешна, иначе false.</returns>
-    private static async Task<bool> SelfCheckCircuitAsync(SelfTestType testType, ISwitchingDevice device = null, IFastMeter meter = null)
+    private static async Task<bool> SelfCheckCircuitAsync(TypeConnector testType, ISwitchingDevice device = null, IFastMeter meter = null)
     {
       if (device == null)
       {
@@ -182,7 +183,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
-    private static async Task<bool> PerformCircuitTestAsync(ISelfTestChecker selfTestChecker, IFastMeter meter, SelfTestType testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(ISelfTestChecker selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
     {
       LogInformation($"Запуск теста: {circuitName}");
 
@@ -241,7 +242,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если все реле прошли проверку, иначе false.</returns>
-    private static async Task<bool> PerformRelayCheck(ISelfTestChecker selfTestChecker, SelfTestType testType, string circuitName, int busContact, IFastMeter meter)
+    private static async Task<bool> PerformRelayCheck(ISelfTestChecker selfTestChecker, TypeConnector testType, string circuitName, int busContact, IFastMeter meter)
     {
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)
@@ -294,8 +295,6 @@ namespace TestConsole
     }
     private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter)
     {
-
-
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
       var result1 = await device.StateManager.Initialize();
@@ -328,7 +327,7 @@ namespace TestConsole
 
     private static ISwitchingDevice SelectDeviceBusCommutation()
     {
-      var dbc = new SwitchingDeviceRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      var dbc = new SwitchingDeviceServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -362,7 +361,7 @@ namespace TestConsole
 
     private static IFastMeter SelectMeter()
     {
-      var dbc = new FastMeterRepository(AppConfig.Config.SystemStateManager.Context).GetAll();
+      var dbc = new FastMeterServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -417,7 +416,7 @@ namespace TestConsole
 
     private static object CreateDeviceInstance(string className)
     {
-      Console.WriteLine($"Создание объекта класса: {className}");
+      Console.WriteLine($"Создание swобъекта класса: {className}");
 
       Type type = Type.GetType(className);
       if (type == null)

@@ -3,11 +3,19 @@ using NewCore.Device;
 
 namespace NewCore.Function.Keysight3466new
 {
+  /// <summary>
+  /// Класс для измерения сопротивления с помощью прибора Keysight.
+  /// </summary>
   public class ResistanceMeasurement : IResistanceMeasurement
   {
     private readonly KeysightDevice _device;
     private readonly ICommunication _communication;
 
+    /// <summary>
+    /// Создаёт экземпляр класса <see cref="ResistanceMeasurement"/>.
+    /// </summary>
+    /// <param name="device">Экземпляр устройства Keysight.</param>
+    /// <exception cref="ArgumentNullException">Выбрасывается, если переданный прибор <c>null</c>.</exception>
     public ResistanceMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
@@ -20,7 +28,9 @@ namespace NewCore.Function.Keysight3466new
     public async Task SetResistanceModeAsync()
     {
       if (!_device.IsConnected)
+      {
         throw new InvalidOperationException("Прибор не подключен.");
+      }
 
       await _communication.SendCommandAsync("CONF:RES");
     }
@@ -32,7 +42,9 @@ namespace NewCore.Function.Keysight3466new
     public async Task<double> MeasureResistanceAsync()
     {
       if (!_device.IsConnected)
+      {
         throw new InvalidOperationException("Прибор не подключен.");
+      }
 
       string response = await _communication.QueryAsync("MEAS:RES?");
 
@@ -45,9 +57,7 @@ namespace NewCore.Function.Keysight3466new
         return resistance;
       }
 
-      // Если парсинг не удался – возвращаем -1
       return -1;
     }
-
   }
 }

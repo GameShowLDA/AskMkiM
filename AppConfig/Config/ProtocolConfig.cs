@@ -99,7 +99,6 @@ namespace AppConfig.Config
     /// <returns>true, если включено; false, если выключено.</returns>
     public static async Task<bool> GetPrintProtocol() => await Task.Run(() => ProtocolModel.AutoPrintProtocol);
 
-
     /// <summary>
     /// Возвращает статус отображения времени в протоколе.
     /// </summary>
@@ -108,6 +107,9 @@ namespace AppConfig.Config
 
     #endregion
 
+    /// <summary>
+    /// Перезаписывает конфигурационный файл протокола с текущими настройками.
+    /// </summary>
     public static async void RewriteProtocolConfig()
     {
       ProtocolModel protocolModel = new ProtocolModel();

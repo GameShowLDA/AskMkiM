@@ -26,6 +26,7 @@ namespace Mode.Metrology.KC
     /// <summary>
     /// Настраивает устройства для измерения.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     public async Task ConfigureDevices(CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
@@ -34,6 +35,7 @@ namespace Mode.Metrology.KC
       {
         await MetrologyDeviceCommunication.DeviceBusCommutationConnectBus(cancellationToken, ShowMessageAsync, deviceBusCommutation);
       }
+
       await ShowMessageAsync(new ShowMessageModel("\tЗамыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
 
       cancellationToken.ThrowIfCancellationRequested();
@@ -42,6 +44,7 @@ namespace Mode.Metrology.KC
       {
         await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.FirstModuleRelayControl, Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB2, ShowMessageAsync);
       }
+
       await ShowMessageAsync(new ShowMessageModel($"\tМКР{measurementDataModel.FirstPointModel.ModuleNumber} Замыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
 
       if (measurementDataModel.LastModuleRelayControl.IPAddress != measurementDataModel.FirstModuleRelayControl.IPAddress)
@@ -51,6 +54,7 @@ namespace Mode.Metrology.KC
         {
           await MetrologyDeviceCommunication.ModuleRelayControl_ConnectBusesAsync(measurementDataModel.LastModuleRelayControl, Core.ModuleRelayControl.Enums.BusModuleRelayControl.AB2, ShowMessageAsync);
         }
+
         await ShowMessageAsync(new ShowMessageModel($"\tМКР{measurementDataModel.LastPointModel.ModuleNumber} Замыкание шин AB2", null, $"[{goodText.Item1}]", goodText.Item2));
       }
 
@@ -60,6 +64,7 @@ namespace Mode.Metrology.KC
       {
         await MetrologyDeviceCommunication.ModuleRelayControl_ConnectRelayAsync(measurementDataModel.FirstPointModel, measurementDataModel.LastPointModel, measurementDataModel.FirstModuleRelayControl, measurementDataModel.LastModuleRelayControl, ShowMessageAsync);
       }
+
       await ShowMessageAsync(new ShowMessageModel($"\tТочка {measurementDataModel.FirstPointModel.PointNumber}", null, $"[{goodText.Item1}]", goodText.Item2));
       await ShowMessageAsync(new ShowMessageModel($"\tТочка {measurementDataModel.LastPointModel.PointNumber}", null, $"[{goodText.Item1}]", goodText.Item2));
 

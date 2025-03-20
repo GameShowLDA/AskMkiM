@@ -1,0 +1,149 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using NewCore.Base.Function.DBC;
+using NewCore.Communication;
+using static Utilities.LoggerUtility;
+
+namespace NewCore.Function.DeviceBusCommutation
+{
+  /// <summary>
+  /// Класс для управления самоконтроля устройства коммутации шин.
+  /// </summary>
+  public class SelfTestManager : ISelfTestChecker
+  {
+    /// <summary>
+    /// Устройство коммутации шин.
+    /// </summary>
+    private readonly Device.DeviceBusCommutation _deviceBusCommutation;
+
+    /// <summary>
+    /// Словарь допустимых комбинаций шины и контактов для каждого типа проверки.
+    /// </summary>
+    public static readonly Dictionary<TypeConnector, List<int>> ValidBusContacts = new()
+        {
+            { TypeConnector.BlockingRelay, new List<int> { 11, 21 } },
+            { TypeConnector.Multimeter, new List<int> { 11,12,13,14,21,22,23,24} },
+            { TypeConnector.ADC, new List<int> { 11,12,13,14,21,22,23,24} },
+            { TypeConnector.ADCReversed, new List<int> { 11,12,13,14,21,22,23,24} },
+            { TypeConnector.PINT, new List<int> { 12, 13, 22, 23 } },
+            { TypeConnector.Shunt, new List<int> { 1, 2 } },
+        };
+
+    /// <summary>
+    /// Словарь, содержащий названия цепей для каждого типа проверки.
+    /// </summary>
+    public static readonly Dictionary<TypeConnector, string> CircuitNames = new()
+        {
+            { TypeConnector.BlockingRelay, "Блокировочное реле" },
+            { TypeConnector.Multimeter, "Мультиметр" },
+            { TypeConnector.ADC, "АЦП" },
+            { TypeConnector.ADCReversed, "АЦП с переполюсовкой" },
+            { TypeConnector.PINT, "ПИНТ" },
+            { TypeConnector.Shunt, "Шунт" },
+        };
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
+    /// </summary>
+    /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
+    public SelfTestManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
+
+    /// <inheritdoc />
+    public async Task<bool> ExecuteSelfTestAsync(TypeConnector testType, int busContact, int action)
+    {
+      if (!ValidateParameters(testType, busContact, action))
+      {
+        LogError($"Некорректные параметры: Тип проверки - {testType}, Контакт - {busContact}, Действие - {action}.");
+        return false;
+      }
+
+      DeviceCommand command = new DeviceCommand(4, (int)testType, busContact, action);
+      LogInformation($"Отправка команды самоконтроля: {command}");
+
+      if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
+      {
+        LogError("Некорректный IP-адрес устройства коммутации шин.");
+        return false;
+      }
+
+      await DeviceCommandSender.SendCommandAsync(ipAddress, command);
+      return true;
+    }
+
+    /// <summary>
+    /// Проверяет корректность переданных параметров.
+    /// </summary>
+    /// <param name="testType">Тип проверки.</param>
+    /// <param name="busContact">Выбор шины и контакта.</param>
+    /// <param name="action">Действие.</param>
+    /// <returns><c>true</c>, если параметры корректны, иначе <c>false</c>.</returns>
+    private bool ValidateParameters(TypeConnector testType, int busContact, int action)
+    {
+      if (!ValidBusContacts.ContainsKey(testType) || action < 1 || action > 2)
+      {
+        return false;
+      }
+
+      return ValidBusContacts[testType].Contains(busContact);
+    }
+
+    /// <inheritdoc />
+    public List<int>? GetValidBusContacts(TypeConnector testType)
+    {
+      return ValidBusContacts.TryGetValue(testType, out var contacts) ? contacts : null;
+    }
+
+    /// <inheritdoc />
+    public string GetCircuitName(TypeConnector testType, int busContact)
+    {
+      if (CircuitNames.TryGetValue(testType, out string? circuitName))
+      {
+        return $"{circuitName}, контакт {busContact}";
+      }
+
+      return $"Неизвестная цепь, контакт {busContact}";
+    }
+
+    /// <inheritdoc />
+    public async Task<int> GetRelayCountAsync(TypeConnector testType, int busContact)
+    {
+      DeviceCommand command = new DeviceCommand(41, (int)testType * 10, busContact, 0);
+      string response = await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_deviceBusCommutation.ConnectionDetails), command, 2000);
+
+      if (int.TryParse(response, out int relayCount))
+      {
+        LogInformation($"Количество реле в цепи {testType}: {relayCount}");
+        return relayCount;
+      }
+
+      LogError($"Ошибка получения количества реле для {testType}");
+      return -1;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ControlRelayAsync(TypeConnector testType, int relayNumber, int busContact, int action)
+    {
+      if (relayNumber < 0)
+      {
+        LogError("Некорректный номер реле.");
+        return false;
+      }
+
+      DeviceCommand command = new DeviceCommand(41, (int)testType * 10 + relayNumber, busContact, action);
+      LogInformation($"Управление реле {relayNumber} в цепи {testType}, контакт {busContact}, действие {action} : команда {command.ToString()}");
+
+      if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
+      {
+        LogError("Некорректный IP-адрес устройства коммутации шин.");
+        return false;
+      }
+
+      await DeviceCommandSender.SendCommandAsync(ipAddress, command);
+      return true;
+    }
+  }
+}

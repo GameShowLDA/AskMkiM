@@ -7,12 +7,22 @@ using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
 
-
 namespace NewCore.Function.GPT
 {
+  /// <summary>
+  /// Класс для управления режимом IR (Insulation Resistance).
+  /// </summary>
   public class IrMode : IIrModeBreakdown
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="IrMode"/>.
+    /// </summary>
+    /// <param name="gpt79904">Объект <see cref="GPT79904"/> для управления устройством.</param>
     public IrMode(GPT79904 gpt79904) => _gptModel = gpt79904;
+
+    /// <summary>
+    /// Экземпляр устройства GPT79904.
+    /// </summary>
     GPT79904 _gptModel { get; set; }
 
     static private int timeDelay = 2;
@@ -35,7 +45,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает режим сопротивления изоляции на пробойке.
     /// </summary>
-    /// <param name="model">Модель пробойки.</param>
     public async Task SetModeAsync()
     {
       LogInformation("Устанавливаем режим СИ на GPT-79904");
@@ -46,7 +55,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает напряжения на пробойном устройстве.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение.</param>
     public async Task SetVoltageAsync(double value)
     {
@@ -59,9 +67,7 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Установка/возврат времени теста в секундах.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение.</param>
-    /// <returns></returns>
     public async Task SetTimeAsync(int value)
     {
       LogInformation($"Устанавливаем время измерения {value} для режима СИ на GPT-79904");
@@ -73,8 +79,7 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Возвращает напряжение на пробойном устройстве.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <returns></returns>
+    /// <returns>Значение напряжения (в В).</returns>
     public async Task<double> GetVoltageAsync()
     {
       LogInformation("Считывание данных с ПУ");
@@ -100,7 +105,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Измерение сопротивления с преобразованием результата в МОм.
     /// </summary>
-    /// <param name="model"></param>
     /// <returns>Результат измерения в МОм.</returns>
     public async Task<double> MeasureResistanceAsync()
     {
@@ -219,7 +223,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает высокий предел сопротивления IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в ГОм).</param>
     public async Task SetHighResistanceLimitAsync(double value)
     {
@@ -230,7 +233,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает низкий предел сопротивления IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в МОм).</param>
     public async Task SetLowResistanceLimitAsync(double value)
     {
@@ -239,6 +241,7 @@ namespace NewCore.Function.GPT
       {
         value = 999;
       }
+
       query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
       await _gptModel.WriteLineAsync(query);
     }
@@ -246,7 +249,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает время теста IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в секундах).</param>
     public async Task SetTestTimeAsync(double value)
     {
@@ -257,7 +259,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает смещение IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в ГОм).</param>
     public async Task SetOffsetAsync(double value)
     {
@@ -269,7 +270,6 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Считывает текущую конфигурацию IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <returns>Объект с текущими настройками IR.</returns>
     public async Task<IrConfiguration> ReadConfigurationAsync()
     {
@@ -315,7 +315,7 @@ namespace NewCore.Function.GPT
           HighResistanceLimit = rhi,
           LowResistanceLimit = rlo,
           TestTime = time,
-          Offset = reference
+          Offset = reference,
         };
       }
       catch (Exception ex)
@@ -335,6 +335,7 @@ namespace NewCore.Function.GPT
       {
         return voltage * 1000; // Преобразование кВ в В
       }
+
       throw new FormatException("Некорректный формат напряжения.");
     }
 
@@ -348,6 +349,7 @@ namespace NewCore.Function.GPT
       {
         return resistance; // Значение уже в ГОм
       }
+
       return 0.0;
     }
 
@@ -361,6 +363,7 @@ namespace NewCore.Function.GPT
       {
         return resistance; // Значение уже в ГОм
       }
+
       return 0.0;
     }
 
@@ -374,8 +377,8 @@ namespace NewCore.Function.GPT
       {
         return time; // Значение уже в секундах
       }
+
       return 0.0;
     }
   }
 }
-

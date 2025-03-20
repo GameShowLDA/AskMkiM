@@ -11,49 +11,43 @@ namespace AppConfig.DataBase.Models
   /// </summary>
   public class BreakdownTesterEntity : IBreakdownTester
   {
+    /// <inheritdoc />
     public int Id { get; set; }
-    /// <summary>
-    /// Номер менеджера шасси, к которому подключена пробойная установка.
-    /// </summary>
+
+    /// <inheritdoc />
     public int NumberChassis { get; set; }
 
-    /// <summary>
-    /// Название пробойной установки.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
-    /// <summary>
-    /// Описание пробойной установки.
-    /// </summary>
+    /// <inheritdoc />
     public string Description { get; set; }
 
-    /// <summary>
-    /// Уникальный номер устройства.
-    /// </summary>
+    /// <inheritdoc />
     public int Number { get; set; }
 
-    /// <summary>
-    /// Детали подключения установки (IP-адрес, COM-порт и т. д.).
-    /// </summary>
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
+    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
-
-    /// <summary>
-    /// Тип устройства, всегда BreakdownTester.
-    /// </summary>
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.BreakdownTester;
 
+    /// <inheritdoc />
     [NotMapped]
     public IAcwModeBreakdown AcwManger { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IDcwModeBreakdown DcwManger { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public IIrModeBreakdown IrManger { get; set; }
 
+    /// <inheritdoc />
     [NotMapped]
     public ISystemSettingsBreakdown SystemManger { get; set; }
 

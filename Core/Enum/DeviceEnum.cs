@@ -149,7 +149,6 @@
       return number;
     }
 
-
     private static Dictionary<RelayCheck, Tuple<int, List<List<int>>>> relayCheckMappings = new Dictionary<RelayCheck, Tuple<int, List<List<int>>>>
     {
       {
@@ -255,7 +254,7 @@
     };
 
     /// <summary>
-    /// Словарь информации об устройствах
+    /// Словарь информации об устройствах.
     /// </summary>
     static private Dictionary<Type, Tuple<string, string>> infoDevice = new System.Collections.Generic.Dictionary<Type, Tuple<string, string>>()
     {

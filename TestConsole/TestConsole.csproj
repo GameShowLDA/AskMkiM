@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.3" />
+    <PackageReference Include="NLog" Version="5.4.0" />
   </ItemGroup>
 
 </Project>

@@ -4,18 +4,30 @@ using System.Windows.Controls;
 namespace UI.Controls.GPT
 {
   /// <summary>
-  /// Логика взаимодействия для GPTController.xaml
+  /// Логика взаимодействия для GPTController.xaml.
   /// </summary>
   public partial class GPTController : UserControl
   {
+    /// <summary>
+    /// Контроллер для управления режимами GPT.
+    /// </summary>
     public GPTController()
     {
       InitializeComponent();
       DataContext = this;
     }
 
+    /// <summary>
+    /// Получает или устанавливает выбранный контент режима.
+    /// </summary>
     public object SelectedModeContent { get; set; }
 
+    /// <summary>
+    /// Обрабатывает событие выбора режима.
+    /// В зависимости от выбранного режима загружает соответствующий элемент управления в контейнер.
+    /// </summary>
+    /// <param name="sender">Источник события, обычно радио кнопка.</param>
+    /// <param name="e">Данные события.</param>
     private void Mode_Checked(object sender, RoutedEventArgs e)
     {
       if (sender is RadioButton radioButton)
@@ -45,7 +57,5 @@ namespace UI.Controls.GPT
         }
       }
     }
-
-
   }
 }

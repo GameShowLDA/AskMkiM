@@ -3,6 +3,9 @@ using System.Text.Json;
 
 namespace NewCore.Base
 {
+  /// <summary>
+  /// Кастомный класс для работы с последовательным портом, расширяющий функциональность <see cref="SerialPort"/>.
+  /// </summary>
   public class SerialPortCustom : SerialPort
   {
     /// <summary>
@@ -48,7 +51,9 @@ namespace NewCore.Base
     public static SerialPortCustom FromSerialPort(SerialPort port)
     {
       if (port == null)
+      {
         throw new ArgumentNullException(nameof(port), "Переданный SerialPort не должен быть null.");
+      }
 
       return new SerialPortCustom(port.PortName, port.BaudRate, port.Parity, port.DataBits, port.StopBits)
       {
@@ -58,7 +63,7 @@ namespace NewCore.Base
         WriteTimeout = port.WriteTimeout,
         DtrEnable = port.DtrEnable,
         RtsEnable = port.RtsEnable,
-        NewLine = port.NewLine
+        NewLine = port.NewLine,
       };
     }
 

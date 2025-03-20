@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -9,25 +11,46 @@ using NewCore.Base.Interface.Main;
 namespace Mode.Settings.DeviceConfig.ChassisManager
 {
   /// <summary>
-  /// Логика взаимодействия для ChassisManagerWindow.xaml
+  /// Логика взаимодействия для ChassisManagerWindow.xaml.
   /// </summary>
   public partial class ChassisManagerWindow : Window, IDataProcessor
   {
-    public EventHandler RequestClose;
-    public EventHandler<ChassisManagerEntity> RequestSave;
+    /// <summary>
+    /// Событие запроса закрытия окна.
+    /// </summary>
+    public event EventHandler RequestClose;
+
+    /// <summary>
+    /// Событие запроса сохранения данных устройства.
+    /// </summary>
+    public event EventHandler<ChassisManagerEntity> RequestSave;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ChassisManagerWindow"/>.
+    /// </summary>
     public ChassisManagerWindow()
     {
       InitializeComponent();
     }
 
+    /// <summary>
+    /// Свойство, предоставляющее доступ к параметрам устройства.
+    /// </summary>
     public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
 
-
+    /// <summary>
+    /// Обрабатывает данные устройства.
+    /// </summary>
+    /// <param name="device">Экземпляр устройства.</param>
+    /// <param name="control">Элемент управления настройками устройства.</param>
     public void ProcessData(IDevice device, DeviceSettingsControl control)
     {
       return;
     }
 
+    /// <summary>
+    /// Устанавливает настройки для теста АСКМ.
+    /// </summary>
     public void SetSettings()
     {
       deviceSettingsWindow.NameDevice = "Тест АСКМ";
@@ -41,23 +64,21 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
         ChassisManagerEntity deviceEntity = processor.ProcessDevice<ChassisManagerEntity>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
-            additionalDataProcessor: this
-        );
+            additionalDataProcessor: this);
 
         if (deviceEntity != null)
         {
-          new ChassisManagerRepository(AppConfig.Config.SystemStateManager.Context).Create(deviceEntity);
+          new ChassisManagerServices().Create(deviceEntity);
         }
 
-        RequestSave?.Invoke(s, deviceEntity as ChassisManagerEntity);
-        this.Close();
+        RequestSave?.Invoke(s, deviceEntity);
+        Close();
       };
-
 
       deviceSettingsWindow.RequestClose += (s, a) =>
       {
         RequestClose?.Invoke(s, a);
-        this.Close();
+        Close();
       };
     }
   }
