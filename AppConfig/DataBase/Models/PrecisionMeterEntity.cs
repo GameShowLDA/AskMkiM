@@ -1,4 +1,6 @@
-﻿using NewCore.Base.Interface.Main;
+﻿using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
+using NewCore.Communication;
 using NewCore.Enum;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -36,5 +38,9 @@ namespace AppConfig.DataBase.Models
     /// <inheritdoc />
     [NotMapped]
     public IConnectable ConnectableManager { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public IDeviceProtocol DeviceProtocol { get; set; }
   }
 }

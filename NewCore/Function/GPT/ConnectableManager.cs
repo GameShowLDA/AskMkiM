@@ -1,4 +1,5 @@
-﻿using NewCore.Device;
+﻿using NewCore.Base.Device;
+using NewCore.Device;
 using System.IO.Ports;
 using System.Management;
 using System.Security.Cryptography;

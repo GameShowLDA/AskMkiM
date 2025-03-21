@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using AppConfig.DataBase.Models;
 using AppConfig.DataBase.Repositories;
+using Microsoft.EntityFrameworkCore;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using static Utilities.LoggerUtility;
@@ -20,12 +21,18 @@ namespace AppConfig.DataBase.Services
     internal readonly AppDbContext _context;
 
     /// <summary>
+    /// Набор сущностей типа T, используемый для операций с базой данных.
+    /// </summary>
+    internal readonly DbSet<T> _dbSet;
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="Service"/>.
     /// </summary>
     /// <param name="context">Контекст базы данных для работы с сущностями.</param>
     internal Service(AppDbContext context)
     {
       _context = context;
+      _dbSet = context.Set<T>();
     }
 
     /// <inheritdoc />
@@ -247,7 +254,7 @@ namespace AppConfig.DataBase.Services
       }
 
       Console.WriteLine($"Неизвестный тип: {type}");
-      return new List<IDevice>(); // Пустой список, если тип не поддерживается
+      return new List<IDevice>();
     }
 
     /// <summary>
@@ -268,7 +275,7 @@ namespace AppConfig.DataBase.Services
         IPrecisionMeter => new PrecisionMeterRepository(),
         IRack => new RackRepository(),
         ISwitchingDevice => new SwitchingDeviceRepository(),
-        _ => null // Если не найден репозиторий, возвращаем null
+        _ => null,
       };
     }
   }

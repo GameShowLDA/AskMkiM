@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using NewCore.Device;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
@@ -31,7 +32,8 @@ namespace NewCore.Function.DeviceBusCommutation
       if (int.TryParse(number, out int num))
       {
         DeviceCommand command = new DeviceCommand(6, 2, num, 1);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+        // await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
         return true;
       }
 
@@ -49,7 +51,8 @@ namespace NewCore.Function.DeviceBusCommutation
       if (int.TryParse(number, out int num))
       {
         DeviceCommand command = new DeviceCommand(6, 2, num, 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+        // await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
         return true;
       }
 

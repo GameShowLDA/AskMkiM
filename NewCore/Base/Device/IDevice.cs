@@ -1,4 +1,5 @@
-﻿using static NewCore.Enum.DeviceEnum;
+﻿using NewCore.Communication;
+using static NewCore.Enum.DeviceEnum;
 
 namespace NewCore.Base.Device
 {
@@ -48,5 +49,10 @@ namespace NewCore.Base.Device
     /// Управление состоянием устройства.
     /// </summary>
     public IConnectable ConnectableManager { get; set; }
+
+    /// <summary>
+    /// Механизм обмена данными с устройством.
+    /// </summary>
+    public IDeviceProtocol DeviceProtocol { get; set; }
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using NewCore.Base.Device;
 using NewCore.Base.Function.ManagerChassis;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;

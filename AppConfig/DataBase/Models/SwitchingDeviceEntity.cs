@@ -3,6 +3,7 @@ using System.Net;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Main;
+using NewCore.Communication;
 using NewCore.Enum;
 
 namespace AppConfig.DataBase.Models
@@ -63,5 +64,9 @@ namespace AppConfig.DataBase.Models
     /// <inheritdoc />
     [NotMapped]
     public IConnectable ConnectableManager { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public IDeviceProtocol DeviceProtocol { get; set; }
   }
 }
