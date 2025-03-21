@@ -138,7 +138,6 @@ namespace UI.Controls.Search
       }
       this.Activate();
       this.Focus();
-      //SearchTextBox.Focus();
     }
     public void CloseDialog()
     {

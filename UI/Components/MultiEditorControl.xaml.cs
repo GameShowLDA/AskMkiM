@@ -24,6 +24,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace UI.Components
 {
@@ -1101,7 +1102,8 @@ namespace UI.Components
 
     private void OnFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
     {
-      GetLineOccurrences(fileName, lineNumber);
+      //GetLineOccurrences(fileName, lineNumber);
+      ProcessLineOccurrences(fileName, lineNumber);
     }
 
     private void GetLineOccurrences(string fileName, int lineNumber)
@@ -1132,6 +1134,87 @@ namespace UI.Components
         }
       }
     }
+
+    // Поля для хранения найденных вхождений в текущей строке и текущего индекса
+    private List<SearchResult> currentLineResults = new List<SearchResult>();
+    private int currentLineIndex = -1;
+
+    /// <summary>
+    /// Вызывается при клике на строку в DataGrid.
+    /// fileName – имя файла (или вкладки), lineNumber – номер строки, где был произведен клик.
+    /// </summary>
+    private void ProcessLineOccurrences(string fileName, int lineNumber)
+    {
+      var foundPage = openPages.FirstOrDefault(page => page.Text == fileName);
+      if (foundPage == null)
+        return;
+
+      int pageIndex = openPages.IndexOf(foundPage);
+      if (userControls[pageIndex] is TextEditorUI textEditor)
+      {
+        var document = textEditor.TextEditor.Document;
+        // Получаем объект строки
+        DocumentLine line = document.GetLineByNumber(lineNumber);
+        string lineText = document.GetText(line);
+
+        // Получаем все вхождения искомого текста относительно строки
+        currentLineResults = FindAllOccurrences(lineText, _searchText, _wholeWord, _caseWord, _searchArea);
+        // Сбрасываем индекс
+        currentLineIndex = -1;
+
+        // Если найдены вхождения, сразу переходим к первому
+        if (currentLineResults != null && currentLineResults.Count > 0)
+        {
+          NextOccurrenceForLine(textEditor, lineNumber);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Переходит к следующему вхождению в текущей строке.
+    /// Не очищает уже созданные маркеры.
+    /// </summary>
+    private void NextOccurrenceForLine(TextEditorUI textEditor, int lineNumber)
+    {
+      if (currentLineResults == null || currentLineResults.Count == 0)
+        return;
+
+      currentLineIndex++;
+      if (currentLineIndex >= currentLineResults.Count)
+        currentLineIndex = 0;
+
+      GoToOccurrenceForLine(currentLineIndex, textEditor, lineNumber);
+    }
+
+    /// <summary>
+    /// Переходит к вхождению с указанным индексом.
+    /// Создает маркер для этого вхождения, не очищая предыдущие маркеры.
+    /// </summary>
+    private void GoToOccurrenceForLine(int index, TextEditorUI textEditor, int lineNumber)
+    {
+      if (index < 0 || index >= currentLineResults.Count)
+        return;
+
+      var result = currentLineResults[index];
+
+      // Абсолютное смещение в документе = начало строки + смещение в строке
+      int absoluteOffset = textEditor.TextEditor.Document.GetLineByNumber(lineNumber).Offset + result.StartOffset;
+
+      // Создаем маркер для данного вхождения.
+      // Важно: не вызываем MarkerService.RemoveAll(), чтобы предыдущие маркеры остаются.
+      ApplyHighlightingWhenRendered(textEditor, absoluteOffset, result.Length);
+
+      // Обновляем слой для отрисовки маркеров
+      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+
+      // Прокручиваем редактор к строке
+      textEditor.ScrollToLine(lineNumber);
+      // Выделяем найденное вхождение (это может помочь пользователю увидеть текущее вхождение)
+      textEditor.Select(absoluteOffset, result.Length);
+      textEditor.Focus();
+    }
+
+
     #endregion
   }
 }
