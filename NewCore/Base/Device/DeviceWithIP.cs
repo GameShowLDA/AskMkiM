@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 using Utilities;
 using static NewCore.Enum.DeviceEnum;
 
@@ -59,6 +60,9 @@ namespace NewCore.Base.Device
     public DeviceWithIP()
     {
     }
+
+    /// <inheritdoc />
+    public IConnectable ConnectableManager { get; set; }
 
     /// <summary>
     /// Получает строковое представление указанного IP-адреса.

@@ -56,10 +56,8 @@ namespace AppConfig.DataBase.Models
     [NotMapped]
     public IStateManager StateManager { get; set; }
 
-    /// <summary>
-    /// Метод инициализации модуля.
-    /// </summary>
-    /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public Task<bool> Initialize() => Task.FromResult(true);
+    /// <inheritdoc />
+    [NotMapped]
+    public IConnectable ConnectableManager { get; set; }
   }
 }

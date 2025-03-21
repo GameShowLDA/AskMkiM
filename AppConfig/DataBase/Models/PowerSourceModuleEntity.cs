@@ -50,10 +50,8 @@ namespace AppConfig.DataBase.Models
     [NotMapped]
     public IVoltageManager VoltageManager { get; set; }
 
-    /// <summary>
-    /// Метод инициализации модуля источника питания.
-    /// </summary>
-    /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public Task<bool> Initialize() => Task.FromResult(true);
+    /// <inheritdoc />
+    [NotMapped]
+    public IConnectable ConnectableManager { get; set; }
   }
 }

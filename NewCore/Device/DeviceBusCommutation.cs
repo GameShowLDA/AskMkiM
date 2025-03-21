@@ -25,7 +25,7 @@ namespace NewCore.Device
       ConnectorManager = new ConnectorManager(this);
       RelayManager = new RelayManager(this);
       ResistorManager = new ResistorManager(this);
-      StateManager = new StateManager(this);
+      ConnectableManager = new StateManager(this);
       SelfTestManager = new SelfTestManager(this);
     }
 
@@ -40,9 +40,6 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IResistorDeviceBusCommutation ResistorManager { get; set; }
-
-    /// <inheritdoc />
-    public IStateDeviceBusCommutation StateManager { get; set; }
 
     /// <inheritdoc />
     public ISelfTestChecker SelfTestManager { get; set; }

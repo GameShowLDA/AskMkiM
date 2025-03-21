@@ -104,12 +104,12 @@ namespace TestConsole.MINT
     {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
-      var result1 = await device.StateManager.Initialize();
-      var result2 = await meter.ConnectionManager.InitializeAsync();
-      var result3 = await powerSource.StateManager.Initialize();
+      var result1 = await device.ConnectableManager.InitializeAsync();
+      var result2 = await meter.ConnectableManager.InitializeAsync();
+      var result3 = await powerSource.ConnectableManager.InitializeAsync();
       Console.ForegroundColor = ConsoleColor.White;
 
-      if (result1.Connect && result2 && result3.Connect)
+      if (result1.Connect && result2.Connect && result3.Connect)
       {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Оба устройства подключены");
@@ -121,7 +121,7 @@ namespace TestConsole.MINT
         Console.WriteLine("УКШ не подключено");
         Console.ForegroundColor = ConsoleColor.White;
       }
-      if (!result2)
+      if (!result2.Connect)
       {
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("Мультиметр не подключен");

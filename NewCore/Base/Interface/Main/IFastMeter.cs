@@ -24,11 +24,6 @@ namespace NewCore.Base.Interface.Main
     public ICommunication CommunicationManager { get; set; }
 
     /// <summary>
-    /// Управление соединением с устройством.
-    /// </summary>
-    public IConnection ConnectionManager { get; set; }
-
-    /// <summary>
     /// Управление измерением проводимости (прозвонка).
     /// </summary>
     public IContinuityMeasurement ContinuityManager { get; set; }

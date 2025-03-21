@@ -9,11 +9,6 @@ namespace NewCore.Base.Interface.Main
   public interface IChassisManager : IDevice
   {
     /// <summary>
-    /// Управление состоянием шасси.
-    /// </summary>
-    public IStateManagerChassis StateManager { get; set; }
-
-    /// <summary>
     /// Управление питанием шасси.
     /// </summary>
     public IPowerManagerChassis PowerManager { get; set; }

@@ -56,8 +56,8 @@ namespace TestConsole.MINT
         return;
       }
 
-      await dbc.StateManager.ResetAsync();
-      await powerSource.StateManager.ResetAsync();
+      await dbc.ConnectableManager.ResetAsync();
+      await powerSource.ConnectableManager.ResetAsync();
 
       await SettingsMeter(meter);
       await powerSource.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
@@ -67,8 +67,8 @@ namespace TestConsole.MINT
       await GenerateDiscreteVoltageCheck(meter, powerSource);
       await CheckMintSwitching(meter, powerSource, dbc);
 
-      await dbc.StateManager.ResetAsync();
-      await powerSource.StateManager.ResetAsync();
+      await dbc.ConnectableManager.ResetAsync();
+      await powerSource.ConnectableManager.ResetAsync();
     }
 
     private static ISwitchingDevice SelectDeviceBusCommutation()

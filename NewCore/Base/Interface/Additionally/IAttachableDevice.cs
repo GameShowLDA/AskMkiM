@@ -2,11 +2,15 @@
 
 namespace NewCore.Base.Interface.Additionally
 {
+  /// <summary>
+  /// Интерфейс устройства, которое можно подключать к шасси.
+  /// Наследует основные свойства и методы устройства из <see cref="IDevice"/>.
+  /// </summary>
   public interface IAttachableDevice : IDevice
   {
     /// <summary>
-    /// Номер менеджера шасси.
+    /// Получает или задаёт номер менеджера шасси, к которому подключено устройство.
     /// </summary>
-    public int NumberChassis { get; set; }
+    int NumberChassis { get; set; }
   }
 }

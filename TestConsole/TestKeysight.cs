@@ -14,7 +14,7 @@ namespace TestConsole
       IPAddress iPAddress = IPAddress.Parse("192.168.1.16");
 
       NewCore.Device.KeysightDevice keysight3466 = new NewCore.Device.KeysightDevice(iPAddress);
-      if (await keysight3466.ConnectionManager.InitializeAsync())
+      if ((await keysight3466.ConnectableManager.InitializeAsync()).Connect)
       {
         Console.WriteLine($"Подключен к: {keysight3466.Name}");
 
@@ -23,7 +23,7 @@ namespace TestConsole
         await Resistance(keysight3466);
         await Voltage(keysight3466);
 
-        keysight3466.ConnectionManager.Disconnect();
+        await keysight3466.ConnectableManager.DisconnectAsync();
       }
       else
       {

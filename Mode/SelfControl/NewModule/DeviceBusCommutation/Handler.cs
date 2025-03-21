@@ -76,7 +76,7 @@ namespace Mode.SelfControl.NewModule.DeviceBusCommutation
         return;
       }
       
-      await deviceBusCommutation.StateManager.ResetAsync();
+      await deviceBusCommutation.ConnectableManager.ResetAsync();
       errorRelays = new List<int>();
 
       // TODO : Реализовать самоконтроль

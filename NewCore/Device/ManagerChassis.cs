@@ -16,7 +16,7 @@ namespace NewCore.Device
     /// </summary>
     public ManagerChassis()
     {
-      StateManager = new StateManager(this);
+      ConnectableManager = new StateManager(this);
       PowerManager = new PowerManager(this);
       DeviceType = DeviceEnum.DeviceType.ChassisManager;
 
@@ -24,9 +24,6 @@ namespace NewCore.Device
       Description = "Добавить описание сюда";
       DeviceClass = GetType().FullName;
     }
-
-    /// <inheritdoc />
-    public IStateManagerChassis StateManager { get; set; }
 
     /// <inheritdoc />
     public IPowerManagerChassis PowerManager { get; set; }

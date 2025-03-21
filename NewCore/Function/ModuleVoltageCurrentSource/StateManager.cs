@@ -3,30 +3,28 @@ using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using NewCore.Device;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {
   /// <summary>
   /// Класс для управления состоянием модуля источника напряжения и тока (МИНТ).
   /// </summary>
-  public class StateManager : IStateManager
+  public class StateManager : IConnectable
   {
-    private readonly IPowerSourceModule _moduleVoltageCurrentSource;
+    private readonly Device.ModuleVoltageCurrentSource _moduleVoltageCurrentSource;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateManager"/>.
     /// </summary>
     /// <param name="moduleVoltageCurrentSource">Модуль источника напряжения и тока, для которого будет выполняться управление состоянием.</param>
-    public StateManager(IPowerSourceModule moduleVoltageCurrentSource) => _moduleVoltageCurrentSource = moduleVoltageCurrentSource;
+    public StateManager(Device.ModuleVoltageCurrentSource moduleVoltageCurrentSource) => _moduleVoltageCurrentSource = moduleVoltageCurrentSource;
 
-    /// <summary>
-    /// Инициализация модуля коммутации реле и проверка корректности его подключения.
-    /// </summary>
-    /// <returns>Кортеж, где первый элемент — булево значение успешности подключения, второй — строка с сообщением об ошибке или успехе.</returns>
-    public async Task<(bool Connect, string Answer)> Initialize()
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), cmd, 2000).ConfigureAwait(true);
+      string result = await DeviceCommandSender.SendCommandAsync(_moduleVoltageCurrentSource.IPAddress, cmd, 2000).ConfigureAwait(true);
 
       // Десериализация ответа
       BaseResponse baseResponse = BaseResponse.FromJson(result);
@@ -60,14 +58,24 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       return (false, result);
     }
 
-    /// <summary>
-    /// Выполняет сброс всех реле на МКР.
-    /// </summary>
-    /// <returns>Возвращает <see cref="Task"/>, представляющий асинхронную операцию сброса.</returns>
+    /// <inheritdoc />
     public async Task<bool> ResetAsync()
     {
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(2));
-      return true;
+      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
+      string result = await DeviceCommandSender.SendCommandAsync(_moduleVoltageCurrentSource.IPAddress, cmd, 1000).ConfigureAwait(true);
+      return result == "2.0.1";
+    }
+
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    {
+      return await InitializeAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectAsync()
+    {
+      return await ResetAsync();
     }
   }
 }

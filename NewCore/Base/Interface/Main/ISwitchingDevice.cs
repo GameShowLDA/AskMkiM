@@ -29,11 +29,6 @@ namespace NewCore.Base.Interface.Main
     public IResistorDeviceBusCommutation ResistorManager { get; set; }
 
     /// <summary>
-    /// Задает или возвращает объект для управления состоянием устройства.
-    /// </summary>
-    public IStateDeviceBusCommutation StateManager { get; set; }
-
-    /// <summary>
     /// Задаёт иди возвращает объект для самоконтроля устройства.
     /// </summary>
     public ISelfTestChecker SelfTestManager { get; set; }

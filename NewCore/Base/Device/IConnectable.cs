@@ -1,0 +1,33 @@
+﻿namespace NewCore.Base.Device
+{
+  /// <summary>
+  /// Определяет интерфейс для компонентов, требующих инициализации,
+  /// подключения и отключения.
+  /// </summary>
+  public interface IConnectable
+  {
+    /// <summary>
+    /// Выполняет инициализацию компонента, подготавливая его к подключению.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию. Возвращает <c>true</c>, если инициализация прошла успешно; иначе — <c>false</c>.</returns>
+    Task<(bool Connect, string Answer)> InitializeAsync();
+
+    /// <summary>
+    /// Выполняет подключение к компоненту.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию. Возвращает <c>true</c>, если подключение прошло успешно; иначе — <c>false</c>.</returns>
+    Task<(bool Connect, string Answer)> ConnectAsync();
+
+    /// <summary>
+    /// Выполняет отключение от компонента.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию. Возвращает <c>true</c>, если отключение прошло успешно; иначе — <c>false</c>.</returns>
+    Task<bool> DisconnectAsync();
+
+    /// <summary>
+    /// Выполняет сброс устройства.
+    /// </summary>
+    /// <returns></returns>
+    Task<bool> ResetAsync();
+  }
+}

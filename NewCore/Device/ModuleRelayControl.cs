@@ -19,7 +19,7 @@ namespace NewCore.Device
       BusManager = new BusManager(this);
       MeterManager = new MeterManager(this);
       PointManager = new PointManager(this);
-      StateManager = new StateManager(this);
+      ConnectableManager = new StateManager(this);
 
       DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
       Name = "Модуль коммутации реле 350";
@@ -45,8 +45,5 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IPointManager PointManager { get; set; }
-
-    /// <inheritdoc />
-    public IStateManager StateManager { get; set; }
   }
 }

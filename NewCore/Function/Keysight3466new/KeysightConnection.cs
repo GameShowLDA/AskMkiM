@@ -8,7 +8,7 @@ namespace NewCore.Function.Keysight3466new
   /// <summary>
   /// Класс для управления подключением к прибору Keysight через TCP/IP.
   /// </summary>
-  public class KeysightConnection : IConnection
+  public class KeysightConnection : IConnectable
   {
     /// <summary>
     /// Экземпляр устройства Keysight.
@@ -36,31 +36,23 @@ namespace NewCore.Function.Keysight3466new
       _communication = device.CommunicationManager;
     }
 
-    /// <summary>
-    /// Инициализирует подключение к прибору.
-    /// Проверяет доступность устройства с помощью команды "*IDN?".
-    /// </summary>
-    /// <returns>Возвращает <c>true</c>, если подключение успешно и устройство отвечает, иначе <c>false</c>.</returns>
-    public async Task<bool> InitializeAsync()
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
-      if (await ConnectAsync())
+      if ((await ConnectAsync()).Connect)
       {
         string idn = await _communication.QueryAsync("*IDN?");
         if (!string.IsNullOrEmpty(idn))
         {
-          return true;
+          return (true, string.Empty);
         }
       }
 
-      return false;
+      return (false, "Нет подключения к маультиметру Keysight.");
     }
 
-    /// <summary>
-    /// Подключается к прибору через TCP/IP.
-    /// </summary>
-    /// <returns>Возвращает <c>true</c>, если подключение успешно, иначе <c>false</c>.</returns>
-    /// <exception cref="InvalidOperationException">Выбрасывается, если IP-адрес прибора не задан.</exception>
-    public async Task<bool> ConnectAsync()
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> ConnectAsync()
     {
       if (_device.IP == null)
       {
@@ -80,21 +72,18 @@ namespace NewCore.Function.Keysight3466new
         await _device.Client.ConnectAsync(_device.IP.ToString(), _device.Port);
         _device.Stream = _device.Client.GetStream();
         _device.IsConnected = true;
-        return true;
+        return (true, string.Empty);
       }
       catch (Exception ex)
       {
         Console.WriteLine($"Ошибка подключения: {ex.Message}");
         _device.IsConnected = false;
-        return false;
+        return (false, ex.Message);
       }
     }
 
-    /// <summary>
-    /// Отключается от прибора.
-    /// Закрывает поток данных и TCP-соединение.
-    /// </summary>
-    public void Disconnect()
+    /// <inheritdoc />
+    public Task<bool> DisconnectAsync()
     {
       _device.Stream?.Close();
       _device.Stream = null;
@@ -103,6 +92,14 @@ namespace NewCore.Function.Keysight3466new
       _device.Client = null;
 
       _device.IsConnected = false;
+
+      return Task.FromResult(true);
+    }
+
+    /// <inheritdoc />
+    public Task<bool> ResetAsync()
+    { 
+      return Task.FromResult(true);
     }
   }
 }

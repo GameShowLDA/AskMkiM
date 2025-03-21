@@ -217,7 +217,7 @@ namespace UI.Components
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await model.StateManager.Initialize();
+      var result = await model.ConnectableManager.InitializeAsync();
 
       if (result.Item1)
       {

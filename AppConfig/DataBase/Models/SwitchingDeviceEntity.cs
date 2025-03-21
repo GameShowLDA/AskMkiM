@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
+using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
@@ -57,25 +58,10 @@ namespace AppConfig.DataBase.Models
 
     /// <inheritdoc />
     [NotMapped]
-    public IStateDeviceBusCommutation StateManager { get; set; }
+    public ISelfTestChecker SelfTestManager { get; set; }
 
     /// <inheritdoc />
     [NotMapped]
-    public ISelfTestChecker SelfTestManager { get; set; }
-
-    /// <summary>
-    /// Метод инициализации устройства коммутации.
-    /// </summary>
-    /// <returns>Возвращает true, если инициализация прошла успешно.</returns>
-    public async Task<bool> Initialize()
-    {
-      if (IPAddress.TryParse(ConnectionDetails, out IPAddress address))
-      {
-        var connect = await NewCore.Communication.DeviceCommandSender.PingAsync("УКШ", address);
-        return connect;
-      }
-
-      throw new NotFiniteNumberException();
-    }
+    public IConnectable ConnectableManager { get; set; }
   }
 }

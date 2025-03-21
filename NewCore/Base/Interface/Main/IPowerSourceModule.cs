@@ -19,11 +19,6 @@ namespace NewCore.Base.Interface.Main
     public ICurrentManager CurrentManager { get; set; }
 
     /// <summary>
-    /// Управление состоянием устройства (инициализация, сброс и т. д.).
-    /// </summary>
-    public IStateManager StateManager { get; set; }
-
-    /// <summary>
     /// Управление настройками напряжения.
     /// </summary>
     public IVoltageManager VoltageManager { get; set; }

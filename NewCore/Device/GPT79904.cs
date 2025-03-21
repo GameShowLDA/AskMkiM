@@ -29,6 +29,7 @@ namespace NewCore.Device
       DcwManger = new DcwMode(this);
       IrManger = new IrMode(this);
       SystemManger = new SystemSettings(this);
+      ConnectableManager = new ConnectableManager(this);
     }
 
     /// <inheritdoc />

@@ -122,7 +122,7 @@ namespace TestConsole
           return false;
         }
       }
-      await device.StateManager.ResetAsync();
+      await device.ConnectableManager.ResetAsync();
 
       await SettingsMeter(meter);
 
@@ -296,11 +296,11 @@ namespace TestConsole
     {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
-      var result1 = await device.StateManager.Initialize();
-      var result2 = await meter.ConnectionManager.InitializeAsync();
+      var result1 = await device.ConnectableManager.InitializeAsync();
+      var result2 = await meter.ConnectableManager.InitializeAsync();
       Console.ForegroundColor = ConsoleColor.White;
 
-      if (result1.Connect && result2)
+      if (result1.Connect && result2.Connect)
       {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Оба устройства подключены");
@@ -314,7 +314,7 @@ namespace TestConsole
         Console.WriteLine("УКШ не подключено");
         Console.ForegroundColor = ConsoleColor.White;
       }
-      else if (!result2)
+      else if (!result2.Connect)
       {
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("Мультиметр не подключен");

@@ -37,11 +37,16 @@ namespace NewCore.Base.Device
     /// <summary>
     /// Тип устройства.
     /// </summary>
-    DeviceType DeviceType { get; }
+    public DeviceType DeviceType { get; }
 
     /// <summary>
     /// Возвращает полный путь к экземпляру класса.
     /// </summary>
     public string DeviceClass { get; set; }
+
+    /// <summary>
+    /// Управление состоянием устройства.
+    /// </summary>
+    public IConnectable ConnectableManager { get; set; }
   }
 }

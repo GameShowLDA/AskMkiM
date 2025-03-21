@@ -39,5 +39,9 @@ namespace AppConfig.DataBase.Models
     /// <inheritdoc />
     [NotMapped]
     public IPowerManagerChassis PowerManager { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public IConnectable ConnectableManager { get; set; }
   }
 }

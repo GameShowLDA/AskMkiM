@@ -1,5 +1,8 @@
 ﻿namespace AppConfig.Data.Execution
 {
+  /// <summary>
+  /// Модель данных для выполнения.
+  /// </summary>
   public class ExecutionModel
   {
     /// <summary>

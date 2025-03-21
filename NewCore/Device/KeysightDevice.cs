@@ -46,9 +46,6 @@ namespace NewCore.Device
     public ICapacitanceMeasurement CapacitanceManager { get; set; }
 
     /// <inheritdoc />
-    public IConnection ConnectionManager { get; set; }
-
-    /// <inheritdoc />
     public IContinuityMeasurement ContinuityManager { get; set; }
 
     /// <inheritdoc />
@@ -85,7 +82,7 @@ namespace NewCore.Device
 
       CapacitanceManager = new CapacitanceMeasurement(this);
       CommunicationManager = new KeysightCommunication(this);
-      ConnectionManager = new KeysightConnection(this);
+      ConnectableManager = new KeysightConnection(this);
       ContinuityManager = new ContinuityMeasurement(this);
       ResistanceManager = new ResistanceMeasurement(this);
       AcVoltageManager = new AcVoltageMeasurement(this);

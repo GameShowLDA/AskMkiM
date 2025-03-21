@@ -61,5 +61,9 @@ namespace AppConfig.DataBase.Models
     /// <inheritdoc />
     [NotMapped]
     public IResistanceMeasurement ResistanceManager { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public IConnectable ConnectableManager { get; set; }
   }
 }

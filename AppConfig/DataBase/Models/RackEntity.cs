@@ -1,6 +1,7 @@
 ﻿using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppConfig.DataBase.Models
 {
@@ -32,5 +33,9 @@ namespace AppConfig.DataBase.Models
 
     /// <inheritdoc />
     public string DeviceClass { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public IConnectable ConnectableManager { get; set; }
   }
 }

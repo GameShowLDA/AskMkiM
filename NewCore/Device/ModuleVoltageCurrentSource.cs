@@ -23,7 +23,7 @@ namespace NewCore.Device
 
       BusManager = new BusManager(this);
       CurrentManager = new CurrentManager(this);
-      StateManager = new StateManager(this);
+      ConnectableManager = new StateManager(this);
       VoltageManager = new VoltageManager(this);
       DeviceClass = GetType().FullName;
     }
@@ -42,11 +42,6 @@ namespace NewCore.Device
     /// Менеджер управления током модуля.
     /// </summary>
     public ICurrentManager CurrentManager { get; set; }
-
-    /// <summary>
-    /// Менеджер управления состоянием модуля.
-    /// </summary>
-    public IStateManager StateManager { get; set; }
 
     /// <summary>
     /// Менеджер управления напряжением модуля.

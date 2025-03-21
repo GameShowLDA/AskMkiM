@@ -1,4 +1,5 @@
-﻿using NewCore.Base.DeviceResponses;
+﻿using NewCore.Base.Device;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
 
@@ -7,7 +8,7 @@ namespace NewCore.Function.DeviceBusCommutation
   /// <summary>
   /// Класс для управления состоянием устройства коммутации шин.
   /// </summary>
-  public class StateManager : IStateDeviceBusCommutation
+  public class StateManager : IConnectable
   {
     /// <summary>
     /// Устройство коммутации шин.
@@ -21,7 +22,19 @@ namespace NewCore.Function.DeviceBusCommutation
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> Initialize()
+    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    {
+      return await InitializeAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectAsync()
+    {
+      return await ResetAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
       string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 2000).ConfigureAwait(true);

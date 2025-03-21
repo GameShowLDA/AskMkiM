@@ -27,10 +27,5 @@ namespace NewCore.Base.Interface.Main
     /// Менеджер для управления реле и точками подключения.
     /// </summary>
     IPointManager PointManager { get; set; }
-
-    /// <summary>
-    /// Менеджер для управления состоянием модуля.
-    /// </summary>
-    IStateManager StateManager { get; set; }
   }
 }
