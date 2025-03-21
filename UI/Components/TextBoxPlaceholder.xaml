@@ -6,14 +6,16 @@
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="250">
 
-    <Grid>
-        <TextBox x:Name="InputBox"
+    <Border Background="{StaticResource LightPrimarySolidColorBrush}" Height="50" CornerRadius="10" Name="BorderData">
+        <TextBox x:Name="InputBox" MinWidth="100"
                  Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Background="Transparent" 
                  BorderThickness="0" 
                  VerticalAlignment="Center" 
                  FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                 PreviewTextInput="InputBox_PreviewTextInput"
                  GotFocus="InputBox_GotFocus"
+                 CaretBrush="{StaticResource ForegroundSolidColorBrush}"
                  LostFocus="InputBox_LostFocus"/>
-    </Grid>
+    </Border>
 </UserControl>

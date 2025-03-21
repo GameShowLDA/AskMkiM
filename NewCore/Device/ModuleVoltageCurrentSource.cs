@@ -1,6 +1,7 @@
 ﻿using NewCore.Base.Device;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.ModuleVoltageCurrentSource;
 
 namespace NewCore.Device
@@ -17,6 +18,9 @@ namespace NewCore.Device
     {
       Name = "Модуль источника напряжения и тока";
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
+
+      DeviceType = DeviceEnum.DeviceType.PowerSourceModule;
+
       BusManager = new BusManager(this);
       CurrentManager = new CurrentManager(this);
       StateManager = new StateManager(this);

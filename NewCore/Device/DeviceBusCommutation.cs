@@ -1,6 +1,7 @@
 ﻿using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.DeviceBusCommutation;
 
 namespace NewCore.Device
@@ -18,6 +19,7 @@ namespace NewCore.Device
       Name = "Устройство коммутации шин";
       Description = "Реализовать описание в NewCore.Device.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
+      DeviceType = DeviceEnum.DeviceType.SwitchingDevice;
 
       CapacitorManager = new CapacitorManager(this);
       ConnectorManager = new ConnectorManager(this);

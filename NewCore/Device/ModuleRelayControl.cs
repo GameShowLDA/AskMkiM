@@ -21,7 +21,7 @@ namespace NewCore.Device
       PointManager = new PointManager(this);
       StateManager = new StateManager(this);
 
-      DeviceType = DeviceEnum.DeviceType.ChassisManager;
+      DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
       Name = "Модуль коммутации реле 350";
       Description = "Добавить описание сюда";
       PointCount = 350;

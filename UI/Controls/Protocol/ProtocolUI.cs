@@ -85,15 +85,6 @@ namespace UI.Controls.Protocol
 
     #endregion
 
-    /// <summary>
-    /// Возвращает токен отмены для текущего действия.
-    /// </summary>
-    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
-    public CancellationToken GetCancellationToken()
-    {
-      return ActionExecutor.CancellationTokenSource.Token;
-    }
-
     #region Основные настройки.
 
     /// <summary>
@@ -323,5 +314,14 @@ namespace UI.Controls.Protocol
     /// <param name="messageDelegate">Делегат для обработки сообщений о состоянии подключения.</param>
     /// <returns>True, если все устройства успешно подключены, иначе False.</returns>
     public async Task<bool> AttemptDeviceConnection(List<IDevice> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
+
+    /// <summary>
+    /// Возвращает токен отмены для текущего действия.
+    /// </summary>
+    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
+    public CancellationToken GetCancellationToken()
+    {
+      return ActionExecutor.CancellationTokenSource.Token;
+    }
   }
 }

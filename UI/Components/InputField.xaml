@@ -13,8 +13,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <local:TextBoxPlaceholder Margin="5" Grid.Row="0" Placeholder="Первая точка вида a.b.c"/>
-        <local:TextBoxPlaceholder Margin="5" Grid.Row="1" Placeholder="Вторая точка вида a.b.c"/>
-        <local:TextBoxPlaceholder Margin="5" Grid.Row="2" Placeholder="Первая точка вида a.b.c"/>
+        <local:TextBoxPlaceholder x:Name="FirstTextBox" Margin="5" Grid.Row="0" Placeholder="Первая точка вида a.b.c"/>
+        <local:TextBoxPlaceholder x:Name="SecondTextBox" Margin="5" Grid.Row="1" Placeholder="Вторая точка вида a.b.c"/>
+        <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Margin="5" Grid.Row="2" Placeholder="Электрический параметр" IsNumberInputEnabled="False"/>
+        
     </Grid>
 </UserControl>

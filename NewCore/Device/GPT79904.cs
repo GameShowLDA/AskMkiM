@@ -2,6 +2,7 @@
 using NewCore.Base.Device;
 using NewCore.Base.Function.Breakdown;
 using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.GPT;
 
 namespace NewCore.Device
@@ -21,6 +22,9 @@ namespace NewCore.Device
       DataBits = 8;
       Parity = Parity.None;
       DeviceClass = GetType().FullName;
+
+      DeviceType = DeviceEnum.DeviceType.BreakdownTester;
+
       AcwManger = new AcwMode(this);
       DcwManger = new DcwMode(this);
       IrManger = new IrMode(this);

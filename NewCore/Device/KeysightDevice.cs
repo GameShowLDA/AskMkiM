@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using NewCore.Base.Device;
 using NewCore.Base.Function.FastMeter;
 using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.Keysight3466new;
 
 namespace NewCore.Device
@@ -78,6 +79,7 @@ namespace NewCore.Device
       Name = "Keysight 3466 new";
       Description = "Реализовать описание в NewCore.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
+      DeviceType = DeviceEnum.DeviceType.FastMeter;
 
       IsConnected = false;
 

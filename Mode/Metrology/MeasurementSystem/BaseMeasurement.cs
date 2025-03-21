@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using AppConfig.DataBase.Repositories;
+using NewCore.Base.Device;
+using UI.Components;
 
 namespace Mode.Metrology.MeasurementSystem
 {
@@ -50,18 +52,21 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="referenceValue">Эталонное значение.</param>
     public virtual void ValidateInput(string point1, string point2, string referenceValue)
     {
-      if (!IsValidPointFormat(point1) || !IsValidPointFormat(point2))
+      ValidatePointFormat(point1, "Первая");
+      ValidatePointFormat(point2, "Вторая");
+
+      if (point1 == point2)
       {
-        throw new ArgumentException("Ошибка: Точки должны быть в формате A.B.C, где A, B, C – целые числа.");
+        Utilities.Events.InputValidationEvents.TriggerDuplicatePoints = true;
+        throw new ArgumentException($"Ошибка: Точки не должны совпадать (введено: \"{point1}\").");
       }
 
-      if (!PointExistsInDatabase(point1) || !PointExistsInDatabase(point2))
-      {
-        throw new ArgumentException("Ошибка: Одна или обе точки отсутствуют в базе данных.");
-      }
+      ValidatePointExists(point1, "Первая");
+      ValidatePointExists(point2, "Вторая");
 
       if (!IsValidElectricalParameter(referenceValue, out double parsedValue))
       {
+        Utilities.Events.InputValidationEvents.TriggerInvalidParameter = true;
         throw new ArgumentException("Ошибка: Электрический параметр должен быть числом.");
       }
     }
@@ -87,6 +92,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <summary>
     /// Настраивает измерительное устройство (мультиметр или ППУ).
     /// </summary>
+    /// <param name="device">Объект настройки.</param>
     protected abstract void ConfigureMultimeter();
 
     /// <summary>
@@ -108,19 +114,40 @@ namespace Mode.Metrology.MeasurementSystem
     #region private
 
     /// <summary>
-    /// Проверяет, соответствует ли точка формату A.B.C.
+    /// Проверяет, соответствует ли точка формату A.B.C и выбрасывает исключение, если нет.
     /// </summary>
     /// <param name="point">Точка измерения.</param>
-    /// <returns>True, если точка соответствует формату, иначе false.</returns>
-    private bool IsValidPointFormat(string point)
+    /// <param name="label">Метка точки (например, \"первая\" или \"вторая\").</param>
+    private void ValidatePointFormat(string point, string label)
     {
       if (string.IsNullOrWhiteSpace(point))
       {
-        return false;
+        if (label == "Первая")
+        {
+          Utilities.Events.InputValidationEvents.TriggerInvalidFirstPoint = true;
+        }
+        else if (label == "Вторая")
+        {
+          Utilities.Events.InputValidationEvents.TriggerInvalidSecondPoint = true;
+        }
+
+        throw new ArgumentException($"Ошибка: {label} точка не задана.");
       }
 
       string pattern = @"^\d+\.\d+\.\d+$";
-      return Regex.IsMatch(point, pattern);
+      if (!Regex.IsMatch(point, pattern))
+      {
+        if (label == "Первая")
+        {
+          Utilities.Events.InputValidationEvents.TriggerInvalidFirstPoint = true;
+        }
+        else if (label == "Вторая")
+        {
+          Utilities.Events.InputValidationEvents.TriggerInvalidSecondPoint = true;
+        }
+
+        throw new ArgumentException($"Ошибка: {label} точка \"{point}\" должна быть в формате A.B.C, где A, B, C – целые числа.");
+      }
     }
 
     /// <summary>
@@ -164,11 +191,12 @@ namespace Mode.Metrology.MeasurementSystem
     }
 
     /// <summary>
-    /// Проверяет, существует ли модуль коммутации реле и точка в базе данных.
+    /// Проверяет, существует ли точка в системе.
     /// </summary>
     /// <param name="point">Точка измерения в формате A.B.C.</param>
-    /// <returns>True, если точка существует в БД, иначе false.</returns>
-    private bool PointExistsInDatabase(string point)
+    /// <param name="label">Метка точки: "Первая" или "Вторая".</param>
+    /// <exception cref="ArgumentException">Выбрасывается с конкретным описанием ошибки.</exception>
+    private void ValidatePointExists(string point, string label)
     {
       int chassisNumber = GetChassisNumber(point);
       int moduleNumber = GetModuleNumber(point);
@@ -176,12 +204,24 @@ namespace Mode.Metrology.MeasurementSystem
 
       if (!ChassisExistsInDatabase(chassisNumber))
       {
-        return false;
+        RaisePointValidationEvent(label);
+        throw new ArgumentException($"Ошибка: Менеджер шасси с номером {chassisNumber} не найден (введено: \"{point}\").");
       }
 
       var modules = _relaySwitchModuleRepository.GetDevicesByNumberChassis(chassisNumber);
       var module = modules.FirstOrDefault(m => m.Number == moduleNumber);
-      return module != null && pointNumber >= 0 && pointNumber < module.PointCount;
+
+      if (module == null)
+      {
+        RaisePointValidationEvent(label);
+        throw new ArgumentException($"Ошибка: Модуль коммутации с номером {moduleNumber} не найден у шасси {chassisNumber} (введено: \"{point}\").");
+      }
+
+      if (pointNumber < 0 || pointNumber >= module.PointCount)
+      {
+        RaisePointValidationEvent(label);
+        throw new ArgumentException($"Ошибка: Точка {pointNumber} вне допустимого диапазона (0 - {module.PointCount - 1}) в модуле {moduleNumber} шасси {chassisNumber} (введено: \"{point}\").");
+      }
     }
 
     /// <summary>
@@ -200,6 +240,17 @@ namespace Mode.Metrology.MeasurementSystem
       return false;
     }
 
+    private void RaisePointValidationEvent(string label)
+    {
+      if (label == "Первая")
+      {
+        Utilities.Events.InputValidationEvents.TriggerInvalidFirstPoint = true;
+      }
+      else if (label == "Вторая")
+      {
+        Utilities.Events.InputValidationEvents.TriggerInvalidSecondPoint = true;
+      }
+    }
     #endregion
   }
 }

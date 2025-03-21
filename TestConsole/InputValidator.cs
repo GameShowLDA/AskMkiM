@@ -100,14 +100,12 @@ namespace TestConsole
         ("1.1.50", "1.2.50", "Infinity", "Некорректное число"),
         ("1.1.50", "1.2.50", "-Infinity", "Некорректное число")
     };
-
       foreach (var test in testCases)
       {
         Console.WriteLine($"\nТест: {test.point1}, {test.point2}, {test.value} ({test.expected})");
         ValidateAndPrintResult(test.point1, test.point2, test.value);
       }
     }
-
 
     /// <summary>
     /// Выполняет валидацию и выводит результат в консоль.
