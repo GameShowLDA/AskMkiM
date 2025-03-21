@@ -22,6 +22,8 @@ using System.Windows.Controls;
 using ICSharpCode.AvalonEdit.Rendering;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 using System.Windows.Media.Effects;
+using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace UI.Components
 {
@@ -73,7 +75,6 @@ namespace UI.Components
       };
 
       this.KeyDown += MultiWindowControl_KeyDown;
-      EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
     }
 
@@ -333,7 +334,7 @@ namespace UI.Components
           {
             index--;
           }
-          EventAggregator.RaiseTextEditorClosing(control is TextEditorUI);
+          EventAggregator.RaiseTextEditorClosing(control is TextEditorUI, tabButton.Text);
 
 
           openPages.Remove(tabButton);
@@ -568,7 +569,13 @@ namespace UI.Components
           var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
           var pageIndex = openPages.IndexOf(activeTab);
           var pageName = openPages[pageIndex].Text;
-          FindAllOccurrences(fullText[userControls[pageIndex]], searchText, wholeWord, caseWord, searchArea);
+          var allOccurrences = FindAllOccurrences(fullText[userControls[pageIndex]], searchText, wholeWord, caseWord, searchArea);
+          if (allOccurrences != null)
+          {
+            InitializeCurrentIndex();
+            GoToOccurrence(currentIndex);
+          }
+
         }
       }
       else
@@ -614,11 +621,14 @@ namespace UI.Components
         foundInOpenedFiles.Clear();
       }
 
-      ApplyBlurAndDisableMainWindow();
-      Dispatcher progressDispatcher = await ShowProgressWindowOnSeparateThread();
+      //ApplyBlurAndDisableMainWindow();
+      EventAggregator.RaiseRequestShowProgress();
+
+      //Dispatcher progressDispatcher = await ShowProgressWindowOnSeparateThread();
       List<Task> tasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(tasks);
-      await CloseProgressWindowAndRemoveBlur(progressDispatcher);
+      //await CloseProgressWindowAndRemoveBlur(progressDispatcher);
+      EventAggregator.RaiseRequestCloseProgress();
 
       if (foundInOpenedFiles.Count > 0)
       {
@@ -635,56 +645,6 @@ namespace UI.Components
         return;
       }
     }
-
-    /// <summary>
-    /// Применяет эффект размытия к главному окну и блокирует его.
-    /// </summary>
-    private void ApplyBlurAndDisableMainWindow()
-    {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        Application.Current.MainWindow.Effect = new BlurEffect { Radius = 5 };
-        Application.Current.MainWindow.IsEnabled = false;
-      });
-    }
-
-    /// <summary>
-    /// Создает окно прогресса в отдельном STA-потоке без установки Owner,
-    /// но позиционирует его по центру главного окна, используя координаты, полученные на UI-потоке.
-    /// </summary>
-    private Task<Dispatcher> ShowProgressWindowOnSeparateThread()
-    {
-      var tcs = new TaskCompletionSource<Dispatcher>();
-
-      Rect mainWindowRect = Application.Current.Dispatcher.Invoke(() =>
-      {
-        Window mainWindow = Application.Current.MainWindow;
-        return new Rect(mainWindow.Left, mainWindow.Top, mainWindow.Width, mainWindow.Height);
-      });
-
-      Thread thread = new Thread(() =>
-      {
-        var progressWindow = new ProgressWindow
-        {
-          WindowStartupLocation = WindowStartupLocation.Manual,
-          Topmost = true
-        };
-
-        progressWindow.Left = mainWindowRect.Left + (mainWindowRect.Width - progressWindow.Width) / 2;
-        progressWindow.Top = mainWindowRect.Top + (mainWindowRect.Height - progressWindow.Height) / 2;
-
-        progressWindow.Show();
-
-        tcs.SetResult(Dispatcher.CurrentDispatcher);
-        Dispatcher.Run();
-      });
-      thread.SetApartmentState(ApartmentState.STA);
-      thread.IsBackground = true;
-      thread.Start();
-
-      return tcs.Task;
-    }
-
 
     /// <summary>
     /// Выполняет поиск для каждой вкладки в отдельном Task.
@@ -715,31 +675,6 @@ namespace UI.Components
         }
       })).ToList();
     }
-
-    /// <summary>
-    /// Закрывает окно прогресса через Dispatcher отдельного потока и снимает блюр с главного окна.
-    /// </summary>
-    private async Task CloseProgressWindowAndRemoveBlur(Dispatcher progressDispatcher)
-    {
-      // Снимаем эффект размытия и разблокируем главное окно на UI-потоке
-      await Application.Current.Dispatcher.InvokeAsync(() =>
-      {
-        Application.Current.MainWindow.Effect = null;
-        Application.Current.MainWindow.IsEnabled = true;
-      });
-
-      // Закрываем окно прогресса на отдельном потоке через его Dispatcher
-      await progressDispatcher.InvokeAsync(() =>
-      {
-        if (_progressWindow != null)
-        {
-          _progressWindow.Close();
-        }
-      });
-      // Останавливаем Dispatcher отдельного потока
-      progressDispatcher.InvokeShutdown();
-    }
-
 
     private List<OpenFileButton> SetSearchAreaPages(int searchArea)
     {
@@ -839,7 +774,38 @@ namespace UI.Components
     }
 
 
-    private void FindAllOccurrences(string fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea)
+    public List<SearchResult> FindAllOccurrences(string fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea)
+    {
+      ClearAllHighlights();
+
+      if (!ValidateSearchText(searchText))
+      {
+        return null;
+      }
+
+      string pattern = BuildRegexPattern(searchText, wholeWord);
+      RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
+
+      MatchCollection matches = Regex.Matches(fullText, pattern, options);
+
+      ProcessMatches(matches);
+
+      if (foundResults.Count > 0)
+      {
+        return foundResults;
+      }
+      else
+      {
+        MessageBox.Show("Текст не найден.");
+        LogInformation($"Текст {searchText} не найден.");
+        return null;
+      }
+    }
+
+    /// <summary>
+    /// Очищает подсветку для всех текстовых редакторов.
+    /// </summary>
+    private void ClearAllHighlights()
     {
       foreach (var userControl in userControls)
       {
@@ -848,41 +814,65 @@ namespace UI.Components
           ClearHighlights(textEditor);
         }
       }
+    }
+
+    /// <summary>
+    /// Проверяет, что текст для поиска не пустой.
+    /// </summary>
+    private bool ValidateSearchText(string searchText)
+    {
       if (string.IsNullOrEmpty(searchText))
       {
         MessageBox.Show("Введите текст для поиска.");
         LogWarning("Поле для поиска не заполнено");
-        return;
+        return false;
       }
-      RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
+      return true;
+    }
+
+    /// <summary>
+    /// Формирует регулярное выражение для поиска, учитывая параметр wholeWord.
+    /// </summary>
+    private string BuildRegexPattern(string searchText, bool? wholeWord)
+    {
+      // Экранируем спецсимволы
       searchText = Regex.Escape(searchText);
-      string pattern = wholeWord == true ? $@"\b{searchText}\b" : searchText;
-      MatchCollection matches = Regex.Matches(fullText, pattern, options);
+      return wholeWord == true ? $@"\b{searchText}\b" : searchText;
+    }
+
+    /// <summary>
+    /// Обрабатывает найденные совпадения и заполняет коллекцию foundResults.
+    /// </summary>
+    private void ProcessMatches(MatchCollection matches)
+    {
+      // Очищаем старые результаты
+      foundResults.Clear();
 
       foreach (Match match in matches)
       {
         foundResults.Add(new SearchResult(match.Index, match.Length));
       }
+    }
 
-      if (foundResults.Count > 0)
+    /// <summary>
+    /// Инициализирует значение currentIndex, если оно не задано.
+    /// </summary>
+    private void InitializeCurrentIndex()
+    {
+      if (currentIndex == -1)
       {
-        if (currentIndex == -1 && _searchParameters == "FindNext")
+        if (_searchParameters == "FindNext")
         {
           currentIndex = 0;
         }
-        if (currentIndex == -1 && _searchParameters == "FindPrevious")
+        else if (_searchParameters == "FindPrevious")
         {
-          currentIndex = (currentIndex + foundResults.Count) % foundResults.Count;
+          // Пример: берем последний индекс
+          currentIndex = (foundResults.Count - 1);
         }
-        GoToOccurrence(currentIndex);
-      }
-      else
-      {
-        MessageBox.Show("Текст не найден.");
-        LogInformation($"Текст {searchText} не найден.");
-        return;
       }
     }
+
 
     private Dictionary<int, string> FindOccurrencesByLine(string fullText, string searchText, bool? wholeWord, bool? caseWord)
     {
@@ -953,7 +943,12 @@ namespace UI.Components
             index = SwitchToNextDocument();
             if (index > -1)
             {
-              FindAllOccurrences(_fullText.Values.ElementAt(index), _searchText, _wholeWord, _caseWord, searchArea);
+              var allOccurrences = FindAllOccurrences(_fullText.Values.ElementAt(index), _searchText, _wholeWord, _caseWord, searchArea);
+              if (allOccurrences != null)
+              {
+                InitializeCurrentIndex();
+                GoToOccurrence(currentIndex);
+              }
             }
             if (index == -1)
             {
@@ -1045,7 +1040,6 @@ namespace UI.Components
         if (userControls[pageIndex] is TextEditorUI textEditor)
         {
           var result = foundResults[index];
-          //HighlightText(result.StartOffset, result.Length, textEditor);
           ApplyHighlightingWhenRendered(textEditor, result.StartOffset, result.Length);
           textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
           int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
@@ -1081,7 +1075,7 @@ namespace UI.Components
       }
       _pendingHighlights.Clear();
       _fullText = new Dictionary<UserControl, string>();
-      _searchText = string.Empty;
+      //_searchText = string.Empty;
       _wholeWord = false;
       _caseWord = false;
       _searchArea = 0;
@@ -1089,8 +1083,28 @@ namespace UI.Components
       hasChanged = true;
     }
 
-    //работает
-    private async void ShowHighlight(string fileName, int lineNumber, int lineLength)
+    private async void ShowHighlight(TextEditorUI textEditor, int startOffset, int length, string fileName)
+    {
+      ShowControl(textEditor, openPages.FirstOrDefault(page => page.Text == fileName));
+
+      int lineNumber = textEditor.Document.GetLineByOffset(startOffset).LineNumber;
+      textEditor.ScrollToLine(lineNumber);
+      ApplyHighlightingWhenRendered(textEditor, startOffset, length);
+      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+
+      await textEditor.Dispatcher.InvokeAsync(() =>
+      {
+        textEditor.Focus();
+        Keyboard.Focus(textEditor);
+      }, DispatcherPriority.Render);
+    }
+
+    private void OnFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
+    {
+      GetLineOccurrences(fileName, lineNumber);
+    }
+
+    private void GetLineOccurrences(string fileName, int lineNumber)
     {
       var foundPage = openPages.FirstOrDefault(page => page.Text == fileName);
       if (foundPage != null)
@@ -1099,29 +1113,25 @@ namespace UI.Components
 
         if (userControls[pageIndex] is TextEditorUI textEditor)
         {
-          textEditor.MarkerService.RemoveAll();
-          ShowControl(textEditor, foundPage);
-          textEditor.ScrollToLine(lineNumber);
-
-          int startOffset = textEditor.Document.GetOffset(lineNumber, 1);
-          //HighlightText(startOffset, lineLength, textEditor);
-          ApplyHighlightingWhenRendered(textEditor, startOffset, lineLength);
-          textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-          textEditor.Dispatcher.InvokeAsync(() =>
+          var document = textEditor.TextEditor.Document;
+          var line = document.GetLineByNumber(lineNumber);
+          string lineText = document.GetText(line);
+          // allOccurrences возвращает, например, объекты, у которых StartOffset и Length – 0-базированные относительно строки.
+          var allOccurrences = FindAllOccurrences(lineText, _searchText, _wholeWord, _caseWord, _searchArea);
+          if (allOccurrences != null && allOccurrences.Count > 0)
           {
-            textEditor.Focus();
-            Keyboard.Focus(textEditor);
-          }, System.Windows.Threading.DispatcherPriority.Render);
+            textEditor.MarkerService.RemoveAll();
+            foreach (var occurrence in allOccurrences)
+            {
+              // Вычисляем абсолютное смещение: начало строки + смещение внутри строки
+              int startOffset = line.Offset + occurrence.StartOffset;
+              int length = Math.Min(occurrence.Length, line.EndOffset - startOffset);
+              ShowHighlight(textEditor, startOffset, length, fileName);
+            }
+          }
         }
       }
     }
-
-    private void OnFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
-    {
-      _pendingHighlights[fileName] = (lineNumber, lineLength);
-      ShowHighlight(fileName, lineNumber, lineLength);
-    }
-
     #endregion
   }
 }

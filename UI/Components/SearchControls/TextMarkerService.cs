@@ -72,6 +72,77 @@ namespace UI.Components.SearchControls
       }
     }
 
+    //public void Transform(ITextRunConstructionContext context, IList<VisualLineElement> elements)
+    //{
+    //  if (context == null || elements == null)
+    //    return;
+
+    //  // Получаем абсолютные границы текущей строки
+    //  int lineStartOffset = context.VisualLine.FirstDocumentLine.Offset;
+    //  int lineEndOffset = context.VisualLine.LastDocumentLine.EndOffset;
+
+    //  // Обходим все маркеры, перекрывающие текущую строку
+    //  foreach (var marker in markers.FindOverlappingSegments(lineStartOffset, lineEndOffset - lineStartOffset))
+    //  {
+    //    foreach (var element in elements)
+    //    {
+    //      // Вычисляем абсолютное смещение элемента
+    //      int elementStart = lineStartOffset + element.VisualColumn;
+    //      int elementEnd = elementStart + element.DocumentLength;
+
+    //      // Определяем область пересечения элемента и маркера
+    //      int intersectStart = Math.Max(elementStart, marker.StartOffset);
+    //      int intersectEnd = Math.Min(elementEnd, marker.EndOffset);
+
+    //      // Если есть пересечение
+    //      if (intersectEnd > intersectStart)
+    //      {
+    //        // Если элемент полностью покрыт маркером – задаем однородный фон
+    //        if (elementStart >= marker.StartOffset && elementEnd <= marker.EndOffset)
+    //        {
+    //          if (marker.ForegroundColor != null)
+    //          {
+    //            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
+    //          }
+    //          element.TextRunProperties.SetBackgroundBrush(new SolidColorBrush(marker.BackgroundColor));
+    //        }
+    //        else
+    //        {
+    //          // Частичное покрытие – вычисляем относительные координаты в пределах элемента
+    //          double totalLength = element.DocumentLength;
+    //          double relativeStart = (intersectStart - elementStart) / totalLength;
+    //          double relativeEnd = (intersectEnd - elementStart) / totalLength;
+
+    //          // Создаем линейный градиент, который будет прозрачным вне найденного диапазона
+    //          var gradient = new LinearGradientBrush();
+    //          gradient.StartPoint = new Point(0, 0);
+    //          gradient.EndPoint = new Point(1, 0);
+
+    //          // Добавляем градиентные остановки:
+    //          // От начала до начала выделения – прозрачный
+    //          gradient.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
+    //          gradient.GradientStops.Add(new GradientStop(Colors.Transparent, relativeStart));
+
+    //          // От relativeStart до relativeEnd – цвет маркера
+    //          gradient.GradientStops.Add(new GradientStop(marker.BackgroundColor, relativeStart));
+    //          gradient.GradientStops.Add(new GradientStop(marker.BackgroundColor, relativeEnd));
+
+    //          // От relativeEnd до конца – прозрачный
+    //          gradient.GradientStops.Add(new GradientStop(Colors.Transparent, relativeEnd));
+    //          gradient.GradientStops.Add(new GradientStop(Colors.Transparent, 1));
+
+    //          element.TextRunProperties.SetBackgroundBrush(gradient);
+    //          if (marker.ForegroundColor != null)
+    //          {
+    //            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
+    //          }
+    //        }
+    //      }
+    //    }
+    //  }
+    //}
+
+
 
     /// <summary>
     /// Создание нового маркера для подсветки текста

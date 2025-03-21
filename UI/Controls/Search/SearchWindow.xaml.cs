@@ -37,9 +37,10 @@ namespace UI.Controls.Search
       InitializeComponent();
       this.Loaded += Window_Loaded;
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
-      EventAggregator.TextEditorClosing += OnSearchWindowClosing;
-      EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
+      EventAggregator.CloseSearchWindow += OnCloseSearchWindowRequested;
+      //EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
+      this.Focus();
       SearchTextBox.Focus();
     }
 
@@ -137,6 +138,7 @@ namespace UI.Controls.Search
       }
       this.Activate();
       this.Focus();
+      //SearchTextBox.Focus();
     }
     public void CloseDialog()
     {
@@ -320,13 +322,10 @@ namespace UI.Controls.Search
       SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
-    private void OnSearchWindowClosing(bool isOpen)
+    private void OnCloseSearchWindowRequested()
     {
-      if (isOpen)
-      {
-        CloseDialog();
-        EventAggregator.SearchTextRequested -= OnSearchTextRequested;
-      }
+      CloseDialog();
+      //EventAggregator.SearchTextRequested -= OnSearchTextRequested;
     }
 
     private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -371,9 +370,8 @@ namespace UI.Controls.Search
         if (!this.IsVisible)
         {
           this.Show();
-          EventAggregator.RaiseSearchWindowActivated(true);
+          this.Activate();
         }
-        this.Activate(); 
       }
       else
       {

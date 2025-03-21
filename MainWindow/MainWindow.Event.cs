@@ -12,12 +12,15 @@ using UI.Controls.Search;
 using UI.Components;
 using UI.Controls.TextEditor;
 using AppConfig;
+using System.Windows.Media.Effects;
 
 namespace MainWindowProgram
 {
   public partial class MainWindow
   {
     public bool _isSearchWindowOpen;
+    private SearchWindow _searchWindow = new SearchWindow();
+    private ProgressWindow _progressWindow;
 
     #region Основные события управления окном.
 
@@ -100,8 +103,6 @@ namespace MainWindowProgram
       //allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
     }
 
-
-
     /// <summary>
     /// Обработчик нажатия на кнопку "Открыть", открывает диалоговое окно для выбора текстового файла и загружает его в multiEditors.
     /// </summary>
@@ -171,18 +172,63 @@ namespace MainWindowProgram
       MultiWindow.PrintFile();
     }
 
+    private void OnRequestShowProgress()
+    {
+      // Применяем блюр и блокируем главное окно
+      this.Effect = new BlurEffect { Radius = 5 };
+      this.IsEnabled = false;
+
+      // Показываем окно прогресса (можно создать его на UI-потоке)
+      // Пример: если у вас есть метод ShowProgressWindow()
+      ShowProgressWindow();
+    }
+
+    private void OnRequestCloseProgress()
+    {
+      // Снимаем блюр и разблокируем главное окно
+      this.Effect = null;
+      this.IsEnabled = true;
+
+      // Закрываем окно прогресса, если оно открыто
+      CloseProgressWindow();
+    }
+
+    private void ShowProgressWindow()
+    {
+      if (_progressWindow == null)
+      {
+        _progressWindow = new ProgressWindow
+        {
+          Owner = this,
+          WindowStartupLocation = WindowStartupLocation.CenterOwner,
+          Topmost = true,
+          ShowInTaskbar = false
+        };
+        _progressWindow.Show();
+      }
+    }
+
+    private void CloseProgressWindow()
+    {
+      if (_progressWindow != null)
+      {
+        _progressWindow.Close();
+        _progressWindow = null;
+      }
+    }
+
     private void SearchMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       if (_isSearchWindowOpen == false)
       {
-        var searchWindow = new SearchWindow();
-        searchWindow.Owner = this;
+        //var searchWindow = new SearchWindow();
+        _searchWindow.Owner = this;
 
-        searchWindow.SearchText -= SearchWindow_SearchTextHandler;
-        searchWindow.SearchText += SearchWindow_SearchTextHandler;
+        _searchWindow.SearchText -= SearchWindow_SearchTextHandler;
+        _searchWindow.SearchText += SearchWindow_SearchTextHandler;
 
-        searchWindow.SelectFileForSearch -= OpenFileFromEvent;
-        searchWindow.SelectFileForSearch += OpenFileFromEvent;
+        _searchWindow.SelectFileForSearch -= OpenFileFromEvent;
+        _searchWindow.SelectFileForSearch += OpenFileFromEvent;
 
         TextEditorUI activeEditor = MultiWindow.GetActiveTextEditor();
         string selectedText = activeEditor?.TextArea.Selection.GetText();
@@ -192,12 +238,14 @@ namespace MainWindowProgram
           EventAggregator.RaiseSearchTextRequested(selectedText);
         }
 
-        searchWindow.ShowWindow();
-        searchWindow.ClearHighlights -= MultiWindow.OnSearchWindowClosing;
-        searchWindow.ClearHighlights += MultiWindow.OnSearchWindowClosing;
-
+        _searchWindow.ShowWindow();
+        _searchWindow.ClearHighlights -= MultiWindow.OnSearchWindowClosing;
+        _searchWindow.ClearHighlights += MultiWindow.OnSearchWindowClosing;
+        
         _isSearchWindowOpen = true;
-        LogInformation("Открыто окно поиска");
+
+        var temp = _searchWindow.FindName("SearchTextBox") as TextBox;
+        LogInformation($"Открыто окно поиска. Текст в строке поиска: {temp.Text}");
       }
     }
 

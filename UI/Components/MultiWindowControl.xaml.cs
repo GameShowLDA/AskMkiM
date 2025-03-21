@@ -38,7 +38,44 @@ namespace UI.Components
     public MultiWindowControl()
     {
       InitializeComponent();
+      EventAggregator.TextEditorClosing += OnTextEditorClosig;
     }
+
+    private void OnTextEditorClosig(bool textEditorClosing, string textEditorName)
+    {
+      if (textEditorClosing)
+      {
+        RemoveCorrespondingSearchDataGrid(textEditorName);
+        CloseSearchResultsActions();
+      }
+    }
+
+    private void CloseSearchResultsActions()
+    {
+      if (openPages.Count <= 0 && userControls.Count <= 0)
+      {
+        CloseSearchResults();
+        EventAggregator.RaiseCloseSearchWindow();
+      }
+    }
+
+    /// <summary>
+    /// Удаляет DataGrid с результатами поиска, соответствующий закрытому текстовому редактору.
+    /// </summary>
+    /// <param name="textEditorName">Имя закрываемого текстового редактора.</param>
+    private void RemoveCorrespondingSearchDataGrid(string textEditorName)
+    {
+      var foundPage = openPages.FirstOrDefault(page => page.Text == textEditorName);
+      if (foundPage != null)
+      {
+        int index = openPages.IndexOf(foundPage);
+        if (userControls.Count > index && userControls[index] is SearchDataGrid activeDataGrid)
+        {
+          RemoveControl(foundPage, activeDataGrid);
+        }
+      }
+    }
+
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
@@ -101,12 +138,16 @@ namespace UI.Components
 
     private void exitButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      CloseSearchResults();
+    }
+
+    private void CloseSearchResults()
+    {
       SearchResultsRow.Height = new GridLength(0);
       SearchResultsRow.MinHeight = 0;
       SearchResults.Visibility = Visibility.Collapsed;
       MultiWindowSplitter.Visibility = Visibility.Collapsed;
     }
-
 
     public TextEditorUI GetActiveTextEditor()
     {
@@ -172,7 +213,7 @@ namespace UI.Components
 
         return;
       }
-      LogInformation("Начат поиск по тексту");
+      LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
       MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
@@ -184,6 +225,11 @@ namespace UI.Components
     public void ShowSearchResults(string searchText, Dictionary<string, Dictionary<int, string>> results)
     {
       int totalCount = 0;
+      SearchResultsTopPanel.Children.Clear();
+      ContentPanel.Children.Clear();
+      openPages.Clear();
+      userControls.Clear();
+      searchResultsTextBlock.Text = string.Empty;
       foreach (var file in results)
       {
         List<SearchResultItem> items = new List<SearchResultItem>();
@@ -203,7 +249,7 @@ namespace UI.Components
         AddControlInSearchArea(file.Key, searchResultsForFile);
         searchResultsForFile.SetItemSourse(items);
       }
-      
+
       string overallSearchText = $"Результаты поиска по \"{searchText}\". Всего найдено {totalCount} строк";
       searchResultsTextBlock.Text = overallSearchText;
       MultiWindowSplitter.Visibility = Visibility.Visible;
@@ -343,6 +389,8 @@ namespace UI.Components
         {
           ShowControl(userControls[index], openPages[index]);
         }
+        CloseSearchResultsActions();
+
       }
     }
   }

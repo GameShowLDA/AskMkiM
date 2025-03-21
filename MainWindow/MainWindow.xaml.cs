@@ -65,6 +65,8 @@ namespace MainWindowProgram
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler; // Подписываемся на событие
+      RequestShowProgress += OnRequestShowProgress;
+      RequestCloseProgress += OnRequestCloseProgress;
     }
 
     private void SettingsGUI()
@@ -102,6 +104,7 @@ namespace MainWindowProgram
     private void OnSearchWindowActivated(bool isOpen)
     {
       _isSearchWindowOpen = isOpen;
+      _searchWindow.SearchText -= SearchWindow_SearchTextHandler;
     }
   }
 }
