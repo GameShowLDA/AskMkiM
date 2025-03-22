@@ -27,7 +27,7 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), cmd, 2000).ConfigureAwait(true);
+      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
       return result == "1.0.1" ? (true, string.Empty) : (false, result);
     }
 
@@ -35,7 +35,7 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> ResetAsync()
     {
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_moduleRelayControl.IPAddress, cmd, 1000).ConfigureAwait(true);
+      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
       return result == "2.0.1";
     }
 

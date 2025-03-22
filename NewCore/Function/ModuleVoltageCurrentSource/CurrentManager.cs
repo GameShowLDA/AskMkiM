@@ -2,6 +2,7 @@
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using NewCore.Device;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
@@ -31,11 +32,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task SetCurrentLevelAsync(int integerPart, int decimalPart)
     {
       LogInformation($"МИНТ: Установка тока {integerPart}.{decimalPart} мА ({new DeviceCommand(4, integerPart, decimalPart)})");
-
-      await DeviceCommandSender.SendCommandAsync(
-          IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails),
-          new DeviceCommand(4, integerPart, decimalPart)
-      );
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(4, integerPart, decimalPart).ToString());
     }
 
     /// <summary>
@@ -46,11 +43,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task<bool> LimitationOfTheOutputCurrent(int current)
     {
       LogInformation($"МИНТ: Установка ограничения тока в {current} мА ({new DeviceCommand(10, current)})");
-
-      await DeviceCommandSender.SendCommandAsync(
-          IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails),
-          new DeviceCommand(10, current));
-
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(10, current).ToString());
       return true;
     }
   }

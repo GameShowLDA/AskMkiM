@@ -252,6 +252,10 @@ namespace AppConfig.DataBase.Services
       {
         return new Repository<ChassisManagerEntity>(_context).GetAll();
       }
+      else if (typeof(IBreakdownTester).IsAssignableFrom(type))
+      {
+        return new Repository<BreakdownTesterEntity>(_context).GetAll();
+      }
 
       Console.WriteLine($"Неизвестный тип: {type}");
       return new List<IDevice>();

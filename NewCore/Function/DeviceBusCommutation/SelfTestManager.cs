@@ -56,8 +56,8 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      DeviceCommand command = new DeviceCommand(4, (int)testType, busContact, action);
-      LogInformation($"Отправка команды самоконтроля: {command}");
+      DeviceCommand cmd = new DeviceCommand(4, (int)testType, busContact, action);
+      LogInformation($"Отправка команды самоконтроля: {cmd}");
 
       if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
       {
@@ -65,7 +65,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      await DeviceCommandSender.SendCommandAsync(ipAddress, command);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
     }
 
@@ -106,8 +106,9 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<int> GetRelayCountAsync(TypeConnector testType, int busContact)
     {
-      DeviceCommand command = new DeviceCommand(41, (int)testType * 10, busContact, 0);
-      string response = await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_deviceBusCommutation.ConnectionDetails), command, 2000);
+      DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10, busContact, 0);
+      string response = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
+      ;
 
       if (int.TryParse(response, out int relayCount))
       {
@@ -128,8 +129,8 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      DeviceCommand command = new DeviceCommand(41, (int)testType * 10 + relayNumber, busContact, action);
-      LogInformation($"Управление реле {relayNumber} в цепи {testType}, контакт {busContact}, действие {action} : команда {command.ToString()}");
+      DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10 + relayNumber, busContact, action);
+      LogInformation($"Управление реле {relayNumber} в цепи {testType}, контакт {busContact}, действие {action} : команда {cmd.ToString()}");
 
       if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
       {
@@ -137,7 +138,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      await DeviceCommandSender.SendCommandAsync(ipAddress, command);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
     }
   }

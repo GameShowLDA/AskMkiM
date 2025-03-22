@@ -37,7 +37,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Подключение шины {bus} к + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1)})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1));
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1).ToString());
       return true;
     }
 
@@ -55,7 +55,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Подключение шины {bus} к - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1)})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1));
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1).ToString());
       return true;
     }
 
@@ -73,7 +73,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Отключение шины {bus} от + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2)})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2));
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2).ToString());
       return true;
     }
 
@@ -91,7 +91,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Отключение шины {bus} от - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2)})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails), new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2));
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2).ToString());
       return true;
     }
   }

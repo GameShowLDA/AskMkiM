@@ -1,5 +1,6 @@
 ﻿using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
+using TestConsole.GPT;
 using TestConsole.MINT;
 
 namespace TestConsole
@@ -22,7 +23,7 @@ namespace TestConsole
         Console.WriteLine("4. Самоконтроль УКШ");
         Console.WriteLine("5. Самоконтроль МИНТ");
         Console.WriteLine("6. Проверка ввода данных");
-        Console.WriteLine("7. Временный тест");
+        Console.WriteLine("7. ППУ");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
@@ -67,9 +68,7 @@ namespace TestConsole
             break;
 
           case 7:
-            // var dbc = new SwitchingDeviceRepository().GetAll().FirstOrDefault();
-            var dbc = new SwitchingDeviceServices().GetAll().FirstOrDefault();
-            await dbc.CapacitorManager.ConnectCapacitor("1");
+            await GPT_Test.RunAsync();
             break;
 
           case 0:
