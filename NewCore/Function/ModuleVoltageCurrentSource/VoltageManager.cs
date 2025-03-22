@@ -28,8 +28,8 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task SetSourceVoltageAsync(VoltageSources voltageSources)
     {
       LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails),
-        new DeviceCommand(9, voltageSources == VoltageSources.Supply12V ? 1 : 0));
+      var cmd = new DeviceCommand(9, voltageSources == VoltageSources.Supply12V ? 1 : 0);
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString());
     }
 
     /// <summary>
@@ -41,8 +41,8 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
     {
       LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleVoltageCurrentSource.ConnectionDetails),
-        new DeviceCommand(3, integerPart, decimalPart));
+      var cmd = new DeviceCommand(3, integerPart, decimalPart);
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString());
     }
   }
 }

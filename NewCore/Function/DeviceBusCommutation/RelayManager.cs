@@ -32,8 +32,8 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      DeviceCommand command = new DeviceCommand(8, numberRelay, 1);
-      await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(true);
+      DeviceCommand cmd = new DeviceCommand(8, numberRelay, 1);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(10);
       return true;
     }
@@ -50,8 +50,8 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      DeviceCommand command = new DeviceCommand(8, numberRelay, 2);
-      await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(true);
+      DeviceCommand cmd = new DeviceCommand(8, numberRelay, 2);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(10);
       return true;
     }

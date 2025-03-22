@@ -38,7 +38,7 @@ namespace NewCore.Function.ModuleRelayControl
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
 
       LogInformation($"Команда: \"{cmd.ToString()}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), cmd, 1000);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return true;
     }
 
@@ -60,7 +60,7 @@ namespace NewCore.Function.ModuleRelayControl
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 2);
 
       LogInformation($"Команда: \"{cmd.ToString()}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
-      await Communication.DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), new DeviceCommand(4, typeBus, typeVoltage, 2), 1000);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(new DeviceCommand(4, typeBus, typeVoltage, 2).ToString());
       return true;
     }
 

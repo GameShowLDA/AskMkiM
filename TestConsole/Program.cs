@@ -1,4 +1,6 @@
-﻿using AppConfig.DataBase.Services;
+﻿using AppConfig.DataBase.Repositories;
+using AppConfig.DataBase.Services;
+using TestConsole.GPT;
 using TestConsole.MINT;
 
 namespace TestConsole
@@ -21,11 +23,12 @@ namespace TestConsole
         Console.WriteLine("4. Самоконтроль УКШ");
         Console.WriteLine("5. Самоконтроль МИНТ");
         Console.WriteLine("6. Проверка ввода данных");
+        Console.WriteLine("7. ППУ");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 6)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 7)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -62,6 +65,10 @@ namespace TestConsole
           case 6:
 
             InputValidator.Validate();
+            break;
+
+          case 7:
+            await GPT_Test.RunAsync();
             break;
 
           case 0:

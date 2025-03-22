@@ -26,43 +26,43 @@ namespace NewCore.Communication
     /// </summary>
     private static readonly Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-    /// <summary>
-    /// Отсылает команду по IP-адресу и, при необходимости, возвращает ответ от устройства.
-    /// </summary>
-    /// <param name="ip">IP-адрес целевого устройства.</param>
-    /// <param name="command">Строка команды, которая будет отправлена на устройство.</param>
-    /// <param name="timeout">Время ответа в миллисекундах.</param>
-    /// <returns>Возвращает ответ от устройства, если <paramref name="awaitResponse"/> равно true; в противном случае возвращает пустую строку. В случае ошибки возвращает сообщение об ошибке.</returns>
-    public static async Task<string> SendCommandAsync(IPAddress ip, DeviceCommand command, int timeout = 0)
-    {
-      int lastNumber = GetLastOctet(ip);
-      try
-      {
-        IPEndPoint endPoint = new IPEndPoint(ip, _portOutput + lastNumber);
-        LogInformation($"Отправка команды на {endPoint}");
-        byte[] messageBuffer = Encoding.UTF8.GetBytes(command.ToString());
-        await socket.SendToAsync(new ArraySegment<byte>(messageBuffer), SocketFlags.None, endPoint);
+    // /// <summary>
+    // /// Отсылает команду по IP-адресу и, при необходимости, возвращает ответ от устройства.
+    // /// </summary>
+    // /// <param name="ip">IP-адрес целевого устройства.</param>
+    // /// <param name="command">Строка команды, которая будет отправлена на устройство.</param>
+    // /// <param name="timeout">Время ответа в миллисекундах.</param>
+    // /// <returns>Возвращает ответ от устройства, если <paramref name="awaitResponse"/> равно true; в противном случае возвращает пустую строку. В случае ошибки возвращает сообщение об ошибке.</returns>
+    //public static async Task<string> SendCommandAsync(IPAddress ip, DeviceCommand command, int timeout = 0)
+    //{
+    //  int lastNumber = GetLastOctet(ip);
+    //  try
+    //  {
+    //    IPEndPoint endPoint = new IPEndPoint(ip, _portOutput + lastNumber);
+    //    LogInformation($"Отправка команды на {endPoint}");
+    //    byte[] messageBuffer = Encoding.UTF8.GetBytes(command.ToString());
+    //    await socket.SendToAsync(new ArraySegment<byte>(messageBuffer), SocketFlags.None, endPoint);
 
-        return timeout > 0 ? await GetMessageDeviceAsync(timeout, lastNumber) : string.Empty;
-      }
-      catch (SocketException ex)
-      {
-        return LogError($"Ошибка соединения: {ex.Message}");
-      }
-      catch (TimeoutException ex)
-      {
-        return LogError($"Превышено время ожидания: {ex.Message}");
-      }
-      catch (ArgumentException ex)
-      {
-        return LogError($"Неверные аргументы: {ex.Message}");
-      }
-      catch (Exception ex) // Если нужно перехватить все исключения
-      {
-        LogError($"Непредвиденная ошибка: {ex.Message}");
-        throw;
-      }
-    }
+    //    return timeout > 0 ? await GetMessageDeviceAsync(timeout, lastNumber) : string.Empty;
+    //  }
+    //  catch (SocketException ex)
+    //  {
+    //    return LogError($"Ошибка соединения: {ex.Message}");
+    //  }
+    //  catch (TimeoutException ex)
+    //  {
+    //    return LogError($"Превышено время ожидания: {ex.Message}");
+    //  }
+    //  catch (ArgumentException ex)
+    //  {
+    //    return LogError($"Неверные аргументы: {ex.Message}");
+    //  }
+    //  catch (Exception ex) // Если нужно перехватить все исключения
+    //  {
+    //    LogError($"Непредвиденная ошибка: {ex.Message}");
+    //    throw;
+    //  }
+    //}
 
     /// <summary>
     /// Возвращает ответ от устройства.

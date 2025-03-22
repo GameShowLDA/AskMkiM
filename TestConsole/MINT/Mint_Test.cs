@@ -62,8 +62,7 @@ namespace TestConsole.MINT
       await SettingsMeter(meter);
       await powerSource.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
       await powerSource.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B2);
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(dbc.ConnectionDetails), new DeviceCommand(5, 2, 2, 1));
-
+      await dbc.DeviceProtocol.QueryAsync(new DeviceCommand(5, 2, 2, 1).ToString());
       await GenerateDiscreteVoltageCheck(meter, powerSource);
       await CheckMintSwitching(meter, powerSource, dbc);
 

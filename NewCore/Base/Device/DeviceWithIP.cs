@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using NewCore.Communication;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using Utilities;
 using static NewCore.Enum.DeviceEnum;
@@ -8,7 +9,7 @@ namespace NewCore.Base.Device
   /// <summary>
   /// Абстрактный класс, представляющий устройство с подключением по IP-адресу.
   /// </summary>
-  public abstract class DeviceWithIP : IDevice
+  public abstract class DeviceWithIP : DeviceWithProtocolSupport, IDevice
   {
     /// <inheritdoc />
     public string Name { get; set; }
@@ -64,6 +65,9 @@ namespace NewCore.Base.Device
     /// <inheritdoc />
     public IConnectable ConnectableManager { get; set; }
 
+    /// <inheritdoc />
+    public IDeviceProtocol DeviceProtocol { get; set; }
+
     /// <summary>
     /// Получает строковое представление указанного IP-адреса.
     /// </summary>
@@ -84,9 +88,11 @@ namespace NewCore.Base.Device
       if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
       {
         IPAddress = ipAddress;
+        DeviceProtocol = new UdpDeviceProtocol(this);
       }
       else
       {
+        DeviceProtocol = null;
         LoggerUtility.LogError("Invalid IP Address format.");
       }
     }

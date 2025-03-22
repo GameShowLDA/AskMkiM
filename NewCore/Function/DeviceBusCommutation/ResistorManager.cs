@@ -30,8 +30,9 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        DeviceCommand command = new DeviceCommand(6, 1, num, 1);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        DeviceCommand cmd = new DeviceCommand(6, 1, num, 1);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+
         return true;
       }
 
@@ -48,8 +49,9 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        DeviceCommand command = new DeviceCommand(6, 1, num, 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        DeviceCommand cmd = new DeviceCommand(6, 1, num, 2);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+
         return true;
       }
 

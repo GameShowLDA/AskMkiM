@@ -41,7 +41,7 @@ namespace NewCore.Function.DeviceBusCommutation
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 1 || busNumber > 4))
       {
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         await Task.Delay(10);
         return true;
       }
@@ -78,7 +78,7 @@ namespace NewCore.Function.DeviceBusCommutation
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 1 || busNumber > 4))
       {
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         await Task.Delay(10);
         return true;
       }
@@ -109,7 +109,7 @@ namespace NewCore.Function.DeviceBusCommutation
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 2 || busNumber > 3))
       {
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         await Task.Delay(10);
         return true;
       }
@@ -138,7 +138,7 @@ namespace NewCore.Function.DeviceBusCommutation
       int numberConnector = (int)TypeConnector.BreakdownTester;
 
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
-      await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
       await Task.Delay(10);
       return true;
     }

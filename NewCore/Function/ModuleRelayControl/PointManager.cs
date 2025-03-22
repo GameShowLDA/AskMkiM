@@ -31,7 +31,8 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number)
     {
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), new DeviceCommand(8, number, (int)bus, 1));
+      var cmd = new DeviceCommand(8, number, (int)bus, 1);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(5);
       return true;
     }
@@ -44,7 +45,8 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number)
     {
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), new DeviceCommand(8, number, (int)bus, 2));
+      var cmd = new DeviceCommand(8, number, (int)bus, 2);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(5);
       return true;
     }
@@ -58,7 +60,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint)
     {
-      DeviceCommand command = new DeviceCommand
+      DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
         FirstParameter = firstPoint,
@@ -68,10 +70,9 @@ namespace NewCore.Function.ModuleRelayControl
 
       Stopwatch stopwatch = new Stopwatch();
       stopwatch.Start();
-      string answer = await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), command, 3000);
+      string answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 3000);
       stopwatch.Stop();
       Console.WriteLine($"Время ожидания: {stopwatch.Elapsed}");
-
       return answer.Contains("11.1");
     }
 
@@ -84,7 +85,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint)
     {
-      DeviceCommand command = new DeviceCommand
+      DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
         FirstParameter = firstPoint,
@@ -92,7 +93,7 @@ namespace NewCore.Function.ModuleRelayControl
         ThirdParameter = (2 * 10) + (int)bus,
       };
 
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), command);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(5);
       return true;
     }
@@ -104,7 +105,8 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Строка с ответом от устройства.</returns>
     public async Task<string> CheckPoint(int numberPoint)
     {
-      return await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), new DeviceCommand(6, numberPoint), 1000);
+      var cmd = new DeviceCommand(6, numberPoint);
+      return await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
     }
   }
 }

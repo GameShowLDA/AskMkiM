@@ -24,13 +24,15 @@ namespace NewCore.Function.ManagerChassis
     /// <inheritdoc />
     public async Task StartPowerAsync()
     {
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_chassisModel.ConnectionDetails), new DeviceCommand(2, 1, 1));
+      var cmd = new DeviceCommand(2, 1, 1);
+      await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }
 
     /// <inheritdoc />
     public async Task StopPowerAsync()
     {
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_chassisModel.ConnectionDetails), new DeviceCommand(2, 2, 1));
+      var cmd = new DeviceCommand(2, 2, 1);
+      await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }
   }
 }

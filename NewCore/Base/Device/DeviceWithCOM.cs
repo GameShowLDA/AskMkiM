@@ -1,4 +1,5 @@
-﻿using System.IO.Ports;
+﻿using NewCore.Communication;
+using System.IO.Ports;
 using System.Management;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
@@ -13,7 +14,7 @@ namespace NewCore.Base.Device
   /// Этот класс реализует интерфейс <see cref="IDevice"/> и предоставляет базовые методы для подключения 
   /// и отключения устройств через последовательный порт (COM).
   /// </remarks>
-  public abstract class DeviceWithCOM : IDevice
+  public abstract class DeviceWithCOM : DeviceWithProtocolSupport, IDevice
   {
     /// <inheritdoc />
     public string Name { get; set; }
@@ -42,8 +43,31 @@ namespace NewCore.Base.Device
     /// <inheritdoc />
     public int Number { get; set; }
 
+    private string _connectionDetails;
+
     /// <inheritdoc />
-    public string ConnectionDetails { get; set; }
+    public string ConnectionDetails
+    {
+      get => _connectionDetails;
+      set
+      {
+        _connectionDetails = value;
+
+        var port = SerialPortCustom.ToObject(value);
+        if (port != null)
+        {
+          COMPort = port;
+          DeviceProtocol = new SerialDeviceProtocol(this, COMPort);
+          LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.");
+        }
+        else
+        {
+          LogWarning($"[{Name}] Не удалось сконфигурировать COM-порт из ConnectionDetails.");
+          COMPort = null;
+          DeviceProtocol = null;
+        }
+      }
+    }
 
     /// <inheritdoc />
     public DeviceType DeviceType { get; set; }
@@ -91,6 +115,9 @@ namespace NewCore.Base.Device
 
     /// <inheritdoc />
     public IConnectable ConnectableManager { get; set; }
+
+    /// <inheritdoc />
+    public IDeviceProtocol DeviceProtocol { get; set; }
 
     /// <summary>
     /// Выполняет поиск COM-порта устройства на основе указанных идентификаторов производителя (VID) и продукта (PID).

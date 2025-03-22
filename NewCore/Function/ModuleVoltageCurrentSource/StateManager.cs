@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
@@ -24,7 +25,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_moduleVoltageCurrentSource.IPAddress, cmd, 2000).ConfigureAwait(true);
+      string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
 
       // Десериализация ответа
       BaseResponse baseResponse = BaseResponse.FromJson(result);
@@ -62,7 +63,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task<bool> ResetAsync()
     {
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_moduleVoltageCurrentSource.IPAddress, cmd, 1000).ConfigureAwait(true);
+      string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
       return result == "2.0.1";
     }
 

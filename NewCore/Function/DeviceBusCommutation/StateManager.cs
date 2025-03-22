@@ -37,7 +37,7 @@ namespace NewCore.Function.DeviceBusCommutation
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
-      string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 2000).ConfigureAwait(true);
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
       BaseResponse baseResponse = BaseResponse.FromJson(result);
       if (baseResponse != null)
@@ -72,7 +72,7 @@ namespace NewCore.Function.DeviceBusCommutation
     public async Task<bool> ResetAsync()
     {
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 1000).ConfigureAwait(true);
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return result == "2.0.1";
     }
   }

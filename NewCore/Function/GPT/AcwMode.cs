@@ -30,7 +30,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation("Устанавливаем режим ACW на GPT-79904");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ACW";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>

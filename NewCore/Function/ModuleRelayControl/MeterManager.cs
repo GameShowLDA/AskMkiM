@@ -31,7 +31,7 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> ConnectMeterAsync()
     {
       DeviceCommand cmd = new DeviceCommand(5, 1);
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), cmd);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
     }
 
@@ -45,7 +45,7 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> DisconnectMeterAsync()
     {
       DeviceCommand cmd = new DeviceCommand(5, 2);
-      await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), cmd);
+      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
     }
 
@@ -59,7 +59,7 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> GetMeterResponseAsync()
     {
       DeviceCommand cmd = new DeviceCommand(7);
-      return (await DeviceCommandSender.SendCommandAsync(IPAddress.Parse(_moduleRelayControl.ConnectionDetails), cmd, 1000)).Contains("105.1");
+      return (await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000)).Contains("105.1");
     }
   }
 }
