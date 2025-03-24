@@ -17,11 +17,6 @@ namespace NewCore.Function.Keysight3466new
     private readonly KeysightDevice _device;
 
     /// <summary>
-    /// Менеджер коммуникации для обмена SCPI-командами.
-    /// </summary>
-    private readonly ICommunication _communication;
-
-    /// <summary>
     /// Возвращает состояние подключения к прибору.
     /// </summary>
     public bool IsConnected => _device.IsConnected;
@@ -34,7 +29,6 @@ namespace NewCore.Function.Keysight3466new
     public KeysightConnection(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.CommunicationManager;
     }
 
     /// <inheritdoc />
@@ -42,7 +36,7 @@ namespace NewCore.Function.Keysight3466new
     {
       if ((await ConnectAsync()).Connect)
       {
-        string idn = await _communication.QueryAsync("*IDN?");
+        string idn = await _device.DeviceProtocol.QueryAsync("*IDN?", timeout: 1000, port:_device.Port);
         if (!string.IsNullOrEmpty(idn))
         {
           return (true, string.Empty);

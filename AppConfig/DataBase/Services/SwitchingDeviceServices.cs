@@ -1,4 +1,5 @@
-﻿using AppConfig.DataBase.Repositories;
+﻿using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Repositories;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 
@@ -21,17 +22,32 @@ namespace AppConfig.DataBase.Services
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <returns>Список пробойных установок.</returns>
+    /// <returns>Список устройств коммутации шин.</returns>
     public List<ISwitchingDevice> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new SwitchingDeviceRepository().GetDevicesByNumberChassis(numberChassis);
+      var data = _context.Set<SwitchingDeviceEntity>()
+                         .Where(device => device.NumberChassis == numberChassis)
+                         .ToList();
+
       var result = data
-      .OfType<IDevice>()
-      .Select(GetDeviceInstance)
-      .Where(instance => instance != null)
-      .ToList();
+          .OfType<ISwitchingDevice>()
+          .Select(GetDeviceInstance)
+          .Where(instance => instance != null)
+          .ToList();
 
       return result;
+    }
+
+    /// <summary>
+    /// Получает список сущностей пробойных установок, привязанных к определённому шасси.
+    /// </summary>
+    /// <param name="numberChassis">Номер шасси.</param>
+    /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
+    public List<SwitchingDeviceEntity> GetEntitiesByNumberChassis(int numberChassis)
+    {
+      return _context.Set<SwitchingDeviceEntity>()
+                     .Where(device => device.NumberChassis == numberChassis)
+                     .ToList();
     }
   }
 }

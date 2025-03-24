@@ -31,7 +31,7 @@ namespace AppConfig.DataBase.Repositories
 
     /// <inheritdoc />
     public List<T> GetAll()
-    {
+    { 
       return _dbSet.ToList();
     }
 

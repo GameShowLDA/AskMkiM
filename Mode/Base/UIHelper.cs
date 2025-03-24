@@ -18,7 +18,7 @@ namespace Mode.Base
     /// </summary>
     /// <param name="inputField">Экземпляр InputField.</param>
     /// <returns>Кортеж с первой точкой, второй точкой и электрическим параметром.</returns>
-    public static (string First, string Second, string Parameter) GetInputFieldValuesSafe(this InputField inputField)
+    public static (string First, string Second, string Parameter) GetInputFieldValuesSafe(this InputFieldMultimeter inputField)
     {
       string first = string.Empty;
       string second = string.Empty;
@@ -48,18 +48,18 @@ namespace Mode.Base
     /// </summary>
     /// <param name="protocolUI">Элемент ProtocolUI.</param>
     /// <returns>InputField или null, если не удалось извлечь.</returns>
-    public static InputField? GetInputFieldSafe(this ProtocolUI protocolUI)
+    public static InputFieldMultimeter? GetInputFieldSafe(this ProtocolUI protocolUI)
     {
       if (protocolUI == null)
       {
         return null;
       }
 
-      InputField? result = null;
+      InputFieldMultimeter? result = null;
 
       void TryGet()
       {
-        if (protocolUI.ContentView is InputField inputField)
+        if (protocolUI.ContentView is InputFieldMultimeter inputField)
         {
           result = inputField;
         }

@@ -15,9 +15,14 @@ namespace NewCore.Communication
   {
     private const int BaseOutputPort = 8888;
     private const int BaseInputPort = 8800;
-
-    private readonly Socket _socket;
+    private static readonly Socket SharedSocket;
     private readonly DeviceWithIP _device;
+
+    static UdpDeviceProtocol()
+    {
+      SharedSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+      SharedSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+    }
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="UdpDeviceProtocol"/> для указанного IP-устройства.
@@ -26,27 +31,27 @@ namespace NewCore.Communication
     public UdpDeviceProtocol(DeviceWithIP device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0)
+    public async Task<string> QueryAsync(string command, int timeout = 0, int responseDelay = 0, int port = 0)
     {
       try
       {
-        if (!IPAddress.TryParse(_device.ConnectionDetails, out IPAddress ip))
-        {
-          throw new ArgumentException($"Неверный формат IP-адреса: {_device.ConnectionDetails}");
-        }
+        int lastOctet = GetLastOctet(_device.IPAddress);
 
-        int lastOctet = GetLastOctet(ip);
-        int outputPort = BaseOutputPort + lastOctet;
-        IPEndPoint endPoint = new IPEndPoint(ip, outputPort);
+        int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
+        int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
 
-        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {endPoint}");
+        IPEndPoint deviceEndpoint = new IPEndPoint(_device.IPAddress, outputPort);
+        using UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort));
+
+        // Гарантированно слушаем ДО отправки
+        Task<UdpReceiveResult> receiveTask = udpClient.ReceiveAsync();
 
         byte[] buffer = Encoding.UTF8.GetBytes(command);
-        await _socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, endPoint);
+        await udpClient.SendAsync(buffer, buffer.Length, deviceEndpoint);
+        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}");
 
         if (responseDelay > 0)
         {
@@ -55,15 +60,24 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
-          return await ReceiveResponseAsync(lastOctet, timeout);
+          Task timeoutTask = Task.Delay(timeout);
+          if (await Task.WhenAny(receiveTask, timeoutTask) == receiveTask)
+          {
+            string response = Encoding.UTF8.GetString((await receiveTask).Buffer);
+            LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
+            return response;
+          }
+          else
+          {
+            return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
+          }
         }
 
         return string.Empty;
       }
       catch (Exception ex)
       {
-        LogError($"[{_device.Name}] Ошибка при отправке команды: {ex.Message}");
-        throw;
+        return LogError($"[{_device.Name}] Ошибка при отправке/приёме: {ex.Message}");
       }
     }
 
@@ -73,11 +87,12 @@ namespace NewCore.Communication
     /// <param name="lastOctet">Последний октет IP-адреса, используется для вычисления порта.</param>
     /// <param name="timeout">Таймаут ожидания, мс.</param>
     /// <returns>Ответ от устройства.</returns>
-    private async Task<string> ReceiveResponseAsync(int lastOctet, int timeout)
+    private async Task<string> ReceiveResponseAsync(int lastOctet, int timeout, string command)
     {
       int inputPort = BaseInputPort + lastOctet;
+      LogInformation($"[{_device.Name}] Чтение ответа команды \"{command}\" с порта {inputPort}");
 
-      using (UdpClient receiver = new UdpClient(inputPort))
+      using (UdpClient receiver = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort)))
       {
         try
         {
@@ -92,12 +107,12 @@ namespace NewCore.Communication
           }
           else
           {
-            return LogWarning($"Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
+            return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
           }
         }
         catch (Exception ex)
         {
-          return LogError($"Произошла ошибка при получении ответа от устройства: {ex.Message}");
+          return LogError($"[{_device.Name}] Ошибка при получении ответа: {ex.Message}");
         }
       }
     }

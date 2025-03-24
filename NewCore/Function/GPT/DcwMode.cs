@@ -30,7 +30,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation("Устанавливаем режим DCW на GPT-79904");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} DCW";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем напряжение DCW: {value:F3} кВ");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {value:F3}".Replace(',', '.');
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем высокий предел тока DCW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CHISET)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -63,8 +63,7 @@ namespace NewCore.Function.GPT
     {
       var query1 = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
       LogInformation($"Отправляем команду (Вариант 1): {query1}");
-      await _gptModel.WriteLineAsync(query1);
-      await Task.Delay(100); // Небольшая задержка
+      await _gptModel.DeviceProtocol.QueryAsync(query1);
     }
 
     /// <summary>
@@ -75,7 +74,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -86,7 +85,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем смещение DCW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_REF)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -97,7 +96,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем текущее значение тока DCW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_ARCCURRENT)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -134,8 +133,7 @@ namespace NewCore.Function.GPT
     private async Task<double> ReadDoubleAsync(ManualCommand command)
     {
       var query = $"{GetCommandSyntax(command)} ?";
-      await _gptModel.WriteLineAsync(query);
-      var response = await _gptModel.ReadLineAsync();
+      var response = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 100);
       return double.TryParse(response.Replace("kV", "").Replace("mA", "").Replace("S", "").Trim().Replace(".", ","), out var result) ? result : 0.0;
     }
 

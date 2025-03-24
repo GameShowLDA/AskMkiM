@@ -14,11 +14,6 @@ namespace NewCore.Function.Keysight3466new
     private readonly KeysightDevice _device;
 
     /// <summary>
-    /// Менеджер связи с прибором.
-    /// </summary>
-    private readonly ICommunication _communication;
-
-    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ContinuityMeasurement"/>.
     /// </summary>
     /// <param name="device">Экземпляр устройства Keysight.</param>
@@ -26,7 +21,6 @@ namespace NewCore.Function.Keysight3466new
     public ContinuityMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.CommunicationManager;
     }
 
     /// <summary>
@@ -35,12 +29,7 @@ namespace NewCore.Function.Keysight3466new
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
     public async Task SetContinuityModeAsync()
     {
-      if (!_device.IsConnected)
-      {
-        throw new InvalidOperationException("Прибор не подключен.");
-      }
-
-      await _communication.SendCommandAsync("CONF:CONT");
+      await _device.DeviceProtocol.QueryAsync("CONF:CONT");
     }
 
     /// <summary>
@@ -57,9 +46,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _communication.QueryAsync("MEAS:CONT?");
-
-      // Если прибор возвращает +9.90000000E+37, значит цепь разомкнута (нет связи)
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:CONT?", timeout: 1000);
       return response != "+9.90000000E+37";
     }
   }

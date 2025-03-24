@@ -72,7 +72,7 @@ namespace NewCore.Function.DeviceBusCommutation
     public async Task<bool> ResetAsync()
     {
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       return result == "2.0.1";
     }
   }

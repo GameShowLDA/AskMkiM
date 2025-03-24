@@ -25,7 +25,8 @@ namespace TestConsole
         Console.WriteLine("4. Тест АЦП с переполюсовкой");
         Console.WriteLine("5. Тест ПИНТ");
         Console.WriteLine("6. Тест Шунт");
-        Console.WriteLine("7. Весь самоконтроль");
+        Console.WriteLine("7. Тест ППУ");
+        Console.WriteLine("8. Весь самоконтроль");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
@@ -65,6 +66,10 @@ namespace TestConsole
             break;
 
           case 7:
+            await SelfCheckCircuitAsync(TypeConnector.BreakdownTester);
+            break;
+
+          case 8:
 
             var device = GetDeviceInstance(SelectDeviceBusCommutation);
             var meter = GetDeviceInstance(SelectMeter);
@@ -218,8 +223,6 @@ namespace TestConsole
       {
         LogWarning($"Прибор не поддерживает проверку целостности для {circuitName}. Пропуск теста.");
       }
-
-
 
       // Размыкаем цепь
       if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 2))

@@ -11,7 +11,7 @@ namespace AppConfig.DataBase.Models
   /// <summary>
   /// Класс, представляющий сущность менеджера шасси.
   /// </summary>
-  public class ChassisManagerEntity : IChassisManager, IHeadUnit
+  public class ChassisManagerEntity : IChassisManager
   {
     /// <inheritdoc />
     public int Id { get; set; }

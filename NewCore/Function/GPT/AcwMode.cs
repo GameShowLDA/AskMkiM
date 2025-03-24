@@ -41,7 +41,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем напряжение ACW: {value:F3} кВ");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} {value:F3}".Replace(',', '.');
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем верхний предел тока ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем нижний предел тока ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} {value:F3}".Replace(',', '.');
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем время теста ACW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_TTIME)} {value:F1}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace NewCore.Function.GPT
 
       LogInformation($"Устанавливаем частоту ACW: {frequency} Гц");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} {frequency}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем смещение ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_REF)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем предельное значение дугового тока ACW: {value:F3} мА");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_ARCCURRENT)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -165,8 +165,7 @@ namespace NewCore.Function.GPT
     private async Task<double> ReadDoubleParameterAsync(ManualCommand command, string unit)
     {
       var query = $"{GetCommandSyntax(command)} ?";
-      await _gptModel.WriteLineAsync(query);
-      var response = await _gptModel.ReadLineAsync();
+      var response = await _gptModel.DeviceProtocol.QueryAsync(query, 100);
       return double.Parse(response.Replace(unit, "").Trim().Replace(".", ","));
     }
 
@@ -179,8 +178,7 @@ namespace NewCore.Function.GPT
     private async Task<int> ReadIntParameterAsync(ManualCommand command, string unit)
     {
       var query = $"{GetCommandSyntax(command)} ?";
-      await _gptModel.WriteLineAsync(query);
-      var response = await _gptModel.ReadLineAsync();
+      var response = await _gptModel.DeviceProtocol.QueryAsync(query, 100);
       return int.Parse(response.Replace(unit, "").Trim());
     }
   }

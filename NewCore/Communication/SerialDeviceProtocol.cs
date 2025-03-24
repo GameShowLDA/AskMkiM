@@ -26,13 +26,13 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0)
+    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0, int port = 0)
     {
       try
       {
-        if (!_serialPort.IsOpen)
+        if (!EnsurePortOpen())
         {
-          _serialPort.Open();
+          return string.Empty;
         }
 
         LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}");
@@ -69,7 +69,52 @@ namespace NewCore.Communication
       catch (Exception ex)
       {
         LogError($"[{_device.Name}] Ошибка при работе с COM-портом: {ex.Message}");
-        throw;
+        return string.Empty;
+      }
+      finally
+      {
+        if (_serialPort.IsOpen)
+        {
+          _serialPort.Close();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Безопасно открывает COM-порт, если он ещё не открыт.
+    /// </summary>
+    /// <returns>True, если порт успешно открыт или уже был открыт.</returns>
+    private bool EnsurePortOpen()
+    {
+      try
+      {
+        if (!_serialPort.IsOpen)
+        {
+          _serialPort.Open();
+          LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} успешно открыт.");
+        }
+
+        return true;
+      }
+      catch (UnauthorizedAccessException ex)
+      {
+        LogError($"[{_device.Name}] Доступ к порту запрещен: {ex.Message}");
+        return false;
+      }
+      catch (IOException ex)
+      {
+        LogError($"[{_device.Name}] Ошибка ввода-вывода при открытии порта: {ex.Message}");
+        return false;
+      }
+      catch (InvalidOperationException ex)
+      {
+        LogError($"[{_device.Name}] Порт уже используется другим процессом: {ex.Message}");
+        return false;
+      }
+      catch (Exception ex)
+      {
+        LogError($"[{_device.Name}] Неизвестная ошибка при открытии порта: {ex.Message}");
+        return false;
       }
     }
   }

@@ -27,7 +27,7 @@ namespace UI.Components
     /// <summary>
     /// Флаг, указывающий, активно ли подключение системы (true - подключено, false - отключено).
     /// </summary>
-    private bool active = false;
+    private static bool active = false;
 
     /// <summary>
     /// Статический флаг, показывающий, выполняется ли в данный момент задача подключения/отключения.
@@ -307,10 +307,13 @@ namespace UI.Components
     /// </summary>
     private void SetLoadingState(string text, Color color)
     {
-      nameTextBlock.Text = text;
-      GridBlock.Background = new SolidColorBrush(color);
-      nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
-      GridBlock.Opacity = 1;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        nameTextBlock.Text = text;
+        GridBlock.Background = new SolidColorBrush(color);
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
+        GridBlock.Opacity = 1;
+      });
     }
 
     /// <summary>
@@ -318,11 +321,14 @@ namespace UI.Components
     /// </summary>
     private void SetConnectedState(string text, Color color)
     {
-      nameTextBlock.Text = text;
-      GridBlock.Background = new SolidColorBrush(color);
-      nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
-      GridBlock.Opacity = 0.5;
-      active = true;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        nameTextBlock.Text = text;
+        GridBlock.Background = new SolidColorBrush(color);
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+        GridBlock.Opacity = 0.5;
+        active = true;
+      });
     }
 
     /// <summary>
@@ -330,11 +336,14 @@ namespace UI.Components
     /// </summary>
     private void SetDisconnectedState(string text, Color color)
     {
-      nameTextBlock.Text = text;
-      GridBlock.Background = new SolidColorBrush(color);
-      nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["PrimarySolidColorBrush"];
-      GridBlock.Opacity = 0.5;
-      active = false;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        nameTextBlock.Text = text;
+        GridBlock.Background = new SolidColorBrush(color);
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["PrimarySolidColorBrush"];
+        GridBlock.Opacity = 0.5;
+        active = false;
+      });
     }
 
     /// <summary>
@@ -343,7 +352,10 @@ namespace UI.Components
     /// <param name="topPanel">Элемент управления верхней панелью.</param>
     public void SetTopPanel(TopPanelControl topPanel)
     {
-      this.topPanel = topPanel;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        this.topPanel = topPanel;
+      });
     }
   }
 }

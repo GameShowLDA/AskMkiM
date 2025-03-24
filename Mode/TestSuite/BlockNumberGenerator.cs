@@ -1,4 +1,5 @@
 ﻿using AppConfig.DataBase.Repositories;
+using AppConfig.DataBase.Services;
 using NewCore.Base.Interface.Main;
 
 namespace Mode.TestSuite
@@ -23,7 +24,7 @@ namespace Mode.TestSuite
         IRelaySwitchModule first,
         IRelaySwitchModule last)
     {
-      var allBlocks = new RelaySwitchModuleRepository().GetAll().Cast<IRelaySwitchModule>().ToList();
+      var allBlocks = new RelaySwitchModuleServices().GetAll().Cast<IRelaySwitchModule>().ToList();
 
       // Найти индексы начального и конечного блоков
       int startIndex = allBlocks.FindIndex(block => block.Number == first.Number);
