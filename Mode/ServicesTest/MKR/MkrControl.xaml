@@ -73,24 +73,13 @@
                         IsEnabled="False" />
 
                 <!-- Группа RadioButton для шины A (по аналогии с исходным проектом) -->
-                <GroupBox Header="Шина A" Foreground="White" Margin="0,0,0,10">
+                <GroupBox Header="Группы шин" Foreground="White" Margin="0,0,0,10">
                     <WrapPanel>
-                        <RadioButton Content="A1" Foreground="White" GroupName="BusA" Name="RbA1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="A2" Foreground="White" GroupName="BusA" Name="RbA2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="A3" Foreground="White" GroupName="BusA" Name="RbA3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="A4" Foreground="White" GroupName="BusA" Name="RbA4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="Откл. A" Foreground="White" GroupName="BusA" Name="RbOffA" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                    </WrapPanel>
-                </GroupBox>
-
-                <!-- Группа RadioButton для шины B -->
-                <GroupBox Header="Шина B" Foreground="White" Margin="0,0,0,10">
-                    <WrapPanel>
-                        <RadioButton Content="B1" Foreground="White" GroupName="BusB" Name="RbB1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="B2" Foreground="White" GroupName="BusB" Name="RbB2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="B3" Foreground="White" GroupName="BusB" Name="RbB3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="B4" Foreground="White" GroupName="BusB" Name="RbB4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="Откл. B" Foreground="White" GroupName="BusB" Name="RbOffB" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="AB-1" Foreground="White" GroupName="TireRb" Name="RbAB1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="AB-2" Foreground="White" GroupName="TireRb" Name="RbAB2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="AB-3" Foreground="White" GroupName="TireRb" Name="RbAB3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="AB-4" Foreground="White" GroupName="TireRb" Name="RbAB4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
+                        <RadioButton Content="Откл." Foreground="White" GroupName="TireRb" Name="RbOff" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
                     </WrapPanel>
                 </GroupBox>
 

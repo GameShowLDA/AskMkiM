@@ -157,12 +157,14 @@ namespace Mode.ServicesTest.MKR
     {
       if (sender is RadioButton rb)
       {
-        string busState = rb.Name switch
-        {
-          "RbOffA" => "Шина A отключена",
-          "RbOffB" => "Шина B отключена",
-          _ => $"Шина {rb.Name} подключена"
-        };
+        //string busState = rb.Name switch
+        //{
+        //  "RbOffA" => "Шина A отключена",
+        //  "RbOffB" => "Шина B отключена",
+        //  _ => $"Шина {rb.Name} подключена"
+        //};
+
+        string busState = rb.Name == "RbOff" ? "Группа шин отключена" : $"Группа шин {rb.Content} подключена";
 
         await ShowMessageAsync(busState);
       }
@@ -174,17 +176,11 @@ namespace Mode.ServicesTest.MKR
     /// <param name="enable">Если true, все RadioButton становятся доступными.</param>
     private void ToggleRadioButtonState(bool enable)
     {
-      RbA1.IsEnabled = enable;
-      RbA2.IsEnabled = enable;
-      RbA3.IsEnabled = enable;
-      RbA4.IsEnabled = enable;
-      RbOffA.IsEnabled = enable;
-
-      RbB1.IsEnabled = enable;
-      RbB2.IsEnabled = enable;
-      RbB3.IsEnabled = enable;
-      RbB4.IsEnabled = enable;
-      RbOffB.IsEnabled = enable;
+      RbAB1.IsEnabled = enable;
+      RbAB2.IsEnabled = enable;
+      RbAB3.IsEnabled = enable;
+      RbAB4.IsEnabled = enable;
+      RbOff.IsEnabled = enable;
     }
 
     /// <summary>

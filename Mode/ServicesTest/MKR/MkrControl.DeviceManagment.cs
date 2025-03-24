@@ -45,8 +45,7 @@
         await AttemptDeviceConnectionAsync();
       }
 
-      RbOffA.IsChecked = true;
-      RbOffB.IsChecked = true;
+      RbOff.IsChecked = true;
 
       // Сброс состояния точек с использованием DeferRefresh для минимизации обновлений UI.
       using (pointsView.DeferRefresh())
