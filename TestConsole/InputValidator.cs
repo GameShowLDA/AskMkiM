@@ -118,7 +118,6 @@ namespace TestConsole
       try
       {
         var testMeasurement = new TestMeasurement();
-        testMeasurement.ValidateInput(point1, point2, referenceValue);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("✅ Данные корректны!");

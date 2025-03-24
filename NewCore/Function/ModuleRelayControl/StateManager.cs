@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using NewCore.Base.Device;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
@@ -27,8 +28,35 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
-      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
-      return result == "1.0.1" ? (true, string.Empty) : (false, result);
+      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
+
+      BaseResponse baseResponse = BaseResponse.FromJson(result);
+      if (baseResponse != null)
+      {
+        if (baseResponse.NumberChassis == _moduleRelayControl.NumberChassis &&
+      baseResponse.NumberDevice == _moduleRelayControl.Number)
+        {
+          return (true, result);
+        }
+        else
+        {
+          string errorMessage = string.Empty;
+
+          if (baseResponse.NumberChassis != _moduleRelayControl.NumberChassis)
+          {
+            errorMessage += $"Несовпадение по NumberChassis: ожидается {_moduleRelayControl.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+          }
+
+          if (baseResponse.NumberDevice != _moduleRelayControl.Number)
+          {
+            errorMessage += $"Несовпадение по NumberDevice: ожидается {_moduleRelayControl.Number}, получено {baseResponse.NumberDevice}.";
+          }
+
+          return (false, errorMessage.Trim());
+        }
+      }
+
+      return (false, result);
     }
 
     /// <inheritdoc />

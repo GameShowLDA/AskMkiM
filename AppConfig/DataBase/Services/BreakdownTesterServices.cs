@@ -1,4 +1,5 @@
-﻿using AppConfig.DataBase.Repositories;
+﻿using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Repositories;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 
@@ -24,14 +25,29 @@ namespace AppConfig.DataBase.Services
     /// <returns>Список пробойных установок.</returns>
     public List<IBreakdownTester> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new BreakdownTesterRepository().GetDevicesByNumberChassis(numberChassis);
+      var data = _context.Set<BreakdownTesterEntity>()
+                         .Where(device => device.NumberChassis == numberChassis)
+                         .ToList();
+
       var result = data
-      .OfType<IDevice>()
-      .Select(GetDeviceInstance)
-      .Where(instance => instance != null)
-      .ToList();
+          .OfType<IBreakdownTester>()
+          .Select(GetDeviceInstance)
+          .Where(instance => instance != null)
+          .ToList();
 
       return result;
+    }
+
+    /// <summary>
+    /// Получает список сущностей пробойных установок, привязанных к определённому шасси.
+    /// </summary>
+    /// <param name="numberChassis">Номер шасси.</param>
+    /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
+    public List<BreakdownTesterEntity> GetEntitiesByNumberChassis(int numberChassis)
+    {
+      return _context.Set<BreakdownTesterEntity>()
+                     .Where(device => device.NumberChassis == numberChassis)
+                     .ToList();
     }
   }
 }

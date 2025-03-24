@@ -71,6 +71,10 @@ namespace TestConsole
             await GPT_Test.RunAsync();
             break;
 
+
+          case 8:
+            break;
+
           case 0:
             // Выход из программы
             Console.WriteLine("Выход из программы...");

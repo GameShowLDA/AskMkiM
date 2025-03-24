@@ -1,4 +1,5 @@
-﻿using AppConfig.DataBase.Repositories;
+﻿using AppConfig.DataBase.Models;
+using AppConfig.DataBase.Repositories;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 
@@ -21,17 +22,32 @@ namespace AppConfig.DataBase.Services
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <returns>Список пробойных установок.</returns>
+    /// <returns>Список быстрых измерителей.</returns>
     public List<IFastMeter> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = new FastMeterRepository().GetDevicesByNumberChassis(numberChassis);
+      var data = _context.Set<FastMeterEntity>()
+                         .Where(device => device.NumberChassis == numberChassis)
+                         .ToList();
+
       var result = data
-      .OfType<IDevice>()
-      .Select(GetDeviceInstance)
-      .Where(instance => instance != null)
-      .ToList();
+          .OfType<IFastMeter>()
+          .Select(GetDeviceInstance)
+          .Where(instance => instance != null)
+          .ToList();
 
       return result;
+    }
+
+    /// <summary>
+    /// Получает список сущностей пробойных установок, привязанных к определённому шасси.
+    /// </summary>
+    /// <param name="numberChassis">Номер шасси.</param>
+    /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
+    public List<FastMeterEntity> GetEntitiesByNumberChassis(int numberChassis)
+    {
+      return _context.Set<FastMeterEntity>()
+                     .Where(device => device.NumberChassis == numberChassis)
+                     .ToList();
     }
   }
 }

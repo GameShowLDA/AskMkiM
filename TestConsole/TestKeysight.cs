@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using NewCore.Base.Interface.Main;
 using NewCore.Device;
 
 namespace TestConsole
@@ -13,7 +14,7 @@ namespace TestConsole
       Console.WriteLine("=== Управление Keysight ===");
       IPAddress iPAddress = IPAddress.Parse("192.168.1.16");
 
-      NewCore.Device.KeysightDevice keysight3466 = new NewCore.Device.KeysightDevice(iPAddress);
+      var keysight3466 = new AppConfig.DataBase.Services.FastMeterServices().GetAll().FirstOrDefault();
       if ((await keysight3466.ConnectableManager.InitializeAsync()).Connect)
       {
         Console.WriteLine($"Подключен к: {keysight3466.Name}");
@@ -31,28 +32,28 @@ namespace TestConsole
       }
     }
 
-    static private async Task Continuity(KeysightDevice keysight3466)
+    static private async Task Continuity(IFastMeter keysight3466)
     {
       await keysight3466.ContinuityManager.SetContinuityModeAsync();
       var data = await keysight3466.ContinuityManager.CheckContinuityAsync();
       Console.WriteLine($"Результат прозвонки: {data}");
     }
 
-    static private async Task Resistance(KeysightDevice keysight3466)
+    static private async Task Resistance(IFastMeter keysight3466)
     {
       await keysight3466.ResistanceManager.SetResistanceModeAsync();
       var data = await keysight3466.ResistanceManager.MeasureResistanceAsync();
       Console.WriteLine($"Результат сопротивления: {data}");
     }
 
-    static private async Task Capacitance(KeysightDevice keysight3466)
+    static private async Task Capacitance(IFastMeter keysight3466)
     {
       await keysight3466.CapacitanceManager.SetCapacitanceModeAsync();
       var data = await keysight3466.CapacitanceManager.MeasureCapacitanceAsync();
       Console.WriteLine($"Результат ёмкости: {data}");
     }
 
-    static private async Task Voltage(KeysightDevice keysight3466)
+    static private async Task Voltage(IFastMeter keysight3466)
     {
       await keysight3466.DcVoltageManager.SetDCVoltageModeAsync();
       var data = await keysight3466.DcVoltageManager.MeasureDCVoltageAsync();

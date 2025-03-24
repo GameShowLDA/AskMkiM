@@ -31,7 +31,7 @@ namespace NewCore.Function.GPT
     public async Task SetLcdContrastAsync(double value)
     {
       var command = GetCommandSyntax(SystemCommand.LCD_CONTRAST) + $" {value}";
-      await _gptModel.WriteLineAsync(command);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ namespace NewCore.Function.GPT
     public async Task SetLcdBrightnessAsync(double value)
     {
       var command = GetCommandSyntax(SystemCommand.LCD_BRIGHTNESS) + $" {value}";
-      await _gptModel.WriteLineAsync(command);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ namespace NewCore.Function.GPT
     {
       var value = state ? "ON" : "OFF";
       var command = GetCommandSyntax(SystemCommand.BUZZER_PSOUND) + $" {value}";
-      await _gptModel.WriteLineAsync(command);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ namespace NewCore.Function.GPT
     {
       var value = state ? "ON" : "OFF";
       var command = GetCommandSyntax(SystemCommand.BUZZER_FSOUND) + $" {value}";
-      await _gptModel.WriteLineAsync(command);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ namespace NewCore.Function.GPT
     public async Task SetBuzzerPrimaryTime(double duration)
     {
       var command = GetCommandSyntax(SystemCommand.BUZZER_PTIME) + $" {duration}";
-      await _gptModel.WriteLineAsync(command);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ namespace NewCore.Function.GPT
     public async Task SetBuzzerFeedbackTime(double duration)
     {
       var command = GetCommandSyntax(SystemCommand.BUZZER_FTIME) + $" {duration}";
-      await _gptModel.WriteLineAsync(command);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
     }
 
     /// <summary>
@@ -100,43 +100,37 @@ namespace NewCore.Function.GPT
 
         // Запрос контраста дисплея
         string contrastCommand = GetCommandSyntax(SystemCommand.LCD_CONTRAST) + "?";
-        await _gptModel.WriteLineAsync(contrastCommand);
-        string contrastResponse = await _gptModel.ReadLineAsync();
+        string contrastResponse = await _gptModel.DeviceProtocol.QueryAsync(contrastCommand, 100);
         systemData.LcdContrast = int.Parse(contrastResponse);
         Console.WriteLine($"Контраст дисплея: {systemData.LcdContrast}");
 
         // Запрос яркости дисплея
         string brightnessCommand = GetCommandSyntax(SystemCommand.LCD_BRIGHTNESS) + "?";
-        await _gptModel.WriteLineAsync(brightnessCommand);
-        string brightnessResponse = await _gptModel.ReadLineAsync();
+        string brightnessResponse = await _gptModel.DeviceProtocol.QueryAsync(brightnessCommand, 100);
         systemData.LcdBrightness = int.Parse(brightnessResponse);
         Console.WriteLine($"Яркость дисплея: {systemData.LcdBrightness}");
 
         // Запрос состояния звука успешного теста
         string buzzerPSoundCommand = GetCommandSyntax(SystemCommand.BUZZER_PSOUND) + "?";
-        await _gptModel.WriteLineAsync(buzzerPSoundCommand);
-        string buzzerPSoundResponse = await _gptModel.ReadLineAsync();
+        string buzzerPSoundResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerPSoundCommand, 100);
         systemData.BuzzerPrimarySound = buzzerPSoundResponse.Trim().ToUpper() == "ON";
         Console.WriteLine($"Звук успешного теста: {systemData.BuzzerPrimarySound}");
 
         // Запрос состояния звука ошибочного теста
         string buzzerFSoundCommand = GetCommandSyntax(SystemCommand.BUZZER_FSOUND) + "?";
-        await _gptModel.WriteLineAsync(buzzerFSoundCommand);
-        string buzzerFSoundResponse = await _gptModel.ReadLineAsync();
+        string buzzerFSoundResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerFSoundCommand, 100);
         systemData.BuzzerFeedbackSound = buzzerFSoundResponse.Trim().ToUpper() == "ON";
         Console.WriteLine($"Звук ошибочного теста: {systemData.BuzzerFeedbackSound}");
 
         // Запрос продолжительности звука успешного теста
         string buzzerPTimeCommand = GetCommandSyntax(SystemCommand.BUZZER_PTIME) + "?";
-        await _gptModel.WriteLineAsync(buzzerPTimeCommand);
-        string buzzerPTimeResponse = await _gptModel.ReadLineAsync();
+        string buzzerPTimeResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerPTimeCommand, 100);
         systemData.BuzzerPrimaryTime = double.Parse(buzzerPTimeResponse);
         Console.WriteLine($"Продолжительность звука успешного теста: {systemData.BuzzerPrimaryTime}");
 
         // Запрос продолжительности звука ошибочного теста
         string buzzerFTimeCommand = GetCommandSyntax(SystemCommand.BUZZER_FTIME) + "?";
-        await _gptModel.WriteLineAsync(buzzerFTimeCommand);
-        string buzzerFTimeResponse = await _gptModel.ReadLineAsync();
+        string buzzerFTimeResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerFTimeCommand, 100);
         systemData.BuzzerFeedbackTime = double.Parse(buzzerFTimeResponse);
         Console.WriteLine($"Продолжительность звука ошибочного теста: {systemData.BuzzerFeedbackTime}");
 

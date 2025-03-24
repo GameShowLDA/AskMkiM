@@ -48,7 +48,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation("Устанавливаем режим СИ на GPT-79904");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ namespace NewCore.Function.GPT
       LogInformation($"Устанавливаем напряжение {value} для режима СИ на GPT-79904");
       string valueResult = (value / 1000).ToString().Replace(",", ".");
       var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {valueResult}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем время измерения {value} для режима СИ на GPT-79904");
       var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
       timeDelay = value;
     }
 
@@ -83,9 +83,8 @@ namespace NewCore.Function.GPT
     {
       LogInformation("Считывание данных с ПУ");
       var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
-      await _gptModel.WriteLineAsync(query);
+      var return_value = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 10);
 
-      var return_value = await _gptModel.ReadLineAsync();
       string numericPart = return_value.Replace("kV", string.Empty).Trim().Replace(".", ",");
 
       if (double.TryParse(numericPart, out double voltageInVolts))
@@ -109,14 +108,11 @@ namespace NewCore.Function.GPT
     {
       LogInformation("Запуск измерений режима СИ");
       var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      await _gptModel.WriteLineAsync(query);
-      await Task.Delay((timeDelay + 2) * 1000);
+      await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: (timeDelay + 2) * 1000);
 
       query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
-      await _gptModel.WriteLineAsync(query);
-      await Task.Delay(500);
-
-      var answerDevice = await _gptModel.ReadLineAsync();
+      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, 1000, 500);
+      
       var result = answerDevice.Split(',');
       var measureResulte = result[3];
 
@@ -226,7 +222,7 @@ namespace NewCore.Function.GPT
     public async Task SetHighResistanceLimitAsync(double value)
     {
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -242,7 +238,7 @@ namespace NewCore.Function.GPT
       }
 
       query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -252,7 +248,7 @@ namespace NewCore.Function.GPT
     public async Task SetTestTimeAsync(double value)
     {
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -263,7 +259,7 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем смещение IR: {value} M");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} {value}M";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
@@ -278,33 +274,27 @@ namespace NewCore.Function.GPT
 
         // Чтение напряжения
         var voltageQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
-        await _gptModel.WriteLineAsync(voltageQuery);
-        await Task.Delay(10);
-        var voltageResponse = await _gptModel.ReadLineAsync();
+        var voltageResponse = await _gptModel.DeviceProtocol.QueryAsync(voltageQuery, 1000, 10);
         double voltage = ParseVoltage(voltageResponse);
 
         // Чтение высокого предела сопротивления
         var rhiQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?";
-        await _gptModel.WriteLineAsync(rhiQuery);
-        var rhiResponse = await _gptModel.ReadLineAsync();
+        var rhiResponse = await _gptModel.DeviceProtocol.QueryAsync(rhiQuery, 1000, 10);
         double rhi = ParseResistanceG(rhiResponse);
 
         // Чтение низкого предела сопротивления
         var rloQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?";
-        await _gptModel.WriteLineAsync(rloQuery);
-        var rloResponse = await _gptModel.ReadLineAsync();
+        var rloResponse = await _gptModel.DeviceProtocol.QueryAsync(rloQuery, 1000, 10);
         double rlo = ParseResistanceM(rloResponse);
 
         // Чтение времени теста
         var timeQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} ?";
-        await _gptModel.WriteLineAsync(timeQuery);
-        var timeResponse = await _gptModel.ReadLineAsync();
+        var timeResponse = await _gptModel.DeviceProtocol.QueryAsync(timeQuery, 1000, 10);
         double time = ParseTime(timeResponse);
 
         // Чтение смещения
         var refQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} ?";
-        await _gptModel.WriteLineAsync(refQuery);
-        var refResponse = await _gptModel.ReadLineAsync();
+        var refResponse = await _gptModel.DeviceProtocol.QueryAsync(refQuery, 1000, 10);
         double reference = ParseResistanceG(refResponse);
 
         // Возвращаем объект конфигурации

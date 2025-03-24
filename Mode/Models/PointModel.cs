@@ -1,4 +1,6 @@
-﻿namespace Mode.Models
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace Mode.Models
 {
   /// <summary>
   /// Модель точки.
@@ -66,6 +68,16 @@
       {
         return true;
       }
+    }
+
+    /// <summary>
+    /// Преобразует объект PointModel в строковое представление.
+    /// Строковое представление имеет формат 'x.x.x'.
+    /// </summary>
+    /// <returns>Строковое представление команды.</returns>
+    public override string ToString()
+    {
+      return $"{DeviceNumber}.{ModuleNumber}.{PointNumber}";
     }
   }
 }

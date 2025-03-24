@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using Mode.Models;
+using NewCore.Device;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
@@ -56,10 +57,23 @@ namespace TestWPF
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      var (ok, msg, first, second, param) = await UIValidationHelper.TryValidateAndParseInputAsync<TestMeasurement>(ProtocolUI);
+      var (ok, msg, first, second, param) = await UIValidationHelper.TryValidateAndParseInputWithEquipmentAsync<TestMeasurement>(ProtocolUI);
       if (!ok)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        return;
+      }
+
+      ManagerChassis managerChassis = new ManagerChassis();
+      managerChassis.ConnectionDetails = "192.168.1.0";
+      await managerChassis.PowerManager.StartPowerAsync();
+      await Task.Delay(5000);
+
+      TestMeasurement testMeasurement = new TestMeasurement();
+      var connect = await testMeasurement.ConnectToEquipment(first, second, NewCore.Enum.MetrologyEnum.MetrologicalModeRole.KC, ProtocolUI);
+      if (!connect.Connect)
+      {
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
         return;
       }
     }
@@ -71,7 +85,7 @@ namespace TestWPF
     /// <inheritdoc />
     protected override void ConfigureMultimeter()
     {
-      // Заглушка для теста
+
     }
   }
 }

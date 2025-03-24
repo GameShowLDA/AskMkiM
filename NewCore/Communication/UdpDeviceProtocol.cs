@@ -30,7 +30,7 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0)
+    public async Task<string> QueryAsync(string command, int timeout = 0, int responseDelay = 0)
     {
       try
       {
@@ -55,7 +55,7 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
-          return await ReceiveResponseAsync(lastOctet, timeout);
+          return await ReceiveResponseAsync(lastOctet, timeout, command);
         }
 
         return string.Empty;
@@ -73,10 +73,10 @@ namespace NewCore.Communication
     /// <param name="lastOctet">Последний октет IP-адреса, используется для вычисления порта.</param>
     /// <param name="timeout">Таймаут ожидания, мс.</param>
     /// <returns>Ответ от устройства.</returns>
-    private async Task<string> ReceiveResponseAsync(int lastOctet, int timeout)
+    private async Task<string> ReceiveResponseAsync(int lastOctet, int timeout, string command)
     {
       int inputPort = BaseInputPort + lastOctet;
-
+      LogInformation($"[{_device.Name}] Чтение ответа команды \"{command}\" с порта {inputPort}");
       using (UdpClient receiver = new UdpClient(inputPort))
       {
         try

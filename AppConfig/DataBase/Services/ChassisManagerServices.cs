@@ -1,4 +1,5 @@
-﻿using NewCore.Base.Interface.Main;
+﻿using AppConfig.DataBase.Models;
+using NewCore.Base.Interface.Main;
 
 namespace AppConfig.DataBase.Services
 {
@@ -14,5 +15,18 @@ namespace AppConfig.DataBase.Services
     /// </summary>
     public ChassisManagerServices() : base(AppConfig.Config.SystemStateManager.Context)
     { }
+
+    /// <summary>
+    /// Получает менеджер шасси по номеру шасси.
+    /// </summary>
+    /// <param name="numberChassis">Номер шасси.</param>
+    /// <returns>Объект менеджера шасси, реализующий <see cref="IChassisManager"/>.</returns>
+    public IChassisManager GetByNumber(int numberChassis)
+    {
+      var entity = _context.Set<ChassisManagerEntity>()
+                           .FirstOrDefault(device => device.Number == numberChassis);
+
+      return GetDeviceInstance(entity);
+    }
   }
 }

@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppConfig.DataBase.Models;
+using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.ChassisManager
 {
@@ -15,7 +16,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Коллекция доступных систем шасси.
     /// </summary>
-    public ObservableCollection<ChassisManagerEntity> SystemsChassis { get; set; } = new();
+    public ObservableCollection<IChassisManager> SystemsChassis { get; set; } = new();
 
     /// <summary>
     /// Коллекция доступных стоек.
@@ -25,9 +26,9 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Выбранная система шасси.
     /// </summary>
-    public ChassisManagerEntity SelectedSystem
+    public IChassisManager SelectedSystem
     {
-      get => (ChassisManagerEntity)GetValue(SelectedSystemProperty);
+      get => (IChassisManager)GetValue(SelectedSystemProperty);
       set => SetValue(SelectedSystemProperty, value);
     }
 
@@ -37,7 +38,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     public static readonly DependencyProperty SelectedSystemProperty =
         DependencyProperty.Register(
             nameof(SelectedSystem),
-            typeof(ChassisManagerEntity),
+            typeof(IChassisManager),
             typeof(ChassisManagerControl),
             new PropertyMetadata(null));
 
@@ -63,7 +64,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Событие, вызываемое при выборе системы.
     /// </summary>
-    public event EventHandler<ChassisManagerEntity> SystemSelected;
+    public event EventHandler<IChassisManager> SystemSelected;
 
     /// <summary>
     /// Событие, вызываемое при выборе стойки.
@@ -94,7 +95,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// Добавляет систему в список для отображения.
     /// </summary>
     /// <param name="chassisManager">Экземпляр <see cref="ChassisManagerEntity"/>.</param>
-    public void AddSystem(ChassisManagerEntity chassisManager)
+    public void AddSystem(IChassisManager chassisManager)
     {
       if (chassisManager == null)
       {
@@ -129,7 +130,7 @@ namespace Mode.Settings.DeviceConfig.ChassisManager
     /// <param name="e">Аргументы события.</param>
     private void OnSystemSelected(object sender, RoutedEventArgs e)
     {
-      if (sender is Button button && button.DataContext is ChassisManagerEntity system)
+      if (sender is Button button && button.DataContext is IChassisManager system)
       {
         SelectedSystem = system;
         SystemSelected?.Invoke(this, system);

@@ -26,6 +26,7 @@ namespace NewCore.Function.DeviceBusCommutation
             { TypeConnector.ADCReversed, new List<int> { 11,12,13,14,21,22,23,24} },
             { TypeConnector.PINT, new List<int> { 12, 13, 22, 23 } },
             { TypeConnector.Shunt, new List<int> { 1, 2 } },
+            { TypeConnector.BreakdownTester, new List<int> { 11, 21 } },
         };
 
     /// <summary>
