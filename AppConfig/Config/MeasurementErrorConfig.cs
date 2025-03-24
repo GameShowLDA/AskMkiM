@@ -36,7 +36,6 @@ namespace AppConfig.Config
     /// <summary>
     /// Установить объект MeasurementErrorModel по TypeCommand.
     /// </summary>
-    /// <param name="type">Тип команды.</param>
     /// <param name="model">Объект MeasurementErrorModel.</param>
     public static void SetMeasurementErrorModel(MeasurementErrorModel model)
     {
@@ -68,14 +67,32 @@ namespace AppConfig.Config
     /// </summary>
     /// <param name="type">Тип команды.</param>
     /// <returns>Погрешность в процентах.</returns>
-    public static double GetPercentageError(MeasurementErrorModel.TypeCommand type) => GetMeasurementErrorModel(type).PercentageError;
+    public static double GetPercentageError(MeasurementErrorModel.TypeCommand type)
+    {
+      var result = GetMeasurementErrorModel(type);
+      if (result != null)
+      { 
+        return result.PercentageError;
+      }
+
+      return 0;
+    }
 
     /// <summary>
     /// Получить значение погрешности в числовом значении.
     /// </summary>
     /// <param name="type">Тип команды.</param>
     /// <returns>Погрешность в процентах.</returns>
-    public static double GetNumericError(MeasurementErrorModel.TypeCommand type) => GetMeasurementErrorModel(type).NumericError;
+    public static double GetNumericError(MeasurementErrorModel.TypeCommand type)
+    {
+      var result = GetMeasurementErrorModel(type);
+      if (result != null)
+      {
+        return result.NumericError;
+      }
+
+      return 0;
+    }
 
     /// <summary>
     /// Получить объект MeasurementErrorModel по TypeCommand.

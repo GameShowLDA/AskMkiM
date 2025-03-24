@@ -2,7 +2,9 @@
 using System.Net.Sockets;
 using NewCore.Base.Device;
 using NewCore.Base.Function.FastMeter;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
+using NewCore.Communication;
 using NewCore.Enum;
 using NewCore.Function.Keysight3466new;
 
@@ -57,9 +59,6 @@ namespace NewCore.Device
     /// <inheritdoc />
     public IResistanceMeasurement ResistanceManager { get; set; }
 
-    /// <inheritdoc />
-    public ICommunication CommunicationManager { get; set; }
-
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
     /// Работает через сетевое подключение (TCP/IP).
@@ -77,16 +76,15 @@ namespace NewCore.Device
       Description = "Реализовать описание в NewCore.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
       DeviceType = DeviceEnum.DeviceType.FastMeter;
-
       IsConnected = false;
 
       CapacitanceManager = new CapacitanceMeasurement(this);
-      CommunicationManager = new KeysightCommunication(this);
       ConnectableManager = new KeysightConnection(this);
       ContinuityManager = new ContinuityMeasurement(this);
       ResistanceManager = new ResistanceMeasurement(this);
       AcVoltageManager = new AcVoltageMeasurement(this);
       DcVoltageManager = new DcVoltageMeasurement(this);
+      DeviceProtocol = new KeysightDeviceProtocol(this, Port);
     }
   }
 }

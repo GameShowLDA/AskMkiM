@@ -34,15 +34,16 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int timeout = 0, int responseDelay = 0)
+    public async Task<string> QueryAsync(string command, int timeout = 0, int responseDelay = 0, int port = 0)
     {
       try
       {
         int lastOctet = GetLastOctet(_device.IPAddress);
-        int inputPort = BaseInputPort + lastOctet;
-        int outputPort = BaseOutputPort + lastOctet;
-        IPEndPoint deviceEndpoint = new IPEndPoint(_device.IPAddress, outputPort);
 
+        int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
+        int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
+
+        IPEndPoint deviceEndpoint = new IPEndPoint(_device.IPAddress, outputPort);
         using UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort));
 
         // Гарантированно слушаем ДО отправки

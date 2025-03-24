@@ -46,10 +46,6 @@ namespace AppConfig.DataBase.Models
 
     /// <inheritdoc />
     [NotMapped]
-    public ICommunication CommunicationManager { get; set; }
-
-    /// <inheritdoc />
-    [NotMapped]
     public IConnection ConnectionManager { get; set; }
 
     /// <inheritdoc />

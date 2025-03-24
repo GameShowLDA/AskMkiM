@@ -17,9 +17,9 @@ using Utilities.Events;
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для InputField.xaml.
+  /// Логика взаимодействия для InputFieldBreakdown.xaml.
   /// </summary>
-  public partial class InputField : UserControl
+  public partial class InputFieldBreakdown : UserControl
   {
     /// <summary>
     /// Первая точка.
@@ -49,9 +49,27 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="InputField"/>.
+    /// Время выполнения теста.
     /// </summary>
-    public InputField()
+    public string Time
+    {
+      get => TimeTextBox.Text;
+      set => TimeTextBox.Text = value;
+    }
+
+    /// <summary>
+    /// Напряжение.
+    /// </summary>
+    public string Voltage
+    {
+      get => VoltageTextBox.Text;
+      set => VoltageTextBox.Text = value;
+    }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="InputFieldBreakdown"/>.
+    /// </summary>
+    public InputFieldBreakdown()
     {
       InitializeComponent();
       SubscribeToValidationEvents();
@@ -89,7 +107,7 @@ namespace UI.Components
     /// </summary>
     private void HighlightElectricalTextBox()
     {
-      ElectricalTextBox.DataError() ;
+      ElectricalTextBox.DataError();
     }
 
     /// <summary>

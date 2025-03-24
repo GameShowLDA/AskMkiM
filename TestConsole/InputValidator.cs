@@ -50,7 +50,6 @@ namespace TestConsole
       Console.Write("Введите измеряемое значение: ");
       string referenceValue = Console.ReadLine();
 
-      ValidateAndPrintResult(point1, point2, referenceValue);
     }
 
     /// <summary>
@@ -103,48 +102,9 @@ namespace TestConsole
       foreach (var test in testCases)
       {
         Console.WriteLine($"\nТест: {test.point1}, {test.point2}, {test.value} ({test.expected})");
-        ValidateAndPrintResult(test.point1, test.point2, test.value);
       }
     }
 
-    /// <summary>
-    /// Выполняет валидацию и выводит результат в консоль.
-    /// </summary>
-    /// <summary>
-    /// Выполняет валидацию и выводит результат в консоль.
-    /// </summary>
-    private static void ValidateAndPrintResult(string point1, string point2, string referenceValue)
-    {
-      try
-      {
-        var testMeasurement = new TestMeasurement();
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("✅ Данные корректны!");
-      }
-      catch (Exception ex)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"❌ {ex.Message}");
-      }
-      finally
-      {
-        Console.ResetColor();
-      }
-    }
   }
 
-  /// <summary>
-  /// Тестовый класс измерения для вызова ValidateInput().
-  /// </summary>
-  public class TestMeasurement : BaseMeasurement
-  {
-    public TestMeasurement() : base() { }
-
-    /// <inheritdoc />
-    protected override void ConfigureMultimeter()
-    {
-      // Заглушка для теста
-    }
-  }
 }

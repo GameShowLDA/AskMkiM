@@ -9,7 +9,6 @@ namespace NewCore.Function.Keysight3466new
   public class AcVoltageMeasurement : IAcVoltageMeasurement
   {
     private readonly KeysightDevice _device;
-    private readonly ICommunication _communication;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcVoltageMeasurement"/>.
@@ -19,7 +18,6 @@ namespace NewCore.Function.Keysight3466new
     public AcVoltageMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.CommunicationManager;
     }
 
     /// <summary>
@@ -32,7 +30,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await _communication.SendCommandAsync("CONF:VOLT:AC");
+      await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC");
     }
 
     /// <summary>
@@ -46,7 +44,8 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _communication.QueryAsync("MEAS:VOLT:AC?");
+      string response = await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC", timeout: 1000);
+
       response = response.Trim().Replace("+", "");
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float,

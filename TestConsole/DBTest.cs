@@ -2,6 +2,7 @@
 using AppConfig.DataBase;
 using AppConfig.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
+using NewCore.Device;
 
 namespace TestConsole
 {
@@ -54,6 +55,7 @@ namespace TestConsole
             break;
         }
       }
+
     }
 
     /// <summary>

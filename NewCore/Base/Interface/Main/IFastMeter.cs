@@ -19,11 +19,6 @@ namespace NewCore.Base.Interface.Main
     public ICapacitanceMeasurement CapacitanceManager { get; set; }
 
     /// <summary>
-    /// Управление коммуникацией с устройством.
-    /// </summary>
-    public ICommunication CommunicationManager { get; set; }
-
-    /// <summary>
     /// Управление измерением проводимости (прозвонка).
     /// </summary>
     public IContinuityMeasurement ContinuityManager { get; set; }

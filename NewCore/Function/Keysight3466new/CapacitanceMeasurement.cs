@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -14,11 +15,6 @@ namespace NewCore.Function.Keysight3466new
     private readonly KeysightDevice _device;
 
     /// <summary>
-    /// Менеджер связи с прибором.
-    /// </summary>
-    private readonly ICommunication _communication;
-
-    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="CapacitanceMeasurement"/>.
     /// </summary>
     /// <param name="device">Экземпляр устройства Keysight.</param>
@@ -26,7 +22,6 @@ namespace NewCore.Function.Keysight3466new
     public CapacitanceMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.CommunicationManager;
     }
 
     /// <summary>
@@ -40,7 +35,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await _communication.SendCommandAsync("CONF:CAP");
+      await _device.DeviceProtocol.QueryAsync("CONF:CAP");
     }
 
     /// <summary>
@@ -57,9 +52,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _communication.QueryAsync("MEAS:CAP?");
-
-      // Убираем возможные пробелы и символы `+` перед числом
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:CAP?", timeout: 1000);
       response = response.Trim().Replace("+", "");
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float,
@@ -69,7 +62,7 @@ namespace NewCore.Function.Keysight3466new
         return capacitance * 1e9;
       }
 
-      throw new InvalidOperationException($"Не удалось обработать значение ёмкости: {response}");
+      throw new InvalidOperationException(LogError($"Не удалось обработать значение ёмкости: {response}"));
     }
   }
 }

@@ -9,7 +9,6 @@ namespace NewCore.Function.Keysight3466new
   public class ResistanceMeasurement : IResistanceMeasurement
   {
     private readonly KeysightDevice _device;
-    private readonly ICommunication _communication;
 
     /// <summary>
     /// Создаёт экземпляр класса <see cref="ResistanceMeasurement"/>.
@@ -19,7 +18,6 @@ namespace NewCore.Function.Keysight3466new
     public ResistanceMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.CommunicationManager;
     }
 
     /// <summary>
@@ -32,7 +30,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await _communication.SendCommandAsync("CONF:RES");
+      await _device.DeviceProtocol.QueryAsync("CONF:RES");
     }
 
     /// <summary>
@@ -46,7 +44,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _communication.QueryAsync("MEAS:RES?");
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:RES?", timeout: 1000);
 
       // Убираем возможные пробелы и символы `+` перед числом
       response = response.Trim().Replace("+", "");

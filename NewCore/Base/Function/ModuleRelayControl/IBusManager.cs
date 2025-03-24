@@ -13,7 +13,7 @@ namespace NewCore.Base.Function.ModuleRelayControl
     /// <param name="bus">Замыкаемая шина.</param>
     /// <param name="lowVoltage">true - низковольтная шина, false - высоковольтная.</param>
     /// <returns>Результат замыкания шины.</returns>
-    Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage);
+    Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage = true);
 
     /// <summary>
     /// Отключает шину МКР.

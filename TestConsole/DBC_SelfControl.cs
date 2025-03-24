@@ -224,8 +224,6 @@ namespace TestConsole
         LogWarning($"Прибор не поддерживает проверку целостности для {circuitName}. Пропуск теста.");
       }
 
-
-
       // Размыкаем цепь
       if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 2))
       {

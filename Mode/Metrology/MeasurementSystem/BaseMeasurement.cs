@@ -4,6 +4,7 @@ using AppConfig.DataBase.Repositories;
 using AppConfig.DataBase.Services;
 using Mode.Models;
 using NewCore.Base.Device;
+using NewCore.Base.Interface.Main;
 using UI.Components;
 using UI.Controls.Protocol;
 using Utilities.Models;
@@ -17,7 +18,16 @@ namespace Mode.Metrology.MeasurementSystem
   /// Использует шаблонный метод для автоматизации процесса.
   /// </summary>
   public abstract class BaseMeasurement
+
   {
+    enum MetrologicalDeviceType
+    {
+      FastMeter,
+      BreakdownTester,
+      Mint,
+      None,
+    }
+
     #region Репозитории устройств.
     /// <summary>
     /// Коллекция подключённых устройств, сгруппированных по метрологическим ролям.
@@ -30,31 +40,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// Используется для проверки существования шасси в базе данных.
     /// </summary>
     private readonly ChassisManagerServices _chassisManagerRepository = new ChassisManagerServices();
-
-    /// <summary>
-    /// Репозиторий для работы с модулями коммутации реле.
-    /// Используется для проверки существования модуля и точки.
-    /// </summary>
-    private readonly RelaySwitchModuleServices _relaySwitchModuleRepository = new RelaySwitchModuleServices();
-
     #endregion
-
-    /// <summary>
-    /// Запускает процесс измерения.
-    /// </summary>
-    /// <param name="mode">Метрологический режим.</param>
-    /// <param name="point1">Первая точка измерения.</param>
-    /// <param name="point2">Вторая точка измерения.</param>
-    /// <param name="referenceValue">Эталонное значение.</param>
-    public void ExecuteMeasurement(MetrologicalModeRole mode, PointModel point1, PointModel point2, double referenceValue)
-    {
-      // CollectDevices(point1, point2, mode);
-      // ConnectToEquipment();
-      // SetupCommutation(point1, point2);
-      // ConfigureMultimeter();
-      // PerformMeasurement();
-      // FinalizeMeasurement();
-    }
 
     /// <summary>
     /// Формирует список уникальных устройств, необходимых для выполнения алгоритма,
@@ -78,43 +64,51 @@ namespace Mode.Metrology.MeasurementSystem
 
       var mkr1 = relayRepo.GetDevicesByNumberChassis(point1.DeviceNumber)
        .FirstOrDefault(m => m.Number == point1.ModuleNumber);
-      AddUniqueDevice(MetrologicalModeRole.KC, mkr1);
+      AddUniqueDevice(mode, mkr1);
 
       if (point1.DeviceNumber != point2.DeviceNumber || point1.ModuleNumber != point2.ModuleNumber)
       {
         var mkr2 = relayRepo.GetDevicesByNumberChassis(point2.DeviceNumber)
             .FirstOrDefault(m => m.Number == point2.ModuleNumber);
-        AddUniqueDevice(MetrologicalModeRole.KC, mkr2);
+        AddUniqueDevice(mode, mkr2);
       }
 
       var uksh = ukshRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
-      AddUniqueDevice(MetrologicalModeRole.KC, uksh);
+      AddUniqueDevice(mode, uksh);
 
-      switch (mode)
+      var modeDevice = GetDeviceTypeForMode(mode);
+      if (modeDevice == MetrologicalDeviceType.FastMeter || modeDevice == MetrologicalDeviceType.Mint)
       {
-        case MetrologicalModeRole.PR:
-        case MetrologicalModeRole.IE:
-        case MetrologicalModeRole.KC:
+        var fastRepo = new FastMeterServices();
+        var fast = fastRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        if (fast == null)
+        {
+          throw new ArgumentException("Мультиметр не найден в конфигурации!");
+        }
+
+        AddUniqueDevice(mode, fast);
+
+        if (modeDevice == MetrologicalDeviceType.Mint)
+        {
+          var power = new PowerSourceModuleServices();
+          var mint = power.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+          if (fast == null)
           {
-            var fastRepo = new FastMeterServices();
-
-            var fast = fastRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
-            if (fast == null)
-            {
-              throw new ArgumentException("Мультиметр не найден в конфигурации!");
-            }
-
-            AddUniqueDevice(MetrologicalModeRole.PR, fast);
-            break;
+            throw new ArgumentException("Мультиметр не найден в конфигурации!");
           }
 
-        case MetrologicalModeRole.CI:
-          {
-            var breakdownRepo = new BreakdownTesterServices();
-            var breakdown = breakdownRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
-            AddUniqueDevice(MetrologicalModeRole.IE, breakdown);
-            break;
-          }
+          AddUniqueDevice(mode, mint);
+        }
+      }
+      else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
+      {
+        var breakdownRepo = new BreakdownTesterServices();
+        var breakdown = breakdownRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        AddUniqueDevice(mode, breakdown);
+      }
+      else
+      {
+        throw new ArgumentException($"Метрологический режим {mode} не распознан.");
       }
     }
 
@@ -132,7 +126,7 @@ namespace Mode.Metrology.MeasurementSystem
       {
         CollectDevices(point1, point2, mode);
       }
-      catch (Exception ex) 
+      catch (Exception ex)
       {
         return (false, ex.Message);
       }
@@ -184,31 +178,85 @@ namespace Mode.Metrology.MeasurementSystem
     /// </summary>
     /// <param name="point1">Первая точка.</param>
     /// <param name="point2">Вторая точка.</param>
-    protected virtual void SetupCommutation(PointModel point1, PointModel point2)
+    /// <param name="mode">Режим метрологии.</param>
+    public virtual async Task SetupCommutation(PointModel point1, PointModel point2, MetrologicalModeRole mode)
     {
-      // TODO: Реализовать настройку коммутации
+      var relayModules = Devices.TryGetValue(mode, out var modules) ? modules.OfType<IRelaySwitchModule>().ToList() : null;
+      var busSwitcher = Devices.TryGetValue(mode, out var ukshs) ? ukshs.OfType<ISwitchingDevice>().FirstOrDefault() : null;
+      var mint = Devices.TryGetValue(mode, out var mints) ? mints.OfType<IPowerSourceModule>().FirstOrDefault() : null;
+      var modeDevice = GetDeviceTypeForMode(mode);
+
+      if (relayModules == null || relayModules.Count == 0)
+      {
+        throw new InvalidOperationException("Не найдено ни одного модуля коммутации реле (МКР).");
+      }
+
+      if (busSwitcher == null)
+      {
+        throw new InvalidOperationException("Не найдено устройство коммутации шин (УКШ).");
+      }
+
+      if (modeDevice == MetrologicalDeviceType.Mint && mint == null)
+      {
+        throw new InvalidOperationException("Не найден модуль источника напряжения и тока (МИНТ).");
+      }
+
+      foreach (var relayModule in relayModules)
+      {
+        if (modeDevice == MetrologicalDeviceType.Mint)
+        {
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
+        }
+        else
+        {
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
+        }
+      }
+
+      await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
+      await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);
+
+      if (modeDevice == MetrologicalDeviceType.Mint)
+      {
+        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
+        if (mint != null)
+        {
+          await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
+          await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
+        }
+      }
+      else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
+      {
+        await busSwitcher.ConnectorManager.ConnectBreakdownTester();
+      }
+      else
+      { 
+        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
+      }
     }
 
     /// <summary>
     /// Настраивает измерительное устройство (мультиметр или ППУ).
     /// </summary>
-    /// <param name="device">Объект настройки.</param>
-    protected abstract void ConfigureMultimeter();
+    /// <param name="metrologicalModeRole">Метрологический режим.</param>
+    public abstract Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole);
 
     /// <summary>
     /// Выполняет измерение.
     /// </summary>
-    protected virtual void PerformMeasurement()
-    {
-      // TODO: Реализовать процесс измерения
-    }
+    /// <param name="metrologicalModeRole">Метрологический режим.</param>
+    /// <param name="param">Электрическое значение.</param>
+    /// <param name="protocolUI">Пользовательский элемент для вывода в протокол.</param>
+    public abstract Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI);
 
     /// <summary>
     /// Завершает измерение, размыкает реле и отключает прибор.
     /// </summary>
-    protected virtual void FinalizeMeasurement()
+    public virtual async Task FinalizeMeasurement()
     {
-      // TODO: Реализовать завершение измерения
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
 
     /// <summary>
@@ -254,76 +302,25 @@ namespace Mode.Metrology.MeasurementSystem
       throw new InvalidOperationException($"Устройство с ролью {role} (index: {index}) не найдено или не реализует интерфейс {typeof(T).Name}.");
     }
 
+    private static MetrologicalDeviceType GetDeviceTypeForMode(MetrologicalModeRole mode)
+    {
+      switch (mode)
+      {
+        case MetrologicalModeRole.IE:
+        case MetrologicalModeRole.KC:
+          return MetrologicalDeviceType.FastMeter;
+        case MetrologicalModeRole.PR:
+          return MetrologicalDeviceType.Mint;
+
+        case MetrologicalModeRole.CI:
+          return MetrologicalDeviceType.BreakdownTester;
+
+        default:
+          return MetrologicalDeviceType.None;
+      }
+    }
+
     #region private
-
-    /// <summary>
-    /// Извлекает номер шасси из точки A.B.C.
-    /// </summary>
-    /// <param name="point">Точка в формате A.B.C.</param>
-    /// <returns>Номер шасси.</returns>
-    private int GetChassisNumber(string point)
-    {
-      return int.Parse(point.Split('.')[0]);
-    }
-
-    /// <summary>
-    /// Извлекает номер модуля коммутации реле из точки A.B.C.
-    /// </summary>
-    /// <param name="point">Точка в формате A.B.C.</param>
-    /// <returns>Номер модуля.</returns>
-    private int GetModuleNumber(string point)
-    {
-      return int.Parse(point.Split('.')[1]);
-    }
-
-    /// <summary>
-    /// Извлекает номер точки из точки A.B.C.
-    /// </summary>
-    /// <param name="point">Точка в формате A.B.C.</param>
-    /// <returns>Номер точки.</returns>
-    private int GetPointNumber(string point)
-    {
-      return int.Parse(point.Split('.')[2]);
-    }
-
-    /// <summary>
-    /// Проверяет, существует ли указанное шасси в базе данных.
-    /// </summary>
-    /// <param name="chassisNumber">Номер шасси.</param>
-    /// <returns>True, если шасси существует, иначе false.</returns>
-    private bool ChassisExistsInDatabase(int chassisNumber)
-    {
-      return _chassisManagerRepository.GetByNumber(chassisNumber) != null;
-    }
-
-    /// <summary>
-    /// Проверяет, можно ли преобразовать строку в корректное положительное число.
-    /// </summary>
-    /// <param name="value">Строковое значение параметра.</param>
-    /// <param name="parsedValue">Выходной параметр с преобразованным значением.</param>
-    /// <returns>True, если преобразование успешно и число положительное, иначе false.</returns>
-    private bool IsValidElectricalParameter(string value, out double parsedValue)
-    {
-      if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out parsedValue))
-      {
-        return !double.IsNaN(parsedValue) && !double.IsInfinity(parsedValue) && parsedValue >= 0;
-      }
-
-      return false;
-    }
-
-    private void RaisePointValidationEvent(string label)
-    {
-      if (label == "Первая")
-      {
-        Utilities.Events.InputValidationEvents.TriggerInvalidFirstPoint = true;
-      }
-      else if (label == "Вторая")
-      {
-        Utilities.Events.InputValidationEvents.TriggerInvalidSecondPoint = true;
-      }
-    }
-
     #endregion
   }
 }

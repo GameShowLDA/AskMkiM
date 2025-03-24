@@ -1,6 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
+using Mode.Metrology.IE;
+using Mode.Metrology.KC;
 using static AppConfig.Config.SystemStateManager;
 using static Utilities.LoggerUtility;
 
@@ -142,10 +144,10 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private void KC_Handler(object sender, MouseButtonEventArgs e)
     {
-      //Application.Current.Dispatcher.Invoke(async () =>
-      //{
-      //  await AddControlAsync(new KcControl(), "Режим КС");
-      //});
+      Application.Current.Dispatcher.Invoke(async () =>
+      {
+        await AddControlAsync(new KcMetrologyControl(), "Режим КС");
+      });
     }
 
     /// <summary>
@@ -153,7 +155,7 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void IE_Handler(object sender, MouseButtonEventArgs e) => throw new NotImplementedException(); // await AddControlAsync(new IeControl(), "Режим ИЕ");
+    private async void IE_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new IeMetrologyControl(), "Режим ИЕ");
 
     /// <summary>
     /// Добавляет пользовательский элемент управления режима СИ в multiEditors.

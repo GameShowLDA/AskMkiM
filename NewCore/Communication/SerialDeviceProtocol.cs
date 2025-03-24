@@ -26,7 +26,7 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0)
+    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0, int port = 0)
     {
       try
       {

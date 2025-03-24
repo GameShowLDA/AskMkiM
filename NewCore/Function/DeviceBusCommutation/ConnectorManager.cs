@@ -38,7 +38,7 @@ namespace NewCore.Function.DeviceBusCommutation
     private async Task<bool> SetMultimeterState(bool connect, SwitchingBusNew bus)
     {
       int numberConnector = (int)TypeConnector.Multimeter;
-      if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 1 || busNumber > 4))
+      if (TryGetBusNumber(bus, out int busNumber) && (busNumber >= 1 || busNumber <= 4))
       {
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());

@@ -9,7 +9,7 @@ namespace NewCore.Base.Device
   /// <summary>
   /// Абстрактный класс, представляющий устройство с подключением по IP-адресу.
   /// </summary>
-  public abstract class DeviceWithIP : DeviceWithProtocolSupport, IDevice
+  public abstract class DeviceWithIP : IDevice
   {
     /// <inheritdoc />
     public string Name { get; set; }
@@ -88,7 +88,10 @@ namespace NewCore.Base.Device
       if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
       {
         IPAddress = ipAddress;
-        DeviceProtocol = new UdpDeviceProtocol(this);
+        if (DeviceProtocol == null)
+        {
+          DeviceProtocol = new UdpDeviceProtocol(this);
+        }
       }
       else
       {

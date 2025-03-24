@@ -14,11 +14,6 @@ namespace NewCore.Function.Keysight3466new
     private readonly KeysightDevice _device;
 
     /// <summary>
-    /// Менеджер связи с прибором.
-    /// </summary>
-    private readonly ICommunication _communication;
-
-    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DcVoltageMeasurement"/>.
     /// </summary>
     /// <param name="device">Экземпляр устройства Keysight.</param>
@@ -26,7 +21,6 @@ namespace NewCore.Function.Keysight3466new
     public DcVoltageMeasurement(KeysightDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _communication = device.CommunicationManager;
     }
 
     /// <summary>
@@ -40,7 +34,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await _communication.SendCommandAsync("CONF:VOLT:DC");
+      await _device.DeviceProtocol.QueryAsync("CONF:VOLT:DC");
     }
 
     /// <summary>
@@ -57,7 +51,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _communication.QueryAsync("MEAS:VOLT:DC?");
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:VOLT:DC?", timeout: 1000);
       response = response.Trim().Replace("+", "");
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))

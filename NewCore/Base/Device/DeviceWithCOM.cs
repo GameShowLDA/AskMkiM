@@ -14,7 +14,7 @@ namespace NewCore.Base.Device
   /// Этот класс реализует интерфейс <see cref="IDevice"/> и предоставляет базовые методы для подключения 
   /// и отключения устройств через последовательный порт (COM).
   /// </remarks>
-  public abstract class DeviceWithCOM : DeviceWithProtocolSupport, IDevice
+  public abstract class DeviceWithCOM : IDevice
   {
     /// <inheritdoc />
     public string Name { get; set; }
