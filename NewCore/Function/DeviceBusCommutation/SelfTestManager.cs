@@ -40,6 +40,7 @@ namespace NewCore.Function.DeviceBusCommutation
             { TypeConnector.ADCReversed, "АЦП с переполюсовкой" },
             { TypeConnector.PINT, "ПИНТ" },
             { TypeConnector.Shunt, "Шунт" },
+            { TypeConnector.BreakdownTester, "ППУ" },
         };
 
     /// <summary>
@@ -108,8 +109,7 @@ namespace NewCore.Function.DeviceBusCommutation
     public async Task<int> GetRelayCountAsync(TypeConnector testType, int busContact)
     {
       DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10, busContact, 0);
-      string response = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
-      ;
+      string response = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
       if (int.TryParse(response, out int relayCount))
       {
