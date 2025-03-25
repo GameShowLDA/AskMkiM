@@ -324,7 +324,6 @@ namespace UI.Controls.Search
     private void OnCloseSearchWindowRequested()
     {
       CloseDialog();
-      //EventAggregator.SearchTextRequested -= OnSearchTextRequested;
     }
 
     private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -362,28 +361,13 @@ namespace UI.Controls.Search
       }
     }
 
-    private void OnActiveEditorChanged(bool isTextEditor)
-    {
-      if (isTextEditor)
-      {
-        if (!this.IsVisible)
-        {
-          this.Show();
-          this.Activate();
-        }
-      }
-      else
-      {
-        this.Hide();
-      }
-    }
-
     private void OnSearchTextRequested(string selectedText)
     {
       if (!string.IsNullOrEmpty(selectedText))
       {
         SearchTextBox.Text = selectedText;
         SearchTextBox.Focus();
+        SearchPlaceholder.Visibility = Visibility.Collapsed;
         SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
       }
     }

@@ -1,4 +1,5 @@
-﻿using static AppConfig.Config.SystemStateManager;
+﻿using System.Diagnostics.CodeAnalysis;
+using static AppConfig.Config.SystemStateManager;
 
 namespace AppConfig
 {
@@ -81,7 +82,7 @@ namespace AppConfig
     /// <summary>
     /// Событие, которое вызывается, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
     /// </summary>
-    public static event Action<string, int, int> FoundTextSelectRow;
+    public static event Action<string, int, int, string> FoundTextSelectRow;
 
     /// <summary>
     /// Событие для запроса показа окна прогресса с блюром на главном окне
@@ -246,9 +247,9 @@ namespace AppConfig
     /// Метод для вызова события, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
     /// </summary>
     /// <param name="isTextEditor"></param>
-    public static void RaiseFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
+    public static void RaiseFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText)
     {
-      FoundTextSelectRow?.Invoke(fileName, lineNumber, lineLength);
+      FoundTextSelectRow?.Invoke(fileName, lineNumber, startOffset, lineText);
     }
 
     public static void RaiseRequestShowProgress()

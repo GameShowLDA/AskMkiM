@@ -25,6 +25,16 @@ namespace UI.Components.SearchControls
   /// </summary>
   public partial class SearchDataGrid : UserControl
   {
+    public string SearchText
+    {
+      get { return (string)GetValue(SearchTextProperty); }
+      set { SetValue(SearchTextProperty, value); }
+    }
+
+    public static readonly DependencyProperty SearchTextProperty =
+        DependencyProperty.Register("SearchText", typeof(string), typeof(SearchDataGrid), new PropertyMetadata(string.Empty));
+
+
     public SearchDataGrid()
     {
       InitializeComponent();
@@ -32,14 +42,15 @@ namespace UI.Components.SearchControls
 
     private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-      var row = (sender as DataGrid).SelectedItem as SearchResultItem;
+      var row = (sender as DataGrid).SelectedItem as SearchResult;
       if (row != null)
       {
         var fileName = row.FileName;
         var lineNumber = row.LineNumber;
-        var lineLength = row.LineText.Length;
+        var startOffset = row.StartOffset; 
+        var lineText = row.SubstringFromWord;
 
-        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, lineLength);
+        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, startOffset, lineText);
         LogInformation("Сработало событие нажатия на строку dataGrid с результатами поиска");
       }
     }
@@ -49,7 +60,7 @@ namespace UI.Components.SearchControls
       e.Handled = true;
     }
 
-    public void SetItemSourse(List<SearchResultItem> items)
+    public void SetItemSourse(List<SearchResult> items)
     {
       ResultsDataGrid.ItemsSource = items;
     }

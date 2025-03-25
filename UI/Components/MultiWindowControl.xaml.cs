@@ -222,7 +222,7 @@ namespace UI.Components
       MultiEditor.OnSearchWindowClosing();
     }
 
-    public void ShowSearchResults(string searchText, Dictionary<string, Dictionary<int, string>> results)
+    public void ShowSearchResults(string searchText, Dictionary<string, List<SearchResult>> results)
     {
       int totalCount = 0;
       SearchResultsTopPanel.Children.Clear();
@@ -232,16 +232,19 @@ namespace UI.Components
       searchResultsTextBlock.Text = string.Empty;
       foreach (var file in results)
       {
-        List<SearchResultItem> items = new List<SearchResultItem>();
+        List<SearchResult> items = new List<SearchResult>();
         var searchResultsForFile = new SearchDataGrid();
         foreach (var occurrence in file.Value)
         {
-          items.Add(new SearchResultItem
-          {
-            FileName = file.Key,
-            LineNumber = occurrence.Key,
-            LineText = occurrence.Value
-          });
+
+          items.Add(new SearchResult(
+            occurrence.StartOffset, 
+            occurrence.Length, 
+            occurrence.LineNumber, 
+            occurrence.WordStartOffset, 
+            occurrence.SubstringFromWord, 
+            file.Key));
+          
         }
         totalCount += items.Count;
         var searchResultsText = $"Результаты поиска по \"{searchText}\" в файле \"{file.Key}\". Найдено {items.Count} строк";

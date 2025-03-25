@@ -37,7 +37,7 @@ namespace UI.Components
     List<UserControl> userControls = new List<UserControl>();
 
     Dictionary<string, string> filePaths = new Dictionary<string, string>();
-    Dictionary<string, Dictionary<int, string>> foundInOpenedFiles = new Dictionary<string, Dictionary<int, string>>();
+    Dictionary<string, List<SearchResult>> foundInOpenedFiles = new Dictionary<string, List<SearchResult>>();
 
     private List<SearchResult> foundResults = new List<SearchResult>();
     private int currentIndex = -1;
@@ -56,7 +56,7 @@ namespace UI.Components
     private int _editorCount = 0;
     private DispatcherTimer _clickTimer;
 
-    public event Action<string, Dictionary<string, Dictionary<int, string>>> SearchResultsReady;
+    public event Action<string, Dictionary<string, List<SearchResult>>> SearchResultsReady;
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
 
     private static ProgressWindow _progressWindow;
@@ -576,7 +576,6 @@ namespace UI.Components
             InitializeCurrentIndex();
             GoToOccurrence(currentIndex);
           }
-
         }
       }
       else
@@ -622,13 +621,9 @@ namespace UI.Components
         foundInOpenedFiles.Clear();
       }
 
-      //ApplyBlurAndDisableMainWindow();
       EventAggregator.RaiseRequestShowProgress();
-
-      //Dispatcher progressDispatcher = await ShowProgressWindowOnSeparateThread();
       List<Task> tasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(tasks);
-      //await CloseProgressWindowAndRemoveBlur(progressDispatcher);
       EventAggregator.RaiseRequestCloseProgress();
 
       if (foundInOpenedFiles.Count > 0)
@@ -664,13 +659,12 @@ namespace UI.Components
         {
           // Получаем текст редактора через Dispatcher
           string pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
-          var foundResultsDictionary = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
-
-          if (foundResultsDictionary.Count > 0)
+          var foundResultsList = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
+          if (foundResultsList.Count > 0)
           {
             lock (lockObj)
             {
-              foundInOpenedFiles[pageName] = foundResultsDictionary;
+              foundInOpenedFiles[pageName] = foundResultsList;
             }
           }
         }
@@ -694,7 +688,7 @@ namespace UI.Components
       return searchPages;
     }
 
-    public void DisplaySearchResults(string searchText, Dictionary<string, Dictionary<int, string>> results)
+    public void DisplaySearchResults(string searchText, Dictionary<string, List<SearchResult>> results)
     {
       if (results == null || results.Count == 0)
       {
@@ -874,25 +868,48 @@ namespace UI.Components
       }
     }
 
-
-    private Dictionary<int, string> FindOccurrencesByLine(string fullText, string searchText, bool? wholeWord, bool? caseWord)
+    public List<SearchResult> FindOccurrencesByLine(string fullText, string searchText, bool? wholeWord, bool? caseWord, int lineOffset = 0)
     {
-      var result = new Dictionary<int, string>();
-      RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
-      searchText = Regex.Escape(searchText);
-      string pattern = wholeWord == true ? $@"\b{searchText}\b" : searchText;
+      List<SearchResult> results = new List<SearchResult>();
+      if (string.IsNullOrEmpty(searchText))
+        return results;
 
+      RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
+      string escapedSearchText = Regex.Escape(searchText);
+      string pattern = wholeWord == true ? $@"\b{escapedSearchText}\b" : escapedSearchText;
+
+      // Разбиваем текст на строки
       string[] lines = fullText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
       for (int i = 0; i < lines.Length; i++)
       {
-        if (Regex.IsMatch(lines[i], pattern, options))
+        string line = lines[i];
+        MatchCollection matches = Regex.Matches(line, pattern, options);
+        foreach (Match match in matches)
         {
-          result[i + 1] = lines[i];
+          int matchIndex = match.Index;
+          // Находим начало слова в строке, в которой найдено совпадение
+          int wordStart = 0;
+          var preMatch = Regex.Match(line.Substring(0, matchIndex), @"\b\w*$");
+          if (preMatch.Success)
+            wordStart = preMatch.Index;
+          else
+            wordStart = matchIndex;
+
+          // Получаем подстроку, начиная с найденного слова до конца строки
+          string substringFromWord = line.Substring(wordStart);
+
+          // Абсолютное смещение = lineOffset (начало строки в документе) + match.Index
+          int absoluteIndex = lineOffset + match.Index;
+
+          // Создаем SearchResult с дополнительной информацией
+          results.Add(new SearchResult(absoluteIndex, match.Length, i + 1, wordStart, substringFromWord));
         }
+        // Обновляем базовое смещение для следующей строки
+        lineOffset += line.Length + Environment.NewLine.Length;
       }
 
-      return result;
+      return results.Count > 0 ? results : null;
     }
 
 
@@ -1051,6 +1068,7 @@ namespace UI.Components
       }
     }
 
+
     /// <summary>
     /// Очистка подстветки.
     /// </summary>
@@ -1084,29 +1102,12 @@ namespace UI.Components
       hasChanged = true;
     }
 
-    private async void ShowHighlight(TextEditorUI textEditor, int startOffset, int length, string fileName)
+    private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText)
     {
-      ShowControl(textEditor, openPages.FirstOrDefault(page => page.Text == fileName));
-
-      int lineNumber = textEditor.Document.GetLineByOffset(startOffset).LineNumber;
-      textEditor.ScrollToLine(lineNumber);
-      ApplyHighlightingWhenRendered(textEditor, startOffset, length);
-      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-
-      await textEditor.Dispatcher.InvokeAsync(() =>
-      {
-        textEditor.Focus();
-        Keyboard.Focus(textEditor);
-      }, DispatcherPriority.Render);
+      GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
     }
 
-    private void OnFoundTextSelectRow(string fileName, int lineNumber, int lineLength)
-    {
-      //GetLineOccurrences(fileName, lineNumber);
-      ProcessLineOccurrences(fileName, lineNumber);
-    }
-
-    private void GetLineOccurrences(string fileName, int lineNumber)
+    private void GetLineOccurrences(string fileName, int lineNumber, int startOffset, string lineText)
     {
       var foundPage = openPages.FirstOrDefault(page => page.Text == fileName);
       if (foundPage != null)
@@ -1115,105 +1116,16 @@ namespace UI.Components
 
         if (userControls[pageIndex] is TextEditorUI textEditor)
         {
-          var document = textEditor.TextEditor.Document;
-          var line = document.GetLineByNumber(lineNumber);
-          string lineText = document.GetText(line);
-          // allOccurrences возвращает, например, объекты, у которых StartOffset и Length – 0-базированные относительно строки.
-          var allOccurrences = FindAllOccurrences(lineText, _searchText, _wholeWord, _caseWord, _searchArea);
-          if (allOccurrences != null && allOccurrences.Count > 0)
-          {
-            textEditor.MarkerService.RemoveAll();
-            foreach (var occurrence in allOccurrences)
-            {
-              // Вычисляем абсолютное смещение: начало строки + смещение внутри строки
-              int startOffset = line.Offset + occurrence.StartOffset;
-              int length = Math.Min(occurrence.Length, line.EndOffset - startOffset);
-              ShowHighlight(textEditor, startOffset, length, fileName);
-            }
-          }
+          textEditor.MarkerService.RemoveAll();
+          ShowControl(textEditor, foundPage);
+          ApplyHighlightingWhenRendered(textEditor, startOffset, _searchText.Length);
+          textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+          textEditor.ScrollToLine(lineNumber);
+          textEditor.Select(startOffset, _searchText.Length);
+          textEditor.Focus();
         }
       }
     }
-
-    // Поля для хранения найденных вхождений в текущей строке и текущего индекса
-    private List<SearchResult> currentLineResults = new List<SearchResult>();
-    private int currentLineIndex = -1;
-
-    /// <summary>
-    /// Вызывается при клике на строку в DataGrid.
-    /// fileName – имя файла (или вкладки), lineNumber – номер строки, где был произведен клик.
-    /// </summary>
-    private void ProcessLineOccurrences(string fileName, int lineNumber)
-    {
-      var foundPage = openPages.FirstOrDefault(page => page.Text == fileName);
-      if (foundPage == null)
-        return;
-
-      int pageIndex = openPages.IndexOf(foundPage);
-      if (userControls[pageIndex] is TextEditorUI textEditor)
-      {
-        var document = textEditor.TextEditor.Document;
-        // Получаем объект строки
-        DocumentLine line = document.GetLineByNumber(lineNumber);
-        string lineText = document.GetText(line);
-
-        // Получаем все вхождения искомого текста относительно строки
-        currentLineResults = FindAllOccurrences(lineText, _searchText, _wholeWord, _caseWord, _searchArea);
-        // Сбрасываем индекс
-        currentLineIndex = -1;
-
-        // Если найдены вхождения, сразу переходим к первому
-        if (currentLineResults != null && currentLineResults.Count > 0)
-        {
-          NextOccurrenceForLine(textEditor, lineNumber);
-        }
-      }
-    }
-
-    /// <summary>
-    /// Переходит к следующему вхождению в текущей строке.
-    /// Не очищает уже созданные маркеры.
-    /// </summary>
-    private void NextOccurrenceForLine(TextEditorUI textEditor, int lineNumber)
-    {
-      if (currentLineResults == null || currentLineResults.Count == 0)
-        return;
-
-      currentLineIndex++;
-      if (currentLineIndex >= currentLineResults.Count)
-        currentLineIndex = 0;
-
-      GoToOccurrenceForLine(currentLineIndex, textEditor, lineNumber);
-    }
-
-    /// <summary>
-    /// Переходит к вхождению с указанным индексом.
-    /// Создает маркер для этого вхождения, не очищая предыдущие маркеры.
-    /// </summary>
-    private void GoToOccurrenceForLine(int index, TextEditorUI textEditor, int lineNumber)
-    {
-      if (index < 0 || index >= currentLineResults.Count)
-        return;
-
-      var result = currentLineResults[index];
-
-      // Абсолютное смещение в документе = начало строки + смещение в строке
-      int absoluteOffset = textEditor.TextEditor.Document.GetLineByNumber(lineNumber).Offset + result.StartOffset;
-
-      // Создаем маркер для данного вхождения.
-      // Важно: не вызываем MarkerService.RemoveAll(), чтобы предыдущие маркеры остаются.
-      ApplyHighlightingWhenRendered(textEditor, absoluteOffset, result.Length);
-
-      // Обновляем слой для отрисовки маркеров
-      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-
-      // Прокручиваем редактор к строке
-      textEditor.ScrollToLine(lineNumber);
-      // Выделяем найденное вхождение (это может помочь пользователю увидеть текущее вхождение)
-      textEditor.Select(absoluteOffset, result.Length);
-      textEditor.Focus();
-    }
-
 
     #endregion
   }

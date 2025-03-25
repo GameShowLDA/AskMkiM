@@ -32,7 +32,8 @@
           >
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
-                <DataGridTextColumn Header="Текст" Binding="{Binding LineText}" Width="*"/>
+                <DataGridTextColumn Header="Столбец" Binding="{Binding WordStartOffset}" Width="100"/>
+                <DataGridTextColumn Header="Текст" Binding="{Binding SubstringFromWord}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -58,7 +59,8 @@
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
-                <DataGridTextColumn Binding="{Binding LineText}" Width="*">
+                <DataGridTextColumn Binding="{Binding StartOffset}" Width="100"/>
+                <DataGridTextColumn Binding="{Binding SubstringFromWord}" Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>

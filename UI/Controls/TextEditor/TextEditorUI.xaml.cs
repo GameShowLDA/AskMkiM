@@ -53,41 +53,34 @@ namespace UI.Controls.TextEditor
 
     private void textEditor_DragEnter(object sender, DragEventArgs e)
     {
-      // Проверяем, перетаскиваются ли файлы
       if (e.Data.GetDataPresent(DataFormats.FileDrop))
       {
-        // Меняем фон текстового редактора на цвет подсветки
         textEditor.Background = (Brush)FindResource("ActiveBorderSolidColorBrush");
-        e.Effects = DragDropEffects.Copy; // Устанавливаем эффект копирования
+        e.Effects = DragDropEffects.Copy; 
       }
       else
       {
-        e.Effects = DragDropEffects.None; // Отменяем эффект, если это не файлы
+        e.Effects = DragDropEffects.None; 
       }
     }
 
     private void textEditor_DragLeave(object sender, DragEventArgs e)
     {
-      // Возвращаем фон текстового редактора к исходному цвету
       textEditor.Background = (Brush)FindResource("PrimarySolidColorBrush");
     }
 
     private void textEditor_Drop(object sender, DragEventArgs e)
     {
-      // Возвращаем фон текстового редактора к исходному цвету при отпускании файла
       textEditor.Background = (Brush)FindResource("PrimarySolidColorBrush");
 
-      // Проверяем, перетаскиваются ли файлы
       if (e.Data.GetDataPresent(DataFormats.FileDrop))
       {
         string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-        // Открываем первый файл
         if (files.Length > 0)
         {
           string filePath = files[0];
           try
           {
-            // Загружаем содержимое файла в текстовый редактор
             if (_multiEditorControl == null)
             {
               string content = System.IO.File.ReadAllText(filePath);
@@ -109,7 +102,7 @@ namespace UI.Controls.TextEditor
     private void CloseEditor_Click(object sender, RoutedEventArgs e)
     {
       var parent = this.Parent as Panel;
-      parent?.Children.Remove(this); // Удаляем себя из StackPanel
+      parent?.Children.Remove(this);
     }
 
     public string Text { get { return textEditor.Text; } set { textEditor.Text = value; } }
