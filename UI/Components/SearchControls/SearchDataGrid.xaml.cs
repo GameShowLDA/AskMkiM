@@ -25,21 +25,11 @@ namespace UI.Components.SearchControls
   /// </summary>
   public partial class SearchDataGrid : UserControl
   {
-    public string SearchText
-    {
-      get { return (string)GetValue(SearchTextProperty); }
-      set { SetValue(SearchTextProperty, value); }
-    }
-
-    public static readonly DependencyProperty SearchTextProperty =
-        DependencyProperty.Register("SearchText", typeof(string), typeof(SearchDataGrid), new PropertyMetadata(string.Empty));
-
-
+    
     public SearchDataGrid()
     {
       InitializeComponent();
     }
-
     private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
       var row = (sender as DataGrid).SelectedItem as SearchResult;
@@ -64,6 +54,5 @@ namespace UI.Components.SearchControls
     {
       ResultsDataGrid.ItemsSource = items;
     }
-
   }
 }

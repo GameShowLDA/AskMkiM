@@ -31,6 +31,7 @@ namespace UI.Controls.Search
     public event Action<string, bool?, bool?, int, string> SearchText;
     public event Action ClearHighlights;
     public event Action SelectFileForSearch;
+    public string SearchTextData { get; set; }
 
     public SearchWindow()
     {
@@ -319,6 +320,7 @@ namespace UI.Controls.Search
       }
 
       SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      //EventAggregator.RaiseSearchTextUpdated(searchText);
     }
 
     private void OnCloseSearchWindowRequested()

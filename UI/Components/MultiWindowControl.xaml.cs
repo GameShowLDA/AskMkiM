@@ -225,26 +225,22 @@ namespace UI.Components
     public void ShowSearchResults(string searchText, Dictionary<string, List<SearchResult>> results)
     {
       int totalCount = 0;
-      SearchResultsTopPanel.Children.Clear();
-      ContentPanel.Children.Clear();
-      openPages.Clear();
-      userControls.Clear();
-      searchResultsTextBlock.Text = string.Empty;
+      PrepareSearchResultsArea();
       foreach (var file in results)
       {
         List<SearchResult> items = new List<SearchResult>();
         var searchResultsForFile = new SearchDataGrid();
+        EventAggregator.RaiseSearchTextUpdated(searchText);
         foreach (var occurrence in file.Value)
         {
-
           items.Add(new SearchResult(
-            occurrence.StartOffset, 
-            occurrence.Length, 
-            occurrence.LineNumber, 
-            occurrence.WordStartOffset, 
-            occurrence.SubstringFromWord, 
-            file.Key));
-          
+            occurrence.StartOffset,
+            occurrence.Length,
+            occurrence.LineNumber,
+            occurrence.WordStartOffset,
+            occurrence.SubstringFromWord,
+            file.Key,
+            searchText));
         }
         totalCount += items.Count;
         var searchResultsText = $"Результаты поиска по \"{searchText}\" в файле \"{file.Key}\". Найдено {items.Count} строк";
@@ -258,6 +254,15 @@ namespace UI.Components
       MultiWindowSplitter.Visibility = Visibility.Visible;
       SearchResultsRow.Height = new GridLength(200);
       SearchResults.Visibility = Visibility.Visible;
+    }
+
+    private void PrepareSearchResultsArea()
+    {
+      SearchResultsTopPanel.Children.Clear();
+      ContentPanel.Children.Clear();
+      openPages.Clear();
+      userControls.Clear();
+      searchResultsTextBlock.Text = string.Empty;
     }
 
     public override void OnApplyTemplate()

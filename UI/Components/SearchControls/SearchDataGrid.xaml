@@ -6,6 +6,9 @@
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:SearchHighlightConverter x:Key="SearchHighlightConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <!-- Фиксированная шапка DataGrid -->
@@ -32,7 +35,7 @@
           >
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
-                <DataGridTextColumn Header="Столбец" Binding="{Binding WordStartOffset}" Width="100"/>
+                <DataGridTextColumn Header="Координата начала вхождения" Binding="{Binding WordStartOffset}" Width="100"/>
                 <DataGridTextColumn Header="Текст" Binding="{Binding SubstringFromWord}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
@@ -52,7 +55,6 @@
         PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick"
         ScrollViewer.CanContentScroll="True">
             <DataGrid.Resources>
-                <!-- Скрываем автоматическую прокрутку для каждой строки -->
                 <Style TargetType="DataGridRow">
                     <EventSetter Event="RequestBringIntoView" Handler="ResultsDataGrid_RequestBringIntoView"/>
                 </Style>
@@ -60,13 +62,16 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
                 <DataGridTextColumn Binding="{Binding StartOffset}" Width="100"/>
-                <DataGridTextColumn Binding="{Binding SubstringFromWord}" Width="*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                <DataGridTemplateColumn Header="Текст" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <local:HighlightingTextBlock TextWrapping="Wrap"
+                                     MainText="{Binding SubstringFromWord}"
+                                     HighlightText="{Binding SearchText}"
+                                     HighlightBrush="Red" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

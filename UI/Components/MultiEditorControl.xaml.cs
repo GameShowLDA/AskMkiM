@@ -660,7 +660,7 @@ namespace UI.Components
           // Получаем текст редактора через Dispatcher
           string pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
           var foundResultsList = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
-          if (foundResultsList.Count > 0)
+          if (foundResultsList!=null && foundResultsList.Count > 0)
           {
             lock (lockObj)
             {

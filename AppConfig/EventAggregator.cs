@@ -74,6 +74,8 @@ namespace AppConfig
     /// </summary>
     public static event Action<string> SearchTextRequested;
 
+    public static event Action<string> SearchTextUpdated;
+
     /// <summary>
     /// Событие, которое вызывается, когда происходиити переключение активного окна.
     /// </summary>
@@ -223,6 +225,11 @@ namespace AppConfig
     public static void RaiseSearchTextRequested(string selectedText)
     {
       SearchTextRequested?.Invoke(selectedText);
+    }
+
+    public static void RaiseSearchTextUpdated(string text)
+    {
+      SearchTextUpdated?.Invoke(text);
     }
 
     /// <summary>
