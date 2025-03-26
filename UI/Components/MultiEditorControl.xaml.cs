@@ -25,6 +25,8 @@ using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
 using ICSharpCode.AvalonEdit.Document;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System;
 
 namespace UI.Components
 {
@@ -56,7 +58,7 @@ namespace UI.Components
     private int _editorCount = 0;
     private DispatcherTimer _clickTimer;
 
-    public event Action<string, Dictionary<string, List<SearchResult>>> SearchResultsReady;
+    public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
 
     private static ProgressWindow _progressWindow;
@@ -78,20 +80,6 @@ namespace UI.Components
       this.KeyDown += MultiWindowControl_KeyDown;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
     }
-
-    private void InitializeTextMarkerService(TextEditorUI textEditorUI)
-    {
-      if (textEditorUI.MarkerService != null)
-        return;
-
-      var textEditor = textEditorUI.TextEditor;
-      var markerService = new TextMarkerService(textEditor.Document, textEditor);
-      textEditor.TextArea.TextView.BackgroundRenderers.Add(markerService);
-      textEditor.TextArea.TextView.LineTransformers.Add(markerService);
-
-      textEditorUI.MarkerService = markerService;
-    }
-
 
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -209,8 +197,32 @@ namespace UI.Components
         {
           filePaths.Add(nameFile, path);
         }
-        InitializeTextMarkerService(textEditor);
       }
+      //try
+      //{
+      //  // Читаем весь текст из файла
+      //  string fileContent = System.IO.File.ReadAllText(path);
+
+      //  // Убираем пробелы в начале каждой строки
+      //  string[] lines = fileContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+      //  for (int i = 0; i < lines.Length; i++)
+      //  {
+      //    lines[i] = lines[i].TrimStart(); // Убираем пробелы в начале строки
+      //  }
+
+      //  // Собираем строки обратно в один текст
+      //  string trimmedContent = string.Join(Environment.NewLine, lines);
+
+      //  // Создаем новый редактор текста и присваиваем очищенный текст
+      //  var textEditor = new TextEditorUI();
+      //  textEditor.Text = trimmedContent;
+
+      //  AddControl(nameFile, textEditor);
+      //  if (!filePaths.ContainsKey(nameFile))
+      //  {
+      //    filePaths.Add(nameFile, path);
+      //  }
+      //}
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
@@ -237,7 +249,6 @@ namespace UI.Components
       var textEditor = new TextEditorUI();
       AddControl(controlName, textEditor /*{ Text  = "Новый файл"}*/);
       filePaths.Add(controlName, string.Empty);
-      InitializeTextMarkerService(textEditor);
     }
 
     /// <summary>
@@ -302,7 +313,6 @@ namespace UI.Components
 
           int startOffset = textEditor.Document.GetOffset(
               highlightInfo.lineNumber, 1);
-          ApplyHighlightingWhenRendered(textEditor, startOffset, highlightInfo.lineLength);
 
           _pendingHighlights.Remove(fileName);
         }
@@ -531,7 +541,6 @@ namespace UI.Components
 
     #region Поиск по тексту
 
-    // TODO: поиск по тексту делать тут
     /// <summary>
     /// Выполняет поиск по тектсу.
     /// </summary>
@@ -631,7 +640,7 @@ namespace UI.Components
         var lastFoundResultsDictionary = foundInOpenedFiles.Values.LastOrDefault();
         if (lastFoundResultsDictionary?.Count > 0)
         {
-          DisplaySearchResults(searchText, foundInOpenedFiles);
+          DisplaySearchResults(searchText, caseWord, foundInOpenedFiles);
         }
       }
       else
@@ -651,16 +660,14 @@ namespace UI.Components
 
       return searchPages.Select(page => Task.Run(() =>
       {
-        // Получаем имя вкладки через Dispatcher (на UI-потоке)
         string pageName = page.Dispatcher.Invoke(() => page.Text);
 
         int pageIndex = openPages.IndexOf(page);
         if (userControls[pageIndex] is TextEditorUI textEditor)
         {
-          // Получаем текст редактора через Dispatcher
           string pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
           var foundResultsList = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
-          if (foundResultsList!=null && foundResultsList.Count > 0)
+          if (foundResultsList != null && foundResultsList.Count > 0)
           {
             lock (lockObj)
             {
@@ -688,14 +695,14 @@ namespace UI.Components
       return searchPages;
     }
 
-    public void DisplaySearchResults(string searchText, Dictionary<string, List<SearchResult>> results)
+    public void DisplaySearchResults(string searchText, bool? isCaseSensetive, Dictionary<string, List<SearchResult>> results)
     {
       if (results == null || results.Count == 0)
       {
         MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
-      SearchResultsReady?.Invoke(searchText, results);
+      SearchResultsReady?.Invoke(searchText, isCaseSensetive, results);
     }
 
     private Dictionary<UserControl, string> GetText(int searchArea)
@@ -830,7 +837,6 @@ namespace UI.Components
     /// </summary>
     private string BuildRegexPattern(string searchText, bool? wholeWord)
     {
-      // Экранируем спецсимволы
       searchText = Regex.Escape(searchText);
       return wholeWord == true ? $@"\b{searchText}\b" : searchText;
     }
@@ -840,7 +846,6 @@ namespace UI.Components
     /// </summary>
     private void ProcessMatches(MatchCollection matches)
     {
-      // Очищаем старые результаты
       foundResults.Clear();
 
       foreach (Match match in matches)
@@ -862,7 +867,6 @@ namespace UI.Components
         }
         else if (_searchParameters == "FindPrevious")
         {
-          // Пример: берем последний индекс
           currentIndex = (foundResults.Count - 1);
         }
       }
@@ -878,70 +882,25 @@ namespace UI.Components
       string escapedSearchText = Regex.Escape(searchText);
       string pattern = wholeWord == true ? $@"\b{escapedSearchText}\b" : escapedSearchText;
 
-      // Разбиваем текст на строки
       string[] lines = fullText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
       for (int i = 0; i < lines.Length; i++)
       {
         string line = lines[i];
-        MatchCollection matches = Regex.Matches(line, pattern, options);
-        foreach (Match match in matches)
+        if(line.Equals("    for (int i = 0; i < header.NumberOfSignals; i++)"))
         {
-          int matchIndex = match.Index;
-          // Находим начало слова в строке, в которой найдено совпадение
-          int wordStart = 0;
-          var preMatch = Regex.Match(line.Substring(0, matchIndex), @"\b\w*$");
-          if (preMatch.Success)
-            wordStart = preMatch.Index;
-          else
-            wordStart = matchIndex;
-
-          // Получаем подстроку, начиная с найденного слова до конца строки
-          string substringFromWord = line.Substring(wordStart);
-
-          // Абсолютное смещение = lineOffset (начало строки в документе) + match.Index
-          int absoluteIndex = lineOffset + match.Index;
-
-          // Создаем SearchResult с дополнительной информацией
-          results.Add(new SearchResult(absoluteIndex, match.Length, i + 1, wordStart, substringFromWord));
+          Console.WriteLine("Дошли до строки с пробелами в начале");
         }
-        // Обновляем базовое смещение для следующей строки
+        MatchCollection matches = Regex.Matches(line, pattern, options);
+        if (Regex.IsMatch(lines[i], pattern, options))
+        {
+          results.Add(new SearchResult(lineOffset, searchText.Length, i + 1, lines[i]));
+        }
         lineOffset += line.Length + Environment.NewLine.Length;
       }
 
       return results.Count > 0 ? results : null;
     }
-
-
-    private void HighlightText(int startOffset, int length, TextEditorUI textEditor)
-    {
-      var marker = textEditor.MarkerService.Create(startOffset, length);
-      marker.BackgroundColor = (Color)Application.Current.Resources["ActiveColor"];
-      marker.ForegroundColor = Colors.Black;
-      textEditor.TextArea.TextView.Redraw();
-      //textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-    }
-
-    /// <summary>
-    /// Ждёт, пока визуальный слой TextView обновится, и затем выполняет подсветку.
-    /// Это помогает, если документ ещё не отрендерен (например, вкладка была неактивна).
-    /// </summary>
-    /// <param name="textEditor">Текущий редактор.</param>
-    /// <param name="startOffset">Начальное смещение для подсветки.</param>
-    /// <param name="length">Длина подсветки.</param>
-    private void ApplyHighlightingWhenRendered(TextEditorUI textEditor, int startOffset, int length)
-    {
-      EventHandler handler = null;
-      handler = (s, e) =>
-      {
-        // Отписываемся, чтобы обработчик сработал только один раз
-        textEditor.TextArea.TextView.LayoutUpdated -= handler;
-        // Вызываем подсветку
-        HighlightText(startOffset, length, textEditor);
-      };
-      textEditor.TextArea.TextView.LayoutUpdated += handler;
-    }
-
 
     /// <summary>
     /// Переход к следующему вхождению.
@@ -951,7 +910,7 @@ namespace UI.Components
       if (foundResults.Count > 0)
       {
         currentIndex++;
-        textEditor.MarkerService.RemoveAll();
+        textEditor.MarkerService.ClearAllMarkers();
 
         if (currentIndex >= foundResults.Count)
         {
@@ -1023,8 +982,6 @@ namespace UI.Components
       return -1;
     }
 
-
-
     /// <summary>
     /// Переход к предыдущему вхождению.
     /// </summary>
@@ -1032,7 +989,7 @@ namespace UI.Components
     {
       if (foundResults.Count == 0) return;
 
-      textEditor.MarkerService.RemoveAll();
+      textEditor.MarkerService.ClearAllMarkers();
       currentIndex = (currentIndex - 1 + foundResults.Count) % foundResults.Count;
       if (currentIndex >= foundResults.Count)
       {
@@ -1058,27 +1015,30 @@ namespace UI.Components
         if (userControls[pageIndex] is TextEditorUI textEditor)
         {
           var result = foundResults[index];
-          ApplyHighlightingWhenRendered(textEditor, result.StartOffset, result.Length);
+          textEditor.MarkerService.ClearAllMarkers();
+          textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, (Color)ColorConverter.ConvertFromString("#b23a48"));
           textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
           int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
           textEditor.ScrollToLine(lineNumber);
-          textEditor.Select(result.StartOffset, result.Length);
+          textEditor.TextArea.Caret.Offset = result.StartOffset + result.Length;
           textEditor.Focus();
+          textEditor.TextArea.Focus();
+          textEditor.TextArea.Caret.BringCaretToView();
         }
       }
     }
-
 
     /// <summary>
     /// Очистка подстветки.
     /// </summary>
     private void ClearHighlights(TextEditorUI textEditor)
     {
-      textEditor.MarkerService.RemoveAll();
+      textEditor?.MarkerService?.ClearAllMarkers();
       foundResults.Clear();
       textEditor.TextArea.SelectionBorder = null;
       currentIndex = -1;
     }
+
 
     /// <summary>
     /// Очистка подстветки.
@@ -1094,7 +1054,6 @@ namespace UI.Components
       }
       _pendingHighlights.Clear();
       _fullText = new Dictionary<UserControl, string>();
-      //_searchText = string.Empty;
       _wholeWord = false;
       _caseWord = false;
       _searchArea = 0;
@@ -1110,20 +1069,44 @@ namespace UI.Components
     private void GetLineOccurrences(string fileName, int lineNumber, int startOffset, string lineText)
     {
       var foundPage = openPages.FirstOrDefault(page => page.Text == fileName);
-      if (foundPage != null)
-      {
-        int pageIndex = openPages.IndexOf(foundPage);
+      if (foundPage == null)
+        return;
 
-        if (userControls[pageIndex] is TextEditorUI textEditor)
+      int pageIndex = openPages.IndexOf(foundPage);
+
+      if (userControls[pageIndex] is TextEditorUI textEditor)
+      {
+        if (textEditor.MarkerService == null)
         {
-          textEditor.MarkerService.RemoveAll();
-          ShowControl(textEditor, foundPage);
-          ApplyHighlightingWhenRendered(textEditor, startOffset, _searchText.Length);
-          textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-          textEditor.ScrollToLine(lineNumber);
-          textEditor.Select(startOffset, _searchText.Length);
-          textEditor.Focus();
+          Console.WriteLine("❌ markerService == null");
+          return;
         }
+
+        ShowControl(textEditor, foundPage);
+        textEditor.MarkerService.ClearAllMarkers();
+        var ranges = new List<(int start, int end)>();
+        int offsetInDocument = startOffset;
+
+        int index = 0;
+
+        StringComparison options = _caseWord == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        while ((index = lineText.IndexOf(_searchText, index, options)) >= 0)
+        {
+          int start = offsetInDocument + index;
+          int end = start + _searchText.Length;
+          ranges.Add((start, end));
+          index += _searchText.Length;
+        }
+
+        textEditor.HighlightRanges(ranges);
+
+        if (ranges.Count > 0)
+        {
+          textEditor.ScrollToLine(lineNumber);
+        }
+
+        textEditor.Focus();
       }
     }
 

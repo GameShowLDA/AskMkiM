@@ -221,11 +221,10 @@ namespace MainWindowProgram
     {
       if (_isSearchWindowOpen == false)
       {
-        //var searchWindow = new SearchWindow();
         _searchWindow.Owner = this;
 
-        _searchWindow.SearchText -= SearchWindow_SearchTextHandler;
-        _searchWindow.SearchText += SearchWindow_SearchTextHandler;
+        EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
+        EventAggregator.SearchText += SearchWindow_SearchTextHandler;
 
         _searchWindow.SelectFileForSearch -= OpenFileFromEvent;
         _searchWindow.SelectFileForSearch += OpenFileFromEvent;

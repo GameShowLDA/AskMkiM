@@ -28,7 +28,6 @@ namespace UI.Controls.Search
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
-    public event Action<string, bool?, bool?, int, string> SearchText;
     public event Action ClearHighlights;
     public event Action SelectFileForSearch;
     public string SearchTextData { get; set; }
@@ -319,8 +318,7 @@ namespace UI.Controls.Search
         searchAreaParameters.SelectedIndex = 0;
       }
 
-      SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
-      //EventAggregator.RaiseSearchTextUpdated(searchText);
+      EventAggregator.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     private void OnCloseSearchWindowRequested()

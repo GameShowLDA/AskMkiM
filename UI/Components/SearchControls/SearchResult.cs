@@ -21,6 +21,7 @@ namespace UI.Components.SearchControls
     /// Подстрока строки, начиная с найденного слова
     /// </summary>
     public string SubstringFromWord { get; }
+    public bool IsCaseSensitive { get; set; }
 
     public SearchResult(int startOffset, int length)
     {
@@ -28,18 +29,18 @@ namespace UI.Components.SearchControls
       Length = length;
     }
 
-    public SearchResult(int startOffset, int length, int lineNumber, int wordStartOffset, string substringFromWord) : this(startOffset, length)
+    public SearchResult(int startOffset, int length, int lineNumber, string substringFromWord) : this(startOffset, length)
     {
       LineNumber = lineNumber;
-      WordStartOffset = wordStartOffset;
       SubstringFromWord = substringFromWord;
     }
 
-    public SearchResult(int startOffset, int length, int lineNumber, int wordStartOffset, string substringFromWord, string fileName, string searchText)
-      : this(startOffset, length, lineNumber, wordStartOffset, substringFromWord)
+    public SearchResult(int startOffset, int length, int lineNumber, string substringFromWord, string fileName, string searchText, bool isCaseSensitive = false)
+      : this(startOffset, length, lineNumber, substringFromWord)
     {
       FileName = fileName;
       SearchText = searchText;
+      IsCaseSensitive = isCaseSensitive;
     }
 
   }

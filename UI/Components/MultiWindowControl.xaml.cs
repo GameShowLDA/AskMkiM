@@ -222,7 +222,7 @@ namespace UI.Components
       MultiEditor.OnSearchWindowClosing();
     }
 
-    public void ShowSearchResults(string searchText, Dictionary<string, List<SearchResult>> results)
+    public void ShowSearchResults(string searchText, bool? isCaseSensetive, Dictionary<string, List<SearchResult>> results)
     {
       int totalCount = 0;
       PrepareSearchResultsArea();
@@ -231,16 +231,21 @@ namespace UI.Components
         List<SearchResult> items = new List<SearchResult>();
         var searchResultsForFile = new SearchDataGrid();
         EventAggregator.RaiseSearchTextUpdated(searchText);
+        var caseValue = true;
+        if (isCaseSensetive == null)
+        {
+          caseValue = false;
+        }
         foreach (var occurrence in file.Value)
         {
           items.Add(new SearchResult(
             occurrence.StartOffset,
             occurrence.Length,
             occurrence.LineNumber,
-            occurrence.WordStartOffset,
             occurrence.SubstringFromWord,
             file.Key,
-            searchText));
+            searchText,
+            caseValue));
         }
         totalCount += items.Count;
         var searchResultsText = $"Результаты поиска по \"{searchText}\" в файле \"{file.Key}\". Найдено {items.Count} строк";

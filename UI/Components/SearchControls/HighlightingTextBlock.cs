@@ -1,16 +1,32 @@
-﻿using System;
+﻿using AppConfig;
+using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using UI.Controls.Search;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.SearchControls
 {
   public class HighlightingTextBlock : TextBlock
   {
+    public static readonly DependencyProperty IsCaseSensitiveProperty =
+        DependencyProperty.Register(
+            "IsCaseSensitive",
+            typeof(bool),
+            typeof(HighlightingTextBlock),
+            new PropertyMetadata(false));
+
+    // Оборачиваем DependencyProperty в обычное свойство
+    public bool IsCaseSensitive
+    {
+      get { return (bool)GetValue(IsCaseSensitiveProperty); }
+      set { SetValue(IsCaseSensitiveProperty, value); }
+    }
+
     // Основной текст для отображения
     public static readonly DependencyProperty MainTextProperty =
         DependencyProperty.Register(nameof(MainText), typeof(string), typeof(HighlightingTextBlock),
@@ -65,7 +81,9 @@ namespace UI.Components.SearchControls
         return;
       }
 
-      Regex regex = new Regex(Regex.Escape(HighlightText), RegexOptions.IgnoreCase);
+      RegexOptions options = IsCaseSensitive == true ? RegexOptions.None : RegexOptions.IgnoreCase;
+
+      Regex regex = new Regex(Regex.Escape(HighlightText), options);
       int lastIndex = 0;
       foreach (Match match in regex.Matches(text))
       {
@@ -85,5 +103,6 @@ namespace UI.Components.SearchControls
         Inlines.Add(new Run(text.Substring(lastIndex)));
       }
     }
+
   }
 }

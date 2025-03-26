@@ -1,97 +1,147 @@
-﻿using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Rendering;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using UI.Controls.TextEditor;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
 
 namespace UI.Components.SearchControls
 {
-  public class TextMarkerService : IBackgroundRenderer, IVisualLineTransformer
+  /// <summary>
+  /// Интерфейс для текстового маркера, предоставляющий свойства для подсветки текста.
+  /// </summary>
+  public interface ITextMarker
+  {
+    /// <summary>Начальный индекс (позиция) маркера.</summary>
+    int StartOffset { get; }
+
+    /// <summary>Длина выделяемого текста.</summary>
+    int Length { get; }
+
+    /// <summary>Дополнительная информация, прикреплённая к маркеру.</summary>
+    object Tag { get; set; }
+
+    /// <summary>Цвет фона подсветки.</summary>
+    Color? BackgroundColor { get; set; }
+
+    /// <summary>Цвет текста.</summary>
+    Color? ForegroundColor { get; set; }
+
+    /// <summary>Жирность шрифта (если нужно).</summary>
+    FontWeight? FontWeight { get; set; }
+
+    /// <summary>Удаляет маркер.</summary>
+    void Delete();
+  }
+
+  /// <summary>
+  /// Сервис подсветки текста для AvalonEdit. Отвечает за визуальное выделение фрагментов текста.
+  /// </summary>
+  public sealed class TextMarkerService : IBackgroundRenderer
   {
     private readonly TextSegmentCollection<TextMarker> markers;
-    private readonly TextEditor textEditor;
+    private readonly ICSharpCode.AvalonEdit.TextEditor editor;
 
-    public TextMarkerService(TextDocument document, TextEditor textEditor)
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
+    /// </summary>
+    /// <param name="editor">Экземпляр <see cref="TextEditor"/>, для которого работает сервис.</param>
+    public TextMarkerService(ICSharpCode.AvalonEdit.TextEditor editor)
     {
-      markers = new TextSegmentCollection<TextMarker>(document);
-      this.textEditor = textEditor;
+      this.editor = editor ?? throw new ArgumentNullException(nameof(editor));
+      markers = new TextSegmentCollection<TextMarker>(editor.Document);
     }
 
-    public IEnumerable<TextMarker> TextMarkers => markers;
+    /// <summary>
+    /// Уровень слоя рендера. Используется AvalonEdit для наложения визуальных эффектов.
+    /// </summary>
+    public KnownLayer Layer => KnownLayer.Selection;
 
-    public KnownLayer Layer => KnownLayer.Selection;  // Указывает слой рендера для подсветки
-
+    /// <summary>
+    /// Отрисовывает подсветку на фоне для всех активных маркеров.
+    /// </summary>
+    /// <param name="textView">Объект текстового отображения.</param>
+    /// <param name="drawingContext">Контекст рисования WPF.</param>
     public void Draw(TextView textView, DrawingContext drawingContext)
     {
-      if (textView == null || drawingContext == null)
+      if (editor.Document == null || !textView.VisualLinesValid)
+      {
         return;
-
-      textView.EnsureVisualLines();
+      }
 
       foreach (var marker in markers)
       {
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
         {
-          var geometry = new RectangleGeometry(rect);
-          drawingContext.DrawGeometry(new SolidColorBrush(marker.BackgroundColor), null, geometry);
-        }
-      }
-    }
-
-    public void Transform(ITextRunConstructionContext context, IList<VisualLineElement> elements)
-    {
-      if (context == null || elements == null)
-        return;
-
-      // Вычисляем границы текущей строки
-      int lineStartOffset = context.VisualLine.FirstDocumentLine.Offset;
-      int lineEndOffset = context.VisualLine.LastDocumentLine.EndOffset;
-
-      // Для каждого маркера, который пересекается с текущей строкой
-      foreach (var marker in markers.FindOverlappingSegments(lineStartOffset, lineEndOffset - lineStartOffset))
-      {
-        // Для каждого элемента строки
-        foreach (var element in elements)
-        {
-          // Определяем реальные границы элемента в документе
-          int elementStart = lineStartOffset + element.VisualColumn;
-          int elementEnd = elementStart + element.DocumentLength;
-
-          // Если элемент пересекается с диапазоном маркера, применяем цвет
-          if (elementEnd > marker.StartOffset && elementStart < marker.EndOffset)
-          {
-            if (marker.ForegroundColor != null)
-            {
-              element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
-            }
-            // Можно также установить фон, если нужно:
-            element.TextRunProperties.SetBackgroundBrush(new SolidColorBrush(marker.BackgroundColor));
-          }
+          var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
+          brush.Freeze();
+          drawingContext.DrawRectangle(brush, null, new Rect(rect.Location, new Size(rect.Width, rect.Height)));
         }
       }
     }
 
     /// <summary>
-    /// Создание нового маркера для подсветки текста
+    /// Очищает все существующие маркеры подсветки.
     /// </summary>
-    /// <param name="startOffset">Стартовая позиция.</param>
-    /// <param name="length">Длина подствеки.</param>
-    /// <returns>Подстветку текста необходимой длины.</returns>
-    public TextMarker Create(int startOffset, int length)
-    {
-      var marker = new TextMarker(startOffset, length);
-      markers.Add(marker);
-      return marker;
-    }
-
-    /// <summary>
-    /// Очистка подсветки.
-    /// </summary>
-    public void RemoveAll()
+    public void ClearAllMarkers()
     {
       markers.Clear();
-      textEditor.TextArea.TextView.Redraw();
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      Console.WriteLine("🧹 Все маркеры удалены.");
+    }
+
+
+    /// <summary>
+    /// Добавляет новый маркер подсветки.
+    /// </summary>
+    /// <param name="startOffset">Начальный индекс в тексте.</param>
+    /// <param name="length">Длина выделения.</param>
+    /// <param name="backgroundColor">Цвет фона подсветки.</param>
+    public void AddMarker(int startOffset, int length, Color backgroundColor)
+    {
+      var marker = new TextMarker(startOffset, length)
+      {
+        BackgroundColor = backgroundColor,
+      };
+
+      markers.Add(marker);
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>
+    /// Реализация текстового маркера.
+    /// </summary>
+    private sealed class TextMarker : TextSegment, ITextMarker
+    {
+      /// <summary>
+      /// Создаёт новый текстовый маркер.
+      /// </summary>
+      /// <param name="startOffset">Начальная позиция.</param>
+      /// <param name="length">Длина сегмента.</param>
+      public TextMarker(int startOffset, int length)
+      {
+        StartOffset = startOffset;
+        Length = length;
+      }
+
+      /// <inheritdoc/>
+      public object Tag { get; set; }
+
+      /// <inheritdoc/>
+      public Color? BackgroundColor { get; set; }
+
+      /// <inheritdoc/>
+      public Color? ForegroundColor { get; set; }
+
+      /// <inheritdoc/>
+      public FontWeight? FontWeight { get; set; }
+
+      /// <inheritdoc/>
+      public void Delete()
+      {
+        Length = 0;
+      }
     }
   }
 }

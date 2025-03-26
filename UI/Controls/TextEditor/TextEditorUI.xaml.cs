@@ -5,8 +5,10 @@ using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
+using NLog;
 using UI.Components;
 using UI.Components.SearchControls;
+using static Utilities.LoggerUtility;
 
 namespace UI.Controls.TextEditor
 {
@@ -16,18 +18,115 @@ namespace UI.Controls.TextEditor
   public partial class TextEditorUI : UserControl
   {
     MultiEditorControl _multiEditorControl;
-    private TextMarkerService textMarkerService;
+    private TextMarkerService _markerService;
+    private List<string> _pendingHighlights = new();
+    private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
+
     public ICSharpCode.AvalonEdit.TextEditor TextEditor => textEditor;
-    public TextMarkerService MarkerService { get; set; }
+    public TextMarkerService MarkerService
+    {
+      get
+      {
+        if (_markerService == null)
+        {
+          LogWarning("📢 MarkerService был null, вызываем инициализацию.");
+          InitializeMarkerService();
+        }
+        return _markerService;
+      }
+    }
 
     public TextEditorUI()
     {
       InitializeComponent();
-      textMarkerService = new TextMarkerService(textEditor.Document, textEditor);
-
-      textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
-      textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
     }
+
+    public void InitializeMarkerService()
+    {
+      if (textEditor == null)
+      {
+        LogError("❌ textEditor == null");
+        return;
+      }
+
+      if (textEditor.Document == null)
+      {
+        LogWarning("⚠ textEditor.Document == null. Создаю новый документ.");
+        textEditor.Document = new ICSharpCode.AvalonEdit.Document.TextDocument();
+      }
+
+      _markerService = new TextMarkerService(textEditor);
+      textEditor.TextArea.TextView.BackgroundRenderers.Add(_markerService);
+      textEditor.TextArea.TextView.Services.AddService(typeof(TextMarkerService), _markerService);
+
+      LogInformation("✅ TextMarkerService инициализирован.");
+
+      foreach (var text in _pendingHighlights)
+      {
+        HighlightText(text);
+      }
+
+      _pendingHighlights.Clear();
+    }
+
+    /// <summary>
+    /// Подсвечивает указанный текст, если сервис инициализирован. Иначе — откладывает подсветку.
+    /// </summary>
+    public void HighlightText(string textToHighlight)
+    {
+      if (string.IsNullOrEmpty(textToHighlight))
+        return;
+
+      if (_markerService == null)
+      {
+        _pendingHighlights.Add(textToHighlight);
+        LogInformation("Подсветка отложена до инициализации.");
+        return;
+      }
+
+      string fullText = textEditor.Text;
+      LogInformation($"Текст в редакторе: {fullText}");
+
+      int index = 0;
+      while ((index = fullText.IndexOf(textToHighlight, index, StringComparison.OrdinalIgnoreCase)) >= 0)
+      {
+        LogInformation($"Найдено '{textToHighlight}' на позиции: {index}");
+        _markerService.AddMarker(index, textToHighlight.Length, backgroudColor);
+        index += textToHighlight.Length;
+      }
+
+      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>
+    /// Подсвечивает набор диапазонов текста.
+    /// </summary>
+    /// <param name="ranges">Список диапазонов (начало, конец).</param>
+    public void HighlightRanges(List<(int start, int end)> ranges)
+    {
+      if (_markerService == null)
+      {
+        Console.WriteLine("❌ MarkerService не инициализирован. Операция отклонена.");
+        return;
+      }
+
+      foreach (var (start, end) in ranges)
+      {
+        if (start >= 0 && end > start && end <= textEditor.Text.Length)
+        {
+          int length = end - start;
+          Console.WriteLine($"Подсветка диапазона: {start}–{end} (длина {length})");
+          _markerService.AddMarker(start, length, backgroudColor);
+        }
+        else
+        {
+          Console.WriteLine($"⚠ Некорректный диапазон: ({start}, {end})");
+        }
+      }
+
+      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
 
     public void SetMultiEditorControl(MultiEditorControl multiEditorControl)
     {
@@ -36,7 +135,7 @@ namespace UI.Controls.TextEditor
 
     public void ClearHighlights()
     {
-      textMarkerService.RemoveAll();
+      _markerService.ClearAllMarkers();
     }
 
     public TextDocument Document => textEditor.Document;
@@ -105,6 +204,10 @@ namespace UI.Controls.TextEditor
       parent?.Children.Remove(this);
     }
 
-    public string Text { get { return textEditor.Text; } set { textEditor.Text = value; } }
+    public string Text
+    {
+      get => textEditor.Text;
+      set => textEditor.Text = value;
+    }
   }
 }

@@ -1,4 +1,5 @@
-﻿using AppConfig.DataBase;
+﻿using AppConfig;
+using AppConfig.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System.Diagnostics;
@@ -104,7 +105,7 @@ namespace MainWindowProgram
     private void OnSearchWindowActivated(bool isOpen)
     {
       _isSearchWindowOpen = isOpen;
-      _searchWindow.SearchText -= SearchWindow_SearchTextHandler;
+      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
     }
   }
 }

@@ -30,6 +30,7 @@ namespace UI.Components.SearchControls
     {
       InitializeComponent();
     }
+
     private void ResultsDataGrid_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
       var row = (sender as DataGrid).SelectedItem as SearchResult;

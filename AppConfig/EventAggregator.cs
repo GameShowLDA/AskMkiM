@@ -87,6 +87,11 @@ namespace AppConfig
     public static event Action<string, int, int, string> FoundTextSelectRow;
 
     /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
+    /// </summary>
+    public static event Action<string, bool?, bool?, int, string> SearchText;
+
+    /// <summary>
     /// Событие для запроса показа окна прогресса с блюром на главном окне
     /// </summary>
     public static event Action RequestShowProgress;
@@ -199,6 +204,15 @@ namespace AppConfig
     static public void RaiseSearchWindowClosing(bool isOpen)
     {
       SearchWindowClosing?.Invoke(isOpen);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchText(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     /// <summary>
