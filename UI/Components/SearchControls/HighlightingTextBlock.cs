@@ -13,6 +13,7 @@ namespace UI.Components.SearchControls
 {
   public class HighlightingTextBlock : TextBlock
   {
+
     public static readonly DependencyProperty IsCaseSensitiveProperty =
         DependencyProperty.Register(
             "IsCaseSensitive",
@@ -20,12 +21,24 @@ namespace UI.Components.SearchControls
             typeof(HighlightingTextBlock),
             new PropertyMetadata(false));
 
-    // Оборачиваем DependencyProperty в обычное свойство
     public bool IsCaseSensitive
     {
       get { return (bool)GetValue(IsCaseSensitiveProperty); }
       set { SetValue(IsCaseSensitiveProperty, value); }
     }
+    public bool IsWholeWord
+    {
+      get { return (bool)GetValue(IsWholeWordProperty); }
+      set { SetValue(IsWholeWordProperty, value); }
+    }
+
+    public static readonly DependencyProperty IsWholeWordProperty =
+        DependencyProperty.Register(
+            "IsWholeWord",
+            typeof(bool),
+            typeof(HighlightingTextBlock),
+            new PropertyMetadata(false));
+
 
     // Основной текст для отображения
     public static readonly DependencyProperty MainTextProperty =
@@ -83,7 +96,9 @@ namespace UI.Components.SearchControls
 
       RegexOptions options = IsCaseSensitive == true ? RegexOptions.None : RegexOptions.IgnoreCase;
 
-      Regex regex = new Regex(Regex.Escape(HighlightText), options);
+      string pattern = IsWholeWord ? $@"(?<!\w){Regex.Escape(HighlightText)}(?!\w)" : Regex.Escape(HighlightText);
+
+      Regex regex = new Regex(pattern, options);
       int lastIndex = 0;
       foreach (Match match in regex.Matches(text))
       {

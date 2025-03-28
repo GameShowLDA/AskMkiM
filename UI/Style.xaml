@@ -778,10 +778,11 @@
     </Style>
 
     <Style TargetType="DataGridCell">
+        <Setter Property="Height" Value="30"/>
         <Setter Property="Padding" Value="5"/>
         <Setter Property="Background" Value="{StaticResource PrimarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
-        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Bottom"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -799,7 +800,7 @@
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="Background" Value="#1f242b"/>
                 <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="Height" Value="40"/>
+                <Setter Property="Height" Value="30"/>
                 <Setter Property="VerticalContentAlignment" Value="Bottom"/>
             </Trigger>
             <Trigger Property="IsSelected" Value="False">
@@ -810,7 +811,6 @@
     </Style>
 
     <Style TargetType="DataGridRow" >
-        <Setter Property="Height" Value="Auto"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="Padding" Value="5"/>
         <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
@@ -818,8 +818,11 @@
         <Setter Property="VerticalContentAlignment" Value="Bottom"/>
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Trigger>
 
+            <Trigger Property="IsSelected" Value="False">
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
             </Trigger>
         </Style.Triggers>
     </Style>

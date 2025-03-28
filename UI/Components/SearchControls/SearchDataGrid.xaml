@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             >
     <UserControl.Resources>
         <local:SearchHighlightConverter x:Key="SearchHighlightConverter"/>
     </UserControl.Resources>
@@ -34,8 +35,8 @@
           CanUserReorderColumns="False"
           >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="100"/>
-                <DataGridTextColumn Header="Текст" Binding="{Binding SubstringFromWord}" Width="*"/>
+                <DataGridTextColumn Header="Строка" Width="100"/>
+                <DataGridTextColumn Header="Текст" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -47,9 +48,9 @@
         IsReadOnly="True"
         HeadersVisibility="None"
         RowHeaderWidth="0"
-        Background="Transparent"
+        Background="{StaticResource PrimarySolidColorBrush}"
         BorderThickness="0"
-        VerticalAlignment="Stretch"
+        VerticalAlignment="Top"
         EnableRowVirtualization="False"
         PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick"
         ScrollViewer.CanContentScroll="True">
@@ -60,14 +61,16 @@
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
-                <DataGridTemplateColumn Header="Текст" Width="*">
+                <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:HighlightingTextBlock TextWrapping="Wrap"
+                                     TextTrimming="CharacterEllipsis"
                                      MainText="{Binding SubstringFromWord}"
                                      HighlightText="{Binding SearchText}"
                                      HighlightBrush= "#b23a48"
-                                     IsCaseSensitive="{Binding IsCaseSensitive}" />
+                                     IsCaseSensitive="{Binding IsCaseSensitive}"
+                                     IsWholeWord="{Binding IsWholeWord}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

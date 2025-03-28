@@ -8,7 +8,7 @@
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
              mc:Ignorable="d" 
-             Background="Transparent"
+             Background="{StaticResource PrimarySolidColorBrush}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
