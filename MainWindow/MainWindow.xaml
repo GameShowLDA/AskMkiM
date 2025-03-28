@@ -215,6 +215,18 @@
 
                     </MenuItem>
 
+                    <MenuItem
+                        Header="Тесты МКР"
+                        >
+
+                        <MenuItem
+                            Header="Перекрёстный тест"
+                            Name="CrossTestMkrMenuItem"
+                            PreviewMouseDown="CrossTestMkrControl_PreviewMouseDown"
+                            />
+
+                    </MenuItem>
+
                 </MenuItem>
 
                 <MenuItem 

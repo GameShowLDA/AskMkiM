@@ -208,6 +208,8 @@ namespace MainWindowProgram
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private void NodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.TestSuite.NodeMethod.NodeMethodControl(), "Метод узла");
 
+    private void CrossTestMkrControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.TestSuite.CrossTestMkr.CrossTestMkrControl(), "Перекрёстный тест");
+
     #endregion
 
     #region Настройки.
