@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using AppManager.DataBase.Services;
+using DataBaseConfiguration.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 

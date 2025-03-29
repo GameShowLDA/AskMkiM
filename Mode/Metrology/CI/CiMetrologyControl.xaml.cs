@@ -5,8 +5,8 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppManager.Config.MeasurementErrorConfig;
-using static AppManager.Data.MeasurementError.MeasurementErrorModel;
+using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
+using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 
@@ -25,14 +25,14 @@ namespace Mode.Metrology.CI
     public CiMetrologyControl()
     {
       InitializeComponent();
-      InitializeSettingsAsync().ConfigureAwait(true);
+      InitializeSettings();
     }
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
     /// </summary>
-    public async Task InitializeSettingsAsync()
+    public void InitializeSettings()
     {
       try
       {
@@ -48,7 +48,7 @@ namespace Mode.Metrology.CI
     /// <summary>
     /// Выполнение контроля.
     /// </summary>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {

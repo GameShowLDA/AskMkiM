@@ -12,11 +12,6 @@ namespace AppConfiguration.Base
   static public class FileLocations
   {
     /// <summary>
-    /// Путь к файлу настроек конфигурации.
-    /// </summary>
-    static public string ConfigFilePath => ".\\Settings\\_config.db";
-
-    /// <summary>
     /// Путь к файлу настроек протокола.
     /// </summary>
     static public string ProtocolConfigPath => ".\\Settings\\_protocol_config.yaml";

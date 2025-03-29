@@ -2,7 +2,7 @@
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.Protocol;
-using static AppManager.EventAggregator;
+using static AppConfiguration.Base.EventAggregator;
 
 namespace UI.Management
 {

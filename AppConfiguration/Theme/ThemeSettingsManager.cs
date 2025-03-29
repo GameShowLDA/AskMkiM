@@ -1,5 +1,6 @@
-﻿namespace AppConfiguration.Theme
+﻿using AppConfiguration.Base;
 
+namespace AppConfiguration.Theme
 {
   static public class ThemeSettingsManager
   {

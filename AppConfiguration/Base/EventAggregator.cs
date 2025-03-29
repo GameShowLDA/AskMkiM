@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AppConfiguration.SystemState.SystemStateManager;
 
 namespace AppConfiguration.Base
 {
@@ -120,3 +121,4 @@ namespace AppConfiguration.Base
       InfoMessageEvent?.Invoke(message, clearMessage);
     }
   }
+}

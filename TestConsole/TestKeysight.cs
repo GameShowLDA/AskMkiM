@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using DataBaseConfiguration.Services;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 
@@ -14,7 +15,7 @@ namespace TestConsole
       Console.WriteLine("=== Управление Keysight ===");
       IPAddress iPAddress = IPAddress.Parse("192.168.1.16");
 
-      var keysight3466 = new AppManager.DataBase.Services.FastMeterServices().GetAll().FirstOrDefault();
+      var keysight3466 = new FastMeterServices().GetAll().FirstOrDefault();
       if ((await keysight3466.ConnectableManager.InitializeAsync()).Connect)
       {
         Console.WriteLine($"Подключен к: {keysight3466.Name}");

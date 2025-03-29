@@ -1,6 +1,4 @@
-﻿using AppManager.DataBase.Repositories;
-using AppManager.DataBase.Services;
-using TestConsole.GPT;
+﻿using TestConsole.GPT;
 using TestConsole.MINT;
 
 namespace TestConsole

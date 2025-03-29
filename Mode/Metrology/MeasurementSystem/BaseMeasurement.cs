@@ -1,12 +1,8 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
-using AppManager.DataBase.Repositories;
-using AppManager.DataBase.Services;
+﻿using DataBaseConfiguration.Services;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
-using UI.Components;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
@@ -19,7 +15,6 @@ namespace Mode.Metrology.MeasurementSystem
   /// Использует шаблонный метод для автоматизации процесса.
   /// </summary>
   public abstract class BaseMeasurement
-
   {
     enum MetrologicalDeviceType
     {
@@ -139,7 +134,7 @@ namespace Mode.Metrology.MeasurementSystem
 
           if (device is IDevice connectableDevice)
           {
-            var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync();
+            var (connected, message) = (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled()) ? await connectableDevice.ConnectableManager.ConnectAsync() : (true, string.Empty);
             if (!connected)
             {
               return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
@@ -147,9 +142,7 @@ namespace Mode.Metrology.MeasurementSystem
               throw new InvalidOperationException($"Не удалось подключить устройство с ролью {role}: {message}");
             }
 
-            // TODO : Заглушка
-            //if (await AppManager.Config.ProtocolConfig.GetDeviceInfo())
-            if (true)
+            if (await AppConfiguration.Protocol.ProtocolConfig.GetDeviceInfo())
             {
               await protocolUI.ShowMessageAsync(new ShowMessageModel($"{connectableDevice.Name}({connectableDevice.Number})", message: $"[{ShowMessageModel.SuccessMessage.Item1}]", messageColor: ShowMessageModel.SuccessMessage.Item2));
             }
@@ -174,6 +167,11 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="mode">Режим метрологии.</param>
     public virtual async Task SetupCommutation(PointModel point1, PointModel point2, MetrologicalModeRole mode)
     {
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var relayModules = Devices.TryGetValue(mode, out var modules) ? modules.OfType<IRelaySwitchModule>().ToList() : null;
       var busSwitcher = Devices.TryGetValue(mode, out var ukshs) ? ukshs.OfType<ISwitchingDevice>().FirstOrDefault() : null;
       var mint = Devices.TryGetValue(mode, out var mints) ? mints.OfType<IPowerSourceModule>().FirstOrDefault() : null;
@@ -225,7 +223,7 @@ namespace Mode.Metrology.MeasurementSystem
         await busSwitcher.ConnectorManager.ConnectBreakdownTester();
       }
       else
-      { 
+      {
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
       }
     }
@@ -250,7 +248,10 @@ namespace Mode.Metrology.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeMeasurement()
     {
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      }
     }
 
     /// <summary>

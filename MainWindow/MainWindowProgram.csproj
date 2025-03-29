@@ -17,8 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppManager\AppManager.csproj" />
+    <ProjectReference Include="..\AppConfiguration\AppConfiguration.csproj" />
     <ProjectReference Include="..\ConsoleUtilities\ConsoleUtilities.csproj" />
+    <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
     <ProjectReference Include="..\Mode\Mode.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
   </ItemGroup>

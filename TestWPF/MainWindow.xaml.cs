@@ -1,10 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using AppManager;
-using AppManager.DataBase;
-using AppManager.DataBase.Models;
-using AppManager.DataBase.Services;
-using Microsoft.EntityFrameworkCore;
+using AppConfiguration.Base;
+using AppConfiguration.Execution;
+using AppConfiguration.MeasurementError;
+using AppConfiguration.Protocol;
+using AppConfiguration.Theme;
 using static Utilities.LoggerUtility;
 
 namespace TestWPF
@@ -38,7 +38,26 @@ namespace TestWPF
 
     private async Task StartConfigAsync()
     {
-      await SettingsFileReader.ReadAllSettingsAsync();
+      try
+      {
+        var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
+        var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
+        var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
+        var db = DataBaseConfiguration.Configurations.DataBaseConfig.InitializeDB();
+
+        await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
+        await ThemeSettingsManager.ReadThemeModeAsync();
+      }
+      catch (Exception ex)
+      {
+        var stackTrace = new System.Diagnostics.StackTrace();
+        var callingFrame = stackTrace.GetFrame(1);
+        var method = callingFrame.GetMethod();
+        var className = method.DeclaringType.FullName;
+        var methodName = method.Name;
+
+        LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
+      }
     }
 
 

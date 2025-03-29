@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Execution;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
@@ -108,7 +109,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         {
           successMessage = ShowMessageModel.ErrorMessage.Item1;
           colorMessage = ShowMessageModel.ErrorMessage.Item2;
-          if (await AppManager.Config.ExecutionConfig.GetIsStopOnErrorEnabled())
+          if (await ExecutionConfig.GetIsStopOnErrorEnabled())
           {
             pause = true;
           }

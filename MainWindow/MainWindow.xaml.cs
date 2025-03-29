@@ -2,10 +2,11 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using AppConfiguration.Execution;
+using AppConfiguration.SystemState;
 using ConsoleUtilities;
 using Utilities.USB;
-using static AppManager.EventAggregator;
-using static AppManager.SettingsFileReader;
+using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -54,7 +55,6 @@ namespace MainWindowProgram
     {
       _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
       SetEvent();
-      Initialize();
 
       await Task.Run(async () =>
       {
@@ -149,7 +149,7 @@ namespace MainWindowProgram
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
-      AppManager.Config.ExecutionConfig.IdleModeChange += ExecutionConfig_IdleModeChange;
+      ExecutionConfig.IdleModeChange += ExecutionConfig_IdleModeChange;
     }
 
     /// <summary>
@@ -180,7 +180,7 @@ namespace MainWindowProgram
     /// <returns>Задача, представляющая асинхронную операцию чтения настроек.</returns>
     private async Task StartConfigAsync()
     {
-      await ReadAllSettingsAsync();
+      await Initialize();
     }
 
     /// <summary>
@@ -215,7 +215,7 @@ namespace MainWindowProgram
     /// <param name="newRights">Новое состояние прав администратора.</param>
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
-      AppManager.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+      SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
 
     /// <summary>

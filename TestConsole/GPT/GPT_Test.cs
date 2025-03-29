@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppManager.DataBase.Services;
+﻿using DataBaseConfiguration.Services;
 using NewCore.Base.Interface.Main;
 
 namespace TestConsole.GPT

@@ -9,7 +9,7 @@ using Mode.TestSuite.Metrology.MethodExecutor.CI;
 using Mode.TestSuite.Metrology.MethodExecutor.PI;
 using Mode.TestSuite.Metrology.NodeMethod.CI;
 using Mode.TestSuite.Metrology.NodeMethod.PI;
-using static AppManager.Config.SystemStateManager;
+using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram

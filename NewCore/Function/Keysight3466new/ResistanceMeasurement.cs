@@ -20,9 +20,7 @@ namespace NewCore.Function.Keysight3466new
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
-    /// <summary>
-    /// Устанавливает прибор в режим измерения сопротивления.
-    /// </summary>
+    /// <inheritdoc />
     public async Task SetResistanceModeAsync()
     {
       if (!_device.IsConnected)
@@ -33,12 +31,14 @@ namespace NewCore.Function.Keysight3466new
       await _device.DeviceProtocol.QueryAsync("CONF:RES");
     }
 
-    /// <summary>
-    /// Измеряет сопротивление и возвращает результат.
-    /// Если значение некорректно, возвращает -1.
-    /// </summary>
-    public async Task<double> MeasureResistanceAsync()
+    /// <inheritdoc />
+    public async Task<double> MeasureResistanceAsync(double param)
     {
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return param;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");

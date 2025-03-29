@@ -4,8 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using static AppManager.Config.ProtocolConfig;
-using static AppManager.Config.SystemStateManager;
+using static AppConfiguration.Protocol.ProtocolConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.Invoke.InvokeRichTextBox

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Globalization;
+using DataBaseConfiguration.Services;
 using Mode.Models;
-using Mode.Metrology.MeasurementSystem;
-using UI.Controls.Protocol;
-using AppManager.DataBase.Services;
-using Utilities.Events;
 using UI.Components;
+using UI.Controls.Protocol;
+using Utilities.Events;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Base

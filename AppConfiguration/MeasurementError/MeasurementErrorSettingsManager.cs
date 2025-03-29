@@ -2,12 +2,12 @@
 
 namespace AppConfiguration.MeasurementError
 {
-  static internal class MeasurementErrorSettingsManager
+  static public class MeasurementErrorSettingsManager
   {
     /// <summary>
     /// Считывает параметры погрешностей и задаёт их в программе.
     /// </summary>
-    static internal async Task ReadMeasurementErrorMode()
+    static public async Task ReadMeasurementErrorMode()
     {
       MeasurementErrorFileManage measurementErrorFileManage = new MeasurementErrorFileManage(FileLocations.MeasurementErrorConfigPath);
 

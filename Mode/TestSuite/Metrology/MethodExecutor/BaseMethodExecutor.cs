@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AppManager.DataBase.Services;
-using Mode.Base;
+﻿using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
-using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor
