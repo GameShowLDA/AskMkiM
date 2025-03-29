@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Repositories;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Models;
+using AppManager.DataBase.Repositories;
+using AppManager.DataBase.Services;
 using Mode.Settings.DeviceConfig.BreakDown;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceBusCommutation;

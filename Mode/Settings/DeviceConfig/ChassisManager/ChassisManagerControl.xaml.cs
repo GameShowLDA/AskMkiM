@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfig.DataBase.Models;
+using AppManager.DataBase.Models;
 using NewCore.Base.Interface.Main;
 
 namespace Mode.Settings.DeviceConfig.ChassisManager

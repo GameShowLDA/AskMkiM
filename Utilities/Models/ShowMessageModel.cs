@@ -10,12 +10,12 @@ namespace Utilities.Models
     /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
-    static public Tuple<string, Color> SuccessMessage => Tuple.Create("OK", Color.FromArgb(255, 79, 205, 101));
+    static public Tuple<string, Color> SuccessMessage => Tuple.Create("НОРМА", Color.FromArgb(255, 79, 205, 101));
 
     /// <summary>
     /// Сообщение и цвет для ошибки.
     /// </summary>
-    static public Tuple<string, Color> ErrorMessage => Tuple.Create("NO", Color.FromArgb(255, 241, 48, 27));
+    static public Tuple<string, Color> ErrorMessage => Tuple.Create("БРАК", Color.FromArgb(255, 241, 48, 27));
 
     /// <summary>
     /// Получает или задает заголовок сообщения.

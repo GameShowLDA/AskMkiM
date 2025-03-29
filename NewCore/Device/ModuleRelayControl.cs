@@ -22,7 +22,7 @@ namespace NewCore.Device
       ConnectableManager = new StateManager(this);
 
       DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
-      Name = "Модуль коммутации реле 350";
+      Name = "Модуль МКР-350";
       Description = "Добавить описание сюда";
       PointCount = 350;
       DeviceClass = GetType().FullName;

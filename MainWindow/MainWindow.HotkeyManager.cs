@@ -74,7 +74,7 @@ namespace MainWindowProgram
 
         // Тесты
         case "NodeMethodMenuItem":
-          NodeMethodControl_PreviewMouseDown(menuItem, null);
+          CiNodeMethodControl_PreviewMouseDown(menuItem, null);
           break;
 
         // Настройки

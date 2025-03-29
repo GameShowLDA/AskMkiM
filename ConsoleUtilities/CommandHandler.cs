@@ -211,7 +211,7 @@ namespace ConsoleUtilities
     /// <param name="args">Массив аргументов, где первый элемент — имя таблицы.</param>
     private void ShowTable(string[] args)
     {
-      using (var db = AppConfig.Config.SystemStateManager.Context)
+      using (var db = AppManager.Config.SystemStateManager.Context)
       {
         if (args.Length == 0)
         {
@@ -284,7 +284,7 @@ namespace ConsoleUtilities
         return;
       }
 
-      string saveDirectory = AppConfig.FileLocations.ConsoleSaveDirectory;
+      string saveDirectory = AppManager.FileLocations.ConsoleSaveDirectory;
       if (string.IsNullOrWhiteSpace(saveDirectory))
       {
         Console.WriteLine("Ошибка: ConsoleSaveDirectory не задан.");

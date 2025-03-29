@@ -1,12 +1,17 @@
 ﻿using System.Windows.Controls;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
+using Mode.Models;
+using Mode.TestSuite.Metrology.MethodExecutor;
+using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
+using Newtonsoft.Json.Linq;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppConfig.Config.MeasurementErrorConfig;
-using static AppConfig.Data.MeasurementError.MeasurementErrorModel;
+using YamlDotNet.Core.Tokens;
+using static AppManager.Config.MeasurementErrorConfig;
+using static AppManager.Data.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 
@@ -17,7 +22,6 @@ namespace TestWPF
   /// </summary>
   public partial class TestProtocolControl : UserControl
   {
-    MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.CI;
     public TestProtocolControl()
     {
       InitializeComponent();
@@ -48,63 +52,76 @@ namespace TestWPF
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      var (ok, msg, first, second, param) = await UIValidationHelper.TryValidateAndParseInputWithEquipmentAsync<TestMeasurement>(ProtocolUI);
+      var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
         return;
       }
 
-      ManagerChassis managerChassis = new ManagerChassis();
-      managerChassis.ConnectionDetails = "192.168.1.0";
-      await managerChassis.PowerManager.StartPowerAsync();
-      await Task.Delay(5000);
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      var first = dataModel.FirstPoint;
+      var second = dataModel.SecondPoint;
+      var param = dataModel.Param;
+
+      // ManagerChassis managerChassis = new ManagerChassis();
+      // managerChassis.ConnectionDetails = "192.168.1.0";
+      // await managerChassis.PowerManager.StartPowerAsync();
+      // await Task.Delay(5000);
+      // await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
       TestMeasurement testMeasurement = new TestMeasurement();
-      var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
+      var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
         return;
       }
 
-      await testMeasurement.SetupCommutation(first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole);
-      //await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      
-      await testMeasurement.FinalizeMeasurement();
-
+      await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
+      // await testMeasurement.ConfigureMeter(dataModel);
+      // await testMeasurement.RunAllStepsAsync(ProtocolUI, dataModel);
+      await testMeasurement.RunParallelModuleTasksAsync(ProtocolUI, dataModel);
+      await testMeasurement.FinalizeAsync();
     }
   }
-  public class TestMeasurement : BaseMeasurement
+  public class TestMeasurement : BaseMethodExecutor
   {
     public TestMeasurement() : base() { }
 
     /// <inheritdoc />
-    public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole)
+    public override async Task ConfigureMeter(DataModel dataModel = null)
     {
-      var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
+      var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
+      await breakDown.ConnectableManager.ConnectAsync();
       await breakDown.IrManger.SetModeAsync();
+      await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage);
+      await breakDown.IrManger.SetTestTimeAsync(dataModel.Time);
     }
 
     /// <inheritdoc />
-    public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+    public override async Task PerformMeasurement(ProtocolUI protocolUI, DataModel dataModel)
     {
-      var fastMeter = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-      await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления", headerColor: ShowMessageModel.SuccessMessage.Item2));
+      //var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
-      double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI));
-      double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI);
+      // var answer = await breakDown.IrManger.MeasureResistanceAsync();
+      var answer = 0;
+      var successMessage = ShowMessageModel.SuccessMessage.Item1;
+      var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+      if (answer < (dataModel.Param * 1000))
+      {
+        successMessage = ShowMessageModel.ErrorMessage.Item1;
+        colorMessage = ShowMessageModel.ErrorMessage.Item2;
+      }
 
-      var result = await fastMeter.ResistanceManager.MeasureResistanceAsync();
+      await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм [{successMessage}]", messageColor: colorMessage));
+    }
 
-      ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-      showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
-      showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
-      showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-
-      await protocolUI.ShowMessageAsync(showMessageModel);
+    public override async Task FinalizeAsync()
+    {
+      await base.FinalizeAsync();
+      var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
+      await breakDown.ConnectableManager.DisconnectAsync();
     }
   }
 }

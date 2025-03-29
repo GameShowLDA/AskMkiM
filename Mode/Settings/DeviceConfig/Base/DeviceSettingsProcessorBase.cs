@@ -1,4 +1,4 @@
-﻿using AppConfig.DataBase.Models;
+﻿using AppManager.DataBase.Models;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Additionally;

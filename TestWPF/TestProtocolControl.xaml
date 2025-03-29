@@ -12,7 +12,7 @@
     <Grid>
         <Protocol:ProtocolUI x:Name="ProtocolUI" Header="Тестовый протокол">
             <Protocol:ProtocolUI.ContentView>
-                <Custom:InputFieldBreakdown Height="Auto"/>
+                <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" />
             </Protocol:ProtocolUI.ContentView>
         </Protocol:ProtocolUI>
     </Grid>

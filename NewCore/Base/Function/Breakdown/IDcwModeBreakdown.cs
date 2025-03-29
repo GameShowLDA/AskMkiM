@@ -39,6 +39,12 @@ namespace NewCore.Base.Function.Breakdown
     Task SetTestTimeAsync(double value);
 
     /// <summary>
+    /// Устанавливает время нарастания напряжения (Ramp Time) для DCW.
+    /// </summary>
+    /// <param name="value">Значение времени нарастания в секундах (0.1 – 999.9).</param>
+    Task SetRampTimeAsync(double value);
+
+    /// <summary>
     /// Устанавливает смещение DCW.
     /// </summary>
     /// <param name="value">Значение смещения (в мА).</param>
@@ -61,5 +67,11 @@ namespace NewCore.Base.Function.Breakdown
     /// </summary>
     /// <returns>Измеренный ток (в мА).</returns>
     Task<double> MeasureCurrentAsync();
+
+    /// <summary>
+    /// Получает текущее время нарастания напряжения (Ramp Time) для текущего теста.
+    /// </summary>
+    /// <returns>Значение времени нарастания в секундах.</returns>
+    Task<double> GetRampTimeAsync();
   }
 }

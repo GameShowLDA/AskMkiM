@@ -1,4 +1,4 @@
-﻿using AppConfig.DataBase.Models;
+﻿using AppManager.DataBase.Models;
 using NewCore.Base.Device;
 
 namespace Mode.Settings.DeviceConfig.DeviceManager

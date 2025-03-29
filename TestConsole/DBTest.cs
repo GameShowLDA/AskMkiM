@@ -1,6 +1,6 @@
-﻿using AppConfig;
-using AppConfig.DataBase;
-using AppConfig.DataBase.Models;
+﻿using AppManager;
+using AppManager.DataBase;
+using AppManager.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
 using NewCore.Device;
 
@@ -63,7 +63,7 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      using var dbContext = AppConfig.Config.SystemStateManager.Context;
+      using var dbContext = AppManager.Config.SystemStateManager.Context;
 
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();

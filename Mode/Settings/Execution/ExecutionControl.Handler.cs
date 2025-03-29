@@ -1,5 +1,5 @@
 ﻿using System.Windows.Input;
-using static AppConfig.Config.ExecutionConfig;
+using static AppManager.Config.ExecutionConfig;
 
 namespace Mode.Settings.Execution
 {

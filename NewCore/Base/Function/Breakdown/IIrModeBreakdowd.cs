@@ -11,16 +11,10 @@ namespace NewCore.Base.Function.Breakdown
     Task SetModeAsync();
 
     /// <summary>
-    /// Устанавливает напряжения на пробойном устройстве.
+    /// Устанавливает напряжения на пробойном устройстве (в В).
     /// </summary>
     /// <param name="value">Устанавливаемое значение.</param>
     Task SetVoltageAsync(double value);
-
-    /// <summary>
-    /// Установка/возврат времени теста в секундах.
-    /// </summary>
-    /// <param name="value">Устанавливаемое значение.</param>
-    Task SetTimeAsync(int value);
 
     /// <summary>
     /// Возвращает напряжение на пробойном устройстве.

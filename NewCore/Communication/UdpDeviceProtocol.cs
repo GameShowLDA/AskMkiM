@@ -34,7 +34,7 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int timeout = 0, int responseDelay = 0, int port = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
       try
       {
@@ -55,7 +55,8 @@ namespace NewCore.Communication
 
         if (responseDelay > 0)
         {
-          await Task.Delay(responseDelay);
+          int roundedDelay = (int)Math.Ceiling(responseDelay);
+          await Task.Delay(roundedDelay);
         }
 
         if (timeout > 0)

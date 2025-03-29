@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;

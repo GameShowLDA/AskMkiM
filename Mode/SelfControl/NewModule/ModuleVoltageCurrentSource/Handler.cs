@@ -2,13 +2,13 @@
 using System.Net;
 using System.Windows;
 using System.Windows.Media;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppConfig.Config.ExecutionConfig;
+using static AppManager.Config.ExecutionConfig;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;

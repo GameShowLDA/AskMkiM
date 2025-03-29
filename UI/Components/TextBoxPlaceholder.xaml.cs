@@ -1,7 +1,9 @@
-﻿using System.Printing;
+﻿using System.Globalization;
+using System.Printing;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Utilities.Models;
@@ -37,6 +39,23 @@ namespace UI.Components
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
     /// <summary>
+    /// Свойство зависимости для включения/отключения проверки на числовой ввод.
+    /// </summary>
+    public static readonly DependencyProperty IsNumberInputEnabledProperty =
+        DependencyProperty.Register(nameof(IsNumberInputEnabled), typeof(bool), typeof(TextBoxPlaceholder),
+            new PropertyMetadata(true));
+
+    /// <summary>
+    /// Свойство зависимости для единицы измерения, отображаемой рядом с полем ввода.
+    /// </summary>
+    public static readonly DependencyProperty UnitProperty =
+        DependencyProperty.Register(
+            nameof(Unit),
+            typeof(string),
+            typeof(TextBoxPlaceholder),
+            new PropertyMetadata(string.Empty));
+
+    /// <summary>
     /// Текст, отображаемый как Placeholder.
     /// </summary>
     public string Placeholder
@@ -55,11 +74,13 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Свойство зависимости для включения/отключения проверки на числовой ввод.
+    /// Единица измерения, отображаемая рядом с полем ввода (например, "В", "Ом", "мА").
     /// </summary>
-    public static readonly DependencyProperty IsNumberInputEnabledProperty =
-        DependencyProperty.Register(nameof(IsNumberInputEnabled), typeof(bool), typeof(TextBoxPlaceholder),
-            new PropertyMetadata(true));
+    public string Unit
+    {
+      get => (string)GetValue(UnitProperty);
+      set => SetValue(UnitProperty, value);
+    }
 
     /// <summary>
     /// Включает или отключает проверку на числовой ввод.
@@ -124,7 +145,7 @@ namespace UI.Components
     /// <param name="e">Аргументы события ввода текста.</param>
     private void InputBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-      if(BorderData.Background != (Brush)FindResource("LightPrimarySolidColorBrush"))
+      if (BorderData.Background != (Brush)FindResource("LightPrimarySolidColorBrush"))
       {
         BorderData.Background = (Brush)FindResource("LightPrimarySolidColorBrush");
       }
@@ -176,6 +197,40 @@ namespace UI.Components
     {
       BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.Item2);
       Keyboard.ClearFocus();
+    }
+  }
+
+  /// <summary>
+  /// Конвертер для изменения отступа в зависимости от наличия значения в свойстве Unit.
+  /// Если значение Unit не пустое, возвращает отступ в 10 пикселей справа, иначе 0.
+  /// </summary>
+  public class MarginConverter : IValueConverter
+  {
+    /// <summary>
+    /// Конвертирует значение для задания отступа.
+    /// </summary>
+    /// <param name="value">Значение, которое нужно конвертировать (в данном случае строка, представляющая Unit).</param>
+    /// <param name="targetType">Целевой тип (в данном случае <see cref="Thickness"/>).</param>
+    /// <param name="parameter">Параметр для конвертации (не используется в данном случае).</param>
+    /// <param name="culture">Культура, используемая для конвертации (не используется в данном случае).</param>
+    /// <returns>Возвращает <see cref="Thickness"/> с отступом, основанным на значении Unit.</returns>
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      // Если Unit не пустое, возвращаем отступ 10 пикселей, иначе 0
+      return string.IsNullOrEmpty(value as string) ? new Thickness(0) : new Thickness(0, 0, 10, 0);
+    }
+
+    /// <summary>
+    /// Не реализован, так как конвертация назад не требуется.
+    /// </summary>
+    /// <param name="value">Значение, которое нужно конвертировать обратно.</param>
+    /// <param name="targetType">Целевой тип (не используется).</param>
+    /// <param name="parameter">Параметр для конвертации (не используется).</param>
+    /// <param name="culture">Культура, используемая для конвертации (не используется).</param>
+    /// <returns>Метод не реализован, так как не требуется конвертировать обратно.</returns>
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      throw new NotImplementedException();
     }
   }
 }

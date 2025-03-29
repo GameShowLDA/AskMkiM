@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
+using static AppManager.Config.SystemStateManager;
+using static AppManager.EventAggregator;
+using static AppManager.SettingsFileReader;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram

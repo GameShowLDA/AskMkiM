@@ -1,7 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using AppConfig.DataBase.Repositories;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Repositories;
+using AppManager.DataBase.Services;
+using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
@@ -28,19 +29,11 @@ namespace Mode.Metrology.MeasurementSystem
       None,
     }
 
-    #region Репозитории устройств.
     /// <summary>
     /// Коллекция подключённых устройств, сгруппированных по метрологическим ролям.
     /// Каждая роль может иметь одно или несколько устройств (например, два модуля коммутации для КС).
     /// </summary>
     public Dictionary<MetrologicalModeRole, List<object>> Devices { get; set; } = new();
-
-    /// <summary>
-    /// Репозиторий для работы с менеджерами шасси.
-    /// Используется для проверки существования шасси в базе данных.
-    /// </summary>
-    private readonly ChassisManagerServices _chassisManagerRepository = new ChassisManagerServices();
-    #endregion
 
     /// <summary>
     /// Формирует список уникальных устройств, необходимых для выполнения алгоритма,
@@ -155,7 +148,7 @@ namespace Mode.Metrology.MeasurementSystem
             }
 
             // TODO : Заглушка
-            //if (await AppConfig.Config.ProtocolConfig.GetDeviceInfo())
+            //if (await AppManager.Config.ProtocolConfig.GetDeviceInfo())
             if (true)
             {
               await protocolUI.ShowMessageAsync(new ShowMessageModel($"{connectableDevice.Name}({connectableDevice.Number})", message: $"[{ShowMessageModel.SuccessMessage.Item1}]", messageColor: ShowMessageModel.SuccessMessage.Item2));
@@ -241,7 +234,8 @@ namespace Mode.Metrology.MeasurementSystem
     /// Настраивает измерительное устройство (мультиметр или ППУ).
     /// </summary>
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
-    public abstract Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole);
+    /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
+    public abstract Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null);
 
     /// <summary>
     /// Выполняет измерение.
@@ -313,6 +307,7 @@ namespace Mode.Metrology.MeasurementSystem
           return MetrologicalDeviceType.Mint;
 
         case MetrologicalModeRole.CI:
+        case MetrologicalModeRole.PI:
           return MetrologicalDeviceType.BreakdownTester;
 
         default:

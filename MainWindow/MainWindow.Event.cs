@@ -1,9 +1,15 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
+using Mode.Metrology.CI;
 using Mode.Metrology.IE;
 using Mode.Metrology.KC;
-using static AppConfig.Config.SystemStateManager;
+using Mode.Metrology.PI;
+using Mode.TestSuite.Metrology.MethodExecutor.CI;
+using Mode.TestSuite.Metrology.MethodExecutor.PI;
+using Mode.TestSuite.Metrology.NodeMethod.CI;
+using Mode.TestSuite.Metrology.NodeMethod.PI;
+using static AppManager.Config.SystemStateManager;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -162,7 +168,14 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void CI_Handler(object sender, MouseButtonEventArgs e) => throw new NotImplementedException(); // await AddControlAsync(new CiControl(), "Режим СИ");
+    private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMetrologyControl(), "Режим СИ");
+
+    /// <summary>
+    /// Добавляет пользовательский элемент управления режима ПИ в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void PI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiMetrologyControl(), "Режим ПИ");
 
     #endregion
 
@@ -180,12 +193,47 @@ namespace MainWindowProgram
     #region Тесты.
 
     /// <summary>
-    /// Добавляет элемент управления для теста методом узла в multiEditors.
+    /// Добавляет элемент управления для теста методом узла СИ в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void NodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.TestSuite.NodeMethod.NodeMethodControl(), "Метод узла");
+    private async void CiNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiNodeMethodControl(), "Метод узла СИ");
 
+    /// <summary>
+    /// Добавляет элемент управления для теста методом узла ПИ(DCW) в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void PiDCWNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWNodeMethodControl(), "Метод узла ПИ(DCW)");
+
+    /// <summary>
+    /// Добавляет элемент управления для теста методом узла ПИ(ACW) в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void PiACWNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWNodeMethodControl(), "Метод узла ПИ(ACW)");
+
+    /// <summary>
+    /// Добавляет элемент управления для теста групповым методом СИ в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void CiMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMethodExecutor(), "Групповой метод СИ");
+
+    /// <summary>
+    /// Добавляет элемент управления для теста групповым методом ПИ(ACW) в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void PiACWMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWMethodExecutorControl(), "Групповой метод ПИ(ACW)");
+
+    /// <summary>
+    /// Добавляет элемент управления для теста групповым методом ПИ(DCW) в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void PiDCWMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWMethodExecutorControl(), "Групповой метод ПИ(DCW)");
+    
     #endregion
 
     #region Настройки.

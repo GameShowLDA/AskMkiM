@@ -26,22 +26,37 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, int responseDelay = 0, int timeout = 0, int port = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
+      if (delayBeforeCall > 0)
+      {
+        LogDebug($"Задержка перед вызовом: {delayBeforeCall} мс");
+        await Task.Delay(delayBeforeCall);
+      }
+
       try
       {
         if (!EnsurePortOpen())
         {
+          LogWarning($"COM-порт не удалось открыть: {_serialPort.PortName}");
           return string.Empty;
         }
 
+        LogDebug($"COM-порт открыт: {_serialPort.IsOpen}, Скорость: {_serialPort.BaudRate}, Handshake: {_serialPort.Handshake}");
         LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}");
+
+        _serialPort.DiscardInBuffer();  // очистка входного буфера перед отправкой
+        _serialPort.DiscardOutBuffer(); // очистка выходного буфера
 
         _serialPort.WriteLine(command);
 
+        LogDebug($"Команда отправлена. BytesToRead до задержки: {_serialPort.BytesToRead}");
+
         if (responseDelay > 0)
         {
-          await Task.Delay(responseDelay);
+          int roundedDelay = (int)Math.Ceiling(responseDelay) + 300;
+          LogDebug($"Задержка перед чтением ответа: {roundedDelay} мс");
+          await Task.Delay(roundedDelay);
         }
 
         if (timeout > 0)
@@ -52,6 +67,7 @@ namespace NewCore.Communication
           {
             try
             {
+              LogDebug("Ожидание ответа от устройства...");
               string response = _serialPort.ReadLine();
               LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
               return response;
@@ -61,9 +77,15 @@ namespace NewCore.Communication
               LogWarning($"[{_device.Name}] Время ожидания ответа истекло ({timeout} мс)");
               return string.Empty;
             }
+            catch (Exception ex)
+            {
+              LogError($"[{_device.Name}] Ошибка при чтении из порта: {ex.Message}");
+              return string.Empty;
+            }
           });
         }
 
+        LogDebug("Таймаут чтения не задан, возвращается пустой ответ.");
         return string.Empty;
       }
       catch (Exception ex)
@@ -75,6 +97,7 @@ namespace NewCore.Communication
       {
         if (_serialPort.IsOpen)
         {
+          LogDebug("Закрытие COM-порта.");
           _serialPort.Close();
         }
       }

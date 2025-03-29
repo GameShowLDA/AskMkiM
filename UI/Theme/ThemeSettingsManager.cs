@@ -1,4 +1,4 @@
-﻿using AppConfig;
+﻿using AppManager;
 
 namespace UI.Theme
 {

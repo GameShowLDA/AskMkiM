@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AppManager.DataBase.Services;
 using NewCore.Base.Interface.Main;
 
 namespace UI.Controls.GPT
@@ -13,7 +14,7 @@ namespace UI.Controls.GPT
     /// <summary>
     /// Статическая модель GPT, используемая для подключения и проверки связи.
     /// </summary>
-    static internal IBreakdownTester ModelGPT { get; set; }
+    static internal IBreakdownTester? ModelGPT { get; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="GPTPunchControl"/>.
@@ -21,6 +22,7 @@ namespace UI.Controls.GPT
     public GPTPunchControl()
     {
       InitializeComponent();
+      ModelGPT = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
     }
 
     /// <summary>
@@ -29,19 +31,17 @@ namespace UI.Controls.GPT
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Данные события мыши.</param>
-    private void ConnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private async void ConnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      // TODO: заглушка. Разобраться, что нужно сделать
+      var model = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
+      var connect = await model.ConnectableManager.ConnectAsync();
 
-      //ModelGPT = new Core.GptLibrary.Model();
-      //ModelGPT.Connect();
-
-      //if (ModelGPT.CheckConnection())
-      //{
-      //  ConnectMenuItem.Visibility = Visibility.Collapsed;
-      //  DisconnectMenuItem.Visibility = Visibility.Visible;
-      //  Controller.Visibility = Visibility.Visible;
-      //}
+      if (connect.Connect)
+      {
+        ConnectMenuItem.Visibility = Visibility.Collapsed;
+        DisconnectMenuItem.Visibility = Visibility.Visible;
+        Controller.Visibility = Visibility.Visible;
+      }
     }
 
     /// <summary>
@@ -50,17 +50,16 @@ namespace UI.Controls.GPT
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Данные события мыши.</param>
-    private void DisconnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private async void DisconnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      // TODO: заглушка. Разобраться, что нужно сделать
-
-      //if (ModelGPT.CheckConnection())
-      //{
-      //  ModelGPT.Disconnect();
-      //  ConnectMenuItem.Visibility = Visibility.Visible;
-      //  DisconnectMenuItem.Visibility = Visibility.Collapsed;
-      //  Controller.Visibility = Visibility.Collapsed;
-      //}
+      var model = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
+      var connect = await model.ConnectableManager.DisconnectAsync();
+      if (connect)
+      {
+        ConnectMenuItem.Visibility = Visibility.Visible;
+        DisconnectMenuItem.Visibility = Visibility.Collapsed;
+        Controller.Visibility = Visibility.Collapsed;
+      }
     }
   }
 }

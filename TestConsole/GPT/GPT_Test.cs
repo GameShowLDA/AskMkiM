@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using NewCore.Base.Interface.Main;
 
 namespace TestConsole.GPT
@@ -12,11 +12,12 @@ namespace TestConsole.GPT
   {
     internal static async Task RunAsync()
     {
-      Console.WriteLine("=== Самоконтроль МИНТ ===");
+      Console.WriteLine("=== Работа с GPT79904 ===");
       while (true)
       {
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("1. Проверка подлючения");
+        Console.WriteLine("2. Проверка времени нарастания");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
@@ -31,6 +32,11 @@ namespace TestConsole.GPT
           case 1:
             await CheckConnection();
             break;
+
+          case 2:
+            await CheckTimeRamp();
+            break;
+
 
           case 0:
             return;
@@ -47,6 +53,17 @@ namespace TestConsole.GPT
       var device = SelectBreakdownTester();
       if (device != null)
         await device.IrManger.SetModeAsync();
+    }
+
+    private static async Task CheckTimeRamp()
+    {
+      var device = SelectBreakdownTester();
+      if (device != null)
+      {
+        await device.DcwManger.SetModeAsync();
+        await device.DcwManger.SetRampTimeAsync(0.1);
+      }
+
     }
 
     private static IBreakdownTester SelectBreakdownTester()

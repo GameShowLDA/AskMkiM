@@ -1,5 +1,5 @@
-﻿using AppConfig.DataBase.Repositories;
-using AppConfig.DataBase.Services;
+﻿using AppManager.DataBase.Repositories;
+using AppManager.DataBase.Services;
 using TestConsole.GPT;
 using TestConsole.MINT;
 

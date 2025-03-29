@@ -20,9 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Ag3466x_2_08">
-      <HintPath>..\Dll\Ag3466x_2_08.dll</HintPath>
-    </Reference>
     <Reference Include="Keysight.CommandExpert.InstrumentAbstraction">
       <HintPath>..\Dll\Keysight.CommandExpert.InstrumentAbstraction.dll</HintPath>
     </Reference>

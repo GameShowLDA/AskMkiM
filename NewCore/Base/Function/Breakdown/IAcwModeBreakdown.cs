@@ -38,6 +38,12 @@ namespace NewCore.Base.Function.Breakdown
     Task SetTestTimeAsync(double value);
 
     /// <summary>
+    /// Устанавливает время нарастания напряжения (Ramp Time) для DCW.
+    /// </summary>
+    /// <param name="value">Значение времени нарастания в секундах (0.1 – 999.9).</param>
+    Task SetRampTimeAsync(double value);
+
+    /// <summary>
     /// Устанавливает частоту ACW.
     /// </summary>
     /// <param name="frequency">Частота (50 или 60 Гц).</param>

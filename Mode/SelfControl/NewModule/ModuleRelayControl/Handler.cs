@@ -1,12 +1,12 @@
 ﻿using System.Windows;
 using System.Windows.Media;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using Mode.SelfControl.Module.ModuleRelayControl;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppConfig.Config.ExecutionConfig;
+using static AppManager.Config.ExecutionConfig;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;

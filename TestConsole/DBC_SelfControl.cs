@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Main;
@@ -200,7 +200,7 @@ namespace TestConsole
       LogInformation($"Проверка целостности цепи {circuitName}...");
 
       // Выполняем проверку цепи (если прибор поддерживает тест целостности)
-      await Task.Delay(100);
+      await Task.Delay(25);
       bool continuityResult = false;
       if (meter.ContinuityManager != null)
       {
@@ -267,7 +267,7 @@ namespace TestConsole
 
         LogInformation($"Реле {relay} выключено, проверяем целостность цепи...");
 
-        await Task.Delay(100);
+        await Task.Delay(25);
         var result = await meter.ContinuityManager.CheckContinuityAsync();
         if (!result)
         {

@@ -1,5 +1,8 @@
-﻿using NewCore.Base.Function.Breakdown;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
+using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
@@ -23,6 +26,8 @@ namespace NewCore.Function.GPT
     /// <param name="gpt79904">Объект <see cref="GPT79904"/> для управления устройством.</param>
     public DcwMode(GPT79904 gpt79904) => _gptModel = gpt79904;
 
+    static private int delayBeforeCall = 100;
+
     /// <summary>
     /// Устанавливает режим DCW на устройстве.
     /// </summary>
@@ -36,10 +41,11 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает напряжение DCW.
     /// </summary>
-    /// <param name="value">Значение напряжения (в кВ).</param>
+    /// <param name="value">Значение напряжения (в В).</param>
     public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение DCW: {value:F3} кВ");
+      value /= 1000;
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {value:F3}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -74,6 +80,18 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
+      await _gptModel.DeviceProtocol.QueryAsync(query);
+    }
+
+    /// <summary>
+    /// Устанавливает время нарастания напряжения (Ramp Time) для текущего теста.
+    /// </summary>
+    /// <param name="value">Значение времени нарастания в секундах (0.1 – 999.9).</param>
+    public async Task SetRampTimeAsync(double value)
+    {
+      var rampTime = Convert.ToInt32(value);
+      LogInformation($"Устанавливаем время нарастания напряжения: {value:F1} сек");
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
@@ -143,8 +161,72 @@ namespace NewCore.Function.GPT
     /// <returns>Измеренный ток (в мА).</returns>
     public async Task<double> MeasureCurrentAsync()
     {
-      // TODO: Реализация измерения DCW
-      return 0.00;
+      LogInformation("Запуск измерений режима ПИ DCW");
+      var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
+      var timeDelay = Convert.ToInt32(await GetRampTimeAsync() + await GetTestTimeAsync());
+
+      await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
+      query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
+      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
+
+      var result = answerDevice.Split(',');
+      var measureResulte = result[3];
+
+      LogInformation($"Результат измерения режима ПИ(DCW): {measureResulte}");
+
+      Match match = Regex.Match(measureResulte, @"\d+(\.\d+)?");
+
+      if (match.Success)
+      {
+        return double.Parse(match.Value, CultureInfo.InvariantCulture);
+      }
+
+      throw new FormatException("Число не найдено в строке.");
+    }
+
+    /// <summary>
+    /// Получает текущее время нарастания напряжения (Ramp Time) для текущего теста.
+    /// </summary>
+    /// <returns>Значение времени нарастания в секундах.</returns>
+    public async Task<double> GetRampTimeAsync()
+    {
+      var query = GetCommandSyntax(ManualCommand.MANU_RTIME) + "?";
+      LogInformation("Запрашиваем текущее время нарастания напряжения (Ramp Time)...");
+
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+      LogDebug($"Ответ на запрос Ramp Time: \"{response}\"");
+
+      // Ищем число с точкой: 005.0, 12.3 и т.д.
+      var match = Regex.Match(response, @"\d+(\.\d+)?");
+      if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var rampTime))
+      {
+        return rampTime;
+      }
+
+      LogWarning("Не удалось разобрать значение Ramp Time. Возвращаем 0.0.");
+      return 0.0;
+    }
+
+    /// <summary>
+    /// Получает текущее время теста DCW.
+    /// </summary>
+    /// <returns>Значение времени в секундах.</returns>
+    public async Task<double> GetTestTimeAsync()
+    {
+      var query = GetCommandSyntax(ManualCommand.MANU_DCW_TTIME) + "?";
+      LogInformation("Запрашиваем время теста DCW...");
+
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+      LogDebug($"Ответ на запрос DCW Test Time: \"{response}\"");
+
+      var match = Regex.Match(response, @"\d+(\.\d+)?");
+      if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var testTime))
+      {
+        return testTime;
+      }
+
+      LogWarning("Не удалось разобрать значение времени теста DCW. Возвращаем 0.0.");
+      return 0.0;
     }
   }
 }

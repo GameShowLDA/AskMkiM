@@ -1,8 +1,8 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfig.Data.MeasurementError;
-using static AppConfig.Config.MeasurementErrorConfig;
-using static AppConfig.Data.MeasurementError.MeasurementErrorModel;
+using AppManager.Data.MeasurementError;
+using static AppManager.Config.MeasurementErrorConfig;
+using static AppManager.Data.MeasurementError.MeasurementErrorModel;
 
 namespace Mode.Settings.MeasurementError
 {
@@ -215,7 +215,7 @@ namespace Mode.Settings.MeasurementError
         IeModel,
       };
 
-      MeasurementErrorFileManage measurementErrorFileManage = new MeasurementErrorFileManage(AppConfig.FileLocations.MeasurementErrorConfigPath);
+      MeasurementErrorFileManage measurementErrorFileManage = new MeasurementErrorFileManage(AppManager.FileLocations.MeasurementErrorConfigPath);
       await measurementErrorFileManage.RewriteFileAsync(models);
     }
 

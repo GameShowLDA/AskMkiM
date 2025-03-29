@@ -1,4 +1,4 @@
-﻿using AppConfig.Abstract;
+﻿using AppManager.Abstract;
 using Utilities.FilesUtility;
 
 namespace UI.Theme

@@ -3,11 +3,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using NewCore.Base.Interface.Main;
-using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
+using static AppManager.Config.ExecutionConfig;
+using static AppManager.Config.SystemStateManager;
+using static AppManager.EventAggregator;
 
 namespace UI.Components
 {
@@ -48,21 +48,6 @@ namespace UI.Components
     /// Токен для отмены асинхронных задач при необходимости.
     /// </summary>
     private CancellationTokenSource cancellationToken;
-
-    /// <summary>
-    /// Цвет рамки в состоянии загрузки.
-    /// </summary>
-    Color ActiveBorder => (Color)ColorConverter.ConvertFromString("#1ca3e9");
-
-    /// <summary>
-    /// Цвет при успешном подключении.
-    /// </summary>
-    Color Connected => (Color)ColorConverter.ConvertFromString("#4b7765");
-
-    /// <summary>
-    /// Цвет для отображения ошибок.
-    /// </summary>
-    Color Error => (Color)ColorConverter.ConvertFromString("#b23a48");
     #endregion
 
     /// <summary>
@@ -162,7 +147,7 @@ namespace UI.Components
       taskInProgress = true;
       hasError = false;
 
-      SetLoadingState("Загрузка...", ActiveBorder);
+      SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
 
       if (!active)
       {
@@ -209,7 +194,7 @@ namespace UI.Components
       await model.PowerManager.StopPowerAsync();
       await Task.Delay(1000);
 
-      SetDisconnectedState("Подключить систему", Error);
+      SetDisconnectedState("Подключить систему");
     }
 
     /// <summary>
@@ -221,11 +206,11 @@ namespace UI.Components
 
       if (result.Item1)
       {
-        SetConnectedState("Отключить систему", Connected);
+        SetConnectedState("Отключить систему");
         return true;
       }
 
-      SetDisconnectedState("Подключить систему", Error);
+      SetDisconnectedState("Подключить систему");
       return false;
     }
 
@@ -235,7 +220,7 @@ namespace UI.Components
     private async Task HandleConnectionErrorAsync()
     {
       hasError = true;
-      SetLoadingState("Отменить подключение", Error);
+      SetLoadingState("Отменить подключение", (Color)FindResource("RedColor"));
 
       bool exitLoop = false;
 
@@ -319,12 +304,12 @@ namespace UI.Components
     /// <summary>
     /// Установка состояния подключения с изменением текста и цвета кнопки.
     /// </summary>
-    private void SetConnectedState(string text, Color color)
+    private void SetConnectedState(string text)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
         nameTextBlock.Text = text;
-        GridBlock.Background = new SolidColorBrush(color);
+        GridBlock.Background = (Brush)FindResource("GreenColorSolidColorBrush");
         nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
         GridBlock.Opacity = 0.5;
         active = true;
@@ -334,13 +319,13 @@ namespace UI.Components
     /// <summary>
     /// Установка состояния отключения с изменением текста и цвета кнопки.
     /// </summary>
-    private void SetDisconnectedState(string text, Color color)
+    private void SetDisconnectedState(string text)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
         nameTextBlock.Text = text;
-        GridBlock.Background = new SolidColorBrush(color);
-        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["PrimarySolidColorBrush"];
+        GridBlock.Background = (Brush)FindResource("RedColorSolidColorBrush");
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
         GridBlock.Opacity = 0.5;
         active = false;
       });

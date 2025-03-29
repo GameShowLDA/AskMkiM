@@ -10,4 +10,5 @@
         MinHeight="600"
         Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}">
     <local:TestProtocolControl/>
+    <!--<local:TestMainText />-->
 </Window>

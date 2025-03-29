@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using AppConfig;
-using AppConfig.DataBase;
-using AppConfig.DataBase.Models;
-using AppConfig.DataBase.Services;
+using AppManager;
+using AppManager.DataBase;
+using AppManager.DataBase.Models;
+using AppManager.DataBase.Services;
 using Microsoft.EntityFrameworkCore;
 using static Utilities.LoggerUtility;
 

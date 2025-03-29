@@ -4,8 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using static AppConfig.Config.ProtocolConfig;
-using static AppConfig.Config.SystemStateManager;
+using static AppManager.Config.ProtocolConfig;
+using static AppManager.Config.SystemStateManager;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.Invoke.InvokeRichTextBox
@@ -219,7 +219,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
     {
       Paragraph paragraph = new Paragraph { LineHeight = 2, Foreground = new SolidColorBrush(Colors.White) };
 
-      Run headerRun = new Run(header) { FontWeight = FontWeights.Bold, FontSize = _currentFontSize, Foreground = new SolidColorBrush(headerColor) };
+      Run headerRun = new Run(header) { FontSize = _currentFontSize, Foreground = new SolidColorBrush(headerColor) };
       paragraph.Inlines.Add(headerRun);
 
       if (!string.IsNullOrEmpty(description))
@@ -229,7 +229,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
         paragraph.Inlines.Add(descriptionRun);
       }
 
-      if (await GetTimeStart() && !string.IsNullOrEmpty(description))
+      if (await GetTimeStart())
       {
         string elapsedTime = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", System.Globalization.CultureInfo.InvariantCulture);
         paragraph.Inlines.Add(new Run("  ["));

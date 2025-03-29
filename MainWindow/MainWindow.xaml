@@ -94,7 +94,7 @@
                 VerticalContentAlignment="Center" 
                 Height="40" 
                 FontSize="15" 
-                Background="{StaticResource SecondarySolidColorBrush}" 
+                Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="0" BorderThickness="0"
                 Padding="0,0,40,0"
@@ -154,6 +154,11 @@
                         PreviewMouseDown="CI_Handler" 
                         />
 
+                    <MenuItem 
+                        Header="Режим ПИ" 
+                        Name="ModePIMenuItem"
+                        PreviewMouseDown="PI_Handler" 
+                        />
 
                 </MenuItem>
 
@@ -180,9 +185,47 @@
                         >
 
                         <MenuItem Header="Метод узла"
-                                  Name="NodeMethodMenuItem"
-                                  PreviewMouseDown="NodeMethodControl_PreviewMouseDown"
+                                  Name="NodeMethodMenuItemCI"
+                                  PreviewMouseDown="CiNodeMethodControl_PreviewMouseDown"
                                   />
+
+                        <MenuItem Header="Групповой метод"
+                               Name="MethodExecutorMenuItemCI"
+                               PreviewMouseDown="CiMethodExecutorControl_PreviewMouseDown"
+                               />
+
+                    </MenuItem>
+
+                    <MenuItem 
+                  Header="Тест ПИ на постоянном токе" 
+                  >
+
+                        <MenuItem Header="Метод узла"
+                            Name="NodeMethodMenuItemPiDCW"
+                            PreviewMouseDown="PiDCWNodeMethodControl_PreviewMouseDown"
+                            />
+
+                        <MenuItem Header="Групповой метод"
+                                Name="MethodExecutorMenuItemPiDCW"
+                                PreviewMouseDown="PiDCWMethodExecutorControl_PreviewMouseDown"
+                                />
+
+                    </MenuItem>
+
+                    <MenuItem 
+                  Header="Тест ПИ на переменном токе" 
+                  >
+
+                        <MenuItem Header="Метод узла"
+                            Name="NodeMethodMenuItemPiACW"
+                            PreviewMouseDown="PiACWNodeMethodControl_PreviewMouseDown"
+                            />
+
+
+                        <MenuItem Header="Групповой метод"
+                             Name="MethodExecutorMenuItemPiACW"
+                             PreviewMouseDown="PiACWMethodExecutorControl_PreviewMouseDown"
+                             />
 
                     </MenuItem>
 
@@ -274,7 +317,7 @@
             </Menu>
 
             <StackPanel  
-                Background="{StaticResource SecondarySolidColorBrush}" 
+                Background="Transparent" 
                 Grid.Column="2" 
                 MouseLeftButtonDown="mainMenu_MouseLeftButtonDown"
                 />
@@ -285,7 +328,7 @@
                 VerticalAlignment="Top" 
                 Grid.Column="2" 
                 Name="ButtonsPanel"
-                Background="{StaticResource SecondarySolidColorBrush}"
+                Background="Transparent"
                 >
 
                 <DefaultGUI:WindowButtons 
@@ -320,6 +363,7 @@
             />
 
         <Grid 
+            Name="BottomPanel"
             Grid.Row="2" 
             Height="40" 
             Background="{StaticResource SecondarySolidColorBrush}"

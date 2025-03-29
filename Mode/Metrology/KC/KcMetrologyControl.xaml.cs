@@ -5,8 +5,8 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppConfig.Config.MeasurementErrorConfig;
-using static AppConfig.Data.MeasurementError.MeasurementErrorModel;
+using static AppManager.Config.MeasurementErrorConfig;
+using static AppManager.Data.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 
@@ -52,12 +52,16 @@ namespace Mode.Metrology.KC
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      var (ok, msg, first, second, param) = await UIValidationHelper.TryValidateAndParseInputWithEquipmentAsync<KcMeasurement>(ProtocolUI);
+      var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI);
       if (!ok)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
         return;
       }
+
+      var first = dataModel.FirstPoint;
+      var second = dataModel.SecondPoint;
+      var param = dataModel.Param;
 
       KcMeasurement testMeasurement = new KcMeasurement();
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
@@ -78,7 +82,7 @@ namespace Mode.Metrology.KC
       public KcMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole)
+      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await fastMeter.ResistanceManager.SetResistanceModeAsync();

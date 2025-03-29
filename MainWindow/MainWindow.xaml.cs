@@ -1,10 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using ConsoleUtilities;
 using Utilities.USB;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
+using static AppManager.EventAggregator;
+using static AppManager.SettingsFileReader;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -53,6 +54,7 @@ namespace MainWindowProgram
     {
       _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
       SetEvent();
+      Initialize();
 
       await Task.Run(async () =>
       {
@@ -147,6 +149,7 @@ namespace MainWindowProgram
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      AppManager.Config.ExecutionConfig.IdleModeChange += ExecutionConfig_IdleModeChange;
     }
 
     /// <summary>
@@ -212,7 +215,31 @@ namespace MainWindowProgram
     /// <param name="newRights">Новое состояние прав администратора.</param>
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
-      AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+      AppManager.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Обработчик события изменения холостого режима.
+    /// </summary>
+    /// <param name="sender">Объект изменения.</param>
+    /// <param name="e">Значение изменения.</param>
+    private void ExecutionConfig_IdleModeChange(object? sender, bool e)
+    {
+      Application.Current.Dispatcher.BeginInvoke(() =>
+      {
+        if (e)
+        {
+          BottomPanel.Background = (Brush)FindResource("GreenColorSolidColorBrush");
+          TopPanel.Background = (Brush)FindResource("GreenColorSolidColorBrush");
+          PowerButton.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+          BottomPanel.Background = (Brush)FindResource("SecondarySolidColorBrush");
+          TopPanel.Background = (Brush)FindResource("SecondarySolidColorBrush");
+          PowerButton.Visibility = Visibility.Visible;
+        }
+      });
     }
   }
 }

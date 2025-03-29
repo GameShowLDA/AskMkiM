@@ -14,6 +14,8 @@
     <Color x:Key="ForegroundColor">#f3f0f9</Color>
     <Color x:Key="ActiveColor">#1ca3e9</Color>
     <Color x:Key="IsCheckedColor">#1f242b</Color>
+    <Color x:Key="RedColor">#b23a48</Color>
+    <Color x:Key="GreenColor">#4b7765</Color>
 
     <SolidColorBrush x:Key="LightPrimarySolidColorBrush" Color="{DynamicResource LightPrimaryColor}"/>
     <SolidColorBrush x:Key="PrimarySolidColorBrush" Color="{DynamicResource PrimaryColor}"/>
@@ -22,6 +24,8 @@
     <SolidColorBrush x:Key="ActiveForegroundSolidColorBrush" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ActiveBorderSolidColorBrush" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="{DynamicResource IsCheckedColor}"/>
+    <SolidColorBrush x:Key="RedColorSolidColorBrush" Color="{DynamicResource RedColor}"/>
+    <SolidColorBrush x:Key="GreenColorSolidColorBrush" Color="{DynamicResource GreenColor}"/>
 
     <!--#region Стили метрологии -->
 

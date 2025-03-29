@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Mode.Models;
 using Mode.Metrology.MeasurementSystem;
 using UI.Controls.Protocol;
-using AppConfig.DataBase.Services;
+using AppManager.DataBase.Services;
 using Utilities.Events;
+using UI.Components;
+using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Base
 {
@@ -15,36 +17,103 @@ namespace Mode.Base
   /// </summary>
   public static class UIValidationHelper
   {
+    static InputField? inputField;
+
     /// <summary>
     /// Выполняет валидацию данных из InputField, включая проверку оборудования, и возвращает готовые объекты.
     /// </summary>
     /// <typeparam name="T">Тип измерения, наследуемый от BaseMeasurement.</typeparam>
     /// <param name="protocolUI">Экземпляр ProtocolUI.</param>
     /// <param name="messageOnSuccess">Показывать ли сообщение при успешной валидации.</param>
+    /// <param name="timeCheck">Проверять ли заданное время для выполнения режимов (ППУ).</param>
+    /// <param name="voltageCheck">Проверять ли заданное напряжение для выполнения режимов (ППУ).</param>
+    /// <param name="timeRampCheck">Проверять ли заданное время нарасстания для выполнения режимов (ППУ).</param>
+    /// <param name="busCheck">Проверять ли заданную шину.</param>
     /// <returns>Кортеж: успешность, сообщение, первая точка, вторая точка, параметр.</returns>
-    public static async Task<(bool Success, string Message, PointModel First, PointModel Second, double Parameter)>
-        TryValidateAndParseInputWithEquipmentAsync<T>(ProtocolUI protocolUI, bool messageOnSuccess = true)
-        where T : BaseMeasurement, new()
+    public static (bool Success, string Message, DataModel DataModel)
+        TryValidateAndParseInputWithEquipment(
+      ProtocolUI protocolUI,
+      bool messageOnSuccess = true,
+      bool timeCheck = false,
+      bool voltageCheck = false,
+      bool timeRampCheck = false,
+      bool busCheck = false)
     {
-      var (success, message, first, second, parameter) = await TryValidateAndParseInputAsync<T>(protocolUI, messageOnSuccess);
+      var (success, message, first, second, parameter) = TryValidateAndParseInput(protocolUI, messageOnSuccess);
       if (!success)
       {
-        return (false, message, null, null, 0);
+        return (false, message, new DataModel());
       }
 
       var equipmentValidation = CheckEquipmentExists(first, second);
       if (!equipmentValidation.Success)
       {
-        return (false, equipmentValidation.Message, null, null, 0);
+        return (false, equipmentValidation.Message, new DataModel());
       }
 
       var unique = CheckPointsAreUnique(first, second);
       if (!unique.Success)
-      { 
-        return (false, unique.Error, null, null, 0);
+      {
+        return (false, unique.Error, new DataModel());
       }
 
-      return (true, "OK", first, second, parameter);
+      double time = -1;
+      if (timeCheck)
+      {
+        var timeData = CheckTime();
+        if (!timeData.Success)
+        {
+          time = 1;
+        }
+
+        time = timeData.Value;
+      }
+
+      double voltage = -1;
+      if (voltageCheck)
+      {
+        var voltageData = CheckVoltage();
+        if (!voltageData.Success)
+        {
+          voltage = 500;
+        }
+
+        voltage = voltageData.Value;
+      }
+
+      double timeRampResult = -1;
+      if (timeRampCheck)
+      {
+        var timeRampData = CheckTimeRamp();
+        if (!timeRampData.Success)
+        {
+          timeRampResult = 1;
+        }
+
+        timeRampResult = timeRampData.Value;
+      }
+
+      DataModel dataModel = new DataModel(first, second, parameter)
+      {
+        Time = time,
+        Voltage = voltage,
+        RampTime = timeRampResult,
+      };
+
+      if (busCheck)
+      {
+        var dataBus = CheckBus();
+        if (dataBus.Success)
+        {
+          dataModel.ActiveBus = dataBus.Value;
+        }
+        else
+        {
+          dataModel.ActiveBus = BusPoint.A;
+        }
+      }
+
+      return (true, "OK", dataModel);
     }
 
     /// <summary>
@@ -56,11 +125,9 @@ namespace Mode.Base
     /// <returns>
     /// Кортеж с результатом: успешность, сообщение, первая точка, вторая точка, электрический параметр.
     /// </returns>
-    private static async Task<(bool Success, string Message, PointModel First, PointModel Second, double Parameter)>
-     TryValidateAndParseInputAsync<T>(ProtocolUI protocolUI, bool messageOnSuccess = true)
-     where T : BaseMeasurement, new()
+    private static (bool Success, string Message, PointModel First, PointModel Second, double Parameter) TryValidateAndParseInput(ProtocolUI protocolUI, bool messageOnSuccess = true)
     {
-      var inputField = protocolUI.GetInputFieldSafe();
+      inputField = protocolUI.GetInputFieldSafe();
       if (inputField == null)
       {
         InputValidationEvents.TriggerInvalidFirstPoint = true;
@@ -185,6 +252,86 @@ namespace Mode.Base
         Success = result,
       };
     }
+
+    private static (bool Success, string Message, double Value) CheckTime()
+    {
+      if (inputField == null)
+      {
+        InputValidationEvents.TriggerInvalidFirstPoint = true;
+        return (false, "Элемент ввода не найден.", -1);
+      }
+
+      var timeString = inputField.GetInputFieldTimeValuesSafe();
+
+      if (double.TryParse(timeString, out double result))
+      {
+        return (true, string.Empty, result);
+      }
+      else
+      {
+        return (false, "Время выполнения должно быть дробным числом вида : x.y", -1);
+      }
+    }
+
+    private static (bool Success, string Message, double Value) CheckTimeRamp()
+    {
+      if (inputField == null)
+      {
+        InputValidationEvents.TriggerInvalidFirstPoint = true;
+        return (false, "Элемент ввода не найден.", -1);
+      }
+
+      var timeString = inputField.GetInputFieldTimeRampValuesSafe();
+
+      if (double.TryParse(timeString, out double result))
+      {
+        return (true, string.Empty, result);
+      }
+      else
+      {
+        return (false, "Время выполнения должно быть дробным числом вида : x.y", -1);
+      }
+    }
+
+    private static (bool Success, string Message, BusPoint Value) CheckBus()
+    {
+      if (inputField == null)
+      {
+        InputValidationEvents.TriggerInvalidFirstPoint = true;
+        return (false, "Элемент ввода не найден.", default);
+      }
+
+      var timeString = inputField.GetInputFieldBusValuesSafe();
+
+      if (timeString != default)
+      {
+        return (true, string.Empty, timeString);
+      }
+      else
+      {
+        return (false, "Шина для подключения некорректна", default);
+      }
+    }
+
+    private static (bool Success, string Message, double Value) CheckVoltage()
+    {
+      if (inputField == null)
+      {
+        InputValidationEvents.TriggerInvalidFirstPoint = true;
+        return (false, "Элемент ввода не найден.", -1);
+      }
+
+      var voltageString = inputField.GetInputFieldVoltageValuesSafe();
+
+      if (double.TryParse(voltageString, out double result))
+      {
+        return (true, string.Empty, result);
+      }
+      else
+      {
+        return (false, "Время выполнения должно быть дробным числом вида : x.y", -1);
+      }
+    }
   }
 
   /// <summary>
@@ -201,5 +348,67 @@ namespace Mode.Base
     /// Сообщение об ошибке (если есть).
     /// </summary>
     public string Error { get; set; }
+  }
+
+  /// <summary>
+  /// Модель данных элемента.
+  /// </summary>
+  public class DataModel
+  {
+    /// <summary>
+    /// Модель первой точки.
+    /// </summary>
+    public PointModel FirstPoint { get; set; }
+
+    /// <summary>
+    /// Модель второй точки.
+    /// </summary>
+    public PointModel SecondPoint { get; set; }
+
+    /// <summary>
+    /// Значение электрического параметра.
+    /// </summary>
+    public double Param { get; set; }
+
+    /// <summary>
+    /// Значение времени при выполнения теста (ППУ).
+    /// </summary>
+    public double Time { get; set; }
+
+    /// <summary>
+    /// Значение нарастания времени при выполнения теста (ППУ).
+    /// </summary>
+    public double RampTime { get; set; }
+
+    /// <summary>
+    /// Значение напряжения при выполнения теста (ППУ).
+    /// </summary>
+    public double Voltage { get; set; }
+
+    /// <summary>
+    /// Заданная шина.
+    /// </summary>
+    public BusPoint ActiveBus { get; set; }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="DataModel"/>.
+    /// </summary>
+    /// <param name="first">Первая точка.</param>
+    /// <param name="second">Вторая точка.</param>
+    /// <param name="param">Значение электрического параметра.</param>
+    public DataModel(PointModel first, PointModel second, double param)
+    {
+      FirstPoint = first;
+      SecondPoint = second;
+      Param = param;
+    }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="DataModel"/>.
+    /// </summary>
+    /// <param name="first">Первая точка.</param>
+    /// <param name="second">Вторая точка.</param>
+    /// <param name="param">Значение электрического параметра.</param>
+    public DataModel() { }
   }
 }

@@ -1,4 +1,4 @@
-﻿using static AppConfig.Config.ProtocolConfig;
+﻿using static AppManager.Config.ProtocolConfig;
 
 namespace Mode.Settings.ProtocolManager
 {

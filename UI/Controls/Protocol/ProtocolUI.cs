@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using NewCore.Base.Device;
 using Utilities.Models;
-using static AppConfig.Config.ProtocolConfig;
+using static AppManager.Config.ProtocolConfig;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 
@@ -272,7 +272,7 @@ namespace UI.Controls.Protocol
 
       await Task.Run(async () =>
       {
-        using (FileStream fileStream = new FileStream($"{AppConfig.FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
+        using (FileStream fileStream = new FileStream($"{AppManager.FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
         {
           await Task.Run(() => range.Save(fileStream, DataFormats.Rtf)).ConfigureAwait(true);
         }

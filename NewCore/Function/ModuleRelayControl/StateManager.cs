@@ -30,6 +30,11 @@ namespace NewCore.Function.ModuleRelayControl
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
       string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
+      if (string.IsNullOrEmpty(result))
+      {
+        return (false, $"Нет ответа от устройства {_moduleRelayControl.Name}({_moduleRelayControl.Number})");
+      }
+
       BaseResponse baseResponse = BaseResponse.FromJson(result);
       if (baseResponse != null)
       {
