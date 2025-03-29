@@ -75,7 +75,7 @@ namespace Mode.Metrology.PI
         return;
       }
 
-      await testMeasurement.SetupCommutation(first, second, metrologicalModeRole);
+      await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole, dataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();

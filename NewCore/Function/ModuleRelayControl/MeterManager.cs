@@ -2,6 +2,7 @@
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -30,6 +31,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> ConnectMeterAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(5, 1);
       await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
@@ -44,6 +50,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> DisconnectMeterAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(5, 2);
       await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
@@ -58,6 +69,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> GetMeterResponseAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(7);
       return (await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000)).Contains("105.1");
     }

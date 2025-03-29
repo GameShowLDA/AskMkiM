@@ -2,6 +2,7 @@
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -36,6 +37,11 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Включен холостой режим");
+      }
+
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
       string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
@@ -71,6 +77,11 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ResetAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
       string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       return result == "2.0.1";

@@ -5,6 +5,8 @@ using System.Management;
 using System.Security.Cryptography;
 using System.Xml.Linq;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
+using NewCore.Function.GPT.Data;
 
 namespace NewCore.Function.GPT
 {
@@ -27,6 +29,11 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Включен холостой режим");
+      }
+
       if (_gptModel.COMPort == null)
       {
         return (false, "COM-порт не инициализирован.");
@@ -79,6 +86,11 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       if (_gptModel.COMPort == null)
       {
         return true;
@@ -102,6 +114,11 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Включен холостой режим");
+      }
+
       try
       {
         LogInformation("Открываем порт...");

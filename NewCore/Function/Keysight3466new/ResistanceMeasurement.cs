@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -23,6 +24,11 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task SetResistanceModeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
@@ -34,7 +40,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<double> MeasureResistanceAsync(double param)
     {
-      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      if (await GetIsIdleModeEnabled())
       {
         return param;
       }

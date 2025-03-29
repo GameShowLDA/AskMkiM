@@ -13,6 +13,7 @@
     /// <summary>
     /// Измеряет переменное напряжение.
     /// </summary>
-    Task<double> MeasureACVoltageAsync();
+    /// <param name="param">Ожидаемое значение.</param>
+    Task<double> MeasureACVoltageAsync(double param = 0);
   }
 }

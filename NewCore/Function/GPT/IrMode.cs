@@ -5,6 +5,7 @@ using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -49,6 +50,12 @@ namespace NewCore.Function.GPT
     public async Task SetModeAsync()
     {
       LogInformation("Устанавливаем режим СИ на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
       await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
@@ -60,6 +67,12 @@ namespace NewCore.Function.GPT
     public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение {value} для режима СИ на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       string valueResult = (value / 1000).ToString().Replace(",", ".");
       var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {valueResult}";
       await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
@@ -72,6 +85,12 @@ namespace NewCore.Function.GPT
     public async Task SetTestTimeAsync(double value)
     {
       LogInformation($"Устанавливаем время измерения {value} для режима СИ на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
       await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
       timeDelay = value;
@@ -84,6 +103,12 @@ namespace NewCore.Function.GPT
     public async Task<double> GetVoltageAsync()
     {
       LogInformation("Считывание данных с ПУ");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
       var return_value = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 10, delayBeforeCall: delayBeforeCall);
 
@@ -109,6 +134,12 @@ namespace NewCore.Function.GPT
     public async Task<double> MeasureResistanceAsync()
     {
       LogInformation("Запуск измерений режима СИ");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
       await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
       query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
@@ -222,6 +253,11 @@ namespace NewCore.Function.GPT
     /// <param name="value">Устанавливаемое значение (в ГОм).</param>
     public async Task SetHighResistanceLimitAsync(double value)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}";
       await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
@@ -232,6 +268,11 @@ namespace NewCore.Function.GPT
     /// <param name="value">Устанавливаемое значение (в МОм).</param>
     public async Task SetLowResistanceLimitAsync(double value)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       string query = string.Empty;
       if (value == 1000)
       {
@@ -249,6 +290,12 @@ namespace NewCore.Function.GPT
     public async Task SetOffsetAsync(double value)
     {
       LogInformation($"Устанавливаем смещение IR: {value} M");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} {value}M";
       await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
@@ -262,6 +309,11 @@ namespace NewCore.Function.GPT
       try
       {
         LogInformation("Чтение конфигурации режима IR");
+
+        if (await GetIsIdleModeEnabled())
+        {
+          return new IrConfiguration();
+        }
 
         // Чтение напряжения
         var voltageQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";

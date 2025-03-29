@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -29,6 +30,11 @@ namespace NewCore.Function.Keysight3466new
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
     public async Task SetContinuityModeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       await _device.DeviceProtocol.QueryAsync("CONF:CONT");
     }
 

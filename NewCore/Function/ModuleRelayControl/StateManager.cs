@@ -5,6 +5,7 @@ using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -27,6 +28,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Включен холостой режим");
+      }
+
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
       string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
@@ -67,6 +73,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ResetAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
       string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
       return result == "2.0.1";

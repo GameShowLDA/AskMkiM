@@ -4,6 +4,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -34,6 +35,11 @@ namespace NewCore.Function.ModuleRelayControl
         return false;
       }
 
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
 
@@ -54,6 +60,11 @@ namespace NewCore.Function.ModuleRelayControl
       {
         LogError("Ошибка данных шины!");
         return false;
+      }
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
       }
 
       int typeVoltage = lowVoltage ? numberBus : numberBus + 10;

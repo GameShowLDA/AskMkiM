@@ -5,6 +5,7 @@ using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {
@@ -24,6 +25,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Включен холостой режим");
+      }
+
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
       string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
 
@@ -62,6 +68,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <inheritdoc />
     public async Task<bool> ResetAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
       string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
       return result == "2.0.1";

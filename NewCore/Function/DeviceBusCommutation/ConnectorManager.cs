@@ -2,6 +2,7 @@
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -40,6 +41,11 @@ namespace NewCore.Function.DeviceBusCommutation
       int numberConnector = (int)TypeConnector.Multimeter;
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber >= 1 || busNumber <= 4))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         await Task.Delay(10);
@@ -77,6 +83,11 @@ namespace NewCore.Function.DeviceBusCommutation
 
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 1 || busNumber > 4))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         await Task.Delay(10);
@@ -108,6 +119,11 @@ namespace NewCore.Function.DeviceBusCommutation
       int numberConnector = (int)TypeConnector.PINT;
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 2 || busNumber > 3))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         await Task.Delay(10);
@@ -136,6 +152,11 @@ namespace NewCore.Function.DeviceBusCommutation
     private async Task<bool> SeBreakdownTesterState(bool connect)
     {
       int numberConnector = (int)TypeConnector.BreakdownTester;
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
 
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
       await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());

@@ -13,6 +13,7 @@
     /// <summary>
     /// Измеряет постоянное напряжение.
     /// </summary>
-    Task<double> MeasureDCVoltageAsync();
+    /// <param name="param">Ожидаемое значение.</param>
+    Task<double> MeasureDCVoltageAsync(double param = 0);
   }
 }

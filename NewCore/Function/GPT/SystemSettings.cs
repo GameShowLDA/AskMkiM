@@ -4,6 +4,7 @@ using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static NewCore.Function.GPT.Command.SystemCommandManager;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -30,6 +31,11 @@ namespace NewCore.Function.GPT
     /// <param name="value">Значение контрастности (1-8).</param>
     public async Task SetLcdContrastAsync(double value)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var command = GetCommandSyntax(SystemCommand.LCD_CONTRAST) + $" {value}";
       await _gptModel.DeviceProtocol.QueryAsync(command);
     }
@@ -40,6 +46,11 @@ namespace NewCore.Function.GPT
     /// <param name="value">Значение яркости (1 или 2).</param>
     public async Task SetLcdBrightnessAsync(double value)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var command = GetCommandSyntax(SystemCommand.LCD_BRIGHTNESS) + $" {value}";
       await _gptModel.DeviceProtocol.QueryAsync(command);
     }
@@ -50,6 +61,11 @@ namespace NewCore.Function.GPT
     /// <param name="state">Состояние (ON или OFF).</param>
     public async Task SetBuzzerPrimarySound(bool state)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var value = state ? "ON" : "OFF";
       var command = GetCommandSyntax(SystemCommand.BUZZER_PSOUND) + $" {value}";
       await _gptModel.DeviceProtocol.QueryAsync(command);
@@ -61,6 +77,11 @@ namespace NewCore.Function.GPT
     /// <param name="state">Состояние (ON или OFF).</param>
     public async Task SetBuzzerFeedbackSound(bool state)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var value = state ? "ON" : "OFF";
       var command = GetCommandSyntax(SystemCommand.BUZZER_FSOUND) + $" {value}";
       await _gptModel.DeviceProtocol.QueryAsync(command);
@@ -72,6 +93,11 @@ namespace NewCore.Function.GPT
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
     public async Task SetBuzzerPrimaryTime(double duration)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var command = GetCommandSyntax(SystemCommand.BUZZER_PTIME) + $" {duration}";
       await _gptModel.DeviceProtocol.QueryAsync(command);
     }
@@ -82,6 +108,11 @@ namespace NewCore.Function.GPT
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
     public async Task SetBuzzerFeedbackTime(double duration)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var command = GetCommandSyntax(SystemCommand.BUZZER_FTIME) + $" {duration}";
       await _gptModel.DeviceProtocol.QueryAsync(command);
     }
@@ -93,6 +124,11 @@ namespace NewCore.Function.GPT
     public async Task<SystemDataModel> ReadConfigurationAsync()
     {
       var systemData = new SystemDataModel();
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return systemData;
+      }
 
       try
       {

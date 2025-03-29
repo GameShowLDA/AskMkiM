@@ -2,11 +2,12 @@
 using NewCore.Communication;
 using NewCore.Device;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
   /// <summary>
-  /// Менеджер управления подлючением конденсаторов.
+  /// Менеджер управления подключением конденсаторов.
   /// Обеспечивает подключение и отключение конденсаторов в системе.
   /// </summary>
   public class CapacitorManager : ICapacitorDeviceBusCommutation
@@ -31,9 +32,13 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         DeviceCommand command = new DeviceCommand(6, 2, num, 1);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-        // await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
         return true;
       }
 
@@ -50,9 +55,13 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         DeviceCommand command = new DeviceCommand(6, 2, num, 2);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-        // await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
         return true;
       }
 

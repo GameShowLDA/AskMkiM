@@ -2,6 +2,7 @@
 using NewCore.Base.Function.ManagerChassis;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ManagerChassis
 {
@@ -24,6 +25,11 @@ namespace NewCore.Function.ManagerChassis
     /// <inheritdoc />
     public async Task StartPowerAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var cmd = new DeviceCommand(2, 1, 1);
       await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }
@@ -31,6 +37,11 @@ namespace NewCore.Function.ManagerChassis
     /// <inheritdoc />
     public async Task StopPowerAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var cmd = new DeviceCommand(2, 2, 1);
       await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }

@@ -4,6 +4,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {
@@ -28,6 +29,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task SetSourceVoltageAsync(VoltageSources voltageSources)
     {
       LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var cmd = new DeviceCommand(9, voltageSources == VoltageSources.Supply12V ? 1 : 0);
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString());
     }
@@ -41,6 +48,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
     {
       LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var cmd = new DeviceCommand(3, integerPart, decimalPart);
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString());
     }

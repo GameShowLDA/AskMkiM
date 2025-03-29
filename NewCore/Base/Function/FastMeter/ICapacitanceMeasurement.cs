@@ -13,6 +13,7 @@
     /// <summary>
     /// Выполняет измерение ёмкости.
     /// </summary>
-    Task<double> MeasureCapacitanceAsync();
+    /// <param name="param">Ожиданемео знчение.</param>
+    Task<double> MeasureCapacitanceAsync(double param = 0);
   }
 }

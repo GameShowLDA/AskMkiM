@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using static AppConfiguration.Execution.ExecutionConfig ;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -32,6 +33,11 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 1);
       await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(10);
@@ -48,6 +54,11 @@ namespace NewCore.Function.DeviceBusCommutation
       if (numberRelay < 0)
       {
         return false;
+      }
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
       }
 
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 2);

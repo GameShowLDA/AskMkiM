@@ -4,6 +4,7 @@ using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -31,6 +32,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       var cmd = new DeviceCommand(8, number, (int)bus, 1);
       await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(5);
@@ -45,6 +51,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       var cmd = new DeviceCommand(8, number, (int)bus, 2);
       await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
       await Task.Delay(5);
@@ -60,6 +71,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
@@ -85,6 +101,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
@@ -105,6 +126,11 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Строка с ответом от устройства.</returns>
     public async Task<string> CheckPoint(int numberPoint)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return "Включен холостой режим.";
+      }
+
       var cmd = new DeviceCommand(6, numberPoint);
       return await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
     }

@@ -2,6 +2,7 @@
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -56,6 +57,11 @@ namespace NewCore.Function.DeviceBusCommutation
       {
         LogError($"Некорректные параметры: Тип проверки - {testType}, Контакт - {busContact}, Действие - {action}.");
         return false;
+      }
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
       }
 
       DeviceCommand cmd = new DeviceCommand(4, (int)testType, busContact, action);

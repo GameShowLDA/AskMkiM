@@ -1,6 +1,7 @@
 ﻿using NewCore.Base.Function.DBC;
 using NewCore.Communication;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -30,6 +31,11 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 1);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
 
@@ -49,6 +55,11 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 2);
         await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
 

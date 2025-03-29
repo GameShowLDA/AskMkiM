@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -23,12 +24,14 @@ namespace NewCore.Function.Keysight3466new
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
-    /// <summary>
-    /// Устанавливает прибор в режим измерения постоянного напряжения (DC Voltage).
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
+    /// <inheritdoc />
     public async Task SetDCVoltageModeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
@@ -37,15 +40,14 @@ namespace NewCore.Function.Keysight3466new
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:DC");
     }
 
-    /// <summary>
-    /// Измеряет постоянное напряжение и возвращает его значение.
-    /// </summary>
-    /// <returns>
-    /// Значение измеренного напряжения в вольтах. Если измерение некорректное, возвращает -1.
-    /// </returns>
-    /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    public async Task<double> MeasureDCVoltageAsync()
+    /// <inheritdoc />
+    public async Task<double> MeasureDCVoltageAsync(double param = 0)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return param;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");

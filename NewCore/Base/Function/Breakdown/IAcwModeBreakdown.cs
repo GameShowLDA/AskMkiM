@@ -72,6 +72,7 @@ namespace NewCore.Base.Function.Breakdown
     /// Запускает тест ACW и возвращает измеренный ток.
     /// </summary>
     /// <returns>Измеренное значение тока (в мА).</returns>
-    Task<double> MeasureCurrentAsync();
+    /// <param name="param">Ожидаемое значение.</param>
+    Task<double> MeasureCurrentAsync(double param = 0);
   }
 }

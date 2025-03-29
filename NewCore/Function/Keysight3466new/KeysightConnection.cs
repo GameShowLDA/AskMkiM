@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using NewCore.Base.Device;
 using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -34,6 +35,11 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Холостой режим");
+      }
+
       if ((await ConnectAsync()).Connect)
       {
         string idn = await _device.DeviceProtocol.QueryAsync("*IDN?", timeout: 1000, port:_device.Port);
@@ -49,6 +55,11 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Холостой режим");
+      }
+
       if (_device.IP == null)
       {
         if (IPAddress.TryParse(_device.ConnectionDetails, out IPAddress ip))
@@ -78,8 +89,13 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+      
       _device.Stream?.Close();
       _device.Stream = null;
 
@@ -88,7 +104,7 @@ namespace NewCore.Function.Keysight3466new
 
       _device.IsConnected = false;
 
-      return Task.FromResult(true);
+      return true;
     }
 
     /// <inheritdoc />

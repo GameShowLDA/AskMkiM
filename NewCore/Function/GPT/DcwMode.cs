@@ -7,6 +7,7 @@ using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -34,6 +35,12 @@ namespace NewCore.Function.GPT
     public async Task SetModeAsync()
     {
       LogInformation("Устанавливаем режим DCW на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} DCW";
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -45,6 +52,12 @@ namespace NewCore.Function.GPT
     public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение DCW: {value:F3} кВ");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       value /= 1000;
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {value:F3}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(query);
@@ -57,6 +70,12 @@ namespace NewCore.Function.GPT
     public async Task SetHighCurrentLimitAsync(double value)
     {
       LogInformation($"Устанавливаем высокий предел тока DCW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CHISET)} {value:F3}";
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -67,8 +86,14 @@ namespace NewCore.Function.GPT
     /// <param name="value">Значение предела (в мА).</param>
     public async Task SetLowCurrentLimitAsync(double value)
     {
+      LogInformation($"Устанавливаем низкий предел тока DCW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query1 = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
-      LogInformation($"Отправляем команду (Вариант 1): {query1}");
       await _gptModel.DeviceProtocol.QueryAsync(query1);
     }
 
@@ -79,6 +104,12 @@ namespace NewCore.Function.GPT
     public async Task SetTestTimeAsync(double value)
     {
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -91,6 +122,12 @@ namespace NewCore.Function.GPT
     {
       var rampTime = Convert.ToInt32(value);
       LogInformation($"Устанавливаем время нарастания напряжения: {value:F1} сек");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -102,6 +139,12 @@ namespace NewCore.Function.GPT
     public async Task SetOffsetAsync(double value)
     {
       LogInformation($"Устанавливаем смещение DCW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_REF)} {value:F3}";
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -113,6 +156,12 @@ namespace NewCore.Function.GPT
     public async Task SetArcCurrentAsync(double value)
     {
       LogInformation($"Устанавливаем текущее значение тока DCW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_ARCCURRENT)} {value:F3}";
       await _gptModel.DeviceProtocol.QueryAsync(query);
     }
@@ -124,6 +173,10 @@ namespace NewCore.Function.GPT
     public async Task<DcwConfiguration> ReadConfigurationAsync()
     {
       LogInformation("Считываем конфигурацию DCW...");
+      if (await GetIsIdleModeEnabled())
+      {
+        return new DcwConfiguration();
+      }
 
       var voltage = await ReadDoubleAsync(ManualCommand.MANU_DCW_VOLTAGE);
       var highCurrentLimit = await ReadDoubleAsync(ManualCommand.MANU_DCW_CHISET);
@@ -150,6 +203,11 @@ namespace NewCore.Function.GPT
     /// <returns>Преобразованное значение.</returns>
     private async Task<double> ReadDoubleAsync(ManualCommand command)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = $"{GetCommandSyntax(command)} ?";
       var response = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 100);
       return double.TryParse(response.Replace("kV", "").Replace("mA", "").Replace("S", "").Trim().Replace(".", ","), out var result) ? result : 0.0;
@@ -162,6 +220,12 @@ namespace NewCore.Function.GPT
     public async Task<double> MeasureCurrentAsync()
     {
       LogInformation("Запуск измерений режима ПИ DCW");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
       var timeDelay = Convert.ToInt32(await GetRampTimeAsync() + await GetTestTimeAsync());
 
@@ -190,6 +254,11 @@ namespace NewCore.Function.GPT
     /// <returns>Значение времени нарастания в секундах.</returns>
     public async Task<double> GetRampTimeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = GetCommandSyntax(ManualCommand.MANU_RTIME) + "?";
       LogInformation("Запрашиваем текущее время нарастания напряжения (Ramp Time)...");
 
@@ -213,6 +282,11 @@ namespace NewCore.Function.GPT
     /// <returns>Значение времени в секундах.</returns>
     public async Task<double> GetTestTimeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = GetCommandSyntax(ManualCommand.MANU_DCW_TTIME) + "?";
       LogInformation("Запрашиваем время теста DCW...");
 

@@ -162,70 +162,22 @@ namespace Mode.Metrology.MeasurementSystem
     /// <summary>
     /// Настраивает коммутацию перед измерением.
     /// </summary>
+    /// <param name="protocolUI">Элемент управления для вывода данных.</param>
     /// <param name="point1">Первая точка.</param>
     /// <param name="point2">Вторая точка.</param>
     /// <param name="mode">Режим метрологии.</param>
-    public virtual async Task SetupCommutation(PointModel point1, PointModel point2, MetrologicalModeRole mode)
+    public virtual async Task SetupCommutation(ProtocolUI protocolUI, PointModel point1, PointModel point2, MetrologicalModeRole mode)
     {
-      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var relayModules = Devices.TryGetValue(mode, out var modules) ? modules.OfType<IRelaySwitchModule>().ToList() : null;
-      var busSwitcher = Devices.TryGetValue(mode, out var ukshs) ? ukshs.OfType<ISwitchingDevice>().FirstOrDefault() : null;
-      var mint = Devices.TryGetValue(mode, out var mints) ? mints.OfType<IPowerSourceModule>().FirstOrDefault() : null;
+      var relayModules = GetRelayModules(mode);
+      var busSwitcher = GetBusSwitcher(mode);
+      var mint = GetMintModule(mode);
       var modeDevice = GetDeviceTypeForMode(mode);
 
-      if (relayModules == null || relayModules.Count == 0)
-      {
-        throw new InvalidOperationException("Не найдено ни одного модуля коммутации реле (МКР).");
-      }
+      ValidateDevices(relayModules, busSwitcher, mint, modeDevice);
 
-      if (busSwitcher == null)
-      {
-        throw new InvalidOperationException("Не найдено устройство коммутации шин (УКШ).");
-      }
-
-      if (modeDevice == MetrologicalDeviceType.Mint && mint == null)
-      {
-        throw new InvalidOperationException("Не найден модуль источника напряжения и тока (МИНТ).");
-      }
-
-      foreach (var relayModule in relayModules)
-      {
-        if (modeDevice == MetrologicalDeviceType.Mint)
-        {
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
-        }
-        else
-        {
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
-        }
-      }
-
-      await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
-      await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);
-
-      if (modeDevice == MetrologicalDeviceType.Mint)
-      {
-        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
-        if (mint != null)
-        {
-          await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
-          await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
-        }
-      }
-      else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
-      {
-        await busSwitcher.ConnectorManager.ConnectBreakdownTester();
-      }
-      else
-      {
-        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
-      }
+      await ConnectBusesAsync(relayModules, modeDevice);
+      await ConnectRelayPointsAsync(relayModules, point1, point2);
+      await ConnectDevicesToBusAsync(busSwitcher, mint, modeDevice);
     }
 
     /// <summary>
@@ -317,6 +269,130 @@ namespace Mode.Metrology.MeasurementSystem
     }
 
     #region private
+
+    /// <summary>
+    /// Возвращает список модулей коммутации реле (МКР), связанных с заданным режимом.
+    /// </summary>
+    /// <param name="mode">Метрологическая роль устройства.</param>
+    /// <returns>Список модулей коммутации реле или null, если не найдено.</returns>
+    public List<IRelaySwitchModule>? GetRelayModules(MetrologicalModeRole mode)
+    {
+      return Devices.TryGetValue(mode, out var modules)
+          ? modules.OfType<IRelaySwitchModule>().ToList()
+          : null;
+    }
+
+    /// <summary>
+    /// Возвращает устройство коммутации шин (УКШ), связанное с заданным режимом.
+    /// </summary>
+    /// <param name="mode">Метрологическая роль устройства.</param>
+    /// <returns>Устройство коммутации шин или null, если не найдено.</returns>
+    public ISwitchingDevice? GetBusSwitcher(MetrologicalModeRole mode)
+    {
+      return Devices.TryGetValue(mode, out var ukshs)
+          ? ukshs.OfType<ISwitchingDevice>().FirstOrDefault()
+          : null;
+    }
+
+    /// <summary>
+    /// Возвращает модуль источника напряжения и тока (МИНТ), связанный с заданным режимом.
+    /// </summary>
+    /// <param name="mode">Метрологическая роль устройства.</param>
+    /// <returns>Модуль МИНТ или null, если не найдено.</returns>
+    public IPowerSourceModule? GetMintModule(MetrologicalModeRole mode)
+    {
+      return Devices.TryGetValue(mode, out var mints)
+          ? mints.OfType<IPowerSourceModule>().FirstOrDefault()
+          : null;
+    }
+
+    /// <summary>
+    /// Выполняет проверку наличия всех необходимых устройств для коммутации.
+    /// Генерирует исключения при отсутствии обязательных компонентов.
+    /// </summary>
+    /// <param name="relayModules">Список модулей коммутации реле.</param>
+    /// <param name="busSwitcher">Устройство коммутации шин.</param>
+    /// <param name="mint">Модуль источника напряжения и тока.</param>
+    /// <param name="modeDevice">Тип метрологического устройства.</param>
+    private void ValidateDevices(List<IRelaySwitchModule> relayModules, ISwitchingDevice busSwitcher, IPowerSourceModule mint, MetrologicalDeviceType modeDevice)
+    {
+      if (relayModules == null || relayModules.Count == 0)
+      {
+        throw new InvalidOperationException("Не найдено ни одного модуля коммутации реле (МКР).");
+      }
+
+      if (busSwitcher == null)
+      {
+        throw new InvalidOperationException("Не найдено устройство коммутации шин (УКШ).");
+      }
+
+      if (modeDevice == MetrologicalDeviceType.Mint && mint == null)
+      {
+        throw new InvalidOperationException("Не найден модуль источника напряжения и тока (МИНТ).");
+      }
+    }
+
+    /// <summary>
+    /// Подключает соответствующие шины в зависимости от типа метрологического устройства.
+    /// </summary>
+    /// <param name="relayModules">Список модулей коммутации реле.</param>
+    /// <param name="modeDevice">Тип метрологического устройства.</param>
+    private async Task ConnectBusesAsync(List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice)
+    {
+      foreach (var relayModule in relayModules)
+      {
+        if (modeDevice == MetrologicalDeviceType.Mint)
+        {
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
+        }
+        else
+        {
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
+          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Подключает реле к заданным точкам коммутации.
+    /// </summary>
+    /// <param name="relayModules">Список модулей коммутации реле.</param>
+    /// <param name="point1">Первая точка коммутации.</param>
+    /// <param name="point2">Вторая точка коммутации.</param>
+    private async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2)
+    {
+      await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
+      await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);
+    }
+
+    /// <summary>
+    /// Подключает измерительные устройства к соответствующим шинам в зависимости от режима.
+    /// </summary>
+    /// <param name="busSwitcher">Устройство коммутации шин.</param>
+    /// <param name="mint">Модуль источника напряжения и тока (если используется).</param>
+    /// <param name="modeDevice">Тип метрологического устройства.</param>
+    private async Task ConnectDevicesToBusAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, MetrologicalDeviceType modeDevice)
+    {
+      if (modeDevice == MetrologicalDeviceType.Mint)
+      {
+        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
+        if (mint != null)
+        {
+          await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
+          await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
+        }
+      }
+
+      if (modeDevice == MetrologicalDeviceType.Mint)
+      {
+        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
+      }
+      else
+      {
+        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
+      }
+    }
     #endregion
   }
 }

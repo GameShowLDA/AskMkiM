@@ -4,6 +4,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {
@@ -37,6 +38,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Подключение шины {bus} к + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1)})");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1).ToString());
       return true;
     }
@@ -55,6 +62,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Подключение шины {bus} к - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1)})");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1).ToString());
       return true;
     }
@@ -73,6 +86,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Отключение шины {bus} от + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2)})");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2).ToString());
       return true;
     }
@@ -91,6 +110,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       LogInformation($"МИНТ: Отключение шины {bus} от - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2)})");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2).ToString());
       return true;
     }

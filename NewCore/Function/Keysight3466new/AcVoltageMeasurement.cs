@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -20,11 +21,14 @@ namespace NewCore.Function.Keysight3466new
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
-    /// <summary>
-    /// Устанавливает режим измерения переменного напряжения (AC Voltage).
-    /// </summary>
+    /// <inheritdoc />
     public async Task SetACVoltageModeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
@@ -33,12 +37,14 @@ namespace NewCore.Function.Keysight3466new
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC");
     }
 
-    /// <summary>
-    /// Измеряет переменное напряжение и возвращает результат.
-    /// Если значение некорректно, возвращает -1.
-    /// </summary>
-    public async Task<double> MeasureACVoltageAsync()
+    /// <inheritdoc />
+    public async Task<double> MeasureACVoltageAsync(double param = 0)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return param;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");

@@ -1,6 +1,7 @@
 ﻿using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -24,12 +25,14 @@ namespace NewCore.Function.Keysight3466new
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
-    /// <summary>
-    /// Устанавливает прибор в режим измерения ёмкости.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
+    /// <inheritdoc />
     public async Task SetCapacitanceModeAsync()
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
@@ -38,15 +41,14 @@ namespace NewCore.Function.Keysight3466new
       await _device.DeviceProtocol.QueryAsync("CONF:CAP");
     }
 
-    /// <summary>
-    /// Выполняет измерение ёмкости и возвращает результат в нанофарадах (нФ).
-    /// </summary>
-    /// <returns>Значение ёмкости в нФ.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// Выбрасывается, если прибор не подключен или не удалось обработать полученное значение.
-    /// </exception>
-    public async Task<double> MeasureCapacitanceAsync()
+    /// <inheritdoc />
+    public async Task<double> MeasureCapacitanceAsync(double param = 0)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return param;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
