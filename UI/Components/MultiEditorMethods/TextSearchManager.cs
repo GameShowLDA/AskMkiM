@@ -1,17 +1,10 @@
 ﻿using AppConfig;
 using ICSharpCode.AvalonEdit.Rendering;
-using ICSharpCode.AvalonEdit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Windows;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
-using System.Windows.Threading;
-using System.Windows.Media;
 using UI.Components.SearchControls;
 using static Utilities.LoggerUtility;
 using System.Windows.Controls;
@@ -227,10 +220,10 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
+      EventAggregator.RaiseRequestShowProgress();
+
       List<OpenFileButton> searchPages = SetSearchAreaPages(searchArea);
       ClearPreviousSearchResults();
-
-      EventAggregator.RaiseRequestShowProgress();
 
       List<Task> searchTasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(searchTasks);
@@ -269,7 +262,7 @@ namespace UI.Components.MultiEditorMethods
         var lastFoundResultsDictionary = foundInOpenedFiles.Values.LastOrDefault();
         if (lastFoundResultsDictionary?.Count > 0)
         {          
-          DisplaySearchResults(searchText, null, foundInOpenedFiles); // Можно уточнить использование параметра caseWord
+          DisplaySearchResults(searchText, _caseWord, foundInOpenedFiles);
         }
 
         EventAggregator.RaiseRequestCloseProgress();
@@ -723,7 +716,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="nextIndex">Индекс следующей вкладки, которую нужно отобразить.</param>
     private void ShowNextPage(int nextIndex)
     {
-      _textEditor++; // Увеличиваем счётчик для следующей страницы
+      _textEditor++;
       Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
       ShowControl(fileManager.UserControls[nextIndex], fileManager.OpenPages[nextIndex]);
     }

@@ -17,7 +17,6 @@
                   BorderThickness="0"
                   Margin="-4,-1,-21,1"
                   PreviewMouseDown="searchArrowsComboBox_PreviewMouseDown"
-                  SelectionChanged="searchArrowsComboBox_SelectionChanged"
                   > 
 
             <!-- Шаблон для стрелок в выпадающем списке -->
