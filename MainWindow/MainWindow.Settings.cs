@@ -43,7 +43,7 @@ namespace MainWindowProgram
     /// </summary>
     private async void StartSettings()
     {
-      await ReadAllSettingsAsync();
+      // await ReadAllSettingsAsync();
 
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;

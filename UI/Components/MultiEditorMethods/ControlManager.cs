@@ -1,5 +1,4 @@
 ﻿using AppConfig;
-using System;
 using System.Windows;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
@@ -7,16 +6,18 @@ using UserControl = System.Windows.Controls.UserControl;
 using System.Windows.Media;
 using System.Windows.Input;
 
-
 namespace UI.Components.MultiEditorMethods
 {
+  /// <summary>
+  /// Класс для работы с контролами.
+  /// </summary>
   public class ControlManager
   {
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
+
     FileManager fileManager { get; set; }
+
     private MultiEditorControl multiEditorControl { get; set; }
-
-
 
     /// <summary>
     /// Удаляет указанный элемент управления и соответствующую вкладку.
@@ -27,33 +28,72 @@ namespace UI.Components.MultiEditorMethods
     {
       if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control))
       {
-        var result = MessageBoxResult.No;
-        var saveFileResult = false;
-        int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
-        if (control is TextEditorUI)
+        var saveFileResult = ShowSaveDialogForControl(control);
+
+        if (saveFileResult || !(control is TextEditorUI))
         {
-          var saveFileManager = new SaveFileManager(fileManager);
-          saveFileManager.SaveFileDialog(ref result, ref saveFileResult, index);
+          int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
+
+          HandleClosingEvents(control, tabButton);
+
+          RemoveTabAndControl(tabButton, control);
+
+          ShowNextTab(index);
         }
-        if (saveFileResult == true || !(control is TextEditorUI) || result == MessageBoxResult.No)
-        {
-          if (index > 0)
-          {
-            index--;
-          }
-          EventAggregator.RaiseTextEditorClosing(control is TextEditorUI, tabButton.Text);
+      }
+    }
 
-          fileManager.OpenPages.Remove(tabButton);
-          fileManager.UserControls.Remove(control);
+    /// <summary>
+    /// Отображает диалоговое окно для сохранения файла, если это требуется.
+    /// </summary>
+    /// <param name="control">Элемент управления для проверки.</param>
+    /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
+    private bool ShowSaveDialogForControl(UserControl control)
+    {
+      var result = MessageBoxResult.No;
+      var saveFileResult = false;
+      if (control is TextEditorUI)
+      {
+        var saveFileManager = new SaveFileManager(fileManager);
+        saveFileManager.SaveFileDialog(ref result, ref saveFileResult, multiEditorControl.ContentPanel.Children.IndexOf(control));
+      }
 
-          multiEditorControl.TopPanel.Children.Remove(tabButton);
-          multiEditorControl.ContentPanel.Children.Remove(control);
+      return saveFileResult;
+    }
 
-          if (multiEditorControl.ContentPanel.Children.Count > 0)
-          {
-            ShowControl(fileManager.UserControls[index], fileManager.OpenPages[index]);
-          }
-        }
+    /// <summary>
+    /// Обрабатывает события закрытия для контрола и вкладки.
+    /// </summary>
+    /// <param name="control">Элемент управления, который закрывается.</param>
+    /// <param name="tabButton">Вкладка, которая будет закрыта.</param>
+    private void HandleClosingEvents(UserControl control, OpenFileButton tabButton)
+    {
+      EventAggregator.RaiseTextEditorClosing(control is TextEditorUI, tabButton.Text);
+    }
+
+    /// <summary>
+    /// Удаляет вкладку и контрол из соответствующих коллекций и панелей.
+    /// </summary>
+    /// <param name="tabButton">Вкладка для удаления.</param>
+    /// <param name="control">Элемент управления для удаления.</param>
+    private void RemoveTabAndControl(OpenFileButton tabButton, UserControl control)
+    {
+      fileManager.OpenPages.Remove(tabButton);
+      fileManager.UserControls.Remove(control);
+
+      multiEditorControl.TopPanel.Children.Remove(tabButton);
+      multiEditorControl.ContentPanel.Children.Remove(control);
+    }
+
+    /// <summary>
+    /// Показывает следующую вкладку, если она существует.
+    /// </summary>
+    /// <param name="index">Индекс удаленного контрола.</param>
+    private void ShowNextTab(int index)
+    {
+      if (multiEditorControl.ContentPanel.Children.Count > 0)
+      {
+        ShowControl(fileManager.UserControls[index > 0 ? index - 1 : 0], fileManager.OpenPages[index > 0 ? index - 1 : 0]);
       }
     }
 
@@ -61,6 +101,7 @@ namespace UI.Components.MultiEditorMethods
     /// Отображает указанный элемент управления, скрывая остальные.
     /// </summary>
     /// <param name="control">Элемент управления для отображения.</param>
+    /// <param name="openPage">Вкладка для отображения плоьзовательского элемента управления.</param>
     public void ShowControl(UserControl control, OpenFileButton openPage)
     {
       foreach (UIElement child in multiEditorControl.ContentPanel.Children)
@@ -90,18 +131,55 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
-    /// Добавляет элемент управления и кнопку в соответствующие панели.
+    /// Добавляет новый контрол в панель и создает соответствующую вкладку.
     /// </summary>
-    /// <param name="header">Заголовок для кнопки.</param>
-    /// <param name="control">Элемент управления для отображения.</param>
+    /// <param name="header">Заголовок для вкладки.</param>
+    /// <param name="control">Контрол, который будет добавлен.</param>
+    /// <param name="description">Описание вкладки, если необходимо.</param>
     public void AddControl(string header, UserControl control, string description = null)
+    {
+      OpenFileButton tabButton = CreateTabButton(header, description);
+
+      if (CheckExistingPage(tabButton, description))
+      {
+        return;
+      }  
+
+      ConfigureTabEvents(tabButton, control);
+
+      AddTabAndControl(tabButton, control);
+
+      ShowControl(control, tabButton);
+    }
+
+    /// <summary>
+    /// Создает кнопку вкладки для нового контрола.
+    /// </summary>
+    /// <param name="header">Заголовок для вкладки.</param>
+    /// <param name="description">Описание вкладки.</param>
+    /// <returns>Созданная кнопка вкладки.</returns>
+    private OpenFileButton CreateTabButton(string header, string description)
     {
       OpenFileButton tabButton = new OpenFileButton();
       tabButton.Header.Text = header;
       if (description != null)
       {
         tabButton.Description = description;
+      }
 
+      return tabButton;
+    }
+
+    /// <summary>
+    /// Проверяет, существует ли вкладка с таким же описанием или заголовком.
+    /// </summary>
+    /// <param name="tabButton">Кнопка вкладки для поиска.</param>
+    /// <param name="description">Описание вкладки для поиска.</param>
+    /// <returns><c>true</c>, если вкладка найдена; в противном случае <c>false</c>.</returns>
+    private bool CheckExistingPage(OpenFileButton tabButton, string description)
+    {
+      if (description != null)
+      {
         foreach (OpenFileButton page in fileManager.OpenPages)
         {
           if (page.Description == description)
@@ -109,7 +187,7 @@ namespace UI.Components.MultiEditorMethods
             var index = fileManager.OpenPages.IndexOf(page);
             var userControl = fileManager.UserControls[index];
             ShowControl(userControl, page);
-            return;
+            return true;
           }
         }
       }
@@ -117,17 +195,26 @@ namespace UI.Components.MultiEditorMethods
       {
         foreach (OpenFileButton page in fileManager.OpenPages)
         {
-          if (page.Header.Text == header)
+          if (page.Header.Text == tabButton.Header.Text)
           {
             var index = fileManager.OpenPages.IndexOf(page);
             var userControl = fileManager.UserControls[index];
             ShowControl(userControl, page);
-
-            return;
+            return true;
           }
         }
       }
 
+      return false;
+    }
+
+    /// <summary>
+    /// Настроить обработчики событий для вкладки.
+    /// </summary>
+    /// <param name="tabButton">Кнопка вкладки.</param>
+    /// <param name="control">Контрол, с которым связана вкладка.</param>
+    private void ConfigureTabEvents(OpenFileButton tabButton, UserControl control)
+    {
       tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
       tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
       tabButton.MouseDown += (s, e) =>
@@ -137,7 +224,15 @@ namespace UI.Components.MultiEditorMethods
           RemoveControl(tabButton, control);
         }
       };
+    }
 
+    /// <summary>
+    /// Добавляет вкладку и контрол в соответствующие панели.
+    /// </summary>
+    /// <param name="tabButton">Кнопка вкладки.</param>
+    /// <param name="control">Контрол, который будет добавлен.</param>
+    private void AddTabAndControl(OpenFileButton tabButton, UserControl control)
+    {
       fileManager.OpenPages.Add(tabButton);
       fileManager.UserControls.Add(control);
 
@@ -171,14 +266,27 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ControlManager"/> с передачей экземпляра <see cref="FileManager"/> и <see cref="MultiEditorControl"/>.
+    /// </summary>
+    /// <param name="fileManager">Экземпляр <see cref="FileManager"/> для управления файлами.</param>
+    /// <param name="multiEditorControl">Экземпляр <see cref="MultiEditorControl"/> для взаимодействия с редактором.</param>
     public ControlManager(FileManager fileManager, MultiEditorControl multiEditorControl)
     {
       this.fileManager = fileManager;
       this.multiEditorControl = multiEditorControl;
     }
-    
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ControlManager"/> с передачей списка открытых страниц, пользовательских контролов, путей к файлам и экземпляра <see cref="MultiEditorControl"/>.
+    /// </summary>
+    /// <param name="openPages">Список открытых страниц, представленных кнопками <see cref="OpenFileButton"/>.</param>
+    /// <param name="userControls">Список пользовательских контролов, представленных элементами <see cref="UserControl"/>.</param>
+    /// <param name="filePaths">Словарь, содержащий пути к файлам, где ключ — имя файла, а значение — путь к файлу.</param>
+    /// <param name="multiEditorControl">Экземпляр <see cref="MultiEditorControl"/> для взаимодействия с редактором.</param>
     public ControlManager(List<OpenFileButton> openPages, List<UserControl> userControls, Dictionary<string, string> filePaths, MultiEditorControl multiEditorControl)
     {
+      this.fileManager = new FileManager(multiEditorControl);
       this.fileManager.OpenPages = openPages;
       this.fileManager.UserControls = userControls;
       this.fileManager.FilePaths = filePaths;

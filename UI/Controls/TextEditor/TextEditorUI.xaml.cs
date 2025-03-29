@@ -13,7 +13,7 @@ using static Utilities.LoggerUtility;
 namespace UI.Controls.TextEditor
 {
   /// <summary>
-  /// Логика взаимодействия для TextEditorUI.xaml
+  /// Логика взаимодействия для TextEditorUI.xaml.
   /// </summary>
   public partial class TextEditorUI : UserControl
   {
@@ -22,7 +22,33 @@ namespace UI.Controls.TextEditor
     private List<string> _pendingHighlights = new();
     private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
 
+    /// <summary>
+    /// Получает экземпляр текстового редактора AvalonEdit.
+    /// </summary>
+    /// <value>
+    /// Возвращает объект <see cref="ICSharpCode.AvalonEdit.TextEditor"/>, который используется в этом классе.
+    /// </value>
     public ICSharpCode.AvalonEdit.TextEditor TextEditor => textEditor;
+
+    /// <summary>
+    /// Получает или задает текст в текстовом редакторе.
+    /// </summary>
+    /// <value>
+    /// Возвращает или устанавливает строку текста, которая отображается в текстовом редакторе.
+    /// </value>
+    public string Text
+    {
+      get => textEditor.Text;
+      set => textEditor.Text = value;
+    }
+
+    /// <summary>
+    /// Получает экземпляр сервиса маркеров для подсветки текста в редакторе.
+    /// </summary>
+    /// <value>
+    /// Возвращает объект <see cref="TextMarkerService"/>, который управляет подсветкой текста в редакторе.
+    /// Если сервис маркеров ещё не инициализирован, то вызывается его инициализация.
+    /// </value>
     public TextMarkerService MarkerService
     {
       get
@@ -32,26 +58,36 @@ namespace UI.Controls.TextEditor
           LogWarning("📢 MarkerService был null, вызываем инициализацию.");
           InitializeMarkerService();
         }
+
         return _markerService;
       }
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
+    /// </summary>
+    /// <remarks>
+    /// Этот конструктор вызывается при создании экземпляра класса. Он инициализирует компоненты UI и подготавливает текстовый редактор для работы.
+    /// </remarks>
     public TextEditorUI()
     {
       InitializeComponent();
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
+    /// </summary>
     public void InitializeMarkerService()
     {
       if (textEditor == null)
       {
-        LogError("❌ textEditor == null");
+        LogError("textEditor == null");
         return;
       }
 
       if (textEditor.Document == null)
       {
-        LogWarning("⚠ textEditor.Document == null. Создаю новый документ.");
+        LogWarning("textEditor.Document == null. Создаю новый документ.");
         textEditor.Document = new ICSharpCode.AvalonEdit.Document.TextDocument();
       }
 
@@ -59,7 +95,7 @@ namespace UI.Controls.TextEditor
       textEditor.TextArea.TextView.BackgroundRenderers.Add(_markerService);
       textEditor.TextArea.TextView.Services.AddService(typeof(TextMarkerService), _markerService);
 
-      LogInformation("✅ TextMarkerService инициализирован.");
+      LogInformation("TextMarkerService инициализирован.");
 
       foreach (var text in _pendingHighlights)
       {
@@ -72,10 +108,13 @@ namespace UI.Controls.TextEditor
     /// <summary>
     /// Подсвечивает указанный текст, если сервис инициализирован. Иначе — откладывает подсветку.
     /// </summary>
+    /// <param name="textToHighlight">Текст, который необходимо подсветить.</param>
     public void HighlightText(string textToHighlight)
     {
       if (string.IsNullOrEmpty(textToHighlight))
+      {
         return;
+      }  
 
       if (_markerService == null)
       {
@@ -127,24 +166,66 @@ namespace UI.Controls.TextEditor
       textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
-
+    /// <summary>
+    /// Устанавливает ссылку на объект <see cref="MultiEditorControl"/> для управления файлами в редакторе.
+    /// </summary>
+    /// <param name="multiEditorControl">
+    /// Экземпляр класса <see cref="MultiEditorControl"/>, который будет использоваться для управления редакторами.
+    /// </param>
     public void SetMultiEditorControl(MultiEditorControl multiEditorControl)
     {
       _multiEditorControl = multiEditorControl;
     }
 
+    /// <summary>
+    /// Очищает все подсветки в тексте.
+    /// </summary>
+    /// <remarks>
+    /// Этот метод вызывает метод <see cref="TextMarkerService.ClearAllMarkers"/> для очистки всех маркеров и подсветки
+    /// в текущем текстовом редакторе.
+    /// </remarks>
     public void ClearHighlights()
     {
       _markerService.ClearAllMarkers();
     }
 
+    /// <summary>
+    /// Получает документ текстового редактора.
+    /// </summary>
+    /// <value>
+    /// Возвращает объект <see cref="TextDocument"/>, который представляет текст, загруженный в редактор.
+    /// </value>
     public TextDocument Document => textEditor.Document;
+
+    /// <summary>
+    /// Получает область текста редактора.
+    /// </summary>
+    /// <value>
+    /// Возвращает объект <see cref="TextArea"/>, который представляет текстовую область редактора, включая курсор,
+    /// выделение и другие параметры отображения.
+    /// </value>
     public TextArea TextArea => textEditor.TextArea;
+
+    /// <summary>
+    /// Прокручивает редактор до указанной строки.
+    /// </summary>
+    /// <param name="line">
+    /// Номер строки, до которой нужно прокрутить текст в редакторе.
+    /// </param>
     public void ScrollToLine(int line)
     {
       textEditor.ScrollToLine(line);
     }
 
+    /// <summary>
+    /// Выделяет текст в редакторе, начиная с указанного смещения и заданной длины.
+    /// </summary>
+    /// <param name="startOffset">
+    /// Смещение в документе, с которого начинается выделение.
+    /// </param>
+    /// <param name="length">
+    /// Длина выделяемого текста.
+    /// </param>
     public void Select(int startOffset, int length)
     {
       textEditor.Select(startOffset, length);
@@ -202,12 +283,6 @@ namespace UI.Controls.TextEditor
     {
       var parent = this.Parent as Panel;
       parent?.Children.Remove(this);
-    }
-
-    public string Text
-    {
-      get => textEditor.Text;
-      set => textEditor.Text = value;
     }
   }
 }

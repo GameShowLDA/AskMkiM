@@ -84,7 +84,7 @@ namespace AppConfig
     /// <summary>
     /// Событие, которое вызывается, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
     /// </summary>
-    public static event Action<string, int, int, string> FoundTextSelectRow;
+    public static event Action<string, int, int, string, string> FoundTextSelectRow;
 
     /// <summary>
     /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
@@ -268,9 +268,9 @@ namespace AppConfig
     /// Метод для вызова события, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
     /// </summary>
     /// <param name="isTextEditor"></param>
-    public static void RaiseFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText)
+    public static void RaiseFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
     {
-      FoundTextSelectRow?.Invoke(fileName, lineNumber, startOffset, lineText);
+      FoundTextSelectRow?.Invoke(fileName, lineNumber, startOffset, lineText, searchText);
     }
 
     public static void RaiseRequestShowProgress()

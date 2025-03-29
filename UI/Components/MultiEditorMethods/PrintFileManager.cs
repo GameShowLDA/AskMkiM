@@ -8,14 +8,21 @@ using static Utilities.LoggerUtility;
 
 namespace UI.Components.MultiEditorMethods
 {
+  /// <summary>
+  /// Класс для работы с печатью документов.
+  /// </summary>
   public static class PrintFileManager
   {
+    /// <summary>
+    /// Выполняет печать содержимого активной вкладки в редакторе текста.
+    /// </summary>
+    /// <param name="openPages">Список вкладок, представляющих открытые страницы.</param>
+    /// <param name="userControls">Список пользовательских контролов, ассоциированных с открытыми страницами.</param>
     public static void PrintFile(List<OpenFileButton> openPages, List<UserControl> userControls)
     {
       var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
       PrintDialog printDialog = new PrintDialog();
       FlowDocument flowDocument = new FlowDocument();
-
 
       if (printDialog.ShowDialog() == true)
       {

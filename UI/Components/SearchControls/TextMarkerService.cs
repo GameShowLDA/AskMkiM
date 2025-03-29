@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
@@ -88,9 +86,8 @@ namespace UI.Components.SearchControls
     {
       markers.Clear();
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-      Console.WriteLine("🧹 Все маркеры удалены.");
+      Console.WriteLine("Все маркеры удалены.");
     }
-
 
     /// <summary>
     /// Добавляет новый маркер подсветки.

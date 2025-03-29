@@ -14,27 +14,41 @@ using UI.Components.MultiEditorMethods;
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для MultiEditorControl.xaml
+  /// Логика взаимодействия для MultiEditorControl.xaml.
   /// </summary>
-  public partial class MultiEditorControl : UserControl, IFileManagerControl
+  public partial class MultiEditorControl : UserControl
   {
     private int _clickCount = 0;
     private DispatcherTimer _clickTimer;
 
-    public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
-    FileManager fileManager;
+    /// <summary>
+    /// Объект, управляющий операциями с файлами, включая открытие, сохранение и управление содержимым файлов.
+    /// </summary>
+    internal FileManager fileManager;
 
+    /// <summary>
+    /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
+    /// </summary>
+    public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
+
+    /// <summary>
+    /// Инициализирует экземпляр <see cref="FileManager"/> и устанавливает связь с текущим контролом.
+    /// </summary>
     public void InitializeFileManager()
     {
       fileManager = new FileManager(this);
     }
 
+    /// <summary>
+    /// Конструктор класса <see cref="MultiEditorControl"/>.
+    /// Инициализирует компоненты и подписывается на необходимые события.
+    /// </summary>
     public MultiEditorControl()
     {
       InitializeComponent();
       _clickTimer = new DispatcherTimer
       {
-        Interval = TimeSpan.FromMilliseconds(300)
+        Interval = TimeSpan.FromMilliseconds(300),
       };
 
       _clickTimer.Tick += (s, e) =>
@@ -48,9 +62,9 @@ namespace UI.Components
       InitializeFileManager();
     }
 
-    private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText)
+    private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
     {
-      TextSearchManager textSearchMethods = new TextSearchManager(fileManager, this);
+      TextSearchManager textSearchMethods = new TextSearchManager(fileManager, this, searchText);
       textSearchMethods.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
     }
 
@@ -70,6 +84,10 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
     public TextEditorUI GetActiveTextEditor()
     {
       var activePage = fileManager.OpenPages.FirstOrDefault(page =>
@@ -82,21 +100,26 @@ namespace UI.Components
           return activeEditor;
         }
       }
+
       return null;
     }
 
     /// <summary>
-    /// Добавляет элемент управления и кнопку в соответствующие панели.
+    /// Добавляет элемент управления и соответствующую вкладку в панель управления.
     /// </summary>
-    /// <param name="header">Заголовок для кнопки.</param>
-    /// <param name="control">Элемент управления для отображения.</param>
+    /// <param name="header">Заголовок для кнопки, отображаемой в панели вкладок.</param>
+    /// <param name="control">Элемент управления для отображения в панели управления.</param>
+    /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
     public void AddControl(string header, UserControl control, string description = null)
     {
       var controlManager = new ControlManager(this.fileManager, this);
       controlManager.AddControl(header, control, description);
     }
 
-    // TODO: FileManager
+    /// <summary>
+    /// Открывает диалоговое окно для открытия файла.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
     public void OpenFile(string path)
     {
       fileManager.OpenFile(path);
@@ -110,6 +133,11 @@ namespace UI.Components
       fileManager.CreateNewFile();
     }
 
+    /// <summary>
+    /// Открывает диалоговое окно для сохранения файла в новом месте.
+    /// В случае успешного сохранения, возвращает true, в противном случае false.
+    /// </summary>
+    /// <returns>True, если файл был успешно сохранен, иначе false.</returns>
     public bool SaveFileAs()
     {
       var saveFileManager = new SaveFileManager(fileManager);
@@ -143,13 +171,19 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие закрытия окна поиска.
+    /// </summary>
     public void OnSearchWindowClosing()
     {
       var textSearchManager = new TextSearchManager(fileManager, this);
       textSearchManager.OnSearchWindowClosing();
     }
 
-
+    /// <summary>
+    /// Обрабатывает сохранение файла.
+    /// </summary>
+    /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
     public bool SaveFile()
     {
       var activeTab = fileManager.OpenPages.FirstOrDefault(page => 
@@ -158,6 +192,9 @@ namespace UI.Components
       return saveFileManager.SaveFile(activeTab);
     }
 
+    /// <summary>
+    /// Выводит файл на печать.
+    /// </summary>
     public void PrintFile()
     {
       PrintFileManager.PrintFile(fileManager.OpenPages, fileManager.UserControls);
@@ -174,9 +211,13 @@ namespace UI.Components
     public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       TextSearchManager textSearchMethods = new TextSearchManager(fileManager, this);
+      textSearchMethods.SearchResultsReady += OnSearchResultsReady;
       await textSearchMethods.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
-    
+    private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
+    {
+      SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
+    }
   }
 }

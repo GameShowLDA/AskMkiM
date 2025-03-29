@@ -1,31 +1,19 @@
 ﻿using AppConfig;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using UI.Components.Invoke;
-using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.SearchControls
 {
   /// <summary>
-  /// Логика взаимодействия для SearchDataGrid.xaml
+  /// Логика взаимодействия для SearchDataGrid.xaml.
   /// </summary>
   public partial class SearchDataGrid : UserControl
   {
-    
+    /// <summary>
+    /// Конструктор для создания экземпляра класса SearchDataGrid.
+    /// Инициализирует компоненты интерфейса.
+    /// </summary>
     public SearchDataGrid()
     {
       InitializeComponent();
@@ -41,7 +29,7 @@ namespace UI.Components.SearchControls
         var startOffset = row.StartOffset; 
         var lineText = row.SubstringFromWord;
 
-        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, startOffset, lineText);
+        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, startOffset, lineText, row.SearchText);
         LogInformation("Сработало событие нажатия на строку dataGrid с результатами поиска");
       }
     }
@@ -51,6 +39,10 @@ namespace UI.Components.SearchControls
       e.Handled = true;
     }
 
+    /// <summary>
+    /// Устанавливает источник данных для DataGrid в элементе управления ResultsDataGrid.
+    /// </summary>
+    /// <param name="items">Список объектов SearchResult, которые будут отображены в ResultsDataGrid.</param>
     public void SetItemSourse(List<SearchResult> items)
     {
       ResultsDataGrid.ItemsSource = items;

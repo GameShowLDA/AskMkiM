@@ -9,23 +9,30 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace UI.Components.SearchControls
 {
   /// <summary>
-  /// Логика взаимодействия для WholeWordToggleButton.xaml
+  /// Логика взаимодействия для WholeWordToggleButton.xaml.
   /// </summary>
   public partial class WholeWordToggleButton : UserControl
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="WholeWordToggleButton"/>.
+    /// </summary>
     public WholeWordToggleButton()
     {
       InitializeComponent();
     }
 
-    public bool IsChecked { get => GetChecked(); set => SetChecked(value); }
+    /// <summary>
+    /// Получает или устанавливает значение состояния кнопки-переключателя (включена или выключена).
+    /// </summary>
+    public bool IsChecked
+    {
+      get => GetChecked();  // Получаем состояние из метода GetChecked()
+      set => SetChecked(value);  // Устанавливаем состояние с помощью метода SetChecked()
+    }
 
     private void SetChecked(bool value)
     {
