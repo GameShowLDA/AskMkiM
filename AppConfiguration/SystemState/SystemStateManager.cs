@@ -35,16 +35,6 @@ namespace AppConfiguration.SystemState
     /// </summary>
     static internal bool IsLocked { get; set; }
 
-    /// <summary>
-    /// Опции конфигурации базы данных для подключения через SQLite.
-    /// </summary>
-    static internal readonly DbContextOptionsBuilder<AppDbContext> OptionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
-
-    /// <summary>
-    /// Контекст базы данных, используемый для управления состоянием системы.
-    /// </summary>
-    static public AppDbContext Context => new AppDbContext(OptionsBuilder.Options);
-
     #endregion
 
     #region Set.

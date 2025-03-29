@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static AppManager.Config.SystemStateManager;
+using static AppConfiguration.SystemState.SystemStateManager;
 
 namespace Mode.Settings.Execution
 {

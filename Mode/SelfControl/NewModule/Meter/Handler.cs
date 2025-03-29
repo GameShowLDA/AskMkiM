@@ -1,13 +1,12 @@
 ﻿using System.Globalization;
-using System.Net;
 using System.Windows;
 using System.Windows.Media;
-using AppManager.DataBase.Services;
+using DataBaseConfiguration.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppManager.Config.ExecutionConfig;
+using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;

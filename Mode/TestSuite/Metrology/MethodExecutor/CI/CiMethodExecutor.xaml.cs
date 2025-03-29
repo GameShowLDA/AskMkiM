@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Execution;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using Mode.Models;
@@ -10,8 +11,8 @@ using Newtonsoft.Json.Linq;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using YamlDotNet.Core.Tokens;
-using static AppManager.Config.MeasurementErrorConfig;
-using static AppManager.Data.MeasurementError.MeasurementErrorModel;
+using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
+using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 
@@ -120,7 +121,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
         {
           successMessage = ShowMessageModel.ErrorMessage.Item1;
           colorMessage = ShowMessageModel.ErrorMessage.Item2;
-          if (await AppManager.Config.ExecutionConfig.GetIsStopOnErrorEnabled())
+          if (await ExecutionConfig.GetIsStopOnErrorEnabled())
           {
             pause = true;
           }

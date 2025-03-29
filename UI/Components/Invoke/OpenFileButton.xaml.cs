@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using static AppManager.EventAggregator;
+using static AppConfiguration.Base.EventAggregator;
 
 namespace UI.Components.Invoke
 {

@@ -3,11 +3,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppManager.DataBase.Services;
+using DataBaseConfiguration.Services;
 using NewCore.Base.Interface.Main;
-using static AppManager.Config.ExecutionConfig;
-using static AppManager.Config.SystemStateManager;
-using static AppManager.EventAggregator;
+using static AppConfiguration.Execution.ExecutionConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
+using static AppConfiguration.Base.EventAggregator;
 
 namespace UI.Components
 {

@@ -1,5 +1,4 @@
 ﻿using AppConfiguration.Base;
-using AppManager.Abstract;
 using Utilities.FilesUtility;
 
 namespace AppConfiguration.Theme

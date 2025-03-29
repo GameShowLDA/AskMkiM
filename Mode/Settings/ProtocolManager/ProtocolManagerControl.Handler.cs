@@ -1,16 +1,16 @@
-﻿using static AppManager.Config.ProtocolConfig;
+﻿using static AppConfiguration.Protocol.ProtocolConfig;
 
 namespace Mode.Settings.ProtocolManager
 {
   public partial class ProtocolManagerControl
   {
     /// <summary>
-    /// Флаг, указывающий, начата ли работа с конфигурацией
+    /// Флаг, указывающий, начата ли работа с конфигурацией.
     /// </summary>
     readonly bool start = false;
 
     /// <summary>
-    /// Устанавливает конфигурацию протокола на основе данных из YAML-файла
+    /// Устанавливает конфигурацию протокола на основе данных из YAML-файла.
     /// </summary>
     private async void SetConfiguration()
     {
@@ -22,7 +22,7 @@ namespace Mode.Settings.ProtocolManager
     }
 
     /// <summary>
-    /// Сохраняет новые данные конфигурации протокола
+    /// Сохраняет новые данные конфигурации протокола.
     /// </summary>
     private async Task NewDataSaveAsync()
     {

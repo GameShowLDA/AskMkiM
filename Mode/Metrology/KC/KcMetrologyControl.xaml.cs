@@ -5,8 +5,8 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using UI.Controls.Protocol;
 using Utilities.Models;
-using static AppManager.Config.MeasurementErrorConfig;
-using static AppManager.Data.MeasurementError.MeasurementErrorModel;
+using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
+using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 
@@ -25,14 +25,14 @@ namespace Mode.Metrology.KC
     public KcMetrologyControl()
     {
       InitializeComponent();
-      InitializeSettingsAsync().ConfigureAwait(true);
+      InitializeSettings();
     }
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
     /// </summary>
-    public async Task InitializeSettingsAsync()
+    public void InitializeSettings()
     {
       try
       {
@@ -48,7 +48,7 @@ namespace Mode.Metrology.KC
     /// <summary>
     /// Выполнение контроля.
     /// </summary>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
@@ -84,6 +84,11 @@ namespace Mode.Metrology.KC
       /// <inheritdoc />
       public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
+        if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return;
+        }
+
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await fastMeter.ResistanceManager.SetResistanceModeAsync();
       }
@@ -91,13 +96,13 @@ namespace Mode.Metrology.KC
       /// <inheritdoc />
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole  , out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole , out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления", headerColor: ShowMessageModel.SuccessMessage.Item2));
 
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
 
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync();
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param);
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
         showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;

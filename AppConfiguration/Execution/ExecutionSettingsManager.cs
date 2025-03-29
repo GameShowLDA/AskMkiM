@@ -2,12 +2,12 @@
 
 namespace AppConfiguration.Execution
 {
-  static internal class ExecutionSettingsManager
+  static public class ExecutionSettingsManager
   {
     /// <summary>
     /// Считывает параметры выполнения режимов и задаёт их в программе.
     /// </summary>
-    static internal async Task ReadExecutionModeAsync()
+    static public async Task ReadExecutionModeAsync()
     {
       ExecutionFileManager executionFileManager = new ExecutionFileManager(FileLocations.ExecutionConfigPath);
 

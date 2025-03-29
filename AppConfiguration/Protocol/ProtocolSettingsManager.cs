@@ -2,12 +2,12 @@
 
 namespace AppConfiguration.Protocol
 {
-  static internal class ProtocolSettingsManager
+  static public class ProtocolSettingsManager
   {
     /// <summary>
     /// Считывает параметры отображения данных в протоколе и задаёт их в программе.
     /// </summary>
-    static internal async Task ReadProtocolModeAsync()
+    static public async Task ReadProtocolModeAsync()
     {
       ProtocolFileManager protocolFileManager = new ProtocolFileManager(FileLocations.ProtocolConfigPath);
 

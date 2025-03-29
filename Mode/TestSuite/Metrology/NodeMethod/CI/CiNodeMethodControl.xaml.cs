@@ -9,8 +9,8 @@ using Newtonsoft.Json.Linq;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using YamlDotNet.Core.Tokens;
-using static AppManager.Config.MeasurementErrorConfig;
-using static AppManager.Data.MeasurementError.MeasurementErrorModel;
+using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
+using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 

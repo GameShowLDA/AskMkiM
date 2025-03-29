@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using AppManager.DataBase.Services;
+using DataBaseConfiguration.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Main;
