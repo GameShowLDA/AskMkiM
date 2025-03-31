@@ -27,7 +27,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Первая точка вида a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Первая точка вида a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..."/>
             </Grid>
         </Border>
@@ -38,7 +38,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Вторая точка вида a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Name="headerSecondData" TextWrapping="Wrap" TextTrimming="None" Text="Вторая точка вида a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..."/>
             </Grid>
         </Border>
@@ -50,7 +50,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Электрический параметр" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Name="headerElectricalData" TextWrapping="Wrap" TextTrimming="None" Text="Электрический параметр" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" Placeholder="Введите значение..."
                                            Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
@@ -64,7 +64,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Время выполнения в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="headerTimeData" TextWrapping="Wrap" TextTrimming="None" Text="Время выполнения в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" Placeholder="от 1 до 999 сек." 
                                           Unit=",сек."/>
             </Grid>
@@ -79,7 +79,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Время нарастания в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="headerTimeRampData" TextWrapping="Wrap" TextTrimming="None" Text="Время нарастания в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" Placeholder="от 0.1 до 999.9 сек." Unit=",сек." />
             </Grid>
         </Border>
@@ -93,7 +93,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Напряжение в В." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="headerVoltageData" TextWrapping="Wrap" TextTrimming="None" Text="Напряжение в В." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder x:Name="VoltageTextBox" Grid.Row="5" Placeholder="Введите значение..." Unit=",В." />
             </Grid>
         </Border>
@@ -105,8 +105,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Шина для проверки" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <Border Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="10" Margin="0,5,0,0">
+                <TextBlock Name="headerBusData" TextWrapping="Wrap" TextTrimming="None"  Text="Шина для проверки" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Border Name="BusBorder" Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="10" Margin="0,5,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="50"/>

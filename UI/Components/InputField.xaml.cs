@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UI.Controls.Protocol;
 using Utilities.Events;
 using static NewCore.Enum.DeviceEnum;
 
@@ -183,6 +184,48 @@ namespace UI.Components
       InputValidationEvents.OnInvalidSecondPoint += HighlightSecondTextBox;
       InputValidationEvents.OnInvalidElectricalParameter += HighlightElectricalTextBox;
       InputValidationEvents.OnDuplicatePoints += HighlightBothPoints;
+      ActionExecutor.StartProcessing += ActionExecutor_StartProcessing;
+    }
+
+    private void ActionExecutor_StartProcessing(bool obj)
+    {
+      var firstBaseText = "Первая точка";
+      var secondBaseText = "Вторая точка";
+      var electricalBaseText = "Электрический параметр";
+      var timeBaseText = "Время выполнения";
+      var timeRampBaseText = "Время нарастания";
+      var voltageBaseText = "Напряжение";
+      var BusBaseText = "Шина для проверки";
+
+      Visibility visibility = obj ? Visibility.Collapsed : Visibility.Visible;
+      FirstTextBox.Visibility = visibility;
+      SecondTextBox.Visibility = visibility;
+      ElectricalTextBox.Visibility = visibility;
+      TimeTextBox.Visibility = visibility;
+      TimeRampTextBox.Visibility = visibility;
+      VoltageTextBox.Visibility = visibility;
+      BusBorder.Visibility = visibility;
+
+      if (obj)
+      {
+        headerFirstData.Text = $"{firstBaseText}: {FirstTextBox.Text}";
+        headerSecondData.Text = $"{secondBaseText}: {SecondTextBox.Text}";
+        headerElectricalData.Text = $"{electricalBaseText}: {ElectricalTextBox.Text} {ElectricalTextBox.Unit}";
+        headerTimeData.Text = $"{timeBaseText}: {TimeTextBox.Text} {TimeTextBox.Unit}";
+        headerTimeRampData.Text = $"{timeRampBaseText}: {TimeRampTextBox.Text} {TimeRampTextBox.Unit}";
+        headerVoltageData.Text = $"{voltageBaseText}: {VoltageTextBox.Text} {VoltageTextBox.Unit}";
+        headerBusData.Text = $"{BusBaseText}: {ActiveBus}";
+      }
+      else 
+      {
+        headerFirstData.Text = $"{firstBaseText}: вида a.b.c";
+        headerSecondData.Text = $"{secondBaseText}: вида a.b.c";
+        headerElectricalData.Text = $"{electricalBaseText}";
+        headerTimeData.Text = $"{timeBaseText} в сек.";
+        headerTimeRampData.Text = $"{timeRampBaseText} в сек.";
+        headerVoltageData.Text = $"{voltageBaseText} в В.";
+        headerBusData.Text = $"{BusBaseText}";
+      }
     }
 
     /// <summary>

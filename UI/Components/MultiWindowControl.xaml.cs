@@ -6,6 +6,7 @@ using AppConfiguration.Base;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;
+using static UI.Components.Invoke.OpenFileButton;
 using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -170,9 +171,9 @@ namespace UI.Components
     /// <param name="userControl">
     /// Элемент управления, который будет добавлен.
     /// </param>
-    public void AddControl(string name, UserControl userControl)
+    public void AddControl(string name, UserControl userControl, TypeWindow tabType)
     {
-      MultiEditor.AddControl(name, userControl);
+      MultiEditor.AddControl(name, userControl, tabType);
     }
 
     /// <summary>

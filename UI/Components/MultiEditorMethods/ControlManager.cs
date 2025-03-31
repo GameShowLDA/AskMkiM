@@ -5,6 +5,7 @@ using UserControl = System.Windows.Controls.UserControl;
 using System.Windows.Media;
 using System.Windows.Input;
 using AppConfiguration.Base;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -132,25 +133,62 @@ namespace UI.Components.MultiEditorMethods
 
     /// <summary>
     /// Добавляет новый контрол в панель и создает соответствующую вкладку.
+    /// При этом удаляет все ранее открытые.
     /// </summary>
     /// <param name="header">Заголовок для вкладки.</param>
     /// <param name="control">Контрол, который будет добавлен.</param>
     /// <param name="description">Описание вкладки, если необходимо.</param>
-    public void AddControl(string header, UserControl control, string description = null)
+    public void AddControl(string header, UserControl control, TypeWindow tabType, string description = null)
     {
-      OpenFileButton tabButton = CreateTabButton(header, description);
+      if (tabType == TypeWindow.DeviceControl)
+      {
+        RemoveControlsByType(TypeWindow.DeviceControl);
+      }
+
+      OpenFileButton tabButton = CreateTabButton(header, description, tabType);
 
       if (CheckExistingPage(tabButton, description))
       {
         return;
-      }  
+      }
 
       ConfigureTabEvents(tabButton, control);
-
       AddTabAndControl(tabButton, control);
-
       ShowControl(control, tabButton);
     }
+
+    /// <summary>
+    /// Удаляет все вкладки и контролы определенного типа.
+    /// </summary>
+    /// <param name="tabType">Тип вкладки для удаления.</param>
+    private void RemoveControlsByType(TypeWindow tabType)
+    {
+      for (int i = fileManager.OpenPages.Count - 1; i >= 0; i--)
+      {
+        var tab = fileManager.OpenPages[i];
+        if (tab.TabType == tabType)
+        {
+          var control = fileManager.UserControls[i];
+          RemoveControl(tab, control);
+        }
+      }
+    }
+
+    private OpenFileButton CreateTabButton(string header, string description, TypeWindow tabType)
+    {
+      OpenFileButton tabButton = new OpenFileButton
+      {
+        TabType = tabType
+      };
+      tabButton.Header.Text = header;
+      if (description != null)
+      {
+        tabButton.Description = description;
+      }
+
+      return tabButton;
+    }
+
 
     /// <summary>
     /// Создает кнопку вкладки для нового контрола.
