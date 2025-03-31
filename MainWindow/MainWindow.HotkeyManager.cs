@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Components;
+using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -266,6 +268,20 @@ namespace MainWindowProgram
         if (!_isSearchWindowOpen)
         {
           await HandleUserControlPreviewMouseDownAsync(searchMenuItem, mouseEventArgs);
+        }
+        else
+        {
+          TextEditorUI activeEditor = MultiWindow.GetActiveTextEditor();
+          string selectedText = activeEditor?.TextArea.Selection.GetText();
+          if (!string.IsNullOrEmpty(selectedText))
+          {
+            var foundElement = _searchWindow.FindName("SearchTextBox");
+            if (foundElement != null)
+            {
+              var foundTextBox = foundElement as TextBox;
+              foundTextBox.Text = selectedText;
+            }
+          }
         }
       }
     }

@@ -330,23 +330,9 @@ namespace UI.Controls.Search
     }
     #endregion
 
-    public string GetSearchTextFromUI()
-    {
-      string searchText = null;
-
-      // Убедитесь, что получаем текст на UI потоке
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        searchText = SearchTextBox.Text;
-      });
-
-      return searchText;
-    }
-
-
     private void OnSearchButtonPressed(string searchParameters)
     {
-      var searchText = GetSearchTextFromUI();
+      var searchText = SearchTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
       var caseWord = caseButton.IsChecked;
