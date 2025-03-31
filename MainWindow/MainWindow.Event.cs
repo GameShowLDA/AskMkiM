@@ -17,6 +17,7 @@ using Mode.TestSuite.Metrology.NodeMethod.PI;
 using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Base;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram
 {
@@ -287,7 +288,7 @@ namespace MainWindowProgram
     {
       Application.Current.Dispatcher.Invoke(async () =>
       {
-        await AddControlAsync(new KcMetrologyControl(), "Режим КС");
+        await AddControlAsync(new KcMetrologyControl(), "Режим КС", TypeWindow.DeviceControl);
       });
     }
 
@@ -296,28 +297,28 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void IE_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new IeMetrologyControl(), "Режим ИЕ");
+    private async void IE_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new IeMetrologyControl(), "Режим ИЕ", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет пользовательский элемент управления режима СИ в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMetrologyControl(), "Режим СИ");
+    private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMetrologyControl(), "Режим СИ", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет пользовательский элемент управления режима ПИ(DCW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PIDCW_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWMetrologyControl(), "Режим ПИ(DCW)");
+    private async void PIDCW_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWMetrologyControl(), "Режим ПИ(DCW)", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет пользовательский элемент управления режима ПИ(ACW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PIACW_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWMetrologyControl(), "Режим ПИ(ACW)");
+    private async void PIACW_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWMetrologyControl(), "Режим ПИ(ACW)", TypeWindow.DeviceControl);
 
     #endregion
 
@@ -339,42 +340,42 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void CiNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiNodeMethodControl(), "Метод узла СИ");
+    private async void CiNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiNodeMethodControl(), "Метод узла СИ", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста методом узла ПИ(DCW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PiDCWNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWNodeMethodControl(), "Метод узла ПИ(DCW)");
+    private async void PiDCWNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWNodeMethodControl(), "Метод узла ПИ(DCW)", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста методом узла ПИ(ACW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PiACWNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWNodeMethodControl(), "Метод узла ПИ(ACW)");
+    private async void PiACWNodeMethodControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWNodeMethodControl(), "Метод узла ПИ(ACW)", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом СИ в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void CiMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMethodExecutor(), "Групповой метод СИ");
+    private async void CiMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMethodExecutor(), "Групповой метод СИ", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом ПИ(ACW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PiACWMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWMethodExecutorControl(), "Групповой метод ПИ(ACW)");
+    private async void PiACWMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWMethodExecutorControl(), "Групповой метод ПИ(ACW)", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом ПИ(DCW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PiDCWMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWMethodExecutorControl(), "Групповой метод ПИ(DCW)");
+    private async void PiDCWMethodExecutorControl_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWMethodExecutorControl(), "Групповой метод ПИ(DCW)", TypeWindow.DeviceControl);
     
     #endregion
 
@@ -385,14 +386,14 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Execution_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.Execution.ExecutionControl(), "Выполнение");
+    private void Execution_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.Execution.ExecutionControl(), "Выполнение", TypeWindow.Settings);
 
     /// <summary>
     /// Добавляет элемент управления для настроек конфигурации оборудования в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Config_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.DeviceConfig.DeviceConfigControl(), "Конфигурация оборудования");
+    private void Config_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.DeviceConfig.DeviceConfigControl(), "Конфигурация оборудования", TypeWindow.Settings);
     //private void Config_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.ConfigSettings.ConfigSettingsControl(), "Конфигурация оборудования");
 
     /// <summary>
@@ -400,14 +401,14 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Error_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.MeasurementError.MeasurementErrorControl(), "Погрешности измерений");
+    private void Error_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.MeasurementError.MeasurementErrorControl(), "Погрешности измерений", TypeWindow.Settings);
 
     /// <summary>
     /// Добавляет элемент управления для управления протоколом в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Protocol_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.ProtocolManager.ProtocolManagerControl(), "Протокол");
+    private void Protocol_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.ProtocolManager.ProtocolManagerControl(), "Протокол", TypeWindow.Settings);
 
     #endregion
 
@@ -431,21 +432,21 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Gpt_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new UI.Controls.GPT.GPTPunchControl(), "GptManagement").ConfigureAwait(true);
+    private void Gpt_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new UI.Controls.GPT.GPTPunchControl(), "GptManagement", TypeWindow.Settings).ConfigureAwait(true);
 
     /// <summary>
     /// Добавляет элемент управления для отправки команды в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void SendCommand_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.SendCommand.SendCommandControl(), "Send Command");
+    private void SendCommand_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.SendCommand.SendCommandControl(), "Send Command", TypeWindow.Settings);
 
     /// <summary>
     /// Добавляет элемент управления для работы с логами в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Logger_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.LoggerMessage.LoggerControl(), "Logger");
+    private void Logger_Handler(object sender, MouseButtonEventArgs e) => AddControlAsync(new Mode.Settings.LoggerMessage.LoggerControl(), "Logger", TypeWindow.Settings);
 
     #endregion
 

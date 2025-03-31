@@ -59,17 +59,21 @@
 
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Name="header" Text="Ваша надпись" 
+                    <TextBlock Name="header" 
+                               Text="Ваша надпись" 
                                Foreground="{StaticResource ForegroundSolidColorBrush}" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Center"
+                               TextAlignment="Center"
                                Padding="20,10,10,10" 
-                               FontSize="25"/>
+                               FontSize="25"
+                               TextWrapping="Wrap" TextTrimming="None"
+                               />
 
                     <ContentControl Content="{Binding ContentView}" Grid.Row="1" Margin="20,10,20,10"/>
 

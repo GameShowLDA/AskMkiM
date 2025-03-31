@@ -21,6 +21,8 @@ namespace UI.Controls.Protocol
   /// </summary>
   public class ActionExecutor
   {
+    static public event Action<bool> StartProcessing;
+
     #region Проверка токена.
 
     /// <summary>
@@ -108,6 +110,7 @@ namespace UI.Controls.Protocol
       }
 
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
+      StartProcessing?.Invoke(true);
 
       if (IsProcessRunning(name))
       {
@@ -155,6 +158,7 @@ namespace UI.Controls.Protocol
       ProtocolSelfCheck.ShowOnlyStartButton();
 
       await DisplayCompletionMessage();
+      StartProcessing?.Invoke(false);
     }
 
     /// <summary>
