@@ -1,20 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NewCore.Function.GPT.Data
+﻿namespace NewCore.Function.GPT.Data
 {
   /// <summary>
-  /// Класс для хранения конфигурации IR.
+  /// Класс для хранения конфигурации режима IR (изоляционное сопротивление).
   /// </summary>
   public class IrConfiguration
   {
-    public double Voltage { get; set; } // Напряжение (в В)
-    public double HighResistanceLimit { get; set; } // Высокий предел сопротивления (в ГОм)
-    public double LowResistanceLimit { get; set; } // Низкий предел сопротивления (в ГОм)
-    public double TestTime { get; set; } // Время теста (в секундах)
-    public double Offset { get; set; } // Смещение (в ГОм)
+    /// <summary>
+    /// Напряжение теста IR (в Вольтах).
+    /// </summary>
+    public double Voltage { get; set; }
+
+    /// <summary>
+    /// Верхний предел измеряемого сопротивления (в ГОм).
+    /// </summary>
+    public double HighResistanceLimit { get; set; }
+
+    /// <summary>
+    /// Нижний предел измеряемого сопротивления (в ГОм).
+    /// </summary>
+    public double LowResistanceLimit { get; set; }
+
+    /// <summary>
+    /// Время теста IR (в секундах).
+    /// </summary>
+    public double TestTime { get; set; }
+
+    /// <summary>
+    /// Смещение измерения IR (в ГОм).
+    /// </summary>
+    public double Offset { get; set; }
   }
 }

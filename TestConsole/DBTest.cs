@@ -1,11 +1,7 @@
-﻿using AppConfig;
-using AppConfig.DataBase;
-using AppConfig.DataBase.Models;
+﻿using AppConfiguration.Base;
+using DataBaseConfiguration;
+using DataBaseConfiguration.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TestConsole
 {
@@ -58,6 +54,7 @@ namespace TestConsole
             break;
         }
       }
+
     }
 
     /// <summary>
@@ -65,8 +62,7 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
-      using var dbContext = new AppDbContext(optionsBuilder.Options);
+      using var dbContext = DataBaseConfiguration.Configurations.DataBaseConfig.Context;
 
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();
@@ -92,7 +88,7 @@ namespace TestConsole
     private static async Task DeleteAllDataAsync()
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+        .UseSqlite($"Data Source={DataBaseConfiguration.Configurations.DataBaseConfig.ConfigFilePath}");
 
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Удаление всех данных...");
@@ -115,7 +111,7 @@ namespace TestConsole
     private static async Task AddRandomDataAsync()
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={FileLocations.ConfigFilePath}");
+        .UseSqlite($"Data Source={DataBaseConfiguration.Configurations.DataBaseConfig.ConfigFilePath}");
 
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Добавление тестовых данных...");

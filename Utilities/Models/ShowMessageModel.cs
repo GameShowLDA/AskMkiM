@@ -2,17 +2,20 @@
 
 namespace Utilities.Models
 {
+  /// <summary>
+  /// Модель сообщения.
+  /// </summary>
   public class ShowMessageModel
   {
     /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
-    static public Tuple<string, Color> SuccessMessage => Tuple.Create("OK", Color.FromArgb(255, 79, 205, 101));
+    static public Tuple<string, Color> SuccessMessage => Tuple.Create("НОРМА", Color.FromArgb(255, 79, 205, 101));
 
     /// <summary>
     /// Сообщение и цвет для ошибки.
     /// </summary>
-    static public Tuple<string, Color> ErrorMessage => Tuple.Create("NO", Color.FromArgb(255, 241, 48, 27));
+    static public Tuple<string, Color> ErrorMessage => Tuple.Create("БРАК", Color.FromArgb(255, 241, 48, 27));
 
     /// <summary>
     /// Получает или задает заголовок сообщения.
@@ -44,12 +47,19 @@ namespace Utilities.Models
     /// </summary>
     public bool CanBeDeleted { get; set; }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/>.
+    /// </summary>
     public ShowMessageModel()
     {
       ExecutionError = false;
       CanBeDeleted = false;
     }
 
+    /// <summary>
+    /// Возвращает сообщение вида "Заголовок: Сообщение".
+    /// </summary>
+    /// <returns>Строковое представление объекта.</returns>
     public override string ToString()
     {
       if (!string.IsNullOrEmpty(Header) && !string.IsNullOrEmpty(Message))
@@ -69,6 +79,14 @@ namespace Utilities.Models
         return null;
       }
     }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/> с заданными параметрами.
+    /// </summary>
+    /// <param name="header">Текст заголовка сообщения (по умолчанию null).</param>
+    /// <param name="headerColor">Цвет заголовка сообщения (по умолчанию null).</param>
+    /// <param name="message">Основной текст сообщения (по умолчанию null).</param>
+    /// <param name="messageColor">Цвет основного текста сообщения (по умолчанию null).</param>
     public ShowMessageModel(string header = null, Color? headerColor = null, string message = null, Color? messageColor = null) : this()
     {
       Header = header;

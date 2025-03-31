@@ -1,26 +1,33 @@
-﻿using NewCore.Base;
+﻿using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
 using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
-
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
-  public class IrMode : IIrMode
+  /// <summary>
+  /// Класс для управления режимом IR (Insulation Resistance).
+  /// </summary>
+  public class IrMode : IIrModeBreakdown
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="IrMode"/>.
+    /// </summary>
+    /// <param name="gpt79904">Объект <see cref="GPT79904"/> для управления устройством.</param>
     public IrMode(GPT79904 gpt79904) => _gptModel = gpt79904;
+
+    /// <summary>
+    /// Экземпляр устройства GPT79904.
+    /// </summary>
     GPT79904 _gptModel { get; set; }
 
-    static private int timeDelay = 2;
+    static private double timeDelay = 2;
+
+    static private int delayBeforeCall = 100;
 
     /// <summary>
     /// Gets or sets значения напряжения пробойной установки.
@@ -40,53 +47,71 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает режим сопротивления изоляции на пробойке.
     /// </summary>
-    /// <param name="model">Модель пробойки.</param>
     public async Task SetModeAsync()
     {
       LogInformation("Устанавливаем режим СИ на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
 
     /// <summary>
     /// Устанавливает напряжения на пробойном устройстве.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение.</param>
     public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение {value} для режима СИ на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       string valueResult = (value / 1000).ToString().Replace(",", ".");
       var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {valueResult}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
 
     /// <summary>
-    /// Установка/возврат времени теста в секундах.
+    /// Устанавливает время теста IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение.</param>
-    /// <returns></returns>
-    public async Task SetTimeAsync(int value)
+    /// <param name="value">Устанавливаемое значение (в секундах).</param>
+    public async Task SetTestTimeAsync(double value)
     {
       LogInformation($"Устанавливаем время измерения {value} для режима СИ на GPT-79904");
-      var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
-      await _gptModel.WriteLineAsync(query);
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
+      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
       timeDelay = value;
     }
 
     /// <summary>
     /// Возвращает напряжение на пробойном устройстве.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <returns></returns>
+    /// <returns>Значение напряжения (в В).</returns>
     public async Task<double> GetVoltageAsync()
     {
       LogInformation("Считывание данных с ПУ");
-      var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
-      await _gptModel.WriteLineAsync(query);
 
-      var return_value = await _gptModel.ReadLineAsync();
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
+      var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
+      var return_value = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 10, delayBeforeCall: delayBeforeCall);
+
       string numericPart = return_value.Replace("kV", string.Empty).Trim().Replace(".", ",");
 
       if (double.TryParse(numericPart, out double voltageInVolts))
@@ -105,20 +130,21 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Измерение сопротивления с преобразованием результата в МОм.
     /// </summary>
-    /// <param name="model"></param>
     /// <returns>Результат измерения в МОм.</returns>
     public async Task<double> MeasureResistanceAsync()
     {
       LogInformation("Запуск измерений режима СИ");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
       var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      await _gptModel.WriteLineAsync(query);
-      await Task.Delay((timeDelay + 2) * 1000);
-
+      await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
       query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
-      await _gptModel.WriteLineAsync(query);
-      await Task.Delay(500);
+      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-      var answerDevice = await _gptModel.ReadLineAsync();
       var result = answerDevice.Split(',');
       var measureResulte = result[3];
 
@@ -224,93 +250,94 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Устанавливает высокий предел сопротивления IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в ГОм).</param>
     public async Task SetHighResistanceLimitAsync(double value)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
 
     /// <summary>
     /// Устанавливает низкий предел сопротивления IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в МОм).</param>
     public async Task SetLowResistanceLimitAsync(double value)
     {
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       string query = string.Empty;
       if (value == 1000)
       {
         value = 999;
       }
-      query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
-      await _gptModel.WriteLineAsync(query);
-    }
 
-    /// <summary>
-    /// Устанавливает время теста IR.
-    /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в секундах).</param>
-    public async Task SetTestTimeAsync(double value)
-    {
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
-      await _gptModel.WriteLineAsync(query);
+      query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
+      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
 
     /// <summary>
     /// Устанавливает смещение IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="value">Устанавливаемое значение (в ГОм).</param>
     public async Task SetOffsetAsync(double value)
     {
       LogInformation($"Устанавливаем смещение IR: {value} M");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} {value}M";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
     }
 
     /// <summary>
     /// Считывает текущую конфигурацию IR.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <returns>Объект с текущими настройками IR.</returns>
-    public async Task<IrConfiguration> ReadConfigurationAsync() 
+    public async Task<IrConfiguration> ReadConfigurationAsync()
     {
       try
       {
         LogInformation("Чтение конфигурации режима IR");
 
+        if (await GetIsIdleModeEnabled())
+        {
+          return new IrConfiguration();
+        }
+
         // Чтение напряжения
         var voltageQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
-        await _gptModel.WriteLineAsync(voltageQuery);
-        await Task.Delay(10);
-        var voltageResponse = await _gptModel.ReadLineAsync();
+        var voltageResponse = await _gptModel.DeviceProtocol.QueryAsync(voltageQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
         double voltage = ParseVoltage(voltageResponse);
 
         // Чтение высокого предела сопротивления
         var rhiQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?";
-        await _gptModel.WriteLineAsync(rhiQuery);
-        var rhiResponse = await _gptModel.ReadLineAsync();
+        var rhiResponse = await _gptModel.DeviceProtocol.QueryAsync(rhiQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
         double rhi = ParseResistanceG(rhiResponse);
 
         // Чтение низкого предела сопротивления
         var rloQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?";
-        await _gptModel.WriteLineAsync(rloQuery);
-        var rloResponse = await _gptModel.ReadLineAsync();
+        var rloResponse = await _gptModel.DeviceProtocol.QueryAsync(rloQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
         double rlo = ParseResistanceM(rloResponse);
 
         // Чтение времени теста
         var timeQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} ?";
-        await _gptModel.WriteLineAsync(timeQuery);
-        var timeResponse = await _gptModel.ReadLineAsync();
+        var timeResponse = await _gptModel.DeviceProtocol.QueryAsync(timeQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
         double time = ParseTime(timeResponse);
 
         // Чтение смещения
         var refQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} ?";
-        await _gptModel.WriteLineAsync(refQuery);
-        var refResponse = await _gptModel.ReadLineAsync();
+        var refResponse = await _gptModel.DeviceProtocol.QueryAsync(refQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
         double reference = ParseResistanceG(refResponse);
 
         // Возвращаем объект конфигурации
@@ -320,7 +347,7 @@ namespace NewCore.Function.GPT
           HighResistanceLimit = rhi,
           LowResistanceLimit = rlo,
           TestTime = time,
-          Offset = reference
+          Offset = reference,
         };
       }
       catch (Exception ex)
@@ -340,6 +367,7 @@ namespace NewCore.Function.GPT
       {
         return voltage * 1000; // Преобразование кВ в В
       }
+
       throw new FormatException("Некорректный формат напряжения.");
     }
 
@@ -353,6 +381,7 @@ namespace NewCore.Function.GPT
       {
         return resistance; // Значение уже в ГОм
       }
+
       return 0.0;
     }
 
@@ -366,6 +395,7 @@ namespace NewCore.Function.GPT
       {
         return resistance; // Значение уже в ГОм
       }
+
       return 0.0;
     }
 
@@ -379,8 +409,8 @@ namespace NewCore.Function.GPT
       {
         return time; // Значение уже в секундах
       }
+
       return 0.0;
     }
   }
 }
-

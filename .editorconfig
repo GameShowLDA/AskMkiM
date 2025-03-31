@@ -1,6 +1,7 @@
 ﻿[*.cs]
 
 dotnet_diagnostic.SA1010.severity = none
+dotnet_diagnostic.SA1025.severity = error
 dotnet_diagnostic.SA1028.severity = none
 
 dotnet_diagnostic.SA1101.severity = none
@@ -15,6 +16,7 @@ dotnet_diagnostic.SA1201.severity = none
 dotnet_diagnostic.SA1202.severity = none
 dotnet_diagnostic.SA1206.severity = none
 dotnet_diagnostic.SA1208.severity = none
+dotnet_diagnostic.SA1217.severity = none
 
 dotnet_diagnostic.SA1300.severity = none
 dotnet_diagnostic.SA1309.severity = none
@@ -29,6 +31,7 @@ dotnet_diagnostic.SA1505.severity = error
 dotnet_diagnostic.SA1506.severity = error
 dotnet_diagnostic.SA1507.severity = error
 dotnet_diagnostic.SA1508.severity = error
+dotnet_diagnostic.SA1509.severity = error
 dotnet_diagnostic.SA1513.severity = error
 dotnet_diagnostic.SA1514.severity = none
 dotnet_diagnostic.SA1515.severity = none

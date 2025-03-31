@@ -1,14 +1,15 @@
-﻿using NewCore.Communication;
-using NewCore.Device;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NewCore.Base.Device;
+using NewCore.Base.DeviceResponses;
+using NewCore.Base.Function.DBC;
+using NewCore.Communication;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class StateManager
+  /// <summary>
+  /// Класс для управления состоянием устройства коммутации шин.
+  /// </summary>
+  public class StateManager : IConnectable
   {
     /// <summary>
     /// Устройство коммутации шин.
@@ -21,30 +22,69 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
-    /// <summary>
-    /// Сброс всех реле на УКШ.
-    /// </summary>
-    /// <param name="_deviceBusCommutation.IPAddress">"Ip адрес УКШ.".</param>
-    /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
-    public async Task<bool> ResetAsync()
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> ConnectAsync()
     {
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 1000).ConfigureAwait(true);
-      return result == "2.0.1";
+      return await InitializeAsync();
     }
 
-    /// <summary>
-    /// Инициализация устройства коммутации шин.
-    /// </summary>
-    /// <param name="_deviceBusCommutation.IPAddress">"Ip адрес УКШ.".</param>
-    /// <returns>Возвращает ответ, получен ли ответ от инициализации.</returns>
-    public async Task<(bool Connect, string Answer)> Initialize()
+    /// <inheritdoc />
+    public async Task<bool> DisconnectAsync()
     {
-      DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
-      string result = await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, cmd, 2000).ConfigureAwait(true);
+      return await ResetAsync();
+    }
 
-      // TODO : Тут ошибка, я не знаю ответ от УКШ...
-      return result == "1.0.1" ? (true, string.Empty) : (false, result);
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    {
+      if (await GetIsIdleModeEnabled())
+      {
+        return (true, "Включен холостой режим");
+      }
+
+      DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
+
+      BaseResponse baseResponse = BaseResponse.FromJson(result);
+      if (baseResponse != null)
+      {
+        if (baseResponse.NumberChassis == _deviceBusCommutation.NumberChassis &&
+      baseResponse.NumberDevice == _deviceBusCommutation.Number)
+        {
+          return (true, result);
+        }
+        else
+        {
+          string errorMessage = string.Empty;
+
+          if (baseResponse.NumberChassis != _deviceBusCommutation.NumberChassis)
+          {
+            errorMessage += $"Несовпадение по NumberChassis: ожидается {_deviceBusCommutation.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+          }
+
+          if (baseResponse.NumberDevice != _deviceBusCommutation.Number)
+          {
+            errorMessage += $"Несовпадение по NumberDevice: ожидается {_deviceBusCommutation.Number}, получено {baseResponse.NumberDevice}.";
+          }
+
+          return (false, errorMessage.Trim());
+        }
+      }
+
+      return (false, result);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ResetAsync()
+    {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      return result == "2.0.1";
     }
   }
 }

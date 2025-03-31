@@ -1,174 +1,216 @@
-﻿using NewCore.Device;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+using NewCore.Base.Function.Breakdown;
+using NewCore.Device;
+using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
   /// <summary>
-  /// Класс для работы с режимом ACW.
+  /// Класс для работы с режимом ACW (переменный ток высокого напряжения).
   /// </summary>
-  public class AcwMode
+  public class AcwMode : IAcwModeBreakdown
   {
+    /// <summary>
+    /// Создает новый экземпляр класса <see cref="AcwMode"/>.
+    /// </summary>
+    /// <param name="gpt79904">Объект устройства GPT-79904.</param>
     public AcwMode(GPT79904 gpt79904) => _gptModel = gpt79904;
-    GPT79904 _gptModel { get; set; }
 
     /// <summary>
-    /// Устанавливает режим сопротивления изоляции на пробойке.
+    /// Модель устройства GPT-79904.
     /// </summary>
-    /// <param name="model">Модель пробойки.</param>
-     public async Task SetModeAsync()
+    private GPT79904 _gptModel { get; set; }
+
+    static private int delayBeforeCall = 100;
+
+    /// <summary>
+    /// Устанавливает режим ACW (переменного высокого напряжения).
+    /// </summary>
+    public async Task SetModeAsync()
     {
-      LogInformation("Устанавливаем режим СИ на GPT-79904");
+      LogInformation("Устанавливаем режим ACW на GPT-79904");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ACW";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
     /// Устанавливает напряжение ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в кВ).</param>
-    public  async Task SetVoltageAsync(double value)
+    /// <param name="value">Напряжение в кВ.</param>
+    public async Task SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение ACW: {value:F3} кВ");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
+      value /= 1000;
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} {value:F3}".Replace(',', '.');
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
-    /// Устанавливает высокий предел тока ACW.
+    /// Устанавливает верхний предел тока ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetHighCurrentLimitAsync(double value)
+    /// <param name="value">Ток в мА.</param>
+    public async Task SetHighCurrentLimitAsync(double value)
     {
-      LogInformation($"Устанавливаем высокий предел тока ACW: {value:F3} мА");
+      LogInformation($"Устанавливаем верхний предел тока ACW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
-    /// Устанавливает низкий предел тока ACW.
+    /// Устанавливает нижний предел тока ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetLowCurrentLimitAsync(double value)
+    /// <param name="value">Ток в мА.</param>
+    public async Task SetLowCurrentLimitAsync(double value)
     {
-      LogInformation($"Устанавливаем низкий предел тока ACW: {value:F3} мА");
+      LogInformation($"Устанавливаем нижний предел тока ACW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} {value:F3}".Replace(',', '.');
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
     /// Устанавливает время теста ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в секундах).</param>
-    public  async Task SetTestTimeAsync(double value)
+    /// <param name="value">Время в секундах.</param>
+    public async Task SetTestTimeAsync(double value)
     {
       LogInformation($"Устанавливаем время теста ACW: {value:F1} сек");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_TTIME)} {value:F1}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
+    }
+
+    /// <summary>
+    /// Устанавливает время нарастания напряжения (Ramp Time) для текущего теста.
+    /// </summary>
+    /// <param name="value">Значение времени нарастания в секундах (0.1 – 999.9).</param>
+    public async Task SetRampTimeAsync(double value)
+    {
+      var rampTime = Convert.ToInt32(value);
+      LogInformation($"Устанавливаем время нарастания напряжения: {value:F1} сек");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
     /// Устанавливает частоту ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
     /// <param name="frequency">Частота (50 или 60 Гц).</param>
-    public  async Task SetFrequencyAsync(int frequency)
+    /// <exception cref="ArgumentException">Выбрасывается, если частота не равна 50 или 60 Гц.</exception>
+    public async Task SetFrequencyAsync(int frequency)
     {
       if (frequency != 50 && frequency != 60)
+      {
         throw new ArgumentException("Частота должна быть 50 или 60 Гц.");
+      }
 
       LogInformation($"Устанавливаем частоту ACW: {frequency} Гц");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} {frequency}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
     /// Устанавливает смещение ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetOffsetAsync(double value)
+    /// <param name="value">Смещение в мА.</param>
+    public async Task SetOffsetAsync(double value)
     {
       LogInformation($"Устанавливаем смещение ACW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_REF)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
-    /// Устанавливает текущее значение тока ACW.
+    /// Устанавливает предельное значение тока дугового пробоя ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <param name="value">Устанавливаемое значение (в мА).</param>
-    public  async Task SetArcCurrentAsync(double value)
+    /// <param name="value">Ток в мА.</param>
+    public async Task SetArcCurrentAsync(double value)
     {
-      LogInformation($"Устанавливаем текущее значение тока ACW: {value:F3} мА");
+      LogInformation($"Устанавливаем предельное значение дугового тока ACW: {value:F3} мА");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return;
+      }
+
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_ARCCURRENT)} {value:F3}";
-      await _gptModel.WriteLineAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(query);
     }
 
     /// <summary>
     /// Считывает текущую конфигурацию ACW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <returns>Объект с текущими параметрами ACW.</returns>
-    public  async Task<AcwConfiguration> ReadConfigurationAsync()
+    /// <returns>Объект <see cref="AcwConfiguration"/> с текущими параметрами.</returns>
+    public async Task<AcwConfiguration> ReadConfigurationAsync()
     {
       LogInformation("Считываем конфигурацию ACW...");
 
-      // Чтение напряжения
-      var voltageQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} ?";
-      await _gptModel.WriteLineAsync(voltageQuery);
-      await Task.Delay(10); // Задержка для обработки ответа устройством
-      var voltageResponse = await _gptModel.ReadLineAsync();
-      double voltage = ParseVoltage(voltageResponse);
+      if (await GetIsIdleModeEnabled())
+      {
+        return new AcwConfiguration();
+      }
 
-      // Чтение высокого предела тока
-      var chiQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} ?";
-      await _gptModel.WriteLineAsync(chiQuery);
-      var chiResponse = await _gptModel.ReadLineAsync();
-      double highCurrentLimit = ParseCurrent(chiResponse);
+      // Чтение параметров
+      double voltage = await ReadDoubleParameterAsync(ManualCommand.MANU_ACW_VOLTAGE, "kV");
+      double highCurrentLimit = await ReadDoubleParameterAsync(ManualCommand.MANU_ACW_CHISET, "mA");
+      double lowCurrentLimit = await ReadDoubleParameterAsync(ManualCommand.MANU_ACW_CLOSET, "mA");
+      double testTime = await ReadDoubleParameterAsync(ManualCommand.MANU_ACW_TTIME, "S");
+      int frequency = await ReadIntParameterAsync(ManualCommand.MANU_ACW_FREQUENCY, "Hz");
+      double offset = await ReadDoubleParameterAsync(ManualCommand.MANU_ACW_REF, "mA");
+      double arcCurrent = await ReadDoubleParameterAsync(ManualCommand.MANU_ACW_ARCCURRENT, "mA");
 
-      // Чтение низкого предела тока
-      var cloQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} ?";
-      await _gptModel.WriteLineAsync(cloQuery);
-      var cloResponse = await _gptModel.ReadLineAsync();
-      double lowCurrentLimit = ParseCurrent(cloResponse);
-
-      // Чтение времени теста
-      var timeQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_TTIME)} ?";
-      await _gptModel.WriteLineAsync(timeQuery);
-      var timeResponse = await _gptModel.ReadLineAsync();
-      double testTime = ParseTime(timeResponse);
-
-      // Чтение частоты
-      var frequencyQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} ?";
-      await _gptModel.WriteLineAsync(frequencyQuery);
-      var frequencyResponse = await _gptModel.ReadLineAsync();
-      int frequency = ParseFrequency(frequencyResponse);
-
-      // Чтение смещения
-      var offsetQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_REF)} ?";
-      await _gptModel.WriteLineAsync(offsetQuery);
-      var offsetResponse = await _gptModel.ReadLineAsync();
-      double offset = ParseCurrent(offsetResponse);
-
-      var arcCurrentQuery = $"{GetCommandSyntax(ManualCommand.MANU_ACW_ARCCURRENT)} ?";
-      await _gptModel.WriteLineAsync(offsetQuery);
-      var arcCurrentResponse = await _gptModel.ReadLineAsync();
-      double arcCurrent = ParseCurrent(offsetResponse);
-
-      // Возвращаем объект конфигурации
       return new AcwConfiguration
       {
         Voltage = voltage,
@@ -176,65 +218,132 @@ namespace NewCore.Function.GPT
         LowCurrentLimit = lowCurrentLimit,
         TestTime = testTime,
         Frequency = frequency,
-        Offset = offset
+        Offset = offset,
+        ArcCurrent = arcCurrent,
       };
     }
 
-    /// <summary>
-    /// Парсит значение напряжения из строки ответа.
-    /// </summary>
-    /// <param name="response">Строка ответа.</param>
-    /// <returns>Значение напряжения (в кВ).</returns>
-    private  double ParseVoltage(string response)
+    /// <inheritdoc />
+    public async Task<double> MeasureCurrentAsync(double param = 0)
     {
-      var value = response.Replace("kV", "").Trim().Replace(".", ",");
-      return double.Parse(value);
+      LogInformation("Запуск измерений режима ПИ ACW");
+
+      if (await GetIsIdleModeEnabled())
+      {
+        return param;
+      }
+
+      var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
+      var timeDelay = Convert.ToInt32(await GetRampTimeAsync() + await GetTestTimeAsync());
+
+      await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
+      query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
+      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
+
+      var result = answerDevice.Split(',');
+      var measureResulte = result[3];
+
+      LogInformation($"Результат измерения режима ПИ(ACW): {measureResulte}");
+
+      Match match = Regex.Match(measureResulte, @"\d+(\.\d+)?");
+
+      if (match.Success)
+      {
+        return double.Parse(match.Value, CultureInfo.InvariantCulture);
+      }
+
+      throw new FormatException("Число не найдено в строке.");
     }
 
     /// <summary>
-    /// Парсит значение тока из строки ответа.
+    /// Считывает числовой параметр из устройства.
     /// </summary>
-    /// <param name="response">Строка ответа.</param>
-    /// <returns>Значение тока (в мА).</returns>
-    private  double ParseCurrent(string response)
+    /// <param name="command">Команда запроса.</param>
+    /// <param name="unit">Единица измерения.</param>
+    /// <returns>Извлеченное значение.</returns>
+    private async Task<double> ReadDoubleParameterAsync(ManualCommand command, string unit)
     {
-      var value = response.Replace("mA", "").Trim().Replace(".", ",");
-      return double.Parse(value);
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
+      var query = $"{GetCommandSyntax(command)} ?";
+      var response = await _gptModel.DeviceProtocol.QueryAsync(query, 100);
+      return double.Parse(response.Replace(unit, "").Trim().Replace(".", ","));
     }
 
     /// <summary>
-    /// Парсит значение времени из строки ответа.
+    /// Считывает целочисленный параметр из устройства.
     /// </summary>
-    /// <param name="response">Строка ответа.</param>
-    /// <returns>Значение времени (в секундах).</returns>
-    private  double ParseTime(string response)
+    /// <param name="command">Команда запроса.</param>
+    /// <param name="unit">Единица измерения.</param>
+    /// <returns>Извлеченное значение.</returns>
+    private async Task<int> ReadIntParameterAsync(ManualCommand command, string unit)
     {
-      var value = response.Replace("S", "").Trim().Replace(".", ",");
-      return double.Parse(value);
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
+      var query = $"{GetCommandSyntax(command)} ?";
+      var response = await _gptModel.DeviceProtocol.QueryAsync(query, 100);
+      return int.Parse(response.Replace(unit, "").Trim());
     }
 
     /// <summary>
-    /// Парсит значение частоты из строки ответа.
+    /// Получает текущее время нарастания напряжения (Ramp Time) для текущего теста.
     /// </summary>
-    /// <param name="response">Строка ответа.</param>
-    /// <returns>Значение частоты (в Гц).</returns>
-    private  int ParseFrequency(string response)
+    /// <returns>Значение времени нарастания в секундах.</returns>
+    public async Task<double> GetRampTimeAsync()
     {
-      // Предполагается, что ответ имеет формат "MANU:ACW:FREQUENCY XX"
-      var value = response.Replace("Hz", "").Trim().Replace(".", ",");
-      return int.Parse(value);
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
+
+      var query = GetCommandSyntax(ManualCommand.MANU_RTIME) + "?";
+      LogInformation("Запрашиваем текущее время нарастания напряжения (Ramp Time)...");
+
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+      LogDebug($"Ответ на запрос Ramp Time: \"{response}\"");
+
+      // Ищем число с точкой: 005.0, 12.3 и т.д.
+      var match = Regex.Match(response, @"\d+(\.\d+)?");
+      if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var rampTime))
+      {
+        return rampTime;
+      }
+
+      LogWarning("Не удалось разобрать значение Ramp Time. Возвращаем 0.0.");
+      return 0.0;
     }
 
     /// <summary>
-    /// Запускает тест ACW и возвращает результат.
+    /// Получает текущее время теста DCW.
     /// </summary>
-    /// <param name="model">Модель устройства.</param>
-    /// <returns>Результат теста (в мА).</returns>
-    public  async Task<double> MeasureCurrentAsync()
+    /// <returns>Значение времени в секундах.</returns>
+    public async Task<double> GetTestTimeAsync()
     {
-      // TODO : Реализация измерения ACW
+      if (await GetIsIdleModeEnabled())
+      {
+        return 0;
+      }
 
-      return 00.00;
+      var query = GetCommandSyntax(ManualCommand.MANU_ACW_TTIME) + "?";
+      LogInformation("Запрашиваем время теста DCW...");
+
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+      LogDebug($"Ответ на запрос DCW Test Time: \"{response}\"");
+
+      var match = Regex.Match(response, @"\d+(\.\d+)?");
+      if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var testTime))
+      {
+        return testTime;
+      }
+
+      LogWarning("Не удалось разобрать значение времени теста DCW. Возвращаем 0.0.");
+      return 0.0;
     }
   }
 }

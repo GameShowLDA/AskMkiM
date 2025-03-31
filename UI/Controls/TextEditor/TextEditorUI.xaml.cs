@@ -17,6 +17,9 @@ namespace UI.Controls.TextEditor
   /// </summary>
   public partial class TextEditorUI : UserControl
   {
+    /// <summary>
+    /// Экземпляр <see cref="MultiEditorControl"/>, используемый для работы с вкладками редактора.
+    /// </summary>
     MultiEditorControl _multiEditorControl;
     private TextMarkerService _markerService;
     private List<string> _pendingHighlights = new();
@@ -72,6 +75,27 @@ namespace UI.Controls.TextEditor
     public TextEditorUI()
     {
       InitializeComponent();
+
+      Loaded += (s, e) =>
+      {
+        if (_markerService == null)
+        {
+          _markerService = new TextMarkerService(textEditor);
+          textEditor.TextArea.TextView.BackgroundRenderers.Add(_markerService);
+
+          var services = textEditor.TextArea.TextView.Services;
+          if (services.GetService(typeof(TextMarkerService)) == null)
+          {
+            services.AddService(typeof(TextMarkerService), _markerService);
+          }
+
+          Console.WriteLine("✅ TextMarkerService зарегистрирован.");
+        }
+        else
+        {
+          Console.WriteLine("⚠ TextMarkerService уже инициализирован.");
+        }
+      };
     }
 
     /// <summary>
@@ -244,11 +268,17 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    /// <summary>
+    /// Обработчик события DragLeave. Восстанавливает исходный фон редактора.
+    /// </summary>
     private void textEditor_DragLeave(object sender, DragEventArgs e)
     {
       textEditor.Background = (Brush)FindResource("PrimarySolidColorBrush");
     }
 
+    /// <summary>
+    /// Обработчик события Drop. Загружает содержимое перетаскиваемого файла в редактор.
+    /// </summary>
     private void textEditor_Drop(object sender, DragEventArgs e)
     {
       textEditor.Background = (Brush)FindResource("PrimarySolidColorBrush");

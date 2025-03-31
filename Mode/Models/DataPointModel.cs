@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NewCore.Base.Interface.Main;
 using UI.Components.Invoke;
 
 namespace Mode.Models
 {
+  /// <summary>
+  /// Представляет базовую модель данных для измерения, содержащую информацию о двух точках измерения,
+  /// а также элементы управления для ввода данных и управления отображением.
+  /// </summary>
   internal class DataPointModel
   {
     /// <summary>
@@ -22,11 +21,13 @@ namespace Mode.Models
 
     /// <summary>
     /// Граница для первой точки измерения.
+    /// Используется для визуального выделения и группировки элемента ввода данных первой точки.
     /// </summary>
     internal InvokeBorder FirstPointBorder { get; set; } = new InvokeBorder();
 
     /// <summary>
     /// Граница для второй точки измерения.
+    /// Используется для визуального выделения и группировки элемента ввода данных второй точки.
     /// </summary>
     internal InvokeBorder LastPointBorder { get; set; } = new InvokeBorder();
 
@@ -40,27 +41,45 @@ namespace Mode.Models
     /// </summary>
     internal InvokeTextBox LastPointData { get; set; } = new InvokeTextBox();
 
-    internal Core.ManagerShassy.Model ManagerShassy { get; set; }
+    /// <summary>
+    /// Модель менеджера шасси, используемая для работы с устройством.
+    /// </summary>
+    internal IChassisManager ManagerShassy { get; set; }
 
-    internal Core.ModuleRelayControl.Model FirstModuleRelayControl { get; set; }
-    internal Core.ModuleRelayControl.Model LastModuleRelayControl { get; set; }
+    /// <summary>
+    /// Модель первого модуля реле для подключения измерительных точек.
+    /// </summary>
+    internal IRelaySwitchModule FirstModuleRelayControl { get; set; }
+
+    /// <summary>
+    /// Модель второго модуля реле для подключения измерительных точек.
+    /// </summary>
+    internal IRelaySwitchModule LastModuleRelayControl { get; set; }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="DataPointModel"/> с заданными элементами управления.
+    /// </summary>
+    /// <param name="firstBorder">Граница для первой точки измерения.</param>
+    /// <param name="secondBorder">Граница для второй точки измерения.</param>
+    /// <param name="firstData">Поле для ввода данных первой точки измерения.</param>
+    /// <param name="secondData">Поле для ввода данных второй точки измерения.</param>
     internal DataPointModel(InvokeBorder firstBorder, InvokeBorder secondBorder, InvokeTextBox firstData, InvokeTextBox secondData)
     {
       FirstPointBorder = firstBorder;
       LastPointBorder = secondBorder;
-
       FirstPointData = firstData;
       LastPointData = secondData;
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="DataPointModel"/> с элементами управления по умолчанию.
+    /// </summary>
     internal DataPointModel()
     {
       FirstPointBorder = new InvokeBorder();
       LastPointBorder = new InvokeBorder();
-
       FirstPointData = new InvokeTextBox();
       LastPointData = new InvokeTextBox();
     }
-
   }
 }

@@ -1,22 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NewCore.Function.GPT.Data
+﻿namespace NewCore.Function.GPT.Data
 {
   /// <summary>
-  /// Класс для хранения конфигурации ACW.
+  /// Класс для хранения конфигурации DCW (постоянный ток высокого напряжения).
   /// </summary>
   public class DcwConfiguration
   {
-    public double Voltage { get; set; } // Напряжение (кВ)
-    public double HighCurrentLimit { get; set; } // Высокий предел тока (мА)
-    public double LowCurrentLimit { get; set; } // Низкий предел тока (мА)
-    public double TestTime { get; set; } // Время теста (сек)
-    public double Offset { get; set; } // Смещение (мА)
+    /// <summary>
+    /// Напряжение теста DCW (в кВ).
+    /// </summary>
+    public double Voltage { get; set; }
 
+    /// <summary>
+    /// Верхний предел тока DCW (в мА).
+    /// </summary>
+    public double HighCurrentLimit { get; set; }
+
+    /// <summary>
+    /// Нижний предел тока DCW (в мА).
+    /// </summary>
+    public double LowCurrentLimit { get; set; }
+
+    /// <summary>
+    /// Время теста DCW (в секундах).
+    /// </summary>
+    public double TestTime { get; set; }
+
+    /// <summary>
+    /// Смещение измерения DCW (в мА).
+    /// </summary>
+    public double Offset { get; set; }
+
+    /// <summary>
+    /// Ток дугового пробоя DCW (в мА).
+    /// </summary>
     public double ArcCurrent { get; set; }
   }
 }

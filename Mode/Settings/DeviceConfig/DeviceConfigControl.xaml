@@ -5,16 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig"
              xmlns:Chassis="clr-namespace:Mode.Settings.DeviceConfig.ChassisManager"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" MinWidth="800">
+             mc:Ignorable="d"
+             MinWidth="800" MinHeight="600">
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="Auto" x:Name="Column1"/>
+            <ColumnDefinition Width="*" x:Name="Column2"/>
+            <ColumnDefinition Width="Auto" x:Name="Column3"/>
         </Grid.ColumnDefinitions>
 
+
         <Chassis:ChassisManagerControl x:Name="chassisManager"/>
-        <Border Grid.Column="1" Background="Red" Name="deviceBorder"/>
+        
+        <Border Grid.Column="1" 
+            Name="deviceBorder"
+            >
+        </Border>
+
+        <Border Grid.Column="2" Name="settingsBorder" Visibility="Collapsed"/>
+
     </Grid>
 </UserControl>

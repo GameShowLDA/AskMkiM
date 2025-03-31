@@ -1,55 +1,49 @@
-﻿using NewCore.Base;
+﻿using NewCore.Base.Device;
+using NewCore.Base.Function.ModuleRelayControl;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.ModuleRelayControl;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
-  public class ModuleRelayControl : DeviceWithIP
+  /// <summary>
+  /// Модуль коммутации реле, обеспечивающее подключение объектов контроля.
+  /// </summary>
+  public class ModuleRelayControl : DeviceWithIP, IRelaySwitchModule
   {
-    public ModuleRelayControl(IPAddress ip) : base(ip)
-    {
-      Name = "Модуль коммутации реле";
-      Description = "Предназначен для коммутации измерительных шин автоматизированной системы контроля к высоковольтным цепям объектов контроля, таких как кабели, жгуты, кабельные сети. Коммутация происходит за счет замыкания реле на шину";
-    }
-
-    public Functions Functions => new Functions(this);
-
     /// <summary>
-    /// Проверяет соединение с устройством.
+    /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControl"/>.
     /// </summary>
-    /// <returns>
-    /// Возвращает <see cref="bool"/>, указывающий на наличие соединения:
-    /// <c>true</c> — если соединение установлено, <c>false</c> — в противном случае.
-    /// </returns>
-    /// <exception cref="Exception">Выбрасывается, если произошла непредвиденная ошибка при проверке соединения.</exception>
-    public override async Task<bool> Initialize()
+    public ModuleRelayControl()
     {
-      try
-      {
-        var (isConnected, answer) = await Functions.Initialize();
+      BusManager = new BusManager(this);
+      MeterManager = new MeterManager(this);
+      PointManager = new PointManager(this);
+      ConnectableManager = new StateManager(this);
 
-        if (!isConnected)
-        {
-          LogWarning($"Соединение с устройством не установлено. ({answer})");
-        }
-        else
-        {
-          LogInformation("Соединение с устройством успешно установлено.");
-        }
-
-        return isConnected;
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при проверке соединения: {ex.Message}");
-        return false;
-      }
+      DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
+      Name = "Модуль МКР-350";
+      Description = "Добавить описание сюда";
+      PointCount = 350;
+      DeviceClass = GetType().FullName;
     }
+
+    /// <inheritdoc />
+    public int NumberRack { get; set; }
+
+    /// <inheritdoc />
+    public int NumberChassis { get; set; }
+
+    /// <inheritdoc />
+    public int PointCount { get; set; }
+
+    /// <inheritdoc />
+    public IBusManager BusManager { get; set; }
+
+    /// <inheritdoc />
+    public IMeterManager MeterManager { get; set; }
+
+    /// <inheritdoc />
+    public IPointManager PointManager { get; set; }
   }
 }

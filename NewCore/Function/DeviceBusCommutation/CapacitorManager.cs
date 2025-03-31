@@ -1,10 +1,16 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.Function.DBC;
+using NewCore.Communication;
+using NewCore.Device;
 using static Utilities.LoggerUtility;
-
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class CapacitorManager
+  /// <summary>
+  /// Менеджер управления подключением конденсаторов.
+  /// Обеспечивает подключение и отключение конденсаторов в системе.
+  /// </summary>
+  public class CapacitorManager : ICapacitorDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.
@@ -12,7 +18,7 @@ namespace NewCore.Function.DeviceBusCommutation
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="CapacitorManager"/>.
+    /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public CapacitorManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
@@ -26,8 +32,13 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         DeviceCommand command = new DeviceCommand(6, 2, num, 1);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         return true;
       }
 
@@ -44,8 +55,13 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
         DeviceCommand command = new DeviceCommand(6, 2, num, 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         return true;
       }
 

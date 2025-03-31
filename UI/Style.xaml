@@ -1,25 +1,31 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:CustomControls="clr-namespace:UI.Components" 
+                        xmlns:CustomControls="clr-namespace:UI.Components" 
                     xmlns:SliderConcerter="clr-namespace:UI"
                     >
-    
+
     <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->
-    
+
+    <Color x:Key="LightPrimaryColor">#6a7689</Color>
     <Color x:Key="PrimaryColor">#465060</Color>
     <Color x:Key="SecondaryColor">#303843</Color>
     <Color x:Key="ForegroundColor">#f3f0f9</Color>
     <Color x:Key="ActiveColor">#1ca3e9</Color>
     <Color x:Key="IsCheckedColor">#1f242b</Color>
+    <Color x:Key="RedColor">#b23a48</Color>
+    <Color x:Key="GreenColor">#4b7765</Color>
 
+    <SolidColorBrush x:Key="LightPrimarySolidColorBrush" Color="{DynamicResource LightPrimaryColor}"/>
     <SolidColorBrush x:Key="PrimarySolidColorBrush" Color="{DynamicResource PrimaryColor}"/>
     <SolidColorBrush x:Key="SecondarySolidColorBrush" Color="{DynamicResource SecondaryColor}"/>
     <SolidColorBrush x:Key="ForegroundSolidColorBrush" Color="{DynamicResource ForegroundColor}"/>
     <SolidColorBrush x:Key="ActiveForegroundSolidColorBrush" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ActiveBorderSolidColorBrush" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="{DynamicResource IsCheckedColor}"/>
+    <SolidColorBrush x:Key="RedColorSolidColorBrush" Color="{DynamicResource RedColor}"/>
+    <SolidColorBrush x:Key="GreenColorSolidColorBrush" Color="{DynamicResource GreenColor}"/>
 
     <!--#region Стили метрологии -->
 
@@ -275,6 +281,39 @@
         </Setter>
     </Style>
 
+    <Style x:Key="ConfigButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{StaticResource PrimarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                        CornerRadius="15" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                <!-- Меняем фон на красный -->
+                <Setter Property="Foreground" Value="{StaticResource PrimarySolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
     <Style x:Key="CustomButtonStyle" TargetType="Button">
         <Setter Property="Height" Value="50"/>
         <Setter Property="FontSize" Value="20"/>
@@ -313,33 +352,33 @@
         <Setter Property="Foreground" Value="{StaticResource ToggleButtonForegroundColor}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Border Background="{TemplateBinding Background}" 
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border Background="{TemplateBinding Background}" 
                          CornerRadius="0" 
                          BorderThickness="{TemplateBinding BorderThickness}" 
                          BorderBrush="{TemplateBinding BorderBrush}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <!-- Триггер для изменения цвета фона и текста при наведении -->
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ToggleButtonActiveBackgroundColor}"/>
-                    <Setter Property="Foreground" Value="{StaticResource ToggleButtonActiveForegroundColor}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource ToggleButtonActiveBorderColor}"/>
-                    <Setter Property="BorderThickness" Value="5,0,0,0"/>
-                </Trigger>
-                <!-- Триггер для изменения цвета фона и текста при нажатии -->
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ToggleButtonSecondActiveBorderColor}" />
-                    <Setter Property="Foreground" Value="{StaticResource ToggleButtonActiveForegroundColor}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource ToggleButtonActiveBorderColor}"/>
-                    <Setter Property="BorderThickness" Value="5,0,0,0"/>
-                </Trigger>
-            </Style.Triggers>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <!-- Триггер для изменения цвета фона и текста при наведении -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ToggleButtonActiveBackgroundColor}"/>
+                <Setter Property="Foreground" Value="{StaticResource ToggleButtonActiveForegroundColor}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ToggleButtonActiveBorderColor}"/>
+                <Setter Property="BorderThickness" Value="5,0,0,0"/>
+            </Trigger>
+            <!-- Триггер для изменения цвета фона и текста при нажатии -->
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="{StaticResource ToggleButtonSecondActiveBorderColor}" />
+                <Setter Property="Foreground" Value="{StaticResource ToggleButtonActiveForegroundColor}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ToggleButtonActiveBorderColor}"/>
+                <Setter Property="BorderThickness" Value="5,0,0,0"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="CustomComboBoxStyle" TargetType="ComboBox">
@@ -641,7 +680,7 @@
         <Setter Property="Background" Value="Transparent"/>
     </Style>
 
-    
+
     <!-- Стиль для Slider -->
     <Style x:Key="CustomSliderStyle" TargetType="Slider">
         <Setter Property="Background" Value="{StaticResource IsCheckedColorSolidColorBrush}" />

@@ -6,5 +6,8 @@
         xmlns:local="clr-namespace:TestWPF"
         xmlns:ChassisManager ="clr-namespace:Mode.Settings.DeviceConfig;assembly=Mode"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        MinWidth="800"
+        MinHeight="600"
+        Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}">
+    <local:TestProtocolControl/>
 </Window>

@@ -1,22 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NewCore.Enum
+﻿namespace NewCore.Enum
 {
+  /// <summary>
+  /// Различные перечисления для устройств.
+  /// </summary>
   public class DeviceEnum
   {
     /// <summary>
-    /// Перечисление типов устройств
+    /// Перечисление типов устройств.
     /// </summary>
     public enum DeviceType
     {
       /// <summary>
-      /// Менеджер шасси
+      /// Тестер АСКМ
       /// </summary>
       ChassisManager,
+
+      /// <summary>
+      /// Стойка СКМ
+      /// </summary>
+      Rack,
 
       /// <summary>
       /// Модуль коммутации реле
@@ -46,7 +48,7 @@ namespace NewCore.Enum
       /// <summary>
       /// Пробойная установка
       /// </summary>
-      BreakdownTester
+      BreakdownTester,
     }
 
     /// <summary>
@@ -54,8 +56,41 @@ namespace NewCore.Enum
     /// </summary>
     public enum ConnectionType
     {
+      /// <summary>
+      /// IP-адрес.
+      /// </summary>
       IP,
-      COM
+
+      /// <summary>
+      /// COM- порт
+      /// </summary>
+      COM,
+    }
+
+    /// <summary>
+    /// Коммутационные шины системы.
+    /// </summary>
+    public enum SwitchingBusNew
+    {
+      /// <summary>
+      /// Шина А1 и В1.
+      /// </summary>
+      AB1 = 1,
+
+      /// <summary>
+      /// Шина А2 и В2.
+      /// </summary>
+      AB2 = 2,
+
+      /// <summary>
+      /// Шина А3 и В3.
+      /// </summary>
+      AB3 = 3,
+
+      /// <summary>
+      /// Шина А4 и В4.
+      /// </summary>
+      AB4 = 4,
     }
 
     /// <summary>
@@ -164,7 +199,14 @@ namespace NewCore.Enum
     /// </summary>
     public enum VoltageSources
     {
+      /// <summary>
+      /// Источник 12 В.
+      /// </summary>
       Supply12V,
+
+      /// <summary>
+      /// Источник 5 В.
+      /// </summary>
       Supply5V,
     }
 

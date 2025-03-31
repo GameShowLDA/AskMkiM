@@ -1,8 +1,12 @@
-﻿using AppConfig.Abstract;
+﻿using AppConfiguration.Base;
 using Utilities.FilesUtility;
 
 namespace UI.Theme
 {
+  /// <summary>
+  /// Класс для управления конфигурационным файлом темы оформления приложения.
+  /// Реализует чтение и запись данных в формате YAML.
+  /// </summary>
   internal class ThemeFileManager : ConfigurationManagerBase<ThemeModel>
   {
     private readonly YamlUtility<ThemeModel> _yamlHelper;
@@ -27,6 +31,5 @@ namespace UI.Theme
     /// </summary>
     /// <param name="executionModel">Объект <see cref="ThemeModel"/> с новыми данными для записи в файл.</param>
     public override async Task RewriteFileAsync(ThemeModel executionModel) => await _yamlHelper.RewriteAsync(executionModel);
-
   }
 }

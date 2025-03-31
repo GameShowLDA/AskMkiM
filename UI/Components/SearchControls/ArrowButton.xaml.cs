@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -85,6 +84,9 @@ namespace UI.Components.SearchControls
       set => SetValue(IsArrowUpProperty, value);
     }
 
+    /// <summary>
+    /// Обработчик изменения свойства IsArrowUp, вызывающий анимацию поворота стрелки.
+    /// </summary>
     private static void OnIsArrowUpChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       if (d is ArrowButton control)
@@ -93,12 +95,18 @@ namespace UI.Components.SearchControls
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика, переключая состояние IsArrowUp и инициируя анимацию поворота.
+    /// </summary>
     private void Button_Click(object sender, RoutedEventArgs e)
     {
       IsArrowUp = !IsArrowUp;
       RotateArrow(IsArrowUp);
     }
 
+    /// <summary>
+    /// Выполняет анимацию поворота стрелки в зависимости от значения IsArrowUp.
+    /// </summary>
     private void RotateArrow(bool isUp)
     {
       if (_rootRotate == null)

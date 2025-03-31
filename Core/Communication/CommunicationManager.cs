@@ -7,9 +7,11 @@ using static Utilities.LoggerUtility;
 
 namespace Core.Communication
 {
+  /// <summary>
+  /// Класс для общения с утсройствами по IP.
+  /// </summary>
   static public class CommunicationManager
   {
-
     /// <summary>
     /// Порт для входящих сообщений.
     /// </summary>
@@ -35,7 +37,6 @@ namespace Core.Communication
         IPEndPoint endPoint = new IPEndPoint(ip, Convert.ToInt32(PortOutput));
         byte[] messageBuffer = Encoding.UTF8.GetBytes(command.ToString());
         await socket.SendToAsync(new ArraySegment<byte>(messageBuffer), SocketFlags.None, endPoint);
-
 
         if (time > 0)
         {

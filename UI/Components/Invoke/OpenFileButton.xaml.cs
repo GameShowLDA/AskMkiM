@@ -1,12 +1,13 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using static AppConfig.EventAggregator;
+using static AppConfiguration.Base.EventAggregator;
 
 namespace UI.Components.Invoke
 {
   /// <summary>
-  /// Логика взаимодействия для OpenFileButton.xaml.
+  /// Логика взаимодействия для компонента OpenFileButton.
+  /// Кнопка с текстом и возможностью изменения фона, с дополнительной логикой для изменения ширины в зависимости от текста.
   /// </summary>
   public partial class OpenFileButton : UserControl
   {
@@ -29,7 +30,7 @@ namespace UI.Components.Invoke
     }
 
     /// <summary>
-    /// Получает или задает фон для кнопки.
+    /// Свойство для изменения фона кнопки. Изменяет фон на ButtonPage.
     /// </summary>
     public new Brush Background
     {
@@ -45,10 +46,12 @@ namespace UI.Components.Invoke
     /// <summary>
     /// Получает или задает текст, отображаемый на кнопке.
     /// </summary>
-    /// <value>Текст, отображаемый на кнопке.</value>
     public string Text
     {
-      get { return Header.Text; }
+      get
+      {
+        return Header.Text;
+      }
 
       set
       {
@@ -57,19 +60,26 @@ namespace UI.Components.Invoke
       }
     }
 
+    /// <summary>
+    /// Метод, который регулирует ширину кнопки в зависимости от длины текста.
+    /// Ширина кнопки будет автоматически подстраиваться под длину текста, но не превышать 300.
+    /// </summary>
     private void AdjustWidth()
     {
       double width = MeasureTextWidth(Text, Header.FontSize);
       if (width > 300 - 20)
       {
-        Width = 300;
+        Width = 300; // Максимальная ширина 300
       }
       else
       {
-        Width = width + 30;
+        Width = width + 30; // Подстраивает ширину с небольшим запасом
       }
     }
 
+    /// <summary>
+    /// Метод для измерения ширины текста с заданным шрифтом.
+    /// </summary>
     private double MeasureTextWidth(string text, double fontSize)
     {
       var formattedText = new FormattedText(
@@ -84,21 +94,25 @@ namespace UI.Components.Invoke
       return formattedText.Width;
     }
 
+    /// <summary>
+    /// Обработчик изменения состояния LockedChanged. Меняет доступность кнопки и фон в зависимости от состояния.
+    /// </summary>
     private void ApplicationDataHandler_LockedChanged(bool newValue)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        this.IsEnabled = !newValue;
+        this.IsEnabled = !newValue; // Кнопка отключается, если состояние "locked" активно
 
+        // Если фон не равен активному цвету, меняем фон в зависимости от состояния кнопки
         if (this.Background != (SolidColorBrush)Application.Current.Resources["ActiveBorderSolidColorBrush"])
         {
           if (!this.IsEnabled)
           {
-            this.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#b23a48"));
+            this.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#b23a48")); // Красный фон для отключенной кнопки
           }
           else if (this.IsEnabled)
           {
-            this.Background = (SolidColorBrush)Application.Current.Resources["IsCheckedColorSolidColorBrush"];
+            this.Background = (SolidColorBrush)Application.Current.Resources["IsCheckedColorSolidColorBrush"]; // Стандартный фон для включенной кнопки
           }
         }
       });

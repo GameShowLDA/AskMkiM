@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Core.GptLibrary.Data;
+﻿using Core.GptLibrary.Data;
 using static Core.GptLibrary.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
 
 namespace Core.GptLibrary
 {
+  /// <summary>
+  /// Статический класс для работы с режимом DCW.
+  /// Предоставляет методы установки параметров DCW и считывания конфигурации устройства.
+  /// </summary>
   static public class DcwMode
   {
     /// <summary>
@@ -57,9 +55,8 @@ namespace Core.GptLibrary
       var query1 = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
       LogInformation($"Отправляем команду (Вариант 1): {query1}");
       await model.WriteLineAsync(query1);
-      await Task.Delay(100); // Небольшая задержка
+      await Task.Delay(100);
     }
-
 
     /// <summary>
     /// Устанавливает время теста DCW.
@@ -70,6 +67,7 @@ namespace Core.GptLibrary
     {
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
       var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
+      query = query.Replace(",", ".");
       await model.WriteLineAsync(query);
     }
 
@@ -149,7 +147,7 @@ namespace Core.GptLibrary
         HighCurrentLimit = highCurrentLimit,
         LowCurrentLimit = lowCurrentLimit,
         TestTime = testTime,
-        Offset = offset
+        Offset = offset,
       };
     }
 

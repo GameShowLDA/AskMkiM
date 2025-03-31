@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NewCore.Communication
+﻿namespace NewCore.Communication
 {
   /// <summary>
   /// Класс DeviceCommand представляет команду устройства с номером и тремя параметрами.

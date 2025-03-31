@@ -1,7 +1,11 @@
-﻿using AppConfig;
+﻿using AppConfiguration.Base;
 
 namespace UI.Theme
 {
+  /// <summary>
+  /// Класс для управления настройками темы оформления приложения.
+  /// Позволяет загружать и применять параметры отображения.
+  /// </summary>
   static public class ThemeSettingsManager
   {
     /// <summary>
@@ -14,6 +18,7 @@ namespace UI.Theme
       {
         return;
       }
+
       await ThemeScheme.LoadSettingsColor(themeFileManager);
     }
   }

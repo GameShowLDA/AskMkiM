@@ -5,20 +5,28 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core.Model;
+using AppConfiguration.Base;
+using NewCore.Base.Device;
 using Utilities.Models;
-using static AppConfig.Config.ProtocolConfig;
+using static AppConfiguration.Protocol.ProtocolConfig;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 
 namespace UI.Controls.Protocol
 {
-  partial class ProtocolUI
+  /// <inheritdoc />
+  public partial class ProtocolUI
   {
     #region Поля.
 
+    /// <summary>
+    /// Последнее отображенное сообщение в протоколе.
+    /// </summary>
     ShowMessageModel LastModelMeassage;
 
+    /// <summary>
+    /// Возвращает текущий статус пошагового режима.
+    /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
     /// <summary>
@@ -67,36 +75,28 @@ namespace UI.Controls.Protocol
 
     #endregion
 
-
     #region Работа с оборудованием?
 
     /// <summary>
     /// Список моделей устройств, используемых в действиях.
     /// </summary>
-    List<DeviceModel> DeviceModels;
+    List<IDevice> DeviceModels;
 
     #endregion
 
     #endregion
-
-    /// <summary>
-    /// Возвращает токен отмены для текущего действия.
-    /// </summary>
-    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
-    public CancellationToken GetCancellationToken()
-    {
-      return ActionExecutor.CancellationTokenSource.Token;
-    }
 
     #region Основные настройки.
 
     /// <summary>
-    /// Устанавливает основные настройки для выполнения действий.
+    /// Устанавливает основные настройки выполнения действий.
     /// </summary>
     /// <param name="MainWindow">Главное окно приложения.</param>
-    /// <param name="StartDelegate">Делегат, вызываемый для начала действия.</param>
-    /// <param name="StopDelegate">Делегат, вызываемый для остановки действия.</param>
-    /// <param name="ReturnDelegate">Делегат, вызываемый для возврата к предыдущему состоянию.</param>
+    /// <param name="StartDelegate">Делегат запуска.</param>
+    /// <param name="isRepeatEnabled">Флаг разрешения повторного выполнения.</param>
+    /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
+    /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
+    /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
     public void SetSettings(UIElement MainWindow, StartDelegate StartDelegate, bool isRepeatEnabled, StopDelegate StopDelegate = null, ReturnDelegate ReturnDelegate = null, PreActionDelegate preActionDelegate = null)
     {
       _mainWindow = MainWindow;
@@ -104,13 +104,18 @@ namespace UI.Controls.Protocol
       _startDelegate = StartDelegate;
       _returnDelegate = ReturnDelegate;
       _preActionDelegate = preActionDelegate;
+
+      if (ReturnDelegate != null)
+      {
+        _isRepeatEnabled = true;
+      }
     }
 
     /// <summary>
     /// Устанавливает список моделей устройств для использования в действиях.
     /// </summary>
     /// <param name="deviceModels">Список моделей устройств <see cref="DeviceModel"/>.</param>
-    public void SetDevices(List<DeviceModel> deviceModels)
+    public void SetDevices(List<IDevice> deviceModels)
     {
       DeviceModels = deviceModels;
     }
@@ -139,6 +144,10 @@ namespace UI.Controls.Protocol
 
     #region Начало и конец.
 
+    /// <summary>
+    /// Прерывает выполнение текущего процесса.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
     public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate);
 
     /// <summary>
@@ -154,8 +163,10 @@ namespace UI.Controls.Protocol
     private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate);
 
     /// <summary>
-    /// Выполняет завершающие действия после завершения самоконтроля или режима.
+    /// Выполняет завершающие действия после завершения процесса.
     /// </summary>
+    /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
     public async Task FinalizeAsync(StopDelegate stopDelegate = null) => await ActionExecutor.FinalizeAsync(stopDelegate);
 
     #endregion
@@ -225,11 +236,8 @@ namespace UI.Controls.Protocol
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
-    /// <param name="header">Заголовок.</param>
-    /// <param name="headerColor">Цвет заголовка.</param>
-    /// <param name="description">Описание.</param>
-    /// <param name="descriptionColor">Цвет описания.</param>
-    /// <returns></returns>
+    /// <param name="showMessageModel">Модель сообщения.</param>
+    /// <returns>Возвращает режим по шагам.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
     {
       if (!await GetShowDetailedProtocol())
@@ -238,6 +246,7 @@ namespace UI.Controls.Protocol
         {
           await protocolTextBox.RemoveLastLinesAsync();
         }
+
         LastModelMeassage = showMessageModel;
       }
 
@@ -269,7 +278,7 @@ namespace UI.Controls.Protocol
 
       await Task.Run(async () =>
       {
-        using (FileStream fileStream = new FileStream($"{AppConfig.FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
+        using (FileStream fileStream = new FileStream($"{FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
         {
           await Task.Run(() => range.Save(fileStream, DataFormats.Rtf)).ConfigureAwait(true);
         }
@@ -305,9 +314,12 @@ namespace UI.Controls.Protocol
     #endregion
 
     /// <summary>
-    /// Пытается подключиться к устройствам и возвращает ответ о попытке подключения.
+    /// Возвращает токен отмены для текущего действия.
     /// </summary>
-    public async Task<bool> AttemptDeviceConnection(List<DeviceModel> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
-
+    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
+    public CancellationToken GetCancellationToken()
+    {
+      return ActionExecutor.CancellationTokenSource.Token;
+    }
   }
 }

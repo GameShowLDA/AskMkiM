@@ -19,12 +19,17 @@ using TextBox = System.Windows.Controls.TextBox;
 
 namespace UI.Controls.Search
 {
+  /// <summary>
+  /// Окно поиска, содержащее функции поиска и замены, а также возможность сворачивания/разворачивания строки замены.
+  /// </summary>
   public partial class SearchWindow : Window
   {
-    private bool _isExpanded = false; // По умолчанию строка скрыта
+    /// <summary>
+    /// Флаг, указывающий, развернута ли строка замены.
+    /// </summary>
+    private bool _isExpanded = false;
 
     private const double MinWindowHeight = 80;  // Высота окна без строки 2
-    private const double ExpandedWindowHeight = 120; // Высота окна со строкой 2
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
@@ -32,6 +37,14 @@ namespace UI.Controls.Search
     public event Action SelectFileForSearch;
     public string SearchTextData { get; set; }
 
+    /// <summary>
+    /// Высота окна при развернутой строке замены.
+    /// </summary>
+    private double ExpandedWindowHeight => 120;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="SearchWindow"/>.
+    /// </summary>
     public SearchWindow()
     {
       InitializeComponent();
@@ -44,6 +57,10 @@ namespace UI.Controls.Search
       SearchTextBox.Focus();
     }
 
+    /// <summary>
+    /// Обработчик события загрузки окна.
+    /// Устанавливает начальную высоту окна и скрывает строку замены.
+    /// </summary>
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
       _parentWindow = Window.GetWindow(this)?.Owner;
@@ -116,6 +133,10 @@ namespace UI.Controls.Search
       this.MaxHeight = newHeight;
     }
 
+    /// <summary>
+    /// Обработчик изменения размера окна.
+    /// Ограничивает изменение высоты окна.
+    /// </summary>
     private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
     {
       this.Height = this.MinHeight;
@@ -144,6 +165,9 @@ namespace UI.Controls.Search
       this.Hide();
     }
 
+    /// <summary>
+    /// Обработчик изменения состояния кнопки регистра (чувствительность к регистру).
+    /// </summary>
     private void OnCaseChanged(object sender, EventArgs e)
     {
       var button = sender as CaseToggleButton;

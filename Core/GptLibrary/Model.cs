@@ -1,7 +1,6 @@
 ﻿using System.IO.Ports;
 using System.Text;
 using Core.Abstract;
-using YamlDotNet.Core.Tokens;
 using static Utilities.LoggerUtility;
 
 namespace Core.GptLibrary
@@ -159,7 +158,6 @@ namespace Core.GptLibrary
         return false;
       }
     }
-
 
     /// <summary>
     /// Разрывает соединение с устройством и освобождает ресурсы порта.

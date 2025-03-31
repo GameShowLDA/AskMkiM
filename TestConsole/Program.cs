@@ -1,12 +1,14 @@
-﻿using NewCore.Base;
-using NewCore.Device;
+﻿using TestConsole.GPT;
+using TestConsole.MINT;
 
 namespace TestConsole
 {
   internal class Program
   {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
+      Console.ForegroundColor = ConsoleColor.White;
+
       Console.WriteLine("=== Главное меню ===");
 
       while (true)
@@ -15,11 +17,16 @@ namespace TestConsole
         Console.WriteLine("\nВыберите действие:");
         Console.WriteLine("1. Тест COM-портов");
         Console.WriteLine("2. Работа с базой данных");
+        Console.WriteLine("3. Работа с Keysight");
+        Console.WriteLine("4. Самоконтроль УКШ");
+        Console.WriteLine("5. Самоконтроль МИНТ");
+        Console.WriteLine("6. Проверка ввода данных");
+        Console.WriteLine("7. ППУ");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 2)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 7)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -38,6 +45,34 @@ namespace TestConsole
             DBTest.Run();
             break;
 
+          case 3:
+
+            TestKeysight.RunAsync();
+            break;
+
+          case 4:
+
+            await DBC_SelfControl.RunAsync();
+            break;
+
+          case 5:
+
+            await Mint_Test.RunAsync();
+            break;
+
+          case 6:
+
+            InputValidator.Validate();
+            break;
+
+          case 7:
+            await GPT_Test.RunAsync();
+            break;
+
+
+          case 8:
+            break;
+
           case 0:
             // Выход из программы
             Console.WriteLine("Выход из программы...");
@@ -49,5 +84,6 @@ namespace TestConsole
         }
       }
     }
+
   }
 }

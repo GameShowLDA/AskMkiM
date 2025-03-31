@@ -1,28 +1,52 @@
-﻿using NewCore.Base;
+﻿using NewCore.Base.Device;
+using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.DeviceBusCommutation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NewCore.Device
 {
-  public class DeviceBusCommutation : DeviceWithIP
+  /// <summary>
+  /// Устройство коммутации шин, обеспечивающее подключение различных измерителей системы.
+  /// </summary>
+  public class DeviceBusCommutation : DeviceWithIP, ISwitchingDevice
   {
-    public DeviceBusCommutation(IPAddress ip) : base(ip) 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="DeviceBusCommutation"/>.
+    /// </summary>
+    public DeviceBusCommutation()
     {
       Name = "Устройство коммутации шин";
       Description = "Реализовать описание в NewCore.Device.DeviceBusCommutation";
+      DeviceClass = GetType().FullName;
+      DeviceType = DeviceEnum.DeviceType.SwitchingDevice;
+
+      CapacitorManager = new CapacitorManager(this);
+      ConnectorManager = new ConnectorManager(this);
+      RelayManager = new RelayManager(this);
+      ResistorManager = new ResistorManager(this);
+      ConnectableManager = new StateManager(this);
+      SelfTestManager = new SelfTestManager(this);
     }
 
-    public Functions Functions => new Functions(this);
+    /// <inheritdoc />
+    public ICapacitorDeviceBusCommutation CapacitorManager { get; set; }
 
-    public override Task<bool> Initialize()
+    /// <inheritdoc />
+    public IConnectorDeviceBusCommutation ConnectorManager { get; set; }
 
-    {
-      throw new NotImplementedException();
-    }
+    /// <inheritdoc />
+    public IRelayDeviceBusCommutation RelayManager { get; set; }
+
+    /// <inheritdoc />
+    public IResistorDeviceBusCommutation ResistorManager { get; set; }
+
+    /// <inheritdoc />
+    public ISelfTestChecker SelfTestManager { get; set; }
+
+    /// <summary>
+    /// Устанавливает или возвращает номер шасси.
+    /// </summary>
+    public int NumberChassis { get; set; }
   }
 }

@@ -27,11 +27,6 @@ namespace Core
           result = await CheckModule(deviceModel, messageDelegate);
           break;
 
-        case Enum.DeviceEnum.Type.AccurateMeter:
-        case Enum.DeviceEnum.Type.FastMeter:
-          result = await CheckMeter(deviceModel, messageDelegate);
-          break;
-
         case Enum.DeviceEnum.Type.Breakdown:
           result = await CheckBreakdownAsync(deviceModel, messageDelegate);
           break;
@@ -54,21 +49,6 @@ namespace Core
     }
 
     /// <summary>
-    /// Проверка подключения к мультиметру.
-    /// </summary>
-    /// <param name="deviceModel">Модель мультиметра.</param>
-    /// <returns>Результат подключение к мультиметру.</returns>
-    static private async Task<bool> CheckMeter(DeviceModel deviceModel, MessageDelegate messageDelegate)
-    {
-      if (deviceModel.Name.ToLower().Contains("keysight"))
-      {
-        return await ConnectToKeysight34465AAsync(messageDelegate);
-      }
-
-      return false;
-    }
-
-    /// <summary>
     /// Проверка подключения к пробойной установке.
     /// </summary>
     /// <param name="deviceModel">Модель мультиметра.</param>
@@ -81,22 +61,6 @@ namespace Core
       }
 
       return false;
-    }
-
-    /// <summary>
-    /// Подключение к Keysight.
-    /// </summary>
-    /// <returns>Результат подключение к мультиметру Keysight.</returns>
-    static private async Task<bool> ConnectToKeysight34465AAsync(MessageDelegate messageDelegate)
-    {
-      var meter = await KeysightLibrary.Model.CreateAsync();
-      if (!await meter.ConnectAsync())
-      {
-        await messageDelegate(new ShowMessageModel("Keysight34465A", null, "[NO]", ShowMessageModel.ErrorMessage.Item2));
-        return false;
-      }
-
-      return true;
     }
 
     /// <summary>

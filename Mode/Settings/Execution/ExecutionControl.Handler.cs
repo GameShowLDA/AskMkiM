@@ -1,9 +1,12 @@
 ﻿using System.Windows.Input;
-using static AppConfig.Config.ExecutionConfig;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace Mode.Settings.Execution
 {
-  partial class ExecutionControl
+  /// <summary>
+  /// Класс <see cref="ExecutionControl"/> отвечает за управление конфигурацией выполнения.
+  /// </summary>
+  public partial class ExecutionControl
   {
     /// <summary>
     /// Устанавливает конфигурацию на основе данных, прочитанных из YAML-файла.
@@ -23,11 +26,12 @@ namespace Mode.Settings.Execution
     /// <returns>True, если текст не является числовым; в противном случае - false.</returns>
     private bool CheckIsNumeric(TextCompositionEventArgs e)
     {
-      if (!(double.TryParse(e.Text, out _)))
+      if (!double.TryParse(e.Text, out _))
       {
         e.Handled = true;
         return true;
       }
+
       return false;
     }
 

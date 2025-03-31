@@ -1,38 +1,56 @@
-﻿using NewCore.Base;
+﻿using System.IO.Ports;
+using NewCore.Base.Device;
+using NewCore.Base.Function.Breakdown;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.GPT;
-using System;
-using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NewCore.Device
 {
-  public class GPT79904 : DeviceWithCOM
+  /// <summary>
+  /// Класс, представляющий пробойную установку GPT79904, работающую через последовательный порт (COM).
+  /// </summary>
+  public class GPT79904 : DeviceWithCOM, IBreakdownTester
   {
-    public GPT79904(string VID, string PID)
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="GPT79904"/>.
+    /// </summary>
+    public GPT79904()
     {
-      string portName = FindComPort(VID, PID);
-      COMPort = new SerialPort(portName, 115200, Parity.None, 8, StopBits.One)
-      {
-        ReadTimeout = 2000,
-        WriteTimeout = 2000,
-        DtrEnable = true,
-        RtsEnable = true,
-        Handshake = Handshake.None
-      };
+      BaudRate = 115200;
+      StopBits = StopBits.One;
+      DataBits = 8;
+      Parity = Parity.None;
+      DeviceClass = GetType().FullName;
 
-      Name = "GPT79904";
-      Description = "Реализовать описание в NewCore.Device.GPT79904";
+      DeviceType = DeviceEnum.DeviceType.BreakdownTester;
+
+      AcwManger = new AcwMode(this);
+      DcwManger = new DcwMode(this);
+      IrManger = new IrMode(this);
+      SystemManger = new SystemSettings(this);
+      ConnectableManager = new ConnectableManager(this);
     }
 
-    public IIrMode IrMode => new IrMode(this);
+    /// <inheritdoc />
+    public new string Name { get => "GPT79904"; }
 
-    // TODO : нужен интерфейс
-    public AcwMode AcwMode => new AcwMode(this);
-    // TODO : нужен интерфейс
-    public DcwMode DcwMode => new DcwMode(this);
+    /// <inheritdoc />
+    public new string Description { get => "Реализовать описание в NewCore.Device.GPT79904"; }
+
+    /// <inheritdoc />
+    public int NumberChassis { get; set; }
+
+    /// <inheritdoc />
+    public IAcwModeBreakdown AcwManger { get; set; }
+
+    /// <inheritdoc />
+    public IDcwModeBreakdown DcwManger { get; set; }
+
+    /// <inheritdoc />
+    public IIrModeBreakdown IrManger { get; set; }
+
+    /// <inheritdoc />
+    public ISystemSettingsBreakdown SystemManger { get; set; }
   }
 }

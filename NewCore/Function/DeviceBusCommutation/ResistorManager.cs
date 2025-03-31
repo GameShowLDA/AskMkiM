@@ -1,9 +1,15 @@
-﻿using NewCore.Communication;
+﻿using NewCore.Base.Function.DBC;
+using NewCore.Communication;
 using static Utilities.LoggerUtility;
+using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
-  public class ResistorManager
+  /// <summary>
+  /// Менеджер управления коммутацией резисторов.
+  /// Обеспечивает подключение и отключение резисторов в системе.
+  /// </summary>
+  public class ResistorManager : IResistorDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.
@@ -11,7 +17,7 @@ namespace NewCore.Function.DeviceBusCommutation
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="ResistorManager"/>.
+    /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public ResistorManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
@@ -25,8 +31,14 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        DeviceCommand command = new DeviceCommand(6, 1, num, 1);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
+        DeviceCommand cmd = new DeviceCommand(6, 1, num, 1);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+
         return true;
       }
 
@@ -43,8 +55,14 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        DeviceCommand command = new DeviceCommand(6, 1, num, 2);
-        await DeviceCommandSender.SendCommandAsync(_deviceBusCommutation.IPAddress, command).ConfigureAwait(false);
+        if (await GetIsIdleModeEnabled())
+        {
+          return true;
+        }
+
+        DeviceCommand cmd = new DeviceCommand(6, 1, num, 2);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+
         return true;
       }
 

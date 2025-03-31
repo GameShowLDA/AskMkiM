@@ -1,50 +1,51 @@
-﻿using NewCore.Base;
+﻿using NewCore.Base.Device;
+using NewCore.Base.Function.ModuleVoltageCurrentSource;
+using NewCore.Base.Interface.Main;
+using NewCore.Enum;
 using NewCore.Function.ModuleVoltageCurrentSource;
-using System.Net;
-using static Utilities.LoggerUtility;
 
 namespace NewCore.Device
 {
-  public class ModuleVoltageCurrentSource : DeviceWithIP
+  /// <summary>
+  /// Класс, представляющий модуль источника напряжения и тока.
+  /// </summary>
+  public class ModuleVoltageCurrentSource : DeviceWithIP, IPowerSourceModule
   {
-
-    public ModuleVoltageCurrentSource(IPAddress iPAddress) : base(iPAddress)
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ModuleVoltageCurrentSource"/>.
+    /// </summary>
+    public ModuleVoltageCurrentSource()
     {
       Name = "Модуль источника напряжения и тока";
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
+
+      DeviceType = DeviceEnum.DeviceType.PowerSourceModule;
+
+      BusManager = new BusManager(this);
+      CurrentManager = new CurrentManager(this);
+      ConnectableManager = new StateManager(this);
+      VoltageManager = new VoltageManager(this);
+      DeviceClass = GetType().FullName;
     }
-    public Functions Functions => new Functions(this);
 
     /// <summary>
-    /// Проверяет соединение с устройством.
+    /// Получает или задает номер шасси, к которому подключен модуль.
     /// </summary>
-    /// <returns>
-    /// Возвращает <see cref="bool"/>, указывающий на наличие соединения:
-    /// <c>true</c> — если соединение установлено, <c>false</c> — в противном случае.
-    /// </returns>
-    /// <exception cref="Exception">Выбрасывается, если произошла непредвиденная ошибка при проверке соединения.</exception>
-    public override async Task<bool> Initialize()
-    {
-      try
-      {
-        var (isConnected, answer) = await Functions.Initialize();
+    public int NumberChassis { get; set; }
 
-        if (!isConnected)
-        {
-          LogWarning($"Соединение с устройством не установлено. ({answer})");
-        }
-        else
-        {
-          LogInformation("Соединение с устройством успешно установлено.");
-        }
+    /// <summary>
+    /// Менеджер управления шинами модуля.
+    /// </summary>
+    public IBusManager BusManager { get; set; }
 
-        return isConnected;
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при проверке соединения: {ex.Message}");
-        return false;
-      }
-    }
+    /// <summary>
+    /// Менеджер управления током модуля.
+    /// </summary>
+    public ICurrentManager CurrentManager { get; set; }
+
+    /// <summary>
+    /// Менеджер управления напряжением модуля.
+    /// </summary>
+    public IVoltageManager VoltageManager { get; set; }
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -18,7 +19,14 @@ namespace UI.Components
   /// </summary>
   public partial class MultiEditorControl : UserControl
   {
+    /// <summary>
+    /// Счетчик кликов для определения двойного клика.
+    /// </summary>
     private int _clickCount = 0;
+
+    /// <summary>
+    /// Таймер для обработки двойного клика.
+    /// </summary>
     private DispatcherTimer _clickTimer;
 
     /// <summary>
@@ -85,6 +93,12 @@ namespace UI.Components
       textSearchManager.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
     }
 
+    /// <summary>
+    /// Обрабатывает событие нажатия левой кнопки мыши на верхней панели.
+    /// При двойном клике создаёт новый файл.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события мыши.</param>
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       _clickCount++;
@@ -169,6 +183,12 @@ namespace UI.Components
       controlManager.RemoveControl(tabButton, control);
     }
 
+    /// <summary>
+    /// Обрабатывает событие нажатия клавиш. 
+    /// Позволяет закрыть активную вкладку при нажатии Alt+System+X.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Данные события клавиатуры.</param>
     private void MultiWindowControl_KeyDown(object sender, KeyEventArgs e)
     {
       Console.WriteLine($"e.Key = {e.Key}; e.SystemKey = {e.SystemKey}; Keyboard.Modifiers = {Keyboard.Modifiers}");

@@ -6,39 +6,124 @@
              xmlns:local="clr-namespace:Mode.Settings.DeviceConfig.ChassisManager"
              xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="300">
+             d:DesignHeight="450" d:DesignWidth="300" MinWidth="250">
+    <UserControl.Resources>
+        <DropShadowEffect x:Key="ShadowEffect" 
+                  BlurRadius="20" 
+                  ShadowDepth="0" 
+                  Opacity="0.5" 
+                  Color="Black"/>
+    </UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Border Margin="10" Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="15" Effect="{DynamicResource ShadowEffect}" Padding="5,10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <Border Background="Red">
-
-            <!-- Кнопка добавления системы -->
-            <CustomControls:PlusButtonControl 
-                 x:Name="addAccurateMeterButton" 
-                 Grid.Column="1" 
-                 FontSize="4" 
-                 Height="40" 
-                 Width="40" 
-                 Padding="5" 
-                
+            <TextBlock
+                Text="Список устройств"
+                Foreground="{StaticResource ForegroundSolidColorBrush}"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                FontSize="20"
+                FontWeight="Bold"
+                Margin="10"
                 />
-        </Border>
-        
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding Systems}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Content="{Binding Name}" 
-                                Margin="5"
-                                Padding="10"
-                                Command="{Binding SelectSystemCommand}"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Background="{StaticResource ActiveForegroundSolidColorBrush}" x:Name="addChassisButton"
+                        MouseEnter="addChassisButton_MouseEnter"
+                        MouseLeave="addChassisButton_MouseLeave"
+                        PreviewMouseDown="addChassisButton_PreviewMouseDown"
+                        CornerRadius="5"
+                        Height="40"
+                >
+                    <TextBlock 
+                               Text="Добавить тестер АСКМ"
+                               Foreground="{StaticResource ForegroundSolidColorBrush}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontSize="18"
+                               />
+
+                </Border>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
+                    <ItemsControl ItemsSource="{Binding SystemsChassis}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnSystemSelected">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <Separator Grid.Row="2" Margin="20,10">
+                <Separator.Style>
+                    <Style TargetType="Separator">
+                        <Setter Property="Background" Value="{StaticResource ForegroundSolidColorBrush}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource ForegroundSolidColorBrush}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                </Separator.Style>
+            </Separator>
+
+            <Grid Grid.Row="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Background="{StaticResource ActiveForegroundSolidColorBrush}" x:Name="addRackButton"
+                MouseEnter="addChassisButton_MouseEnter"
+                MouseLeave="addChassisButton_MouseLeave"
+                PreviewMouseDown="addRackButton_PreviewMouseDown"
+                CornerRadius="5"
+                Height="40"
+                >
+
+                    <TextBlock 
+                   Text="Добавить стойку СКМ"
+                   Foreground="{StaticResource ForegroundSolidColorBrush}"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   FontSize="18"
+                   />
+                </Border>
+
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
+                    <ItemsControl ItemsSource="{Binding SystemsRack}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnRackSelected">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
 </UserControl>
+    

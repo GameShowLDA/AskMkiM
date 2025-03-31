@@ -4,14 +4,14 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using static AppConfig.Config.ProtocolConfig;
-using static AppConfig.Config.SystemStateManager;
+using static AppConfiguration.Protocol.ProtocolConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.Invoke.InvokeRichTextBox
 {
   /// <summary>
-  /// Логика взаимодействия для InvokeRichTextBoxUI.xaml
+  /// Логика взаимодействия для InvokeRichTextBoxUI.xaml.
   /// </summary>
   public partial class InvokeRichTextBoxUI : UserControl
   {
@@ -33,6 +33,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
         Application.Current.Dispatcher.Invoke(() => readOnly = protocolTextBox.IsReadOnly);
         return readOnly;
       }
+
       set
       {
         Application.Current.Dispatcher.Invoke(new Action(() => protocolTextBox.IsReadOnly = value));
@@ -52,11 +53,17 @@ namespace UI.Components.Invoke.InvokeRichTextBox
       }
     }
 
+    /// <summary>
+    /// Прокручивает содержимое TextBox до конца.
+    /// </summary>
     public void ScrollToEnd()
     {
       Application.Current.Dispatcher.Invoke(new Action(() => protocolTextBox.ScrollToEnd()));
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="Ваш класс"/>.
+    /// </summary>
     public InvokeRichTextBoxUI()
     {
       InitializeComponent();
@@ -78,6 +85,10 @@ namespace UI.Components.Invoke.InvokeRichTextBox
       await AppendLineAsync(header, description, headerColor, descriptionColor);
     }
 
+    /// <summary>
+    /// Добавляет параграф с текстом в RichTextBox.
+    /// </summary>
+    /// <param name="paragraph">Параграф, который необходимо добавить.</param>
     public void AppendParagraph(Paragraph paragraph)
     {
       StringBuilder text = new StringBuilder();
@@ -88,10 +99,19 @@ namespace UI.Components.Invoke.InvokeRichTextBox
           text.Append(run.Text);
         }
       }
+
       LogInformation($"Отобразить текст: {text.ToString()}");
       protocolTextBox.Document.Blocks.Add(paragraph);
     }
 
+    /// <summary>
+    /// Асинхронно добавляет строку в RichTextBox.
+    /// </summary>
+    /// <param name="header">Заголовок.</param>
+    /// <param name="description">Описание.</param>
+    /// <param name="headerColor">Цвет заголовка.</param>
+    /// <param name="descriptionColor">Цвет описания.</param>
+    /// <returns>Асинхронная задача.</returns>
     public async Task AppendLineAsync(string header = null, string description = null, Color? headerColor = null, Color? descriptionColor = null)
     {
       (header, headerColor, descriptionColor) = SetDefaultValues(header, headerColor, descriptionColor);
@@ -199,7 +219,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
     {
       Paragraph paragraph = new Paragraph { LineHeight = 2, Foreground = new SolidColorBrush(Colors.White) };
 
-      Run headerRun = new Run(header) { FontWeight = FontWeights.Bold, FontSize = _currentFontSize, Foreground = new SolidColorBrush(headerColor) };
+      Run headerRun = new Run(header) { FontSize = _currentFontSize, Foreground = new SolidColorBrush(headerColor) };
       paragraph.Inlines.Add(headerRun);
 
       if (!string.IsNullOrEmpty(description))
@@ -209,7 +229,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
         paragraph.Inlines.Add(descriptionRun);
       }
 
-      if (await GetTimeStart() && !string.IsNullOrEmpty(description))
+      if (await GetTimeStart())
       {
         string elapsedTime = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", System.Globalization.CultureInfo.InvariantCulture);
         paragraph.Inlines.Add(new Run("  ["));
@@ -277,6 +297,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
         {
           ChangeFontSize(-2);
         }
+
         e.Handled = true;
       }
     }
@@ -288,7 +309,9 @@ namespace UI.Components.Invoke.InvokeRichTextBox
     public void ChangeFontSize(double change)
     {
       if (_currentFontSize + change > 0)
-        _currentFontSize += change; // Update the current font size
+      {
+        _currentFontSize += change;
+      }
 
       foreach (Block block in protocolTextBox.Document.Blocks)
       {

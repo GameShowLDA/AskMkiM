@@ -1,11 +1,14 @@
 ﻿using AppConfig;
 using System.Windows;
 using System.Windows.Controls;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
+using static AppConfiguration.SystemState.SystemStateManager;
+using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
-
+using AppConfiguration.Execution;
+using AppConfiguration.MeasurementError;
+using AppConfiguration.Protocol;
+using AppConfiguration.Theme;
+using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
 {
@@ -14,10 +17,10 @@ namespace MainWindowProgram
     /// <summary>
     /// Инициализация приложения.
     /// </summary>
-    private void Initialize()
+    private async Task Initialize()
     {
       CheckStatusProgram();
-      StartSettings();
+      await StartSettings();
       RegisterHotkeys();
     }
 
@@ -41,9 +44,28 @@ namespace MainWindowProgram
     /// <summary>
     /// Выполняет асинхронную настройку приложения, загружает настройки темы и регистрирует обработчики событий для сообщений.
     /// </summary>
-    private async void StartSettings()
+    private async Task StartSettings()
     {
-      // await ReadAllSettingsAsync();
+      try
+      {
+        var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
+        var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
+        var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
+        var db = DataBaseConfiguration.Configurations.DataBaseConfig.InitializeDB();
+
+        await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
+        await ThemeSettingsManager.ReadThemeModeAsync();
+      }
+      catch (Exception ex)
+      {
+        var stackTrace = new System.Diagnostics.StackTrace();
+        var callingFrame = stackTrace.GetFrame(1);
+        var method = callingFrame.GetMethod();
+        var className = method.DeclaringType.FullName;
+        var methodName = method.Name;
+
+        LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
+      }
 
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
@@ -75,6 +97,7 @@ namespace MainWindowProgram
         });
       }
     }
+
     private void OnTextEditorActive(bool isTextEditor)
     {
       if (isTextEditor)

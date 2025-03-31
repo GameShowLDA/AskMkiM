@@ -47,7 +47,7 @@
 
         <!-- MANU_DCW_TTIME -->
         <TextBlock Grid.Row="3" Text="Время теста DCW (1 - 999 сек):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <Slider x:Name="TimeSlider" Grid.Row="3" Style="{StaticResource CustomSliderStyle}" Grid.Column="1" Margin="10" Minimum="1" Maximum="999" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="TimeSlider_ValueChanged" />
+        <Slider x:Name="TimeSlider" Grid.Row="3" Style="{StaticResource CustomSliderStyle}" Grid.Column="1" Margin="10" Minimum="1" Maximum="999" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="TimeSlider_ValueChanged" />
         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Value, ElementName=TimeSlider, StringFormat='Выбранное время: {0} сек'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
 
         <!-- MANU_DCW_REF -->
