@@ -650,6 +650,11 @@ namespace UI.Components.MultiEditorMethods
 
         GoToOccurrence(currentIndex);
       }
+      else 
+      {
+        MessageBox.Show($"Текст {_searchText} не найден", "Ошибка");
+        return;
+      }
     }
 
     /// <summary>
