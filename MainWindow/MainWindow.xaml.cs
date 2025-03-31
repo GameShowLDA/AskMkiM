@@ -1,4 +1,5 @@
-﻿using AppConfig.DataBase;
+﻿using AppConfig;
+using AppConfig.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System.Diagnostics;
@@ -23,6 +24,7 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
+      Initialize();
       SetEvent();
 
       Task.Run(async () =>
@@ -59,9 +61,12 @@ namespace MainWindowProgram
       TextEditorActive += OnTextEditorActive;
       TextEditorClosing += OnTextEditorClosing;
       SearchWindowClosing += OnSearchWindowClosing;
+      SearchWindowAtivated += OnSearchWindowActivated;
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler; // Подписываемся на событие
+      RequestShowProgress += OnRequestShowProgress;
+      RequestCloseProgress += OnRequestCloseProgress;
     }
 
     private void SettingsGUI()
@@ -94,6 +99,13 @@ namespace MainWindowProgram
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
       AppConfig.Config.SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+    }
+
+
+    private void OnSearchWindowActivated(bool isOpen)
+    {
+      _isSearchWindowOpen = isOpen;
+      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
     }
   }
 }

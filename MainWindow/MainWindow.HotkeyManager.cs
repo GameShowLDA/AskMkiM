@@ -1,12 +1,16 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UI.Components;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
 {
   public partial class MainWindow
   {
+    private bool isSearchWindowOpened;
+    private bool isTextEditorActive;
+
     public static readonly RoutedUICommand ActivateMenuItemCommand = new RoutedUICommand(
     "ActivateMenuItem", "ActivateMenuItemCommand", typeof(MainWindow));
     private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -91,13 +95,18 @@ namespace MainWindowProgram
 
     private async Task HandleUserControlPreviewMouseDownAsync(object sender, MouseButtonEventArgs e)
     {
-      if (sender is UserControl userControl)
+      if (sender is Control userControl)
       {
         switch (userControl.Name)
         {
           case "PowerButton":
             await PowerButton.PowerButtonClick();
             break;
+
+          case "searchMenuItem":
+            SearchMenuItem_PreviewMouseDown(sender, e);
+            break;
+
           default:
             LogWarning($"Неизвестный UserControl: {userControl.Name}");
             break;
@@ -130,6 +139,7 @@ namespace MainWindowProgram
       RegisterHotkey(Key.D7, ModifierKeys.Control, () => FocusMenuItem(Admin));
 
       RegisterHotkey(Key.P, ModifierKeys.Control, async () => await SimulateButtonAsync(PowerButton));
+      RegisterHotkey(Key.F, ModifierKeys.Control, async () => await ShowSearchWindow(searchMenuItem));
     }
 
     private void RegisterHotkey(Key key, ModifierKeys modifiers, Action action)
@@ -178,6 +188,22 @@ namespace MainWindowProgram
       };
 
       await HandleUserControlPreviewMouseDownAsync(PowerButton, mouseEventArgs);
+    }
+
+    private async Task ShowSearchWindow(MenuItem userControl)
+    {
+      if (isTextEditorActive)
+      {
+        var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+        {
+          RoutedEvent = UIElement.MouseLeftButtonDownEvent,
+          Source = userControl
+        };
+        if (!_isSearchWindowOpen)
+        {
+          await HandleUserControlPreviewMouseDownAsync(searchMenuItem, mouseEventArgs);
+        }
+      }
     }
   }
 }

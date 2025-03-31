@@ -364,9 +364,9 @@
             </StackPanel>
         </Grid>
 
-        <Components:MultiEditorControl
-            x:Name="multiEditors" 
-            Grid.Row="1"
+        <Components:MultiWindowControl 
+            x:Name="MultiWindow" 
+            Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"
             />
 
         <Grid 

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using AppConfig;
+using System.Windows;
 using System.Windows.Controls;
 using static AppConfig.Config.SystemStateManager;
 using static AppConfig.EventAggregator;
@@ -42,7 +43,7 @@ namespace MainWindowProgram
     /// </summary>
     private async void StartSettings()
     {
-      await ReadAllSettingsAsync();
+      // await ReadAllSettingsAsync();
 
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
@@ -70,7 +71,7 @@ namespace MainWindowProgram
       {
         await Dispatcher.InvokeAsync(() =>
         {
-          multiEditors.AddControl(name, userControl);
+          MultiWindow.AddControl(name, userControl);
         });
       }
     }
@@ -78,6 +79,7 @@ namespace MainWindowProgram
     {
       if (isTextEditor)
       {
+        isTextEditorActive = true;
         fileActionsSeparator.Visibility = Visibility.Visible;
         saveMenuItem.Visibility = Visibility.Visible;
         saveAsMenuItem.Visibility = Visibility.Visible;
@@ -91,7 +93,7 @@ namespace MainWindowProgram
       }
     }
 
-    private void OnTextEditorClosing(bool isTextEditor)
+    private void OnTextEditorClosing(bool isTextEditor, string textEditorName)
     {
       if (isTextEditor)
       {
@@ -101,6 +103,7 @@ namespace MainWindowProgram
 
     private void HideTextEditorActions()
     {
+      isTextEditorActive = false;
       fileActionsSeparator.Visibility = Visibility.Collapsed;
       saveMenuItem.Visibility = Visibility.Collapsed;
       saveAsMenuItem.Visibility = Visibility.Collapsed;
@@ -111,7 +114,7 @@ namespace MainWindowProgram
 
     private void OnSearchWindowClosing(bool isOpen)
     {
-      _isOpen = isOpen;
+      _isSearchWindowOpen = isOpen;
     }
   }
 }

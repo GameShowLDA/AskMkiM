@@ -17,17 +17,28 @@ using YamlDotNet.Core.Tokens;
 namespace UI.Components.SearchControls
 {
   /// <summary>
-  /// Логика взаимодействия для CaseToggleButton.xaml
+  /// Логика взаимодействия для CaseToggleButton.xaml.
   /// </summary>
   public partial class CaseToggleButton : UserControl
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="CaseToggleButton"/>.
+    /// </summary>
     public CaseToggleButton()
     {
       InitializeComponent();
     }
 
+    /// <summary>
+    /// Получает или задает текущее состояние кнопки.
+    /// Если <c>true</c>, кнопка активна (переключен режим с учётом регистра), если <c>false</c>, режим без учёта регистра.
+    /// </summary>
     public bool IsChecked { get => GetChecked(); set => SetChecked(value); }
 
+    /// <summary>
+    /// Метод для установки состояния кнопки.
+    /// </summary>
+    /// <param name="value">Новое состояние кнопки: <c>true</c> для активного состояния, <c>false</c> для неактивного.</param>
     private void SetChecked(bool value)
     {
       if (value)
@@ -42,6 +53,10 @@ namespace UI.Components.SearchControls
       }
     }
 
+    /// <summary>
+    /// Метод для получения текущего состояния.
+    /// </summary>
+    /// <returns><c>true</c>, если кнопка активна, <c>false</c> в противном случае.</returns>
     private bool GetChecked()
     {
       var color = (Brush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];

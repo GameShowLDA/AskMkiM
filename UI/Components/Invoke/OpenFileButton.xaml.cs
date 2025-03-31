@@ -1,37 +1,55 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using static AppConfig.EventAggregator;
-
 
 namespace UI.Components.Invoke
 {
   /// <summary>
-  /// Логика взаимодействия для OpenFileButton.xaml
+  /// Логика взаимодействия для OpenFileButton.xaml.
   /// </summary>
   public partial class OpenFileButton : UserControl
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="OpenFileButton"/>.
+    /// </summary>
     public OpenFileButton()
     {
       InitializeComponent();
       LockedChanged += ApplicationDataHandler_LockedChanged;
     }
+
+    /// <summary>
+    /// Возвращает кнопку закрытия для элемента управления.
+    /// </summary>
+    /// <returns>Кнопка закрытия для данного элемента управления.</returns>
     public CloseButton GetCloseButton()
     {
       return this.CloseButton;
     }
 
+    /// <summary>
+    /// Получает или задает фон для кнопки.
+    /// </summary>
     public new Brush Background
     {
       get { return ButtonPage.Background; }
       set { ButtonPage.Background = value; }
     }
 
+    /// <summary>
+    /// Получает или задает описание для кнопки.
+    /// </summary>
     public string Description { get; set; }
+
+    /// <summary>
+    /// Получает или задает текст, отображаемый на кнопке.
+    /// </summary>
+    /// <value>Текст, отображаемый на кнопке.</value>
     public string Text
     {
       get { return Header.Text; }
+
       set
       {
         Header.Text = value;

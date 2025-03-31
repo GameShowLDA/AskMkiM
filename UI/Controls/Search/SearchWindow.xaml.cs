@@ -28,17 +28,20 @@ namespace UI.Controls.Search
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
-    public event Action<string, bool?, bool?, int, string> SearchText;
     public event Action ClearHighlights;
     public event Action SelectFileForSearch;
+    public string SearchTextData { get; set; }
 
     public SearchWindow()
     {
       InitializeComponent();
       this.Loaded += Window_Loaded;
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
-      EventAggregator.TextEditorClosing += OnSearchWindowClosing;
-      EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
+      EventAggregator.CloseSearchWindow += OnCloseSearchWindowRequested;
+      //EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
+      EventAggregator.SearchTextRequested += OnSearchTextRequested;
+      this.Focus();
+      SearchTextBox.Focus();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -138,7 +141,7 @@ namespace UI.Controls.Search
       ClearHighlights?.Invoke();
       EventAggregator.RaiseSearchWindowClosing(false);
       _allowClose = true;
-      this.Close();
+      this.Hide();
     }
 
     private void OnCaseChanged(object sender, EventArgs e)
@@ -303,7 +306,6 @@ namespace UI.Controls.Search
     #endregion
     private void OnSearchButtonPressed(string searchParameters)
     {
-      //TODO: получить все параметры из окна и передать их в метод поиска в мультиэдиторе
       var searchText = SearchTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
@@ -313,15 +315,12 @@ namespace UI.Controls.Search
         searchAreaParameters.SelectedIndex = 0;
       }
 
-      SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      EventAggregator.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
-    private void OnSearchWindowClosing(bool isOpen)
+    private void OnCloseSearchWindowRequested()
     {
-      if (isOpen)
-      {
-        CloseDialog();
-      }
+      CloseDialog();
     }
 
     private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -359,16 +358,14 @@ namespace UI.Controls.Search
       }
     }
 
-    private void OnActiveEditorChanged(bool isTextEditor)
+    private void OnSearchTextRequested(string selectedText)
     {
-      if (isTextEditor)
+      if (!string.IsNullOrEmpty(selectedText))
       {
-        this.Visibility = Visibility.Visible;
-        this.Activate();
-      }
-      else
-      {
-        this.Visibility = Visibility.Hidden;
+        SearchTextBox.Text = selectedText;
+        SearchTextBox.Focus();
+        SearchPlaceholder.Visibility = Visibility.Collapsed;
+        SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
       }
     }
   }
