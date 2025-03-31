@@ -52,7 +52,7 @@ namespace MainWindowProgram
       MainWindow mainWindow = null;
 
       // 2. Создаем MainWindow в UI-потоке
-      await Dispatcher.InvokeAsync(() =>
+      Application.Current.Dispatcher.Invoke(() =>
       {
         mainWindow = new MainWindow();
         mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow

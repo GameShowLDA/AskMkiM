@@ -23,7 +23,7 @@ namespace MainWindowProgram
   public partial class MainWindow
   {
     public bool _isSearchWindowOpen;
-    private SearchWindow _searchWindow = new SearchWindow();
+    private SearchWindow _searchWindow;
     private ProgressWindow _progressWindow;
 
     #region Основные события управления окном.

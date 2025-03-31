@@ -329,9 +329,24 @@ namespace UI.Controls.Search
         toggleButton.Foreground = color;
     }
     #endregion
+
+    public string GetSearchTextFromUI()
+    {
+      string searchText = null;
+
+      // Убедитесь, что получаем текст на UI потоке
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        searchText = SearchTextBox.Text;
+      });
+
+      return searchText;
+    }
+
+
     private void OnSearchButtonPressed(string searchParameters)
     {
-      var searchText = SearchTextBox.Text;
+      var searchText = GetSearchTextFromUI();
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
       var caseWord = caseButton.IsChecked;

@@ -12,6 +12,7 @@ using Utilities.USB;
 using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Base;
+using UI.Controls.Search;
 
 namespace MainWindowProgram
 {
@@ -82,6 +83,7 @@ namespace MainWindowProgram
       SettingsGUI();
       ProcessCommandLineArgs();
       this.PreviewKeyDown += OnKeyDown;
+      _searchWindow = new SearchWindow();
     }
 
     /// <summary>
