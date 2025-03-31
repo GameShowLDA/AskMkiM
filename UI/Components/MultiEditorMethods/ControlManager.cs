@@ -29,18 +29,16 @@ namespace UI.Components.MultiEditorMethods
     {
       if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control))
       {
-        var saveFileResult = ShowSaveDialogForControl(control);
-
-        if (saveFileResult || !(control is TextEditorUI))
+        int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
+        if (control is TextEditorUI)
         {
-          int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
-
-          HandleClosingEvents(control, tabButton);
-
-          RemoveTabAndControl(tabButton, control);
-
-          ShowNextTab(index);
+          if (ShowSaveDialogForControl(control))
+          {
+            HandleClosingEvents(control, tabButton);
+          }
         }
+        RemoveTabAndControl(tabButton, control);
+        ShowNextTab(index);
       }
     }
 
