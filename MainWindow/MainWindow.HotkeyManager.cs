@@ -166,16 +166,19 @@ namespace MainWindowProgram
     /// </summary>
     private void RegisterHotkeys()
     {
-      RegisterHotkey(Key.D1, ModifierKeys.Control, () => FocusMenuItem(File));
-      RegisterHotkey(Key.D2, ModifierKeys.Control, () => FocusMenuItem(Metrology));
-      RegisterHotkey(Key.D3, ModifierKeys.Control, () => FocusMenuItem(SelfControl));
-      RegisterHotkey(Key.D4, ModifierKeys.Control, () => FocusMenuItem(TestControl));
-      RegisterHotkey(Key.D5, ModifierKeys.Control, () => FocusMenuItem(Settings));
-      RegisterHotkey(Key.D6, ModifierKeys.Control, () => FocusMenuItem(Help));
-      RegisterHotkey(Key.D7, ModifierKeys.Control, () => FocusMenuItem(Admin));
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        RegisterHotkey(Key.D1, ModifierKeys.Control, () => FocusMenuItem(File));
+        RegisterHotkey(Key.D2, ModifierKeys.Control, () => FocusMenuItem(Metrology));
+        RegisterHotkey(Key.D3, ModifierKeys.Control, () => FocusMenuItem(SelfControl));
+        RegisterHotkey(Key.D4, ModifierKeys.Control, () => FocusMenuItem(TestControl));
+        RegisterHotkey(Key.D5, ModifierKeys.Control, () => FocusMenuItem(Settings));
+        RegisterHotkey(Key.D6, ModifierKeys.Control, () => FocusMenuItem(Help));
+        RegisterHotkey(Key.D7, ModifierKeys.Control, () => FocusMenuItem(Admin));
 
-      RegisterHotkey(Key.P, ModifierKeys.Control, async () => await SimulateButtonAsync(PowerButton));
-      RegisterHotkey(Key.F, ModifierKeys.Control, async () => await ShowSearchWindow(searchMenuItem));
+        RegisterHotkey(Key.P, ModifierKeys.Control, async () => await SimulateButtonAsync(PowerButton));
+        RegisterHotkey(Key.F, ModifierKeys.Control, async () => await ShowSearchWindow(searchMenuItem));
+      });
     }
 
     /// <summary>
