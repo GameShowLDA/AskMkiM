@@ -11,6 +11,7 @@ using ConsoleUtilities;
 using Utilities.USB;
 using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
+using AppConfiguration.Base;
 
 namespace MainWindowProgram
 {
@@ -250,7 +251,6 @@ namespace MainWindowProgram
         }
       });
     }
-
 
     private void OnSearchWindowActivated(bool isOpen)
     {

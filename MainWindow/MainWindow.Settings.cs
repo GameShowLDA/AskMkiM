@@ -1,5 +1,4 @@
-﻿using AppConfig;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using static AppConfiguration.SystemState.SystemStateManager;
 using static AppConfiguration.Base.EventAggregator;

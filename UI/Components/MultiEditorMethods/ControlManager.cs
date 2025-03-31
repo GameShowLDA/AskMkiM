@@ -1,10 +1,10 @@
-﻿using AppConfig;
-using System.Windows;
+﻿using System.Windows;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using UserControl = System.Windows.Controls.UserControl;
 using System.Windows.Media;
 using System.Windows.Input;
+using AppConfiguration.Base;
 
 namespace UI.Components.MultiEditorMethods
 {

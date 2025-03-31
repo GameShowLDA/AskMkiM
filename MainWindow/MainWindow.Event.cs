@@ -16,6 +16,7 @@ using Mode.TestSuite.Metrology.NodeMethod.CI;
 using Mode.TestSuite.Metrology.NodeMethod.PI;
 using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
+using AppConfiguration.Base;
 
 namespace MainWindowProgram
 {

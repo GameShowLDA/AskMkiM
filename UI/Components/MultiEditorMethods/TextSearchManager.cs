@@ -1,5 +1,4 @@
-﻿using AppConfig;
-using ICSharpCode.AvalonEdit.Rendering;
+﻿using ICSharpCode.AvalonEdit.Rendering;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 using System.Windows;
@@ -8,6 +7,7 @@ using UI.Controls.TextEditor;
 using UI.Components.SearchControls;
 using static Utilities.LoggerUtility;
 using System.Windows.Controls;
+using AppConfiguration.Base;
 
 namespace UI.Components.MultiEditorMethods
 {

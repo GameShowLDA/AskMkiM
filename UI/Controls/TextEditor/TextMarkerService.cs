@@ -86,6 +86,16 @@ namespace UI.Controls.TextEditor
     }
 
     /// <summary>
+    /// Очищает все существующие маркеры подсветки.
+    /// </summary>
+    public void ClearAllMarkers()
+    {
+      markers.Clear();
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      Console.WriteLine("Все маркеры удалены.");
+    }
+
+    /// <summary>
     /// Добавляет новый маркер подсветки.
     /// </summary>
     /// <param name="startOffset">Начальный индекс в тексте.</param>

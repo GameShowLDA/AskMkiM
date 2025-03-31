@@ -8,9 +8,9 @@ using UI.Controls.TextEditor;
 using Application = System.Windows.Application;
 using UserControl = System.Windows.Controls.UserControl;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using AppConfig;
 using UI.Components.SearchControls;
 using UI.Components.MultiEditorMethods;
+using AppConfiguration.Base;
 
 namespace UI.Components
 {

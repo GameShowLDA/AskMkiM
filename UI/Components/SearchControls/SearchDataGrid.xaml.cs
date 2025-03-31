@@ -1,4 +1,4 @@
-﻿using AppConfig;
+﻿using AppConfiguration.Base;
 using System.Windows;
 using System.Windows.Controls;
 using static Utilities.LoggerUtility;

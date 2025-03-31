@@ -1,5 +1,4 @@
-﻿using AppConfig;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -7,6 +6,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
+using AppConfiguration.Base;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;
 using Application = System.Windows.Application;
@@ -33,7 +33,9 @@ namespace UI.Controls.Search
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
+
     public event Action ClearHighlights;
+
     public event Action SelectFileForSearch;
     public string SearchTextData { get; set; }
 
@@ -71,6 +73,7 @@ namespace UI.Controls.Search
         _parentWindow.StateChanged += ParentWindow_StateChanged;
         UpdatePosition();
       }
+
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
@@ -123,7 +126,6 @@ namespace UI.Controls.Search
 
     #endregion
 
-
     #region Изменение размеров окна
 
     private void UpdateWindowHeight(double newHeight)
@@ -143,7 +145,6 @@ namespace UI.Controls.Search
     }
 
     #endregion
-
 
     #region Обработчики событий окна
 

@@ -1,8 +1,8 @@
-﻿using AppConfig;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using AppConfiguration.Base;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;
