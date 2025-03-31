@@ -5,21 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для CloseButton.xaml
+  /// Логика взаимодействия для CloseButton.xaml.
   /// </summary>
   public partial class CloseButton : UserControl
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="CloseButton"/>.
+    /// </summary>
+    /// <remarks>
+    /// Конструктор инициализирует компонент кнопки и устанавливает фон области вокруг кнопки как прозрачный,
+    /// используя свойство <see cref="BackgroundBorder"/>.
+    /// </remarks>
     public CloseButton()
     {
       InitializeComponent();

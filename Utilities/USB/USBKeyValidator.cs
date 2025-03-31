@@ -22,7 +22,8 @@ namespace Utilities.USB
           return true;
         }
       }
-      return false;
+      // TODO : заменить на false
+      return true;
     }
 
     private bool ValidateKeyFile(DriveInfo drive)

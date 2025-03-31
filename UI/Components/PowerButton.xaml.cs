@@ -103,7 +103,9 @@ namespace UI.Components
     private async void OnMouseEnter(object sender, MouseEventArgs e)
     {
       if (!taskInProgress || hasError)
+      {
         await AnimateOpacityAsync(1);
+      }
     }
 
     /// <summary>
@@ -112,17 +114,26 @@ namespace UI.Components
     private async void OnMouseLeave(object sender, MouseEventArgs e)
     {
       if (!taskInProgress || hasError)
+      {
         await AnimateOpacityAsync(0.5);
+      }
     }
 
     /// <summary>
-    /// Обработка нажатия на кнопку, управление подключением или отключением системы.
+    /// Обработчик события клика по кнопке питания.
+    /// Запускает процесс включения/выключения питания в зависимости от текущего состояния.
     /// </summary>
+    /// <param name="sender">Источник события (кнопка питания).</param>
+    /// <param name="e">Аргументы события мыши.</param>
     public async void OnPowerButtonClick(object sender, MouseButtonEventArgs e)
     {
       await PowerButtonClick();
     }
 
+    /// <summary>
+    /// Включает или выключает питание в зависимости от текущего состояния системы.
+    /// Выполняет серию проверок, таких как наличие модели шасси, включение холостого режима и наличие активной задачи.
+    /// </summary>
     public async Task PowerButtonClick()
     {
       model = ConfigCollector.GetManagerShassy();
@@ -238,8 +249,11 @@ namespace UI.Components
           await ShowCountdownMessageAsync(3, "Повторная попытка через");
         }
 
-        if (exitLoop) break;
-      }
+        if (exitLoop)
+        {
+          break;
+        }
+        }
       while (!await TryConnectAsync());
     }
 
@@ -264,6 +278,7 @@ namespace UI.Components
         GridBlock.Opacity += (targetOpacity - GridBlock.Opacity) * 0.1;
         await Task.Delay(10);
       }
+
       GridBlock.Opacity = targetOpacity;
     }
 
@@ -323,6 +338,11 @@ namespace UI.Components
     /// <summary>
     /// Устанавливает ссылку на верхнюю панель для вывода сообщений.
     /// </summary>
+    /// <param name="topPanel">Ссылка на объект верхней панели, которая будет использоваться для вывода сообщений.</param>
+    /// <remarks>
+    /// Этот метод позволяет связать верхнюю панель с текущим компонентом, чтобы позднее использовать её для
+    /// вывода сообщений или других операций, связанных с интерфейсом.
+    /// </remarks>
     public void SetTopPanel(TopPanelControl topPanel)
     {
       this.topPanel = topPanel;

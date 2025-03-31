@@ -1,35 +1,72 @@
-﻿using System.IO;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using System.Windows.Threading;
-using ICSharpCode.AvalonEdit;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
+using Application = System.Windows.Application;
+using UserControl = System.Windows.Controls.UserControl;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using AppConfig;
+using UI.Components.SearchControls;
+using UI.Components.MultiEditorMethods;
 
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для MultiEditorControl.xaml
+  /// Логика взаимодействия для MultiEditorControl.xaml.
   /// </summary>
   public partial class MultiEditorControl : UserControl
   {
-    List<OpenFileButton> openPages = new List<OpenFileButton>();
-    List<UserControl> userControls = new List<UserControl>();
-
     private int _clickCount = 0;
     private DispatcherTimer _clickTimer;
 
+    /// <summary>
+    /// Объект, управляющий операциями с файлами, включая открытие, сохранение и управление содержимым файлов.
+    /// </summary>
+    internal FileManager fileManager;
+
+    /// <summary>
+    /// Объект, управляющий операциями с поиском по тексту.
+    /// </summary>
+    internal TextSearchManager textSearchManager;
+
+    /// <summary>
+    /// Объект, управляющий операциями связанные с пользовательсикми элементами управления.
+    /// </summary>
+    internal ControlManager controlManager;
+
+    /// <summary>
+    /// Объект, управляющй операциями связнными с сохранением файлов.
+    /// </summary>
+    internal SaveFileManager saveFileManager;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
+    /// </summary>
+    public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
+
+    /// <summary>
+    /// Инициализирует экземпляр <see cref="FileManager"/> и устанавливает связь с текущим контролом.
+    /// </summary>
+    public void InitializeManagers()
+    {
+      fileManager = new FileManager(this);
+      textSearchManager = new TextSearchManager(fileManager, this);
+      controlManager = new ControlManager(fileManager, this);
+      saveFileManager = new SaveFileManager(fileManager);
+    }
+
+    /// <summary>
+    /// Конструктор класса <see cref="MultiEditorControl"/>.
+    /// Инициализирует компоненты и подписывается на необходимые события.
+    /// </summary>
     public MultiEditorControl()
     {
       InitializeComponent();
       _clickTimer = new DispatcherTimer
       {
-        Interval = TimeSpan.FromMilliseconds(300)
+        Interval = TimeSpan.FromMilliseconds(300),
       };
 
       _clickTimer.Tick += (s, e) =>
@@ -39,6 +76,13 @@ namespace UI.Components
       };
 
       this.KeyDown += MultiWindowControl_KeyDown;
+      EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
+      InitializeManagers();
+    }
+
+    private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
+    {
+      textSearchManager.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
     }
 
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -58,91 +102,43 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Добавляет элемент управления и кнопку в соответствующие панели.
+    /// Получает активный текстовый редактор.
     /// </summary>
-    /// <param name="header">Заголовок для кнопки.</param>
-    /// <param name="control">Элемент управления для отображения.</param>
-    public void AddControl(string header, UserControl control, string description = null)
+    /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
+    public TextEditorUI GetActiveTextEditor()
     {
-      OpenFileButton tabButton = new OpenFileButton();
-      tabButton.Header.Text = header;
-      if (description != null)
+      var activePage = fileManager.OpenPages.FirstOrDefault(page =>
+                        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activePage != null)
       {
-        tabButton.Description = description;
-
-        foreach (OpenFileButton page in openPages)
+        int index = fileManager.OpenPages.IndexOf(activePage);
+        if (fileManager.UserControls[index] is TextEditorUI activeEditor)
         {
-          if (page.Description == description)
-          {
-            var index = openPages.IndexOf(page);
-            var userControl = userControls[index];
-            ShowControl(userControl, page);
-            return;
-          }
-        }
-      }
-      else
-      {
-        foreach (OpenFileButton page in openPages)
-        {
-          if (page.Header.Text == header)
-          {
-            var index = openPages.IndexOf(page);
-            var userControl = userControls[index];
-            ShowControl(userControl, page);
-            return;
-          }
+          return activeEditor;
         }
       }
 
-
-
-      tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
-      tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
-      tabButton.MouseDown += (s, e) =>
-      {
-        if (e.ChangedButton == MouseButton.Middle)
-        {
-          RemoveControl(tabButton, control);
-        }
-      };
-
-      openPages.Add(tabButton);
-      userControls.Add(control);
-
-      try
-      {
-        ContentPanel.Children.Add(control);
-        TopPanel.Children.Add(tabButton);
-      }
-      finally
-      {
-        ShowControl(control, tabButton);
-      }
+      return null;
     }
 
+    /// <summary>
+    /// Добавляет элемент управления и соответствующую вкладку в панель управления.
+    /// </summary>
+    /// <param name="header">Заголовок для кнопки, отображаемой в панели вкладок.</param>
+    /// <param name="control">Элемент управления для отображения в панели управления.</param>
+    /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
+    public void AddControl(string header, UserControl control, string description = null)
+    {
+      controlManager.AddControl(header, control, description);
+    }
+
+    /// <summary>
+    /// Открывает диалоговое окно для открытия файла.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
     public void OpenFile(string path)
     {
-      var nameFile = GetNameFile(path);
-      if (string.IsNullOrEmpty(nameFile))
-      {
-        MessageBox.Show("Ошибка", "Ошибка при открытии файла");
-        return;
-      }
-
-      try
-      {
-        string fileContent = System.IO.File.ReadAllText(path);
-
-        var textEditor = new TextEditorUI();
-        textEditor.Text = fileContent;
-
-        AddControl(nameFile, textEditor);
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
-      }
+      fileManager.OpenFile(path);
     }
 
     /// <summary>
@@ -150,61 +146,17 @@ namespace UI.Components
     /// </summary>
     public void CreateNewFile()
     {
-      AddControl("Новый", new TextEditorUI() /*{ Text  = "Новый файл"}*/);
+      fileManager.CreateNewFile();
     }
 
     /// <summary>
-    /// Получает имя файла по пути к файлу.
+    /// Открывает диалоговое окно для сохранения файла в новом месте.
+    /// В случае успешного сохранения, возвращает true, в противном случае false.
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    private string GetNameFile(string path)
+    /// <returns>True, если файл был успешно сохранен, иначе false.</returns>
+    public bool SaveFileAs()
     {
-      if (string.IsNullOrEmpty(path))
-      {
-        return string.Empty;
-      }
-      try
-      {
-        return System.IO.Path.GetFileName(path).ToString();
-      }
-      catch (Exception ex)
-      {
-        return string.Empty;
-      }
-    }
-
-    /// <summary>
-    /// Отображает указанный элемент управления, скрывая остальные.
-    /// </summary>
-    /// <param name="control">Элемент управления для отображения.</param>
-    private void ActivePage(OpenFileButton control)
-    {
-      foreach (OpenFileButton child in TopPanel.Children)
-      {
-        if (control == child)
-        {
-          child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
-        }
-        else
-        {
-          child.Background = (Brush)Application.Current.Resources["SecondarySolidColorBrush"];
-        }
-      }
-    }
-
-    /// <summary>
-    /// Отображает указанный элемент управления, скрывая остальные.
-    /// </summary>
-    /// <param name="control">Элемент управления для отображения.</param>
-    private void ShowControl(UserControl control, OpenFileButton openPage)
-    {
-      foreach (UIElement child in ContentPanel.Children)
-      {
-        child.Visibility = child == control ? Visibility.Visible : Visibility.Collapsed;
-      }
-
-      ActivePage(openPage);
+      return saveFileManager.SaveFileAs();
     }
 
     /// <summary>
@@ -214,29 +166,7 @@ namespace UI.Components
     /// <param name="control">Элемент управления для удаления.</param>
     private void RemoveControl(OpenFileButton tabButton, UserControl control)
     {
-      if (openPages.Contains(tabButton) && userControls.Contains(control))
-      {
-        int index = ContentPanel.Children.IndexOf(control);
-        if (index == 0)
-        {
-          index++;
-        }
-        else
-        {
-          index--;
-        }
-
-        openPages.Remove(tabButton);
-        userControls.Remove(control);
-
-        TopPanel.Children.Remove(tabButton);
-        ContentPanel.Children.Remove(control);
-
-        if (ContentPanel.Children.Count > 0)
-        {
-          ShowControl(userControls[index], openPages[index]);
-        }
-      }
+      controlManager.RemoveControl(tabButton, control);
     }
 
     private void MultiWindowControl_KeyDown(object sender, KeyEventArgs e)
@@ -245,13 +175,60 @@ namespace UI.Components
 
       if (e.Key == Key.System && e.SystemKey == Key.X && Keyboard.Modifiers == ModifierKeys.Alt)
       {
-        var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page => 
+          page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
         if (activeTab != null)
         {
-          int index = openPages.IndexOf(activeTab);
-          RemoveControl(activeTab, userControls[index]);
+          int index = fileManager.OpenPages.IndexOf(activeTab);
+          RemoveControl(activeTab, fileManager.UserControls[index]);
         }
       }
+    }
+
+    /// <summary>
+    /// Обрабатывает событие закрытия окна поиска.
+    /// </summary>
+    public void OnSearchWindowClosing()
+    {
+      textSearchManager.OnSearchWindowClosing();
+    }
+
+    /// <summary>
+    /// Обрабатывает сохранение файла.
+    /// </summary>
+    /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
+    public bool SaveFile()
+    {
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => 
+        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      return saveFileManager.SaveFile(activeTab);
+    }
+
+    /// <summary>
+    /// Выводит файл на печать.
+    /// </summary>
+    public void PrintFile()
+    {
+      PrintFileManager.PrintFile(fileManager.OpenPages, fileManager.UserControls);
+    }
+
+    /// <summary>
+    /// Выполняет поиск по тектсу.
+    /// </summary>
+    /// <param name="searchText">Текст, который мы ищем.</param>
+    /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
+    /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
+    /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
+    /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
+    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      textSearchManager.SearchResultsReady += OnSearchResultsReady;
+      await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
+    {
+      SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
     }
   }
 }

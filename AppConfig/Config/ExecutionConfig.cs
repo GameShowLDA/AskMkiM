@@ -9,28 +9,7 @@ namespace AppConfig.Config
   /// </summary>
   public static class ExecutionConfig
   {
-    #region Properties.
-
-    /// <summary>
-    /// Флаг, указывающий, активен ли холостой режим.
-    /// </summary>
-    static private bool IsIdleModeActive { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, нужно ли останавливать выполнение при ошибке.
-    /// </summary>
-    static private bool StopOnError { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, активен ли режим симуляции ошибок в холостом режиме.
-    /// </summary>
-    static private bool IsErrorSimulationActive { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, активен ли пошаговый режим.
-    /// </summary>
-    static private bool IsStepByStepModeActive { get; set; }
-    #endregion
+    static ExecutionModel ExecutionModel = new ExecutionModel();
 
     #region Set.
 
@@ -42,7 +21,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        IsIdleModeActive = enable;
+        ExecutionModel.IdleModeExecution = enable;
       });
     }
 
@@ -54,7 +33,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        IsStepByStepModeActive = enable;
+        ExecutionModel.StopOnError = enable;
       });
     }
 
@@ -66,7 +45,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        StopOnError = enable;
+        ExecutionModel.StopOnError = enable;
       });
     }
 
@@ -78,7 +57,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        IsErrorSimulationActive = enable;
+        ExecutionModel.IsErrorSimulationMode = enable;
       });
     }
 
@@ -90,35 +69,34 @@ namespace AppConfig.Config
     /// Проверяет, активен ли холостой режим.
     /// </summary>
     /// <returns>true, если включен; false, если выключен.</returns>
-    public static async Task<bool> GetIsIdleModeEnabled() => await Task.Run(() => IsIdleModeActive);
+    public static async Task<bool> GetIsIdleModeEnabled() => await Task.Run(() => ExecutionModel.IdleModeExecution);
 
     /// <summary>
     /// Проверяет, установлен ли флаг остановки при ошибке.
     /// </summary>
     /// <returns>true, если включен; false, если выключен.</returns>
-    public static async Task<bool> GetIsStopOnErrorEnabled() => await Task.Run(() => StopOnError);
+    public static async Task<bool> GetIsStopOnErrorEnabled() => await Task.Run(() => ExecutionModel.StopOnError);
 
     /// <summary>
     /// Возвращает, включена ли симуляция ошибок в холостом режиме.
     /// </summary>
     /// <returns>true, если включена; false, если выключена.</returns>
-    public static async Task<bool> GetIsErrorSimulationEnabled() => await Task.Run(() => IsErrorSimulationActive);
+    public static async Task<bool> GetIsErrorSimulationEnabled() => await Task.Run(() => ExecutionModel.IsErrorSimulationMode);
 
     /// <summary>
     /// Возвращает, включена ли симуляция ошибок в холостом режиме.
     /// </summary>
     /// <returns>true, если включена; false, если выключена.</returns>
-    public static async Task<bool> GetIsStepByStepModeEnabled() => await Task.Run(() => IsStepByStepModeActive);
+    public static async Task<bool> GetIsStepByStepModeEnabled() => await Task.Run(() => ExecutionModel.StopOnError);
 
     #endregion
-
     public static async Task RewriteExecutionConfigAsync()
     {
       ExecutionModel executionModel = new ExecutionModel();
-      executionModel.IdleModeExecution = IsIdleModeActive;
-      executionModel.StopOnError = StopOnError;
-      executionModel.IsErrorSimulationMode = IsErrorSimulationActive;
-      executionModel.StopOnError = IsStepByStepModeActive;
+      executionModel.IdleModeExecution = ExecutionModel.IdleModeExecution;
+      executionModel.StopOnError = ExecutionModel.StopOnError;
+      executionModel.IsErrorSimulationMode = ExecutionModel.IsErrorSimulationMode;
+      executionModel.StopOnError = ExecutionModel.StepByStepMode;
 
       ExecutionFileManager executionFileManager = new ExecutionFileManager(FileLocations.ExecutionConfigPath);
       await executionFileManager.RewriteFileAsync(executionModel);

@@ -2,11 +2,10 @@
 {
   static public class FileLocations
   {
-
     /// <summary>
     /// Путь к файлу настроек конфигурации.
     /// </summary>
-    static public string ConfigFilePath => ".\\Settings\\_config.json";
+    static public string ConfigFilePath => ".\\Settings\\_config.db";
 
     /// <summary>
     /// Путь к файлу настроек протокола.

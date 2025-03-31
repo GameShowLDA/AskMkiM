@@ -7,33 +7,7 @@ namespace AppConfig.Config
   /// </summary>
   public static class ProtocolConfig
   {
-    #region Properties.
-
-    /// <summary>
-    /// Флаг, указывающий, нужно ли отображать информацию об устройствах.
-    /// </summary>
-    static private bool ShowDeviceInfo { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, на режим подробного вывода информации в протокол.
-    /// </summary>
-    static private bool ShowDetailedProtocol { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, включено ли автоматическое сохранение протокола.
-    /// </summary>
-    static private bool AutoSaveProtocol { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, включена ли автоматическая печать протокола.
-    /// </summary>
-    static private bool AutoPrintProtocol { get; set; }
-
-    /// <summary>
-    /// Флаг, указывающий, нужно ли отображать время выполнения операций.
-    /// </summary>
-    static private bool DisplayOperationTime { get; set; }
-    #endregion
+    static ProtocolModel ProtocolModel = new ProtocolModel();
 
     #region Set.
 
@@ -45,7 +19,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        ShowDeviceInfo = enable;
+        ProtocolModel.ShowDeviceInfo = enable;
       });
     }
 
@@ -57,7 +31,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        ShowDetailedProtocol = enable;
+        ProtocolModel.ShowDetailedProtocol = enable;
       });
     }
 
@@ -69,7 +43,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        AutoSaveProtocol = enable;
+        ProtocolModel.AutoSaveProtocol = enable;
       });
     }
 
@@ -81,7 +55,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        AutoPrintProtocol = enable;
+        ProtocolModel.AutoPrintProtocol = enable;
       });
     }
 
@@ -93,7 +67,7 @@ namespace AppConfig.Config
     {
       await Task.Run(() =>
       {
-        DisplayOperationTime = enable;
+        ProtocolModel.DisplayOperationTime = enable;
       });
     }
 
@@ -105,43 +79,43 @@ namespace AppConfig.Config
     /// Возвращает статус отображения информации об устройствах в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetDeviceInfo() => await Task.Run(() => ShowDeviceInfo);
+    public static async Task<bool> GetDeviceInfo() => await Task.Run(() => ProtocolModel.ShowDeviceInfo);
 
     /// <summary>
     /// Возвращает статус отображения подробной информации в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetShowDetailedProtocol() => await Task.Run(() => ShowDetailedProtocol);
+    public static async Task<bool> GetShowDetailedProtocol() => await Task.Run(() => ProtocolModel.ShowDetailedProtocol);
 
     /// <summary>
     /// Возвращает статус автосохранения протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static async Task<bool> GetSaveProtocol() => await Task.Run(() => AutoSaveProtocol);
+    public static async Task<bool> GetSaveProtocol() => await Task.Run(() => ProtocolModel.AutoSaveProtocol);
 
     /// <summary>
     /// Возвращает статус авто печати протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static async Task<bool> GetPrintProtocol() => await Task.Run(() => AutoPrintProtocol);
+    public static async Task<bool> GetPrintProtocol() => await Task.Run(() => ProtocolModel.AutoPrintProtocol);
 
 
     /// <summary>
     /// Возвращает статус отображения времени в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetTimeStart() => await Task.Run(() => DisplayOperationTime);
+    public static async Task<bool> GetTimeStart() => await Task.Run(() => ProtocolModel.DisplayOperationTime);
 
     #endregion
 
     public static async void RewriteProtocolConfig()
     {
       ProtocolModel protocolModel = new ProtocolModel();
-      protocolModel.DeviceInfo = ShowDeviceInfo;
-      protocolModel.ShowDetailedProtocol = ShowDetailedProtocol;
-      protocolModel.SaveProtocol = AutoSaveProtocol;
-      protocolModel.PrintProtocol = AutoPrintProtocol;
-      protocolModel.StartTime = DisplayOperationTime;
+      protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;
+      protocolModel.ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol;
+      protocolModel.AutoSaveProtocol = ProtocolModel.AutoSaveProtocol;
+      protocolModel.AutoPrintProtocol = ProtocolModel.AutoPrintProtocol;
+      protocolModel.DisplayOperationTime = ProtocolModel.DisplayOperationTime;
 
       ProtocolFileManager protocolFileManager = new ProtocolFileManager(FileLocations.ProtocolConfigPath);
       await protocolFileManager.RewriteFileAsync(protocolModel);

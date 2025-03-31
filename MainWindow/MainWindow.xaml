@@ -19,7 +19,7 @@
         WindowState="Maximized"
         >
     <Window.Resources>
-        
+
         <Style TargetType="DefaultGUI:WindowButtons">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
@@ -70,6 +70,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
         </Style>
+
     </Window.Resources>
 
 
@@ -80,11 +81,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TopPanel">
+        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}" MouseLeftButtonDown="TopPanel_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="50"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -107,6 +107,56 @@
                     BorderBrush="#FF303843" 
                     OpacityMask="#FF303843"
                     >
+                    <MenuItem 
+               Header="Архив" 
+               PreviewMouseDown="Archive_PreviewMouseDown"
+               />
+
+                    <Separator 
+               Background="{StaticResource ActiveBorderSolidColorBrush}" 
+               Visibility="Collapsed"
+               x:Name="fileActionsSeparator"
+               />
+                    <MenuItem 
+               Header="Сохранить" 
+               x:Name="saveMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SaveMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Сохранить как" 
+               x:Name="saveAsMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SaveAsMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               
+               Header="Печать" 
+               x:Name="printMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="PrintMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Поиск" 
+               x:Name="searchMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SearchMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Сравнить" 
+               x:Name="compareMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="CompareMenuItem_PreviewMouseDown"
+               />
+
+                    <Separator 
+               Background="{StaticResource ActiveBorderSolidColorBrush}" 
+               />
+
 
                     <MenuItem 
                         Header="Открыть" 
@@ -219,9 +269,6 @@
 
                 </MenuItem>
 
-
-
-
                 <MenuItem 
                     Header="Справка"
                     Name="Help"
@@ -261,6 +308,18 @@
         PreviewMouseDown="USB_Handler"
         />
 
+                    <MenuItem 
+                    Header="Управление" 
+                    Name="DeviceManagment"
+                    >
+                        <MenuItem 
+                            Header="GPT" 
+                            Name="GptManagment"
+                            PreviewMouseDown="Gpt_Handler"
+                            >
+                        </MenuItem>
+                    </MenuItem>
+
                 </MenuItem>
             </Menu>
 
@@ -275,6 +334,7 @@
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top" 
                 Grid.Column="2" 
+                Name="ButtonsPanel"
                 Background="{StaticResource SecondarySolidColorBrush}"
                 >
 
@@ -304,9 +364,9 @@
             </StackPanel>
         </Grid>
 
-        <Components:MultiEditorControl
-            x:Name="multiEditors" 
-            Grid.Row="1"
+        <Components:MultiWindowControl 
+            x:Name="MultiWindow" 
+            Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"
             />
 
         <Grid 

@@ -105,7 +105,6 @@ namespace Utilities.USB
       });
     }
 
-    // Метод для вызова события
     protected virtual void OnAdminRightsChanged(bool newRights)
     {
       AdminRightsChanged?.Invoke(this, newRights); // Генерация события

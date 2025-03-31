@@ -1,10 +1,10 @@
-﻿using System.Windows;
-using AppConfig.Data.Device;
-using AppConfig.Data.Execution;
+﻿using AppConfig.Data.Execution;
 using AppConfig.Data.MeasurementError;
 using AppConfig.Data.Protocol;
 using AppConfig.Data.Theme;
-using Utilities.USB;
+using AppConfig.DataBase;
+using Microsoft.EntityFrameworkCore;
+using static Utilities.LoggerUtility;
 
 namespace AppConfig
 {
@@ -14,25 +14,42 @@ namespace AppConfig
   static public class SettingsFileReader
   {
 
-    static private USBMonitorService usbMonitorService = new USBMonitorService(Application.Current.Dispatcher);
-
     /// <summary>
     /// Считывает настройки программы из файлов.
     /// </summary>
     /// <returns>Задача, которая завершится после того, как все настройки будут считаны.</returns>
     static public async Task ReadAllSettingsAsync()
     {
-      var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
-      var themeTask = ThemeSettingsManager.ReadThemeModeAsync();
-      var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
-      var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-      var deviceConfigTask = DeviceSettingsManager.ReadDeviceModeAsync();
-      await Task.WhenAll(executionTask, /*themeTask,*/ protocolTask, measurementErrorTask, deviceConfigTask);
+      try
+      {
+
+        var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
+        var themeTask = ThemeSettingsManager.ReadThemeModeAsync();
+        var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
+        var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
+        var db = InicializeDB();
+
+        await Task.WhenAll(executionTask, themeTask, protocolTask, measurementErrorTask, db);
+      }
+      catch (Exception ex)
+      {
+        var stackTrace = new System.Diagnostics.StackTrace();
+        var callingFrame = stackTrace.GetFrame(1);
+        var method = callingFrame.GetMethod();
+        var className = method.DeclaringType.FullName;
+        var methodName = method.Name;
+
+        LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
+      }
     }
 
-    static private async Task OnAdminRightsChanged(bool newRights)
+    static public async Task InicializeDB()
     {
-      await Config.SystemStateManager.SetAdminRights(newRights);
+      var dbContextFactory = new DbContextFactory();
+      using (var scope = dbContextFactory.CreateDbContext(new string[0]))
+      {
+        await scope.Database.MigrateAsync();
+      }
     }
   }
 }

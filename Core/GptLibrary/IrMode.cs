@@ -1,4 +1,6 @@
-﻿using Core.GptLibrary.Command;
+﻿using System.Configuration;
+using Core.GptLibrary.Command;
+using Core.GptLibrary.Data;
 using static Core.GptLibrary.Command.FunctionCommandManager;
 using static Core.GptLibrary.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
@@ -10,20 +12,8 @@ namespace Core.GptLibrary
   /// </summary>
   public static class IrMode
   {
-    /// <summary>
-    /// Gets or sets значения напряжения пробойной установки.
-    /// </summary>
-    static public double Voltage { get; set; }
 
-    /// <summary>
-    /// Gets or sets значения высокого сопротивления пробойной установки.
-    /// </summary>
-    static public double Rhiset { get; set; }
-
-    /// <summary>
-    /// Gets or sets значения низкого сопротивления пробойной установки.
-    /// </summary>
-    static public double Rloset { get; set; }
+    static private int timeDelay = 2;
 
     /// <summary>
     /// Устанавливает режим сопротивления изоляции на пробойке.
@@ -32,11 +22,10 @@ namespace Core.GptLibrary
     static public async Task SetModeAsync(GptLibrary.Model model)
     {
       LogInformation("Устанавливаем режим СИ на GPT-79904");
-      var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
       await model.WriteLineAsync(query);
     }
 
-    static private int timeDelay = 2;
 
     /// <summary>
     /// Устанавливает напряжения на пробойном устройстве.
@@ -209,6 +198,167 @@ namespace Core.GptLibrary
       }
 
       return voltages;
+    }
+
+    /// <summary>
+    /// Устанавливает высокий предел сопротивления IR.
+    /// </summary>
+    /// <param name="model">Модель устройства.</param>
+    /// <param name="value">Устанавливаемое значение (в ГОм).</param>
+    public static async Task SetHighResistanceLimitAsync(Model model, double value)
+    {
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}";
+      await model.WriteLineAsync(query);
+    }
+
+    /// <summary>
+    /// Устанавливает низкий предел сопротивления IR.
+    /// </summary>
+    /// <param name="model">Модель устройства.</param>
+    /// <param name="value">Устанавливаемое значение (в МОм).</param>
+    public static async Task SetLowResistanceLimitAsync(Model model, double value)
+    {
+      string query = string.Empty;
+      if (value == 1000)
+      {
+        value = 999;
+      }
+      query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
+      await model.WriteLineAsync(query);
+    }
+
+    /// <summary>
+    /// Устанавливает время теста IR.
+    /// </summary>
+    /// <param name="model">Модель устройства.</param>
+    /// <param name="value">Устанавливаемое значение (в секундах).</param>
+    public static async Task SetTestTimeAsync(Model model, double value)
+    {
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
+      await model.WriteLineAsync(query);
+    }
+
+    /// <summary>
+    /// Устанавливает смещение IR.
+    /// </summary>
+    /// <param name="model">Модель устройства.</param>
+    /// <param name="value">Устанавливаемое значение (в ГОм).</param>
+    public static async Task SetOffsetAsync(Model model, double value)
+    {
+      LogInformation($"Устанавливаем смещение IR: {value} M");
+      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} {value}M";
+      await model.WriteLineAsync(query);
+    }
+
+    /// <summary>
+    /// Считывает текущую конфигурацию IR.
+    /// </summary>
+    /// <param name="model">Модель устройства.</param>
+    /// <returns>Объект с текущими настройками IR.</returns>
+    public static async Task<IrConfiguration> ReadConfigurationAsync(Model model)
+    {
+      try
+      {
+        LogInformation("Чтение конфигурации режима IR");
+
+        // Чтение напряжения
+        var voltageQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
+        await model.WriteLineAsync(voltageQuery);
+        await Task.Delay(10);
+        var voltageResponse = await model.ReadLineAsync();
+        double voltage = ParseVoltage(voltageResponse);
+
+        // Чтение высокого предела сопротивления
+        var rhiQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?";
+        await model.WriteLineAsync(rhiQuery);
+        var rhiResponse = await model.ReadLineAsync();
+        double rhi = ParseResistanceG(rhiResponse);
+
+        // Чтение низкого предела сопротивления
+        var rloQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?";
+        await model.WriteLineAsync(rloQuery);
+        var rloResponse = await model.ReadLineAsync();
+        double rlo = ParseResistanceM(rloResponse);
+
+        // Чтение времени теста
+        var timeQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} ?";
+        await model.WriteLineAsync(timeQuery);
+        var timeResponse = await model.ReadLineAsync();
+        double time = ParseTime(timeResponse);
+
+        // Чтение смещения
+        var refQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} ?";
+        await model.WriteLineAsync(refQuery);
+        var refResponse = await model.ReadLineAsync();
+        double reference = ParseResistanceG(refResponse);
+
+        // Возвращаем объект конфигурации
+        return new IrConfiguration
+        {
+          Voltage = voltage,
+          HighResistanceLimit = rhi,
+          LowResistanceLimit = rlo,
+          TestTime = time,
+          Offset = reference
+        };
+      }
+      catch (Exception ex)
+      {
+        LogError($"Ошибка при чтении конфигурации IR: {ex.Message}");
+        throw;
+      }
+    }
+
+    /// <summary>
+    /// Парсит значение напряжения из строки ответа устройства.
+    /// </summary>
+    private static double ParseVoltage(string response)
+    {
+      string numericPart = response.Replace("kV", "").Trim().Replace(".", ",");
+      if (double.TryParse(numericPart, out double voltage))
+      {
+        return voltage * 1000; // Преобразование кВ в В
+      }
+      throw new FormatException("Некорректный формат напряжения.");
+    }
+
+    /// <summary>
+    /// Парсит значение сопротивления из строки ответа устройства.
+    /// </summary>
+    private static double ParseResistanceG(string response)
+    {
+      string numericPart = response.Replace("G", "").Trim().Replace(".", ",");
+      if (double.TryParse(numericPart, out double resistance))
+      {
+        return resistance; // Значение уже в ГОм
+      }
+      return 0.0;
+    }
+
+    /// <summary>
+    /// Парсит значение сопротивления из строки ответа устройства.
+    /// </summary>
+    private static double ParseResistanceM(string response)
+    {
+      string numericPart = response.Replace("M", "").Trim().Replace(".", ",");
+      if (double.TryParse(numericPart, out double resistance))
+      {
+        return resistance; // Значение уже в ГОм
+      }
+      return 0.0;
+    }
+
+    /// <summary>
+    /// Парсит значение времени из строки ответа устройства.
+    /// </summary>
+    private static double ParseTime(string response)
+    {
+      string numericPart = response.Replace("S", "").Trim().Replace(".", ",");
+      if (double.TryParse(numericPart, out double time))
+      {
+        return time; // Значение уже в секундах
+      }
+      return 0.0;
     }
   }
 }

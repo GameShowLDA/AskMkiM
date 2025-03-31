@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using AppConfig;
+using System.Windows;
 using System.Windows.Controls;
 using static AppConfig.Config.SystemStateManager;
 using static AppConfig.EventAggregator;
@@ -42,7 +43,7 @@ namespace MainWindowProgram
     /// </summary>
     private async void StartSettings()
     {
-      await ReadAllSettingsAsync();
+      // await ReadAllSettingsAsync();
 
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
@@ -70,10 +71,50 @@ namespace MainWindowProgram
       {
         await Dispatcher.InvokeAsync(() =>
         {
-          multiEditors.AddControl(name, userControl);
+          MultiWindow.AddControl(name, userControl);
         });
       }
     }
+    private void OnTextEditorActive(bool isTextEditor)
+    {
+      if (isTextEditor)
+      {
+        isTextEditorActive = true;
+        fileActionsSeparator.Visibility = Visibility.Visible;
+        saveMenuItem.Visibility = Visibility.Visible;
+        saveAsMenuItem.Visibility = Visibility.Visible;
+        printMenuItem.Visibility = Visibility.Visible;
+        searchMenuItem.Visibility = Visibility.Visible;
+        compareMenuItem.Visibility = Visibility.Visible;
+      }
+      else
+      {
+        HideTextEditorActions();
+      }
+    }
 
+    private void OnTextEditorClosing(bool isTextEditor, string textEditorName)
+    {
+      if (isTextEditor)
+      {
+        HideTextEditorActions();
+      }
+    }
+
+    private void HideTextEditorActions()
+    {
+      isTextEditorActive = false;
+      fileActionsSeparator.Visibility = Visibility.Collapsed;
+      saveMenuItem.Visibility = Visibility.Collapsed;
+      saveAsMenuItem.Visibility = Visibility.Collapsed;
+      printMenuItem.Visibility = Visibility.Collapsed;
+      searchMenuItem.Visibility = Visibility.Collapsed;
+      compareMenuItem.Visibility = Visibility.Collapsed;
+    }
+
+    private void OnSearchWindowClosing(bool isOpen)
+    {
+      _isSearchWindowOpen = isOpen;
+    }
   }
 }

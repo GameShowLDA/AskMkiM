@@ -1,5 +1,7 @@
-﻿using System.Drawing;
+﻿using NLog;
 using System.Windows;
+using System.Windows.Media;
+using static Utilities.LoggerUtility;
 
 namespace AppConfig.Data.Theme
 {
@@ -51,14 +53,28 @@ namespace AppConfig.Data.Theme
     {
       var resourceDictionary = new ResourceDictionary
       {
-        Source = new Uri("pack://application:,,,/DefaultSettingsGUI;component/Style.xaml")
+        Source = new Uri("pack://application:,,,/UI;component/Style.xaml")
       };
 
-      resourceDictionary["PrimaryColor"] = FromHex(themeModel.PrimaryColor);
-      resourceDictionary["SecondaryColor"] = FromHex(themeModel.SecondaryColor);
-      resourceDictionary["ForegroundColor"] = FromHex(themeModel.ForegroundColor);
-      resourceDictionary["ActiveColor"] = FromHex(themeModel.ActiveColor);
-      resourceDictionary["IsCheckedColor"] = FromHex(themeModel.IsCheckedColor);
+      if (!Application.Current.Resources.MergedDictionaries.Contains(resourceDictionary))
+      {
+        Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
+        LogInformation("Ресурс Style.xaml был добавлен в MergedDictionaries.");
+      }
+
+      if (Application.Current.Resources.MergedDictionaries.Contains(resourceDictionary))
+      {
+        resourceDictionary["PrimaryColor"] = FromHex(themeModel.PrimaryColor);
+        resourceDictionary["SecondaryColor"] = FromHex(themeModel.SecondaryColor);
+        resourceDictionary["ForegroundColor"] = FromHex(themeModel.ForegroundColor);
+        resourceDictionary["ActiveColor"] = FromHex(themeModel.ActiveColor);
+        resourceDictionary["IsCheckedColor"] = FromHex(themeModel.IsCheckedColor);
+        LogInformation("Ресурсы успешно обновлены.");
+      }
+      else
+      {
+        LogError("Ошибка: Ресурс не найден в MergedDictionaries.");
+      }
 
       Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
     }

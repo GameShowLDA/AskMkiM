@@ -1,6 +1,7 @@
 ﻿using System.IO.Ports;
 using System.Text;
 using Core.Abstract;
+using YamlDotNet.Core.Tokens;
 using static Utilities.LoggerUtility;
 
 namespace Core.GptLibrary
@@ -37,33 +38,36 @@ namespace Core.GptLibrary
       try
       {
         LogInformation("Открываем порт...");
-
-        using (var port = new SerialPort(this.Port.PortName, this.Port.BaudRate, this.Port.Parity, this.Port.DataBits, this.Port.StopBits))
+        if (this.Port != null)
         {
-          port.Open();
-          LogInformation("Порт открыт");
-
-          Thread.Sleep(100);
-          port.DiscardInBuffer();
-          port.DiscardOutBuffer();
-
-          LogInformation("Отправляем команду идентификации...");
-          port.Write("*IDN?\r\n");
-          Thread.Sleep(100);
-
-          if (port.BytesToRead > 0)
+          using (var port = new SerialPort(this.Port.PortName, this.Port.BaudRate, this.Port.Parity, this.Port.DataBits, this.Port.StopBits))
           {
-            byte[] buffer = new byte[100];
-            int bytesRead = port.Read(buffer, 0, buffer.Length);
-            string response = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+            port.Open();
+            LogInformation("Порт открыт");
 
-            LogInformation($"Получен ответ: {response.Trim()}");
-            return response.StartsWith("GPT-");
+            Thread.Sleep(100);
+            port.DiscardInBuffer();
+            port.DiscardOutBuffer();
+
+            LogInformation("Отправляем команду идентификации...");
+            port.Write("*IDN?\r\n");
+            Thread.Sleep(100);
+
+            if (port.BytesToRead > 0)
+            {
+              byte[] buffer = new byte[100];
+              int bytesRead = port.Read(buffer, 0, buffer.Length);
+              string response = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+
+              LogInformation($"Получен ответ: {response.Trim()}");
+              return response.StartsWith("GPT-");
+            }
+
+            LogError("Ответ не получен");
+            return false;
           }
-
-          LogError("Ответ не получен");
-          return false;
         }
+        return false;
       }
       catch (UnauthorizedAccessException ex)
       {
@@ -235,6 +239,8 @@ namespace Core.GptLibrary
     {
       try
       {
+        LogInformation($"Отправка команды на GPT79904: {command}");
+
         if (!this.Port.IsOpen)
         {
           this.Port.Open();

@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="UI.Components.MultiWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             xmlns:SearchControls="clr-namespace:UI.Components.SearchControls"
+             xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
+             xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
+             mc:Ignorable="d" 
+             Background="{StaticResource PrimarySolidColorBrush}"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Верхняя панель -->
+            <RowDefinition Height="Auto"/>
+            <!-- Контейнер редакторов -->
+            <RowDefinition Height="*" MinHeight="100"/>
+            <!-- Разделитель -->
+            <RowDefinition Height="5"/>
+            <!-- Окно поиска -->
+            <RowDefinition Height="0" x:Name="SearchResultsRow"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхняя панель -->
+        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Transparent" Orientation="Horizontal"/>
+
+        <!-- Контейнер для редакторов -->
+        <local:MultiEditorControl x:Name="MultiEditor" Grid.Row="1"/>
+
+        <!-- Разделитель -->
+        <GridSplitter x:Name="MultiWindowSplitter" Grid.Row="2" Height="5" Background="{StaticResource IsCheckedColorSolidColorBrush}"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      ShowsPreview="True" DragDelta="GridSplitter_DragDelta" Visibility="Collapsed"/>
+
+        <!-- Окно результатов поиска -->
+        <Border x:Name="SearchResults"
+        Grid.Row="3"
+        Background="Transparent"
+        Visibility="Collapsed"
+        BorderThickness="1"
+        BorderBrush="Gray"
+        CornerRadius="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <!-- Верхняя панель с кнопками -->
+                    <RowDefinition Height="30"/>
+                    <!-- Прокручиваемая область DataGrid -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Верхняя панель с заголовком и кнопками -->
+                <Grid Background="{StaticResource SecondarySolidColorBrush}" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="30"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock x:Name="searchResultsTextBlock" Text="Результаты поиска"
+                       Foreground="{StaticResource ForegroundSolidColorBrush}"
+                       FontSize="15"
+                       VerticalAlignment="Center"
+                       Margin="10,0,0,0"/>
+
+                    <local:WindowButtons 
+                        Style="{StaticResource WindowsButtonStyle}"
+                        x:Name="minimizeButton"
+                        ChoiceElement="Minimize"  
+                        Grid.Column="1"
+                        Width="30"
+                        Height="30"
+                        HorizontalAlignment="Right"
+                        PreviewMouseDown="minimizeButton_PreviewMouseDown"
+                        />
+
+                    <local:WindowButtons 
+                        Style="{StaticResource WindowsButtonStyle}"
+                        x:Name="exitButton"
+                        ChoiceElement="Exit"  
+                        Grid.Column="2"
+                        Width="30"
+                        Height="30"
+                        HorizontalAlignment="Right"
+                        PreviewMouseDown="exitButton_PreviewMouseDown"
+                        />
+
+                </Grid>
+                
+                <Grid Grid.Row="1" x:Name="searchDataGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel x:Name="SearchResultsTopPanel" 
+                                Grid.Row="0" 
+                                Background="{StaticResource SecondarySolidColorBrush}"  
+                                Orientation="Horizontal"/>
+                    <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
+                </Grid>
+
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

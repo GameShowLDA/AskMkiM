@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="UI.Controls.GPT.Mode.SettingsGPT"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.GPT.Mode"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Background="{StaticResource PrimarySolidColorBrush}" FontSize="20" FontWeight="Bold" >
+    <Grid>
+        <!-- Определение строк -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <!-- Определение столбцов -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <!-- Для описания -->
+            <ColumnDefinition Width="*" />
+            <!-- Для ввода -->
+        </Grid.ColumnDefinitions>
+
+        <!-- LCD_CONTRAST -->
+        <TextBlock Grid.Row="0" Text="Контраст дисплея (1-8):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" FontWeight="Bold"/>
+        <ComboBox x:Name="ContrastComboBox" Grid.Row="0" Grid.Column="1" Margin="10" SelectionChanged="ContrastComboBox_SelectionChanged" Style="{StaticResource CustomComboBoxStyle}" Width="80" HorizontalAlignment="Left">
+            <ComboBoxItem Content="1" />
+            <ComboBoxItem Content="2" />
+            <ComboBoxItem Content="3" />
+            <ComboBoxItem Content="4" />
+            <ComboBoxItem Content="5" />
+            <ComboBoxItem Content="6" />
+            <ComboBoxItem Content="7" />
+            <ComboBoxItem Content="8" />
+        </ComboBox>
+
+        <!-- LCD_BRIGHTNESS -->
+        <TextBlock Grid.Row="1" Text="Яркость дисплея (1-dark, 2-bright):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" FontWeight="Bold"/>
+        <ComboBox x:Name="BrightnessComboBox" Grid.Row="1" Grid.Column="1" Margin="10" SelectionChanged="BrightnessComboBox_SelectionChanged" Style="{StaticResource CustomComboBoxStyle}" Width="150" HorizontalAlignment="Left">
+            <ComboBoxItem Content="1 - Dark" />
+            <ComboBoxItem Content="2 - Bright" />
+        </ComboBox>
+
+        <!-- BUZZER_PSOUND -->
+        <TextBlock Grid.Row="2" Text="Звук успешного теста (ON/OFF):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" FontWeight="Bold"/>
+        <ComboBox x:Name="SuccessSoundComboBox" Grid.Row="2" Grid.Column="1" Margin="10" SelectionChanged="SuccessSoundComboBox_SelectionChanged" Style="{StaticResource CustomComboBoxStyle}" Width="80" HorizontalAlignment="Left">
+            <ComboBoxItem Content="ON" />
+            <ComboBoxItem Content="OFF" />
+        </ComboBox>
+
+        <!-- BUZZER_FSOUND -->
+        <TextBlock Grid.Row="3" Text="Звук ошибочного теста (ON/OFF):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" FontWeight="Bold"/>
+        <ComboBox x:Name="ErrorSoundComboBox" Grid.Row="3" Grid.Column="1" Margin="10" SelectionChanged="ErrorSoundComboBox_SelectionChanged" Style="{StaticResource CustomComboBoxStyle}" Width="80" HorizontalAlignment="Left">
+            <ComboBoxItem Content="ON" />
+            <ComboBoxItem Content="OFF" />
+        </ComboBox>
+
+        <!-- BUZZER_PTIME -->
+        <TextBlock Grid.Row="4" Text="Время звука успешного теста (0.2-10):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" FontWeight="Bold"/>
+        <StackPanel Grid.Row="4" Grid.Column="1" Margin="10">
+            <Slider x:Name="SuccessSoundSlider" Style="{StaticResource CustomSliderStyle}" Minimum="0.2" Maximum="10" Value="5" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SuccessSoundSlider_ValueChanged" />
+            <TextBlock Text="{Binding Value, ElementName=SuccessSoundSlider, StringFormat='Выбранное время: {0:F1} сек.'}" 
+                       HorizontalAlignment="Center" Margin="0,5,0,0" />
+        </StackPanel>
+
+        <!-- BUZZER_FTIME -->
+        <TextBlock Grid.Row="5" Text="Время звука ошибочного теста (0.2-10):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" FontWeight="Bold"/>
+        <StackPanel Grid.Row="5" Grid.Column="1" Margin="10">
+            <Slider x:Name="ErrorSoundSlider" Style="{StaticResource CustomSliderStyle}" Minimum="0.2" Maximum="10" Value="5" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="ErrorSoundSlider_ValueChanged" />
+            <TextBlock Text="{Binding Value, ElementName=ErrorSoundSlider, StringFormat='Выбранное время: {0:F1} сек.'}" 
+                       HorizontalAlignment="Center" Margin="0,5,0,0" />
+        </StackPanel>
+    </Grid>
+</UserControl>

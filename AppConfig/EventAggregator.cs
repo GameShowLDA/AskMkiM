@@ -1,4 +1,5 @@
-﻿using static AppConfig.Config.SystemStateManager;
+﻿using System.Diagnostics.CodeAnalysis;
+using static AppConfig.Config.SystemStateManager;
 
 namespace AppConfig
 {
@@ -37,10 +38,73 @@ namespace AppConfig
     /// </summary>
     static public event Action<bool> AdminRightsChanged;
 
+
+    /// <summary>
+    /// Событие, которое вызывается, когда активно окно типа TextEditor.
+    /// </summary>
+    static public event Action<bool> TextEditorActive;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда активно окно типа TextEditor.
+    /// </summary>
+    static public event Action<bool, string> TextEditorClosing;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
+    /// </summary>
+    static public event Action<bool> SearchWindowClosing;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
+    /// </summary>
+    static public event Action CloseSearchWindow;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда окно типа searchWindow вновь активируется.
+    /// </summary>
+    static public event Action<bool> SearchWindowAtivated;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
+    /// </summary>
+    static public event Action<string> SearchButtonPressed;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
+    /// </summary>
+    public static event Action<string> SearchTextRequested;
+
+    public static event Action<string> SearchTextUpdated;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда происходиити переключение активного окна.
+    /// </summary>
+    public static event Action<bool> ActiveEditorChanged;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
+    /// </summary>
+    public static event Action<string, int, int, string, string> FoundTextSelectRow;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
+    /// </summary>
+    public static event Action<string, bool?, bool?, int, string> SearchText;
+
+    /// <summary>
+    /// Событие для запроса показа окна прогресса с блюром на главном окне
+    /// </summary>
+    public static event Action RequestShowProgress;
+
+    /// <summary>
+    /// Событие для запроса закрытия окна прогресса и снятия блюра с главного окна
+    /// </summary>
+    public static event Action RequestCloseProgress;
+
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
     /// </summary>
-    static private bool AdminRightsFlag
+    static internal bool AdminRightsFlag
     {
       get => IsAdmin;
       set
@@ -56,7 +120,7 @@ namespace AppConfig
     /// <summary>
     /// Флаг, указывающий, активно ли питание системы.
     /// </summary>
-    static private bool PowerFlag
+    static internal bool PowerFlag
     {
       get => IsActivePower;
       set
@@ -72,7 +136,7 @@ namespace AppConfig
     /// <summary>
     /// Флаг, указывающий, активно ли питание системы.
     /// </summary>
-    static private bool LockedFlag
+    static internal bool LockedFlag
     {
       get => IsLocked;
       set
@@ -113,6 +177,110 @@ namespace AppConfig
     static public void RaiseInfoMessage(string message, bool clearMessage = false)
     {
       InfoMessageEvent?.Invoke(message, clearMessage);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTextEditorActive(bool isTextEditor)
+    {
+      TextEditorActive?.Invoke(isTextEditor);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTextEditorClosing(bool isTextEditor, string textEditorName)
+    {
+      TextEditorClosing?.Invoke(isTextEditor, textEditorName);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchWindowClosing(bool isOpen)
+    {
+      SearchWindowClosing?.Invoke(isOpen);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchText(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      SearchText?.Invoke(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    public static void RaiseCloseSearchWindow()
+    {
+      CloseSearchWindow?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchWindowActivated(bool isActivated)
+    {
+      SearchWindowAtivated?.Invoke(isActivated);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
+    /// </summary>
+    public static void RaiseSearchTextRequested(string selectedText)
+    {
+      SearchTextRequested?.Invoke(selectedText);
+    }
+
+    public static void RaiseSearchTextUpdated(string text)
+    {
+      SearchTextUpdated?.Invoke(text);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка поиска.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseSearchButtonPressed(string searchParameters)
+    {
+      SearchButtonPressed?.Invoke(searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда происходит смена активного окна.
+    /// </summary>
+    /// <param name="isTextEditor"></param>
+    public static void RaiseActiveEditorChanged(bool isTextEditor)
+    {
+      ActiveEditorChanged?.Invoke(isTextEditor);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда выпонен двойнок клик по строке в таблице с результатми поиска оп тексту.
+    /// </summary>
+    /// <param name="isTextEditor"></param>
+    public static void RaiseFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
+    {
+      FoundTextSelectRow?.Invoke(fileName, lineNumber, startOffset, lineText, searchText);
+    }
+
+    public static void RaiseRequestShowProgress()
+    {
+      RequestShowProgress?.Invoke();
+    }
+
+    public static void RaiseRequestCloseProgress()
+    {
+      RequestCloseProgress?.Invoke();
     }
   }
 }
