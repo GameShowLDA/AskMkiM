@@ -12,21 +12,25 @@ namespace Utilities
     /// <summary>
     /// Делегат для выполнения предварительных действий.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены.</param>
     public delegate void PreActionDelegate();
 
     /// <summary>
     /// Делегат для метода запуска.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены.</param>
     public delegate Task StartDelegate(CancellationToken cancellationToken);
 
     /// <summary>
     /// Делегат для метода остановки.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены.</param>
     public delegate Task StopDelegate(CancellationToken cancellationToken);
 
     /// <summary>
     /// Делегат для метода повтора и зацикливания.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены.</param>
     public delegate Task ReturnDelegate(CancellationToken cancellationToken);
   }
 }

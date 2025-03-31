@@ -12,7 +12,7 @@
     <Grid>
         <Protocol:ProtocolUI x:Name="ProtocolUI" Header="СИ - Групповой метод">
             <Protocol:ProtocolUI.ContentView>
-                <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" UnitElectrical=",ГОм"/>
+                <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" IsBusVisible="True" UnitElectrical=",ГОм"/>
             </Protocol:ProtocolUI.ContentView>
         </Protocol:ProtocolUI>
     </Grid>

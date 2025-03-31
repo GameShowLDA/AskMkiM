@@ -12,7 +12,7 @@
     <Grid>
         <Protocol:ProtocolUI x:Name="ProtocolUI" Header="ПИ - Групповой (DCW)">
             <Protocol:ProtocolUI.ContentView>
-                <Custom:InputField Height="Auto" IsTimeVisible="True" IsTimeRampVisible="True" IsVoltageVisible="True" UnitElectrical=",мА"/>
+                <Custom:InputField Height="Auto" IsTimeVisible="True" IsTimeRampVisible="True" IsVoltageVisible="True" IsBusVisible="True" UnitElectrical=",мА"/>
             </Protocol:ProtocolUI.ContentView>
         </Protocol:ProtocolUI>
     </Grid>

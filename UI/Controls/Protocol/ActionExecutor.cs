@@ -242,14 +242,22 @@ namespace UI.Controls.Protocol
     {
       try
       {
+        var token = CancellationTokenSource?.Token ?? new CancellationToken();
+
         if (returnDelegate != null)
         {
-          await returnDelegate(CancellationTokenSource.Token);
+          await returnDelegate(token);
         }
         else
         {
           await FinalizeAsync(stop);
         }
+      }
+      catch (ObjectDisposedException ex)
+      {
+        LogError("Token уже утилизирован: " + ex.ToString());
+        MessageBox.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
+        await FinalizeAsync(stop);
       }
       catch (Exception ex)
       {
@@ -467,34 +475,39 @@ namespace UI.Controls.Protocol
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
     private async Task ExecuteTaskAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled)
     {
-      using (CancellationTokenSource = new CancellationTokenSource())
+      // Освобождаем старый токен, если был
+      CancellationTokenSource?.Dispose();
+
+      // Создаём новый токен
+      CancellationTokenSource = new CancellationTokenSource();
+      PauseCompletionSource = new TaskCompletionSource<bool>();
+
+      if (startDelegate != null)
       {
-        PauseCompletionSource = new TaskCompletionSource<bool>();
-
-        if (startDelegate != null)
+        try
         {
-          try
-          {
-            _stopwatch.Restart();
+          _stopwatch.Restart();
 
-            ProcessTask = Task.Run(() => startDelegate(CancellationTokenSource.Token));
-            await SetIsLocked(true);
-            await ProcessTask;
-            if (isRepeatEnabled)
-            {
-              ProtocolSelfCheck.ShowAdditionalFunctionButtons();
-            }
-            else
-            {
-              await ProtocolSelfCheck.FinalizeAsync(stop);
-            }
-          }
-          catch (Exception ex)
+          // Запускаем задачу с новым токеном
+          ProcessTask = Task.Run(() => startDelegate(CancellationTokenSource.Token));
+          await SetIsLocked(true);
+          await ProcessTask;
+
+          // После выполнения задачи
+          if (isRepeatEnabled)
           {
-            LogError($"Ошибка при запуске \"{name}\": {ex.Message}");
-            await SetIsLocked(false);
-            _stopwatch.Stop();
+            ProtocolSelfCheck.ShowAdditionalFunctionButtons();
           }
+          else
+          {
+            await ProtocolSelfCheck.FinalizeAsync(stop);
+          }
+        }
+        catch (Exception ex)
+        {
+          LogError($"Ошибка при запуске \"{name}\": {ex.Message}");
+          await SetIsLocked(false);
+          _stopwatch.Stop();
         }
       }
     }
@@ -511,9 +524,8 @@ namespace UI.Controls.Protocol
       {
         try
         {
-          CancellationTokenSource.Cancel();
-          ProcessTask = null;
-
+          // Отмена токена
+          CancellationTokenSource?.Cancel();
           LogInformation($"Процесс \"{name}\" успешно завершен.");
         }
         catch (Exception ex)
@@ -528,8 +540,13 @@ namespace UI.Controls.Protocol
 
       if (stopDelegate != null)
       {
-        await stopDelegate(CancellationTokenSource.Token);
+        var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+        await stopDelegate(token);
       }
+
+      CancellationTokenSource?.Dispose();
+      CancellationTokenSource = null;
+      ProcessTask = null;
     }
 
     /// <summary>
@@ -593,57 +610,6 @@ namespace UI.Controls.Protocol
 
       await SetIsLocked(false);
     }
-    #endregion
-
-    #region Оборудование.
-
-    /// <summary>
-    /// Пытается подключиться к устройствам.
-    /// </summary>
-    /// <param name="deviceModels">Список моделей устройств.</param>
-    /// <param name="messageDelegate">Делегат для отображения сообщений.</param>
-    /// <returns>True, если подключение успешно.</returns>
-    internal async Task<bool> AttemptDeviceConnection(List<IDevice> deviceModels, MessageDelegate messageDelegate)
-    {
-      // TODO : Заглушка. Разобраться потом
-      return true;
-
-      // if (await GetIsIdleModeEnabled())
-      // {
-      //   return true;
-      // }
-      // 
-      // var tasks = new List<Task<bool>>();
-      // 
-      // foreach (var task in deviceModels)
-      // {
-      //   tasks.Add(DeviceChecker.CheckConnectDevice(task, messageDelegate));
-      // }
-      // 
-      // try
-      // {
-      //   bool[] results = await Task.WhenAll(tasks);
-      //   if (results.All(result => result))
-      //   {
-      //     await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Все устройства успешно подключены.", goodText.Item2));
-      //     LogInformation("Все устройства успешно подключены.");
-      //     return true;
-      //   }
-      //   else
-      //   {
-      //     await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Некоторые устройства не удалось подключить.", errorText.Item2));
-      //     LogError("Некоторые устройства не удалось подключить.");
-      //     return false;
-      //   }
-      // }
-      // catch (Exception ex)
-      // {
-      //   await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Ошибка при подключении к устройствам: {ex.Message}", errorText.Item2));
-      //   LogError($"Ошибка при подключении к устройствам: {ex.Message}");
-      //   return false;
-      // }
-    }
-
     #endregion
 
     #region Настройки подключения к классу.

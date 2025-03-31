@@ -31,6 +31,12 @@ namespace Mode.Metrology.PI
     public VoltageValue()
     {
       InitializeComponent();
+      this.Loaded += Window_Loaded;
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+      VoltageInput.Focus();
     }
 
     /// <summary>
@@ -41,6 +47,14 @@ namespace Mode.Metrology.PI
     private void NumberDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
       e.Handled = !Regex.IsMatch(e.Text, "^[0-9]+$");
+    }
+
+    private void VoltageInput_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.Enter)
+      {
+        SaveButton_Click(sender, e);
+      }
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)

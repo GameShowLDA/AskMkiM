@@ -402,7 +402,7 @@ namespace UI.Controls.Protocol
       {
         SetNonVisibleAllButton();
         NextButtonVisibility = Visibility.Visible;
-        ExitButtonVisibility = Visibility.Collapsed;
+        ExitButtonVisibility = Visibility.Visible;
       });
     }
 

@@ -84,20 +84,20 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
         return;
       }
 
-      if (!await GetIsIdleModeEnabled())
-      {
-        var chassisNumber = moduleVoltageCurrentSource.NumberChassis;
-        var managerShassy = new ChassisManagerServices().GetById(chassisNumber);
+      //if (!await GetIsIdleModeEnabled())
+      //{
+      //  var chassisNumber = moduleVoltageCurrentSource.NumberChassis;
+      //  var managerShassy = new ChassisManagerServices().GetById(chassisNumber);
 
-        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>()
-        {
-          managerShassy,
-          moduleVoltageCurrentSource,
-        }, ProtocolSelfCheckControl.ShowMessageAsync))
-        {
-          return;
-        }
-      }
+      //  if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>()
+      //  {
+      //    managerShassy,
+      //    moduleVoltageCurrentSource,
+      //  }, ProtocolSelfCheckControl.ShowMessageAsync))
+      //  {
+      //    return;
+      //  }
+      //}
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль МИНТ", goodText.Item2));
 

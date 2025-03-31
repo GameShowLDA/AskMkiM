@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using UI.Controls.Protocol;
 using Utilities.Models;
 using YamlDotNet.Core.Tokens;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
 using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
@@ -117,13 +118,21 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
             var answer = await breakDown.AcwManger.MeasureCurrentAsync();
             var successMessage = ShowMessageModel.SuccessMessage.Item1;
             var colorMessage = ShowMessageModel.SuccessMessage.Item2;
-            if (answer > dataModel.Param)
+            
+            bool error = false;
+            if (answer >= dataModel.Param)
             {
               successMessage = ShowMessageModel.ErrorMessage.Item1;
               colorMessage = ShowMessageModel.ErrorMessage.Item2;
+              error = true;
             }
 
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА [{successMessage}]", messageColor: colorMessage));
+            if (error)
+            {
+              await protocolUI.PauseAsync();
+              error = false;
+            }
           }
           else
           {

@@ -19,6 +19,10 @@ namespace Mode.Metrology.CI
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.CI;
 
+    CiMeasurement testMeasurement = new CiMeasurement();
+
+    (bool Success, string Message, DataModel DataModel) Data;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="CiMetrologyControl"/>.
     /// </summary>
@@ -36,7 +40,12 @@ namespace Mode.Metrology.CI
     {
       try
       {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
+        ProtocolUI.SetSettings(
+          this, 
+          StartDelegate: ExecuteMeasurementProcess, 
+          true,
+          ReturnDelegate: async (CancellationToken token) => {await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+          });
       }
       catch (Exception ex)
       {
@@ -52,20 +61,19 @@ namespace Mode.Metrology.CI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
-      if (!ok)
+      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
+      if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, Data.Message));
         return;
       }
 
-      var first = dataModel.FirstPoint;
-      var second = dataModel.SecondPoint;
-      var param = dataModel.Param;
+      var first = Data.DataModel.FirstPoint;
+      var second = Data.DataModel.SecondPoint;
+      var param = Data.DataModel.Param;
 
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
-      CiMeasurement testMeasurement = new CiMeasurement();
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
@@ -74,7 +82,7 @@ namespace Mode.Metrology.CI
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole, dataModel);
+      await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();
     }

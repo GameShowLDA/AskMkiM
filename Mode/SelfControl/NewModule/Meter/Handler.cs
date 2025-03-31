@@ -104,12 +104,12 @@ namespace Mode.SelfControl.NewModule.Meter
     /// </summary>
     private async Task RunSelfCheck(CancellationToken token)
     {
-      if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(
-            new List<IDevice> { meter, deviceBusCommutation },
-            ProtocolSelfCheckControl.ShowMessageAsync))
-      {
-        return;
-      }
+      //if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(
+      //      new List<IDevice> { meter, deviceBusCommutation },
+      //      ProtocolSelfCheckControl.ShowMessageAsync))
+      //{
+      //  return;
+      //}
 
       await ProtocolSelfCheckControl.ShowMessageAsync(
         new ShowMessageModel("\r\nСамоконтроль мультиметра", goodText.Item2));

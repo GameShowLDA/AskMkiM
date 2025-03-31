@@ -12,7 +12,7 @@
     <Grid>
         <Protocol:ProtocolUI x:Name="ProtocolUI" Header="Режим КС">
             <Protocol:ProtocolUI.ContentView>
-                <Custom:InputField Height="Auto" UnitElectrical=",Ом" IsBusVisible="False"/>
+                <Custom:InputField Height="Auto" UnitElectrical=",Ом"/>
             </Protocol:ProtocolUI.ContentView>
         </Protocol:ProtocolUI>
     </Grid>

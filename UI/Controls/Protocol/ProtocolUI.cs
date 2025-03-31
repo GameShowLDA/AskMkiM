@@ -104,6 +104,11 @@ namespace UI.Controls.Protocol
       _startDelegate = StartDelegate;
       _returnDelegate = ReturnDelegate;
       _preActionDelegate = preActionDelegate;
+
+      if (ReturnDelegate != null)
+      {
+        _isRepeatEnabled = true;
+      }
     }
 
     /// <summary>
@@ -307,14 +312,6 @@ namespace UI.Controls.Protocol
     }
 
     #endregion
-
-    /// <summary>
-    /// Пытается подключиться к указанным устройствам и возвращает результат попытки подключения.
-    /// </summary>
-    /// <param name="deviceModels">Список моделей устройств для подключения.</param>
-    /// <param name="messageDelegate">Делегат для обработки сообщений о состоянии подключения.</param>
-    /// <returns>True, если все устройства успешно подключены, иначе False.</returns>
-    public async Task<bool> AttemptDeviceConnection(List<IDevice> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
 
     /// <summary>
     /// Возвращает токен отмены для текущего действия.

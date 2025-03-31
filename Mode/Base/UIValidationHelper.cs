@@ -208,7 +208,7 @@ namespace Mode.Base
       }
 
       // Проверяем диапазон точки
-      if (point.PointNumber < 0 || point.PointNumber >= module.PointCount)
+      if (point.PointNumber < 1 || point.PointNumber > module.PointCount)
       {
         return new PointValidationResult
         {

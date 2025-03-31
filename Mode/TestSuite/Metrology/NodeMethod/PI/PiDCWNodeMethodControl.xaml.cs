@@ -54,7 +54,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true);
+      var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
@@ -116,13 +116,21 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
             var answer = await breakDown.DcwManger.MeasureCurrentAsync();
             var successMessage = ShowMessageModel.SuccessMessage.Item1;
             var colorMessage = ShowMessageModel.SuccessMessage.Item2;
-            if (answer > dataModel.Param)
+
+            bool error = false;
+            if (answer >= dataModel.Param)
             {
               successMessage = ShowMessageModel.ErrorMessage.Item1;
               colorMessage = ShowMessageModel.ErrorMessage.Item2;
+              error = true;
             }
 
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА [{successMessage}]", messageColor: colorMessage));
+            if (error)
+            {
+              await protocolUI.PauseAsync();
+              error = false;
+            }
           }
           else
           {

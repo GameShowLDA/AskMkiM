@@ -67,10 +67,10 @@ namespace Mode.SelfControl.NewModule.DeviceBusCommutation
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Запуск проверки оборудования", goodText.Item2));
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
 
-      if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>() { deviceBusCommutation, meter }, ProtocolSelfCheckControl.ShowMessageAsync))
-      {
-        return;
-      }
+      //if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>() { deviceBusCommutation, meter }, ProtocolSelfCheckControl.ShowMessageAsync))
+      //{
+      //  return;
+      //}
 
       await deviceBusCommutation.ConnectableManager.ResetAsync();
       errorRelays = new List<int>();

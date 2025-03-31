@@ -56,20 +56,20 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
     /// <param name="token">Токен отмены операции.</param>
     private async Task RunSelfCheck(CancellationToken token)
     {
-      if (!await GetIsIdleModeEnabled())
-      {
-        var chassisNumber = moduleRelayControl.NumberChassis;
-        var managerShassy = new ChassisManagerServices().GetById(chassisNumber);
+      //if (!await GetIsIdleModeEnabled())
+      //{
+      //  var chassisNumber = moduleRelayControl.NumberChassis;
+      //  var managerShassy = new ChassisManagerServices().GetById(chassisNumber);
 
-        if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>()
-        {
-          managerShassy,
-          moduleRelayControl,
-        }, ProtocolSelfCheckControl.ShowMessageAsync))
-        {
-          return;
-        }
-      }
+      //  if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>()
+      //  {
+      //    managerShassy,
+      //    moduleRelayControl,
+      //  }, ProtocolSelfCheckControl.ShowMessageAsync))
+      //  {
+      //    return;
+      //  }
+      //}
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР", goodText.Item2));
 

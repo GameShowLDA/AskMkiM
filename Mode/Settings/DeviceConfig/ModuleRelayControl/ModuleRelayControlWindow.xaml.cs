@@ -48,7 +48,7 @@ namespace Mode.Settings.DeviceConfig.ModuleRelayControl
     }
 
     /// <summary>
-    /// Устанавливает настройки для модуля источника питания.
+    /// Устанавливает настройки для модуля коммутации реле.
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
@@ -70,6 +70,7 @@ namespace Mode.Settings.DeviceConfig.ModuleRelayControl
 
         if (deviceEntity != null)
         {
+          deviceEntity.PointCount = (baseDevice as IRelaySwitchModule).PointCount;
           new RelaySwitchModuleServices().Create(deviceEntity);
         }
 

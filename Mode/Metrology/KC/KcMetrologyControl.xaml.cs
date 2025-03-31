@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Diagnostics.Metrics;
+using System.Windows.Controls;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
@@ -19,6 +20,10 @@ namespace Mode.Metrology.KC
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.KC;
 
+    KcMeasurement testMeasurement = new KcMeasurement();
+
+    (bool Success, string Message, DataModel DataModel) Data;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KcMetrologyControl"/>.
     /// </summary>
@@ -36,7 +41,13 @@ namespace Mode.Metrology.KC
     {
       try
       {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
+        ProtocolUI.SetSettings(
+          this,
+          StartDelegate: ExecuteMeasurementProcess,
+          true,
+          ReturnDelegate: async (CancellationToken token) => {
+            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+          });
       }
       catch (Exception ex)
       {
@@ -52,18 +63,17 @@ namespace Mode.Metrology.KC
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI);
-      if (!ok)
+      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
+      if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, Data.Message));
         return;
       }
 
-      var first = dataModel.FirstPoint;
-      var second = dataModel.SecondPoint;
-      var param = dataModel.Param;
+      var first = Data.DataModel.FirstPoint;
+      var second = Data.DataModel.SecondPoint;
+      var param = Data.DataModel.Param;
 
-      KcMeasurement testMeasurement = new KcMeasurement();
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {

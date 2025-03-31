@@ -60,15 +60,6 @@ namespace Mode.Settings.Execution
       }
     }
 
-    ///// <summary>
-    ///// Обрабатывает событие изменения текста.
-    ///// Вызывает метод сохранения новых данных.
-    ///// </summary>
-    //private async void TextChanged(object sender, TextChangedEventArgs e)
-    //{
-    //  await NewDataSaveAsync();
-    //}
-
     /// <summary>
     /// Обрабатывает событие установки флажка пошагового выполнения.
     /// Вызывает метод сохранения новых данных.

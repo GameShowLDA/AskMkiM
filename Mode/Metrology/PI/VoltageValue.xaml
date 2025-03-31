@@ -36,6 +36,7 @@
                      VerticalAlignment="Center" 
                      FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
                      PreviewTextInput="NumberDevice_PreviewTextInput"
+                     KeyDown="VoltageInput_KeyDown"
                     Name="VoltageInput"
                      />
             </Border>

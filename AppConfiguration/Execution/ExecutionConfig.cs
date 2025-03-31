@@ -112,7 +112,7 @@ namespace AppConfiguration.Execution
       executionModel.IdleModeExecution = ExecutionModel.IdleModeExecution;
       executionModel.StopOnError = ExecutionModel.StopOnError;
       executionModel.IsErrorSimulationMode = ExecutionModel.IsErrorSimulationMode;
-      executionModel.StopOnError = ExecutionModel.StepByStepMode;
+      executionModel.StepByStepMode = ExecutionModel.StepByStepMode;
 
       ExecutionFileManager executionFileManager = new ExecutionFileManager(FileLocations.ExecutionConfigPath);
       await executionFileManager.RewriteFileAsync(executionModel);

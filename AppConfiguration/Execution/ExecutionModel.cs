@@ -11,14 +11,14 @@
     public bool IdleModeExecution { get; set; }
 
     /// <summary>
-    /// Указывает, активен ли пошаговый режим выполнения.
-    /// </summary>
-    public bool StepByStepMode { get; set; }
-
-    /// <summary>
     /// Указывает, активен ли режим симуляции ошибок.
     /// </summary>
     public bool IsErrorSimulationMode { get; set; }
+
+    /// <summary>
+    /// Указывает, активен ли пошаговый режим выполнения.
+    /// </summary>
+    public bool StepByStepMode { get; set; }
 
     /// <summary>
     /// Указывает, нужно ли останавливать выполнение при ошибке.

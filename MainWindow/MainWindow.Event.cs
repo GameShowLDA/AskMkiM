@@ -171,11 +171,18 @@ namespace MainWindowProgram
     private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMetrologyControl(), "Режим СИ");
 
     /// <summary>
-    /// Добавляет пользовательский элемент управления режима ПИ в multiEditors.
+    /// Добавляет пользовательский элемент управления режима ПИ(DCW) в multiEditors.
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void PI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiMetrologyControl(), "Режим ПИ");
+    private async void PIDCW_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiDCWMetrologyControl(), "Режим ПИ(DCW)");
+
+    /// <summary>
+    /// Добавляет пользовательский элемент управления режима ПИ(ACW) в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void PIACW_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PiACWMetrologyControl(), "Режим ПИ(ACW)");
 
     #endregion
 

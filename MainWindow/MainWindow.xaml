@@ -155,9 +155,15 @@
                         />
 
                     <MenuItem 
-                        Header="Режим ПИ" 
-                        Name="ModePIMenuItem"
-                        PreviewMouseDown="PI_Handler" 
+                        Header="Режим ПИ (постоянный)" 
+                        Name="ModePIDCWMenuItem"
+                        PreviewMouseDown="PIDCW_Handler" 
+                        />
+
+                    <MenuItem 
+                        Header="Режим ПИ (переменный)" 
+                        Name="ModePIACWMenuItem"
+                        PreviewMouseDown="PIACW_Handler" 
                         />
 
                 </MenuItem>

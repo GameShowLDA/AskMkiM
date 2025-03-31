@@ -98,7 +98,8 @@
             </Grid>
         </Border>
 
-        <Border Margin="5" Grid.Row="6" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+        <Border Margin="5" Grid.Row="6" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10"
+                  Visibility="{Binding IsBusVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition/>

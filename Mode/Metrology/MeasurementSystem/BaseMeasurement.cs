@@ -388,6 +388,10 @@ namespace Mode.Metrology.MeasurementSystem
       {
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
       }
+      else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
+      {
+        await busSwitcher.ConnectorManager.ConnectBreakdownTester();
+      }
       else
       {
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
