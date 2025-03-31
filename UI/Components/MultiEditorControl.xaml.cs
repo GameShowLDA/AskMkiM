@@ -27,6 +27,21 @@ namespace UI.Components
     internal FileManager fileManager;
 
     /// <summary>
+    /// Объект, управляющий операциями с поиском по тексту.
+    /// </summary>
+    internal TextSearchManager textSearchManager;
+
+    /// <summary>
+    /// Объект, управляющий операциями связанные с пользовательсикми элементами управления.
+    /// </summary>
+    internal ControlManager controlManager;
+
+    /// <summary>
+    /// Объект, управляющй операциями связнными с сохранением файлов.
+    /// </summary>
+    internal SaveFileManager saveFileManager;
+
+    /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
     /// </summary>
     public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
@@ -34,9 +49,12 @@ namespace UI.Components
     /// <summary>
     /// Инициализирует экземпляр <see cref="FileManager"/> и устанавливает связь с текущим контролом.
     /// </summary>
-    public void InitializeFileManager()
+    public void InitializeManagers()
     {
       fileManager = new FileManager(this);
+      textSearchManager = new TextSearchManager(fileManager, this);
+      controlManager = new ControlManager(fileManager, this);
+      saveFileManager = new SaveFileManager(fileManager);
     }
 
     /// <summary>
@@ -59,13 +77,12 @@ namespace UI.Components
 
       this.KeyDown += MultiWindowControl_KeyDown;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
-      InitializeFileManager();
+      InitializeManagers();
     }
 
     private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
     {
-      TextSearchManager textSearchMethods = new TextSearchManager(fileManager, this, searchText);
-      textSearchMethods.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
+      textSearchManager.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
     }
 
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -112,7 +129,6 @@ namespace UI.Components
     /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
     public void AddControl(string header, UserControl control, string description = null)
     {
-      var controlManager = new ControlManager(this.fileManager, this);
       controlManager.AddControl(header, control, description);
     }
 
@@ -140,7 +156,6 @@ namespace UI.Components
     /// <returns>True, если файл был успешно сохранен, иначе false.</returns>
     public bool SaveFileAs()
     {
-      var saveFileManager = new SaveFileManager(fileManager);
       return saveFileManager.SaveFileAs();
     }
 
@@ -151,7 +166,6 @@ namespace UI.Components
     /// <param name="control">Элемент управления для удаления.</param>
     private void RemoveControl(OpenFileButton tabButton, UserControl control)
     {
-      var controlManager = new ControlManager(fileManager, this);
       controlManager.RemoveControl(tabButton, control);
     }
 
@@ -176,7 +190,6 @@ namespace UI.Components
     /// </summary>
     public void OnSearchWindowClosing()
     {
-      var textSearchManager = new TextSearchManager(fileManager, this);
       textSearchManager.OnSearchWindowClosing();
     }
 
@@ -188,7 +201,6 @@ namespace UI.Components
     {
       var activeTab = fileManager.OpenPages.FirstOrDefault(page => 
         page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      var saveFileManager = new SaveFileManager(this.fileManager);
       return saveFileManager.SaveFile(activeTab);
     }
 
@@ -210,9 +222,8 @@ namespace UI.Components
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      TextSearchManager textSearchMethods = new TextSearchManager(fileManager, this);
-      textSearchMethods.SearchResultsReady += OnSearchResultsReady;
-      await textSearchMethods.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      textSearchManager.SearchResultsReady += OnSearchResultsReady;
+      await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
