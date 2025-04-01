@@ -77,32 +77,12 @@ namespace MainWindowProgram
       LogInformation("Настройки инициализированы.");
     }
 
-    /// <summary>
-    /// Добавляет пользовательские элементы управления в интерфейс, если приложение не заблокировано.
-    /// </summary>
-    private async Task AddControlAsync(UserControl userControl, string name, TypeWindow tabType)
-    {
-      if (await GetIsLocked())
-      {
-        await Dispatcher.InvokeAsync(() =>
-        {
-          MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-        });
-      }
-      else
-      {
-        await Dispatcher.InvokeAsync(() =>
-        {
-          MultiWindow.AddControl(name, userControl, tabType);
-        });
-      }
-    }
 
     private void OnTextEditorActive(bool isTextEditor)
     {
       if (isTextEditor)
       {
-        isTextEditorActive = true;
+        IsTextEditorActive = true;
         fileActionsSeparator.Visibility = Visibility.Visible;
         saveMenuItem.Visibility = Visibility.Visible;
         saveAsMenuItem.Visibility = Visibility.Visible;
@@ -126,7 +106,7 @@ namespace MainWindowProgram
 
     private void HideTextEditorActions()
     {
-      isTextEditorActive = false;
+      IsTextEditorActive = false;
       fileActionsSeparator.Visibility = Visibility.Collapsed;
       saveMenuItem.Visibility = Visibility.Collapsed;
       saveAsMenuItem.Visibility = Visibility.Collapsed;

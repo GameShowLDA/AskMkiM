@@ -8,7 +8,8 @@
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
-        
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+
         mc:Ignorable="d"
         Title="ASK MKI M" 
         Height="600" Width="800"
@@ -73,6 +74,17 @@
 
     </Window.Resources>
 
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="SizeChanged">
+            <i:InvokeCommandAction Command="{Binding Window.AdjustCommand}" />
+        </i:EventTrigger>
+
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction 
+                Command="{Binding Window.ClosingCommand}" 
+                PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -81,146 +93,51 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}" MouseLeftButtonDown="TopPanel_MouseLeftButtonDown">
+        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeftButtonDown">
+                    <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="50"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Menu 
-                Name="mainMenu" 
-                VerticalAlignment="Top" 
-                VerticalContentAlignment="Center" 
-                Height="40" 
-                FontSize="15" 
-                Background="Transparent" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                Grid.Column="0" BorderThickness="0"
-                Padding="0,0,40,0"
-                >
+            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" Height="40" FontSize="15" Background="Transparent" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0" Padding="0,0,40,0">
 
-                <MenuItem 
-                    Header="Файл" 
-                    Name="File"
-                    Cursor="Hand" 
-                    BorderBrush="#FF303843" 
-                    OpacityMask="#FF303843"
-                    >
-                    <MenuItem 
-               Header="Архив" 
-               PreviewMouseDown="Archive_PreviewMouseDown"
-               />
+                <MenuItem Header="Файл" Name="File" Cursor="Hand" BorderBrush="#FF303843" OpacityMask="#FF303843">
 
-                    <Separator 
-               Background="{StaticResource ActiveBorderSolidColorBrush}" 
-               Visibility="Collapsed"
-               x:Name="fileActionsSeparator"
-               />
-                    <MenuItem 
-               Header="Сохранить" 
-               x:Name="saveMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="SaveMenuItem_PreviewMouseDown"
-               />
+                    <MenuItem Header="Архив" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
-                    <MenuItem 
-               Header="Сохранить как" 
-               x:Name="saveAsMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="SaveAsMenuItem_PreviewMouseDown"
-               />
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
+                    <MenuItem Header="Сохранить" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
+                    <MenuItem Header="Сохранить как" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
+                    <MenuItem Header="Печать" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
+                    <MenuItem Header="Поиск" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
+                    <MenuItem Header="Сравнить" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}" />
 
-                    <MenuItem 
-               
-               Header="Печать" 
-               x:Name="printMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="PrintMenuItem_PreviewMouseDown"
-               />
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+                    <MenuItem Header="Открыть" Command="{Binding File.OpenFileCommand}" />
+                    <MenuItem Header="Создать" Command="{Binding File.CreateNewFileCommand}" />
 
-                    <MenuItem 
-               Header="Поиск" 
-               x:Name="searchMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="SearchMenuItem_PreviewMouseDown"
-               />
-
-                    <MenuItem 
-               Header="Сравнить" 
-               x:Name="compareMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="CompareMenuItem_PreviewMouseDown"
-               />
-
-                    <Separator 
-               Background="{StaticResource ActiveBorderSolidColorBrush}" 
-               />
-
-
-                    <MenuItem 
-                        Header="Открыть" 
-                        Name="OpenMenuItem"
-                        PreviewMouseDown="Open_PreviewMouseDownAsync"
-                        />
-
-                    <MenuItem 
-                        Header="Создать" 
-                        Name="CreateMenuItem"
-                        PreviewMouseDown="Create_PreviewMouseDownAsync"
-                        />
-
-                    <Separator 
-                        Background="{StaticResource ActiveBorderSolidColorBrush}" 
-                        />
-
-                    <MenuItem 
-                        Header="Выход" 
-                        PreviewMouseDown="Exit_Handler" 
-                        />
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+                    <MenuItem Header="Выход" Command="{Binding File.ExitApplicationCommand}"/>
 
                 </MenuItem>
 
-                <MenuItem 
-                    Header="Метрология"
-                    Name="Metrology"
-                    >
+                <MenuItem Header="Метрология" Name="Metrology">
 
-                    <MenuItem 
-                        Header="Режим КС" 
-                         Name="ModeKSMenuItem"
-                        PreviewMouseDown="KC_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ИЕ" 
-                        Name="ModeIEMenuItem"
-                        PreviewMouseDown="IE_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим СИ" 
-                        Name="ModeCIMenuItem"
-                        PreviewMouseDown="CI_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ПР" 
-                        Name="ModePrMenuItem"
-                        PreviewMouseDown="Pr_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ПИ (постоянный)" 
-                        Name="ModePIDCWMenuItem"
-                        PreviewMouseDown="PIDCW_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ПИ (переменный)" 
-                        Name="ModePIACWMenuItem"
-                        PreviewMouseDown="PIACW_Handler" 
-                        />
+                    <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
+                    <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
+                    <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
+                    <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
+                    <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
+                    <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
 
                 </MenuItem>
 
@@ -237,142 +154,49 @@
 
                 </MenuItem>
 
-                <MenuItem 
-                    Header="Тесты"
-                    Name="TestControl"
-                    >
+                <MenuItem  Header="Тесты" Name="TestControl">
 
-                    <MenuItem 
-                        Header="Тест СИ" 
-                        >
+                    <MenuItem Header="Тест СИ">
 
-                        <MenuItem Header="Метод узла"
-                                  Name="NodeMethodMenuItemCI"
-                                  PreviewMouseDown="CiNodeMethodControl_PreviewMouseDown"
-                                  />
-
-                        <MenuItem Header="Групповой метод"
-                               Name="MethodExecutorMenuItemCI"
-                               PreviewMouseDown="CiMethodExecutorControl_PreviewMouseDown"
-                               />
+                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
+                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
 
                     </MenuItem>
 
-                    <MenuItem 
-                  Header="Тест ПИ на постоянном токе" 
-                  >
+                    <MenuItem Header="Тест ПИ на постоянном токе">
 
-                        <MenuItem Header="Метод узла"
-                            Name="NodeMethodMenuItemPiDCW"
-                            PreviewMouseDown="PiDCWNodeMethodControl_PreviewMouseDown"
-                            />
-
-                        <MenuItem Header="Групповой метод"
-                                Name="MethodExecutorMenuItemPiDCW"
-                                PreviewMouseDown="PiDCWMethodExecutorControl_PreviewMouseDown"
-                                />
+                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
+                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
 
                     </MenuItem>
 
-                    <MenuItem 
-                  Header="Тест ПИ на переменном токе" 
-                  >
+                    <MenuItem Header="Тест ПИ на переменном токе">
 
-                        <MenuItem Header="Метод узла"
-                            Name="NodeMethodMenuItemPiACW"
-                            PreviewMouseDown="PiACWNodeMethodControl_PreviewMouseDown"
-                            />
-
-
-                        <MenuItem Header="Групповой метод"
-                             Name="MethodExecutorMenuItemPiACW"
-                             PreviewMouseDown="PiACWMethodExecutorControl_PreviewMouseDown"
-                             />
+                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
+                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
 
                     </MenuItem>
 
                 </MenuItem>
 
-                <MenuItem 
-                    Header="Настройки"
-                    Name="Settings"
-                    >
+                <MenuItem Header="Настройки" Name="Settings">
 
-                    <MenuItem 
-                        Header="Конфигурация" 
-                        Name="ConfigMenuItem"
-                        PreviewMouseDown="Config_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Выполнение" 
-                        Name="ExecutionMenuItem"
-                        PreviewMouseDown="Execution_Handler"
-                        />
-
-                    <MenuItem 
-                        Header="Протокол" 
-                        Name="ProtocolMenuItem"
-                        PreviewMouseDown="Protocol_Handler"
-                        />
-
-                    <MenuItem 
-                        Header="Погрешности" 
-                        Name="ErrorMenuItem"
-                        PreviewMouseDown="Error_Handler"
-                        />
+                    <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
+                    <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
+                    <MenuItem Header="Протокол" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
+                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Settings.ErrorCommand}"/>
 
                 </MenuItem>
 
-                <MenuItem 
-                    Header="Справка"
-                    Name="Help"
-                    >
+                <MenuItem Header="Администрирование" Name="Admin">
 
-                    <MenuItem 
-                        Header="О программе" 
-                        />
+                    <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
+                    <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
+                    <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
+                    <MenuItem Header="Управление" Name="DeviceManagment">
 
-                    <MenuItem 
-                        Header="Справка" 
-                        />
-
-                </MenuItem>
-
-                <MenuItem 
-    Header="Администрирование"
-    Name="Admin"
-    >
-
-                    <MenuItem 
-        Header="Console" 
-        Name="SendCommandMenuItem"
-        PreviewMouseDown="SendCommand_Handler"
-        />
-
-
-                    <MenuItem 
-        Header="Logger" 
-        Name="LoggerMenuItem"
-        PreviewMouseDown="Logger_Handler"
-        />
-
-                    <MenuItem 
-        Header="USB" 
-        Name="USBMenuItem"
-        PreviewMouseDown="USB_Handler"
-        />
-
-                    <MenuItem 
-                    Header="Управление" 
-                    Name="DeviceManagment"
-                    >
-                        <MenuItem 
-                            Header="GPT" 
-                            Name="GptManagment"
-                            PreviewMouseDown="Gpt_Handler"
-                            >
-                        </MenuItem>
+                        <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
+                        
                     </MenuItem>
 
                 </MenuItem>
@@ -380,43 +204,44 @@
 
             <StackPanel  
                 Background="Transparent" 
-                Grid.Column="2" 
-                MouseLeftButtonDown="mainMenu_MouseLeftButtonDown"
-                />
+                Grid.Column="2">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </StackPanel>
 
             <StackPanel 
-                Orientation="Horizontal" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Grid.Column="2" 
-                Name="ButtonsPanel"
-                Background="Transparent"
-                >
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" 
+                    Grid.Column="2" 
+                    Name="ButtonsPanel"
+                    Background="Transparent"
+                    >
 
-                <DefaultGUI:WindowButtons 
-                    Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                    Height="{Binding ActualHeight, ElementName=mainMenu}" 
-                    x:Name="minimizeButton" 
-                    ChoiceElement="Minimize"
-                    PreviewMouseDown="minimizeButton_PreviewMouseDown"
-                    />
+                    <DefaultGUI:WindowButtons 
+                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Height="{Binding ActualHeight, ElementName=mainMenu}" 
+                        x:Name="minimizeButton" ChoiceElement="Minimize" 
+                        Command="{Binding Window.MinimizeCommand}"
+                        />
 
-                <DefaultGUI:WindowButtons 
-                    x:Name="maximizeButton" 
-                    ChoiceElement="Maximize" 
-                    Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                    Height="{Binding ActualHeight, ElementName=mainMenu}"
-                    PreviewMouseDown="maximizeButton_PreviewMouseDown"
-                    />
+                    <DefaultGUI:WindowButtons 
+                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        x:Name="maximizeButton" ChoiceElement="Maximize" 
+                        Command="{Binding Window.MaximizeCommand}"
+                        />
 
-                <DefaultGUI:WindowButtons 
-                    x:Name="exitButton"
-                    ChoiceElement="Exit"  
-                    Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                    Height="{Binding ActualHeight, ElementName=mainMenu}"
-                    PreviewMouseDown="exitButton_PreviewMouseDown"
-                    />
-            </StackPanel>
+                    <DefaultGUI:WindowButtons 
+                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        x:Name="exitButton" ChoiceElement="Exit" 
+                        Command="{Binding Window.CloseCommand}"
+                        />
+                </StackPanel>
         </Grid>
 
         <Components:MultiWindowControl 

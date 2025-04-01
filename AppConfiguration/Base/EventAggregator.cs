@@ -44,7 +44,6 @@ namespace AppConfiguration.Base
     /// </summary>
     static public event Action<bool> AdminRightsChanged;
 
-
     /// <summary>
     /// Событие, которое вызывается, когда активно окно типа TextEditor.
     /// </summary>

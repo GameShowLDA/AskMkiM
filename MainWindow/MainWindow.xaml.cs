@@ -1,18 +1,17 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using AppConfiguration.Base;
 using AppConfiguration.Execution;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
+using MainWindowProgram.Services;
+using MainWindowProgram.ViewModels;
+using UI.Controls.Search;
 using Utilities.USB;
 using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
-using AppConfiguration.Base;
-using UI.Controls.Search;
 
 namespace MainWindowProgram
 {
@@ -27,6 +26,7 @@ namespace MainWindowProgram
     /// Статический блок информации для отображения сообщений.
     /// </summary>
     static TextBlock _infoBlock;
+
     private bool isLocked = false;
 
     /// <summary>
@@ -42,12 +42,27 @@ namespace MainWindowProgram
     // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
     private readonly ConsoleManager _consoleManager;
 
+    private readonly MainWindowViewModel _viewModel;
+
     /// <summary>
     /// Инициализирует новое окно приложения и настраивает события, командную строку, мониторинг USB и конфигурацию.
     /// </summary>
     public MainWindow()
     {
       InitializeComponent();
+
+      var multiWindowService = new MultiWindowService(this.MultiWindow);
+
+      var metrologyService = new MetrologyService(multiWindowService);
+      var fileService = new FileService(multiWindowService, () => isLocked);
+      var testService = new TestService(multiWindowService);
+      var settingsService = new SettingsService(multiWindowService);
+      var adminService = new AdminServices(this, multiWindowService);
+      var windowService = new WindowService(this, mainMenu, ButtonsPanel, () => isLocked);
+
+      _viewModel = new MainWindowViewModel(metrologyService, fileService, testService, settingsService, adminService, windowService);
+      this.DataContext = _viewModel;
+
       _consoleManager = ConsoleManager.Instance;
       this.Visibility = Visibility.Hidden;
     }
@@ -55,7 +70,6 @@ namespace MainWindowProgram
     /// <summary>
     /// Запускает асинхронную инициализацию окна.
     /// </summary>
-    /// <returns></returns>
     public async Task InitializeAsync()
     {
       _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
@@ -146,21 +160,22 @@ namespace MainWindowProgram
     /// </summary>
     private void SetEvent()
     {
-      this.Closing += MainWindow_Closing;
-      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
-      this.SizeChanged += MainWindow_SizeChanged;
+      // AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
+      // Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
 
-      AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
-      Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
       TextEditorActive += OnTextEditorActive;
       TextEditorClosing += OnTextEditorClosing;
+
       SearchWindowClosing += OnSearchWindowClosing;
       SearchWindowAtivated += OnSearchWindowActivated;
+
       LockedChanged += ApplicationDataHandler_LockedChanged;
       AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
-	  usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+
       RequestShowProgress += OnRequestShowProgress;
       RequestCloseProgress += OnRequestCloseProgress;
+
       ExecutionConfig.IdleModeChange += ExecutionConfig_IdleModeChange;
     }
 

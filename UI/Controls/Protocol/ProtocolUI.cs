@@ -75,15 +75,6 @@ namespace UI.Controls.Protocol
 
     #endregion
 
-    #region Работа с оборудованием?
-
-    /// <summary>
-    /// Список моделей устройств, используемых в действиях.
-    /// </summary>
-    List<IDevice> DeviceModels;
-
-    #endregion
-
     #endregion
 
     #region Основные настройки.
@@ -109,15 +100,6 @@ namespace UI.Controls.Protocol
       {
         _isRepeatEnabled = true;
       }
-    }
-
-    /// <summary>
-    /// Устанавливает список моделей устройств для использования в действиях.
-    /// </summary>
-    /// <param name="deviceModels">Список моделей устройств <see cref="DeviceModel"/>.</param>
-    public void SetDevices(List<IDevice> deviceModels)
-    {
-      DeviceModels = deviceModels;
     }
 
     /// <summary>

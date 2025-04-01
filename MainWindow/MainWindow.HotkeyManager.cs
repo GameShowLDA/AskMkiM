@@ -14,7 +14,7 @@ namespace MainWindowProgram
   public partial class MainWindow
   {
     private bool isSearchWindowOpened;
-    private bool isTextEditorActive;
+    public bool IsTextEditorActive { get; set;}
 
     /// <summary>
     /// Команда для активации пункта меню.
@@ -39,78 +39,6 @@ namespace MainWindowProgram
           LogInformation($"Menu item '{focusedMenuItem.Header}' activated with Enter key.");
           e.Handled = true;
         }
-      }
-    }
-
-    /// <summary>
-    /// Выполняет действие, соответствующее выбранному пункту меню.
-    /// Вызывает метод, ассоциированный с именем MenuItem.
-    /// </summary>
-    /// <param name="menuItem">Элемент меню, для которого требуется выполнить действие.</param>
-    private void ExecuteMenuItemAction(MenuItem menuItem)
-    {
-      switch (menuItem.Name)
-      {
-        // Файл
-        case "OpenMenuItem":
-          Open_PreviewMouseDownAsync(menuItem, null);
-          break;
-        case "CreateMenuItem":
-          Create_PreviewMouseDownAsync(menuItem, null);
-          break;
-        case "ExitMenuItem":
-          Exit_Handler(menuItem, null);
-          break;
-
-        // Метрология
-        case "ModeKSMenuItem":
-          KC_Handler(menuItem, null);
-          break;
-        case "ModeIEMenuItem":
-          IE_Handler(menuItem, null);
-          break;
-        case "ModeCIMenuItem":
-          CI_Handler(menuItem, null);
-          break;
-
-        // Самоконтроль
-        case "SelfControlMenuItem":
-          Test_Self(menuItem, null);
-          break;
-
-        // Тесты
-        case "NodeMethodMenuItem":
-          CiNodeMethodControl_PreviewMouseDown(menuItem, null);
-          break;
-
-        // Настройки
-        case "ExecutionMenuItem":
-          Execution_Handler(menuItem, null);
-          break;
-        case "ConfigMenuItem":
-          Config_Handler(menuItem, null);
-          break;
-        case "ErrorMenuItem":
-          Error_Handler(menuItem, null);
-          break;
-        case "ProtocolMenuItem":
-          Protocol_Handler(menuItem, null);
-          break;
-
-        // Администрирование
-        case "USBMenuItem":
-          USB_Handler(menuItem, null);
-          break;
-        case "SendCommandMenuItem":
-          SendCommand_Handler(menuItem, null);
-          break;
-        case "LoggerMenuItem":
-          Logger_Handler(menuItem, null);
-          break;
-
-        default:
-          LogWarning($"Неизвестный элемент меню: {menuItem.Name}");
-          break;
       }
     }
 
@@ -144,25 +72,6 @@ namespace MainWindowProgram
     }
 
     /// <summary>
-    /// Обработчик события PreviewKeyDown для окна.
-    /// При нажатии клавиши Enter, если элемент с фокусом является MenuItem,
-    /// выполняется соответствующее действие пункта меню.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события клавиатуры.</param>
-    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-      if (e.Key == Key.Enter)
-      {
-        if (Keyboard.FocusedElement is MenuItem focusedMenuItem)
-        {
-          ExecuteMenuItemAction(focusedMenuItem);
-          LogInformation($"Menu item '{focusedMenuItem.Header}' activated with Enter key.");
-        }
-      }
-    }
-
-    /// <summary>
     /// Регистрирует горячие клавиши для быстрого доступа к пунктам меню и кнопкам.
     /// Каждая горячая клавиша настраивается с использованием комбинации клавиш и модификаторов.
     /// </summary>
@@ -175,9 +84,7 @@ namespace MainWindowProgram
         RegisterHotkey(Key.D3, ModifierKeys.Control, () => FocusMenuItem(SelfControl));
         RegisterHotkey(Key.D4, ModifierKeys.Control, () => FocusMenuItem(TestControl));
         RegisterHotkey(Key.D5, ModifierKeys.Control, () => FocusMenuItem(Settings));
-        RegisterHotkey(Key.D6, ModifierKeys.Control, () => FocusMenuItem(Help));
         RegisterHotkey(Key.D7, ModifierKeys.Control, () => FocusMenuItem(Admin));
-
         RegisterHotkey(Key.P, ModifierKeys.Control, async () => await SimulateButtonAsync(PowerButton));
         RegisterHotkey(Key.F, ModifierKeys.Control, async () => await ShowSearchWindow(searchMenuItem));
       });
@@ -258,7 +165,7 @@ namespace MainWindowProgram
 
     private async Task ShowSearchWindow(MenuItem userControl)
     {
-      if (isTextEditorActive)
+      if (IsTextEditorActive)
       {
         var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
         {
