@@ -18,6 +18,7 @@ using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
+using Mode.Metrology.PR;
 
 namespace MainWindowProgram
 {
@@ -305,6 +306,13 @@ namespace MainWindowProgram
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void CI_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new CiMetrologyControl(), "Режим СИ", TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет пользовательский элемент управления режима ПР в multiEditors.
+    /// </summary>
+    /// <param name="sender">Объект, вызвавший событие.</param>
+    /// <param name="e">Аргументы события нажатия мыши.</param>
+    private async void Pr_Handler(object sender, MouseButtonEventArgs e) => await AddControlAsync(new PrMetrologyControl(), "Режим ПР", TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет пользовательский элемент управления режима ПИ(DCW) в multiEditors.

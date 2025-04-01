@@ -341,16 +341,8 @@ namespace Mode.Metrology.MeasurementSystem
     {
       foreach (var relayModule in relayModules)
       {
-        if (modeDevice == MetrologicalDeviceType.Mint)
-        {
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
-        }
-        else
-        {
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
-          await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
-        }
+        await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
+        await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
       }
     }
 
@@ -374,26 +366,17 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="modeDevice">Тип метрологического устройства.</param>
     private async Task ConnectDevicesToBusAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, MetrologicalDeviceType modeDevice)
     {
-      if (modeDevice == MetrologicalDeviceType.Mint)
-      {
-        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
-        if (mint != null)
-        {
-          await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A2);
-          await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B2);
-        }
-      }
-
-      if (modeDevice == MetrologicalDeviceType.Mint)
-      {
-        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB2);
-      }
-      else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
+      if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
         await busSwitcher.ConnectorManager.ConnectBreakdownTester();
       }
       else
       {
+        if (modeDevice == MetrologicalDeviceType.Mint)
+        {
+          await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
+          await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
+        }
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
       }
     }

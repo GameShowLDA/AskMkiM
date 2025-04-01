@@ -205,6 +205,12 @@
                         />
 
                     <MenuItem 
+                        Header="Режим ПР" 
+                        Name="ModePrMenuItem"
+                        PreviewMouseDown="Pr_Handler" 
+                        />
+
+                    <MenuItem 
                         Header="Режим ПИ (постоянный)" 
                         Name="ModePIDCWMenuItem"
                         PreviewMouseDown="PIDCW_Handler" 

@@ -56,7 +56,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
         return true;
       }
 
-      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(10, current).ToString());
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(10, current).ToString(), timeout: 2000);
       return true;
     }
   }
