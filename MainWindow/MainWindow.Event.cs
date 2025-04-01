@@ -18,6 +18,8 @@ using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
+using UI.Components.ArchiveControls;
+using UI.Components.ArchiveManager.Models;
 
 namespace MainWindowProgram
 {
@@ -101,11 +103,24 @@ namespace MainWindowProgram
     /// </summary>
     /// <param name="sender">Объект, вызвавший событие.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Archive_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private async void Archive_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      //var allArchives = new TableAllArchivesControl();
-      //AddControl(allArchives, "Архив");
-      //allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
+      var allArchives = new TableAllArchivesControl();
+      await AddControlAsync(allArchives, "Архив", TypeWindow.Files);
+      allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
+    }
+
+    private async void ArchiveControl_ArchiveSelected(object sender, MouseButtonEventArgs e)
+    {
+      var dataGrid = e.Source as DataGrid;
+      if (dataGrid?.SelectedItem is ApkArchive selectedArchive)
+      {
+        if (selectedArchive != null)
+        {
+          var archiveName = selectedArchive.ArchiveName;
+          await AddControlAsync(new TableApkArchiveControl(archiveName), archiveName, TypeWindow.Files);
+        }
+      }
     }
 
     /// <summary>

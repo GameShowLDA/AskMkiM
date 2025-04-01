@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static AppConfiguration.SystemState.SystemStateManager;
+using System.Windows;
 
 namespace AppConfiguration.Base
 {
@@ -153,6 +154,17 @@ namespace AppConfiguration.Base
           LockedChanged?.Invoke(IsLocked);
         }
       }
+    }
+
+    /// <summary>
+    /// Возвращает текущий статус прав администратора.
+    /// </summary>
+    /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
+    static public bool GetAdminRights()
+    {
+      bool result = false;
+      Application.Current.Dispatcher.Invoke(() => result = IsAdmin);
+      return result;
     }
 
     /// <summary>
