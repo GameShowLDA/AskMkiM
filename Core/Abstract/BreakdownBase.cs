@@ -40,9 +40,8 @@ namespace Core.Abstract
     /// <summary>
     /// Чтение порта.
     /// </summary>
-    /// <returns>Ответ с устройства</returns>
+    /// <returns>Ответ с устройства.</returns>
     public abstract Task<string> ReadLineAsync();
-
 
     /// <summary>
     /// Отправка на сообщения в порт.

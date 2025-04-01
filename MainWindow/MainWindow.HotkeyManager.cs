@@ -1,14 +1,34 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UI.Components;
+using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
 {
+  /// <summary>
+  /// Основное окно программы.
+  /// </summary>
   public partial class MainWindow
   {
+    private bool isSearchWindowOpened;
+    private bool isTextEditorActive;
+
+    /// <summary>
+    /// Команда для активации пункта меню.
+    /// </summary>
     public static readonly RoutedUICommand ActivateMenuItemCommand = new RoutedUICommand(
     "ActivateMenuItem", "ActivateMenuItemCommand", typeof(MainWindow));
+
+    /// <summary>
+    /// Обработчик события KeyDown для окна.
+    /// При нажатии клавиши Enter, если элемент с фокусом является MenuItem,
+    /// генерируется событие клика, и логируется информация.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события клавиатуры.</param>
     private void MainWindow_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.Enter)
@@ -22,6 +42,11 @@ namespace MainWindowProgram
       }
     }
 
+    /// <summary>
+    /// Выполняет действие, соответствующее выбранному пункту меню.
+    /// Вызывает метод, ассоциированный с именем MenuItem.
+    /// </summary>
+    /// <param name="menuItem">Элемент меню, для которого требуется выполнить действие.</param>
     private void ExecuteMenuItemAction(MenuItem menuItem)
     {
       switch (menuItem.Name)
@@ -55,7 +80,7 @@ namespace MainWindowProgram
 
         // Тесты
         case "NodeMethodMenuItem":
-          NodeMethodControl_PreviewMouseDown(menuItem, null);
+          CiNodeMethodControl_PreviewMouseDown(menuItem, null);
           break;
 
         // Настройки
@@ -89,15 +114,26 @@ namespace MainWindowProgram
       }
     }
 
+    /// <summary>
+    /// Обработчик события нажатия мыши для элементов управления UserControl.
+    /// В зависимости от имени UserControl вызывается соответствующий асинхронный метод.
+    /// </summary>
+    /// <param name="sender">Источник события (UserControl).</param>
+    /// <param name="e">Аргументы события мыши.</param>
     private async Task HandleUserControlPreviewMouseDownAsync(object sender, MouseButtonEventArgs e)
     {
-      if (sender is UserControl userControl)
+      if (sender is Control userControl)
       {
         switch (userControl.Name)
         {
           case "PowerButton":
             await PowerButton.PowerButtonClick();
             break;
+
+          case "searchMenuItem":
+            SearchMenuItem_PreviewMouseDown(sender, e);
+            break;
+
           default:
             LogWarning($"Неизвестный UserControl: {userControl.Name}");
             break;
@@ -107,6 +143,13 @@ namespace MainWindowProgram
       }
     }
 
+    /// <summary>
+    /// Обработчик события PreviewKeyDown для окна.
+    /// При нажатии клавиши Enter, если элемент с фокусом является MenuItem,
+    /// выполняется соответствующее действие пункта меню.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события клавиатуры.</param>
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.Enter)
@@ -119,19 +162,34 @@ namespace MainWindowProgram
       }
     }
 
+    /// <summary>
+    /// Регистрирует горячие клавиши для быстрого доступа к пунктам меню и кнопкам.
+    /// Каждая горячая клавиша настраивается с использованием комбинации клавиш и модификаторов.
+    /// </summary>
     private void RegisterHotkeys()
     {
-      RegisterHotkey(Key.D1, ModifierKeys.Control, () => FocusMenuItem(File));
-      RegisterHotkey(Key.D2, ModifierKeys.Control, () => FocusMenuItem(Metrology));
-      RegisterHotkey(Key.D3, ModifierKeys.Control, () => FocusMenuItem(SelfControl));
-      RegisterHotkey(Key.D4, ModifierKeys.Control, () => FocusMenuItem(TestControl));
-      RegisterHotkey(Key.D5, ModifierKeys.Control, () => FocusMenuItem(Settings));
-      RegisterHotkey(Key.D6, ModifierKeys.Control, () => FocusMenuItem(Help));
-      RegisterHotkey(Key.D7, ModifierKeys.Control, () => FocusMenuItem(Admin));
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        RegisterHotkey(Key.D1, ModifierKeys.Control, () => FocusMenuItem(File));
+        RegisterHotkey(Key.D2, ModifierKeys.Control, () => FocusMenuItem(Metrology));
+        RegisterHotkey(Key.D3, ModifierKeys.Control, () => FocusMenuItem(SelfControl));
+        RegisterHotkey(Key.D4, ModifierKeys.Control, () => FocusMenuItem(TestControl));
+        RegisterHotkey(Key.D5, ModifierKeys.Control, () => FocusMenuItem(Settings));
+        RegisterHotkey(Key.D6, ModifierKeys.Control, () => FocusMenuItem(Help));
+        RegisterHotkey(Key.D7, ModifierKeys.Control, () => FocusMenuItem(Admin));
 
-      RegisterHotkey(Key.P, ModifierKeys.Control, async () => await SimulateButtonAsync(PowerButton));
+        RegisterHotkey(Key.P, ModifierKeys.Control, async () => await SimulateButtonAsync(PowerButton));
+        RegisterHotkey(Key.F, ModifierKeys.Control, async () => await ShowSearchWindow(searchMenuItem));
+      });
     }
 
+    /// <summary>
+    /// Регистрирует отдельную горячую клавишу с заданным сочетанием клавиш и действием.
+    /// Создаётся KeyGesture и привязывается действие, которое выполняется при срабатывании горячей клавиши.
+    /// </summary>
+    /// <param name="key">Клавиша, которая используется для горячей клавиши.</param>
+    /// <param name="modifiers">Модификаторы для горячей клавиши.</param>
+    /// <param name="action">Действие, которое должно выполниться.</param>
     private void RegisterHotkey(Key key, ModifierKeys modifiers, Action action)
     {
       var gesture = new KeyGesture(key, modifiers);
@@ -144,6 +202,12 @@ namespace MainWindowProgram
       }));
     }
 
+    /// <summary>
+    /// Фокусирует и открывает указанный пункт меню.
+    /// Если у меню есть подменю, фокус переходит на первый пункт подменю.
+    /// Логируется информация о текущем фокусе.
+    /// </summary>
+    /// <param name="menuItem">Пункт меню, который требуется открыть и сфокусировать.</param>
     private void FocusMenuItem(MenuItem menuItem)
     {
       menuItem.IsSubmenuOpen = true;
@@ -160,6 +224,12 @@ namespace MainWindowProgram
       LogInformation($"Текущий фокус: {focusedElement}");
     }
 
+    /// <summary>
+    /// Выполняет команду активации пункта меню при срабатывании команды.
+    /// Генерирует событие клика для пункта меню.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы выполненной команды.</param>
     private void ExecuteActivateMenuItem(object sender, ExecutedRoutedEventArgs e)
     {
       if (e.Parameter is MenuItem menuItem)
@@ -169,15 +239,51 @@ namespace MainWindowProgram
       }
     }
 
+    /// <summary>
+    /// Симулирует нажатие на кнопку на элементе управления UserControl.
+    /// Создаёт событие нажатия мыши и вызывает обработчик события для данного элемента.
+    /// </summary>
+    /// <param name="userControl">Элемент управления, на котором симулируется нажатие.</param>
+    /// <returns>Задача, представляющая асинхронную операцию.</returns>
     private async Task SimulateButtonAsync(UserControl userControl)
     {
       var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
       {
         RoutedEvent = UIElement.MouseLeftButtonDownEvent,
-        Source = userControl
+        Source = userControl,
       };
 
       await HandleUserControlPreviewMouseDownAsync(PowerButton, mouseEventArgs);
+    }
+
+    private async Task ShowSearchWindow(MenuItem userControl)
+    {
+      if (isTextEditorActive)
+      {
+        var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+        {
+          RoutedEvent = UIElement.MouseLeftButtonDownEvent,
+          Source = userControl
+        };
+        if (!_isSearchWindowOpen)
+        {
+          await HandleUserControlPreviewMouseDownAsync(searchMenuItem, mouseEventArgs);
+        }
+        else
+        {
+          TextEditorUI activeEditor = MultiWindow.GetActiveTextEditor();
+          string selectedText = activeEditor?.TextArea.Selection.GetText();
+          if (!string.IsNullOrEmpty(selectedText))
+          {
+            var foundElement = _searchWindow.FindName("SearchTextBox");
+            if (foundElement != null)
+            {
+              var foundTextBox = foundElement as TextBox;
+              foundTextBox.Text = selectedText;
+            }
+          }
+        }
+      }
     }
   }
 }

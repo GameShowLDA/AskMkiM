@@ -19,7 +19,7 @@
         WindowState="Maximized"
         >
     <Window.Resources>
-        
+
         <Style TargetType="DefaultGUI:WindowButtons">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
@@ -70,6 +70,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
         </Style>
+
     </Window.Resources>
 
 
@@ -80,11 +81,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TopPanel">
+        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}" MouseLeftButtonDown="TopPanel_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="50"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -94,7 +94,7 @@
                 VerticalContentAlignment="Center" 
                 Height="40" 
                 FontSize="15" 
-                Background="{StaticResource SecondarySolidColorBrush}" 
+                Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="0" BorderThickness="0"
                 Padding="0,0,40,0"
@@ -107,6 +107,56 @@
                     BorderBrush="#FF303843" 
                     OpacityMask="#FF303843"
                     >
+                    <MenuItem 
+               Header="Архив" 
+               PreviewMouseDown="Archive_PreviewMouseDown"
+               />
+
+                    <Separator 
+               Background="{StaticResource ActiveBorderSolidColorBrush}" 
+               Visibility="Collapsed"
+               x:Name="fileActionsSeparator"
+               />
+                    <MenuItem 
+               Header="Сохранить" 
+               x:Name="saveMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SaveMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Сохранить как" 
+               x:Name="saveAsMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SaveAsMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               
+               Header="Печать" 
+               x:Name="printMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="PrintMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Поиск" 
+               x:Name="searchMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="SearchMenuItem_PreviewMouseDown"
+               />
+
+                    <MenuItem 
+               Header="Сравнить" 
+               x:Name="compareMenuItem"
+               Visibility="Collapsed"
+               PreviewMouseDown="CompareMenuItem_PreviewMouseDown"
+               />
+
+                    <Separator 
+               Background="{StaticResource ActiveBorderSolidColorBrush}" 
+               />
+
 
                     <MenuItem 
                         Header="Открыть" 
@@ -154,6 +204,23 @@
                         PreviewMouseDown="CI_Handler" 
                         />
 
+                    <MenuItem 
+                        Header="Режим ПР" 
+                        Name="ModePrMenuItem"
+                        PreviewMouseDown="Pr_Handler" 
+                        />
+
+                    <MenuItem 
+                        Header="Режим ПИ (постоянный)" 
+                        Name="ModePIDCWMenuItem"
+                        PreviewMouseDown="PIDCW_Handler" 
+                        />
+
+                    <MenuItem 
+                        Header="Режим ПИ (переменный)" 
+                        Name="ModePIACWMenuItem"
+                        PreviewMouseDown="PIACW_Handler" 
+                        />
 
                 </MenuItem>
 
@@ -180,9 +247,47 @@
                         >
 
                         <MenuItem Header="Метод узла"
-                                  Name="NodeMethodMenuItem"
-                                  PreviewMouseDown="NodeMethodControl_PreviewMouseDown"
+                                  Name="NodeMethodMenuItemCI"
+                                  PreviewMouseDown="CiNodeMethodControl_PreviewMouseDown"
                                   />
+
+                        <MenuItem Header="Групповой метод"
+                               Name="MethodExecutorMenuItemCI"
+                               PreviewMouseDown="CiMethodExecutorControl_PreviewMouseDown"
+                               />
+
+                    </MenuItem>
+
+                    <MenuItem 
+                  Header="Тест ПИ на постоянном токе" 
+                  >
+
+                        <MenuItem Header="Метод узла"
+                            Name="NodeMethodMenuItemPiDCW"
+                            PreviewMouseDown="PiDCWNodeMethodControl_PreviewMouseDown"
+                            />
+
+                        <MenuItem Header="Групповой метод"
+                                Name="MethodExecutorMenuItemPiDCW"
+                                PreviewMouseDown="PiDCWMethodExecutorControl_PreviewMouseDown"
+                                />
+
+                    </MenuItem>
+
+                    <MenuItem 
+                  Header="Тест ПИ на переменном токе" 
+                  >
+
+                        <MenuItem Header="Метод узла"
+                            Name="NodeMethodMenuItemPiACW"
+                            PreviewMouseDown="PiACWNodeMethodControl_PreviewMouseDown"
+                            />
+
+
+                        <MenuItem Header="Групповой метод"
+                             Name="MethodExecutorMenuItemPiACW"
+                             PreviewMouseDown="PiACWMethodExecutorControl_PreviewMouseDown"
+                             />
 
                     </MenuItem>
 
@@ -218,9 +323,6 @@
                         />
 
                 </MenuItem>
-
-
-
 
                 <MenuItem 
                     Header="Справка"
@@ -261,11 +363,23 @@
         PreviewMouseDown="USB_Handler"
         />
 
+                    <MenuItem 
+                    Header="Управление" 
+                    Name="DeviceManagment"
+                    >
+                        <MenuItem 
+                            Header="GPT" 
+                            Name="GptManagment"
+                            PreviewMouseDown="Gpt_Handler"
+                            >
+                        </MenuItem>
+                    </MenuItem>
+
                 </MenuItem>
             </Menu>
 
             <StackPanel  
-                Background="{StaticResource SecondarySolidColorBrush}" 
+                Background="Transparent" 
                 Grid.Column="2" 
                 MouseLeftButtonDown="mainMenu_MouseLeftButtonDown"
                 />
@@ -275,7 +389,8 @@
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top" 
                 Grid.Column="2" 
-                Background="{StaticResource SecondarySolidColorBrush}"
+                Name="ButtonsPanel"
+                Background="Transparent"
                 >
 
                 <DefaultGUI:WindowButtons 
@@ -304,12 +419,13 @@
             </StackPanel>
         </Grid>
 
-        <Components:MultiEditorControl
-            x:Name="multiEditors" 
-            Grid.Row="1"
+        <Components:MultiWindowControl 
+            x:Name="MultiWindow" 
+            Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"
             />
 
         <Grid 
+            Name="BottomPanel"
             Grid.Row="2" 
             Height="40" 
             Background="{StaticResource SecondarySolidColorBrush}"

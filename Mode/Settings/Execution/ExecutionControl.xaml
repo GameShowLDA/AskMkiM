@@ -49,21 +49,9 @@
                         />
                         </Grid>
 
-                        <Grid Grid.Row="1" Margin="5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <CheckBox Name="executionDelay" Style="{StaticResource AnimatedSwitch}" Checked="ExecutionDelay_Checked" Unchecked="ExecutionDelay_Checked"/>
-                            <TextBlock 
-                        Text="Задержки в холостом режиме" 
-                        Grid.Column="1" 
-                        Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                        FontSize="18" 
-                        />
-                        </Grid>
+                       
 
-                        <Grid Grid.Row="2" Margin="5">
+                        <Grid Grid.Row="1" Margin="5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="Auto"/>

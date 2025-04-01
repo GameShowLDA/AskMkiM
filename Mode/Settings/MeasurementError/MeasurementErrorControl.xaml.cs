@@ -1,22 +1,41 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfig.Data.MeasurementError;
-using static AppConfig.Config.MeasurementErrorConfig;
-using static AppConfig.Data.MeasurementError.MeasurementErrorModel;
+using AppConfiguration.Base;
+using AppConfiguration.MeasurementError;
+using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
+using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 
 namespace Mode.Settings.MeasurementError
 {
   /// <summary>
-  /// Логика взаимодействия для MeasurementErrorControl.xaml
+  /// Логика взаимодействия для MeasurementErrorControl.xaml.
   /// </summary>
   public partial class MeasurementErrorControl : UserControl
   {
-    MeasurementErrorModel KcModel { get; set; }
-    MeasurementErrorModel CiModel { get; set; }
-    MeasurementErrorModel PrModel { get; set; }
-    MeasurementErrorModel IeModel { get; set; }
+    /// <summary>
+    /// Модель измерения ошибки для команды KC.
+    /// </summary>
+    private MeasurementErrorModel KcModel { get; set; }
 
-    bool start = true;
+    /// <summary>
+    /// Модель измерения ошибки для команды CI.
+    /// </summary>
+    private MeasurementErrorModel CiModel { get; set; }
+
+    /// <summary>
+    /// Модель измерения ошибки для команды PR.
+    /// </summary>
+    private MeasurementErrorModel PrModel { get; set; }
+
+    /// <summary>
+    /// Модель измерения ошибки для команды IE.
+    /// </summary>
+    private MeasurementErrorModel IeModel { get; set; }
+
+    /// <summary>
+    /// Флаг, указывающий, запущен ли процесс инициализации.
+    /// </summary>
+    private bool start = true;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MeasurementErrorControl"/>.
@@ -73,6 +92,7 @@ namespace Mode.Settings.MeasurementError
         e.Handled = true;
         return true;
       }
+
       return false;
     }
 
@@ -189,14 +209,14 @@ namespace Mode.Settings.MeasurementError
     private async Task UpdateFileAsync()
     {
       var models = new List<MeasurementErrorModel>
-            {
-                KcModel,
-                CiModel,
-                PrModel,
-                IeModel
-            };
+      {
+        KcModel,
+        CiModel,
+        PrModel,
+        IeModel,
+      };
 
-      MeasurementErrorFileManage measurementErrorFileManage = new MeasurementErrorFileManage(AppConfig.FileLocations.MeasurementErrorConfigPath);
+      MeasurementErrorFileManage measurementErrorFileManage = new MeasurementErrorFileManage(FileLocations.MeasurementErrorConfigPath);
       await measurementErrorFileManage.RewriteFileAsync(models);
     }
 

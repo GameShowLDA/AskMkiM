@@ -4,24 +4,34 @@ using Newtonsoft.Json;
 
 namespace Utilities.FilesUtility
 {
+  /// <summary>
+  /// Утилита для работы с JSON файлами.
+  /// Позволяет считывать, добавлять, удалять и перезаписывать данные.
+  /// </summary>
+  /// <typeparam name="T">Тип данных, хранящихся в JSON файле.</typeparam>
   public class JsonUtility<T>
   {
     private readonly string _filePath;
     private readonly JsonSerializerSettings _settings;
+
+    /// <summary>
+    /// Создаёт экземпляр <see cref="JsonUtility{T}"/> для работы с указанным JSON файлом.
+    /// </summary>
+    /// <param name="filePath">Путь к JSON файлу.</param>
     public JsonUtility(string filePath)
     {
       _filePath = filePath;
       _settings = new JsonSerializerSettings
       {
         Converters = new List<JsonConverter> { new IPAddressConverter() },
-        Formatting = Formatting.Indented
+        Formatting = Formatting.Indented,
       };
     }
 
     /// <summary>
     /// Добавляет новую сущность в JSON файл.
     /// </summary>
-    /// <param name="value">Новая сущность для добавления</param>
+    /// <param name="value">Новая сущность для добавления.</param>
     public async Task CreateAsync(T value)
     {
       var entities = await ReadAsync();
@@ -35,7 +45,7 @@ namespace Utilities.FilesUtility
     /// <summary>
     /// Удаляет сущность из JSON файла.
     /// </summary>
-    /// <param name="value">Сущность для удаления</param>
+    /// <param name="value">Сущность для удаления.</param>
     public async Task DeleteAsync(T value)
     {
       var entities = await ReadAsync();
@@ -49,7 +59,7 @@ namespace Utilities.FilesUtility
     /// <summary>
     /// Считывает все сущности из JSON файла асинхронно.
     /// </summary>
-    /// <returns>Список всех сущностей</returns>
+    /// <returns>Список всех сущностей.</returns>
     public async Task<List<T>?> ReadAsync()
     {
       try
@@ -88,7 +98,7 @@ namespace Utilities.FilesUtility
     /// <summary>
     /// Перезаписывает все сущности в JSON файле.
     /// </summary>
-    /// <param name="value">Список сущностей для записи</param>
+    /// <param name="value">Список сущностей для записи.</param>
     public async Task RewriteAsync(List<T> value)
     {
       string jsonString = JsonConvert.SerializeObject(value, _settings);

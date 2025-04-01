@@ -1,10 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
+using static AppConfiguration.SystemState.SystemStateManager;
+using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
-
+using AppConfiguration.Execution;
+using AppConfiguration.MeasurementError;
+using AppConfiguration.Protocol;
+using AppConfiguration.Theme;
+using static Utilities.LoggerUtility;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram
 {
@@ -13,10 +17,10 @@ namespace MainWindowProgram
     /// <summary>
     /// Инициализация приложения.
     /// </summary>
-    private void Initialize()
+    private async Task Initialize()
     {
       CheckStatusProgram();
-      StartSettings();
+      await StartSettings();
       RegisterHotkeys();
     }
 
@@ -40,9 +44,28 @@ namespace MainWindowProgram
     /// <summary>
     /// Выполняет асинхронную настройку приложения, загружает настройки темы и регистрирует обработчики событий для сообщений.
     /// </summary>
-    private async void StartSettings()
+    private async Task StartSettings()
     {
-      await ReadAllSettingsAsync();
+      try
+      {
+        var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
+        var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
+        var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
+        var db = DataBaseConfiguration.Configurations.DataBaseConfig.InitializeDB();
+
+        await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
+        await ThemeSettingsManager.ReadThemeModeAsync();
+      }
+      catch (Exception ex)
+      {
+        var stackTrace = new System.Diagnostics.StackTrace();
+        var callingFrame = stackTrace.GetFrame(1);
+        var method = callingFrame.GetMethod();
+        var className = method.DeclaringType.FullName;
+        var methodName = method.Name;
+
+        LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
+      }
 
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
@@ -57,7 +80,7 @@ namespace MainWindowProgram
     /// <summary>
     /// Добавляет пользовательские элементы управления в интерфейс, если приложение не заблокировано.
     /// </summary>
-    private async Task AddControlAsync(UserControl userControl, string name)
+    private async Task AddControlAsync(UserControl userControl, string name, TypeWindow tabType)
     {
       if (await GetIsLocked())
       {
@@ -70,10 +93,51 @@ namespace MainWindowProgram
       {
         await Dispatcher.InvokeAsync(() =>
         {
-          multiEditors.AddControl(name, userControl);
+          MultiWindow.AddControl(name, userControl, tabType);
         });
       }
     }
 
+    private void OnTextEditorActive(bool isTextEditor)
+    {
+      if (isTextEditor)
+      {
+        isTextEditorActive = true;
+        fileActionsSeparator.Visibility = Visibility.Visible;
+        saveMenuItem.Visibility = Visibility.Visible;
+        saveAsMenuItem.Visibility = Visibility.Visible;
+        printMenuItem.Visibility = Visibility.Visible;
+        searchMenuItem.Visibility = Visibility.Visible;
+        compareMenuItem.Visibility = Visibility.Visible;
+      }
+      else
+      {
+        HideTextEditorActions();
+      }
+    }
+
+    private void OnTextEditorClosing(bool isTextEditor, string textEditorName)
+    {
+      if (isTextEditor)
+      {
+        HideTextEditorActions();
+      }
+    }
+
+    private void HideTextEditorActions()
+    {
+      isTextEditorActive = false;
+      fileActionsSeparator.Visibility = Visibility.Collapsed;
+      saveMenuItem.Visibility = Visibility.Collapsed;
+      saveAsMenuItem.Visibility = Visibility.Collapsed;
+      printMenuItem.Visibility = Visibility.Collapsed;
+      searchMenuItem.Visibility = Visibility.Collapsed;
+      compareMenuItem.Visibility = Visibility.Collapsed;
+    }
+
+    private void OnSearchWindowClosing(bool isOpen)
+    {
+      _isSearchWindowOpen = isOpen;
+    }
   }
 }

@@ -1,0 +1,150 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Media;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
+
+namespace UI.Controls.TextEditor
+{
+  /// <summary>
+  /// Интерфейс для текстового маркера, предоставляющий свойства для подсветки текста.
+  /// </summary>
+  public interface ITextMarker
+  {
+    /// <summary>Начальный индекс (позиция) маркера.</summary>
+    int StartOffset { get; }
+
+    /// <summary>Длина выделяемого текста.</summary>
+    int Length { get; }
+
+    /// <summary>Дополнительная информация, прикреплённая к маркеру.</summary>
+    object Tag { get; set; }
+
+    /// <summary>Цвет фона подсветки.</summary>
+    Color? BackgroundColor { get; set; }
+
+    /// <summary>Цвет текста.</summary>
+    Color? ForegroundColor { get; set; }
+
+    /// <summary>Жирность шрифта (если нужно).</summary>
+    FontWeight? FontWeight { get; set; }
+
+    /// <summary>Удаляет маркер.</summary>
+    void Delete();
+  }
+
+  /// <summary>
+  /// Сервис подсветки текста для AvalonEdit. Отвечает за визуальное выделение фрагментов текста.
+  /// </summary>
+  public sealed class TextMarkerService : IBackgroundRenderer
+  {
+    private readonly TextSegmentCollection<TextMarker> markers;
+    private readonly ICSharpCode.AvalonEdit.TextEditor editor;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
+    /// </summary>
+    /// <param name="editor">Экземпляр <see cref="TextEditor"/>, для которого работает сервис.</param>
+    public TextMarkerService(ICSharpCode.AvalonEdit.TextEditor editor)
+    {
+      this.editor = editor ?? throw new ArgumentNullException(nameof(editor));
+      markers = new TextSegmentCollection<TextMarker>(editor.Document);
+    }
+
+    /// <summary>
+    /// Уровень слоя рендера. Используется AvalonEdit для наложения визуальных эффектов.
+    /// </summary>
+    public KnownLayer Layer => KnownLayer.Selection;
+
+    /// <summary>
+    /// Отрисовывает подсветку на фоне для всех активных маркеров.
+    /// </summary>
+    /// <param name="textView">Объект текстового отображения.</param>
+    /// <param name="drawingContext">Контекст рисования WPF.</param>
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+      if (editor.Document == null || !textView.VisualLinesValid)
+      {
+        Console.WriteLine("⚠ Draw: Документ не готов или VisualLines не валидны");
+        return;
+      }
+
+      Console.WriteLine("🖌 Draw: Отрисовка маркеров...");
+
+      foreach (var marker in markers)
+      {
+        Console.WriteLine($"➡ Маркер: offset={marker.StartOffset}, length={marker.Length}");
+        foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
+        {
+          var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
+          brush.Freeze();
+          drawingContext.DrawRectangle(brush, null, new Rect(rect.Location, new Size(rect.Width, rect.Height)));
+        }
+      }
+    }
+
+    /// <summary>
+    /// Очищает все существующие маркеры подсветки.
+    /// </summary>
+    public void ClearAllMarkers()
+    {
+      markers.Clear();
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      Console.WriteLine("Все маркеры удалены.");
+    }
+
+    /// <summary>
+    /// Добавляет новый маркер подсветки.
+    /// </summary>
+    /// <param name="startOffset">Начальный индекс в тексте.</param>
+    /// <param name="length">Длина выделения.</param>
+    /// <param name="backgroundColor">Цвет фона подсветки.</param>
+    public void AddMarker(int startOffset, int length, Color backgroundColor)
+    {
+      var marker = new TextMarker(startOffset, length)
+      {
+        BackgroundColor = backgroundColor,
+      };
+
+      markers.Add(marker);
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>
+    /// Реализация текстового маркера.
+    /// </summary>
+    private sealed class TextMarker : TextSegment, ITextMarker
+    {
+      /// <summary>
+      /// Создаёт новый текстовый маркер.
+      /// </summary>
+      /// <param name="startOffset">Начальная позиция.</param>
+      /// <param name="length">Длина сегмента.</param>
+      public TextMarker(int startOffset, int length)
+      {
+        StartOffset = startOffset;
+        Length = length;
+      }
+
+      /// <inheritdoc/>
+      public object Tag { get; set; }
+
+      /// <inheritdoc/>
+      public Color? BackgroundColor { get; set; }
+
+      /// <inheritdoc/>
+      public Color? ForegroundColor { get; set; }
+
+      /// <inheritdoc/>
+      public FontWeight? FontWeight { get; set; }
+
+      /// <inheritdoc/>
+      public void Delete()
+      {
+        Length = 0;
+      }
+    }
+  }
+}

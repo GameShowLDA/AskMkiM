@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="UI.Components.TextBoxPlaceholder"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression.blend/2008" 
+             mc:Ignorable="d"
+             xmlns:local="clr-namespace:UI.Components"
+             d:DesignHeight="40" d:DesignWidth="250">
+    
+    <UserControl.Resources>
+        <local:MarginConverter x:Key="MarginConverter"/>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource LightPrimarySolidColorBrush}" Height="50" CornerRadius="10" Name="BorderData">
+        <Grid>
+            <!-- Определяем колонки -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!-- Первая колонка для TextBox -->
+                <ColumnDefinition Width="Auto" />
+                <!-- Вторая колонка для параметра (Unit) -->
+            </Grid.ColumnDefinitions>
+
+            <!-- TextBox в первой колонке -->
+            <TextBox x:Name="InputBox" MinWidth="100"
+                 Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Background="Transparent" 
+                 BorderThickness="0" 
+                 VerticalAlignment="Center" 
+                 FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                 PreviewTextInput="InputBox_PreviewTextInput"
+                 GotFocus="InputBox_GotFocus"
+                 CaretBrush="{StaticResource ForegroundSolidColorBrush}"
+                 LostFocus="InputBox_LostFocus"/>
+
+            <TextBlock Text="{Binding Unit, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='', TargetNullValue=''}" 
+                   Grid.Column="1" VerticalAlignment="Center" FontSize="20" 
+                   Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                   Margin="{Binding Unit, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource MarginConverter}}" />
+        </Grid>
+    </Border>
+
+</UserControl>

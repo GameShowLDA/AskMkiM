@@ -3,10 +3,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core.ConfigCollector;
-using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
+using DataBaseConfiguration.Services;
+using NewCore.Base.Interface.Main;
+using static AppConfiguration.Execution.ExecutionConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
+using static AppConfiguration.Base.EventAggregator;
 
 namespace UI.Components
 {
@@ -21,12 +22,12 @@ namespace UI.Components
     /// <summary>
     /// Модель конфигурации устройства, к которому осуществляется подключение.
     /// </summary>
-    private Core.ManagerShassy.Model model;
+    private IChassisManager model;
 
     /// <summary>
     /// Флаг, указывающий, активно ли подключение системы (true - подключено, false - отключено).
     /// </summary>
-    private bool active = false;
+    private static bool active = false;
 
     /// <summary>
     /// Статический флаг, показывающий, выполняется ли в данный момент задача подключения/отключения.
@@ -47,21 +48,6 @@ namespace UI.Components
     /// Токен для отмены асинхронных задач при необходимости.
     /// </summary>
     private CancellationTokenSource cancellationToken;
-
-    /// <summary>
-    /// Цвет рамки в состоянии загрузки.
-    /// </summary>
-    Color ActiveBorder => (Color)ColorConverter.ConvertFromString("#1ca3e9");
-
-    /// <summary>
-    /// Цвет при успешном подключении.
-    /// </summary>
-    Color Connected => (Color)ColorConverter.ConvertFromString("#4b7765");
-
-    /// <summary>
-    /// Цвет для отображения ошибок.
-    /// </summary>
-    Color Error => (Color)ColorConverter.ConvertFromString("#b23a48");
     #endregion
 
     /// <summary>
@@ -103,7 +89,9 @@ namespace UI.Components
     private async void OnMouseEnter(object sender, MouseEventArgs e)
     {
       if (!taskInProgress || hasError)
+      {
         await AnimateOpacityAsync(1);
+      }
     }
 
     /// <summary>
@@ -112,20 +100,31 @@ namespace UI.Components
     private async void OnMouseLeave(object sender, MouseEventArgs e)
     {
       if (!taskInProgress || hasError)
+      {
         await AnimateOpacityAsync(0.5);
+      }
     }
 
     /// <summary>
-    /// Обработка нажатия на кнопку, управление подключением или отключением системы.
+    /// Обработчик события клика по кнопке питания.
+    /// Запускает процесс включения/выключения питания в зависимости от текущего состояния.
     /// </summary>
+    /// <param name="sender">Источник события (кнопка питания).</param>
+    /// <param name="e">Аргументы события мыши.</param>
     public async void OnPowerButtonClick(object sender, MouseButtonEventArgs e)
     {
       await PowerButtonClick();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки питания. Выполняет последовательность включения или выключения питания системы.
+    /// Если система не задана в конфигурации или включен холостой режим, выводит сообщение об ошибке.
+    /// Если задача уже выполняется, отменяет выполнение текущей задачи.
+    /// </summary>
+    /// <returns>Асинхронная задача.</returns>
     public async Task PowerButtonClick()
     {
-      model = ConfigCollector.GetManagerShassy();
+      model = new ChassisManagerServices().GetAll().FirstOrDefault();
 
       if (model == null)
       {
@@ -149,7 +148,7 @@ namespace UI.Components
       taskInProgress = true;
       hasError = false;
 
-      SetLoadingState("Загрузка...", ActiveBorder);
+      SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
 
       if (!active)
       {
@@ -174,7 +173,7 @@ namespace UI.Components
         topPanel = new TopPanelControl();
       }
 
-      await Core.ManagerShassy.Function.StartPowerAsync(model.IPAddress);
+      await model.PowerManager.StartPowerAsync();
       await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
 
       if (!await TryConnectAsync())
@@ -189,14 +188,14 @@ namespace UI.Components
     private async Task StopPowerSequenceAsync()
     {
       active = false;
-      await Core.Communication.CommunicationManager.ResetAllSystem();
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
       await Task.Delay(1000);
 
-      await Core.ManagerShassy.Function.StopPowerAsync(model.IPAddress);
+      await model.PowerManager.StopPowerAsync();
       await Task.Delay(1000);
 
-      SetDisconnectedState("Подключить систему", Error);
+      SetDisconnectedState("Подключить систему");
     }
 
     /// <summary>
@@ -204,15 +203,15 @@ namespace UI.Components
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await Core.ManagerShassy.Function.Initialize(model.IPAddress);
+      var result = await model.ConnectableManager.InitializeAsync();
 
       if (result.Item1)
       {
-        SetConnectedState("Отключить систему", Connected);
+        SetConnectedState("Отключить систему");
         return true;
       }
 
-      SetDisconnectedState("Подключить систему", Error);
+      SetDisconnectedState("Подключить систему");
       return false;
     }
 
@@ -222,7 +221,7 @@ namespace UI.Components
     private async Task HandleConnectionErrorAsync()
     {
       hasError = true;
-      SetLoadingState("Отменить подключение", Error);
+      SetLoadingState("Отменить подключение", (Color)FindResource("RedColor"));
 
       bool exitLoop = false;
 
@@ -234,11 +233,14 @@ namespace UI.Components
         }
         else
         {
-          await Core.ManagerShassy.Function.StartPowerAsync(model.IPAddress);
+          await model.PowerManager.StartPowerAsync();
           await ShowCountdownMessageAsync(3, "Повторная попытка через");
         }
 
-        if (exitLoop) break;
+        if (exitLoop)
+        {
+          break;
+        }
       }
       while (!await TryConnectAsync());
     }
@@ -264,6 +266,7 @@ namespace UI.Components
         GridBlock.Opacity += (targetOpacity - GridBlock.Opacity) * 0.1;
         await Task.Delay(10);
       }
+
       GridBlock.Opacity = targetOpacity;
     }
 
@@ -290,42 +293,59 @@ namespace UI.Components
     /// </summary>
     private void SetLoadingState(string text, Color color)
     {
-      nameTextBlock.Text = text;
-      GridBlock.Background = new SolidColorBrush(color);
-      nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
-      GridBlock.Opacity = 1;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        nameTextBlock.Text = text;
+        GridBlock.Background = new SolidColorBrush(color);
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
+        GridBlock.Opacity = 1;
+      });
     }
 
     /// <summary>
     /// Установка состояния подключения с изменением текста и цвета кнопки.
     /// </summary>
-    private void SetConnectedState(string text, Color color)
+    private void SetConnectedState(string text)
     {
-      nameTextBlock.Text = text;
-      GridBlock.Background = new SolidColorBrush(color);
-      nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
-      GridBlock.Opacity = 0.5;
-      active = true;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        nameTextBlock.Text = text;
+        GridBlock.Background = (Brush)FindResource("GreenColorSolidColorBrush");
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+        GridBlock.Opacity = 0.5;
+        active = true;
+      });
     }
 
     /// <summary>
     /// Установка состояния отключения с изменением текста и цвета кнопки.
     /// </summary>
-    private void SetDisconnectedState(string text, Color color)
+    private void SetDisconnectedState(string text)
     {
-      nameTextBlock.Text = text;
-      GridBlock.Background = new SolidColorBrush(color);
-      nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["PrimarySolidColorBrush"];
-      GridBlock.Opacity = 0.5;
-      active = false;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        nameTextBlock.Text = text;
+        GridBlock.Background = (Brush)FindResource("RedColorSolidColorBrush");
+        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
+        GridBlock.Opacity = 0.5;
+        active = false;
+      });
     }
 
     /// <summary>
     /// Устанавливает ссылку на верхнюю панель для вывода сообщений.
     /// </summary>
+    /// <param name="topPanel">Ссылка на объект верхней панели, которая будет использоваться для вывода сообщений.</param>
+    /// <remarks>
+    /// Этот метод позволяет связать верхнюю панель с текущим компонентом, чтобы позднее использовать её для
+    /// вывода сообщений или других операций, связанных с интерфейсом.
+    /// </remarks>
     public void SetTopPanel(TopPanelControl topPanel)
     {
-      this.topPanel = topPanel;
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        this.topPanel = topPanel;
+      });
     }
   }
 }

@@ -1,59 +1,76 @@
-﻿using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
+using System.Windows.Media;
+using AppConfiguration.Execution;
+using AppConfiguration.SystemState;
+using ConsoleUtilities;
+using Utilities.USB;
+using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
+using AppConfiguration.Base;
+using UI.Controls.Search;
 
 namespace MainWindowProgram
 {
-  /// <summary>
-  /// Основной класс MainWindow, представляющий главное окно приложения.
-  /// </summary>
-  /// <remarks>
-  /// Этот класс содержит логику инициализации главного окна приложения, а также обработки ошибок и отображения сообщений.
-  /// Включает в себя таймер для анимации затухания сообщений, статический экземпляр TextBlock для отображения информации,
-  /// и асинхронный метод для начальной конфигурации приложения.
-  /// </remarks>
   public partial class MainWindow : Window
   {
     /// <summary>
-    /// Таймер для анимации затухания сообщений.
+    /// Таймер, используемый для периодических задач (если необходимо).
     /// </summary>
     static System.Timers.Timer timer = new System.Timers.Timer();
 
     /// <summary>
-    /// Статический экземпляр TextBlock для отображения информации в InfoBlock.
+    /// Статический блок информации для отображения сообщений.
     /// </summary>
     static TextBlock _infoBlock;
-
-    /// <summary>
-    /// Флаг блокировки состояния.
-    /// </summary>
     private bool isLocked = false;
 
     /// <summary>
-    /// Обработчик сообщений, использующий TextBlock для отображения информации.
+    /// Обработчик сообщений, принимает блок информации для вывода.
     /// </summary>
     MessageHandler messageHandler = new MessageHandler(infoBlock: _infoBlock);
 
     /// <summary>
-    /// Конструктор MainWindow.
+    /// Сервис мониторинга USB, работающий с диспетчером приложения.
     /// </summary>
-    /// <remarks>
-    /// Инициализирует компоненты главного окна и запускает асинхронную задачу по чтению настроек конфигурации.
-    /// В случае возникновения исключения выводит сообщение об ошибке и логирует её.
-    /// </remarks>
+    static private USBMonitorService usbMonitorService = new USBMonitorService(Application.Current.Dispatcher);
+
+    // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
+    private readonly ConsoleManager _consoleManager;
+
+    /// <summary>
+    /// Инициализирует новое окно приложения и настраивает события, командную строку, мониторинг USB и конфигурацию.
+    /// </summary>
     public MainWindow()
     {
       InitializeComponent();
+      _consoleManager = ConsoleManager.Instance;
+      this.Visibility = Visibility.Hidden;
+    }
 
-      Task.Run(async () =>
+    /// <summary>
+    /// Запускает асинхронную инициализацию окна.
+    /// </summary>
+    /// <returns></returns>
+    public async Task InitializeAsync()
+    {
+      _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
+      SetEvent();
+
+      await Task.Run(async () =>
       {
         try
         {
           await StartConfigAsync();
+        }
+        catch (InvalidOperationException exception)
+        {
+          LogError($"Ошибка загрузки темы программы: {exception}");
+          return;
         }
         catch (Exception ex)
         {
@@ -64,45 +81,183 @@ namespace MainWindowProgram
       });
 
       SettingsGUI();
+      ProcessCommandLineArgs();
+      this.PreviewKeyDown += OnKeyDown;
+      _searchWindow = new SearchWindow();
     }
 
+    /// <summary>
+    /// Обработчик события изменения режима администратора от менеджера консоли.
+    /// Останавливает или запускает мониторинг USB в зависимости от новых прав.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Новое значение режима администратора.</param>
+    private void _consoleManager_AdminModeChanged(object? sender, bool e)
+    {
+      if (e)
+      {
+        StopUsbMonitoring();
+        OnAdminRightsChangedHandler(null, true);
+      }
+      else
+      {
+        OnAdminRightsChangedHandler(null, false);
+        SetUsbMonitoring(false);
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает нажатия клавиш в главном окне.
+    /// Если нажаты Ctrl + Oem3, переключает видимость консоли.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события нажатия клавиши.</param>
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
+      {
+        _consoleManager.ToggleConsole();
+        e.Handled = true;
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает аргументы командной строки.
+    /// Если аргументы не содержат "admin", USB мониторинг отключается; иначе включается.
+    /// </summary>
+    private void ProcessCommandLineArgs()
+    {
+      string[] args = App.CommandLineArgs;
+
+      if (!args.Contains("admin"))
+      {
+        SetUsbMonitoring(false);
+      }
+      else
+      {
+        LogInformation("Запущен в режиме администратора через аргумент командной строки.");
+        SetUsbMonitoring(true);
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает обработчики событий для окна и приложения.
+    /// Подписывается на события закрытия окна, изменения размера, необработанных исключений и изменений состояний.
+    /// </summary>
+    private void SetEvent()
+    {
+      this.Closing += MainWindow_Closing;
+      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+      this.SizeChanged += MainWindow_SizeChanged;
+
+      AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
+      Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
+      TextEditorActive += OnTextEditorActive;
+      TextEditorClosing += OnTextEditorClosing;
+      SearchWindowClosing += OnSearchWindowClosing;
+      SearchWindowAtivated += OnSearchWindowActivated;
+      LockedChanged += ApplicationDataHandler_LockedChanged;
+      AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
+	  usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      RequestShowProgress += OnRequestShowProgress;
+      RequestCloseProgress += OnRequestCloseProgress;
+      ExecutionConfig.IdleModeChange += ExecutionConfig_IdleModeChange;
+    }
+
+    /// <summary>
+    /// Настраивает визуальное оформление окна и инициализирует информационный блок.
+    /// Скрывает панель администратора и добавляет обработку команды активации пункта меню.
+    /// </summary>
     private void SettingsGUI()
     {
       _infoBlock = InfoBlock;
       this.Admin.Visibility = Visibility.Collapsed;
-      this.Closing += MainWindow_Closing;
-
       this.CommandBindings.Add(new CommandBinding(ActivateMenuItemCommand, ExecuteActivateMenuItem));
-      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
-
-      LockedChanged += ApplicationDataHandler_LockedChanged;
-      AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
       LogInformation("Главное окно инициализировано.");
     }
 
     /// <summary>
-    /// Получает детали ошибки из исключения.
+    /// Возвращает подробное описание ошибки для отображения пользователю.
     /// </summary>
-    /// <param name="ex">Исключение, содержащее информацию об ошибке.</param>
-    /// <returns>Строка с деталями ошибки, включая сообщение, файл и строку, где произошла ошибка.</returns>
+    /// <param name="ex">Исключение, вызвавшее ошибку.</param>
+    /// <returns>Строка с описанием ошибки.</returns>
     private string GetErrorDetails(Exception ex)
     {
-      StackTrace trace = new StackTrace(ex, true);
-      StackFrame frame = trace.GetFrame(0);
-      string fileName = frame?.GetFileName() ?? "Неизвестный файл";
-      int lineNumber = frame?.GetFileLineNumber() ?? -1;
-      return $"{ex.Message} (Файл: {fileName}, строка: {lineNumber})";
+      return $"{ex.Message}";
     }
 
     /// <summary>
-    /// Асинхронный метод для начала конфигурации приложения.
+    /// Асинхронно загружает все настройки.
     /// </summary>
-    /// <remarks>
-    /// Выполняет асинхронное чтение всех настроек из файла конфигурации.
-    /// </remarks>
+    /// <returns>Задача, представляющая асинхронную операцию чтения настроек.</returns>
     private async Task StartConfigAsync()
     {
-      await ReadAllSettingsAsync();
+      await Initialize();
+    }
+
+    /// <summary>
+    /// Включает или отключает мониторинг USB в зависимости от режима администратора.
+    /// </summary>
+    /// <param name="admin">Если <c>true</c> — включить режим администратора, иначе — отключить.</param>
+    private void SetUsbMonitoring(bool admin)
+    {
+      if (!admin)
+      {
+        usbMonitorService.Start();
+      }
+      else
+      {
+        usbMonitorService.AdminRights = admin;
+      }
+    }
+
+    /// <summary>
+    /// Останавливает сервис мониторинга USB.
+    /// </summary>
+    private void StopUsbMonitoring()
+    {
+      usbMonitorService.Stop();
+    }
+
+    /// <summary>
+    /// Обработчик события изменения прав администратора.
+    /// Обновляет состояние прав администратора в системном менеджере.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="newRights">Новое состояние прав администратора.</param>
+    private void OnAdminRightsChangedHandler(object sender, bool newRights)
+    {
+      SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Обработчик события изменения холостого режима.
+    /// </summary>
+    /// <param name="sender">Объект изменения.</param>
+    /// <param name="e">Значение изменения.</param>
+    private void ExecutionConfig_IdleModeChange(object? sender, bool e)
+    {
+      Application.Current.Dispatcher.BeginInvoke(() =>
+      {
+        if (e)
+        {
+          BottomPanel.Background = (Brush)FindResource("GreenColorSolidColorBrush");
+          TopPanel.Background = (Brush)FindResource("GreenColorSolidColorBrush");
+          PowerButton.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+          BottomPanel.Background = (Brush)FindResource("SecondarySolidColorBrush");
+          TopPanel.Background = (Brush)FindResource("SecondarySolidColorBrush");
+          PowerButton.Visibility = Visibility.Visible;
+        }
+      });
+    }
+
+    private void OnSearchWindowActivated(bool isOpen)
+    {
+      _isSearchWindowOpen = isOpen;
+      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
     }
   }
 }

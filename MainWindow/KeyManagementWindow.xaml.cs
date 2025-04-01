@@ -46,6 +46,7 @@ namespace MainWindowProgram
       {
         usbDrivesComboBox.Items.Add(drive.Name);
       }
+
       usbDrivesComboBox.SelectedIndex = 0;
     }
 
