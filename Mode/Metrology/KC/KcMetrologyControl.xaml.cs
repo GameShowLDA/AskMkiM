@@ -94,11 +94,6 @@ namespace Mode.Metrology.KC
       /// <inheritdoc />
       public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return;
-        }
-
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await fastMeter.ResistanceManager.SetResistanceModeAsync();
       }
@@ -112,6 +107,7 @@ namespace Mode.Metrology.KC
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
 
+        await Task.Delay(1000);
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param);
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");

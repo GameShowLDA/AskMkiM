@@ -12,6 +12,29 @@ namespace UI.Components.Invoke
   public partial class OpenFileButton : UserControl
   {
     /// <summary>
+    /// Перечисление типов окон пользовательского интерфейса.
+    /// </summary>
+    public enum TypeWindow
+    {
+      /// <summary>
+      /// Окно настроек.
+      /// </summary>
+      Settings,
+
+      /// <summary>
+      /// Окно управления файлами.
+      /// </summary>
+      Files,
+
+      /// <summary>
+      /// Окно работы с оборудованием.
+      /// </summary>
+      DeviceControl
+    }
+
+    public TypeWindow? TabType { get; set; }
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="OpenFileButton"/>.
     /// </summary>
     public OpenFileButton()

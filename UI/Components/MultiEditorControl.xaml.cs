@@ -11,6 +11,7 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using UI.Components.SearchControls;
 using UI.Components.MultiEditorMethods;
 using AppConfiguration.Base;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace UI.Components
 {
@@ -40,12 +41,12 @@ namespace UI.Components
     internal TextSearchManager textSearchManager;
 
     /// <summary>
-    /// Объект, управляющий операциями связанные с пользовательсикми элементами управления.
+    /// Объект, управляющий операциями связанные с пользовательскими элементами управления.
     /// </summary>
     internal ControlManager controlManager;
 
     /// <summary>
-    /// Объект, управляющй операциями связнными с сохранением файлов.
+    /// Объект, управляющей операциями связанными с сохранением файлов.
     /// </summary>
     internal SaveFileManager saveFileManager;
 
@@ -141,9 +142,9 @@ namespace UI.Components
     /// <param name="header">Заголовок для кнопки, отображаемой в панели вкладок.</param>
     /// <param name="control">Элемент управления для отображения в панели управления.</param>
     /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
-    public void AddControl(string header, UserControl control, string description = null)
+    public void AddControl(string header, UserControl control, TypeWindow tabType, string description = null)
     {
-      controlManager.AddControl(header, control, description);
+      controlManager.AddControl(header, control, tabType, description);
     }
 
     /// <summary>

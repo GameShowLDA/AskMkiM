@@ -74,7 +74,7 @@ namespace UI.Components.MultiEditorMethods
     private void AddFileToControlManager(string nameFile, TextEditorUI textEditor)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-      controlManager.AddControl(nameFile, textEditor);
+      controlManager.AddControl(nameFile, textEditor, OpenFileButton.TypeWindow.Files);
     }
 
     /// <summary>
@@ -129,7 +129,7 @@ namespace UI.Components.MultiEditorMethods
 
       var textEditor = new TextEditorUI();
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl as MultiEditorControl);
-      controlManager.AddControl(controlName, textEditor /*{ Text  = "Новый файл"}*/);
+      controlManager.AddControl(controlName, textEditor, OpenFileButton.TypeWindow.Files /*{ Text  = "Новый файл"}*/);
       FilePaths.Add(controlName, string.Empty);
     }
 

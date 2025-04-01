@@ -31,7 +31,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       }
 
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
-      string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), 2000);
+      string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
       // Десериализация ответа
       BaseResponse baseResponse = BaseResponse.FromJson(result);

@@ -8,6 +8,7 @@ using AppConfiguration.MeasurementError;
 using AppConfiguration.Protocol;
 using AppConfiguration.Theme;
 using static Utilities.LoggerUtility;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram
 {
@@ -79,7 +80,7 @@ namespace MainWindowProgram
     /// <summary>
     /// Добавляет пользовательские элементы управления в интерфейс, если приложение не заблокировано.
     /// </summary>
-    private async Task AddControlAsync(UserControl userControl, string name)
+    private async Task AddControlAsync(UserControl userControl, string name, TypeWindow tabType)
     {
       if (await GetIsLocked())
       {
@@ -92,7 +93,7 @@ namespace MainWindowProgram
       {
         await Dispatcher.InvokeAsync(() =>
         {
-          MultiWindow.AddControl(name, userControl);
+          MultiWindow.AddControl(name, userControl, tabType);
         });
       }
     }
