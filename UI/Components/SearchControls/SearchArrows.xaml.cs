@@ -6,6 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using static Utilities.LoggerUtility;
 
 namespace UI.Components.SearchControls
 {
@@ -144,7 +145,7 @@ namespace UI.Components.SearchControls
     {
       if (searchArrowsComboBox.IsDropDownOpen)
       {
-        Debug.WriteLine("Выпадающий список открыт, отменяем поиск.");
+        LogInformation("Выпадающий список открыт, отменяем поиск.");
         return;
       }
 
@@ -153,7 +154,7 @@ namespace UI.Components.SearchControls
         var arrowType = searchArrowsComboBox.SelectedItem as ArrowItem;
         if (arrowType != null)
         {
-          Debug.WriteLine($"Запуск поиска для: {selectedArrow.Name}");
+          LogInformation($"Запуск поиска для: {selectedArrow.Name}");
           EventAggregator.RaiseSearchButtonPressed(selectedArrow.Name);
         }
       }

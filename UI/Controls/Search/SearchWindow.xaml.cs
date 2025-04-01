@@ -329,6 +329,7 @@ namespace UI.Controls.Search
         toggleButton.Foreground = color;
     }
     #endregion
+
     private void OnSearchButtonPressed(string searchParameters)
     {
       var searchText = SearchTextBox.Text;

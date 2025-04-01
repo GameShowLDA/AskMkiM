@@ -144,15 +144,21 @@ namespace UI.Components.MultiEditorMethods
       if (activeTab != null)
       {
         var fileName = activeTab.Text;
+        int index = OpenPages.IndexOf(activeTab);
         if (FilePaths[fileName] == string.Empty)
         {
-          return true;
+          if (UserControls[index] is TextEditorUI)
+          {
+            var textEditor = UserControls[index] as TextEditorUI;
+            return !string.IsNullOrEmpty(textEditor.Text) && !string.IsNullOrWhiteSpace(textEditor.Text);
+          }
+
+          return false;
         }
         else
         {
           var filePath = FilePaths[fileName];
           var content = File.ReadAllText(filePath);
-          int index = OpenPages.IndexOf(activeTab);
 
           if (UserControls[index] is TextEditorUI)
           {
