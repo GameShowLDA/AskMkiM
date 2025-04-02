@@ -77,47 +77,5 @@ namespace MainWindowProgram
       LogInformation("Настройки инициализированы.");
     }
 
-
-    private void OnTextEditorActive(bool isTextEditor)
-    {
-      if (isTextEditor)
-      {
-        IsTextEditorActive = true;
-        fileActionsSeparator.Visibility = Visibility.Visible;
-        saveMenuItem.Visibility = Visibility.Visible;
-        saveAsMenuItem.Visibility = Visibility.Visible;
-        printMenuItem.Visibility = Visibility.Visible;
-        searchMenuItem.Visibility = Visibility.Visible;
-        compareMenuItem.Visibility = Visibility.Visible;
-      }
-      else
-      {
-        HideTextEditorActions();
-      }
-    }
-
-    private void OnTextEditorClosing(bool isTextEditor, string textEditorName)
-    {
-      if (isTextEditor)
-      {
-        HideTextEditorActions();
-      }
-    }
-
-    private void HideTextEditorActions()
-    {
-      IsTextEditorActive = false;
-      fileActionsSeparator.Visibility = Visibility.Collapsed;
-      saveMenuItem.Visibility = Visibility.Collapsed;
-      saveAsMenuItem.Visibility = Visibility.Collapsed;
-      printMenuItem.Visibility = Visibility.Collapsed;
-      searchMenuItem.Visibility = Visibility.Collapsed;
-      compareMenuItem.Visibility = Visibility.Collapsed;
-    }
-
-    private void OnSearchWindowClosing(bool isOpen)
-    {
-      _isSearchWindowOpen = isOpen;
-    }
   }
 }

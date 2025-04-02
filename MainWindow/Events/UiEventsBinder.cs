@@ -1,32 +1,58 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Media.Effects;
 using AppConfiguration.Base;
 using ICSharpCode.AvalonEdit;
+using UI.Components;
 
 namespace MainWindowProgram.Events
 {
   /// <summary>
-  /// Подписывает обработчики для событий пользовательского интерфейса (UI).
+  /// Класс <c>UiEventsBinder</c> подписывает обработчики событий пользовательского интерфейса (UI),
+  /// и управляет реакцией главного окна на эти события.
   /// </summary>
   public class UiEventsBinder
   {
+    /// <summary>
+    /// Ссылка на главное окно приложения, используемая для управления его элементами.
+    /// </summary>
     private readonly MainWindow _mainWindow;
 
+    /// <summary>
+    /// Контейнер для управления несколькими редакторами внутри интерфейса.
+    /// </summary>
+    private readonly MultiWindowControl _multiWindow;
+
+    /// <summary>
+    /// Свойство, указывающее, открыто ли окно поиска.
+    /// </summary>
+    public bool IsSearchWindowOpen { get; set; }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="UiEventsBinder"/>.
+    /// </summary>
+    /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
     public UiEventsBinder(MainWindow mainWindow)
     {
       _mainWindow = mainWindow;
     }
 
+    /// <summary>
+    /// Подписывает обработчики на события пользовательского интерфейса.
+    /// </summary>
     public void Bind()
     {
       EventAggregator.TextEditorActive += OnTextEditorActive;
       EventAggregator.TextEditorClosing += OnTextEditorClosing;
+
       EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
       EventAggregator.SearchWindowAtivated += OnSearchWindowActivated;
-      EventAggregator.RequestShowProgress += OnRequestShowProgress;
-      EventAggregator.RequestCloseProgress += OnRequestCloseProgress;
     }
 
+    /// <summary>
+    /// Обрабатывает событие активации текстового редактора, обновляя видимость связанных элементов интерфейса.
+    /// </summary>
+    /// <param name="isActive">Флаг, указывающий, активен ли редактор.</param>
     private void OnTextEditorActive(bool isActive)
     {
       _mainWindow.IsTextEditorActive = isActive;
@@ -39,6 +65,12 @@ namespace MainWindowProgram.Events
       _mainWindow.searchMenuItem.Visibility = visibility;
       _mainWindow.compareMenuItem.Visibility = visibility;
     }
+
+    /// <summary>
+    /// Обрабатывает событие закрытия редактора. Если он был активен — отключает его.
+    /// </summary>
+    /// <param name="isActive">Флаг активности редактора.</param>
+    /// <param name="name">Имя закрываемого редактора.</param>
     private void OnTextEditorClosing(bool isActive, string name)
     {
       if (isActive)
@@ -46,9 +78,38 @@ namespace MainWindowProgram.Events
         OnTextEditorActive(false);
       }
     }
-    private void OnSearchWindowClosing(bool closing) { /* TODO */ }
-    private void OnSearchWindowActivated(bool activated) { /* TODO */ }
-    private void OnRequestShowProgress() { /* TODO */ }
-    private void OnRequestCloseProgress() { /* TODO */ }
+
+    /// <summary>
+    /// Обрабатывает событие закрытия окна поиска.
+    /// </summary>
+    /// <param name="closing">Флаг, указывающий, закрыто ли окно поиска.</param>
+    private void OnSearchWindowClosing(bool closing)
+    {
+      IsSearchWindowOpen = closing;
+    }
+
+    /// <summary>
+    /// Обрабатывает событие активации окна поиска.
+    /// Также удаляет подписку на событие поиска текста.
+    /// </summary>
+    /// <param name="activated">Флаг, указывающий, активировано ли окно поиска.</param>
+    private void OnSearchWindowActivated(bool activated)
+    {
+      IsSearchWindowOpen = activated;
+      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
+    }
+
+    /// <summary>
+    /// Обрабатывает событие поиска текста и передаёт параметры в <see cref="MultiWindowControl"/>.
+    /// </summary>
+    /// <param name="searchText">Текст для поиска.</param>
+    /// <param name="wholeWord">Флаг поиска только целых слов.</param>
+    /// <param name="caseWord">Флаг учёта регистра.</param>
+    /// <param name="searchArea">Область, в которой выполняется поиск.</param>
+    /// <param name="searchParameters">Дополнительные параметры поиска.</param>
+    public void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      _multiWindow.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
   }
 }

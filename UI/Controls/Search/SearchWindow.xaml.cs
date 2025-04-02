@@ -90,6 +90,7 @@ namespace UI.Controls.Search
     {
       UpdatePosition();
     }
+
     private void ParentWindow_StateChanged(object sender, EventArgs e)
     {
       UpdatePosition();
@@ -98,7 +99,9 @@ namespace UI.Controls.Search
     private void UpdatePosition()
     {
       if (_parentWindow == null || !this.IsLoaded)
+      {
         return;
+      }
 
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
       Screen screen = Screen.FromHandle(parentWindowHandle);

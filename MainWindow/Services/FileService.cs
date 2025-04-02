@@ -46,7 +46,7 @@ namespace MainWindowProgram.Services
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
           Filter = "All files (*.*)|*.*|Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf",
-          Title = "Выберите текстовый файл"
+          Title = "Выберите текстовый файл",
         };
 
         if (openFileDialog.ShowDialog() == true)

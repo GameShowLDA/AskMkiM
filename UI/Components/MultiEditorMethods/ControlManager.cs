@@ -37,6 +37,7 @@ namespace UI.Components.MultiEditorMethods
             HandleClosingEvents(control, tabButton);
           }
         }
+
         RemoveTabAndControl(tabButton, control);
         ShowNextTab(index);
       }
@@ -176,7 +177,7 @@ namespace UI.Components.MultiEditorMethods
     {
       OpenFileButton tabButton = new OpenFileButton
       {
-        TabType = tabType
+        TabType = tabType,
       };
       tabButton.Header.Text = header;
       if (description != null)
@@ -186,7 +187,6 @@ namespace UI.Components.MultiEditorMethods
 
       return tabButton;
     }
-
 
     /// <summary>
     /// Создает кнопку вкладки для нового контрола.

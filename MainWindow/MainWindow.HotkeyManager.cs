@@ -170,7 +170,7 @@ namespace MainWindowProgram
         var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
         {
           RoutedEvent = UIElement.MouseLeftButtonDownEvent,
-          Source = userControl
+          Source = userControl,
         };
         if (!_isSearchWindowOpen)
         {

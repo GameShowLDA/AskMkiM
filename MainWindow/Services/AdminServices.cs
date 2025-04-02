@@ -39,7 +39,6 @@ namespace MainWindowProgram.Services
     public async Task OpenGptServiceAsync() =>
         await _multiWindow.AddControlAsync("GptManagement", new GPTPunchControl(), TypeWindow.DeviceControl);
 
-
     /// <summary>
     /// Открывает элемент управления для просмотра и анализа логов приложения.
     /// </summary>
@@ -53,7 +52,6 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
     public async Task OpenSendCommand() =>
         await _multiWindow.AddControlAsync("Send Command", new SendCommandControl(), TypeWindow.DeviceControl);
-
 
     /// <summary>
     /// Открывает элемент управления для работы с USB-устройствами (например, флешками).

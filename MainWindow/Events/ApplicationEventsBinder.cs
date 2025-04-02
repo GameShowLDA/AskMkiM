@@ -5,15 +5,15 @@
   /// </summary>
   public class ApplicationEventsBinder
   {
-    private readonly SystemEventsBinder _systemEvents;
-    private readonly UiEventsBinder _uiEvents;
-    private readonly StateEventsBinder _stateEvents;
+    internal readonly SystemEventsBinder SystemEvents;
+    internal readonly UiEventsBinder UiEvents;
+    internal readonly StateEventsBinder StateEvents;
 
     public ApplicationEventsBinder(SystemEventsBinder systemEvents, UiEventsBinder uiEvents, StateEventsBinder stateEvents)
     {
-      _systemEvents = systemEvents;
-      _uiEvents = uiEvents;
-      _stateEvents = stateEvents;
+      SystemEvents = systemEvents;
+      UiEvents = uiEvents;
+      StateEvents = stateEvents;
     }
 
     /// <summary>
@@ -21,9 +21,9 @@
     /// </summary>
     public void BindAll()
     {
-      _systemEvents.Bind();
-      _uiEvents.Bind();
-      _stateEvents.Bind();
+      SystemEvents.Bind();
+      UiEvents.Bind();
+      StateEvents.Bind();
     }
   }
 }

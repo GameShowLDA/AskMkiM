@@ -1,16 +1,13 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using AppConfiguration.Base;
-using AppConfiguration.Execution;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
+using MainWindowProgram.Events;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using UI.Controls.Search;
 using Utilities.USB;
-using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -44,6 +41,8 @@ namespace MainWindowProgram
 
     private readonly MainWindowViewModel _viewModel;
 
+    ApplicationEventsBinder ApplicationEvents;
+
     /// <summary>
     /// Инициализирует новое окно приложения и настраивает события, командную строку, мониторинг USB и конфигурацию.
     /// </summary>
@@ -52,7 +51,6 @@ namespace MainWindowProgram
       InitializeComponent();
 
       var multiWindowService = new MultiWindowService(this.MultiWindow);
-
       var metrologyService = new MetrologyService(multiWindowService);
       var fileService = new FileService(multiWindowService, () => isLocked);
       var testService = new TestService(multiWindowService);
@@ -73,7 +71,13 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
-      SetEvent();
+
+      SystemEventsBinder systemEventsBinder = new SystemEventsBinder();
+      UiEventsBinder uiEventsBinder = new UiEventsBinder(this);
+      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, usbMonitorService);
+
+      ApplicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
+      ApplicationEvents.BindAll();
 
       await Task.Run(async () =>
       {
@@ -155,31 +159,6 @@ namespace MainWindowProgram
     }
 
     /// <summary>
-    /// Устанавливает обработчики событий для окна и приложения.
-    /// Подписывается на события закрытия окна, изменения размера, необработанных исключений и изменений состояний.
-    /// </summary>
-    private void SetEvent()
-    {
-      // AppDomain.CurrentDomain.UnhandledException += App.CurrentDomain_UnhandledException;
-      // Application.Current.DispatcherUnhandledException += App.DispatcherUnhandledException;
-
-      TextEditorActive += OnTextEditorActive;
-      TextEditorClosing += OnTextEditorClosing;
-
-      SearchWindowClosing += OnSearchWindowClosing;
-      SearchWindowAtivated += OnSearchWindowActivated;
-
-      LockedChanged += ApplicationDataHandler_LockedChanged;
-      AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
-      usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
-
-      RequestShowProgress += OnRequestShowProgress;
-      RequestCloseProgress += OnRequestCloseProgress;
-
-      ExecutionConfig.IdleModeChange += ExecutionConfig_IdleModeChange;
-    }
-
-    /// <summary>
     /// Настраивает визуальное оформление окна и инициализирует информационный блок.
     /// Скрывает панель администратора и добавляет обработку команды активации пункта меню.
     /// </summary>
@@ -243,36 +222,6 @@ namespace MainWindowProgram
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
       SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
-    }
-
-    /// <summary>
-    /// Обработчик события изменения холостого режима.
-    /// </summary>
-    /// <param name="sender">Объект изменения.</param>
-    /// <param name="e">Значение изменения.</param>
-    private void ExecutionConfig_IdleModeChange(object? sender, bool e)
-    {
-      Application.Current.Dispatcher.BeginInvoke(() =>
-      {
-        if (e)
-        {
-          BottomPanel.Background = (Brush)FindResource("GreenColorSolidColorBrush");
-          TopPanel.Background = (Brush)FindResource("GreenColorSolidColorBrush");
-          PowerButton.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-          BottomPanel.Background = (Brush)FindResource("SecondarySolidColorBrush");
-          TopPanel.Background = (Brush)FindResource("SecondarySolidColorBrush");
-          PowerButton.Visibility = Visibility.Visible;
-        }
-      });
-    }
-
-    private void OnSearchWindowActivated(bool isOpen)
-    {
-      _isSearchWindowOpen = isOpen;
-      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
     }
   }
 }

@@ -29,9 +29,12 @@ namespace UI.Components.Invoke
       /// <summary>
       /// Окно работы с оборудованием.
       /// </summary>
-      DeviceControl
+      DeviceControl,
     }
 
+    /// <summary>
+    /// Тип вкладки.
+    /// </summary>
     public TypeWindow? TabType { get; set; }
 
     /// <summary>
