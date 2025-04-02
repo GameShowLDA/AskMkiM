@@ -16,7 +16,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
   public class ArchiveEditor
   {
     /// <summary>
-    /// Создает архив с расширением apk и необходимые для работы архива файлы.
+    /// Создает архив с расширением apkw и необходимые для работы архива файлы.
     /// </summary>
     /// <param name="archivePath">Путь к директории, в которой необходимо создать архив.</param>
     public async Task<bool> CreateArchive(string archivePath, string archiveName, string archiveDescription = "", bool isMain = false)
@@ -37,7 +37,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
           var fileEditor = new FileEditor();
           if (fileEditor.AddFileProcess(tempPath))
           {
-            var apkFile = new Models.ApkArchive()
+            var apkFile = new ApkArchive()
             {
               ArchiveName = archiveName,
               Description = archiveDescription,
@@ -58,7 +58,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
           }
           return false;
         },
-        archiveFullPath
+        archiveFullPath, isNewArchive: true
         );
       }
       catch (Exception ex)

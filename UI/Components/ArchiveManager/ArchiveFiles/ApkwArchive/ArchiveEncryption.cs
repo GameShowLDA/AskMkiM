@@ -23,19 +23,24 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
     /// <param name="operation">Делегат, представляющий операцию, которую необходимо выполнить над расшифрованным архивом.</param>
     /// <param name="archivePath">Путь к зашифрованному архиву.</param>
     /// <returns>Результат выполнения операции типа T.</returns>
-    public async Task<T> ExecuteSecureOperation<T>(Func<string, Task<T>> operation, string archivePath)
+    public async Task<T> ExecuteSecureOperation<T>(Func<string, Task<T>> operation, string archivePath, bool isNewArchive = false)
     {
       var archiveName = Path.GetFileName(Path.GetFullPath(archivePath));
       LogInformation($"Начало операции с файлом: {archiveName}");
 
-      string tempPath;
-      tempPath = ChoseTempPath(archiveName);
-
+      string tempPath = string.Empty; 
+      tempPath = ChoseTempPath(archiveName); // Создает временный файл
+      
       try
       {
-        if (File.Exists(archivePath))
+        if (!isNewArchive && File.Exists(archivePath))
         {
           DecryptArchiveProcess(archivePath, archiveName, tempPath);
+        }
+        else
+        {
+          // Если архив новый, временный файл не нужен
+          LogInformation("Создание нового архива, временный файл не создается.");
         }
 
         LogInformation($"Выполнение операции над файлом: {archiveName}");
@@ -91,7 +96,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
     /// </summary>
     /// <param name="archiveName">Название архива.</param>
     /// <returns>Строку с временным путем к архиву.</returns>
-    private static string CreateTempPath(string archiveName)
+    private static string CreateTempPath(string archiveName, bool needCreate = false)
     {
       string tempPath = Path.Combine(Path.GetTempPath(), ArchiveSettings.TempArchivePath, archiveName);
       int counter = 1;
@@ -108,7 +113,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
         counter++;
       }
 
-      if (!System.IO.File.Exists(tempPath))
+      if (!System.IO.File.Exists(tempPath) && needCreate)
       {
         using (FileStream fs = System.IO.File.Create(tempPath))
         {

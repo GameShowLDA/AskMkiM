@@ -71,6 +71,8 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
       content = new List<string>();
       try
       {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
         if (!File.Exists(filePath))
         {
           LogWarning($"Файл не найден: {filePath}");

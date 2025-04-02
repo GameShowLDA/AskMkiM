@@ -268,15 +268,6 @@ namespace UI.Components.ArchiveControls
       }
     }
 
-    private async void viewButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      LogInformation($"Сработан обработчик события для кнопки \"Открыть\"");
-      string foundOpkPath = await GetOpkPath();
-      var content = File.ReadAllText(foundOpkPath);
-
-      //ApplicationConfiguration.ApplicationDataHandler.RaiseAddMultiEditorElement($"{opkFile.OpkFilename}", content);
-    }
-
     private async Task<string> GetOpkPath()
     {
       var opkFileName = opkFile.OpkFilename;
@@ -286,6 +277,15 @@ namespace UI.Components.ArchiveControls
       var foundOpkPath = await archiveEditor.GetArchiveEntry(archivePath, opkFileName);
       return foundOpkPath;
     }
+
+    private async void viewButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      LogInformation($"Сработан обработчик события для кнопки \"Открыть\"");
+      string foundOpkPath = await GetOpkPath();
+      var content = File.ReadAllText(foundOpkPath);
+      // TODO: Добавить открытие файлов
+      //ApplicationConfiguration.ApplicationDataHandler.RaiseAddMultiEditorElement($"{opkFile.OpkFilename}", content);
+    }    
 
     private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -297,6 +297,8 @@ namespace UI.Components.ArchiveControls
       LogInformation($"Сработан обработчик события для двойного клика по строке opk-архива");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
+      // TODO: Добавить открытие файлов
+
       //ApplicationConfiguration.ApplicationDataHandler.RaiseAddMultiEditorElement($"{opkFile.OpkFilename}", content);
     }
   }
