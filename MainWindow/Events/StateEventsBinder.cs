@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using AppConfiguration.Base;
 using AppConfiguration.Execution;
@@ -155,6 +156,21 @@ namespace MainWindowProgram.Events
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
       SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Обрабатывает нажатия клавиш в главном окне.
+    /// Если нажаты Ctrl + Oem3, переключает видимость консоли.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события нажатия клавиши.</param>
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
+      {
+        _consoleManager.ToggleConsole();
+        e.Handled = true;
+      }
     }
   }
 }

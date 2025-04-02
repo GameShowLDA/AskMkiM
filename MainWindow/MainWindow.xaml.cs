@@ -29,7 +29,7 @@ namespace MainWindowProgram
     /// <summary>
     /// Обработчик сообщений, принимает блок информации для вывода.
     /// </summary>
-    MessageHandler messageHandler = new MessageHandler(infoBlock: _infoBlock);
+    MessageHandler messageHandler = new MessageHandler(_infoBlock);
 
     UsbServices usbServices = new UsbServices();
 
@@ -95,23 +95,7 @@ namespace MainWindowProgram
 
       SettingsGUI();
       ProcessCommandLineArgs();
-      this.PreviewKeyDown += OnKeyDown;
       _searchWindow = new SearchWindow();
-    }
-
-    /// <summary>
-    /// Обрабатывает нажатия клавиш в главном окне.
-    /// Если нажаты Ctrl + Oem3, переключает видимость консоли.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события нажатия клавиши.</param>
-    private void OnKeyDown(object sender, KeyEventArgs e)
-    {
-      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
-      {
-        _consoleManager.ToggleConsole();
-        e.Handled = true;
-      }
     }
 
     /// <summary>
@@ -161,17 +145,6 @@ namespace MainWindowProgram
     private async Task StartConfigAsync()
     {
       await Initialize();
-    }
-
-    /// <summary>
-    /// Обработчик события изменения прав администратора.
-    /// Обновляет состояние прав администратора в системном менеджере.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="newRights">Новое состояние прав администратора.</param>
-    private void OnAdminRightsChangedHandler(object sender, bool newRights)
-    {
-      SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
   }
 }
