@@ -30,6 +30,11 @@ namespace MainWindowProgram
 
     #region Файл.
 
+    #region УБРАТЬ ОТ СЮДА!!!
+    private void OpenFileFromEvent()
+    {
+      OpenFile().ConfigureAwait(false);
+    }
     private async Task OpenFile()
     {
       if (await GetIsLocked())
@@ -52,7 +57,8 @@ namespace MainWindowProgram
           LogInformation($"Файл открыт: {filePath}");
         }
       }
-    }
+    } 
+    #endregion
 
     private void SearchMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -85,10 +91,7 @@ namespace MainWindowProgram
       }
     }
 
-    private void OpenFileFromEvent()
-    {
-      OpenFile().ConfigureAwait(false);
-    }
+
 
     private void CompareMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -96,17 +99,5 @@ namespace MainWindowProgram
     }
 
     #endregion
-
-    #region Самоконтроль.
-
-    /// <summary>
-    /// Добавляет элемент управления для самоконтроля одного из модулей в multiEditors.
-    /// </summary>
-    /// <param name="sender">Объект, вызвавший событие.</param>
-    /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void Test_Self(object sender, MouseButtonEventArgs e) => throw new NotImplementedException(); // await AddControlAsync(new Mode.SelfControl.Module.ModuleSelfControl(), "Самоконтроль модулей");
-
-    #endregion
-
   }
 }

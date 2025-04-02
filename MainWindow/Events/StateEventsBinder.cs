@@ -5,6 +5,8 @@ using System.Windows.Media;
 using AppConfiguration.Base;
 using AppConfiguration.Execution;
 using AppConfiguration.SystemState;
+using ConsoleUtilities;
+using MainWindowProgram.Services;
 using UI.Components;
 using Utilities.USB;
 
@@ -20,7 +22,7 @@ namespace MainWindowProgram.Events
     /// Сервис отслеживания подключения и отключения USB-устройств.
     /// Используется для реагирования на смену прав администратора.
     /// </summary>
-    private readonly USBMonitorService _usbMonitorService;
+    private readonly UsbServices _usbMonitorService;
 
     /// <summary>
     /// Ссылка на главное окно приложения, интерфейс которого необходимо обновлять.
@@ -33,15 +35,18 @@ namespace MainWindowProgram.Events
     /// </summary>
     private static bool isLocked = false;
 
+    private readonly ConsoleManager _consoleManager;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateEventsBinder"/>.
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
     /// <param name="usbMonitorService">Сервис мониторинга USB-подключений.</param>
-    public StateEventsBinder(MainWindow mainWindow, USBMonitorService usbMonitorService)
+    public StateEventsBinder(MainWindow mainWindow, UsbServices usbMonitorService, ConsoleManager consoleManager)
     {
       _usbMonitorService = usbMonitorService;
       _mainWindow = mainWindow;
+      _consoleManager = consoleManager;
     }
 
     /// <summary>
@@ -52,7 +57,28 @@ namespace MainWindowProgram.Events
       EventAggregator.LockedChanged += OnLockedChanged;
       EventAggregator.AdminRightsChanged += OnAdminRightsChanged;
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
-      _usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      _consoleManager.AdminModeChanged += AdminModeChanged;
+      _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+    }
+
+    /// <summary>
+    /// Обработчик события изменения режима администратора от менеджера консоли.
+    /// Останавливает или запускает мониторинг USB в зависимости от новых прав.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Новое значение режима администратора.</param>
+    private void AdminModeChanged(object? sender, bool e)
+    {
+      if (e)
+      {
+        _usbMonitorService.StopUsbMonitoring();
+        OnAdminRightsChangedHandler(null, true);
+      }
+      else
+      {
+        OnAdminRightsChangedHandler(null, false);
+        _usbMonitorService.SetUsbMonitoring(false);
+      }
     }
 
     /// <summary>

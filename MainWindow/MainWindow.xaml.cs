@@ -31,10 +31,7 @@ namespace MainWindowProgram
     /// </summary>
     MessageHandler messageHandler = new MessageHandler(infoBlock: _infoBlock);
 
-    /// <summary>
-    /// Сервис мониторинга USB, работающий с диспетчером приложения.
-    /// </summary>
-    static private USBMonitorService usbMonitorService = new USBMonitorService(Application.Current.Dispatcher);
+    UsbServices usbServices = new UsbServices();
 
     // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
     private readonly ConsoleManager _consoleManager;
@@ -70,11 +67,9 @@ namespace MainWindowProgram
     /// </summary>
     public async Task InitializeAsync()
     {
-      _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
-
       SystemEventsBinder systemEventsBinder = new SystemEventsBinder();
       UiEventsBinder uiEventsBinder = new UiEventsBinder(this);
-      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, usbMonitorService);
+      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, usbServices, _consoleManager);
 
       ApplicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
       ApplicationEvents.BindAll();
@@ -105,26 +100,6 @@ namespace MainWindowProgram
     }
 
     /// <summary>
-    /// Обработчик события изменения режима администратора от менеджера консоли.
-    /// Останавливает или запускает мониторинг USB в зависимости от новых прав.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Новое значение режима администратора.</param>
-    private void _consoleManager_AdminModeChanged(object? sender, bool e)
-    {
-      if (e)
-      {
-        StopUsbMonitoring();
-        OnAdminRightsChangedHandler(null, true);
-      }
-      else
-      {
-        OnAdminRightsChangedHandler(null, false);
-        SetUsbMonitoring(false);
-      }
-    }
-
-    /// <summary>
     /// Обрабатывает нажатия клавиш в главном окне.
     /// Если нажаты Ctrl + Oem3, переключает видимость консоли.
     /// </summary>
@@ -149,12 +124,11 @@ namespace MainWindowProgram
 
       if (!args.Contains("admin"))
       {
-        SetUsbMonitoring(false);
+        usbServices.SetUsbMonitoring(false);
       }
       else
       {
-        LogInformation("Запущен в режиме администратора через аргумент командной строки.");
-        SetUsbMonitoring(true);
+        usbServices.SetUsbMonitoring(true);
       }
     }
 
@@ -187,30 +161,6 @@ namespace MainWindowProgram
     private async Task StartConfigAsync()
     {
       await Initialize();
-    }
-
-    /// <summary>
-    /// Включает или отключает мониторинг USB в зависимости от режима администратора.
-    /// </summary>
-    /// <param name="admin">Если <c>true</c> — включить режим администратора, иначе — отключить.</param>
-    private void SetUsbMonitoring(bool admin)
-    {
-      if (!admin)
-      {
-        usbMonitorService.Start();
-      }
-      else
-      {
-        usbMonitorService.AdminRights = admin;
-      }
-    }
-
-    /// <summary>
-    /// Останавливает сервис мониторинга USB.
-    /// </summary>
-    private void StopUsbMonitoring()
-    {
-      usbMonitorService.Stop();
     }
 
     /// <summary>
