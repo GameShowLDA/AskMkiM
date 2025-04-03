@@ -60,6 +60,7 @@ namespace MainWindowProgram.Events
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
       _consoleManager.AdminModeChanged += AdminModeChanged;
       _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      _mainWindow.PreviewKeyDown += OnKeyDown;
     }
 
     /// <summary>

@@ -15,6 +15,11 @@ namespace MainWindowProgram
   public partial class MainWindow : Window
   {
     /// <summary>
+    /// Обработчик сообщений, принимает блок информации для вывода.
+    /// </summary>
+    private readonly MessageHandler messageHandler = new(_infoBlock);
+
+    /// <summary>
     /// Таймер, используемый для периодических задач (если необходимо).
     /// </summary>
     static System.Timers.Timer timer = new System.Timers.Timer();
@@ -25,11 +30,6 @@ namespace MainWindowProgram
     static TextBlock _infoBlock;
 
     private bool isLocked = false;
-
-    /// <summary>
-    /// Обработчик сообщений, принимает блок информации для вывода.
-    /// </summary>
-    MessageHandler messageHandler = new MessageHandler(_infoBlock);
 
     UsbServices usbServices = new UsbServices();
 

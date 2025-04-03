@@ -74,7 +74,8 @@ namespace DataBaseConfiguration.Services
     /// <param name="entity">Экземпляр сущности.</param>
     public void Update(T entity)
     {
-      _context.Update(entity);
+      _context.Attach(entity);
+      _context.Entry(entity).State = EntityState.Modified;
       _context.SaveChanges();
     }
 

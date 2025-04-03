@@ -12,7 +12,21 @@ namespace DataBaseConfiguration.Configurations
     /// <summary>
     /// Путь к файлу настроек конфигурации.
     /// </summary>
-    static public string ConfigFilePath => ".\\Settings\\_config.db";
+    //static public string ConfigFilePath => ".\\Settings\\_config.db";
+
+    /// <summary>
+    /// Путь к временной базе данных в системной папке Temp.
+    /// </summary>
+    static public string ConfigFilePath
+    {
+      get
+      {
+        var tempDir = Path.Combine(Path.GetTempPath(), "AskMkiM");
+        Directory.CreateDirectory(tempDir);
+        return Path.Combine(tempDir, "_config.db");
+      }
+    }
+
 
     /// <summary>
     /// Опции конфигурации базы данных для подключения через SQLite.
@@ -30,11 +44,22 @@ namespace DataBaseConfiguration.Configurations
     /// <returns>Задача, представляющая асинхронную операцию инициализации базы данных.</returns>
     static public async Task InitializeDB()
     {
-      var dbContextFactory = new DbContextFactory();
-      using (var scope = dbContextFactory.CreateDbContext(new string[0]))
+      try
       {
-        await scope.Database.MigrateAsync();
+        using var context = new AppDbContext(OptionsBuilder.Options);
+        await context.Database.MigrateAsync();
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("✅ База данных инициализирована, миграции применены.");
+        Console.ResetColor();
+      }
+      catch (Exception ex)
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"❌ Ошибка при инициализации базы данных: {ex.Message}");
+        Console.ResetColor();
       }
     }
+
   }
 }

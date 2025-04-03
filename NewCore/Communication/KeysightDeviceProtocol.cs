@@ -17,12 +17,12 @@ namespace NewCore.Communication
     /// <summary>
     /// Сетевой поток для передачи команд и получения данных.
     /// </summary>
-    internal NetworkStream Stream { get; set; }
+    static internal NetworkStream Stream { get; set; }
 
     /// <summary>
     /// TCP-клиент для установления соединения с устройством.
     /// </summary>
-    internal TcpClient Client { get; set; }
+    static internal TcpClient Client { get; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KeysightDeviceProtocol"/>.

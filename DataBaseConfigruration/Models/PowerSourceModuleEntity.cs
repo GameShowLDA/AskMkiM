@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using NewCore.Base.Device;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
@@ -59,5 +60,8 @@ namespace DataBaseConfiguration.Models
     /// <inheritdoc />
     [NotMapped]
     public IDeviceProtocol DeviceProtocol { get; set; }
+
+    /// <inheritdoc />
+    public string? ResistanceCalibrationJson { get; set; }
   }
 }

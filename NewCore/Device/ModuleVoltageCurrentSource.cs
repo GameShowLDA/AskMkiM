@@ -1,4 +1,8 @@
-﻿using NewCore.Base.Device;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using NewCore.Base.Device;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
@@ -47,5 +51,12 @@ namespace NewCore.Device
     /// Менеджер управления напряжением модуля.
     /// </summary>
     public IVoltageManager VoltageManager { get; set; }
+    public string? ResistanceCalibrationJson { get; set ; }
+
+    /// <summary>
+    /// Десериализованные калибровочные диапазоны сопротивления
+    /// </summary>
+    [NotMapped]
+    public List<ResistanceCalibrationRange> ResistanceCalibration { get; set; } = new();
   }
 }
