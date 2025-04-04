@@ -74,7 +74,8 @@ namespace DataBaseConfiguration.Services
     /// <param name="entity">Экземпляр сущности.</param>
     public void Update(T entity)
     {
-      _context.Update(entity);
+      _context.Attach(entity);
+      _context.Entry(entity).State = EntityState.Modified;
       _context.SaveChanges();
     }
 
@@ -99,7 +100,7 @@ namespace DataBaseConfiguration.Services
     /// Возвращает список сущностей базы данных, соответствующих типу <typeparamref name="T"/>.
     /// </summary>
     /// <returns>Список необработанных сущностей.</returns>
-    public List<object> GetAllEntities()
+    internal virtual List<object> GetAllData()
     {
       var dbSet = GetDbSet();
       return dbSet.Cast<object>().ToList();

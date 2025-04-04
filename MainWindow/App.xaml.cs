@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
+using ConsoleUtilities.Engine;
+using ConsoleUtilities.Services;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -9,28 +12,12 @@ namespace MainWindowProgram
   /// </summary>
   public partial class App : Application
   {
-    /// <summary>
-    /// Обрабатывает необработанные исключения домена приложения.
-    /// </summary>
-    /// <param name="sender">Источник исключения.</param>
-    /// <param name="e">Аргументы события с информацией об исключении.</param>
-    static internal void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-      Exception ex = (Exception)e.ExceptionObject;
-      LogError("Необработанное исключение в AppDomain: " + ex.Message);
-    }
+    [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    private const int SW_HIDE = 0;
 
-    /// <summary>
-    /// Обрабатывает необработанные исключения в главном потоке (UI).
-    /// </summary>
-    /// <param name="sender">Источник исключения.</param>
-    /// <param name="e">Аргументы события с информацией об исключении.</param>
-    static internal new void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
-    {
-      Exception ex = e.Exception;
-      LogError("Необработанное исключение в Dispatcher: " + ex.Message);
-      e.Handled = true;
-    }
+    // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
+    static internal ConsoleManager _consoleManager { get; private set; }
 
     /// <summary>
     /// Содержит аргументы командной строки, переданные при запуске приложения.
@@ -45,6 +32,12 @@ namespace MainWindowProgram
     {
       base.OnStartup(e);
       CommandLineArgs = e.Args; // Сохраняем аргументы
+
+      var hwnd = GetConsoleWindow();
+      ShowWindow(hwnd, SW_HIDE); // ← Просто скрыть, НЕ уничтожать!
+
+      var handler = ConsoleAppBootstrapper.Build();
+      _consoleManager = new ConsoleManager(handler);
 
       SplashWindow loadWindow = new SplashWindow();
       loadWindow.Show();

@@ -1,7 +1,10 @@
-﻿using System.Windows.Controls;
+﻿using System.Text.Json;
+using System.Windows.Controls;
+using AppConfiguration.Execution;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using Mode.Models;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using UI.Controls.Protocol;
@@ -45,12 +48,12 @@ namespace Mode.Metrology.PR
           ReturnDelegate: async (CancellationToken token) =>
           {
             await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          }, 
+          },
           StopDelegate: async (CancellationToken token) =>
           {
             await testMeasurement.FinalizeMeasurement();
           });
-          
+
       }
       catch (Exception ex)
       {
@@ -104,12 +107,12 @@ namespace Mode.Metrology.PR
       public async Task MintSettings(DataModel dataModel)
       {
         var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var meter) ? meter.OfType<IPowerSourceModule>().FirstOrDefault() : null;
-        (var current, VoltageSources voltage) = SelectOptimalCurrentAndVoltage(dataModel.Param);
+        var data = SelectOptimalCurrentAndVoltage(dataModel.Param, mint);
 
-        int integerPart = current.IntegerCurrent;
-        int decimalPart = current.decimalCurrent;
+        int integerPart = data.IntegerCurrent;
+        int decimalPart = data.DecimalCurrent;
 
-        await mint.VoltageManager.SetSourceVoltageAsync(voltage);
+        await mint.VoltageManager.SetSourceVoltageAsync(data.Voltage);
         await mint.CurrentManager.SetCurrentLevelAsync(integerPart, decimalPart);
       }
 
@@ -123,11 +126,13 @@ namespace Mode.Metrology.PR
       /// <inheritdoc />
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
+        var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной", headerColor: ShowMessageModel.SuccessMessage.Item2));
 
-        (var current, VoltageSources voltageSource) = SelectOptimalCurrentAndVoltage(param);
-        double currentGenerial = (current.decimalCurrent / 1000.0) + current.IntegerCurrent;
+        var data = SelectOptimalCurrentAndVoltage(param, mint);
+        double currentGenerial = (data.DecimalCurrent / 1000.0) + data.IntegerCurrent;
 
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR);
@@ -135,7 +140,7 @@ namespace Mode.Metrology.PR
         await Task.Delay(1000);
         var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tРезультат измерения напряжения", message: $"{voltage} В.", messageColor: ShowMessageModel.SuccessMessage.Item2));
-        var result = voltage / (currentGenerial / 1000);
+        var result = voltage / (currentGenerial / 1000.0);
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
         showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
@@ -145,38 +150,35 @@ namespace Mode.Metrology.PR
       }
 
       /// <summary>
-      /// Выбирает оптимальные параметры тока и источника напряжения
-      /// в зависимости от значения сопротивления.
+      /// Возвращает диапазон параметров (коэффициенты, ток, напряжение), соответствующий указанному сопротивлению.
       /// </summary>
-      /// <param name="resistance">Измеренное сопротивление в Омах.</param>
+      /// <param name="resistance">Измеренное сопротивление (в Омах).</param>
+      /// <param name="powerSourceModule">Модуль источника питания с диапазонами калибровки.</param>
       /// <returns>
-      /// Кортеж, содержащий:
-      /// - рекомендуемый ток в миллиамперах;
-      /// - источник напряжения из перечисления VoltageSources.
+      /// Объект <see cref="ResistanceCalibrationRange"/>, соответствующий диапазону сопротивления.
+      /// Если диапазон не найден, возвращается пустой объект со значениями по умолчанию.
       /// </returns>
-      private ((int IntegerCurrent, int decimalCurrent), VoltageSources Voltage) SelectOptimalCurrentAndVoltage(double resistance)
+      private ResistanceCalibrationRange SelectOptimalCurrentAndVoltage(double resistance, IPowerSourceModule powerSourceModule)
       {
-        if (resistance >= 0 && resistance <= 100)
+        var json = powerSourceModule.ResistanceCalibrationJson;
+
+        var list = string.IsNullOrWhiteSpace(json)
+          ? new List<ResistanceCalibrationRange>()
+          : JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(json) ?? new List<ResistanceCalibrationRange>();
+
+        var matched = list.FirstOrDefault(r =>
+          resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
+
+        return matched ?? new ResistanceCalibrationRange
         {
-          return ((20, 0), VoltageSources.Supply5V);
-        }
-        else if (resistance > 100 && resistance <= 1000)
-        {
-          return ((9, 0), VoltageSources.Supply12V);
-        }
-        else if (resistance > 1000 && resistance <= 10000)
-        {
-          return ((0, 900), VoltageSources.Supply12V);
-        }
-        else if (resistance > 10000 && resistance <= 100000)
-        {
-          return ((0, 90), VoltageSources.Supply12V);
-        }
-        else
-        {
-          return ((0, 0), VoltageSources.Supply12V);
-        }
+          ResistanceMin = 0,
+          ResistanceMax = 0,
+          IntegerCurrent = 0,
+          DecimalCurrent = 0,
+          Voltage = VoltageSources.Supply12V
+        };
       }
+
     }
   }
 }

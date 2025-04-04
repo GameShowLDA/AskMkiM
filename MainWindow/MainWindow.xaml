@@ -141,15 +141,11 @@
 
                 </MenuItem>
 
-                <MenuItem 
-                    Header="Самоконтроль"
-                    Name="SelfControl"
-                    >
+                <MenuItem Header="Самоконтроль" Name="SelfControl">
 
                     <MenuItem 
                         Header="Модуль" 
                         Name="SelfControlMenuItem"
-                        PreviewMouseDown="Test_Self" 
                         />
 
                 </MenuItem>
@@ -212,12 +208,11 @@
                 </i:Interaction.Triggers>
             </StackPanel>
 
-            <StackPanel 
+            <StackPanel Name="ButtonsPanel"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
                     VerticalAlignment="Top" 
                     Grid.Column="2" 
-                    Name="ButtonsPanel"
                     Background="Transparent"
                     >
 

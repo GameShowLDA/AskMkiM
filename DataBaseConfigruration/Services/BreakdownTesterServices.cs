@@ -48,5 +48,10 @@ namespace DataBaseConfiguration.Services
                      .Where(device => device.NumberChassis == numberChassis)
                      .ToList();
     }
+
+    public List<BreakdownTesterEntity> GetAllEntities()
+    {
+      return GetAllData().OfType<BreakdownTesterEntity>().ToList();
+    }
   }
 }

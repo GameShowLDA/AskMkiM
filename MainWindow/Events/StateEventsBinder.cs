@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using AppConfiguration.Base;
 using AppConfiguration.Execution;
 using AppConfiguration.SystemState;
+using ConsoleUtilities;
+using ConsoleUtilities.Commands;
+using ConsoleUtilities.Services;
+using MainWindowProgram.Services;
 using UI.Components;
 using Utilities.USB;
 
@@ -16,11 +21,13 @@ namespace MainWindowProgram.Events
   /// </summary>
   public class StateEventsBinder
   {
+    private HotkeyListenerService _hotkey;
+
     /// <summary>
     /// Сервис отслеживания подключения и отключения USB-устройств.
     /// Используется для реагирования на смену прав администратора.
     /// </summary>
-    private readonly USBMonitorService _usbMonitorService;
+    private readonly UsbServices _usbMonitorService;
 
     /// <summary>
     /// Ссылка на главное окно приложения, интерфейс которого необходимо обновлять.
@@ -33,15 +40,18 @@ namespace MainWindowProgram.Events
     /// </summary>
     private static bool isLocked = false;
 
+    private readonly ConsoleManager _consoleManager;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateEventsBinder"/>.
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
     /// <param name="usbMonitorService">Сервис мониторинга USB-подключений.</param>
-    public StateEventsBinder(MainWindow mainWindow, USBMonitorService usbMonitorService)
+    public StateEventsBinder(MainWindow mainWindow, UsbServices usbMonitorService, ConsoleManager consoleManager)
     {
       _usbMonitorService = usbMonitorService;
       _mainWindow = mainWindow;
+      _consoleManager = consoleManager;
     }
 
     /// <summary>
@@ -52,7 +62,32 @@ namespace MainWindowProgram.Events
       EventAggregator.LockedChanged += OnLockedChanged;
       EventAggregator.AdminRightsChanged += OnAdminRightsChanged;
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
-      _usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+
+      AdminCommand.AdminModeChanged += AdminModeChanged;
+      _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      _mainWindow.PreviewKeyDown += OnKeyDown;
+
+      _hotkey = new HotkeyListenerService(_mainWindow, () => _consoleManager.ToggleConsole());
+    }
+
+    /// <summary>
+    /// Обработчик события изменения режима администратора от менеджера консоли.
+    /// Останавливает или запускает мониторинг USB в зависимости от новых прав.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Новое значение режима администратора.</param>
+    private void AdminModeChanged(object? sender, bool e)
+    {
+      if (e)
+      {
+        _usbMonitorService.StopUsbMonitoring();
+        OnAdminRightsChangedHandler(null, true);
+      }
+      else
+      {
+        OnAdminRightsChangedHandler(null, false);
+        _usbMonitorService.SetUsbMonitoring(false);
+      }
     }
 
     /// <summary>
@@ -129,6 +164,21 @@ namespace MainWindowProgram.Events
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
       SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Обрабатывает нажатия клавиш в главном окне.
+    /// Если нажаты Ctrl + Oem3, переключает видимость консоли.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события нажатия клавиши.</param>
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
+      {
+        _consoleManager.ToggleConsole();
+        e.Handled = true;
+      }
     }
   }
 }

@@ -1,4 +1,5 @@
-﻿using NewCore.Base.Interface.Main;
+﻿using DataBaseConfiguration.Models;
+using NewCore.Base.Interface.Main;
 
 namespace DataBaseConfiguration.Services
 {
@@ -14,5 +15,10 @@ namespace DataBaseConfiguration.Services
     /// </summary>
     public RackServices() : base(Configurations.DataBaseConfig.Context)
     { }
+
+    public List<RackEntity> GetAllEntities()
+    {
+      return GetAllData().OfType<RackEntity>().ToList();
+    }
   }
 }

@@ -105,7 +105,7 @@ namespace Mode.Metrology.KC
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления", headerColor: ShowMessageModel.SuccessMessage.Item2));
 
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
+        double lastNorm = param + (param / 100.0  * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
 
         await Task.Delay(1000);
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param);

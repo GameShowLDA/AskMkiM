@@ -47,5 +47,10 @@ namespace DataBaseConfiguration.Services
                      .Where(device => device.NumberChassis == numberChassis)
                      .ToList();
     }
+
+    public List<FastMeterEntity> GetAllEntities()
+    {
+      return GetAllData().OfType<FastMeterEntity>().ToList();
+    }
   }
 }

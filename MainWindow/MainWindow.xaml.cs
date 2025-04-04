@@ -3,6 +3,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
+using ConsoleUtilities.Engine;
+using ConsoleUtilities.Services;
+using MainWindowProgram.Engine;
 using MainWindowProgram.Events;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
@@ -14,34 +17,46 @@ namespace MainWindowProgram
 {
   public partial class MainWindow : Window
   {
-    /// <summary>
-    /// Таймер, используемый для периодических задач (если необходимо).
-    /// </summary>
-    static System.Timers.Timer timer = new System.Timers.Timer();
+
+    #region Поля.
 
     /// <summary>
-    /// Статический блок информации для отображения сообщений.
+    /// Обработчик сообщений, передаёт текст в интерфейс через связанный блок информации.
+    /// Используется для отображения логов, статусов, ошибок и другой информации в UI.
     /// </summary>
-    static TextBlock _infoBlock;
+    private readonly MessageHandler messageHandler = new(_infoBlock);
 
+    /// <summary>
+    /// Статический UI-элемент, в который выводятся сообщения от системы.
+    /// Используется как главный информационный блок в окне приложения.
+    /// </summary>
+    private static TextBlock _infoBlock;
+
+    /// <summary>
+    /// Флаг, указывающий, заблокировано ли текущее состояние интерфейса.
+    /// Используется для предотвращения повторных операций, если процесс уже запущен.
+    /// </summary>
     private bool isLocked = false;
 
     /// <summary>
-    /// Обработчик сообщений, принимает блок информации для вывода.
+    /// Сервис управления USB-устройствами.
+    /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    MessageHandler messageHandler = new MessageHandler(infoBlock: _infoBlock);
+    private readonly UsbServices _usbServices;
 
     /// <summary>
-    /// Сервис мониторинга USB, работающий с диспетчером приложения.
+    /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
+    /// Связывает интерфейс с бизнес-логикой.
     /// </summary>
-    static private USBMonitorService usbMonitorService = new USBMonitorService(Application.Current.Dispatcher);
-
-    // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
-    private readonly ConsoleManager _consoleManager;
-
     private readonly MainWindowViewModel _viewModel;
 
-    ApplicationEventsBinder ApplicationEvents;
+    /// <summary>
+    /// Класс для подписки на события жизненного цикла приложения (загрузка, закрытие и т.п.).
+    /// Позволяет централизованно обрабатывать глобальные события приложения.
+    /// </summary>
+    private ApplicationEventsBinder _applicationEvents;
+
+    #endregion
 
     /// <summary>
     /// Инициализирует новое окно приложения и настраивает события, командную строку, мониторинг USB и конфигурацию.
@@ -49,6 +64,8 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
+
+      _usbServices = new UsbServices();
 
       var multiWindowService = new MultiWindowService(this.MultiWindow);
       var metrologyService = new MetrologyService(multiWindowService);
@@ -61,7 +78,6 @@ namespace MainWindowProgram
       _viewModel = new MainWindowViewModel(metrologyService, fileService, testService, settingsService, adminService, windowService);
       this.DataContext = _viewModel;
 
-      _consoleManager = ConsoleManager.Instance;
       this.Visibility = Visibility.Hidden;
     }
 
@@ -70,20 +86,18 @@ namespace MainWindowProgram
     /// </summary>
     public async Task InitializeAsync()
     {
-      _consoleManager.AdminModeChanged += _consoleManager_AdminModeChanged;
-
       SystemEventsBinder systemEventsBinder = new SystemEventsBinder();
       UiEventsBinder uiEventsBinder = new UiEventsBinder(this);
-      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, usbMonitorService);
+      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, _usbServices, App._consoleManager);
 
-      ApplicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
-      ApplicationEvents.BindAll();
+      _applicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
+      _applicationEvents.BindAll();
 
       await Task.Run(async () =>
       {
         try
         {
-          await StartConfigAsync();
+          await Initialize();
         }
         catch (InvalidOperationException exception)
         {
@@ -99,63 +113,10 @@ namespace MainWindowProgram
       });
 
       SettingsGUI();
-      ProcessCommandLineArgs();
-      this.PreviewKeyDown += OnKeyDown;
+
+      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+
       _searchWindow = new SearchWindow();
-    }
-
-    /// <summary>
-    /// Обработчик события изменения режима администратора от менеджера консоли.
-    /// Останавливает или запускает мониторинг USB в зависимости от новых прав.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Новое значение режима администратора.</param>
-    private void _consoleManager_AdminModeChanged(object? sender, bool e)
-    {
-      if (e)
-      {
-        StopUsbMonitoring();
-        OnAdminRightsChangedHandler(null, true);
-      }
-      else
-      {
-        OnAdminRightsChangedHandler(null, false);
-        SetUsbMonitoring(false);
-      }
-    }
-
-    /// <summary>
-    /// Обрабатывает нажатия клавиш в главном окне.
-    /// Если нажаты Ctrl + Oem3, переключает видимость консоли.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события нажатия клавиши.</param>
-    private void OnKeyDown(object sender, KeyEventArgs e)
-    {
-      if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
-      {
-        _consoleManager.ToggleConsole();
-        e.Handled = true;
-      }
-    }
-
-    /// <summary>
-    /// Обрабатывает аргументы командной строки.
-    /// Если аргументы не содержат "admin", USB мониторинг отключается; иначе включается.
-    /// </summary>
-    private void ProcessCommandLineArgs()
-    {
-      string[] args = App.CommandLineArgs;
-
-      if (!args.Contains("admin"))
-      {
-        SetUsbMonitoring(false);
-      }
-      else
-      {
-        LogInformation("Запущен в режиме администратора через аргумент командной строки.");
-        SetUsbMonitoring(true);
-      }
     }
 
     /// <summary>
@@ -178,50 +139,6 @@ namespace MainWindowProgram
     private string GetErrorDetails(Exception ex)
     {
       return $"{ex.Message}";
-    }
-
-    /// <summary>
-    /// Асинхронно загружает все настройки.
-    /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию чтения настроек.</returns>
-    private async Task StartConfigAsync()
-    {
-      await Initialize();
-    }
-
-    /// <summary>
-    /// Включает или отключает мониторинг USB в зависимости от режима администратора.
-    /// </summary>
-    /// <param name="admin">Если <c>true</c> — включить режим администратора, иначе — отключить.</param>
-    private void SetUsbMonitoring(bool admin)
-    {
-      if (!admin)
-      {
-        usbMonitorService.Start();
-      }
-      else
-      {
-        usbMonitorService.AdminRights = admin;
-      }
-    }
-
-    /// <summary>
-    /// Останавливает сервис мониторинга USB.
-    /// </summary>
-    private void StopUsbMonitoring()
-    {
-      usbMonitorService.Stop();
-    }
-
-    /// <summary>
-    /// Обработчик события изменения прав администратора.
-    /// Обновляет состояние прав администратора в системном менеджере.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="newRights">Новое состояние прав администратора.</param>
-    private void OnAdminRightsChangedHandler(object sender, bool newRights)
-    {
-      SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
     }
   }
 }
