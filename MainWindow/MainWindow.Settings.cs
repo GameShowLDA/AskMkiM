@@ -70,10 +70,6 @@ namespace MainWindowProgram
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
       InfoMessageEvent += messageHandler.SetInfoMessage;
-
-      timer.AutoReset = true;
-      timer.Enabled = true;
-
       LogInformation("Настройки инициализированы.");
     }
 

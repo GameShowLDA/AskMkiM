@@ -65,17 +65,31 @@ namespace Utilities
 
     static LoggerUtility()
     {
-      LogManager.Setup().LoadConfigurationFromFile("NLog.config");
-      LogManager.ReconfigExistingLoggers();
+      try
+      {
+        LogManager.Setup().LoadConfigurationFromFile("NLog.config");
+        LogManager.ReconfigExistingLoggers();
 
-      if (LogManager.Configuration == null)
-      {
-        Console.WriteLine("Ошибка: NLog.config не загружен!");
+        if (LogManager.Configuration == null)
+        {
+          File.AppendAllText("log_debug.txt", "NLog.config не загружен\n");
+        }
+        else
+        {
+          File.AppendAllText("log_debug.txt", "NLog успешно загружен\n");
+        }
       }
-      else
+      catch (Exception ex)
       {
-        Console.WriteLine("NLog загружен.");
+        File.AppendAllText("log_debug.txt", "Исключение: " + ex.Message);
       }
     }
+
+    public static void ForceInit()
+    {
+      // ничего не делает, просто чтобы static ctor сработал
+    }
+
+
   }
 }

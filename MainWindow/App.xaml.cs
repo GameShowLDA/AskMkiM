@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
+using ConsoleUtilities.Engine;
+using ConsoleUtilities.Services;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -9,6 +12,13 @@ namespace MainWindowProgram
   /// </summary>
   public partial class App : Application
   {
+    [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    private const int SW_HIDE = 0;
+
+    // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
+    static internal ConsoleManager _consoleManager { get; private set; }
+
     /// <summary>
     /// Содержит аргументы командной строки, переданные при запуске приложения.
     /// </summary>
@@ -22,6 +32,12 @@ namespace MainWindowProgram
     {
       base.OnStartup(e);
       CommandLineArgs = e.Args; // Сохраняем аргументы
+
+      var hwnd = GetConsoleWindow();
+      ShowWindow(hwnd, SW_HIDE); // ← Просто скрыть, НЕ уничтожать!
+
+      var handler = ConsoleAppBootstrapper.Build();
+      _consoleManager = new ConsoleManager(handler);
 
       SplashWindow loadWindow = new SplashWindow();
       loadWindow.Show();

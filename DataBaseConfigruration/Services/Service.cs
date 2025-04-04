@@ -100,7 +100,7 @@ namespace DataBaseConfiguration.Services
     /// Возвращает список сущностей базы данных, соответствующих типу <typeparamref name="T"/>.
     /// </summary>
     /// <returns>Список необработанных сущностей.</returns>
-    public List<object> GetAllEntities()
+    internal virtual List<object> GetAllData()
     {
       var dbSet = GetDbSet();
       return dbSet.Cast<object>().ToList();

@@ -11,10 +11,6 @@ namespace NewCore.Communication
   /// </summary>
   static public class DeviceCommandSender
   {
-    /// <summary>
-    /// Порт для входящих сообщений.
-    /// </summary>
-    private static readonly int _portInput = 8800;
 
     /// <summary>
     /// Порт для отправки сообщений.

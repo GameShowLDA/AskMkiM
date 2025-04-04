@@ -7,6 +7,8 @@ using AppConfiguration.Base;
 using AppConfiguration.Execution;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
+using ConsoleUtilities.Commands;
+using ConsoleUtilities.Services;
 using MainWindowProgram.Services;
 using UI.Components;
 using Utilities.USB;
@@ -19,6 +21,8 @@ namespace MainWindowProgram.Events
   /// </summary>
   public class StateEventsBinder
   {
+    private HotkeyListenerService _hotkey;
+
     /// <summary>
     /// Сервис отслеживания подключения и отключения USB-устройств.
     /// Используется для реагирования на смену прав администратора.
@@ -58,9 +62,12 @@ namespace MainWindowProgram.Events
       EventAggregator.LockedChanged += OnLockedChanged;
       EventAggregator.AdminRightsChanged += OnAdminRightsChanged;
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
-      _consoleManager.AdminModeChanged += AdminModeChanged;
+
+      AdminCommand.AdminModeChanged += AdminModeChanged;
       _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
+
+      _hotkey = new HotkeyListenerService(_mainWindow, () => _consoleManager.ToggleConsole());
     }
 
     /// <summary>
