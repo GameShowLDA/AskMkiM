@@ -232,6 +232,9 @@ namespace MainWindowProgram
         EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
         EventAggregator.SearchText += SearchWindow_SearchTextHandler;
 
+        EventAggregator.ReplaceText -= SearchWindow_ReplaceTextHandler;
+        EventAggregator.ReplaceText += SearchWindow_ReplaceTextHandler;
+
         _searchWindow.SelectFileForSearch -= OpenFileFromEvent;
         _searchWindow.SelectFileForSearch += OpenFileFromEvent;
 
@@ -252,6 +255,11 @@ namespace MainWindowProgram
         var temp = _searchWindow.FindName("SearchTextBox") as TextBox;
         LogInformation($"Открыто окно поиска. Текст в строке поиска: {temp.Text}");
       }
+    }
+
+    private void SearchWindow_ReplaceTextHandler(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      MultiWindow.ReplaceData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     private void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)

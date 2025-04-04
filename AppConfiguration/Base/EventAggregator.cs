@@ -76,6 +76,11 @@ namespace AppConfiguration.Base
     static public event Action<string> SearchButtonPressed;
 
     /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
+    /// </summary>
+    static public event Action ReplaceWordButtonPressed;
+
+    /// <summary>
     /// Событие, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
     /// </summary>
     public static event Action<string> SearchTextRequested;
@@ -96,6 +101,11 @@ namespace AppConfiguration.Base
     /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
     /// </summary>
     public static event Action<string, bool?, bool?, int, string> SearchText;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замена слова.
+    /// </summary>
+    public static event Action<string, string, bool?, bool?, int, string> ReplaceText;
 
     /// <summary>
     /// Событие для запроса показа окна прогресса с блюром на главном окне
@@ -225,6 +235,15 @@ namespace AppConfiguration.Base
     /// Метод для вызова события, когда активное окно - TextEditor.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseReplaceText(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      ReplaceText?.Invoke(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
     public static void RaiseCloseSearchWindow()
     {
       CloseSearchWindow?.Invoke();
@@ -259,6 +278,14 @@ namespace AppConfiguration.Base
     static public void RaiseSearchButtonPressed(string searchParameters)
     {
       SearchButtonPressed?.Invoke(searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка поиска.
+    /// </summary>
+    static public void RaiseReplaceWordButtonPressed()
+    {
+      ReplaceWordButtonPressed?.Invoke();
     }
 
     /// <summary>

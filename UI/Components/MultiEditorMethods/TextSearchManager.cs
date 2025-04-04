@@ -30,7 +30,7 @@ namespace UI.Components.MultiEditorMethods
     /// Словарь, хранящий результаты поиска для каждого открытого файла.
     /// Ключ - имя файла, значение - список результатов поиска для этого файла.
     /// </summary>
-    Dictionary<string, List<SearchResult>> foundInOpenedFiles = new Dictionary<string, List<SearchResult>>();
+    public Dictionary<string, List<SearchResult>> foundInOpenedFiles = new Dictionary<string, List<SearchResult>>();
 
     /// <summary>
     /// Список результатов поиска, полученных для текущего документа.

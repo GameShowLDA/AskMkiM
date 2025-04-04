@@ -52,12 +52,14 @@ namespace UI.Controls.Search
       InitializeComponent();
       this.Loaded += Window_Loaded;
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
+      EventAggregator.ReplaceWordButtonPressed += OnReplaceWordButtonPressed;
       EventAggregator.CloseSearchWindow += OnCloseSearchWindowRequested;
       //EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
       this.Focus();
       SearchTextBox.Focus();
     }
+
 
     /// <summary>
     /// Обработчик события загрузки окна.
@@ -342,6 +344,21 @@ namespace UI.Controls.Search
       }
 
       EventAggregator.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void OnReplaceWordButtonPressed()
+    {
+      var searchText = SearchTextBox.Text;
+      var replaceText = ReplaceTextBox.Text;
+      var searchArea = searchAreaParameters.SelectedIndex;
+      var wholeWord = wholeWordButton.IsChecked;
+      var caseWord = caseButton.IsChecked;
+      if (searchArea == 2)
+      {
+        searchAreaParameters.SelectedIndex = 0;
+      }
+
+      EventAggregator.RaiseReplaceText(replaceText, searchText, wholeWord, caseWord, searchArea, "FindNext");
     }
 
     private void OnCloseSearchWindowRequested()
