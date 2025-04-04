@@ -9,6 +9,7 @@ using AppConfiguration.Protocol;
 using AppConfiguration.Theme;
 using static Utilities.LoggerUtility;
 using static UI.Components.Invoke.OpenFileButton;
+using UI.Controls.TextEditor;
 
 namespace MainWindowProgram
 {
@@ -70,11 +71,19 @@ namespace MainWindowProgram
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
       InfoMessageEvent += messageHandler.SetInfoMessage;
+      OpenOpk += OnOpenOpk;
 
       timer.AutoReset = true;
       timer.Enabled = true;
 
       LogInformation("Настройки инициализированы.");
+    }
+
+    private async void OnOpenOpk(UserControl userControl, string elementName, string elementData)
+    {
+      var texteditor = userControl as TextEditorUI;
+      //texteditor.Document
+      await AddControlAsync(texteditor, elementName, TypeWindow.Files);
     }
 
     /// <summary>

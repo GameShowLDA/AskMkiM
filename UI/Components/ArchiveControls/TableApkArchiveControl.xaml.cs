@@ -13,6 +13,8 @@ using AppConfiguration.Base;
 using Path = System.IO.Path;
 using Microsoft.Win32;
 using static Utilities.LoggerUtility;
+using UI.Controls.TextEditor;
+using ICSharpCode.AvalonEdit;
 
 namespace UI.Components.ArchiveControls
 {
@@ -284,7 +286,10 @@ namespace UI.Components.ArchiveControls
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
       // TODO: Добавить открытие файлов
-      //ApplicationConfiguration.ApplicationDataHandler.RaiseAddMultiEditorElement($"{opkFile.OpkFilename}", content);
+      var textEditor = new TextEditorUI();
+      textEditor.Text = content;
+      //textEditor.IsReadOnly = true;
+      EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }    
 
     private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -298,8 +303,10 @@ namespace UI.Components.ArchiveControls
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
       // TODO: Добавить открытие файлов
-
-      //ApplicationConfiguration.ApplicationDataHandler.RaiseAddMultiEditorElement($"{opkFile.OpkFilename}", content);
+      var textEditor = new TextEditorUI();
+      textEditor.Text = content;
+      //textEditor.IsReadOnly = true;
+      EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }
   }
 }

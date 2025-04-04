@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static AppConfiguration.SystemState.SystemStateManager;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace AppConfiguration.Base
 {
@@ -107,6 +108,11 @@ namespace AppConfiguration.Base
     /// Событие для запроса закрытия окна прогресса и снятия блюра с главного окна
     /// </summary>
     public static event Action RequestCloseProgress;
+
+    /// <summary>
+    /// Событие, которое вызывается для добавления нового элемента в MultiEditor.
+    /// </summary>
+    static public event Action<UserControl, string, string> OpenOpk;
 
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
@@ -299,6 +305,15 @@ namespace AppConfiguration.Base
     public static void RaiseRequestCloseProgress()
     {
       RequestCloseProgress?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события добавления нового элемента.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseOpenOpk(UserControl userControl,string elementName, string elementData)
+    {
+      OpenOpk?.Invoke(userControl, elementName, elementData);
     }
   }
 }
