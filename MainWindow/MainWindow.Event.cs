@@ -66,8 +66,8 @@ namespace MainWindowProgram
       {
         _searchWindow.Owner = this;
 
-        EventAggregator.SearchText -= ApplicationEvents.UiEvents.SearchWindow_SearchTextHandler;
-        EventAggregator.SearchText += ApplicationEvents.UiEvents.SearchWindow_SearchTextHandler;
+        EventAggregator.SearchText -= _applicationEvents.UiEvents.SearchWindow_SearchTextHandler;
+        EventAggregator.SearchText += _applicationEvents.UiEvents.SearchWindow_SearchTextHandler;
 
         _searchWindow.SelectFileForSearch -= OpenFileFromEvent;
         _searchWindow.SelectFileForSearch += OpenFileFromEvent;

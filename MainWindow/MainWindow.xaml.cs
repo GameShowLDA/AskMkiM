@@ -3,6 +3,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
+using ConsoleUtilities.Engine;
+using ConsoleUtilities.Services;
+using MainWindowProgram.Engine;
 using MainWindowProgram.Events;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
@@ -14,31 +17,46 @@ namespace MainWindowProgram
 {
   public partial class MainWindow : Window
   {
+
+    #region Поля.
+
     /// <summary>
-    /// Обработчик сообщений, принимает блок информации для вывода.
+    /// Обработчик сообщений, передаёт текст в интерфейс через связанный блок информации.
+    /// Используется для отображения логов, статусов, ошибок и другой информации в UI.
     /// </summary>
     private readonly MessageHandler messageHandler = new(_infoBlock);
 
     /// <summary>
-    /// Таймер, используемый для периодических задач (если необходимо).
+    /// Статический UI-элемент, в который выводятся сообщения от системы.
+    /// Используется как главный информационный блок в окне приложения.
     /// </summary>
-    static System.Timers.Timer timer = new System.Timers.Timer();
+    private static TextBlock _infoBlock;
 
     /// <summary>
-    /// Статический блок информации для отображения сообщений.
+    /// Флаг, указывающий, заблокировано ли текущее состояние интерфейса.
+    /// Используется для предотвращения повторных операций, если процесс уже запущен.
     /// </summary>
-    static TextBlock _infoBlock;
-
     private bool isLocked = false;
 
-    UsbServices usbServices = new UsbServices();
+    /// <summary>
+    /// Сервис управления USB-устройствами.
+    /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
+    /// </summary>
+    private readonly UsbServices _usbServices;
 
-    // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
-    private readonly ConsoleManager _consoleManager;
-
+    /// <summary>
+    /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
+    /// Связывает интерфейс с бизнес-логикой.
+    /// </summary>
     private readonly MainWindowViewModel _viewModel;
 
-    ApplicationEventsBinder ApplicationEvents;
+    /// <summary>
+    /// Класс для подписки на события жизненного цикла приложения (загрузка, закрытие и т.п.).
+    /// Позволяет централизованно обрабатывать глобальные события приложения.
+    /// </summary>
+    private ApplicationEventsBinder _applicationEvents;
+
+    #endregion
 
     /// <summary>
     /// Инициализирует новое окно приложения и настраивает события, командную строку, мониторинг USB и конфигурацию.
@@ -46,6 +64,8 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
+
+      _usbServices = new UsbServices();
 
       var multiWindowService = new MultiWindowService(this.MultiWindow);
       var metrologyService = new MetrologyService(multiWindowService);
@@ -58,7 +78,6 @@ namespace MainWindowProgram
       _viewModel = new MainWindowViewModel(metrologyService, fileService, testService, settingsService, adminService, windowService);
       this.DataContext = _viewModel;
 
-      _consoleManager = ConsoleManager.Instance;
       this.Visibility = Visibility.Hidden;
     }
 
@@ -69,16 +88,16 @@ namespace MainWindowProgram
     {
       SystemEventsBinder systemEventsBinder = new SystemEventsBinder();
       UiEventsBinder uiEventsBinder = new UiEventsBinder(this);
-      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, usbServices, _consoleManager);
+      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, _usbServices, App._consoleManager);
 
-      ApplicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
-      ApplicationEvents.BindAll();
+      _applicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
+      _applicationEvents.BindAll();
 
       await Task.Run(async () =>
       {
         try
         {
-          await StartConfigAsync();
+          await Initialize();
         }
         catch (InvalidOperationException exception)
         {
@@ -94,26 +113,10 @@ namespace MainWindowProgram
       });
 
       SettingsGUI();
-      ProcessCommandLineArgs();
+
+      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+
       _searchWindow = new SearchWindow();
-    }
-
-    /// <summary>
-    /// Обрабатывает аргументы командной строки.
-    /// Если аргументы не содержат "admin", USB мониторинг отключается; иначе включается.
-    /// </summary>
-    private void ProcessCommandLineArgs()
-    {
-      string[] args = App.CommandLineArgs;
-
-      if (!args.Contains("admin"))
-      {
-        usbServices.SetUsbMonitoring(false);
-      }
-      else
-      {
-        usbServices.SetUsbMonitoring(true);
-      }
     }
 
     /// <summary>
@@ -136,15 +139,6 @@ namespace MainWindowProgram
     private string GetErrorDetails(Exception ex)
     {
       return $"{ex.Message}";
-    }
-
-    /// <summary>
-    /// Асинхронно загружает все настройки.
-    /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию чтения настроек.</returns>
-    private async Task StartConfigAsync()
-    {
-      await Initialize();
     }
   }
 }

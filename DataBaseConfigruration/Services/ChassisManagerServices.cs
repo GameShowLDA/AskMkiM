@@ -28,5 +28,10 @@ namespace DataBaseConfiguration.Services
 
       return GetDeviceInstance(entity);
     }
+
+    public List<ChassisManagerEntity> GetAllEntities()
+    {
+      return GetAllData().OfType<ChassisManagerEntity>().ToList();
+    }
   }
 }
