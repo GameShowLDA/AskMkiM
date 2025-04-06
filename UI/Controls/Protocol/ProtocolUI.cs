@@ -6,6 +6,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppConfiguration.Base;
+using AppConfiguration.Interface;
 using NewCore.Base.Device;
 using Utilities.Models;
 using static AppConfiguration.Protocol.ProtocolConfig;
@@ -15,7 +16,7 @@ using static Utilities.Models.ShowMessageModel;
 namespace UI.Controls.Protocol
 {
   /// <inheritdoc />
-  public partial class ProtocolUI
+  public partial class ProtocolUI : IUserMessageService
   {
     #region Поля.
 
@@ -222,6 +223,11 @@ namespace UI.Controls.Protocol
     /// <returns>Возвращает режим по шагам.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
     {
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() && showMessageModel.IsDeviceMessage)
+      {
+        showMessageModel.Message += "| Холостой режим";
+      }
+      
       if (!await GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)

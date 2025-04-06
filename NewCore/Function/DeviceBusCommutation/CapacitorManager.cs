@@ -1,8 +1,9 @@
 ﻿using NewCore.Base.Function.DBC;
 using NewCore.Communication;
-using NewCore.Device;
-using static Utilities.LoggerUtility;
+using NewCore.Function.Helpers;
+using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -30,20 +31,31 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> ConnectCapacitor(string number)
     {
+      bool result;
+      var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
+
       if (int.TryParse(number, out int num))
       {
         if (await GetIsIdleModeEnabled())
         {
-          return true;
+          result = true;
+        }
+        else
+        {
+          DeviceCommand command = new DeviceCommand(6, 2, num, 1);
+          await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+          result = true;
         }
 
-        DeviceCommand command = new DeviceCommand(6, 2, num, 1);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-        return true;
+        showMessageModel.Message = $"Подключение конденсатора {number} [{ShowMessageModel.SuccessMessage.Item1}]";
+      }
+      else
+      {
+        LogError("Неверный номер конденсатора!");
+        result = false;
       }
 
-      LogError("Неверный номер конденсатора!");
-      return false;
+      return result;
     }
 
     /// <summary>
@@ -53,6 +65,8 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> DisconnectCapacitor(string number)
     {
+      var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
+
       if (int.TryParse(number, out int num))
       {
         if (await GetIsIdleModeEnabled())

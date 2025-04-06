@@ -48,12 +48,21 @@ namespace Utilities.Models
     public bool CanBeDeleted { get; set; }
 
     /// <summary>
+    /// Показывает, связано ли сообщение с устройством.
+    /// True — сообщение от устройства или касается его работы; 
+    /// False — общее информационное сообщение.
+    /// </summary>
+    public bool IsDeviceMessage { get; set; }
+
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/>.
     /// </summary>
     public ShowMessageModel()
     {
       ExecutionError = false;
       CanBeDeleted = false;
+      IsDeviceMessage = false;
     }
 
     /// <summary>
