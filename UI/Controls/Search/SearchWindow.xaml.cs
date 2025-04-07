@@ -101,29 +101,26 @@ namespace UI.Controls.Search
       LogInformation("Изменен статус родительского окна");
     }
 
+    private const double ToolPanelHeight = 50; // Высота панели инструментов, которую нужно учесть сверху
+
     private void UpdatePosition()
     {
       if (_parentWindow == null || !this.IsLoaded)
         return;
 
+      // Получаем координаты родительского окна
+      Point parentTopLeft = _parentWindow.PointToScreen(new Point(0, 0));
+      double parentWidth = _parentWindow.ActualWidth;
+      double parentHeight = _parentWindow.ActualHeight;
+
+      // Получаем рабочую область экрана, на котором находится родительское окно
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
       Screen screen = Screen.FromHandle(parentWindowHandle);
       System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
 
-      Point parentRightTop;
-      if (_parentWindow.WindowState == WindowState.Maximized)
-      {
-        parentRightTop = new Point(workingArea.Right, workingArea.Top);
-        LogInformation($"Родительское окно максимизировано. Координаты правого верхнего угла родительского окна: X:{parentRightTop.X} Y:{parentRightTop.Y}");
-      }
-      else
-      {
-        parentRightTop = _parentWindow.PointToScreen(new Point(_parentWindow.ActualWidth - 15, 0));
-        LogInformation($"Родительское окно не максимизировано. Координаты правого верхнего угла родительского окна: X:{parentRightTop.X} Y:{parentRightTop.Y}");
-      }
-
-      double newLeft = parentRightTop.X - this.Width; // Правый край совпадает с правым краем родителя
-      double newTop = parentRightTop.Y + 60; // Отступ сверху
+      // Располагаем окно поиска по центру сверху относительно родительского окна
+      double newLeft = parentTopLeft.X + (parentWidth - this.Width) / 2;  // Центрируем по горизонтали относительно родителя
+      double newTop = parentTopLeft.Y + ToolPanelHeight; // Окно поиска привязываем к верхней части родителя
 
       // Ограничения по горизонтали
       newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
@@ -142,9 +139,9 @@ namespace UI.Controls.Search
 
       this.Left = newLeft;
       this.Top = newTop;
+
       LogInformation($"Координаты левого верхнего угла окна поиска: X:{newLeft} Y:{newTop}");
     }
-
 
     #endregion
 
