@@ -264,7 +264,9 @@ namespace UI.Components
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     public async Task ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea);
+      var fullText = textSearchManager.GetText(searchArea);
+      textSearchManager.InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
         var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();

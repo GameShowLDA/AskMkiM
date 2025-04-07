@@ -76,13 +76,17 @@ namespace UI.Components.MultiEditorMethods
       if (editor is TextEditorUI textEditor)
       {
         var result = searchResult.Value.FirstOrDefault();
-        var document = textEditor.Document; 
-        var text = document.Text; 
-        var endOffset = result.StartOffset + result.Length;
-        text = text.Substring(0, startOffset) + string.Empty + text.Substring(endOffset+2);
-        text = text.Substring(0, startOffset) + replaceText + text.Substring(endOffset + 3);
-        document.Text = text; 
-        textEditor.InvalidateVisual(); 
+
+        if (result != null)
+        {
+          var document = textEditor.Document;
+          var text = document.Text;
+          var endOffset = startOffset + result.Length;
+          var beforeText = text.Substring(0, startOffset);
+          var afterText = text.Substring(endOffset);
+          var newText = beforeText + replaceText + afterText;
+          document.Text = newText;
+        }
       }
     }
 

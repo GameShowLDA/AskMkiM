@@ -212,7 +212,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="wholeWord">Флаг, указывающий, нужно ли искать только целые слова.</param>
     /// <param name="caseWord">Флаг, указывающий, учитывать ли регистр.</param>
     /// <param name="searchArea">Параметры поиска: текущий документ или все документы.</param>
-    public async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea)
+    public async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea, bool showResults = true)
     {
       if (string.IsNullOrEmpty(searchText))
       {
@@ -228,7 +228,14 @@ namespace UI.Components.MultiEditorMethods
       List<Task> searchTasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(searchTasks);
 
-      HandleSearchResults(searchText);
+      if (showResults)
+      {
+        HandleSearchResults(searchText);
+      }
+      else
+      {
+        EventAggregator.RaiseRequestCloseProgress();
+      }
     }
 
     /// <summary>
@@ -354,7 +361,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="searchArea">Область поиска: 0 - текущий документ, 1 - все открытые документы, 2 - только активный документ.</param>
     /// <returns>Словарь, в котором ключ - элемент управления, а значение - текст из редактора.</returns>
-    private Dictionary<UserControl, string> GetText(int searchArea)
+    public Dictionary<UserControl, string> GetText(int searchArea)
     {
       Dictionary<UserControl, string> fullText = new Dictionary<UserControl, string>();
 
@@ -405,7 +412,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
     /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
-    private void InitializeSearch(Dictionary<UserControl, string> fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public void InitializeSearch(Dictionary<UserControl, string> fullText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       bool significantSearchParametersChanged = !string.Equals(_searchParameters, searchParameters)
         && !((string.Equals(_searchParameters, "FindPrevious") && string.Equals(searchParameters, "FindNext"))
