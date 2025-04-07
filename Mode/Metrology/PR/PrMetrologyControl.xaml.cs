@@ -126,6 +126,7 @@ namespace Mode.Metrology.PR
       /// <inheritdoc />
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
+        protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
         var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
@@ -139,10 +140,10 @@ namespace Mode.Metrology.PR
 
         await Task.Delay(1000);
         var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tРезультат измерения напряжения", message: $"{voltage} В.", messageColor: ShowMessageModel.SuccessMessage.Item2));
-        var result = voltage / (currentGenerial / 1000.0);
+        double fakeCurrent = GetInterpolatedCurrent(param, mint);
+        var result = voltage / (fakeCurrent / 1000.0);
 
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
+        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
         showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
@@ -175,8 +176,42 @@ namespace Mode.Metrology.PR
           ResistanceMax = 0,
           IntegerCurrent = 0,
           DecimalCurrent = 0,
+          DecimalCurrentFake = 0,
+          IntegerCurrentFake = 0,
           Voltage = VoltageSources.Supply12V
         };
+      }
+
+      public static double GetInterpolatedCurrent(double resistance, IPowerSourceModule module)
+      {
+        if (string.IsNullOrWhiteSpace(module.ResistanceCalibrationJson))
+          throw new InvalidOperationException("Calibration JSON пуст или отсутствует.");
+
+        // Десериализация
+        var ranges = JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(module.ResistanceCalibrationJson);
+
+        if (ranges == null || !ranges.Any())
+          throw new InvalidOperationException("Не удалось десериализовать калибровочные диапазоны.");
+
+        var range = ranges.FirstOrDefault(r =>
+            resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
+
+        if (range == null)
+        {
+          throw new ArgumentOutOfRangeException(nameof(resistance),
+              $"Сопротивление {resistance} Ом не входит ни в один из диапазонов.");
+        }
+
+        // Процент положения внутри диапазона
+        double percent = (resistance - range.ResistanceMin) /
+                         (range.ResistanceMax - range.ResistanceMin);
+
+        // Преобразование токов в double (миллиамперы)
+        double real = range.IntegerCurrent + range.DecimalCurrent / 1000.0;
+        double fake = range.IntegerCurrentFake + range.DecimalCurrentFake / 1000.0;
+
+        // Интерполяция
+        return real + (fake - real) * percent;
       }
 
     }

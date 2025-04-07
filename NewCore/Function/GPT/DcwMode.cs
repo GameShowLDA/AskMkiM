@@ -216,7 +216,7 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Запускает тест DCW и возвращает результат измерения тока.
     /// </summary>
-    /// <returns>Измеренный ток (в мА).</returns>
+    /// <returns>Измеренный ток (в мА).</returns> 
     public async Task<double> MeasureCurrentAsync()
     {
       LogInformation("Запуск измерений режима ПИ DCW");
@@ -231,9 +231,14 @@ namespace NewCore.Function.GPT
 
       await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
       query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
-      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-      var result = answerDevice.Split(',');
+      string[] result;
+      do
+      {
+        var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
+        result = answerDevice.Split(',');
+      } while (result.Count() <= 1);
+
       var measureResulte = result[3];
 
       LogInformation($"Результат измерения режима ПИ(DCW): {measureResulte}");

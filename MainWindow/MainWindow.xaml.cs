@@ -24,19 +24,19 @@ namespace MainWindowProgram
     /// Обработчик сообщений, передаёт текст в интерфейс через связанный блок информации.
     /// Используется для отображения логов, статусов, ошибок и другой информации в UI.
     /// </summary>
-    private readonly MessageHandler messageHandler = new(_infoBlock);
+    internal readonly MessageHandler messageHandler = new(_infoBlock);
 
     /// <summary>
     /// Статический UI-элемент, в который выводятся сообщения от системы.
     /// Используется как главный информационный блок в окне приложения.
     /// </summary>
-    private static TextBlock _infoBlock;
+    internal static TextBlock _infoBlock;
 
     /// <summary>
     /// Флаг, указывающий, заблокировано ли текущее состояние интерфейса.
     /// Используется для предотвращения повторных операций, если процесс уже запущен.
     /// </summary>
-    private bool isLocked = false;
+    internal bool IsLocked = false;
 
     /// <summary>
     /// Сервис управления USB-устройствами.
@@ -64,21 +64,13 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
-
-      _usbServices = new UsbServices();
-
-      var multiWindowService = new MultiWindowService(this.MultiWindow);
-      var metrologyService = new MetrologyService(multiWindowService);
-      var fileService = new FileService(multiWindowService, () => isLocked);
-      var testService = new TestService(multiWindowService);
-      var settingsService = new SettingsService(multiWindowService);
-      var adminService = new AdminServices(this, multiWindowService);
-      var windowService = new WindowService(this, mainMenu, ButtonsPanel, () => isLocked);
-
-      _viewModel = new MainWindowViewModel(metrologyService, fileService, testService, settingsService, adminService, windowService);
-      this.DataContext = _viewModel;
-
       this.Visibility = Visibility.Hidden;
+
+      (var vm, var usb) = AppServices.Build(this);
+      _viewModel = vm;
+      _usbServices = usb;
+
+      this.DataContext = _viewModel;
     }
 
     /// <summary>
@@ -86,59 +78,26 @@ namespace MainWindowProgram
     /// </summary>
     public async Task InitializeAsync()
     {
-      SystemEventsBinder systemEventsBinder = new SystemEventsBinder();
-      UiEventsBinder uiEventsBinder = new UiEventsBinder(this);
-      StateEventsBinder stateEventsBinder = new StateEventsBinder(this, _usbServices, App._consoleManager);
-
-      _applicationEvents = new ApplicationEventsBinder(systemEventsBinder, uiEventsBinder, stateEventsBinder);
-      _applicationEvents.BindAll();
-
-      await Task.Run(async () =>
-      {
-        try
-        {
-          await Initialize();
-        }
-        catch (InvalidOperationException exception)
-        {
-          LogError($"Ошибка загрузки темы программы: {exception}");
-          return;
-        }
-        catch (Exception ex)
-        {
-          string errorDetails = GetErrorDetails(ex);
-          LogError($"Ошибка выполнения программы: {errorDetails}");
-          MessageBox.Show($"Ошибка: {errorDetails}");
-        }
-      });
-
-      SettingsGUI();
+      var lifecycle = new ApplicationLifecycleManager();
+      lifecycle.Initialize(this, _usbServices, App._consoleManager);
 
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
 
+      try
+      {
+        await Task.Run(() => Initialize());
+      }
+      catch (InvalidOperationException ex)
+      {
+        MessageBox.Show($"Ошибка темы: {ex.Message}");
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Ошибка приложения: {ex.Message}");
+      }
+
+      GuiInitializer.Apply(this);
       _searchWindow = new SearchWindow();
-    }
-
-    /// <summary>
-    /// Настраивает визуальное оформление окна и инициализирует информационный блок.
-    /// Скрывает панель администратора и добавляет обработку команды активации пункта меню.
-    /// </summary>
-    private void SettingsGUI()
-    {
-      _infoBlock = InfoBlock;
-      this.Admin.Visibility = Visibility.Collapsed;
-      this.CommandBindings.Add(new CommandBinding(ActivateMenuItemCommand, ExecuteActivateMenuItem));
-      LogInformation("Главное окно инициализировано.");
-    }
-
-    /// <summary>
-    /// Возвращает подробное описание ошибки для отображения пользователю.
-    /// </summary>
-    /// <param name="ex">Исключение, вызвавшее ошибку.</param>
-    /// <returns>Строка с описанием ошибки.</returns>
-    private string GetErrorDetails(Exception ex)
-    {
-      return $"{ex.Message}";
     }
   }
 }
