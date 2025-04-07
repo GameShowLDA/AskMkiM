@@ -16,6 +16,7 @@ using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using TextBox = System.Windows.Controls.TextBox;
+using static Utilities.LoggerUtility;
 
 namespace UI.Controls.Search
 {
@@ -58,6 +59,7 @@ namespace UI.Controls.Search
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
       this.Focus();
       SearchTextBox.Focus();
+      LogInformation("Окно поиска инициализировано");
     }
 
 
@@ -79,6 +81,7 @@ namespace UI.Controls.Search
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
+      LogInformation("Окно поиска загружено.");
     }
 
     #region Отслеживание родительского окна
@@ -86,44 +89,60 @@ namespace UI.Controls.Search
     private void ParentWindow_LocationChanged(object sender, EventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменено положение родительского окна");
     }
 
     private void ParentWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменен размер родительского окна");
     }
     private void ParentWindow_StateChanged(object sender, EventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменен статус родительского окна");
     }
+
+    private const double ToolPanelHeight = 50; // Высота панели инструментов, которую нужно учесть сверху
 
     private void UpdatePosition()
     {
       if (_parentWindow == null || !this.IsLoaded)
         return;
 
+      // Получаем координаты родительского окна
+      Point parentTopLeft = _parentWindow.PointToScreen(new Point(0, 0));
+      double parentWidth = _parentWindow.ActualWidth;
+      double parentHeight = _parentWindow.ActualHeight;
+
+      // Получаем рабочую область экрана, на котором находится родительское окно
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
       Screen screen = Screen.FromHandle(parentWindowHandle);
       System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
 
-      Point parentRightTop;
-      if (_parentWindow.WindowState == WindowState.Maximized)
-      {
-        parentRightTop = new Point(workingArea.Right, workingArea.Top);
-      }
-      else
-      {
-        parentRightTop = _parentWindow.PointToScreen(new Point(_parentWindow.ActualWidth - 15, 0));
-      }
+      // Располагаем окно поиска по центру сверху относительно родительского окна
+      double newLeft = parentTopLeft.X + (parentWidth - this.Width) / 2;  // Центрируем по горизонтали относительно родителя
+      double newTop = parentTopLeft.Y + ToolPanelHeight; // Окно поиска привязываем к верхней части родителя
 
-      double newLeft = parentRightTop.X - this.Width; // Правый край совпадает с правым краем родителя
-      double newTop = parentRightTop.Y + 60; // Отступ сверху
+      // Ограничения по горизонтали
+      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
+      // Ограничения по вертикали
+      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height));
 
-      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width)); // Ограничение по горизонтали
-      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height)); // Ограничение по вертикали
+      // Убедитесь, что окно не выходит за пределы экрана
+      if (newLeft < workingArea.Left)
+      {
+        newLeft = workingArea.Left;  // Устанавливаем на левый край экрана
+      }
+      if (newTop < workingArea.Top)
+      {
+        newTop = workingArea.Top;  // Устанавливаем на верхний край экрана
+      }
 
       this.Left = newLeft;
       this.Top = newTop;
+
+      LogInformation($"Координаты левого верхнего угла окна поиска: X:{newLeft} Y:{newTop}");
     }
 
     #endregion

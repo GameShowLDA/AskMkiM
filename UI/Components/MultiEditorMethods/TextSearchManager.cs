@@ -105,7 +105,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (searchArea == 2)
       {
-        searchArea = 0; 
+        searchArea = 0;
       }
 
       var fullText = GetText(searchArea);
@@ -261,14 +261,14 @@ namespace UI.Components.MultiEditorMethods
       {
         var lastFoundResultsDictionary = foundInOpenedFiles.Values.LastOrDefault();
         if (lastFoundResultsDictionary?.Count > 0)
-        {          
+        {
           DisplaySearchResults(searchText, _caseWord, foundInOpenedFiles);
+          EventAggregator.RaiseRequestCloseProgress();
         }
-
-        EventAggregator.RaiseRequestCloseProgress();
       }
       else
       {
+        EventAggregator.RaiseRequestCloseProgress();
         MessageBox.Show("Текст не найден в открытых документах.");
         LogInformation("Текст не найден в открытых документах.");
       }
@@ -650,7 +650,7 @@ namespace UI.Components.MultiEditorMethods
 
         GoToOccurrence(currentIndex);
       }
-      else 
+      else
       {
         MessageBox.Show($"Текст {_searchText} не найден", "Ошибка");
         return;
@@ -903,7 +903,7 @@ namespace UI.Components.MultiEditorMethods
     public TextSearchManager(FileManager fileManager, MultiEditorControl multiEditorControl)
     {
       this.fileManager = fileManager;
-      this.multiEditorControl = multiEditorControl;      
+      this.multiEditorControl = multiEditorControl;
     }
 
     /// <summary>
@@ -912,7 +912,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="fileManager">Экземпляр класса <see cref="FileManager"/>.</param>
     /// <param name="multiEditorControl">Экземпляр <see cref="MultiEditorControl"/> для взаимодействия с редактором.</param>
     /// <param name="searchText">Искомый текст.</param>
-    public TextSearchManager(FileManager fileManager, MultiEditorControl multiEditorControl, string searchText) 
+    public TextSearchManager(FileManager fileManager, MultiEditorControl multiEditorControl, string searchText)
       : this(fileManager, multiEditorControl)
     {
       this._searchText = searchText;

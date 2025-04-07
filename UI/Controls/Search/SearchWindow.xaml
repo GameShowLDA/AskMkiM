@@ -9,12 +9,12 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
-        AllowsTransparency="False"
+        AllowsTransparency="True"
         SizeChanged="Window_SizeChanged"
         ShowInTaskbar="False"
-        Background="{StaticResource SecondarySolidColorBrush}"
+        Background="Transparent"
         >
-
+    <Border  Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="0,0,15,15">
       <Grid x:Name="MainGrid" >
         
         <Grid.ColumnDefinitions>
@@ -195,6 +195,7 @@
             </ComboBox>
         </Grid>
     </Grid>
+    </Border>
 </Window>
     
     
