@@ -1,4 +1,5 @@
-﻿using Mode.Base.SearchDevices;
+﻿using Core.Communication;
+using Mode.Base.SearchDevices;
 using Mode.Models;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UI.Components.Invoke;
+using Utilities.Models;
 using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
 
@@ -35,8 +37,8 @@ namespace Mode.TestSuite.CrossTestMkr
     private InvokeBorder rangeBorder = new InvokeBorder();
     private InvokeTextBox rangeData = new InvokeTextBox();
 
-    private InvokeBorder delayBorder = new InvokeBorder();
-    private InvokeTextBox delayData = new InvokeTextBox();
+    //private InvokeBorder delayBorder = new InvokeBorder();
+    //private InvokeTextBox delayData = new InvokeTextBox();
 
     public CrossTestMkrControl()
     {
@@ -63,7 +65,7 @@ namespace Mode.TestSuite.CrossTestMkr
 
         // 2. Очищаем предыдущий контент
         await ProtocolSelfCheckControl.ClearContent();
-
+                 
         // 3. Создаём StackPanel (можно использовать InputControlSettings при желании)
         //    Или вручную:
         StackPanel contentStack = new StackPanel();
@@ -184,24 +186,24 @@ namespace Mode.TestSuite.CrossTestMkr
       contentStack.Children.Add(rangeBorder);
 
 
-      // Поле "Задержка измерения ,мсек."
-      delayBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
-      Grid delayGrid = new Grid();
-      delayGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-      delayGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+      //// Поле "Задержка измерения ,мсек."
+      //delayBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
+      //Grid delayGrid = new Grid();
+      //delayGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+      //delayGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-      // Настраиваем TextBox
-      delayData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
-      delayData.Text = "Задержка измерения ,мсек.";
-      InputControlSettings.DefaultGotAndLostEvent(delayData, "Задержка измерения ,мсек.");
-      delayData.PreviewTextInput += DelayData_PreviewTextInput;
+      //// Настраиваем TextBox
+      //delayData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
+      //delayData.Text = "Задержка измерения ,мсек.";
+      //InputControlSettings.DefaultGotAndLostEvent(delayData, "Задержка измерения ,мсек.");
+      //delayData.PreviewTextInput += DelayData_PreviewTextInput;
 
-      Grid.SetColumn(delayData, 0);
-      delayGrid.Children.Add(delayData);
+      //Grid.SetColumn(delayData, 0);
+      //delayGrid.Children.Add(delayData);
 
-      // Упаковываем в Border
-      delayBorder.Child = delayGrid;
-      contentStack.Children.Add(delayBorder);
+      //// Упаковываем в Border
+      //delayBorder.Child = delayGrid;
+      //contentStack.Children.Add(delayBorder);
 
     }
 
@@ -251,23 +253,38 @@ namespace Mode.TestSuite.CrossTestMkr
     {
       LogInformation("Запуск теста CrossTestMKR...");
 
-      // Здесь можно считать значения:
-      // string tested = testedNumberData.Text;
-      // string tester = testerNumberData.Text;
-      // string range = rangeData.Text;
-      // ... и провести какую-то проверку / логику
+      List<int> points = ParseRange(rangeData.Text);
 
-      // Возвращаем true, если всё успешно
+      await InitializeModule(testedNumberData.Text);
+      await InitializeModule(testerNumberData.Text);
+
+      await MeterEnableAsync(testerNumberData.Text);
+
+      await RunPart1(testedNumberData.Text, testerNumberData.Text, points, cancellationToken);
+      await RunPart2(testedNumberData.Text, testerNumberData.Text, points, cancellationToken);
+      await RunPart3(testedNumberData.Text, testerNumberData.Text, points, cancellationToken);
+
+      await MeterDisableAsync(testerNumberData.Text);
     }
 
     /// <summary>
-    /// Если нужно кнопка "Стоп" – её вызов.
+    /// Принудительно останавливает выполнение теста CrossTestMKR:
+    ///  • выключает измеритель;
+    ///  • сбрасывает оба модуля;
+    ///  • выполняет общий Reset всей системы.
     /// </summary>
     private async Task Stop(CancellationToken cancellationToken)
     {
-      LogInformation("Остановка теста CrossTestMKR");
-      // Если ProtocolSelfCheckControl.ShowOnlyStartButton() – кнопки стоп нет.
-      // Но если ShowStartStopButtons(), тогда Stop сработает.
+      // 1. Отключаем измеритель, если он был задействован
+      await MeterDisableAsync(testerNumberData.Text);
+
+      // 2. Сбрасываем модули в исходное состояние
+      await ResetModule(testedNumberData.Text);
+      await ResetModule(testerNumberData.Text);
+
+      // 3. Общий сброс системы (как в NodeMethodControl)
+      await CommunicationManager.ResetAllSystem();
     }
+
   }
 }
