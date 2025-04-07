@@ -105,6 +105,8 @@ namespace ConsoleUtilities.Commands
           ResistanceMax = range.ResistanceMax,
           IntegerCurrent = PromptInt("Введите целую часть тока (мА): "),
           DecimalCurrent = PromptInt("Введите дробную часть тока (мА): "),
+          IntegerCurrentFake = PromptInt("Введите дробную часть фейкового тока (мА): "),
+          DecimalCurrentFake = PromptInt("Введите дробную часть фейкового тока (мА): "),
         };
         var voltage = PromptVoltageSource();
 
