@@ -16,6 +16,7 @@ using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using TextBox = System.Windows.Controls.TextBox;
+using static Utilities.LoggerUtility;
 
 namespace UI.Controls.Search
 {
@@ -57,6 +58,7 @@ namespace UI.Controls.Search
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
       this.Focus();
       SearchTextBox.Focus();
+      LogInformation("Окно поиска инициализировано");
     }
 
     /// <summary>
@@ -77,6 +79,7 @@ namespace UI.Controls.Search
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
+      LogInformation("Окно поиска загружено.");
     }
 
     #region Отслеживание родительского окна
@@ -84,15 +87,18 @@ namespace UI.Controls.Search
     private void ParentWindow_LocationChanged(object sender, EventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменено положение родительского окна");
     }
 
     private void ParentWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменен размер родительского окна");
     }
     private void ParentWindow_StateChanged(object sender, EventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменен статус родительского окна");
     }
 
     private void UpdatePosition()
@@ -108,10 +114,12 @@ namespace UI.Controls.Search
       if (_parentWindow.WindowState == WindowState.Maximized)
       {
         parentRightTop = new Point(workingArea.Right, workingArea.Top);
+        LogInformation($"Родительское окно максимизировано. Координаты правого верхнего угла родительского окна: X:{parentRightTop.X} Y:{parentRightTop.Y}");
       }
       else
       {
         parentRightTop = _parentWindow.PointToScreen(new Point(_parentWindow.ActualWidth - 15, 0));
+        LogInformation($"Родительское окно не максимизировано. Координаты правого верхнего угла родительского окна: X:{parentRightTop.X} Y:{parentRightTop.Y}");
       }
 
       double newLeft = parentRightTop.X - this.Width; // Правый край совпадает с правым краем родителя
@@ -122,6 +130,7 @@ namespace UI.Controls.Search
 
       this.Left = newLeft;
       this.Top = newTop;
+      LogInformation($"Координаты левого верхнего угла окна поиска: X:{newLeft} Y:{newTop}");
     }
 
     #endregion
