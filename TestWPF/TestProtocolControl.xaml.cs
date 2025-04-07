@@ -34,15 +34,7 @@ namespace TestWPF
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>

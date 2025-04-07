@@ -39,27 +39,18 @@ namespace Mode.Metrology.PR
     /// </summary>
     public void InitializeSettings()
     {
-      try
-      {
-        ProtocolUI.SetSettings(
-          this,
-          StartDelegate: ExecuteMeasurementProcess,
-          true,
-          ReturnDelegate: async (CancellationToken token) =>
-          {
-            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          },
-          StopDelegate: async (CancellationToken token) =>
-          {
-            await testMeasurement.FinalizeMeasurement();
-          });
-
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        ReturnDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
+        });
     }
 
     /// <summary>

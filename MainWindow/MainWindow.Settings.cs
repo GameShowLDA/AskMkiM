@@ -58,13 +58,7 @@ namespace MainWindowProgram
       }
       catch (Exception ex)
       {
-        var stackTrace = new System.Diagnostics.StackTrace();
-        var callingFrame = stackTrace.GetFrame(1);
-        var method = callingFrame.GetMethod();
-        var className = method.DeclaringType.FullName;
-        var methodName = method.Name;
-
-        LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
+        LogException(ex);
       }
 
       ErrorMessageEvent += messageHandler.SetErrorMessage;

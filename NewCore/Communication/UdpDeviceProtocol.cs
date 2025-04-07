@@ -78,45 +78,13 @@ namespace NewCore.Communication
       }
       catch (Exception ex)
       {
-        return LogError($"[{_device.Name}] Ошибка при отправке/приёме: {ex.Message}");
+        LogException($"[{_device.Name}] Ошибка при отправке/приёме", ex);
+        var message = $"[{_device.Name}] Ошибка при отправке/приёме: {ex.Message}";
+        return message;
+
       }
     }
 
-    /// <summary>
-    /// Получает ответ от устройства по UDP.
-    /// </summary>
-    /// <param name="lastOctet">Последний октет IP-адреса, используется для вычисления порта.</param>
-    /// <param name="timeout">Таймаут ожидания, мс.</param>
-    /// <returns>Ответ от устройства.</returns>
-    private async Task<string> ReceiveResponseAsync(int lastOctet, int timeout, string command)
-    {
-      int inputPort = BaseInputPort + lastOctet;
-      LogInformation($"[{_device.Name}] Чтение ответа команды \"{command}\" с порта {inputPort}");
-
-      using (UdpClient receiver = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort)))
-      {
-        try
-        {
-          var receiveTask = receiver.ReceiveAsync();
-          var timeoutTask = Task.Delay(timeout);
-
-          if (await Task.WhenAny(receiveTask, timeoutTask) == receiveTask)
-          {
-            string response = Encoding.UTF8.GetString((await receiveTask).Buffer);
-            LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
-            return response;
-          }
-          else
-          {
-            return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
-          }
-        }
-        catch (Exception ex)
-        {
-          return LogError($"[{_device.Name}] Ошибка при получении ответа: {ex.Message}");
-        }
-      }
-    }
 
     /// <summary>
     /// Получает последний октет IP-адреса.

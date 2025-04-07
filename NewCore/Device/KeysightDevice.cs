@@ -7,6 +7,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
 using NewCore.Function.Keysight3466new;
+using NewCore.FunctionAdapters.Keysight3466new;
 
 namespace NewCore.Device
 {
@@ -79,9 +80,9 @@ namespace NewCore.Device
       IsConnected = false;
 
       CapacitanceManager = new CapacitanceMeasurement(this);
-      ConnectableManager = new KeysightConnection(this);
+      ConnectableManager = new KeysightConnectionAdapter(this);
       ContinuityManager = new ContinuityMeasurement(this);
-      ResistanceManager = new ResistanceMeasurement(this);
+      ResistanceManager = new ResistanceMeasurementAdapter(this);
       AcVoltageManager = new AcVoltageMeasurement(this);
       DcVoltageManager = new DcVoltageMeasurement(this);
       DeviceProtocol = new KeysightDeviceProtocol(this, Port);

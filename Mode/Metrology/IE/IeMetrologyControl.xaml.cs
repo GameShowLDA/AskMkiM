@@ -39,21 +39,15 @@ namespace Mode.Metrology.IE
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(
-          this,
-          StartDelegate: ExecuteMeasurementProcess,
-          true,
-          ReturnDelegate: async (CancellationToken token) => {
-            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          });
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии ИЕ в методе {methodName}: {ex.Message}");
-      }
+
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        ReturnDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        });
     }
 
     /// <summary>

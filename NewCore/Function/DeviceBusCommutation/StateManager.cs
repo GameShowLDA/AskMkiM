@@ -39,7 +39,7 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (await GetIsIdleModeEnabled())
       {
-        return (true, "Включен холостой режим");
+        return (true, string.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);

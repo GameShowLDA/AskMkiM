@@ -25,13 +25,13 @@ namespace MainWindowProgram.Events
     static internal void App_CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
       Exception ex = (Exception)e.ExceptionObject;
-      LogError("Необработанное исключение в AppDomain: " + ex.Message);
+      LogException("Необработанное исключение в AppDomain", ex);
     }
 
     private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
     {
       Exception ex = e.Exception;
-      LogError("Необработанное исключение в Dispatcher: " + ex.Message);
+      LogException("Необработанное исключение в Dispatcher", ex);
       e.Handled = true;
     }
   }

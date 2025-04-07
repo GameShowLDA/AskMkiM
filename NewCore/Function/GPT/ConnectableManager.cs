@@ -70,12 +70,12 @@ namespace NewCore.Function.GPT
       }
       catch (UnauthorizedAccessException ex)
       {
-        LogError($"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}: {ex.Message}");
+        LogException($"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}", ex);
         return (false, $"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}: {ex.Message}");
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при подключении к устройству {_gptModel.Name}: {ex.Message}");
+        LogException($"Ошибка при подключении к устройству {_gptModel.Name}", ex);
         return (false, $"Ошибка при подключении к устройству {_gptModel.Name}: {ex.Message}");
         throw;
       }
@@ -105,7 +105,7 @@ namespace NewCore.Function.GPT
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при отключении от устройства {_gptModel.Name}: {ex.Message}");
+        LogException($"Ошибка при отключении от устройства {_gptModel.Name}", ex);
       }
 
       return true;
@@ -154,12 +154,12 @@ namespace NewCore.Function.GPT
       }
       catch (UnauthorizedAccessException ex)
       {
-        LogError($"Ошибка доступа к порту: {ex.Message}");
+        LogException($"Ошибка доступа к порту", ex);
         return (false, $"Ошибка доступа к порту: {ex.Message}");
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при проверке соединения: {ex.Message}");
+        LogException($"Ошибка при проверке соединения", ex);
         return (false, $"Ошибка при проверке соединения: {ex.Message}");
       }
     }

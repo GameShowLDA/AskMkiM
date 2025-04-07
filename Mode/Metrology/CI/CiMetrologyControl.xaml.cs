@@ -38,20 +38,14 @@ namespace Mode.Metrology.CI
     /// </summary>
     public void InitializeSettings()
     {
-      try
-      {
-        ProtocolUI.SetSettings(
-          this, 
-          StartDelegate: ExecuteMeasurementProcess, 
-          true,
-          ReturnDelegate: async (CancellationToken token) => {await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          });
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        ReturnDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        });
     }
 
     /// <summary>

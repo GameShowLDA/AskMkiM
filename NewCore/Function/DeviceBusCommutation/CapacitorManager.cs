@@ -31,31 +31,20 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> ConnectCapacitor(string number)
     {
-      bool result;
-      var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
-
       if (int.TryParse(number, out int num))
       {
         if (await GetIsIdleModeEnabled())
         {
-          result = true;
-        }
-        else
-        {
-          DeviceCommand command = new DeviceCommand(6, 2, num, 1);
-          await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-          result = true;
+          return true;
         }
 
-        showMessageModel.Message = $"Подключение конденсатора {number} [{ShowMessageModel.SuccessMessage.Item1}]";
-      }
-      else
-      {
-        LogError("Неверный номер конденсатора!");
-        result = false;
+        DeviceCommand command = new DeviceCommand(6, 2, num, 1);
+        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+        return true;
       }
 
-      return result;
+      LogError("Неверный номер конденсатора!");
+      return false;
     }
 
     /// <summary>

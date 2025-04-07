@@ -8,6 +8,7 @@ using System.Windows.Media;
 using AppConfiguration.Base;
 using AppConfiguration.Interface;
 using NewCore.Base.Device;
+using Utilities;
 using Utilities.Models;
 using static AppConfiguration.Protocol.ProtocolConfig;
 using static Utilities.DelegateManager;
@@ -91,15 +92,23 @@ namespace UI.Controls.Protocol
     /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
     public void SetSettings(UIElement MainWindow, StartDelegate StartDelegate, bool isRepeatEnabled, StopDelegate StopDelegate = null, ReturnDelegate ReturnDelegate = null, PreActionDelegate preActionDelegate = null)
     {
-      _mainWindow = MainWindow;
-      _stopDelegate = StopDelegate;
-      _startDelegate = StartDelegate;
-      _returnDelegate = ReturnDelegate;
-      _preActionDelegate = preActionDelegate;
-
-      if (ReturnDelegate != null)
+      try
       {
-        _isRepeatEnabled = true;
+        _mainWindow = MainWindow;
+        _stopDelegate = StopDelegate;
+        _startDelegate = StartDelegate;
+        _returnDelegate = ReturnDelegate;
+        _preActionDelegate = preActionDelegate;
+
+        if (ReturnDelegate != null)
+        {
+          _isRepeatEnabled = true;
+        }
+      }
+      catch (Exception ex)
+      {
+        LoggerUtility.LogException("Ошибка загрузки элемента", ex);
+        throw;
       }
     }
 
@@ -222,12 +231,7 @@ namespace UI.Controls.Protocol
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
-    {
-      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() && showMessageModel.IsDeviceMessage)
-      {
-        showMessageModel.Message += "| Холостой режим";
-      }
-      
+    {   
       if (!await GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
@@ -238,7 +242,7 @@ namespace UI.Controls.Protocol
         LastModelMeassage = showMessageModel;
       }
 
-      await protocolTextBox.AppendLineAsync(showMessageModel.Header, showMessageModel.Message, showMessageModel.HeaderColor, showMessageModel.MessageColor);
+      await protocolTextBox.AppendLineAsync(showMessageModel);
 
       if (ActionExecutor.IsPaused)
       {
@@ -281,8 +285,11 @@ namespace UI.Controls.Protocol
       PrintDialog printDialog = new PrintDialog();
       if (printDialog.ShowDialog() == true)
       {
-        FlowDocument document = new FlowDocument();
-        document.PagePadding = new Thickness(50);
+        FlowDocument document = new FlowDocument
+        {
+          PagePadding = new Thickness(50),
+          ColumnWidth = double.PositiveInfinity,
+        };
 
         TextRange range = new TextRange(ProtocolTextBox.Document.ContentStart, ProtocolTextBox.Document.ContentEnd);
         using (MemoryStream stream = new MemoryStream())
@@ -292,6 +299,9 @@ namespace UI.Controls.Protocol
 
           TextRange documentRange = new TextRange(document.ContentStart, document.ContentEnd);
           documentRange.Load(stream, DataFormats.Xaml);
+
+          documentRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
+          documentRange.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
         }
 
         IDocumentPaginatorSource source = document;

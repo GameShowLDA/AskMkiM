@@ -352,7 +352,7 @@ namespace NewCore.Function.GPT
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при чтении конфигурации IR: {ex.Message}");
+        LogException($"Ошибка при чтении конфигурации IR", ex);
         throw;
       }
     }

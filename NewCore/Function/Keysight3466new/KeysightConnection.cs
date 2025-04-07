@@ -49,7 +49,7 @@ namespace NewCore.Function.Keysight3466new
         }
       }
 
-      return (false, "Нет подключения к маультиметру Keysight.");
+      return (false, "Нет подключения к мультиметру Keysight.");
     }
 
     /// <inheritdoc />
@@ -57,7 +57,7 @@ namespace NewCore.Function.Keysight3466new
     {
       if (await GetIsIdleModeEnabled())
       {
-        return (true, "Холостой режим");
+        return (true, string.Empty);
       }
 
       if (_device.IP == null)

@@ -101,13 +101,13 @@ namespace MainWindowProgram
         }
         catch (InvalidOperationException exception)
         {
-          LogError($"Ошибка загрузки темы программы: {exception}");
+          LogException($"Ошибка загрузки темы программы", exception);
           return;
         }
         catch (Exception ex)
         {
           string errorDetails = GetErrorDetails(ex);
-          LogError($"Ошибка выполнения программы: {errorDetails}");
+          LogException($"Ошибка выполнения программы", ex);
           MessageBox.Show($"Ошибка: {errorDetails}");
         }
       });

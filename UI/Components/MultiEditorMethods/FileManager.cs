@@ -62,7 +62,7 @@ namespace UI.Components.MultiEditorMethods
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
-        LogError($"Ошибка при чтении файла: {ex.Message}");
+        LogException($"Ошибка при чтении файла", ex);
       }
     }
 
