@@ -125,13 +125,26 @@ namespace UI.Controls.Search
       double newLeft = parentRightTop.X - this.Width; // Правый край совпадает с правым краем родителя
       double newTop = parentRightTop.Y + 60; // Отступ сверху
 
-      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width)); // Ограничение по горизонтали
-      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height)); // Ограничение по вертикали
+      // Ограничения по горизонтали
+      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
+      // Ограничения по вертикали
+      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height));
+
+      // Убедитесь, что окно не выходит за пределы экрана
+      if (newLeft < workingArea.Left)
+      {
+        newLeft = workingArea.Left;  // Устанавливаем на левый край экрана
+      }
+      if (newTop < workingArea.Top)
+      {
+        newTop = workingArea.Top;  // Устанавливаем на верхний край экрана
+      }
 
       this.Left = newLeft;
       this.Top = newTop;
       LogInformation($"Координаты левого верхнего угла окна поиска: X:{newLeft} Y:{newTop}");
     }
+
 
     #endregion
 
