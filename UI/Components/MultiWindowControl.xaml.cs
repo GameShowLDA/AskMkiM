@@ -313,6 +313,7 @@ namespace UI.Components
       }
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
+      CloseSearchResults();
       MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
