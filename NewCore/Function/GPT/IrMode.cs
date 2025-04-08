@@ -131,13 +131,13 @@ namespace NewCore.Function.GPT
     /// Измерение сопротивления с преобразованием результата в МОм.
     /// </summary>
     /// <returns>Результат измерения в МОм.</returns>
-    public async Task<double> MeasureResistanceAsync()
+    public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1)
     {
       LogInformation("Запуск измерений режима СИ");
 
       if (await GetIsIdleModeEnabled())
       {
-        return 0;
+        return param;
       }
 
       var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";

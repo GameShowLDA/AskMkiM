@@ -25,8 +25,9 @@ namespace NewCore.Base.Function.Breakdown
     /// <summary>
     /// Измерение сопротивления с преобразованием результата в МОм.
     /// </summary>
+    /// <param name="param">Ожидаемое значение.</param>
     /// <returns>Результат измерения в МОм.</returns>
-    Task<double> MeasureResistanceAsync();
+    Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1);
 
     /// <summary>
     /// Возвращает список напряжений для заданного сопротивления.

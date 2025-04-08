@@ -4,6 +4,7 @@ using NewCore.Base.Function.Breakdown;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
 using NewCore.Function.GPT;
+using NewCore.FunctionAdapters.GPT;
 
 namespace NewCore.Device
 {
@@ -25,11 +26,11 @@ namespace NewCore.Device
 
       DeviceType = DeviceEnum.DeviceType.BreakdownTester;
 
-      AcwManger = new AcwMode(this);
-      DcwManger = new DcwMode(this);
-      IrManger = new IrMode(this);
-      SystemManger = new SystemSettings(this);
-      ConnectableManager = new ConnectableManager(this);
+      AcwManger = new AcwModeAdapter(this);
+      DcwManger = new DcwModeAdapter(this);
+      IrManger = new IrModeAdapter(this);
+      SystemManger = new SystemSettingsAdapter(this);
+      ConnectableManager = new ConnectableManagerAdapter(this);
     }
 
     /// <inheritdoc />

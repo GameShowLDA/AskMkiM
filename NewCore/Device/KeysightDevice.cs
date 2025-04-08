@@ -79,12 +79,12 @@ namespace NewCore.Device
       DeviceType = DeviceEnum.DeviceType.FastMeter;
       IsConnected = false;
 
-      CapacitanceManager = new CapacitanceMeasurement(this);
+      CapacitanceManager = new CapacitanceMeasurementAdapter(this);
       ConnectableManager = new KeysightConnectionAdapter(this);
-      ContinuityManager = new ContinuityMeasurement(this);
+      ContinuityManager = new ContinuityMeasurementAdapter(this);
       ResistanceManager = new ResistanceMeasurementAdapter(this);
-      AcVoltageManager = new AcVoltageMeasurement(this);
-      DcVoltageManager = new DcVoltageMeasurement(this);
+      AcVoltageManager = new AcVoltageMeasurementAdapter(this);
+      DcVoltageManager = new DcVoltageMeasurementAdapter(this);
       DeviceProtocol = new KeysightDeviceProtocol(this, Port);
     }
   }

@@ -79,7 +79,12 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.DcwManger.SetModeAsync();
-        await breakDown.DcwManger.SetVoltageAsync(dataModel.Voltage);
+
+        if (!(await breakDown.DcwManger.SetVoltageAsync(dataModel.Voltage)).Item1)
+        {
+          throw new Exception("Не удалость выставить напряжение на ППУ.");
+        }
+
         await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.DcwManger.SetHighCurrentLimitAsync(dataModel.Param);

@@ -88,6 +88,7 @@ namespace Mode.Metrology.CI
       /// <inheritdoc />
       public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
+        await base.ConfigureMeter(metrologicalModeRole, dataModel);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.IrManger.SetModeAsync();
@@ -104,13 +105,7 @@ namespace Mode.Metrology.CI
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI);
 
-        var result = await meterDevice.IrManger.MeasureResistanceAsync();
-
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
-        showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
-        showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-        await protocolUI.ShowMessageAsync(showMessageModel);
+        var result = await meterDevice.IrManger.MeasureResistanceAsync(param, firstNorm, lastNorm);
       }
 
       public override async Task FinalizeMeasurement()

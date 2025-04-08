@@ -79,7 +79,6 @@ namespace Utilities.Models
           MessageColor = brush.Color;
         }
       });
-
     }
 
     /// <summary>
