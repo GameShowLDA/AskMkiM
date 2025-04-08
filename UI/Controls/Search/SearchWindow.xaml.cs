@@ -17,6 +17,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using TextBox = System.Windows.Controls.TextBox;
 using static Utilities.LoggerUtility;
+using System.Windows.Media.Animation;
 
 namespace UI.Controls.Search
 {
@@ -82,6 +83,8 @@ namespace UI.Controls.Search
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
+      var showAnimation = (Storyboard)Resources["ShowAnimation"];
+      showAnimation.Begin(this);
       LogInformation("Окно поиска загружено.");
     }
 
@@ -176,16 +179,28 @@ namespace UI.Controls.Search
     }
     public void ShowWindow()
     {
-      this.Activate();
+      //this.Activate();
       this.Focus();
       this.Show();
+      this.Activated += (sender, args) =>
+      {
+        var showAnimation = (Storyboard)Resources["ShowAnimation"];
+        showAnimation.Begin(this);
+      };
     }
     public void CloseDialog()
     {
       ClearHighlights?.Invoke();
       EventAggregator.RaiseSearchWindowClosing(false);
       _allowClose = true;
-      this.Hide();
+
+      var hideAnimation = (Storyboard)Resources["HideAnimation"];
+      hideAnimation.Begin(this);
+
+      hideAnimation.Completed += (s, e) =>
+      {
+        this.Hide();  // Скрываем окно после анимации
+      };
     }
 
     /// <summary>
