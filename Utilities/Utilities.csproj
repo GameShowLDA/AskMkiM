@@ -13,6 +13,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="Help\AppHelp\index.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\style.css">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\TextEditor\description.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\TextEditor\hotkeys.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NLog" Version="5.4.0" />
 		<PackageReference Include="NLog.Config" Version="4.7.15" />

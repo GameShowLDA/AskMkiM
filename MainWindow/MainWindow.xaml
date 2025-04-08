@@ -107,7 +107,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" Height="40" FontSize="15" Background="Transparent" 
+            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" Height="40" FontSize="18" Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0" Padding="0,0,40,0">
 
                 <MenuItem Header="Файл" Name="File" Cursor="Hand" BorderBrush="#FF303843" OpacityMask="#FF303843">
