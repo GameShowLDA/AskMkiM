@@ -54,6 +54,7 @@ namespace UI.Controls.Search
       this.Loaded += Window_Loaded;
       EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
       EventAggregator.ReplaceWordButtonPressed += OnReplaceWordButtonPressed;
+      EventAggregator.ReplaceAllWordsButtonPressed += OnReplaceAllWordsButtonPressed;
       EventAggregator.CloseSearchWindow += OnCloseSearchWindowRequested;
       //EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
@@ -378,6 +379,21 @@ namespace UI.Controls.Search
       }
 
       EventAggregator.RaiseReplaceText(replaceText, searchText, wholeWord, caseWord, searchArea, "FindNext");
+    }
+
+    private void OnReplaceAllWordsButtonPressed()
+    {
+      var searchText = SearchTextBox.Text;
+      var replaceText = ReplaceTextBox.Text;
+      var searchArea = searchAreaParameters.SelectedIndex;
+      var wholeWord = wholeWordButton.IsChecked;
+      var caseWord = caseButton.IsChecked;
+      if (searchArea == 2)
+      {
+        searchAreaParameters.SelectedIndex = 0;
+      }
+
+      EventAggregator.RaiseReplaceText(replaceText, searchText, wholeWord, caseWord, searchArea, "FindAll");
     }
 
     private void OnCloseSearchWindowRequested()

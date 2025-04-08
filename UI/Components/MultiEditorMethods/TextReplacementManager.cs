@@ -59,9 +59,9 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     internal Dictionary<UserControl, string> _fullText = new Dictionary<UserControl, string>();
 
-    internal void ReplaceWord(KeyValuePair<string, List <SearchResult>> searchResult, int startOffset, string replaceText, string searchText)
+    internal void ReplaceWord(string fileName, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      var foundPage = fileManager.OpenPages.FirstOrDefault(page => page.Text == searchResult.Key);
+      var foundPage = fileManager.OpenPages.FirstOrDefault(page => page.Text == fileName);
       if (foundPage != null)
       {
         var pageIndex = fileManager.OpenPages.IndexOf(foundPage);
@@ -71,17 +71,15 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private void ReplaceTextInEditor(UserControl editor, KeyValuePair<string, List<SearchResult>> searchResult, int startOffset, string replaceText, string searchText)
+    private void ReplaceTextInEditor(UserControl editor, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
       if (editor is TextEditorUI textEditor)
       {
-        var result = searchResult.Value.FirstOrDefault();
-
-        if (result != null)
+        if (searchResult != null)
         {
           var document = textEditor.Document;
           var text = document.Text;
-          var endOffset = startOffset + result.Length;
+          var endOffset = startOffset + searchResult.Length;
           var beforeText = text.Substring(0, startOffset);
           var afterText = text.Substring(endOffset);
           var newText = beforeText + replaceText + afterText;

@@ -78,9 +78,14 @@ namespace AppConfiguration.Base
     static public event Action<string> SearchButtonPressed;
 
     /// <summary>
-    /// Событие, которое вызывается, когда нажата кнопка поиска по тексту.
+    /// Событие, которое вызывается, когда нажата кнопка замены текста.
     /// </summary>
     static public event Action ReplaceWordButtonPressed;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замены текста.
+    /// </summary>
+    static public event Action ReplaceAllWordsButtonPressed;
 
     /// <summary>
     /// Событие, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
@@ -304,6 +309,14 @@ namespace AppConfiguration.Base
     static public void RaiseReplaceWordButtonPressed()
     {
       ReplaceWordButtonPressed?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка поиска.
+    /// </summary>
+    static public void RaiseReplaceAllWordsButtonPressed()
+    {
+      ReplaceAllWordsButtonPressed?.Invoke();
     }
 
     /// <summary>

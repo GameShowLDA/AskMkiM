@@ -260,13 +260,45 @@ namespace UI.Components
     /// <param name="searchText">Текст, который мы ищем.</param>
     /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
     /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
-    /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
-    /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
-    public async Task ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    /// <param name="searchArea">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
+    /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
+    public async Task ReplaceWordData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       var fullText = textSearchManager.GetText(searchArea);
       textSearchManager.InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
       await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
+      if (string.Equals(searchParameters, "FindNext"))
+      {
+        ReplaceNextWord(replaceText, searchText);
+      }
+      else if (string.Equals(searchParameters, "FindAll"))
+      {
+        ReplaceAllWords(replaceText, searchText);
+      }
+    }
+
+    private void ReplaceAllWords(string replaceText, string searchText)
+    {
+      if (textSearchManager.foundInOpenedFiles.Count > 0)
+      {
+        foreach (var file in textSearchManager.foundInOpenedFiles)
+        {
+          for (int i = file.Value.Count - 1; i >= 0; i--)
+          {
+            var result = file.Value[i];
+            var lineStartOffset = result.StartOffset;
+            int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, result.SubstringFromWord, searchText);
+            if (globalStartOffset >= 0)
+            {
+              textReplacementManager.ReplaceWord(file.Key, result, globalStartOffset, replaceText, searchText);
+            }
+          }
+        }
+      }
+    }
+
+    private void ReplaceNextWord(string replaceText, string searchText)
+    {
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
         var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
@@ -274,7 +306,7 @@ namespace UI.Components
         int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, searchResult.Value.FirstOrDefault().SubstringFromWord, searchText);
         if (globalStartOffset >= 0)
         {
-          textReplacementManager.ReplaceWord(searchResult, globalStartOffset, replaceText, searchText);
+          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), globalStartOffset, replaceText, searchText);
         }
       }
     }
