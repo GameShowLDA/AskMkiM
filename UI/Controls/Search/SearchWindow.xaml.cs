@@ -84,7 +84,7 @@ namespace UI.Controls.Search
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
-      showAnimation.Begin(this);
+      showAnimation.Begin();
       LogInformation("Окно поиска загружено.");
     }
 
@@ -179,14 +179,16 @@ namespace UI.Controls.Search
     }
     public void ShowWindow()
     {
+      if (this.Top < 0)
+      {
+        this.Top = 50;
+      }
       //this.Activate();
       this.Focus();
       this.Show();
-      this.Activated += (sender, args) =>
-      {
-        var showAnimation = (Storyboard)Resources["ShowAnimation"];
-        showAnimation.Begin(this);
-      };
+
+      var showAnimation = (Storyboard)Resources["ShowAnimation"];
+      showAnimation.Begin();
     }
     public void CloseDialog()
     {
@@ -195,12 +197,8 @@ namespace UI.Controls.Search
       _allowClose = true;
 
       var hideAnimation = (Storyboard)Resources["HideAnimation"];
-      hideAnimation.Begin(this);
-
-      hideAnimation.Completed += (s, e) =>
-      {
-        this.Hide();  // Скрываем окно после анимации
-      };
+      hideAnimation.Completed += (s, e) => this.Hide();
+      hideAnimation.Begin();
     }
 
     /// <summary>
