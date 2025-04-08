@@ -17,12 +17,6 @@ namespace MainWindowProgram
     public bool IsTextEditorActive { get; set;}
 
     /// <summary>
-    /// Команда для активации пункта меню.
-    /// </summary>
-    public static readonly RoutedUICommand ActivateMenuItemCommand = new RoutedUICommand(
-    "ActivateMenuItem", "ActivateMenuItemCommand", typeof(MainWindow));
-
-    /// <summary>
     /// Обработчик события KeyDown для окна.
     /// При нажатии клавиши Enter, если элемент с фокусом является MenuItem,
     /// генерируется событие клика, и логируется информация.

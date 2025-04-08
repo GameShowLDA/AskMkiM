@@ -33,9 +33,18 @@ namespace NewCore.Base.DeviceResponses
     public int DecimalCurrent { get; set; }
 
     /// <summary>
+    /// Целая часть рекомендуемого тока (в миллиамперах).
+    /// </summary>
+    public int IntegerCurrentFake { get; set; }
+
+    /// <summary>
+    /// Дробная часть рекомендуемого тока (в миллиамперах).
+    /// </summary>
+    public int DecimalCurrentFake { get; set; }
+
+    /// <summary>
     /// Выдаваемое напряжение на диапазоне.
     /// </summary>
     public VoltageSources Voltage { get; set; }
   }
-
 }

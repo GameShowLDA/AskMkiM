@@ -41,21 +41,14 @@ namespace Mode.Metrology.PI
     /// </summary>
     public void InitializeSettings()
     {
-      try
-      {
-        ProtocolUI.SetSettings(
-          this,
-          StartDelegate: ExecuteMeasurementProcess,
-          true,
-          ReturnDelegate: async (CancellationToken token) => {
-            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          });
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии ПИ(DCW) в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        ReturnDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        });
     }
 
     /// <summary>
@@ -116,7 +109,7 @@ namespace Mode.Metrology.PI
 
         // TODO : позже прописать погрешность в настрйоках
         double firstNorm = param - (param / 100.0 * 5);
-        double lastNorm = param + (param / 100.0 * 5 );
+        double lastNorm = param + (param / 100.0 * 5);
 
         // double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI));
         // double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI);

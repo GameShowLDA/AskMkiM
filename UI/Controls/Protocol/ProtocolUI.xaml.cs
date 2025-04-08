@@ -86,6 +86,8 @@ namespace UI.Controls.Protocol
       returnButton.Visibility = Visibility.Collapsed;
       Items = new ObservableCollection<object>();
 
+      AppConfiguration.Services.UserMessageServiceProvider.Instance = this;
+
       SetupButtons();
       ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
     }

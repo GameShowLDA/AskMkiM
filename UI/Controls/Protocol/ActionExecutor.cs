@@ -259,13 +259,13 @@ namespace UI.Controls.Protocol
       }
       catch (ObjectDisposedException ex)
       {
-        LogError("Token уже утилизирован: " + ex.ToString());
+        LogException("Token уже утилизирован", ex);
         MessageBox.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
       catch (Exception ex)
       {
-        LogError("Системная ошибка: " + ex.ToString());
+        LogException("Системная ошибка", ex);
         MessageBox.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
@@ -302,7 +302,7 @@ namespace UI.Controls.Protocol
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка: {ex}");
+        LogException($"Ошибка", ex);
       }
 
       return stepMode;
@@ -509,9 +509,10 @@ namespace UI.Controls.Protocol
         }
         catch (Exception ex)
         {
-          LogError($"Ошибка при запуске \"{name}\": {ex.Message}");
+          LogException($"Ошибка при запуске \"{name}\"", ex);
           await SetIsLocked(false);
           _stopwatch.Stop();
+          await ProtocolSelfCheck.FinalizeAsync(stop);
         }
       }
     }
@@ -534,7 +535,7 @@ namespace UI.Controls.Protocol
         }
         catch (Exception ex)
         {
-          LogError($"Ошибка при завершении \"{name}\": {ex.Message}");
+          LogException($"Ошибка при завершении \"{name}\"", ex);
         }
       }
       else

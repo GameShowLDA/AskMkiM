@@ -6,14 +6,14 @@
   public interface ICapacitorDeviceBusCommutation
   {
     /// <summary>
-    /// Подключение конденсаторами.
+    /// Подключение конденсаторов.
     /// </summary>
     /// <param name="number">Номер конденсатора.</param>
     /// <returns>Возвращает результат подключения.</returns>
     Task<bool> ConnectCapacitor(string number);
 
     /// <summary>
-    /// Отключение конденсаторами.
+    /// Отключение конденсаторов.
     /// </summary>
     /// <param name="number">Номер конденсатора.</param>
     /// <returns>Возвращает результат отключения.</returns>

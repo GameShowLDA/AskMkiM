@@ -105,6 +105,8 @@ namespace ConsoleUtilities.Commands
           ResistanceMax = range.ResistanceMax,
           IntegerCurrent = PromptInt("Введите целую часть тока (мА): "),
           DecimalCurrent = PromptInt("Введите дробную часть тока (мА): "),
+          IntegerCurrentFake = PromptInt("Введите дробную часть фейкового тока (мА): "),
+          DecimalCurrentFake = PromptInt("Введите дробную часть фейкового тока (мА): "),
         };
         var voltage = PromptVoltageSource();
 
@@ -117,9 +119,9 @@ namespace ConsoleUtilities.Commands
     private static ResistanceCalibrationRange GetPredefinedRange(int index) => index switch
     {
       1 => new ResistanceCalibrationRange { ResistanceMin = 0, ResistanceMax = 100 },
-      2 => new ResistanceCalibrationRange { ResistanceMin = 101, ResistanceMax = 1000 },
-      3 => new ResistanceCalibrationRange { ResistanceMin = 1001, ResistanceMax = 10000 },
-      4 => new ResistanceCalibrationRange { ResistanceMin = 10001, ResistanceMax = 100000 },
+      2 => new ResistanceCalibrationRange { ResistanceMin = 100, ResistanceMax = 1000 },
+      3 => new ResistanceCalibrationRange { ResistanceMin = 1000, ResistanceMax = 10000 },
+      4 => new ResistanceCalibrationRange { ResistanceMin = 10000, ResistanceMax = 100000 },
       _ => throw new ArgumentOutOfRangeException(nameof(index), "Недопустимый индекс диапазона.")
     };
 

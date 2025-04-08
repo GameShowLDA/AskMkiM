@@ -80,17 +80,17 @@ namespace Utilities.FilesUtility
       }
       catch (JsonException ex)
       {
-        LoggerUtility.LogError($"Ошибка при чтении JSON конфигурации {_filePath}: {ex.Message}");
+        LoggerUtility.LogException($"Ошибка при чтении JSON конфигурации {_filePath}", ex);
         return null;
       }
       catch (IOException ex)
       {
-        LoggerUtility.LogError($"Ошибка ввода/вывода при чтении конфигурации{_filePath}: {ex.Message}");
+        LoggerUtility.LogException($"Ошибка ввода/вывода при чтении конфигурации{_filePath}", ex);
         return null; ;
       }
       catch (UnauthorizedAccessException ex)
       {
-        LoggerUtility.LogError($"Ошибка при чтении JSON конфигурации  {_filePath} : : {ex.Message}");
+        LoggerUtility.LogException($"Ошибка при чтении JSON конфигурации  {_filePath}", ex);
         return null; ;
       }
     }

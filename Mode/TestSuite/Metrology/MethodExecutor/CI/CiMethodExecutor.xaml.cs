@@ -38,15 +38,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>
@@ -113,7 +105,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
-        var answer = await breakDown.IrManger.MeasureResistanceAsync();
+        var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, dataModel.Param, 60000);
         var pause = false;
         var successMessage = ShowMessageModel.SuccessMessage.Item1;
         var colorMessage = ShowMessageModel.SuccessMessage.Item2;

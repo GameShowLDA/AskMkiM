@@ -28,15 +28,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>
@@ -87,7 +79,12 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.DcwManger.SetModeAsync();
-        await breakDown.DcwManger.SetVoltageAsync(dataModel.Voltage);
+
+        if (!(await breakDown.DcwManger.SetVoltageAsync(dataModel.Voltage)).Item1)
+        {
+          throw new Exception("Не удалость выставить напряжение на ППУ.");
+        }
+
         await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.DcwManger.SetHighCurrentLimitAsync(dataModel.Param);
@@ -98,13 +95,13 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
 
         var answer = await breakDown.DcwManger.MeasureCurrentAsync();
         var pause = false;
         var successMessage = ShowMessageModel.SuccessMessage.Item1;
         var colorMessage = ShowMessageModel.SuccessMessage.Item2;
-        if (answer > dataModel.Param)
+        if (answer >= dataModel.Param)
         {
           successMessage = ShowMessageModel.ErrorMessage.Item1;
           colorMessage = ShowMessageModel.ErrorMessage.Item2;
@@ -114,7 +111,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
           }
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА [{successMessage}]", messageColor: colorMessage));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда ({GetBitString()})", message: $"{answer.ToString()} мА [{successMessage}]", messageColor: colorMessage));
         if (pause)
         {
           await protocolUI.PauseAsync();

@@ -121,22 +121,22 @@ namespace NewCore.Communication
       }
       catch (UnauthorizedAccessException ex)
       {
-        LogError($"[{_device.Name}] Доступ к порту запрещен: {ex.Message}");
+        LogException($"[{_device.Name}] Доступ к порту запрещен", ex);
         return false;
       }
       catch (IOException ex)
       {
-        LogError($"[{_device.Name}] Ошибка ввода-вывода при открытии порта: {ex.Message}");
+        LogException($"[{_device.Name}] Ошибка ввода-вывода при открытии порта", ex);
         return false;
       }
       catch (InvalidOperationException ex)
       {
-        LogError($"[{_device.Name}] Порт уже используется другим процессом: {ex.Message}");
+        LogException($"[{_device.Name}] Порт уже используется другим процессом", ex);
         return false;
       }
       catch (Exception ex)
       {
-        LogError($"[{_device.Name}] Неизвестная ошибка при открытии порта: {ex.Message}");
+        LogException($"[{_device.Name}] Неизвестная ошибка при открытии порта", ex);
         return false;
       }
     }

@@ -46,21 +46,35 @@ namespace NewCore.Function.GPT
     }
 
     /// <summary>
-    /// Устанавливает напряжение DCW.
+    /// Устанавливает напряжение DCW и проверяет, что ППУ принял значение.
     /// </summary>
     /// <param name="value">Значение напряжения (в В).</param>
-    public async Task SetVoltageAsync(double value)
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    public async Task<(bool, string)> SetVoltageAsync(double value)
     {
-      LogInformation($"Устанавливаем напряжение DCW: {value:F3} кВ");
+      LogInformation($"Устанавливаем напряжение DCW: {value:F3} В");
 
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return (true, string.Empty);
       }
 
-      value /= 1000;
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {value:F3}".Replace(',', '.');
-      await _gptModel.DeviceProtocol.QueryAsync(query);
+      double kvValue = value / 1000;
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {kvValue:F3}".Replace(',', '.');
+
+      // Первая попытка
+      await _gptModel.DeviceProtocol.QueryAsync(command);
+      var actualKv = await GetVoltageAsync();
+      if (actualKv.HasValue && Math.Abs(actualKv.Value - kvValue) < 0.01)
+        return (true, string.Empty);
+
+      LogWarning("Повторная попытка установки напряжения DCW.");
+      await _gptModel.DeviceProtocol.QueryAsync(command);
+      actualKv = await GetVoltageAsync();
+      if (actualKv.HasValue && Math.Abs(actualKv.Value - kvValue) < 0.01)
+        return (true, string.Empty);
+
+      return (false, $"Не удалось установить напряжение {kvValue:F3} кВ. Устройство сообщает: {actualKv?.ToString("F3") ?? "недоступно"} кВ.");
     }
 
     /// <summary>
@@ -213,10 +227,7 @@ namespace NewCore.Function.GPT
       return double.TryParse(response.Replace("kV", "").Replace("mA", "").Replace("S", "").Trim().Replace(".", ","), out var result) ? result : 0.0;
     }
 
-    /// <summary>
-    /// Запускает тест DCW и возвращает результат измерения тока.
-    /// </summary>
-    /// <returns>Измеренный ток (в мА).</returns>
+    /// <inheritdoc />
     public async Task<double> MeasureCurrentAsync()
     {
       LogInformation("Запуск измерений режима ПИ DCW");
@@ -231,9 +242,14 @@ namespace NewCore.Function.GPT
 
       await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
       query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
-      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-      var result = answerDevice.Split(',');
+      string[] result;
+      do
+      {
+        var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
+        result = answerDevice.Split(',');
+      } while (result.Count() <= 1);
+
       var measureResulte = result[3];
 
       LogInformation($"Результат измерения режима ПИ(DCW): {measureResulte}");
@@ -248,10 +264,7 @@ namespace NewCore.Function.GPT
       throw new FormatException("Число не найдено в строке.");
     }
 
-    /// <summary>
-    /// Получает текущее время нарастания напряжения (Ramp Time) для текущего теста.
-    /// </summary>
-    /// <returns>Значение времени нарастания в секундах.</returns>
+    /// <inheritdoc />
     public async Task<double> GetRampTimeAsync()
     {
       if (await GetIsIdleModeEnabled())
@@ -302,5 +315,27 @@ namespace NewCore.Function.GPT
       LogWarning("Не удалось разобрать значение времени теста DCW. Возвращаем 0.0.");
       return 0.0;
     }
+
+    /// <inheritdoc />
+    public async Task<double?> GetVoltageAsync()
+    {
+      string query = GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE) + "?";
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+
+      // Очистка строки: убираем символы \r, \n, пробелы и суффикс "kV"
+      response = response.Trim().Replace("kV", "", StringComparison.OrdinalIgnoreCase).Trim();
+
+      if (double.TryParse(response.Replace(',', '.'),
+                          System.Globalization.NumberStyles.Float,
+                          System.Globalization.CultureInfo.InvariantCulture,
+                          out double result))
+      {
+        return result;
+      }
+
+      LogError($"Ошибка при чтении напряжения DCW: '{response}' не удалось распарсить.");
+      return null;
+    }
+
   }
 }

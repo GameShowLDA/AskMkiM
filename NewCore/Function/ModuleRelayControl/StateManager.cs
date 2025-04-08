@@ -30,7 +30,7 @@ namespace NewCore.Function.ModuleRelayControl
     {
       if (await GetIsIdleModeEnabled())
       {
-        return (true, "Включен холостой режим");
+        return (true, String.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
@@ -78,8 +78,8 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
+      DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
+      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return result == "2.0.1";
     }
 

@@ -27,8 +27,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Первая точка вида a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..."/>
+                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Начальная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..." Text="1.1.1"/>
             </Grid>
         </Border>
 
@@ -38,8 +38,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerSecondData" TextWrapping="Wrap" TextTrimming="None" Text="Вторая точка вида a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..."/>
+                <TextBlock Name="headerSecondData" TextWrapping="Wrap" TextTrimming="None" Text="Конечная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..." Text="1.1.100"/>
             </Grid>
         </Border>
 

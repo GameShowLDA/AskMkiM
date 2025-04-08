@@ -14,13 +14,13 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
   /// </summary>
   public class StateManager : IConnectable
   {
-    private readonly Device.ModuleVoltageCurrentSource _moduleVoltageCurrentSource;
+    private readonly IPowerSourceModule _moduleVoltageCurrentSource;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateManager"/>.
     /// </summary>
     /// <param name="moduleVoltageCurrentSource">Модуль источника напряжения и тока, для которого будет выполняться управление состоянием.</param>
-    public StateManager(Device.ModuleVoltageCurrentSource moduleVoltageCurrentSource) => _moduleVoltageCurrentSource = moduleVoltageCurrentSource;
+    public StateManager(IPowerSourceModule moduleVoltageCurrentSource) => _moduleVoltageCurrentSource = moduleVoltageCurrentSource;
 
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()

@@ -46,21 +46,14 @@ namespace Mode.Metrology.PI
     /// </summary>
     public void InitializeSettings()
     {
-      try
-      {
-        ProtocolUI.SetSettings(
-          this,
-          StartDelegate: ExecuteMeasurementProcess,
-          true,
-          ReturnDelegate: async (CancellationToken token) => {
-            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          });
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии ПИ(ACW) в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        ReturnDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        });
     }
 
     /// <summary>

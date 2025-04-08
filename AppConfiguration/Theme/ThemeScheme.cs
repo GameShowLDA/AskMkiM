@@ -49,7 +49,7 @@ namespace AppConfiguration.Theme
       }
       catch (Exception ex)
       {
-        LogError(ex.Message);
+        LogException(ex);
         throw;
       }
     }

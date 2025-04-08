@@ -39,21 +39,14 @@ namespace Mode.Metrology.KC
     /// </summary>
     public void InitializeSettings()
     {
-      try
-      {
-        ProtocolUI.SetSettings(
-          this,
-          StartDelegate: ExecuteMeasurementProcess,
-          true,
-          ReturnDelegate: async (CancellationToken token) => {
-            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          });
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии КС в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        ReturnDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        });
     }
 
     /// <summary>
@@ -94,6 +87,7 @@ namespace Mode.Metrology.KC
       /// <inheritdoc />
       public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
+        await base.ConfigureMeter(metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await fastMeter.ResistanceManager.SetResistanceModeAsync();
       }
@@ -101,21 +95,14 @@ namespace Mode.Metrology.KC
       /// <inheritdoc />
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole , out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления", headerColor: ShowMessageModel.SuccessMessage.Item2));
 
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
-        double lastNorm = param + (param / 100.0  * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
+        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
 
         await Task.Delay(1000);
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param);
-
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
-        showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
-        showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-
-        await protocolUI.ShowMessageAsync(showMessageModel);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, firstNorm, lastNorm);
       }
     }
   }
