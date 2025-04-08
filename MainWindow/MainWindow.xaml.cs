@@ -85,28 +85,18 @@ namespace MainWindowProgram
 
       try
       {
-        try
-        {
-          await Initialize();
-        }
-        catch (InvalidOperationException exception)
-        {
-          LogException($"Ошибка загрузки темы программы", exception);
-          return;
-        }
-        catch (Exception ex)
-        {
-          string errorDetails = GetErrorDetails(ex);
-          LogException($"Ошибка выполнения программы", ex);
-          MessageBox.Show($"Ошибка: {errorDetails}");
-        }
-      });
-
-      SettingsGUI();
-
-      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
-      GuiInitializer.Apply(this);
-      _searchWindow = new SearchWindow();
+        await Initialize();
+      }
+      catch (InvalidOperationException exception)
+      {
+        LogException($"Ошибка загрузки темы программы", exception);
+        return;
+      }
+      catch (Exception ex)
+      {
+        LogException($"Ошибка выполнения программы", ex);
+        MessageBox.Show($"Ошибка: {ex.Message}");
+      }
     }
   }
 }
