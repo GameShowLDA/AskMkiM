@@ -18,7 +18,7 @@ namespace NewCore.Base.Function.Breakdown
     /// Устанавливает напряжение DCW.
     /// </summary>
     /// <param name="value">Значение напряжения (в кВ).</param>
-    Task SetVoltageAsync(double value);
+    Task<(bool, string)> SetVoltageAsync(double value);
 
     /// <summary>
     /// Устанавливает высокий предел тока DCW.
@@ -73,5 +73,11 @@ namespace NewCore.Base.Function.Breakdown
     /// </summary>
     /// <returns>Значение времени нарастания в секундах.</returns>
     Task<double> GetRampTimeAsync();
+
+    /// <summary>
+    /// Получает текущее установленное напряжение DCW с ППУ.
+    /// </summary>
+    /// <returns>Значение напряжения в кВ, если удалось получить; иначе — null.</returns>
+    Task<double?> GetVoltageAsync();
   }
 }

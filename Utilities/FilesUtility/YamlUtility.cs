@@ -66,7 +66,7 @@ namespace Utilities.FilesUtility
       }
       catch (Exception ex)
       {
-        LoggerUtility.LogError($"Ошибка чтения файла {YamlFilePath}: {ex}");
+        LoggerUtility.LogException($"Ошибка чтения файла {YamlFilePath}", ex);
         return default;
       }
     }

@@ -87,7 +87,7 @@ namespace UI.Theme
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при создании ресурса: {ex.Message}");
+        LogException($"Ошибка при создании ресурса", ex);
       }
     }
 

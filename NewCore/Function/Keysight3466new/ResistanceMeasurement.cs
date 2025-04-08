@@ -38,7 +38,7 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureResistanceAsync(double param)
+    public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1)
     {
       if (await GetIsIdleModeEnabled())
       {

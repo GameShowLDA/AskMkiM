@@ -138,7 +138,6 @@ namespace Mode.Metrology.PR
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR);
 
-        await Task.Delay(1000);
         var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
         double fakeCurrent = GetInterpolatedCurrent(param, mint);
         var result = voltage / (fakeCurrent / 1000.0);

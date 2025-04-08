@@ -16,6 +16,6 @@
     /// </summary>
     /// <returns>Задача, возвращающая измеренное значение сопротивления в Омах.</returns>
     /// <param name="param">Ожидаемое значение.</param>
-    Task<double> MeasureResistanceAsync(double param = 0);
+    Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1);
   }
 }

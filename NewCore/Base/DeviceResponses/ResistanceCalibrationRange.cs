@@ -47,5 +47,4 @@ namespace NewCore.Base.DeviceResponses
     /// </summary>
     public VoltageSources Voltage { get; set; }
   }
-
 }
