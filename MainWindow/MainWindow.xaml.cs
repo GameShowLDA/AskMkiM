@@ -80,17 +80,19 @@ namespace MainWindowProgram
     {
       var lifecycle = new ApplicationLifecycleManager();
       lifecycle.Initialize(this, _usbServices, App._consoleManager);
-
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
 
       try
       {
-        await Initialize();
+        await Task.Run(async () =>
+        {
+          await Initialize();
+        });
       }
       catch (InvalidOperationException exception)
       {
         LogException($"Ошибка загрузки темы программы", exception);
-        return;
+        MessageBox.Show($"Ошибка загрузки темы: {exception.Message}");
       }
       catch (Exception ex)
       {
