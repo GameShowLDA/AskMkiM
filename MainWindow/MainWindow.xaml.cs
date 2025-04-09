@@ -17,7 +17,6 @@ namespace MainWindowProgram
 {
   public partial class MainWindow : Window
   {
-
     #region Поля.
 
     /// <summary>
@@ -81,12 +80,13 @@ namespace MainWindowProgram
       var lifecycle = new ApplicationLifecycleManager();
       lifecycle.Initialize(this, _usbServices, App._consoleManager);
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+      ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler);
 
       try
       {
         await Task.Run(async () =>
         {
-          await Initialize();
+          await applicationInitializer.InitializeAsync();
         });
       }
       catch (InvalidOperationException exception)

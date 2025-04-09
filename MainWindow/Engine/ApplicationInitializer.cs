@@ -1,27 +1,41 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using static AppConfiguration.SystemState.SystemStateManager;
-using static AppConfiguration.Base.EventAggregator;
-using static Utilities.LoggerUtility;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using AppConfiguration.Execution;
 using AppConfiguration.MeasurementError;
 using AppConfiguration.Protocol;
-using AppConfiguration.Theme;
+using System.Windows;
+using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
-using static UI.Components.Invoke.OpenFileButton;
+using AppConfiguration.Theme;
 
-namespace MainWindowProgram
+namespace MainWindowProgram.Engine
 {
-  public partial class MainWindow
+  internal class ApplicationInitializer
   {
+    private readonly MessageHandler messageHandler;
+
     /// <summary>
-    /// Инициализация приложения.
+    /// Конструктор инициализатора приложения.
     /// </summary>
-    private async Task Initialize()
+    /// <param name="messageHandler">Обработчик сообщений, используемый для отображения ошибок, предупреждений и информации.</param>
+    public ApplicationInitializer(MessageHandler messageHandler)
+    {
+      this.messageHandler = messageHandler;
+    }
+
+    /// <summary>
+    /// Запускает полную процедуру инициализации приложения.
+    /// </summary>
+    public async Task InitializeAsync()
     {
       CheckStatusProgram();
-      await StartSettings();
-      RegisterHotkeys();
+      await StartSettingsAsync();
+
+      // TODO: разобраться с горячими клавишами
+      // RegisterHotkeys(); // при необходимости можно передать делегат или событие
     }
 
     /// <summary>
@@ -30,21 +44,21 @@ namespace MainWindowProgram
     private void CheckStatusProgram()
     {
       bool isNewInstance;
-      var _mutex = new Mutex(true, "AxionHolding", out isNewInstance);
+      var mutex = new Mutex(true, "AxionHolding", out isNewInstance);
 
       if (!isNewInstance)
       {
-        MessageBox.Show("Вы не можете запускать несколько экземпляров от Axion Holding. Это реализовано, чтобы избежать перегрузку оборудования АСК-МКИ-М!", "ВНИМАНИЕ!", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show("Вы не можете запускать несколько экземпляров от Axion Holding. Это реализовано, чтобы избежать перегрузку оборудования АСК-МКИ-М!",
+            "ВНИМАНИЕ!", MessageBoxButton.OK, MessageBoxImage.Information);
         LogWarning("Попытка запустить несколько экземпляров.");
         Application.Current.Shutdown();
-        return;
       }
     }
 
     /// <summary>
     /// Выполняет асинхронную настройку приложения, загружает настройки темы и регистрирует обработчики событий для сообщений.
     /// </summary>
-    private async Task StartSettings()
+    private async Task StartSettingsAsync()
     {
       try
       {
@@ -66,6 +80,5 @@ namespace MainWindowProgram
       InfoMessageEvent += messageHandler.SetInfoMessage;
       LogInformation("Настройки инициализированы.");
     }
-
   }
 }
