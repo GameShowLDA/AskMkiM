@@ -9,58 +9,120 @@ namespace NewCore.Base.Function.Breakdown
   public interface IAcwModeBreakdown
   {
     /// <summary>
-    /// Устанавливает режим ACW (переменного высокого напряжения).
+    /// Устанавливает режим ACW и проверяет, что устройство приняло значение.
     /// </summary>
-    Task SetModeAsync();
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetModeAsync();
 
     /// <summary>
-    /// Устанавливает напряжение ACW.
+    /// Устанавливает напряжение ACW и проверяет, что устройство приняло значение.
     /// </summary>
-    /// <param name="value">Напряжение в кВ.</param>
-    Task SetVoltageAsync(double value);
+    /// <param name="value">Значение напряжения в вольтах.</param>
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetVoltageAsync(double value);
 
     /// <summary>
-    /// Устанавливает верхний предел тока ACW.
+    /// Устанавливает верхний предел тока ACW и проверяет, что устройство приняло значение.
     /// </summary>
-    /// <param name="value">Ток в мА.</param>
-    Task SetHighCurrentLimitAsync(double value);
+    /// <param name="value">Ток в миллиамперах.</param>
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetHighCurrentLimitAsync(double value);
 
     /// <summary>
-    /// Устанавливает нижний предел тока ACW.
+    /// Устанавливает нижний предел тока ACW и проверяет, что устройство приняло значение.
     /// </summary>
-    /// <param name="value">Ток в мА.</param>
-    Task SetLowCurrentLimitAsync(double value);
+    /// <param name="value">Ток в миллиамперах.</param>
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetLowCurrentLimitAsync(double value);
 
     /// <summary>
-    /// Устанавливает время теста ACW.
+    /// Устанавливает время теста ACW и проверяет, что устройство приняло значение.
     /// </summary>
     /// <param name="value">Время в секундах.</param>
-    Task SetTestTimeAsync(double value);
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetTestTimeAsync(double value);
 
     /// <summary>
-    /// Устанавливает время нарастания напряжения (Ramp Time) для DCW.
+    /// Устанавливает время нарастания напряжения ACW (Ramp Time) и проверяет, что устройство приняло значение.
     /// </summary>
-    /// <param name="value">Значение времени нарастания в секундах (0.1 – 999.9).</param>
-    Task SetRampTimeAsync(double value);
+    /// <param name="value">Время в секундах.</param>
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetRampTimeAsync(double value);
 
     /// <summary>
-    /// Устанавливает частоту ACW.
+    /// Устанавливает частоту ACW и проверяет, что устройство приняло значение.
     /// </summary>
-    /// <param name="frequency">Частота (50 или 60 Гц).</param>
-    /// <exception cref="ArgumentException">Выбрасывается, если частота не равна 50 или 60 Гц.</exception>
-    Task SetFrequencyAsync(int frequency);
+    /// <param name="frequency">Частота (допустимые значения: 50 или 60 Гц).</param>
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    /// <exception cref="ArgumentException">Если частота не равна 50 или 60.</exception>
+    Task<(bool Success, string Message)> SetFrequencyAsync(int frequency);
 
     /// <summary>
-    /// Устанавливает смещение ACW.
+    /// Устанавливает смещение ACW и проверяет, что устройство приняло значение.
     /// </summary>
     /// <param name="value">Смещение в мА.</param>
-    Task SetOffsetAsync(double value);
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetOffsetAsync(double value);
 
     /// <summary>
-    /// Устанавливает предельное значение тока дугового пробоя ACW.
+    /// Устанавливает предельное значение тока дугового пробоя ACW и проверяет, что устройство приняло значение.
     /// </summary>
     /// <param name="value">Ток в мА.</param>
-    Task SetArcCurrentAsync(double value);
+    /// <returns>Кортеж: bool — успех, string — сообщение об ошибке (если есть).</returns>
+    Task<(bool Success, string Message)> SetArcCurrentAsync(double value);
+
+    /// <summary>
+    /// Получает текущий режим ACW (переменного высокого напряжения).
+    /// </summary>
+    Task<string> GetModeAsync();
+
+    /// <summary>
+    /// Получает установленное значение напряжения ACW.
+    /// </summary>
+    /// <returns>Напряжение в кВ.</returns>
+    Task<double> GetVoltageAsync();
+
+    /// <summary>
+    /// Получает установленное верхнее значение предела тока ACW.
+    /// </summary>
+    /// <returns>Ток в мА.</returns>
+    Task<double> GetHighCurrentLimitAsync();
+
+    /// <summary>
+    /// Получает установленное нижнее значение предела тока ACW.
+    /// </summary>
+    /// <returns>Ток в мА.</returns>
+    Task<double> GetLowCurrentLimitAsync();
+
+    /// <summary>
+    /// Получает установленное время теста ACW.
+    /// </summary>
+    /// <returns>Время в секундах.</returns>
+    Task<double> GetTestTimeAsync();
+
+    /// <summary>
+    /// Получает установленное значение времени нарастания напряжения (Ramp Time) для DCW.
+    /// </summary>
+    /// <returns>Значение времени нарастания в секундах.</returns>
+    Task<double> GetRampTimeAsync();
+
+    /// <summary>
+    /// Получает установленную частоту ACW.
+    /// </summary>
+    /// <returns>Частота (50 или 60 Гц).</returns>
+    Task<int> GetFrequencyAsync();
+
+    /// <summary>
+    /// Получает установленное значение смещения ACW.
+    /// </summary>
+    /// <returns>Смещение в мА.</returns>
+    Task<double> GetOffsetAsync();
+
+    /// <summary>
+    /// Получает установленное предельное значение тока дугового пробоя ACW.
+    /// </summary>
+    /// <returns>Ток в мА.</returns>
+    Task<double> GetArcCurrentAsync();
 
     /// <summary>
     /// Считывает текущую конфигурацию ACW.

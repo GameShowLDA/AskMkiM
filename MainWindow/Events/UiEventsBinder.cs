@@ -47,6 +47,9 @@ namespace MainWindowProgram.Events
 
       EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
       EventAggregator.SearchWindowAtivated += OnSearchWindowActivated;
+
+      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
+      EventAggregator.SearchText += SearchWindow_SearchTextHandler;
     }
 
     /// <summary>

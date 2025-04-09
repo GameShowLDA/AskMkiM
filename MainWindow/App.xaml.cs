@@ -42,26 +42,35 @@ namespace MainWindowProgram
       SplashWindow loadWindow = new SplashWindow();
       loadWindow.Show();
 
-      MainWindow mainWindow = null;
-
-      // 2. Создаем MainWindow в UI-потоке
-      Dispatcher.Invoke(() =>
+      try
       {
-        mainWindow = new MainWindow();
-        mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow
-      });
+        MainWindow mainWindow = null;
 
-      // 3. Инициализируем MainWindow (в фоне)
-      await mainWindow.InitializeAsync();
+        // 2. Создаем MainWindow в UI-потоке
+        Dispatcher.Invoke(() =>
+        {
+          mainWindow = new MainWindow();
+          mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow
+        });
 
-      // 4. Ждём завершения анимации SplashWindow
-      await loadWindow.WaitForCloseAsync(); // Ждёт плавное исчезновение
+        // 3. Инициализируем MainWindow (в фоне)
+        await mainWindow.InitializeAsync();
 
-      // 5. Только теперь показываем основное окно
-      await Dispatcher.InvokeAsync(() =>
+        // 4. Ждём завершения анимации SplashWindow
+        await loadWindow.WaitForCloseAsync(); // Ждёт плавное исчезновение
+
+        // 5. Только теперь показываем основное окно
+        await Dispatcher.InvokeAsync(() =>
+        {
+          mainWindow.Visibility = Visibility.Visible;
+        });
+      }
+      catch (Exception ex) 
       {
-        mainWindow.Visibility = Visibility.Visible;
-      });
+        LogException(ex, "Произошла ошибка запуска приложения.");
+        MessageBox.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        Application.Current.Shutdown();
+      }
     }
   }
 }

@@ -22,76 +22,150 @@ namespace NewCore.FunctionAdapters.GPT
       _acwMode = new AcwMode(device);
     }
 
+    #region Mode
+
     /// <inheritdoc />
-    public async Task SetModeAsync()
+    public async Task<(bool, string)> SetModeAsync()
     {
-      await _acwMode.SetModeAsync();
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима ACW", "ACW", true, 1);
+      var result = await _acwMode.SetModeAsync();
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима ACW", result.Success ? "ACW" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetVoltageAsync(double value)
+    public Task<string> GetModeAsync() => _acwMode.GetModeAsync();
+
+    #endregion
+
+    #region Voltage
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetVoltageAsync(double value)
     {
-      await _acwMode.SetVoltageAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения ACW", $"{value} В", true, 1);
+      var result = await _acwMode.SetVoltageAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения ACW", result.Success ? $"{value} В" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetHighCurrentLimitAsync(double value)
+    public Task<double> GetVoltageAsync() => _acwMode.GetVoltageAsync();
+
+    #endregion
+
+    #region HighCurrentLimit
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetHighCurrentLimitAsync(double value)
     {
-      await _acwMode.SetHighCurrentLimitAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела тока ACW", $"{value} мА", true, 1);
+      var result = await _acwMode.SetHighCurrentLimitAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела тока ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetLowCurrentLimitAsync(double value)
+    public Task<double> GetHighCurrentLimitAsync() => _acwMode.GetHighCurrentLimitAsync();
+
+    #endregion
+
+    #region LowCurrentLimit
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetLowCurrentLimitAsync(double value)
     {
-      await _acwMode.SetLowCurrentLimitAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела тока ACW", $"{value} мА", true, 1);
+      var result = await _acwMode.SetLowCurrentLimitAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела тока ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetTestTimeAsync(double value)
+    public Task<double> GetLowCurrentLimitAsync() => _acwMode.GetLowCurrentLimitAsync();
+
+    #endregion
+
+    #region TestTime
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetTestTimeAsync(double value)
     {
-      await _acwMode.SetTestTimeAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени теста ACW", $"{value} сек", true, 1);
+      var result = await _acwMode.SetTestTimeAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени теста ACW", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetRampTimeAsync(double value)
+    public Task<double> GetTestTimeAsync() => _acwMode.GetTestTimeAsync();
+
+    #endregion
+
+    #region RampTime
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetRampTimeAsync(double value)
     {
-      await _acwMode.SetRampTimeAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка Ramp Time ACW", $"{value} сек", true, 1);
+      var result = await _acwMode.SetRampTimeAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка Ramp Time ACW", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetFrequencyAsync(int frequency)
+    public Task<double> GetRampTimeAsync() => _acwMode.GetRampTimeAsync();
+
+    #endregion
+
+    #region Frequency
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetFrequencyAsync(int frequency)
     {
       try
       {
-        await _acwMode.SetFrequencyAsync(frequency);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка частоты ACW", $"{frequency} Гц", true, 1);
+        var result = await _acwMode.SetFrequencyAsync(frequency);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка частоты ACW", result.Success ? $"{frequency} Гц" : result.Message, result.Success, 1);
+        return result;
       }
       catch (Exception ex)
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка установки частоты ACW", ex.Message, false, 1);
-        throw;
+        return (false, ex.Message);
       }
     }
 
     /// <inheritdoc />
-    public async Task SetOffsetAsync(double value)
+    public Task<int> GetFrequencyAsync() => _acwMode.GetFrequencyAsync();
+
+    #endregion
+
+    #region Offset
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetOffsetAsync(double value)
     {
-      await _acwMode.SetOffsetAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения ACW", $"{value} мА", true, 1);
+      var result = await _acwMode.SetOffsetAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+      return result;
     }
 
     /// <inheritdoc />
-    public async Task SetArcCurrentAsync(double value)
+    public Task<double> GetOffsetAsync() => _acwMode.GetOffsetAsync();
+
+    #endregion
+
+    #region ArcCurrent
+
+    /// <inheritdoc />
+    public async Task<(bool, string)> SetArcCurrentAsync(double value)
     {
-      await _acwMode.SetArcCurrentAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка дугового тока ACW", $"{value} мА", true, 1);
+      var result = await _acwMode.SetArcCurrentAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка дугового тока ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+      return result;
     }
+
+    /// <inheritdoc />
+    public Task<double> GetArcCurrentAsync() => _acwMode.GetArcCurrentAsync();
+
+    #endregion
+
+    #region Конфигурация и измерения
 
     /// <inheritdoc />
     public async Task<AcwConfiguration> ReadConfigurationAsync()
@@ -117,10 +191,6 @@ namespace NewCore.FunctionAdapters.GPT
       }
     }
 
-    /// <inheritdoc />
-    public Task<double> GetRampTimeAsync() => _acwMode.GetRampTimeAsync();
-
-    /// <inheritdoc />
-    public Task<double> GetTestTimeAsync() => _acwMode.GetTestTimeAsync();
+    #endregion
   }
 }

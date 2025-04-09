@@ -50,10 +50,10 @@ namespace MainWindowProgram
     private readonly MainWindowViewModel _viewModel;
 
     /// <summary>
-    /// Класс для подписки на события жизненного цикла приложения (загрузка, закрытие и т.п.).
-    /// Позволяет централизованно обрабатывать глобальные события приложения.
+    /// Показывает, активен ли в данный момент текстовый редактор.
+    /// Значение true означает, что текстовый редактор находится в фокусе или используется пользователем.
     /// </summary>
-    private ApplicationEventsBinder _applicationEvents;
+    public bool IsTextEditorActive { get; set; }
 
     #endregion
 
