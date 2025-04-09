@@ -22,22 +22,26 @@ namespace NewCore.FunctionAdapters.GPT
       _irMode = new IrMode(device);
     }
 
-    public async Task SetModeAsync()
+    #region Mode
+
+    public async Task<(bool, string)> SetModeAsync()
     {
-      await _irMode.SetModeAsync();
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима IR", "IR", true, 1);
+      var result = await _irMode.SetModeAsync();
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима IR", result.Success ? "IR" : result.Message, result.Success, 1);
+      return result;
     }
 
-    public async Task SetVoltageAsync(double value)
-    {
-      await _irMode.SetVoltageAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения IR", $"{value} В", true, 1);
-    }
+    public Task<string> GetModeAsync() => _irMode.GetModeAsync();
 
-    public async Task SetTestTimeAsync(double value)
+    #endregion
+
+    #region Voltage
+
+    public async Task<(bool, string)> SetVoltageAsync(double value)
     {
-      await _irMode.SetTestTimeAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени измерения IR", $"{value} сек", true, 1);
+      var result = await _irMode.SetVoltageAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения IR", result.Success ? $"{value} В" : result.Message, result.Success, 1);
+      return result;
     }
 
     public async Task<double> GetVoltageAsync()
@@ -46,6 +50,62 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Чтение напряжения IR", $"{value} В", value > 0, 1);
       return value;
     }
+
+    #endregion
+
+    #region HighResistanceLimit
+
+    public async Task<(bool, string)> SetHighResistanceLimitAsync(double value)
+    {
+      var result = await _irMode.SetHighResistanceLimitAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела сопротивления IR", result.Success ? $"{value} ГОм" : result.Message, result.Success, 1);
+      return result;
+    }
+
+    public Task<double> GetHighResistanceLimitAsync() => _irMode.GetHighResistanceLimitAsync();
+
+    #endregion
+
+    #region LowResistanceLimit
+
+    public async Task<(bool, string)> SetLowResistanceLimitAsync(double value)
+    {
+      var result = await _irMode.SetLowResistanceLimitAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела сопротивления IR", result.Success ? $"{value} МОм" : result.Message, result.Success, 1);
+      return result;
+    }
+
+    public Task<double> GetLowResistanceLimitAsync() => _irMode.GetLowResistanceLimitAsync();
+
+    #endregion
+
+    #region TestTime
+
+    public async Task<(bool, string)> SetTestTimeAsync(double value)
+    {
+      var result = await _irMode.SetTestTimeAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени измерения IR", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
+      return result;
+    }
+
+    public Task<double> GetTestTimeAsync() => _irMode.GetTestTimeAsync();
+
+    #endregion
+
+    #region Offset
+
+    public async Task<(bool, string)> SetOffsetAsync(double value)
+    {
+      var result = await _irMode.SetOffsetAsync(value);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения IR", result.Success ? $"{value} ГОм" : result.Message, result.Success, 1);
+      return result;
+    }
+
+    public Task<double> GetOffsetAsync() => _irMode.GetOffsetAsync();
+
+    #endregion
+
+    #region Измерение и конфигурация
 
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = 60000)
     {
@@ -62,34 +122,15 @@ namespace NewCore.FunctionAdapters.GPT
       }
     }
 
-    public List<int> GetVoltagesForResistance(double resistance)
-    {
-      return _irMode.GetVoltagesForResistance(resistance);
-    }
-
-    public async Task SetHighResistanceLimitAsync(double value)
-    {
-      await _irMode.SetHighResistanceLimitAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела сопротивления IR", $"{value} ГОм", true, 1);
-    }
-
-    public async Task SetLowResistanceLimitAsync(double value)
-    {
-      await _irMode.SetLowResistanceLimitAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела сопротивления IR", $"{value} МОм", true, 1);
-    }
-
-    public async Task SetOffsetAsync(double value)
-    {
-      await _irMode.SetOffsetAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения IR", $"{value} ГОм", true, 1);
-    }
-
     public async Task<IrConfiguration> ReadConfigurationAsync()
     {
       var config = await _irMode.ReadConfigurationAsync();
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Чтение конфигурации IR", "Конфигурация считана", true, 1);
       return config;
     }
+
+    public List<int> GetVoltagesForResistance(double resistance) => _irMode.GetVoltagesForResistance(resistance);
+
+    #endregion
   }
 }
