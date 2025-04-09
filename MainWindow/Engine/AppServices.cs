@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
+using Utilities.Help;
 
 namespace MainWindowProgram.Engine
 {
@@ -38,6 +39,7 @@ namespace MainWindowProgram.Engine
           windowService
       );
 
+      HelpProvider.RegisterHelp(window);
       return (viewModel, usb);
     }
   }
