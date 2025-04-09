@@ -6,7 +6,13 @@
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="25">
-    <Border Background="{StaticResource IsCheckedColorSolidColorBrush}" Opacity="0.7" CornerRadius="4" MouseEnter="Border_MouseEnter" MouseLeave="Border_MouseLeave" Name="replaceWord">
+    <Border Background="{StaticResource IsCheckedColorSolidColorBrush}" 
+            Opacity="0.7" 
+            CornerRadius="4" 
+            MouseEnter="Border_MouseEnter" 
+            MouseLeave="Border_MouseLeave" 
+            Name="replaceWord"
+            PreviewMouseDown="replaceWord_PreviewMouseDown">
         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>

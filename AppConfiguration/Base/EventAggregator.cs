@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static AppConfiguration.SystemState.SystemStateManager;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace AppConfiguration.Base
 {
@@ -75,6 +77,16 @@ namespace AppConfiguration.Base
     static public event Action<string> SearchButtonPressed;
 
     /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замены текста.
+    /// </summary>
+    static public event Action ReplaceWordButtonPressed;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замены текста.
+    /// </summary>
+    static public event Action ReplaceAllWordsButtonPressed;
+
+    /// <summary>
     /// Событие, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
     /// </summary>
     public static event Action<string> SearchTextRequested;
@@ -97,6 +109,11 @@ namespace AppConfiguration.Base
     public static event Action<string, bool?, bool?, int, string> SearchText;
 
     /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замена слова.
+    /// </summary>
+    public static event Action<string, string, bool?, bool?, int, string> ReplaceText;
+
+    /// <summary>
     /// Событие для запроса показа окна прогресса с блюром на главном окне
     /// </summary>
     public static event Action RequestShowProgress;
@@ -105,6 +122,11 @@ namespace AppConfiguration.Base
     /// Событие для запроса закрытия окна прогресса и снятия блюра с главного окна
     /// </summary>
     public static event Action RequestCloseProgress;
+
+    /// <summary>
+    /// Событие, которое вызывается для добавления нового элемента в MultiEditor.
+    /// </summary>
+    static public event Action<UserControl, string, string> OpenOpk;
 
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
@@ -152,6 +174,17 @@ namespace AppConfiguration.Base
           LockedChanged?.Invoke(IsLocked);
         }
       }
+    }
+
+    /// <summary>
+    /// Возвращает текущий статус прав администратора.
+    /// </summary>
+    /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
+    static public bool GetAdminRights()
+    {
+      bool result = false;
+      Application.Current.Dispatcher.Invoke(() => result = IsAdmin);
+      return result;
     }
 
     /// <summary>
@@ -224,6 +257,15 @@ namespace AppConfiguration.Base
     /// Метод для вызова события, когда активное окно - TextEditor.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseReplaceText(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      ReplaceText?.Invoke(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
     public static void RaiseCloseSearchWindow()
     {
       CloseSearchWindow?.Invoke();
@@ -261,6 +303,22 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
+    /// Метод для вызова события, когда нажата кнопка поиска.
+    /// </summary>
+    static public void RaiseReplaceWordButtonPressed()
+    {
+      ReplaceWordButtonPressed?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка поиска.
+    /// </summary>
+    static public void RaiseReplaceAllWordsButtonPressed()
+    {
+      ReplaceAllWordsButtonPressed?.Invoke();
+    }
+
+    /// <summary>
     /// Метод для вызова события, когда происходит смена активного окна.
     /// </summary>
     /// <param name="isTextEditor"></param>
@@ -286,6 +344,15 @@ namespace AppConfiguration.Base
     public static void RaiseRequestCloseProgress()
     {
       RequestCloseProgress?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события добавления нового элемента.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseOpenOpk(UserControl userControl,string elementName, string elementData)
+    {
+      OpenOpk?.Invoke(userControl, elementName, elementData);
     }
   }
 }

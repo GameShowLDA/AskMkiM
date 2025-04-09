@@ -41,6 +41,11 @@ namespace UI.Components
     internal TextSearchManager textSearchManager;
 
     /// <summary>
+    /// Объект, управляющий операциями с поиском по тексту.
+    /// </summary>
+    internal TextReplacementManager textReplacementManager;
+
+    /// <summary>
     /// Объект, управляющий операциями связанные с пользовательскими элементами управления.
     /// </summary>
     internal ControlManager controlManager;
@@ -64,6 +69,7 @@ namespace UI.Components
       textSearchManager = new TextSearchManager(fileManager, this);
       controlManager = new ControlManager(fileManager, this);
       saveFileManager = new SaveFileManager(fileManager);
+      textReplacementManager = new TextReplacementManager(fileManager, this, controlManager);
     }
 
     /// <summary>
@@ -196,7 +202,7 @@ namespace UI.Components
 
       if (e.Key == Key.System && e.SystemKey == Key.X && Keyboard.Modifiers == ModifierKeys.Alt)
       {
-        var activeTab = fileManager.OpenPages.FirstOrDefault(page => 
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page =>
           page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
         if (activeTab != null)
         {
@@ -220,7 +226,7 @@ namespace UI.Components
     /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
     public bool SaveFile()
     {
-      var activeTab = fileManager.OpenPages.FirstOrDefault(page => 
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page =>
         page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
       return saveFileManager.SaveFile(activeTab);
     }
@@ -246,6 +252,79 @@ namespace UI.Components
       textSearchManager.SearchResultsReady += OnSearchResultsReady;
       await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
+
+    /// <summary>
+    /// Выполняет поиск по тектсу.
+    /// </summary>
+    /// <param name="replaceText">Текст, на который нужно заменить искомый текст.</param>
+    /// <param name="searchText">Текст, который мы ищем.</param>
+    /// <param name="wholeWord">Если true - ищем только слово целиком, false - ищем все вхождения заданного текста.</param>
+    /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
+    /// <param name="searchArea">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
+    /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
+    public async Task ReplaceWordData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      var fullText = textSearchManager.GetText(searchArea);
+      textSearchManager.InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
+      if (string.Equals(searchParameters, "FindNext"))
+      {
+        ReplaceNextWord(replaceText, searchText);
+      }
+      else if (string.Equals(searchParameters, "FindAll"))
+      {
+        ReplaceAllWords(replaceText, searchText);
+      }
+    }
+
+    private void ReplaceAllWords(string replaceText, string searchText)
+    {
+      if (textSearchManager.foundInOpenedFiles.Count > 0)
+      {
+        foreach (var file in textSearchManager.foundInOpenedFiles)
+        {
+          for (int i = file.Value.Count - 1; i >= 0; i--)
+          {
+            var result = file.Value[i];
+            var lineStartOffset = result.StartOffset;
+            int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, result.SubstringFromWord, searchText);
+            if (globalStartOffset >= 0)
+            {
+              textReplacementManager.ReplaceWord(file.Key, result, globalStartOffset, replaceText, searchText);
+            }
+          }
+        }
+      }
+    }
+
+    private void ReplaceNextWord(string replaceText, string searchText)
+    {
+      if (textSearchManager.foundInOpenedFiles.Count > 0)
+      {
+        var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
+        var lineStartOffset = searchResult.Value.FirstOrDefault().StartOffset;
+        int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, searchResult.Value.FirstOrDefault().SubstringFromWord, searchText);
+        if (globalStartOffset >= 0)
+        {
+          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), globalStartOffset, replaceText, searchText);
+        }
+      }
+    }
+
+    private int CalculateGlobalStartOffset(int lineStartOffset, string lineText, string searchText)
+    {
+      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.Ordinal);
+
+      if (wordStartIndex >= 0)
+      {
+        return lineStartOffset + wordStartIndex;
+      }
+      else
+      {
+        return -1;
+      }
+    }
+
 
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
     {

@@ -285,6 +285,39 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Выполняет поиск по тексту в редакторе.
+    /// </summary>
+    /// <param name="searchText">
+    /// Текст, который нужно найти.
+    /// </param>
+    /// <param name="wholeWord">
+    /// Если true - ищем только слово целиком, иначе ищем все вхождения.
+    /// </param>
+    /// <param name="caseWord">
+    /// Если true - учитываем регистр, иначе не учитываем.
+    /// </param>
+    /// <param name="searchArea">
+    /// Параметры поиска: найти далее, найти предыдущее, найти все.
+    /// </param>
+    /// <param name="searchParameters">
+    /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
+    /// </param>
+    public void ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+
+        return;
+      }
+
+      LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
+      CloseSearchResults();
+      MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
     /// Обрабатывает закрытие окна поиска.
     /// </summary>
     /// <remarks>
