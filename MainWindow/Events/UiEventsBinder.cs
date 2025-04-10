@@ -5,6 +5,10 @@ using AppConfiguration.Base;
 using ICSharpCode.AvalonEdit;
 using UI.Components;
 using UI.Controls.Search;
+using static UI.Components.Invoke.OpenFileButton;
+using UI.Controls.TextEditor;
+using System.Windows.Controls;
+using MainWindowProgram.Services;
 
 namespace MainWindowProgram.Events
 {
@@ -23,6 +27,11 @@ namespace MainWindowProgram.Events
     /// Контейнер для управления несколькими редакторами внутри интерфейса.
     /// </summary>
     private readonly MultiWindowControl _multiWindow;
+
+    /// <summary>
+    /// Контейнер для управления несколькими редакторами внутри интерфейса.
+    /// </summary>
+    private readonly MultiWindowService _multiWindowService;
 
     /// <summary>
     /// Свойство, указывающее, открыто ли окно поиска.
@@ -55,6 +64,8 @@ namespace MainWindowProgram.Events
       EventAggregator.ReplaceText += SearchWindow_ReplaceTextHandler;
 
       _mainWindow.SearchWindow.ClearHighlights += _multiWindow.OnSearchWindowClosing;
+
+      EventAggregator.OpenOpk += OnOpenOpk;
     }
 
     /// <summary>
@@ -123,6 +134,12 @@ namespace MainWindowProgram.Events
     private void SearchWindow_ReplaceTextHandler(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       _multiWindow.ReplaceData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void OnOpenOpk(UserControl userControl, string elementName, string elementData)
+    {
+      var texteditor = userControl as TextEditorUI;
+      _multiWindow.AddControl(elementName, texteditor, TypeWindow.Files);
     }
   }
 }

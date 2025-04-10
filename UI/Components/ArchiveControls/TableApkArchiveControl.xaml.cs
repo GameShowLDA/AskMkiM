@@ -208,18 +208,26 @@ namespace UI.Components.ArchiveControls
         var archiveDirectory = Path.Combine(ArchiveSettings.ArchivePath, $"{_archiveName}.apkw");
         var fileEditor = new FileEditor();
 
-        if (await fileEditor.DeleteFileFromArchive(archiveDirectory, opkFile.OpkFilename))
+        MessageBoxResult result = MessageBox.Show(
+                "Вы уверены, что хотите удалить этот файл?",
+                "Подтверждение удаления",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes)
         {
-          var message = $"Файл {opkFile.OpkFilename} удален из архива {_archiveName}.apkw";
-          await ShowOpkFiles();
-          LogInformation(message);
-          MessageBox.Show(message, "Успех!", MessageBoxButton.OK);
-        }
-        else
-        {
-          var message = $"Файл {opkFile.OpkFilename} не удалось корректно удалить из архива {_archiveName}.apkw.";
-          MessageBox.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
-          LogError(message);
+          if (await fileEditor.DeleteFileFromArchive(archiveDirectory, opkFile.OpkFilename))
+          {
+            var message = $"Файл {opkFile.OpkFilename} удален из архива {_archiveName}.apkw";
+            await ShowOpkFiles();
+            LogInformation(message);
+          }
+          else
+          {
+            var message = $"Файл {opkFile.OpkFilename} не удалось корректно удалить из архива {_archiveName}.apkw.";
+            MessageBox.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            LogError(message);
+          }
         }
       }
     }
@@ -285,12 +293,10 @@ namespace UI.Components.ArchiveControls
       LogInformation($"Сработан обработчик события для кнопки \"Открыть\"");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
-      // TODO: Добавить открытие файлов
       var textEditor = new TextEditorUI();
       textEditor.Text = content;
-      //textEditor.IsReadOnly = true;
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
-    }    
+    }
 
     private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -302,10 +308,8 @@ namespace UI.Components.ArchiveControls
       LogInformation($"Сработан обработчик события для двойного клика по строке opk-архива");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
-      // TODO: Добавить открытие файлов
       var textEditor = new TextEditorUI();
       textEditor.Text = content;
-      //textEditor.IsReadOnly = true;
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }
   }
