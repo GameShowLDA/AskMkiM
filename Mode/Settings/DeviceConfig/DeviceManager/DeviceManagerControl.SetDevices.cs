@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Device;
 
 namespace Mode.Settings.DeviceConfig.DeviceManager

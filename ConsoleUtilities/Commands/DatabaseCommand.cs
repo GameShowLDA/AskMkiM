@@ -5,6 +5,7 @@ using ConsoleUtilities.Models;
 using ConsoleUtilities.Services;
 using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 
 namespace ConsoleUtilities.Commands
 {

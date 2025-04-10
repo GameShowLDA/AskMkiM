@@ -1,6 +1,7 @@
 ﻿using AppConfiguration.Base;
 using DataBaseConfiguration;
 using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using Microsoft.EntityFrameworkCore;
 
 namespace TestConsole
@@ -62,7 +63,7 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      using var dbContext = DataBaseConfiguration.Configurations.DataBaseConfig.Context;
+      using var dbContext = DataBaseConfig.Context;
 
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();
@@ -88,7 +89,7 @@ namespace TestConsole
     private static async Task DeleteAllDataAsync()
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={DataBaseConfiguration.Configurations.DataBaseConfig.ConfigFilePath}");
+        .UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
 
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Удаление всех данных...");
@@ -111,7 +112,7 @@ namespace TestConsole
     private static async Task AddRandomDataAsync()
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={DataBaseConfiguration.Configurations.DataBaseConfig.ConfigFilePath}");
+        .UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
 
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Добавление тестовых данных...");

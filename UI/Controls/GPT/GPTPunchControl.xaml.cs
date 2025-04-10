@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 
 namespace UI.Controls.GPT

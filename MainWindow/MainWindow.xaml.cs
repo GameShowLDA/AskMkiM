@@ -1,12 +1,14 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
 using ConsoleUtilities.Engine;
 using ConsoleUtilities.Services;
 using MainWindowProgram.Engine;
 using MainWindowProgram.Events;
+using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using UI.Controls.Search;
@@ -88,6 +90,12 @@ namespace MainWindowProgram
         {
           await applicationInitializer.InitializeAsync();
         });
+
+        await this.Dispatcher.InvokeAsync(() =>
+        {
+          HotkeyBinderManager.AttachAllHotkeys(this, this.DataContext);
+        }, DispatcherPriority.Loaded);
+
       }
       catch (InvalidOperationException exception)
       {

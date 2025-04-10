@@ -1,5 +1,6 @@
 ﻿using System.Windows.Media;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;

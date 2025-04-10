@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppConfiguration.Execution;
+﻿using AppConfiguration.Execution;
 using AppConfiguration.MeasurementError;
 using AppConfiguration.Protocol;
 using System.Windows;
 using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Theme;
+using DataBaseConfiguration;
 
 namespace MainWindowProgram.Engine
 {
@@ -65,7 +61,7 @@ namespace MainWindowProgram.Engine
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-        var db = DataBaseConfiguration.Configurations.DataBaseConfig.InitializeDB();
+        var db = DataBaseConfig.InitializeDB();
 
         await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
         await ThemeSettingsManager.ReadThemeModeAsync();

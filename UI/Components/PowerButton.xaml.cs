@@ -8,6 +8,7 @@ using NewCore.Base.Interface.Main;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static AppConfiguration.SystemState.SystemStateManager;
 using static AppConfiguration.Base.EventAggregator;
+using DataBaseConfiguration.Services.Device;
 
 namespace UI.Components
 {
