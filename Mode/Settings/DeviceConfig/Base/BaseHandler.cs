@@ -1,6 +1,7 @@
 ﻿using System.IO.Ports;
 using System.Net;
 using System.Windows;
+using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Base;

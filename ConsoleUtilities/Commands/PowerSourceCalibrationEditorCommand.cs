@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using ConsoleUtilities.Core;
 using ConsoleUtilities.Models;
 using DataBaseConfiguration.Models.Device;
-using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Device;
 using static NewCore.Enum.DeviceEnum;

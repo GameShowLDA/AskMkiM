@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataBaseConfiguration.Services.Hotkey.Defaults;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataBaseConfiguration.Configurations.Device
+namespace DataBaseConfiguration
 {
   static public class DataBaseConfig
   {
@@ -48,6 +49,8 @@ namespace DataBaseConfiguration.Configurations.Device
       {
         using var context = new AppDbContext(OptionsBuilder.Options);
         await context.Database.MigrateAsync();
+
+        FileHotkeySeeder.Seed(context);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("✅ База данных инициализирована, миграции применены.");

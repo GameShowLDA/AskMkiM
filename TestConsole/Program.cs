@@ -1,4 +1,4 @@
-﻿using DataBaseConfiguration.Configurations.Device;
+﻿using DataBaseConfiguration;
 using TestConsole.GPT;
 using TestConsole.MINT;
 

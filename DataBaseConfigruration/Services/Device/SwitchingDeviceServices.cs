@@ -1,35 +1,35 @@
-﻿using DataBaseConfiguration.Configurations.Device;
+﻿using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Interface.Main;
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.Device
 {
   /// <summary>
-  /// Сервис для работы с моделями модуля коммутации реле из базы данных.
+  /// Сервис для работы с моделями устройства коммутации шин из базы данных.
   /// Предоставляет методы для работы с устройствами, полученными из БД,
   /// преобразуя их из моделей данных в объекты.
   /// </summary>
-  public class RelaySwitchModuleServices : Service<IRelaySwitchModule>
+  public class SwitchingDeviceServices : Service<ISwitchingDevice>
   {
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="RelaySwitchModuleServices"/>.
+    /// Инициализирует новый экземпляр класса <see cref="SwitchingDeviceServices"/>.
     /// </summary>
-    public RelaySwitchModuleServices() : base(DataBaseConfig.Context)
+    public SwitchingDeviceServices() : base(DataBaseConfig.Context)
     { }
 
     /// <summary>
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <returns>Список модулей коммутации реле.</returns>
-    public List<IRelaySwitchModule> GetDevicesByNumberChassis(int numberChassis)
+    /// <returns>Список устройств коммутации шин.</returns>
+    public List<ISwitchingDevice> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<RelaySwitchModuleEntity>()
+      var data = _context.Set<SwitchingDeviceEntity>()
                          .Where(device => device.NumberChassis == numberChassis)
                          .ToList();
 
       var result = data
-          .OfType<IRelaySwitchModule>()
+          .OfType<ISwitchingDevice>()
           .Select(GetDeviceInstance)
           .Where(instance => instance != null)
           .ToList();
@@ -42,16 +42,17 @@ namespace DataBaseConfiguration.Services
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
-    public List<RelaySwitchModuleEntity> GetEntitiesByNumberChassis(int numberChassis)
+    public List<SwitchingDeviceEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<RelaySwitchModuleEntity>()
+      return _context.Set<SwitchingDeviceEntity>()
                      .Where(device => device.NumberChassis == numberChassis)
                      .ToList();
     }
 
-    public List<RelaySwitchModuleEntity> GetAllEntities()
+    public List<SwitchingDeviceEntity> GetAllEntities()
     {
-      return GetAllData().OfType<RelaySwitchModuleEntity>().ToList();
+      return GetAllData().OfType<SwitchingDeviceEntity>().ToList();
     }
+
   }
 }

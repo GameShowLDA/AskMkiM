@@ -1,36 +1,34 @@
-﻿using DataBaseConfiguration.Configurations.Device;
-using DataBaseConfiguration.Models.Device;
-using NewCore.Base.Device;
+﻿using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Interface.Main;
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.Device
 {
   /// <summary>
-  /// Сервис для работы с моделями ППУ из базы данных.
+  /// Сервис для работы с моделями модуля коммутации реле из базы данных.
   /// Предоставляет методы для работы с устройствами, полученными из БД,
   /// преобразуя их из моделей данных в объекты.
   /// </summary>
-  public class BreakdownTesterServices : Service<IBreakdownTester>
+  public class RelaySwitchModuleServices : Service<IRelaySwitchModule>
   {
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="BreakdownTesterServices"/>.
+    /// Инициализирует новый экземпляр класса <see cref="RelaySwitchModuleServices"/>.
     /// </summary>
-    public BreakdownTesterServices() : base(DataBaseConfig.Context)
+    public RelaySwitchModuleServices() : base(DataBaseConfig.Context)
     { }
 
     /// <summary>
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <returns>Список пробойных установок.</returns>
-    public List<IBreakdownTester> GetDevicesByNumberChassis(int numberChassis)
+    /// <returns>Список модулей коммутации реле.</returns>
+    public List<IRelaySwitchModule> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<BreakdownTesterEntity>()
+      var data = _context.Set<RelaySwitchModuleEntity>()
                          .Where(device => device.NumberChassis == numberChassis)
                          .ToList();
 
       var result = data
-          .OfType<IBreakdownTester>()
+          .OfType<IRelaySwitchModule>()
           .Select(GetDeviceInstance)
           .Where(instance => instance != null)
           .ToList();
@@ -43,16 +41,16 @@ namespace DataBaseConfiguration.Services
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
-    public List<BreakdownTesterEntity> GetEntitiesByNumberChassis(int numberChassis)
+    public List<RelaySwitchModuleEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<BreakdownTesterEntity>()
+      return _context.Set<RelaySwitchModuleEntity>()
                      .Where(device => device.NumberChassis == numberChassis)
                      .ToList();
     }
 
-    public List<BreakdownTesterEntity> GetAllEntities()
+    public List<RelaySwitchModuleEntity> GetAllEntities()
     {
-      return GetAllData().OfType<BreakdownTesterEntity>().ToList();
+      return GetAllData().OfType<RelaySwitchModuleEntity>().ToList();
     }
   }
 }

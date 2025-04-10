@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;

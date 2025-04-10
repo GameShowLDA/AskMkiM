@@ -1,8 +1,7 @@
-﻿using DataBaseConfiguration.Configurations.Device;
-using DataBaseConfiguration.Models.Device;
+﻿using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Interface.Main;
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.Device
 {
   /// <summary>
   /// Сервис для работы с моделями стоек СКМ из базы данных.

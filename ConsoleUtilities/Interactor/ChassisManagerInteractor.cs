@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ConsoleUtilities.Core;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 
 namespace ConsoleUtilities.Interactor

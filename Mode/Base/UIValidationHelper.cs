@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using Mode.Models;
 using UI.Components;
 using UI.Controls.Protocol;

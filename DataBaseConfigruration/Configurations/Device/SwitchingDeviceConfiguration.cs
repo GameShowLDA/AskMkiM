@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

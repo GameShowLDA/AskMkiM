@@ -5,7 +5,7 @@ using AppConfiguration.Execution;
 using AppConfiguration.MeasurementError;
 using AppConfiguration.Protocol;
 using AppConfiguration.Theme;
-using DataBaseConfiguration.Configurations.Device;
+using DataBaseConfiguration;
 using static Utilities.LoggerUtility;
 
 namespace TestWPF

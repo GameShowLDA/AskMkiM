@@ -6,7 +6,7 @@ using NewCore.Base.Interface.Main;
 using static Utilities.LoggerUtility;
 
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.Device
 {
 
   /// <summary>

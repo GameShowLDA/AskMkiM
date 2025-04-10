@@ -1,35 +1,34 @@
-﻿using DataBaseConfiguration.Configurations.Device;
-using DataBaseConfiguration.Models.Device;
+﻿using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Interface.Main;
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.Device
 {
   /// <summary>
-  /// Сервис для работы с моделями точных измерителей из базы данных.
+  /// Сервис для работы с моделями модуля источника напряжения и тока из базы данных.
   /// Предоставляет методы для работы с устройствами, полученными из БД,
   /// преобразуя их из моделей данных в объекты.
   /// </summary>
-  public class PrecisionMeterServices : Service<IPrecisionMeter>
+  public class PowerSourceModuleServices : Service<IPowerSourceModule>
   {
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="PrecisionMeterServices"/>.
+    /// Инициализирует новый экземпляр класса <see cref="PowerSourceModuleServices"/>.
     /// </summary>
-    public PrecisionMeterServices() : base(DataBaseConfig.Context)
+    public PowerSourceModuleServices() : base(DataBaseConfig.Context)
     { }
 
     /// <summary>
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <returns>Список точных измерителей.</returns>
-    public List<IPrecisionMeter> GetDevicesByNumberChassis(int numberChassis)
+    /// <returns>Список модулей источников питания.</returns>
+    public List<IPowerSourceModule> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<PrecisionMeterEntity>()
+      var data = _context.Set<PowerSourceModuleEntity>()
                          .Where(device => device.NumberChassis == numberChassis)
                          .ToList();
 
       var result = data
-          .OfType<IPrecisionMeter>()
+          .OfType<IPowerSourceModule>()
           .Select(GetDeviceInstance)
           .Where(instance => instance != null)
           .ToList();
@@ -42,16 +41,16 @@ namespace DataBaseConfiguration.Services
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
-    public List<PrecisionMeterEntity> GetEntitiesByNumberChassis(int numberChassis)
+    public List<PowerSourceModuleEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<PrecisionMeterEntity>()
+      return _context.Set<PowerSourceModuleEntity>()
                      .Where(device => device.NumberChassis == numberChassis)
                      .ToList();
     }
 
-    public List<PrecisionMeterEntity> GetAllEntities()
+    public List<PowerSourceModuleEntity> GetAllEntities()
     {
-      return GetAllData().OfType<PrecisionMeterEntity>().ToList();
+      return GetAllData().OfType<PowerSourceModuleEntity>().ToList();
     }
   }
 }

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DataBaseConfiguration.Models.Device;
-using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;

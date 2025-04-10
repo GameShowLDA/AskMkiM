@@ -122,8 +122,8 @@
                     <MenuItem Header="Сравнить" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <MenuItem Header="Открыть" Command="{Binding File.OpenFileCommand}" />
-                    <MenuItem Header="Создать" Command="{Binding File.CreateNewFileCommand}" />
+                    <MenuItem Header="Открыть" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
+                    <MenuItem Header="Создать" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                     <MenuItem Header="Выход" Command="{Binding File.ExitApplicationCommand}"/>

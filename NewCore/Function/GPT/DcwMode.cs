@@ -53,6 +53,7 @@ namespace NewCore.Function.GPT
 
     public async Task<string> GetModeAsync()
     {
+      await Task.Delay(50);
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?";
       var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
       return response.Trim();

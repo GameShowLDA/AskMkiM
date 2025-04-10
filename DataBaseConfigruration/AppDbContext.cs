@@ -1,6 +1,9 @@
 ﻿using DataBaseConfiguration.Configurations;
 using DataBaseConfiguration.Configurations.Device;
+using DataBaseConfiguration.Configurations.Hotkey;
+using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
+using DataBaseConfiguration.Models.Hotkey;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration
@@ -51,6 +54,11 @@ namespace DataBaseConfiguration
     public DbSet<RackEntity> Rack { get; set; }
 
     /// <summary>
+    /// Таблица горячих главиш файлов.
+    /// </summary>
+    public DbSet<FileHotkeyEntity> FileHotKeys { get; set; }
+
+    /// <summary>
     /// Конфигурация базы данных.
     /// </summary>
     /// <param name="optionsBuilder">
@@ -84,6 +92,7 @@ namespace DataBaseConfiguration
       modelBuilder.ApplyConfiguration(new FastMeterConfiguration());
       modelBuilder.ApplyConfiguration(new PrecisionMeterConfiguration());
       modelBuilder.ApplyConfiguration(new RackConfiguration());
+      modelBuilder.ApplyConfiguration(new FileHotkeyEntityConfiguration());
 
       base.OnModelCreating(modelBuilder);
     }

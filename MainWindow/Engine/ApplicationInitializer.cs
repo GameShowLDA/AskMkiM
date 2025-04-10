@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppConfiguration.Execution;
+﻿using AppConfiguration.Execution;
 using AppConfiguration.MeasurementError;
 using AppConfiguration.Protocol;
 using System.Windows;
 using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Theme;
-using DataBaseConfiguration.Configurations.Device;
+using DataBaseConfiguration;
 
 namespace MainWindowProgram.Engine
 {

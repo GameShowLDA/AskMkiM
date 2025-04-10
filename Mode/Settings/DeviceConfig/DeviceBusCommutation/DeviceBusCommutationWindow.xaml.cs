@@ -1,6 +1,8 @@
 ﻿using System.Windows;
+using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Base.Device;

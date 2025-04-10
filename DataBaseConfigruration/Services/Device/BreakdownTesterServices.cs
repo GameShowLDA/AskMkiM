@@ -1,35 +1,35 @@
-﻿using DataBaseConfiguration.Configurations.Device;
-using DataBaseConfiguration.Models.Device;
+﻿using DataBaseConfiguration.Models.Device;
+using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.Device
 {
   /// <summary>
-  /// Сервис для работы с моделями устройства коммутации шин из базы данных.
+  /// Сервис для работы с моделями ППУ из базы данных.
   /// Предоставляет методы для работы с устройствами, полученными из БД,
   /// преобразуя их из моделей данных в объекты.
   /// </summary>
-  public class SwitchingDeviceServices : Service<ISwitchingDevice>
+  public class BreakdownTesterServices : Service<IBreakdownTester>
   {
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="SwitchingDeviceServices"/>.
+    /// Инициализирует новый экземпляр класса <see cref="BreakdownTesterServices"/>.
     /// </summary>
-    public SwitchingDeviceServices() : base(DataBaseConfig.Context)
+    public BreakdownTesterServices() : base(DataBaseConfig.Context)
     { }
 
     /// <summary>
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <returns>Список устройств коммутации шин.</returns>
-    public List<ISwitchingDevice> GetDevicesByNumberChassis(int numberChassis)
+    /// <returns>Список пробойных установок.</returns>
+    public List<IBreakdownTester> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<SwitchingDeviceEntity>()
+      var data = _context.Set<BreakdownTesterEntity>()
                          .Where(device => device.NumberChassis == numberChassis)
                          .ToList();
 
       var result = data
-          .OfType<ISwitchingDevice>()
+          .OfType<IBreakdownTester>()
           .Select(GetDeviceInstance)
           .Where(instance => instance != null)
           .ToList();
@@ -42,17 +42,16 @@ namespace DataBaseConfiguration.Services
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
-    public List<SwitchingDeviceEntity> GetEntitiesByNumberChassis(int numberChassis)
+    public List<BreakdownTesterEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<SwitchingDeviceEntity>()
+      return _context.Set<BreakdownTesterEntity>()
                      .Where(device => device.NumberChassis == numberChassis)
                      .ToList();
     }
 
-    public List<SwitchingDeviceEntity> GetAllEntities()
+    public List<BreakdownTesterEntity> GetAllEntities()
     {
-      return GetAllData().OfType<SwitchingDeviceEntity>().ToList();
+      return GetAllData().OfType<BreakdownTesterEntity>().ToList();
     }
-
   }
 }
