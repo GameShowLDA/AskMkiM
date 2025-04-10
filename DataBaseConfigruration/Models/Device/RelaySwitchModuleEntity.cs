@@ -1,23 +1,28 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using NewCore.Base.Device;
-using NewCore.Base.DeviceResponses;
-using NewCore.Base.Function.ModuleVoltageCurrentSource;
+using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
 
-namespace DataBaseConfiguration.Models
+namespace DataBaseConfiguration.Models.Device
 {
   /// <summary>
-  /// Класс, представляющий сущность модуля источника питания.
+  /// Класс, представляющий сущность модуля коммутации реле.
   /// </summary>
-  public class PowerSourceModuleEntity : IPowerSourceModule
+  public class RelaySwitchModuleEntity : IRelaySwitchModule
   {
     /// <inheritdoc />
     public int Id { get; set; }
 
     /// <inheritdoc />
     public int NumberChassis { get; set; }
+
+    /// <inheritdoc />
+    public int NumberRack { get; set; }
+
+    /// <inheritdoc />
+    public int PointCount { get; set; }
 
     /// <inheritdoc />
     public string Name { get; set; }
@@ -32,7 +37,7 @@ namespace DataBaseConfiguration.Models
     public string ConnectionDetails { get; set; }
 
     /// <inheritdoc />
-    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.PowerSourceModule;
+    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.RelaySwitchModule;
 
     /// <inheritdoc />
     public string DeviceClass { get; set; }
@@ -43,15 +48,15 @@ namespace DataBaseConfiguration.Models
 
     /// <inheritdoc />
     [NotMapped]
-    public ICurrentManager CurrentManager { get; set; }
+    public IMeterManager MeterManager { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public IPointManager PointManager { get; set; }
 
     /// <inheritdoc />
     [NotMapped]
     public IStateManager StateManager { get; set; }
-
-    /// <inheritdoc />
-    [NotMapped]
-    public IVoltageManager VoltageManager { get; set; }
 
     /// <inheritdoc />
     [NotMapped]
@@ -60,8 +65,5 @@ namespace DataBaseConfiguration.Models
     /// <inheritdoc />
     [NotMapped]
     public IDeviceProtocol DeviceProtocol { get; set; }
-
-    /// <inheritdoc />
-    public string? ResistanceCalibrationJson { get; set; }
   }
 }

@@ -1,4 +1,4 @@
-﻿using DataBaseConfiguration.Configurations;
+﻿using DataBaseConfiguration.Configurations.Device;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 

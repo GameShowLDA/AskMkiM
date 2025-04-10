@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Models;
+﻿using DataBaseConfiguration.Configurations.Device;
+using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Interface.Main;
 
 namespace DataBaseConfiguration.Services
@@ -13,7 +14,7 @@ namespace DataBaseConfiguration.Services
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="SwitchingDeviceServices"/>.
     /// </summary>
-    public SwitchingDeviceServices() : base(Configurations.DataBaseConfig.Context)
+    public SwitchingDeviceServices() : base(DataBaseConfig.Context)
     { }
 
     /// <summary>

@@ -1,8 +1,8 @@
-﻿using DataBaseConfiguration.Models;
+﻿using DataBaseConfiguration.Models.Device;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DataBaseConfiguration.Configurations
+namespace DataBaseConfiguration.Configurations.Device
 {
   public class ChassisManagerConfiguration : IEntityTypeConfiguration<ChassisManagerEntity>
   {

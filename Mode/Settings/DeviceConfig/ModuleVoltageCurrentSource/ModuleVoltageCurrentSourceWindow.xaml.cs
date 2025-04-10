@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
 using Mode.Settings.DeviceConfig.Base;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;

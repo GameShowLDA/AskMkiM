@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ConsoleUtilities.Core;
 using ConsoleUtilities.Models;
-using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
 using NewCore.Base.DeviceResponses;
 using NewCore.Device;

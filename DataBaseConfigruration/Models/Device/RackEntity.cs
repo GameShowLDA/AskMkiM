@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using NewCore.Base.Device;
-using NewCore.Base.Function.ManagerChassis;
+﻿using NewCore.Base.Device;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataBaseConfiguration.Models
+namespace DataBaseConfiguration.Models.Device
 {
   /// <summary>
-  /// Класс, представляющий сущность менеджера шасси.
+  /// Класс, представляющий сущность стойка коммутационная.
   /// </summary>
-  public class ChassisManagerEntity : IChassisManager
+  public class RackEntity : IRack, IHeadUnit
   {
     /// <inheritdoc />
     public int Id { get; set; }
@@ -26,21 +25,16 @@ namespace DataBaseConfiguration.Models
     public int Number { get; set; }
 
     /// <inheritdoc />
+    public int NumberChassis { get; set; }
+
+    /// <inheritdoc />
     public string ConnectionDetails { get; set; }
 
     /// <inheritdoc />
-    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.ChassisManager;
+    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.Rack;
 
     /// <inheritdoc />
     public string DeviceClass { get; set; }
-
-    /// <inheritdoc />
-    [NotMapped]
-    public IStateManagerChassis StateManager { get; set; }
-
-    /// <inheritdoc />
-    [NotMapped]
-    public IPowerManagerChassis PowerManager { get; set; }
 
     /// <inheritdoc />
     [NotMapped]

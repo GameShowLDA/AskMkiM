@@ -4,7 +4,7 @@ using NewCore.Communication;
 using NewCore.Enum;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataBaseConfiguration.Models
+namespace DataBaseConfiguration.Models.Device
 {
   /// <summary>
   /// Класс, представляющий сущность точного измерителя.

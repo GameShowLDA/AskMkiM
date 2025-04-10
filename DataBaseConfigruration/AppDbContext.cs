@@ -1,5 +1,6 @@
 ﻿using DataBaseConfiguration.Configurations;
-using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Configurations.Device;
+using DataBaseConfiguration.Models.Device;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration

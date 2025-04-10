@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Models;
+﻿using DataBaseConfiguration.Configurations.Device;
+using DataBaseConfiguration.Models.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 
@@ -14,7 +15,7 @@ namespace DataBaseConfiguration.Services
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BreakdownTesterServices"/>.
     /// </summary>
-    public BreakdownTesterServices() : base(Configurations.DataBaseConfig.Context)
+    public BreakdownTesterServices() : base(DataBaseConfig.Context)
     { }
 
     /// <summary>

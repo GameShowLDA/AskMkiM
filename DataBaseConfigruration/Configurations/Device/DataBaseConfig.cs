@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataBaseConfiguration.Configurations
+namespace DataBaseConfiguration.Configurations.Device
 {
   static public class DataBaseConfig
   {
@@ -31,7 +31,7 @@ namespace DataBaseConfiguration.Configurations
     /// <summary>
     /// Опции конфигурации базы данных для подключения через SQLite.
     /// </summary>
-    static internal readonly DbContextOptionsBuilder<AppDbContext> OptionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
+    static internal readonly DbContextOptionsBuilder<AppDbContext> OptionsBuilder = new DbContextOptionsBuilder<AppDbContext>().UseSqlite($"Data Source={ConfigFilePath}");
 
     /// <summary>
     /// Контекст базы данных, используемый для управления состоянием системы.

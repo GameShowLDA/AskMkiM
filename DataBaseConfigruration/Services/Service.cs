@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using Microsoft.EntityFrameworkCore;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;

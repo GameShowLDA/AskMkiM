@@ -5,7 +5,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
 
-namespace DataBaseConfiguration.Models
+namespace DataBaseConfiguration.Models.Device
 {
   /// <summary>
   /// Класс, представляющий сущность быстрого измерителя.

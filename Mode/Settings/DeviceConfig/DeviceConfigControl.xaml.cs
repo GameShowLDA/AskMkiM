@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
 using Mode.Settings.DeviceConfig.BreakDown;
 using Mode.Settings.DeviceConfig.ChassisManager;

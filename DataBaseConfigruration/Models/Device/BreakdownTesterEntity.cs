@@ -1,28 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using NewCore.Base.Device;
-using NewCore.Base.Function.ModuleRelayControl;
+using NewCore.Base.Function.Breakdown;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
 
-namespace DataBaseConfiguration.Models
+namespace DataBaseConfiguration.Models.Device
 {
   /// <summary>
-  /// Класс, представляющий сущность модуля коммутации реле.
+  /// Класс, представляющий сущность пробойной установки.
   /// </summary>
-  public class RelaySwitchModuleEntity : IRelaySwitchModule
+  public class BreakdownTesterEntity : IBreakdownTester
   {
     /// <inheritdoc />
     public int Id { get; set; }
 
     /// <inheritdoc />
     public int NumberChassis { get; set; }
-
-    /// <inheritdoc />
-    public int NumberRack { get; set; }
-
-    /// <inheritdoc />
-    public int PointCount { get; set; }
 
     /// <inheritdoc />
     public string Name { get; set; }
@@ -37,26 +31,26 @@ namespace DataBaseConfiguration.Models
     public string ConnectionDetails { get; set; }
 
     /// <inheritdoc />
-    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.RelaySwitchModule;
-
-    /// <inheritdoc />
     public string DeviceClass { get; set; }
 
     /// <inheritdoc />
-    [NotMapped]
-    public IBusManager BusManager { get; set; }
+    public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.BreakdownTester;
 
     /// <inheritdoc />
     [NotMapped]
-    public IMeterManager MeterManager { get; set; }
+    public IAcwModeBreakdown AcwManger { get; set; }
 
     /// <inheritdoc />
     [NotMapped]
-    public IPointManager PointManager { get; set; }
+    public IDcwModeBreakdown DcwManger { get; set; }
 
     /// <inheritdoc />
     [NotMapped]
-    public IStateManager StateManager { get; set; }
+    public IIrModeBreakdown IrManger { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public ISystemSettingsBreakdown SystemManger { get; set; }
 
     /// <inheritdoc />
     [NotMapped]
