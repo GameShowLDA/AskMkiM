@@ -139,6 +139,7 @@ namespace MainWindowProgram.Events
     private void OnOpenOpk(UserControl userControl, string elementName, string elementData)
     {
       var texteditor = userControl as TextEditorUI;
+      texteditor.IsReadOnly = true;
       _multiWindow.AddControl(elementName, texteditor, TypeWindow.Files);
     }
   }
