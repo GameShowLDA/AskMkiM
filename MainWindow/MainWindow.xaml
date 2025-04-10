@@ -72,6 +72,55 @@
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
         </Style>
 
+        <Style x:Key="SideMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="true">
+                            <DockPanel x:Name="ItemDockPanel" Background="Transparent">
+                                <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="4,0,6,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
+                                <Path x:Name="GlyphPanel" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="7,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="HeaderText" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </DockPanel>
+                            <Popup x:Name="PART_Popup"
+                           AllowsTransparency="true"
+                           Focusable="false"
+                           HorizontalOffset="0"
+                           VerticalOffset="0"
+                           IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                           Placement="Right"
+                           PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                                <Border Background="{TemplateBinding Background}">
+                                    <ScrollViewer x:Name="SubMenuScrollViewer"
+                                          CanContentScroll="true"
+                                          Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                                        <Grid RenderOptions.ClearTypeHint="Enabled">
+                                            <ItemsPresenter x:Name="ItemsPresenter"
+                                                    KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                    Grid.IsSharedSizeScope="true"
+                                                    Margin="2"
+                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                    KeyboardNavigation.TabNavigation="Cycle"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush}" TargetName="ItemDockPanel"/>
+                                <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}" TargetName="HeaderText"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush}" TargetName="ItemDockPanel"/>
+                                <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}" TargetName="HeaderText"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
     <i:Interaction.Triggers>
@@ -152,21 +201,21 @@
 
                 <MenuItem  Header="Тесты" Name="TestControl">
 
-                    <MenuItem Header="Тест СИ">
+                    <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}">
 
                         <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
                         <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
 
                     </MenuItem>
 
-                    <MenuItem Header="Тест ПИ на постоянном токе">
+                    <MenuItem Header="Тест ПИ на постоянном токе" Style="{StaticResource SideMenuItemStyle}">
 
                         <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
                         <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
 
                     </MenuItem>
 
-                    <MenuItem Header="Тест ПИ на переменном токе">
+                    <MenuItem Header="Тест ПИ на переменном токе" Style="{StaticResource SideMenuItemStyle}">
 
                         <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
                         <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />

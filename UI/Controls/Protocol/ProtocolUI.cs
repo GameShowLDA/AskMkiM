@@ -253,6 +253,23 @@ namespace UI.Controls.Protocol
     }
 
     /// <summary>
+    /// Полностью очищает протокол и сбрасывает последнее сообщение.
+    /// </summary>
+    /// <returns>Возвращает признак успешного завершения операции.</returns>
+    public async Task<bool> ClearAllMessagesAsync()
+    {
+      await protocolTextBox.ClearAsync();
+      LastModelMeassage = null;
+
+      if (ActionExecutor.IsPaused)
+      {
+        await ActionExecutor.WaitWhilePausedAsync(this);
+      }
+
+      return await ProcessStepModeAsync(ActionExecutor.StepMode);
+    }
+
+    /// <summary>
     /// Асинхронно удаляет блок, содержащий указанную строку, из RichTextBox.
     /// </summary>
     /// <param name="textToRemove">Строка для поиска и удаления.</param>

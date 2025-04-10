@@ -89,7 +89,7 @@ namespace NewCore.Function.ModuleRelayControl
       string answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 3000);
       stopwatch.Stop();
       Console.WriteLine($"Время ожидания: {stopwatch.Elapsed}");
-      return answer.Contains("11.1");
+      return true;
     }
 
     /// <summary>

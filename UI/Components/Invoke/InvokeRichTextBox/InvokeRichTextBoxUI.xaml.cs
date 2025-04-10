@@ -330,6 +330,20 @@ namespace UI.Components.Invoke.InvokeRichTextBox
     }
 
     /// <summary>
+    /// Асинхронно очищает все строки в RichTextBox.
+    /// </summary>
+    /// <returns>Асинхронная задача.</returns>
+    public async Task ClearAsync()
+    {
+      await Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        protocolTextBox.Document.Blocks.Clear();
+        protocolTextBox.ScrollToEnd();
+        LogInformation("Протокол полностью очищен.");
+      });
+    }
+
+    /// <summary>
     /// Изменяет размер шрифта всего текста в _richTextBox на указанное значение.
     /// </summary>
     /// <param name="change">Величина, на которую изменяется размер шрифта.</param>
