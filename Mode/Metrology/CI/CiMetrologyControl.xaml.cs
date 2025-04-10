@@ -90,10 +90,26 @@ namespace Mode.Metrology.CI
       {
         await base.ConfigureMeter(metrologicalModeRole, dataModel);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.ConnectAsync();
-        await breakDown.IrManger.SetModeAsync();
-        await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage);
-        await breakDown.IrManger.SetTestTimeAsync(dataModel.Time);
+
+        if (!(await breakDown.ConnectableManager.ConnectAsync()).Connect)
+        {
+          throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
+        }
+
+        if (!(await breakDown.IrManger.SetModeAsync()).Success)
+        { 
+          throw new Exception($"Ошибка установка режима IR {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
+        }
+
+        if (!(await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success)
+        { 
+          throw new Exception($"Ошибка установка напряжения {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
+        }
+
+        if (!(await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success)
+        {
+          throw new Exception($"Ошибка установка времени теста {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
+        }
       }
 
       /// <inheritdoc />

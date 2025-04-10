@@ -28,22 +28,25 @@ namespace NewCore.Function.GPT
       LogInformation("Устанавливаем режим DCW на GPT-79904");
 
       if (await GetIsIdleModeEnabled())
+      {
         return (true, string.Empty);
-
+      }
       var command = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} DCW";
-      await _gptModel.DeviceProtocol.QueryAsync(command);
 
-      // Проверка
-      string query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?";
-      string response = await _gptModel.DeviceProtocol.QueryAsync(query);
+      await _gptModel.DeviceProtocol.QueryAsync(command);
+      string response = await GetModeAsync();
       if (response.Trim().Equals("DCW", StringComparison.OrdinalIgnoreCase))
+      {
         return (true, string.Empty);
+      }
 
       LogWarning("Повторная попытка установки режима DCW.");
       await _gptModel.DeviceProtocol.QueryAsync(command);
-      response = await _gptModel.DeviceProtocol.QueryAsync(query);
+      response = await GetModeAsync();
       if (response.Trim().Equals("DCW", StringComparison.OrdinalIgnoreCase))
+      {
         return (true, string.Empty);
+      }
 
       return (false, $"Устройство не приняло режим DCW, ответ: {response}");
     }
@@ -64,7 +67,9 @@ namespace NewCore.Function.GPT
       LogInformation($"Устанавливаем напряжение DCW: {value:F3} В");
 
       if (await GetIsIdleModeEnabled())
+      {
         return (true, string.Empty);
+      }
 
       double kvValue = value / 1000;
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {kvValue:F3}".Replace(',', '.');
@@ -72,13 +77,17 @@ namespace NewCore.Function.GPT
       await _gptModel.DeviceProtocol.QueryAsync(command);
       var actualKv = await GetVoltageAsync();
       if (actualKv.HasValue && Math.Abs(actualKv.Value - kvValue) < 0.01)
+      {
         return (true, string.Empty);
+      }
 
       LogWarning("Повторная попытка установки напряжения DCW.");
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actualKv = await GetVoltageAsync();
       if (actualKv.HasValue && Math.Abs(actualKv.Value - kvValue) < 0.01)
+      {
         return (true, string.Empty);
+      }
 
       return (false, $"Не удалось установить напряжение {kvValue:F3} кВ. Устройство сообщает: {actualKv?.ToString("F3") ?? "недоступно"} кВ.");
     }
@@ -86,7 +95,7 @@ namespace NewCore.Function.GPT
     public async Task<double?> GetVoltageAsync()
     {
       string query = GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE) + "?";
-      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500);
 
       response = response.Trim().Replace("kV", "", StringComparison.OrdinalIgnoreCase).Trim();
       if (double.TryParse(response.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
@@ -105,20 +114,26 @@ namespace NewCore.Function.GPT
       LogInformation($"Устанавливаем верхний предел тока DCW: {value:F3} мА");
 
       if (await GetIsIdleModeEnabled())
+      {
         return (true, string.Empty);
+      }
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CHISET)} {value:F3}".Replace(',', '.');
-      await _gptModel.DeviceProtocol.QueryAsync(command);
 
+      await _gptModel.DeviceProtocol.QueryAsync(command);
       double actual = await GetHighCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
+      {
         return (true, string.Empty);
+      }
 
       LogWarning("Повторная попытка установки верхнего предела тока DCW.");
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetHighCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
+      {
         return (true, string.Empty);
+      }
 
       return (false, $"Устройство сообщает: {actual:F3} мА. Ожидалось: {value:F3} мА.");
     }
@@ -134,20 +149,26 @@ namespace NewCore.Function.GPT
       LogInformation($"Устанавливаем нижний предел тока DCW: {value:F3} мА");
 
       if (await GetIsIdleModeEnabled())
+      {
         return (true, string.Empty);
+      }
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
-      await _gptModel.DeviceProtocol.QueryAsync(command);
 
+      await _gptModel.DeviceProtocol.QueryAsync(command);
       double actual = await GetLowCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
+      {
         return (true, string.Empty);
+      }
 
       LogWarning("Повторная попытка установки нижнего предела тока DCW.");
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetLowCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
+      {
         return (true, string.Empty);
+      }
 
       return (false, $"Устройство сообщает: {actual:F3} мА. Ожидалось: {value:F3} мА.");
     }
@@ -163,20 +184,26 @@ namespace NewCore.Function.GPT
       LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
 
       if (await GetIsIdleModeEnabled())
+      {
         return (true, string.Empty);
+      }
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(command);
 
       double actual = await GetTestTimeAsync();
       if (Math.Abs(actual - value) < 0.1)
+      {
         return (true, string.Empty);
+      }
 
       LogWarning("Повторная попытка установки времени теста DCW.");
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetTestTimeAsync();
       if (Math.Abs(actual - value) < 0.1)
+      {
         return (true, string.Empty);
+      }
 
       return (false, $"Устройство сообщает: {actual:F1} сек. Ожидалось: {value:F1} сек.");
     }
@@ -336,7 +363,7 @@ namespace NewCore.Function.GPT
         return 0;
 
       var query = $"{GetCommandSyntax(command)} ?";
-      var response = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 100);
+      var response = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 100, timeout: 1000);
       return double.TryParse(response.Replace("kV", "").Replace("mA", "").Replace("S", "").Trim().Replace(".", ","), out var result)
         ? result
         : 0.0;

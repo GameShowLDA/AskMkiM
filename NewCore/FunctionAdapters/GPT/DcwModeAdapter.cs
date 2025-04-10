@@ -5,6 +5,7 @@ using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.GPT.Data;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device.Breakdown;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -29,6 +30,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetModeAsync();
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима DCW", result.Success ? "DCW" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -44,6 +49,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetVoltageAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения DCW", result.Success ? $"{value} В" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetVoltageFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -73,6 +82,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetHighCurrentLimitAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела тока DCW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -83,11 +96,14 @@ namespace NewCore.FunctionAdapters.GPT
 
     #region LowCurrentLimit
 
-    /// <inheritdoc />
     public async Task<(bool, string)> SetLowCurrentLimitAsync(double value)
     {
       var result = await _dcwMode.SetLowCurrentLimitAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела тока DCW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -103,6 +119,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetTestTimeAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени теста DCW", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -118,6 +138,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetRampTimeAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка Ramp Time DCW", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetRampTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -132,6 +156,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetOffsetAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения DCW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -146,6 +174,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _dcwMode.SetArcCurrentAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка дугового тока DCW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw DcwExceptionFactory.SetArcCurrentFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 

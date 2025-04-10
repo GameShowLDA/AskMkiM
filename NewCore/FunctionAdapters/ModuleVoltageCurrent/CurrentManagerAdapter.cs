@@ -4,6 +4,7 @@ using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleVoltageCurrentSource;
+using Utilities.Error.Device.ModuleVoltageCurrent;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
@@ -24,23 +25,33 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
 
     public async Task SetCurrentLevelAsync(int integerPart, int decimalPart)
     {
+      string value = $"{integerPart}.{decimalPart:D3}";
       try
       {
         await _currentManager.SetCurrentLevelAsync(integerPart, decimalPart);
-        string value = $"{integerPart}.{decimalPart:D3}";
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Установка тока", $"{value} мА", true, 1);
       }
       catch (Exception ex)
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Ошибка установки тока", ex.Message, false, 1);
-        throw;
+        throw CurrentExceptionFactory.SetLevelFailed(value, ex.Message);
       }
     }
 
     public async Task<bool> LimitationOfTheOutputCurrent(int current)
     {
       bool result = await _currentManager.LimitationOfTheOutputCurrent(current);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Ограничение тока", $"{current} мА", result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _module,
+          "Ограничение тока",
+          $"{current} мА",
+          result,
+          1);
+
+      if (!result)
+        throw CurrentExceptionFactory.LimitFailed(current);
+
       return result;
     }
   }

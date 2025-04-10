@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using NewCore.Enum;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device.DeviceBusCommutation;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -35,7 +36,12 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> ConnectBreakdownTester()
     {
       var result = await _connectorManager.ConnectBreakdownTester();
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение пробойной установки", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.ConnectFailed("пробойной установки");
+
       return result;
     }
 
@@ -43,39 +49,68 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectBreakdownTester()
     {
       var result = await _connectorManager.DisconnectBreakdownTester();
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение пробойной установки", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed("пробойной установки");
+
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectMultimeter(DeviceEnum.SwitchingBusNew bus)
     {
+      var description = $"мультиметра к шине [{bus}]";
       var result = await _connectorManager.ConnectMultimeter(bus);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение мультиметра к шине [{bus}]", result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.ConnectFailed(description);
+
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectMultimeter(DeviceEnum.SwitchingBusNew bus)
     {
+      var description = $"мультиметра с шины [{bus}]";
       var result = await _connectorManager.DisconnectMultimeter(bus);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение мультиметра с шины [{bus}]", result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed(description);
+
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectPINT(DeviceEnum.SwitchingBusNew bus)
     {
+      var description = $"ПИНТ к шине [{bus}]";
       var result = await _connectorManager.ConnectPINT(bus);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение \"ПИНТ\" к шине [{bus}]", result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.ConnectFailed(description);
+
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectPINT(DeviceEnum.SwitchingBusNew bus)
     {
+      var description = $"ПИНТ с шины [{bus}]";
       var result = await _connectorManager.DisconnectPINT(bus);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение \"ПИНТ\" c шины [{bus}]", result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed(description);
+
       return result;
     }
   }
