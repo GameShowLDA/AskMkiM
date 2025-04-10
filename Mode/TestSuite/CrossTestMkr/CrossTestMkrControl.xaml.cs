@@ -19,13 +19,14 @@ using UI.Components.Invoke;
 using Utilities.Models;
 using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
+using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.TestSuite.CrossTestMkr
 {
   public partial class CrossTestMkrControl : UserControl
   {
-    // Можно завести какой-нибудь DataModel
-    private DataElectricModel dataModel;
+    private readonly Tuple<string, Color> goodText = SuccessMessage;
+    private readonly Tuple<string, Color> errorText = ErrorMessage;
 
     // Пример: поля для ввода "Номер проверяемого X.X", "Номер проверяющего X.X", "Диапазон проверки"
     private InvokeBorder testedNumberBorder = new InvokeBorder();
@@ -77,9 +78,6 @@ namespace Mode.TestSuite.CrossTestMkr
         // 5. Добавляем StackPanel в ProtocolUI
         ProtocolSelfCheckControl.AddContent(contentStack);
 
-        // 6. Доп. настройка ProtocolUI (кнопки "Только Старт" и т.п.)
-        await ConfigureProtocolSelfCheckControlAsync();
-
         LogInformation("Настройка CrossTestMKRControl завершена");
       }
       catch (Exception ex)
@@ -87,16 +85,6 @@ namespace Mode.TestSuite.CrossTestMkr
         var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
         LogError($"Ошибка при настройке CrossTestMKR в {methodName}: {ex.Message}");
       }
-    }
-
-    /// <summary>
-    /// Настройка ProtocolSelfCheckControl: поле лога = ReadOnly, показываем только Старт и т.п.
-    /// </summary>
-    private async Task ConfigureProtocolSelfCheckControlAsync()
-    {
-      ProtocolSelfCheckControl.ProtocolTextBox.IsReadOnly = true;
-      await SetLoopMeasurement(false);
-      ProtocolSelfCheckControl.ShowOnlyStartButton();
     }
 
     /// <summary>
