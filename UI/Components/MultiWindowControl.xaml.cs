@@ -270,7 +270,7 @@ namespace UI.Components
     /// <param name="searchParameters">
     /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
     /// </param>
-    public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       if (MultiEditor == null)
       {
@@ -281,7 +281,7 @@ namespace UI.Components
       }
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
-      MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     /// <summary>
@@ -302,7 +302,7 @@ namespace UI.Components
     /// <param name="searchParameters">
     /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
     /// </param>
-    public void ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async void ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       if (MultiEditor == null)
       {
@@ -314,7 +314,7 @@ namespace UI.Components
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
       CloseSearchResults();
-      MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     /// <summary>

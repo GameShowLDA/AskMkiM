@@ -4,6 +4,7 @@ using System.Windows.Media.Effects;
 using AppConfiguration.Base;
 using ICSharpCode.AvalonEdit;
 using UI.Components;
+using UI.Controls.Search;
 
 namespace MainWindowProgram.Events
 {
@@ -32,9 +33,10 @@ namespace MainWindowProgram.Events
     /// Инициализирует новый экземпляр класса <see cref="UiEventsBinder"/>.
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
-    public UiEventsBinder(MainWindow mainWindow)
+    public UiEventsBinder(MainWindow mainWindow, MultiWindowControl multiWindow)
     {
       _mainWindow = mainWindow;
+      _multiWindow = multiWindow;
     }
 
     /// <summary>
@@ -48,8 +50,11 @@ namespace MainWindowProgram.Events
       EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
       EventAggregator.SearchWindowAtivated += OnSearchWindowActivated;
 
-      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
       EventAggregator.SearchText += SearchWindow_SearchTextHandler;
+
+      EventAggregator.ReplaceText += SearchWindow_ReplaceTextHandler;
+
+      _mainWindow.SearchWindow.ClearHighlights += _multiWindow.OnSearchWindowClosing;
     }
 
     /// <summary>
@@ -113,6 +118,11 @@ namespace MainWindowProgram.Events
     public void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       _multiWindow.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void SearchWindow_ReplaceTextHandler(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      _multiWindow.ReplaceData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
   }
 }

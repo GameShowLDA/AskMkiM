@@ -38,7 +38,7 @@ namespace UI.Controls.Search
 
     public event Action ClearHighlights;
 
-    public event Action SelectFileForSearch;
+    public event Func<Task> SelectFileForSearch;
     public string SearchTextData { get; set; }
 
     /// <summary>

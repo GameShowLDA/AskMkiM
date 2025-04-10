@@ -14,6 +14,8 @@ namespace MainWindowProgram.Engine
   /// </summary>
   internal class ApplicationLifecycleManager
   {
+    static internal ApplicationEventsBinder ApplicationEvents;
+
     /// <summary>
     /// Инициализирует события приложения и связывает их с соответствующими биндерами.
     /// </summary>
@@ -22,13 +24,13 @@ namespace MainWindowProgram.Engine
     /// <param name="console">Консольный менеджер.</param>
     public void Initialize(MainWindow window, UsbServices usb, ConsoleManager console)
     {
-      var binder = new ApplicationEventsBinder(
+      ApplicationEvents = new ApplicationEventsBinder(
           new SystemEventsBinder(),
-          new UiEventsBinder(window),
+          new UiEventsBinder(window, window.MultiWindow),
           new StateEventsBinder(window, usb, console)
       );
 
-      binder.BindAll();
+      ApplicationEvents.BindAll();
     }
   }
 }
