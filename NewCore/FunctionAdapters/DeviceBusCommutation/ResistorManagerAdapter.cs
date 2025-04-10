@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using NewCore.Base.Function.DBC;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device.DeviceBusCommutation;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -28,12 +29,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> ConnectResistor(string number)
     {
       var result = await _resistorManager.ConnectResistor(number);
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _deviceBusCommutation,
-        "Подключение резистора",
-        $"№{number}",
-        result, 
-        1);
+          _deviceBusCommutation,
+          "Подключение резистора",
+          $"№{number}",
+          result,
+          1);
+
+      if (!result)
+        throw ResistorExceptionFactory.ConnectFailed(number);
+
       return result;
     }
 
@@ -41,12 +47,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectResistor(string number)
     {
       var result = await _resistorManager.DisconnectResistor(number);
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _deviceBusCommutation,
-        "Отключение резистора",
-        $"№{number}",
-        result, 
-        1);
+          _deviceBusCommutation,
+          "Отключение резистора",
+          $"№{number}",
+          result,
+          1);
+
+      if (!result)
+        throw ResistorExceptionFactory.DisconnectFailed(number);
+
       return result;
     }
   }
