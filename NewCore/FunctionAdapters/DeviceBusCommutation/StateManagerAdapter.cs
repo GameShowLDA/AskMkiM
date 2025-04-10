@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -40,25 +41,34 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<(bool Connect, string Answer)> InitializeAsync()
     {
       var (connect, answer) = await _stateManager.ConnectAsync();
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _deviceBusCommutation,
-        "Инициализация устройства",
-        answer,
-        connect, 
-        1);
+          _deviceBusCommutation,
+          "Инициализация устройства",
+          answer,
+          connect,
+          1);
+
+      if (!connect)
+        throw ConnectionExceptionFactory.InitializeFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, answer);
+
       return (connect, answer);
     }
-
     /// <inheritdoc />
     public async Task<bool> ResetAsync()
     {
       var result = await _stateManager.DisconnectAsync();
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _deviceBusCommutation,
-        "Сброс устройства",
-        result ? "Операция выполнена успешно" : "Операция завершилась с ошибкой",
-        result, 
-        1);
+          _deviceBusCommutation,
+          "Сброс устройства",
+          result ? "Операция выполнена успешно" : "Операция завершилась с ошибкой",
+          result,
+          1);
+
+      if (!result)
+        throw ConnectionExceptionFactory.ResetFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, "Операция завершилась с ошибкой");
+
       return result;
     }
   }

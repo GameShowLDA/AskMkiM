@@ -4,6 +4,7 @@ using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
+using Utilities.Error.Device.ModuleRelayControl;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
@@ -28,13 +29,18 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectMeterAsync()
     {
+      const string description = "модуля МКР";
+
       var result = await _meterManager.ConnectMeterAsync();
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _moduleRelayControl,
-        "Подключение измерителя модуля МКР",
-        result,
-        1);
+          _moduleRelayControl,
+          $"Подключение измерителя {description}",
+          result,
+          1);
+
+      if (!result)
+        throw MeterExceptionFactory.ConnectFailed(description);
 
       return result;
     }
@@ -42,13 +48,18 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectMeterAsync()
     {
+      const string description = "модуля МКР";
+
       var result = await _meterManager.DisconnectMeterAsync();
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _moduleRelayControl,
-        "Отключение измерителя модуля МКР",
-        result,
-        1);
+          _moduleRelayControl,
+          $"Отключение измерителя {description}",
+          result,
+          1);
+
+      if (!result)
+        throw MeterExceptionFactory.DisconnectFailed(description);
 
       return result;
     }

@@ -5,6 +5,7 @@ using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.GPT.Data;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device.Breakdown;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -28,10 +29,15 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _irMode.SetModeAsync();
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима IR", result.Success ? "IR" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw IrExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
-    public Task<string> GetModeAsync() => _irMode.GetModeAsync();
+
+    public Task<(bool Success, string Message)> GetModeAsync() => _irMode.GetModeAsync();
 
     #endregion
 
@@ -41,6 +47,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _irMode.SetVoltageAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения IR", result.Success ? $"{value} В" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw IrExceptionFactory.SetVoltageFailed(_device.Name, _device.NumberChassis, _device.Number);
+
       return result;
     }
 
@@ -59,6 +69,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _irMode.SetHighResistanceLimitAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела сопротивления IR", result.Success ? $"{value} ГОм" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw IrExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -72,6 +86,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _irMode.SetLowResistanceLimitAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела сопротивления IR", result.Success ? $"{value} МОм" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw IrExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -85,6 +103,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _irMode.SetTestTimeAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени измерения IR", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw IrExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 
@@ -98,6 +120,10 @@ namespace NewCore.FunctionAdapters.GPT
     {
       var result = await _irMode.SetOffsetAsync(value);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения IR", result.Success ? $"{value} ГОм" : result.Message, result.Success, 1);
+
+      if (!result.Success)
+        throw IrExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+
       return result;
     }
 

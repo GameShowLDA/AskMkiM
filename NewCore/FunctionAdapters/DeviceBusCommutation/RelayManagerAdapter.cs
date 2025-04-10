@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using NewCore.Base.Function.DBC;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device.DeviceBusCommutation;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -28,12 +29,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> ConnectRelay(int numberRelay)
     {
       var result = await _relayManager.ConnectRelay(numberRelay);
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _deviceBusCommutation,
-        "Подключение реле",
-        $"№{numberRelay}",
-        result,
-        1);
+          _deviceBusCommutation,
+          "Подключение реле",
+          $"№{numberRelay}",
+          result,
+          1);
+
+      if (!result)
+        throw RelayControlExceptionFactory.ConnectFailed(numberRelay);
+
       return result;
     }
 
@@ -41,12 +47,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectRelay(int numberRelay)
     {
       var result = await _relayManager.DisconnectRelay(numberRelay);
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _deviceBusCommutation,
-        "Отключение реле",
-        $"№{numberRelay}",
-        result,
-        1);
+          _deviceBusCommutation,
+          "Отключение реле",
+          $"№{numberRelay}",
+          result,
+          1);
+
+      if (!result)
+        throw RelayControlExceptionFactory.DisconnectFailed(numberRelay);
+
       return result;
     }
   }
