@@ -195,7 +195,7 @@ namespace UI.Components
     /// </summary>
     public void DataError()
     {
-      BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.Item2);
+      BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.TitleColor);
       Keyboard.ClearFocus();
     }
   }

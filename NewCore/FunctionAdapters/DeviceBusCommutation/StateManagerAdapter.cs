@@ -45,15 +45,18 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _deviceBusCommutation,
           "Инициализация устройства",
-          answer,
+          !connect ? answer : string.Empty,
           connect,
           1);
 
       if (!connect)
+      {
         throw ConnectionExceptionFactory.InitializeFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, answer);
+      }
 
       return (connect, answer);
     }
+
     /// <inheritdoc />
     public async Task<bool> ResetAsync()
     {
@@ -67,7 +70,9 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
           1);
 
       if (!result)
+      {
         throw ConnectionExceptionFactory.ResetFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, "Операция завершилась с ошибкой");
+      }
 
       return result;
     }

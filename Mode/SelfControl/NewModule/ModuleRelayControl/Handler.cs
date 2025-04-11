@@ -21,8 +21,6 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
     private IRelaySwitchModule moduleRelayControl;
 
     /// <summary>
@@ -71,7 +69,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
       //  }
       //}
 
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР", SuccessMessage.TitleColor));
 
       await moduleRelayControl.MeterManager.ConnectMeterAsync();
       await PerformClosureCycle(token);
@@ -81,8 +79,8 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
       ShowMessageModel showMessageModel = new ShowMessageModel()
       {
         Header = $"\r\nСамоконтроль",
-        Message = $"[{goodText.Item1}]",
-        MessageColor = goodText.Item2,
+        Message = $"[{SuccessMessage.Title}]",
+        MessageColor = SuccessMessage.TitleColor,
         CanBeDeleted = false,
       };
       await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -128,8 +126,8 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
           showMessageModel = new ShowMessageModel()
           {
             Header = $"\tТочка {point}",
-            Message = model.SelfControl ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
-            MessageColor = model.SelfControl ? goodText.Item2 : errorText.Item2,
+            Message = model.SelfControl ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
+            MessageColor = model.SelfControl ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
             ExecutionError = !model.SelfControl,
           };
           showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
@@ -140,8 +138,8 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
             showMessageModel = new ShowMessageModel()
             {
               Header = $"\t\tПодключение точки",
-              Message = model.ConnectPoint ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
-              MessageColor = model.ConnectPoint ? goodText.Item2 : errorText.Item2,
+              Message = model.ConnectPoint ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
+              MessageColor = model.ConnectPoint ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
               CanBeDeleted = model.ConnectPoint,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -149,8 +147,8 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
             showMessageModel = new ShowMessageModel()
             {
               Header = $"\t\tПроверка реле на шине А",
-              Message = model.DisconnectBusA ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
-              MessageColor = model.DisconnectBusA ? goodText.Item2 : errorText.Item2,
+              Message = model.DisconnectBusA ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
+              MessageColor = model.DisconnectBusA ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
               CanBeDeleted = model.DisconnectBusA,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -158,8 +156,8 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
             showMessageModel = new ShowMessageModel()
             {
               Header = $"\t\tПроверка реле на шине B",
-              Message = model.DisconnectBusB ? $"[{goodText.Item1}]" : $"[{errorText.Item1}]",
-              MessageColor = model.DisconnectBusB ? goodText.Item2 : errorText.Item2,
+              Message = model.DisconnectBusB ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
+              MessageColor = model.DisconnectBusB ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
               CanBeDeleted = model.DisconnectBusB,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -170,7 +168,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
           showMessageModel = new ShowMessageModel()
           {
             Header = $"\tОшибка данных!",
-            HeaderColor = errorText.Item2,
+            HeaderColor = ErrorMessage.TitleColor,
             Message = answer,
           };
           await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -201,7 +199,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
     {
       LogInformation("Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
       LogInformation("Завершён метод завершения самоконтроля");
     }
     #endregion

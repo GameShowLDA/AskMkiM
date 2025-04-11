@@ -18,7 +18,7 @@ using static Utilities.LoggerUtility;
 namespace Mode.Metrology.PR
 {
   /// <summary>
-  /// Логика взаимодействия для PrMetrologyControl.xaml
+  /// Логика взаимодействия для PrMetrologyControl.xaml.
   /// </summary>
   public partial class PrMetrologyControl : UserControl
   {
@@ -27,6 +27,10 @@ namespace Mode.Metrology.PR
     PrMeasurement testMeasurement = new PrMeasurement();
 
     (bool Success, string Message, DataModel DataModel) Data;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="PrMetrologyControl"/>.
+    /// </summary>
     public PrMetrologyControl()
     {
       InitializeComponent();
@@ -53,7 +57,6 @@ namespace Mode.Metrology.PR
           {
             await testMeasurement.FinalizeMeasurement();
           });
-
       }
       catch (Exception ex)
       {
@@ -72,7 +75,7 @@ namespace Mode.Metrology.PR
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, Data.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message));
         return;
       }
 
@@ -85,7 +88,7 @@ namespace Mode.Metrology.PR
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -130,7 +133,7 @@ namespace Mode.Metrology.PR
         var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной", headerColor: ShowMessageModel.SuccessMessage.Item2));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         var data = SelectOptimalCurrentAndVoltage(param, mint);
         double currentGenerial = (data.DecimalCurrent / 1000.0) + data.IntegerCurrent;
@@ -143,7 +146,7 @@ namespace Mode.Metrology.PR
         var result = voltage / (fakeCurrent / 1000.0);
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
+        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await protocolUI.ShowMessageAsync(showMessageModel);
@@ -177,20 +180,24 @@ namespace Mode.Metrology.PR
           DecimalCurrent = 0,
           DecimalCurrentFake = 0,
           IntegerCurrentFake = 0,
-          Voltage = VoltageSources.Supply12V
+          Voltage = VoltageSources.Supply12V,
         };
       }
 
       public static double GetInterpolatedCurrent(double resistance, IPowerSourceModule module)
       {
         if (string.IsNullOrWhiteSpace(module.ResistanceCalibrationJson))
+        {
           throw new InvalidOperationException("Calibration JSON пуст или отсутствует.");
+        }
 
         // Десериализация
         var ranges = JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(module.ResistanceCalibrationJson);
 
         if (ranges == null || !ranges.Any())
+        {
           throw new InvalidOperationException("Не удалось десериализовать калибровочные диапазоны.");
+        }
 
         var range = ranges.FirstOrDefault(r =>
             resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
@@ -212,7 +219,6 @@ namespace Mode.Metrology.PR
         // Интерполяция
         return real + (fake - real) * percent;
       }
-
     }
   }
 }

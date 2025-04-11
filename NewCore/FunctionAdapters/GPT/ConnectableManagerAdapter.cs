@@ -29,13 +29,15 @@ namespace NewCore.FunctionAdapters.GPT
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
-          "Подключение пробойной установки",
+          "Инициализация пробойной установки",
           string.IsNullOrWhiteSpace(answer) ? "Успешно" : answer,
           result,
           1);
 
       if (!result)
+      {
         throw ConnectionExceptionFactory.ConnectFailed(_device.Name, _device.NumberChassis, _device.Number, answer);
+      }
 
       return (result, answer);
     }
@@ -52,7 +54,9 @@ namespace NewCore.FunctionAdapters.GPT
           1);
 
       if (!result)
+      {
         throw ConnectionExceptionFactory.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
+      }
 
       return result;
     }

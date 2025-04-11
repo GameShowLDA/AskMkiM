@@ -81,10 +81,8 @@ namespace NewCore.Communication
         LogException($"[{_device.Name}] Ошибка при отправке/приёме", ex);
         var message = $"[{_device.Name}] Ошибка при отправке/приёме: {ex.Message}";
         return message;
-
       }
     }
-
 
     /// <summary>
     /// Получает последний октет IP-адреса.

@@ -18,7 +18,6 @@ namespace ConsoleUtilities.Engine
     /// <returns>Инициализированный обработчик команд.</returns>
     public static ICommandHandler Build()
     {
-      LoggerUtility.ForceInit();
       LoggerUtility.LogInformation("Logger initialized from bootstrapper");
 
       var logBuffer = new StringBuilder();

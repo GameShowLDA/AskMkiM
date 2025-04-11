@@ -5,6 +5,8 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static AppConfiguration.Execution.ExecutionConfig;
+using NewCore.Base.DeviceResponses;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -33,14 +35,25 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number)
     {
       if (await GetIsIdleModeEnabled())
-      {
         return true;
-      }
 
       var cmd = new DeviceCommand(8, number, (int)bus, 1);
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
-      await Task.Delay(5);
-      return true;
+      string commandText = cmd.ToString();
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer == $"8.{number}.{(int)bus}.1")
+          return true;
+
+        LogWarning($"Ответ на команду подключения точки {number} не получен или некорректный. Попытка {attempt}.");
+        await Task.Delay(100);
+      }
+
+      LogError($"Не удалось подключить точку {number} к шине {bus}.");
+      return false;
     }
 
     /// <summary>
@@ -52,14 +65,25 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number)
     {
       if (await GetIsIdleModeEnabled())
-      {
         return true;
-      }
 
       var cmd = new DeviceCommand(8, number, (int)bus, 2);
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
-      await Task.Delay(5);
-      return true;
+      string commandText = cmd.ToString();
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer == $"8.{number}.{(int)bus}.2")
+          return true;
+
+        LogWarning($"Ответ на команду отключения точки {number} не получен или некорректный. Попытка {attempt}.");
+        await Task.Delay(100);
+      }
+
+      LogError($"Не удалось отключить точку {number} от шины {bus}.");
+      return false;
     }
 
     /// <summary>
@@ -72,24 +96,32 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint)
     {
       if (await GetIsIdleModeEnabled())
-      {
         return true;
-      }
 
       DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
         FirstParameter = firstPoint,
         SecondParameter = lastPoint,
-        ThirdParameter = (1 * 10) + (int)bus,
+        ThirdParameter = 10 + (int)bus  // A-11, B-12
       };
 
-      Stopwatch stopwatch = new Stopwatch();
-      stopwatch.Start();
-      string answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 3000);
-      stopwatch.Stop();
-      Console.WriteLine($"Время ожидания: {stopwatch.Elapsed}");
-      return true;
+      string commandText = cmd.ToString();
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 3000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{10 + (int)bus}")
+          return true;
+
+        LogWarning($"Ответ на команду подключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.");
+        await Task.Delay(100);
+      }
+
+      LogError($"Не удалось подключить диапазон точек {firstPoint}-{lastPoint} к шине {bus}.");
+      return false;
     }
 
     /// <summary>
@@ -102,21 +134,34 @@ namespace NewCore.Function.ModuleRelayControl
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint)
     {
       if (await GetIsIdleModeEnabled())
-      {
         return true;
-      }
 
       DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
         FirstParameter = firstPoint,
         SecondParameter = lastPoint,
-        ThirdParameter = (2 * 10) + (int)bus,
+        ThirdParameter = 20 + (int)bus
       };
 
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
-      await Task.Delay(5);
-      return true;
+      string commandText = cmd.ToString();
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 3000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{20 + (int)bus}")
+        {
+          return true;
+        }
+
+        LogWarning($"Ответ на команду отключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.");
+        await Task.Delay(100);
+      }
+
+      LogError($"Не удалось отключить диапазон точек {firstPoint}-{lastPoint} от шины {bus}.");
+      return false;
     }
 
     /// <summary>
@@ -132,7 +177,15 @@ namespace NewCore.Function.ModuleRelayControl
       }
 
       var cmd = new DeviceCommand(6, numberPoint);
-      return await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
+      string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+
+      var parsed = BaseResponse.FromJson(response);
+      if (parsed?.Answer?.StartsWith($"6.{numberPoint}.") == true)
+      {
+        return response;
+      }
+
+      return $"Ошибка при проверке точки {numberPoint}: некорректный ответ или не получен.";
     }
   }
 }
