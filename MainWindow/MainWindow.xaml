@@ -168,14 +168,14 @@
 
                 <MenuItem Header="Файл" Name="File" Cursor="Hand" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
 
-                    <MenuItem Header="Архив" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
+                    <MenuItem Header="Архив" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
-                    <MenuItem Header="Сохранить" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
-                    <MenuItem Header="Сохранить как" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
-                    <MenuItem Header="Печать" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
-                    <MenuItem Header="Поиск" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
-                    <MenuItem Header="Сравнить" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}" />
+                    <MenuItem Header="Сохранить" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
+                    <MenuItem Header="Сохранить как" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
+                    <MenuItem Header="Печать" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
+                    <MenuItem Header="Поиск" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
+                    <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                     <MenuItem Header="Открыть" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
