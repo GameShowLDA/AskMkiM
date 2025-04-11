@@ -40,6 +40,10 @@
                                 <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="4,0,6,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                                 <Path x:Name="GlyphPanel" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="7,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="HeaderText" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+
+                                <!-- Добавляем TextBlock для отображения горячей клавиши -->
+                                <TextBlock x:Name="HotkeyText" Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                                
                             </DockPanel>
                             <Popup x:Name="PART_Popup" AllowsTransparency="true" Focusable="false" HorizontalOffset="1" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom" VerticalOffset="-1">
                                 <Border Background="{TemplateBinding Background}">
@@ -81,6 +85,9 @@
                                 <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="4,0,6,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                                 <Path x:Name="GlyphPanel" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="7,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="HeaderText" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+
+                                <!-- Добавляем TextBlock для отображения горячей клавиши -->
+                                <TextBlock x:Name="HotkeyText" Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
                             </DockPanel>
                             <Popup x:Name="PART_Popup"
                            AllowsTransparency="true"
@@ -159,7 +166,7 @@
             <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" Height="40" FontSize="18" Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0" Padding="0,0,40,0">
 
-                <MenuItem Header="Файл" Name="File" Cursor="Hand" BorderBrush="#FF303843" OpacityMask="#FF303843">
+                <MenuItem Header="Файл" Name="File" Cursor="Hand" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
 
                     <MenuItem Header="Архив" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
@@ -179,7 +186,7 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Метрология" Name="Metrology">
+                <MenuItem Header="Метрология" Name="Metrology" Tag="menuHeader_2">
 
                     <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
                     <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
@@ -190,7 +197,7 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Самоконтроль" Name="SelfControl">
+                <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
 
                     <MenuItem 
                         Header="Модуль" 
@@ -199,7 +206,7 @@
 
                 </MenuItem>
 
-                <MenuItem  Header="Тесты" Name="TestControl">
+                <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4">
 
                     <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}">
 
@@ -224,7 +231,7 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings">
+                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_5">
 
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
