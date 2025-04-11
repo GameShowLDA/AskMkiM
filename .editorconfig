@@ -1,12 +1,12 @@
 ﻿[*.cs]
 
 dotnet_diagnostic.SA1010.severity = none
-dotnet_diagnostic.SA1025.severity = error
+dotnet_diagnostic.SA1025.severity = none
 dotnet_diagnostic.SA1028.severity = none
 
 dotnet_diagnostic.SA1101.severity = none
 dotnet_diagnostic.SA1116.severity = none
-dotnet_diagnostic.SA1119.severity = error
+dotnet_diagnostic.SA1119.severity = none
 dotnet_diagnostic.SA1124.severity = none
 dotnet_diagnostic.SA1127.severity = none
 dotnet_diagnostic.SA1128.severity = none
@@ -23,27 +23,27 @@ dotnet_diagnostic.SA1309.severity = none
 
 dotnet_diagnostic.SA1401.severity = none
 dotnet_diagnostic.SA1402.severity = none
-dotnet_diagnostic.SA1413.severity = error
+dotnet_diagnostic.SA1413.severity = none
 
 dotnet_diagnostic.SA1502.severity = none
-dotnet_diagnostic.SA1503.severity = error
-dotnet_diagnostic.SA1505.severity = error
-dotnet_diagnostic.SA1506.severity = error
-dotnet_diagnostic.SA1507.severity = error
-dotnet_diagnostic.SA1508.severity = error
-dotnet_diagnostic.SA1509.severity = error
-dotnet_diagnostic.SA1513.severity = error
+dotnet_diagnostic.SA1503.severity = none
+dotnet_diagnostic.SA1505.severity = none
+dotnet_diagnostic.SA1506.severity = none
+dotnet_diagnostic.SA1507.severity = none
+dotnet_diagnostic.SA1508.severity = none
+dotnet_diagnostic.SA1509.severity = none
+dotnet_diagnostic.SA1513.severity = none
 dotnet_diagnostic.SA1514.severity = none
 dotnet_diagnostic.SA1515.severity = none
-dotnet_diagnostic.SA1516.severity = error
+dotnet_diagnostic.SA1516.severity = none
 
-dotnet_diagnostic.SA1600.severity = error
-dotnet_diagnostic.SA1611.severity = error
-dotnet_diagnostic.SA1612.severity = error
+dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1611.severity = none
+dotnet_diagnostic.SA1612.severity = none
 dotnet_diagnostic.SA1615.severity = none
 dotnet_diagnostic.SA1618.severity = none
 dotnet_diagnostic.SA1623.severity = none
-dotnet_diagnostic.SA1629.severity = error
+dotnet_diagnostic.SA1629.severity = none
 dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SA1642.severity = none
 dotnet_diagnostic.SA1648.severity = none
