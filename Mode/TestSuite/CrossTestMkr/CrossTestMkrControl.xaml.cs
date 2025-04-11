@@ -1,23 +1,11 @@
 ﻿using Core.Communication;
 using Mode.Base.SearchDevices;
-using Mode.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using UI.Components.Invoke;
 using Utilities.Models;
-using static AppConfig.Config.LoopConfig;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
@@ -28,25 +16,18 @@ namespace Mode.TestSuite.CrossTestMkr
     private readonly Tuple<string, Color> goodText = SuccessMessage;
     private readonly Tuple<string, Color> errorText = ErrorMessage;
 
-    // Пример: поля для ввода "Номер проверяемого X.X", "Номер проверяющего X.X", "Диапазон проверки"
     private InvokeBorder testedNumberBorder = new InvokeBorder();
     private InvokeTextBox testedNumberData = new InvokeTextBox();
 
-    private InvokeBorder testerNumberBorder = new InvokeBorder();
-    private InvokeTextBox testerNumberData = new InvokeTextBox();
+    private InvokeBorder verificatNumberBorder = new InvokeBorder();
+    private InvokeTextBox verificatNumberData = new InvokeTextBox();
 
     private InvokeBorder rangeBorder = new InvokeBorder();
     private InvokeTextBox rangeData = new InvokeTextBox();
 
-    //private InvokeBorder delayBorder = new InvokeBorder();
-    //private InvokeTextBox delayData = new InvokeTextBox();
-
     public CrossTestMkrControl()
     {
       InitializeComponent();
-
-      // По аналогии с NodeMethod:
-      // Асинхронно настраиваем ProtocolSelfCheckControl
       _ = InitializeSettingsAsync();
     }
 
@@ -62,7 +43,7 @@ namespace Mode.TestSuite.CrossTestMkr
         // 1. Настраиваем ProtocolUI 
         //    Параметры: (this, метод старта, показывать ли кнопки, метод стопа?)
         ProtocolSelfCheckControl.SetSettings(this, ExecuteTestProcess, true, Stop);
-        ProtocolSelfCheckControl.Header = "CrossTestMKR";
+        ProtocolSelfCheckControl.Header = "Перекрёстный тест";
 
         // 2. Очищаем предыдущий контент
         await ProtocolSelfCheckControl.ClearContent();
@@ -93,7 +74,8 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </summary>
     private void AddInputFields(StackPanel contentStack)
     {
-      // Поле "Номер проверяемого X.X"
+      #region Поле "Номер проверяемого X.X"
+
       testedNumberBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
       Grid testedGrid = new Grid();
       testedGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
@@ -104,50 +86,36 @@ namespace Mode.TestSuite.CrossTestMkr
       InputControlSettings.DefaultGotAndLostEvent(testedNumberData, "Номер проверяемого X.X");
       testedNumberData.PreviewTextInput += DevicesNumberData_PreviewTextInput;
 
-      // testedNumberData.PreviewTextInput += ... // если нужна валидация
-
-      //var testedLabel = new TextBox
-      //{
-      //  Style = (Style)Application.Current.Resources["MetrologyTextBox"],
-      //  Text = "(X.X)",
-      //  IsReadOnly = true
-      //};
-
       Grid.SetColumn(testedNumberData, 0);
-      //Grid.SetColumn(testedLabel, 1);
       testedGrid.Children.Add(testedNumberData);
-      //testedGrid.Children.Add(testedLabel);
 
       testedNumberBorder.Child = testedGrid;
       contentStack.Children.Add(testedNumberBorder);
 
-      // Поле "Номер проверяющего X.X"
-      testerNumberBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
-      Grid testerGrid = new Grid();
-      testerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-      testerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = System.Windows.GridLength.Auto });
+      #endregion
 
-      testerNumberData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
-      testerNumberData.Text = "Номер проверяющего X.X";
-      InputControlSettings.DefaultGotAndLostEvent(testerNumberData, "Номер проверяющего X.X");
-      testerNumberData.PreviewTextInput += DevicesNumberData_PreviewTextInput;
+      #region Поле "Номер проверяющего X.X"
 
-      //var testerLabel = new TextBox
-      //{
-      //  Style = (Style)Application.Current.Resources["MetrologyTextBox"],
-      //  Text = "(X.X)",
-      //  IsReadOnly = true
-      //};
+      verificatNumberBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
+      Grid verificatGrid = new Grid();
+      verificatGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
+      verificatGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = System.Windows.GridLength.Auto });
 
-      Grid.SetColumn(testerNumberData, 0);
-      //Grid.SetColumn(testerLabel, 1);
-      testerGrid.Children.Add(testerNumberData);
-      //testerGrid.Children.Add(testerLabel);
+      verificatNumberData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
+      verificatNumberData.Text = "Номер проверяющего X.X";
+      InputControlSettings.DefaultGotAndLostEvent(verificatNumberData, "Номер проверяющего X.X");
+      verificatNumberData.PreviewTextInput += DevicesNumberData_PreviewTextInput;
 
-      testerNumberBorder.Child = testerGrid;
-      contentStack.Children.Add(testerNumberBorder);
+      Grid.SetColumn(verificatNumberData, 0);
+      verificatGrid.Children.Add(verificatNumberData);
 
-      // Поле "Диапазон проверки 1, 2-25"
+      verificatNumberBorder.Child = verificatGrid;
+      contentStack.Children.Add(verificatNumberBorder);
+
+      #endregion
+
+      #region Поле "Диапазон проверки 1, 2-25"
+
       rangeBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
       Grid rangeGrid = new Grid();
       rangeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
@@ -158,54 +126,13 @@ namespace Mode.TestSuite.CrossTestMkr
       InputControlSettings.DefaultGotAndLostEvent(rangeData, "Диапазон проверки 1, 2-25");
       rangeData.PreviewTextInput += RangeData_PreviewTextInput;
 
-      //var rangeLabel = new TextBox
-      //{
-      //  Style = (Style)Application.Current.Resources["MetrologyTextBox"],
-      //  Text = "(1, 2-25)",
-      //  IsReadOnly = true
-      //};
-
       Grid.SetColumn(rangeData, 0);
-      //Grid.SetColumn(rangeLabel, 1);
       rangeGrid.Children.Add(rangeData);
-      //rangeGrid.Children.Add(rangeLabel);
 
       rangeBorder.Child = rangeGrid;
       contentStack.Children.Add(rangeBorder);
 
-
-      //// Поле "Задержка измерения ,мсек."
-      //delayBorder.Style = (Style)Application.Current.Resources["MetrologyTextBoxBorder"];
-      //Grid delayGrid = new Grid();
-      //delayGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-      //delayGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-      //// Настраиваем TextBox
-      //delayData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
-      //delayData.Text = "Задержка измерения ,мсек.";
-      //InputControlSettings.DefaultGotAndLostEvent(delayData, "Задержка измерения ,мсек.");
-      //delayData.PreviewTextInput += DelayData_PreviewTextInput;
-
-      //Grid.SetColumn(delayData, 0);
-      //delayGrid.Children.Add(delayData);
-
-      //// Упаковываем в Border
-      //delayBorder.Child = delayGrid;
-      //contentStack.Children.Add(delayBorder);
-
-    }
-
-    private void DelayData_PreviewTextInput(object sender, TextCompositionEventArgs e)
-    {
-      // Разрешаем только цифры
-      foreach (char c in e.Text)
-      {
-        if (!char.IsDigit(c))
-        {
-          e.Handled = true;
-          break;
-        }
-      }
+      #endregion
     }
 
     private void DevicesNumberData_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -234,25 +161,172 @@ namespace Mode.TestSuite.CrossTestMkr
       }
     }
 
+    // Добавляем новый метод в класс CrossTestMkrControl
+    private async Task<bool> ValidateInputFieldsAsync()
+    {
+      // Стандартные (исходные) строки для проверки
+      const string defaultTested = "Номер проверяемого X.X";
+      const string defaultVerificat = "Номер проверяющего X.X";
+      const string defaultRange = "Диапазон проверки 1, 2-25";
+
+      // Разделяем строки на фрагменты для проверки формата номеров
+      string[] testedSplit = testedNumberData.Text.Split('.');
+      string[] verificatSplit = verificatNumberData.Text.Split('.');
+
+      // Проверка поля "Номер проверяемого"
+      if (
+          testedNumberData.Text.Trim() == defaultTested ||
+          testedSplit.Length != 2 ||
+          string.IsNullOrWhiteSpace(testedSplit[0]) ||
+          string.IsNullOrWhiteSpace(testedSplit[1])
+        )
+      {
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("Поле 'Номер проверяемого' не заполнено корректно!", errorText.Item2));
+        return false;
+      }
+
+      // Проверка поля "Номер проверяющего"
+      if (
+          verificatNumberData.Text.Trim() == defaultVerificat ||
+          verificatSplit.Length != 2 ||
+          string.IsNullOrWhiteSpace(verificatSplit[0]) ||
+          string.IsNullOrWhiteSpace(verificatSplit[1])
+        )
+      {
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("Поле 'Номер проверяющего' не заполнено корректно!", errorText.Item2));
+        return false;
+      }
+
+      // Проверка поля "Диапазон проверки" на наличие стандартного текста
+      if (rangeData.Text.Trim() == defaultRange)
+      {
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("Поле 'Диапазон проверки' не заполнено корректно!", errorText.Item2));
+        return false;
+      }
+
+      // Дополнительная проверка диапазона на корректность формата и значений
+      if (!ValidateRangeInput(rangeData.Text.Trim(), out string rangeError))
+      {
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel($"Поле 'Диапазон проверки' не заполнено корректно: {rangeError}", errorText.Item2));
+        return false;
+      }
+
+      // Проверка, что значения в полях номеров не совпадают
+      if (testedNumberData.Text.Trim() == verificatNumberData.Text.Trim())
+      {
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("Значения полей 'Номер проверяемого' и 'Номер проверяющего' не должны совпадать!", errorText.Item2));
+        return false;
+      }
+
+      return true;
+    }
+
+    /// <summary>
+    /// Проверяет корректность строки диапазона.
+    /// Требования:
+    ///  - Не должно быть пустых сегментов после разделения запятой.
+    ///  - Если сегмент содержит тире, оба числа успешно конвертируются, и первое число меньше второго.
+    ///  - Все числа не больше 350.
+    /// </summary>
+    /// <param name="rangeText">Введённый диапазон, например "1, 2-25"</param>
+    /// <param name="errorMessage">Сообщение об ошибке при некорректном вводе</param>
+    /// <returns>True, если ввод корректный, иначе false.</returns>
+    private bool ValidateRangeInput(string rangeText, out string errorMessage)
+    {
+      errorMessage = "";
+      // Разбиваем по запятой
+      string[] segments = rangeText.Split(',');
+      foreach (string segment in segments)
+      {
+        string trimmed = segment.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+          errorMessage = "Обнаружено пустое значение в диапазоне.";
+          return false;
+        }
+
+        // Если сегмент содержит тире, обрабатываем как диапазон (например, "2-25")
+        if (trimmed.Contains("-"))
+        {
+          string[] bounds = trimmed.Split('-');
+          // Проверяем, что есть ровно два элемента и ни один из них не пустой
+          if (bounds.Length != 2 ||
+              string.IsNullOrWhiteSpace(bounds[0]) ||
+              string.IsNullOrWhiteSpace(bounds[1]))
+          {
+            errorMessage = $"Неправильный формат диапазона: \"{trimmed}\".";
+            return false;
+          }
+
+          if (!int.TryParse(bounds[0].Trim(), out int start) ||
+              !int.TryParse(bounds[1].Trim(), out int end))
+          {
+            errorMessage = $"Невозможно преобразовать числа в диапазоне: \"{trimmed}\".";
+            return false;
+          }
+
+          if (start >= end)
+          {
+            errorMessage = $"В диапазоне \"{trimmed}\": значение до тире ({start}) должно быть меньше значения после тире ({end}).";
+            return false;
+          }
+
+          if (start > 350 || end > 350)
+          {
+            errorMessage = $"В диапазоне \"{trimmed}\" одно из значений больше 350.";
+            return false;
+          }
+        }
+        else
+        {
+          // Обрабатываем одиночное число
+          if (!int.TryParse(trimmed, out int number))
+          {
+            errorMessage = $"Невозможно преобразовать число: \"{trimmed}\".";
+            return false;
+          }
+          if (number > 350)
+          {
+            errorMessage = $"Число {number} больше 350.";
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
     /// <summary>
     /// Метод, который вызывается при нажатии кнопки "Старт" (ShowOnlyStartButton).
     /// </summary>
     private async Task ExecuteTestProcess(CancellationToken cancellationToken)
     {
+      // Выполняем проверку корректности введённых данных
+      if (!await ValidateInputFieldsAsync())
+      {
+        // Если данные некорректны, прерываем выполнение теста
+        LogError("Ошибка: введены некорректные данные. Тест не будет запущен.");
+        return;
+      }
+
       LogInformation("Запуск теста CrossTestMKR...");
 
       List<int> points = ParseRange(rangeData.Text);
 
       await InitializeModule(testedNumberData.Text);
-      await InitializeModule(testerNumberData.Text);
+      await InitializeModule(verificatNumberData.Text);
 
-      await MeterEnableAsync(testerNumberData.Text);
+      await MeterEnableAsync(verificatNumberData.Text);
 
-      await RunPart1(testedNumberData.Text, testerNumberData.Text, points, cancellationToken);
-      await RunPart2(testedNumberData.Text, testerNumberData.Text, points, cancellationToken);
-      await RunPart3(testedNumberData.Text, testerNumberData.Text, points, cancellationToken);
+      await RunPart1(testedNumberData.Text, verificatNumberData.Text, points, cancellationToken);
+      await RunPart2(testedNumberData.Text, verificatNumberData.Text, points, cancellationToken);
+      await RunPart3(testedNumberData.Text, verificatNumberData.Text, points, cancellationToken);
 
-      await MeterDisableAsync(testerNumberData.Text);
+      await MeterDisableAsync(verificatNumberData.Text);
     }
 
     /// <summary>
@@ -263,14 +337,11 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </summary>
     private async Task Stop(CancellationToken cancellationToken)
     {
-      // 1. Отключаем измеритель, если он был задействован
-      await MeterDisableAsync(testerNumberData.Text);
+      await MeterDisableAsync(verificatNumberData.Text);
 
-      // 2. Сбрасываем модули в исходное состояние
       await ResetModule(testedNumberData.Text);
-      await ResetModule(testerNumberData.Text);
+      await ResetModule(verificatNumberData.Text);
 
-      // 3. Общий сброс системы (как в NodeMethodControl)
       await CommunicationManager.ResetAllSystem();
     }
 
