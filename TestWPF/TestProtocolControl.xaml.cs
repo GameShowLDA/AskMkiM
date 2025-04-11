@@ -47,7 +47,7 @@ namespace TestWPF
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
         return;
       }
 
@@ -65,7 +65,7 @@ namespace TestWPF
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -98,12 +98,12 @@ namespace TestWPF
 
       // var answer = await breakDown.IrManger.MeasureResistanceAsync();
       var answer = 0;
-      var successMessage = ShowMessageModel.SuccessMessage.Item1;
-      var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+      var successMessage = ShowMessageModel.ErrorMessage.Title;
+      var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
       if (answer < (dataModel.Param * 1000))
       {
         successMessage = ShowMessageModel.ErrorMessage.Item1;
-        colorMessage = ShowMessageModel.ErrorMessage.Item2;
+        colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
       }
 
       await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм [{successMessage}]", messageColor: colorMessage));

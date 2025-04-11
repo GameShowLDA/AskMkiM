@@ -4,6 +4,7 @@ using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
+using Utilities.Error.Device.ModuleRelayControl;
 using static NewCore.Enum.DeviceEnum;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
@@ -29,16 +30,19 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage)
     {
+      var type = lowVoltage ? "низковольтной" : "высоковольтной";
+      var description = $"{type} шины [{bus}]";
+
       var result = await _busManager.ConnectBusAsync(bus, lowVoltage);
 
-      var type = lowVoltage ? "низковольтной" : "высоковольтной";
-      var message = $"Подключение {type} шины [{bus}]";
-
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _moduleRelayControl,
-        message,
-        result,
-        1);
+          _moduleRelayControl,
+          $"Подключение {description}",
+          result,
+          1);
+
+      if (!result)
+        throw BusExceptionFactory.ConnectFailed(description);
 
       return result;
     }
@@ -46,16 +50,19 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage)
     {
+      var type = lowVoltage ? "низковольтной" : "высоковольтной";
+      var description = $"{type} шины [{bus}]";
+
       var result = await _busManager.DisconnectBusAsync(bus, lowVoltage);
 
-      var type = lowVoltage ? "низковольтной" : "высоковольтной";
-      var message = $"Отключение {type} шины [{bus}]";
-
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _moduleRelayControl,
-        message,
-        result,
-        1);
+          _moduleRelayControl,
+          $"Отключение {description}",
+          result,
+          1);
+
+      if (!result)
+        throw BusExceptionFactory.DisconnectFailed(description);
 
       return result;
     }

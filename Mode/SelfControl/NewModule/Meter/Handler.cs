@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.Protocol;
@@ -19,8 +20,6 @@ namespace Mode.SelfControl.NewModule.Meter
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
     private IFastMeter meter;
     private ISwitchingDevice deviceBusCommutation;
 
@@ -94,7 +93,7 @@ namespace Mode.SelfControl.NewModule.Meter
       LogInformation("Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
+        new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
       LogInformation("Завершён метод завершения самоконтроля");
     }
 
@@ -112,7 +111,7 @@ namespace Mode.SelfControl.NewModule.Meter
       //}
 
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\r\nСамоконтроль мультиметра", goodText.Item2));
+        new ShowMessageModel("\r\nСамоконтроль мультиметра", SuccessMessage.TitleColor));
 
       if (!await GetIsIdleModeEnabled())
       {
@@ -136,7 +135,7 @@ namespace Mode.SelfControl.NewModule.Meter
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tКонтроль сопротивления", goodText.Item2));
+        new ShowMessageModel("\tКонтроль сопротивления", SuccessMessage.TitleColor));
 
       await meter.ResistanceManager.MeasureResistanceAsync();
 
@@ -163,12 +162,12 @@ namespace Mode.SelfControl.NewModule.Meter
         if (result >= first && result <= last)
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", goodText.Item2));
+            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", SuccessMessage.TitleColor));
         }
         else
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", errorText.Item2));
+            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", ErrorMessage.TitleColor));
           if (await GetIsStopOnErrorEnabled())
           {
             await ProtocolSelfCheckControl.PauseAsync();
@@ -193,7 +192,7 @@ namespace Mode.SelfControl.NewModule.Meter
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tКонтроль ёмкости", goodText.Item2));
+        new ShowMessageModel("\tКонтроль ёмкости", SuccessMessage.TitleColor));
       for (int i = 1; i <= 6; i++)
       {
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
@@ -216,12 +215,12 @@ namespace Mode.SelfControl.NewModule.Meter
         if (result >= first && result <= last)
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", goodText.Item2));
+            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", SuccessMessage.TitleColor));
         }
         else
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", errorText.Item2));
+            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", ErrorMessage.TitleColor));
         }
 
         await Task.Delay(200, token);

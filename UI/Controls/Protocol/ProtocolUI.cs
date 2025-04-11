@@ -63,20 +63,6 @@ namespace UI.Controls.Protocol
     bool _isRepeatEnabled;
     #endregion
 
-    #region Для работа с текстовым редактором.
-
-    /// <summary>
-    /// Сообщение и цвет, используемые для отображения успешного выполнения операции.
-    /// </summary>
-    readonly Tuple<string, Color> goodText = SuccessMessage;
-
-    /// <summary>
-    /// Сообщение и цвет, используемые для отображения ошибки выполнения операции.
-    /// </summary>
-    readonly Tuple<string, Color> errorText = ErrorMessage;
-
-    #endregion
-
     #endregion
 
     #region Основные настройки.
@@ -223,7 +209,20 @@ namespace UI.Controls.Protocol
     /// <summary>
     /// Проверка на пошаговый режим.
     /// </summary>
-    public async Task CheckStepModeAsync() => await ActionExecutor.CheckStepModeAsync(this.CommandBindings, this.InputBindings);
+    public async Task CheckStepModeAsync()
+    {
+      CommandBindingCollection commandBindings = null;
+      InputBindingCollection inputBindings = null;
+
+      // Получаем доступ к свойствам из UI-потока
+      await Dispatcher.InvokeAsync(() =>
+      {
+        commandBindings = this.CommandBindings;
+        inputBindings = this.InputBindings;
+      });
+
+      await ActionExecutor.CheckStepModeAsync(commandBindings, inputBindings);
+    }
 
     /// <summary>
     /// Выводит информацию в протокол.
@@ -243,6 +242,23 @@ namespace UI.Controls.Protocol
       }
 
       await protocolTextBox.AppendLineAsync(showMessageModel);
+
+      if (ActionExecutor.IsPaused)
+      {
+        await ActionExecutor.WaitWhilePausedAsync(this);
+      }
+
+      return await ProcessStepModeAsync(ActionExecutor.StepMode);
+    }
+
+    /// <summary>
+    /// Полностью очищает протокол и сбрасывает последнее сообщение.
+    /// </summary>
+    /// <returns>Возвращает признак успешного завершения операции.</returns>
+    public async Task<bool> ClearAllMessagesAsync()
+    {
+      await protocolTextBox.ClearAsync();
+      LastModelMeassage = null;
 
       if (ActionExecutor.IsPaused)
       {

@@ -60,7 +60,7 @@ namespace Mode.Metrology.IE
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, Data.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message));
         return;
       }
 
@@ -71,7 +71,7 @@ namespace Mode.Metrology.IE
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -96,7 +96,7 @@ namespace Mode.Metrology.IE
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения ёмкости", headerColor: ShowMessageModel.SuccessMessage.Item2));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения ёмкости", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.IE)) + GetNumericError(TypeCommand.IE));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.IE)) + GetNumericError(TypeCommand.IE);
@@ -104,7 +104,7 @@ namespace Mode.Metrology.IE
         var result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync();
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат ёмкости ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
+        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
 

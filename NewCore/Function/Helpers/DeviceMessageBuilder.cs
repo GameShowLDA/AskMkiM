@@ -20,19 +20,19 @@ namespace NewCore.Function.Helpers
     {
       var model = new ShowMessageModel(header: $"{device.Name}({device.NumberChassis}.{device.Number})")
       {
-        IsDeviceMessage = true
+        IsDeviceMessage = true,
       };
 
       return model;
     }
 
     /// <summary>
-    /// Формирует стандартное сообщение на основе результата.
+    /// Формирует сообщение для отображения пользователю с указанием успешности или ошибки.
     /// </summary>
-    /// <param name="baseMessage">Основной текст сообщения.</param>
-    /// <param name="message">Исходная модель сообщения.</param>
-    /// <param name="isError">Признак ошибки.</param>
-    /// <returns>Сформированная модель сообщения.</returns>
+    /// <param name="message">Модель сообщения, в которую будет записан текст и цвет.</param>
+    /// <param name="baseMessage">Базовое текстовое сообщение, добавляемое в начало.</param>
+    /// <param name="isError">Флаг, указывающий, является ли сообщение ошибкой.</param>
+    /// <returns>Обновлённая модель сообщения <see cref="ShowMessageModel"/>.</returns>
     public static ShowMessageModel BuildMessage(ref ShowMessageModel message, string baseMessage = null, bool isError = false)
     {
       if (baseMessage == null)
@@ -42,18 +42,23 @@ namespace NewCore.Function.Helpers
 
       if (isError)
       {
-        message.Message = $"{baseMessage} [{ShowMessageModel.ErrorMessage.Item1}]";
-        message.MessageColor = ShowMessageModel.ErrorMessage.Item2;
+        message.Message = $"{baseMessage} [{ShowMessageModel.ErrorMessage.Title}]";
+        message.MessageColor = ShowMessageModel.ErrorMessage.TitleColor;
       }
       else
       {
-        message.Message += $"{baseMessage} [{ShowMessageModel.SuccessMessage.Item1}]";
-        message.MessageColor = ShowMessageModel.SuccessMessage.Item2;
+        message.Message += $"{baseMessage} [{ShowMessageModel.SuccessMessage.Title}]";
+        message.MessageColor = ShowMessageModel.SuccessMessage.TitleColor;
       }
 
       return message;
     }
 
+    /// <summary>
+    /// Показывает сообщение пользователю, если результат операции отрицательный или устройство не отвечает.
+    /// </summary>
+    /// <param name="showMessageModel">Модель сообщения для отображения.</param>
+    /// <param name="result">Результат выполнения операции: <c>true</c> — успех, <c>false</c> — ошибка.</param>
     public static async Task ShowDeviceMessage(ShowMessageModel showMessageModel, bool result)
     {
       if (!result || await AppConfiguration.Protocol.ProtocolConfig.GetDeviceInfo())
@@ -64,11 +69,14 @@ namespace NewCore.Function.Helpers
 
     /// <summary>
     /// Унифицированный метод отображения сообщения о подключении или отключении устройства.
+    /// Формирует заголовок, устанавливает отступ, цвет и текст сообщения в зависимости от результата операции,
+    /// а затем отображает сообщение пользователю.
     /// </summary>
     /// <param name="device">Устройство, для которого формируется сообщение.</param>
-    /// <param name="headerSuffix">Текст, добавляемый к заголовку.</param>
-    /// <param name="result">Результат операции (true — успех, false — ошибка).</param>
-    /// <returns>Задача выполнения показа сообщения.</returns>
+    /// <param name="headerSuffix">Текст, добавляемый в конец заголовка (например, "Подключено" или "Отключено").</param>
+    /// <param name="result">Результат операции: <c>true</c> — успешно, <c>false</c> — ошибка.</param>
+    /// <param name="indentLevel">Уровень отступа, используемый при отображении сообщения (визуальная иерархия).</param>
+    /// <returns>Задача асинхронного показа сообщения.</returns>
     public static async Task ShowConnectionMessageAsync(IAttachableDevice device, string headerSuffix, bool result, int indentLevel)
     {
       var showMessageModel = GetDefaultSettings(device);
@@ -85,6 +93,7 @@ namespace NewCore.Function.Helpers
     /// <param name="headerSuffix">Текст, добавляемый к заголовку.</param>
     /// <param name="baseMessage">Основной текст сообщения (например, номер).</param>
     /// <param name="result">Результат операции (true — успех, false — ошибка).</param>
+    /// <param name="indentLevel">Уровень отступа, используемый при отображении сообщения (визуальная иерархия).</param>
     /// <returns>Задача выполнения показа сообщения.</returns>
     public static async Task ShowConnectionMessageAsync(IAttachableDevice device, string headerSuffix, string baseMessage, bool result, int indentLevel)
     {
@@ -94,6 +103,5 @@ namespace NewCore.Function.Helpers
       BuildMessage(ref showMessageModel, baseMessage, isError: !result);
       await ShowDeviceMessage(showMessageModel, result);
     }
-
   }
 }

@@ -32,6 +32,8 @@ namespace MainWindowProgram.Services
 
     private bool _isSearchWindowOpen;
 
+    private Action SearchWindowClosing;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
     /// </summary>
@@ -43,6 +45,13 @@ namespace MainWindowProgram.Services
       _mainWindow = mainWindow;
       _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
+      EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
+    }
+
+    private void OnSearchWindowClosing(bool closing)
+    {
+      _isSearchWindowOpen = false;
+      EventAggregator.RaiseInfoMessage(string.Empty);
     }
 
     /// <summary>
@@ -58,8 +67,7 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          // TODO: расширения файлов изменить
-          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf",
+          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK",
           Title = "Выберите текстовый файл",
         };
 
@@ -127,17 +135,17 @@ namespace MainWindowProgram.Services
       if (_isSearchWindowOpen == false)
       {
         _mainWindow.SearchWindow.Owner = _mainWindow;
-
-        TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
-        string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-        if (!string.IsNullOrEmpty(selectedText))
-        {
-          EventAggregator.RaiseSearchTextRequested(selectedText);
-        }
         _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
         _mainWindow.SearchWindow.ShowWindow();
         _isSearchWindowOpen = true;
+      }
+
+      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+      string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        EventAggregator.RaiseSearchTextRequested(selectedText);
       }
     }
 
@@ -154,7 +162,6 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task OpenArchiveAsync()
     {
-      //throw new Exception("Настроить открытие архива");
       var allArchives = new TableAllArchivesControl();
       await _multiWindow.AddControlAsync("Архив", allArchives, TypeWindow.Files);
       allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;

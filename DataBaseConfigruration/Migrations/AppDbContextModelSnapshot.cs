@@ -16,7 +16,7 @@ namespace DataBaseConfiguration.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.BreakdownTesterEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.BreakdownTesterEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,7 +49,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("BreakdownTesters");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.ChassisManagerEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.ChassisManagerEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -79,7 +79,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("ChassisManagers");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.FastMeterEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.FastMeterEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -112,7 +112,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("FastMeters");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.PowerSourceModuleEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.PowerSourceModuleEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -148,7 +148,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("PowerSourceModules");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.PrecisionMeterEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.PrecisionMeterEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,7 +181,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("PrecisionMeters");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.RackEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.RackEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -214,7 +214,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("Rack");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.RelaySwitchModuleEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.RelaySwitchModuleEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -253,7 +253,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("RelaySwitchModules");
                 });
 
-            modelBuilder.Entity("DataBaseConfiguration.Models.SwitchingDeviceEntity", b =>
+            modelBuilder.Entity("DataBaseConfiguration.Models.Device.SwitchingDeviceEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -284,6 +284,37 @@ namespace DataBaseConfiguration.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SwitchingDevices");
+                });
+
+            modelBuilder.Entity("DataBaseConfiguration.Models.Hotkey.FileHotkeyEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ActionName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("KeyCombination")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileHotkeys");
                 });
 #pragma warning restore 612, 618
         }

@@ -44,7 +44,7 @@ namespace AppConfiguration.Execution
     {
       await Task.Run(() =>
       {
-        ExecutionModel.StopOnError = enable;
+        ExecutionModel.StepByStepMode = enable;
       });
     }
 
@@ -95,10 +95,10 @@ namespace AppConfiguration.Execution
     public static async Task<bool> GetIsErrorSimulationEnabled() => await Task.Run(() => ExecutionModel.IsErrorSimulationMode);
 
     /// <summary>
-    /// Возвращает, включена ли симуляция ошибок в холостом режиме.
+    /// Возвращает, включен ли пошаговый режим.
     /// </summary>
     /// <returns>true, если включена; false, если выключена.</returns>
-    public static async Task<bool> GetIsStepByStepModeEnabled() => await Task.Run(() => ExecutionModel.StopOnError);
+    public static async Task<bool> GetIsStepByStepModeEnabled() => await Task.Run(() => ExecutionModel.StepByStepMode);
 
     #endregion
 

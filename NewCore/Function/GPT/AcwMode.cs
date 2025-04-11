@@ -29,6 +29,8 @@ namespace NewCore.Function.GPT
 
     static private int delayBeforeCall = 100;
 
+    int delay = 500;
+
     #region Mode
 
     /// <inheritdoc />
@@ -70,6 +72,7 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return string.Empty;
 
+      await Task.Delay(delay);
       var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?";
       LogInformation("Запрашиваем текущий режим...");
 
@@ -114,13 +117,14 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return 0;
 
+      await Task.Delay(delay);
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} ?";
       var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
       LogDebug($"Ответ на запрос напряжения ACW: \"{response}\"");
 
       if (double.TryParse(response.Replace("kV", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var voltage))
       {
-        return voltage * 1000; // возвращаем в вольтах
+        return voltage; // возвращаем в вольтах
       }
 
       LogWarning("Не удалось разобрать напряжение. Возвращаем 0.");
@@ -161,6 +165,7 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return 0;
 
+      await Task.Delay(delay);
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} ?";
       var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
       LogDebug($"Ответ на запрос верхнего тока ACW: \"{response}\"");
@@ -213,6 +218,7 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return 0;
 
+      await Task.Delay(delay);
       var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} ?";
       var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
       LogDebug($"Ответ на запрос нижнего тока ACW: \"{response}\"");
@@ -238,6 +244,7 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
 
+      await Task.Delay(delay);
       string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_TTIME)} {value:F1}".Replace(',', '.');
 
       await _gptModel.DeviceProtocol.QueryAsync(command);
@@ -286,6 +293,7 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
 
+      await Task.Delay(delay);
       string command = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
 
       await _gptModel.DeviceProtocol.QueryAsync(command);
@@ -337,6 +345,7 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
 
+      await Task.Delay(delay);
       string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} {frequency}";
 
       await _gptModel.DeviceProtocol.QueryAsync(command);

@@ -27,6 +27,12 @@ namespace NewCore.Base.DeviceResponses
     public int NumberChassis { get; set; }
 
     /// <summary>
+    /// Ответ от устройства.
+    /// </summary>
+    [JsonPropertyName("Answer")]
+    public string? Answer { get; set; }
+
+    /// <summary>
     /// Десериализует JSON-строку в объект <see cref="BaseResponse"/>.
     /// </summary>
     /// <param name="json">Строка JSON с данными.</param>

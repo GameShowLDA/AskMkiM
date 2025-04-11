@@ -186,7 +186,7 @@ namespace UI.Controls.Search
       {
         this.Top = 50;
       }
-      //this.Activate();
+      this.Activate();
       this.Focus();
       this.Show();
 
@@ -198,7 +198,6 @@ namespace UI.Controls.Search
       ClearHighlights?.Invoke();
       EventAggregator.RaiseSearchWindowClosing(false);
       _allowClose = true;
-
       var hideAnimation = (Storyboard)Resources["HideAnimation"];
       hideAnimation.Completed += (s, e) => this.Hide();
       hideAnimation.Begin();

@@ -1,12 +1,14 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using AppConfiguration.SystemState;
 using ConsoleUtilities;
 using ConsoleUtilities.Engine;
 using ConsoleUtilities.Services;
 using MainWindowProgram.Engine;
 using MainWindowProgram.Events;
+using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using UI.Controls.Search;
@@ -23,7 +25,7 @@ namespace MainWindowProgram
     /// Обработчик сообщений, передаёт текст в интерфейс через связанный блок информации.
     /// Используется для отображения логов, статусов, ошибок и другой информации в UI.
     /// </summary>
-    internal readonly MessageHandler messageHandler = new(_infoBlock);
+    internal MessageHandler messageHandler { get; set; }
 
     /// <summary>
     /// Статический UI-элемент, в который выводятся сообщения от системы.
@@ -75,6 +77,7 @@ namespace MainWindowProgram
       _usbServices = usb;
 
       this.DataContext = _viewModel;
+      GuiInitializer.Apply(this);
     }
 
     /// <summary>
@@ -85,7 +88,7 @@ namespace MainWindowProgram
       var lifecycle = new ApplicationLifecycleManager();
       lifecycle.Initialize(this, _usbServices, App._consoleManager);
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
-      ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler);
+      ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
 
       try
       {
@@ -93,6 +96,12 @@ namespace MainWindowProgram
         {
           await applicationInitializer.InitializeAsync();
         });
+
+        await this.Dispatcher.InvokeAsync(() =>
+        {
+          HotkeyBinderManager.AttachAllHotkeys(this, this.DataContext);
+        }, DispatcherPriority.Loaded);
+
       }
       catch (InvalidOperationException exception)
       {

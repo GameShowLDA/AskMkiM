@@ -5,6 +5,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleVoltageCurrentSource;
+using Utilities.Error.Device.ModuleVoltageCurrent;
 using static NewCore.Enum.DeviceEnum;
 
 namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
@@ -25,21 +26,56 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
 
     public async Task SetSourceVoltageAsync(VoltageSources voltageSources)
     {
-      await _voltageManager.SetSourceVoltageAsync(voltageSources);
       string label = voltageSources == VoltageSources.Supply12V ? "12 В" : "5 В";
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Выбор источника напряжения", $"Источник: {label}", true, 1);
+
+      try
+      {
+        await _voltageManager.SetSourceVoltageAsync(voltageSources);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Выбор источника напряжения",
+            $"Источник: {label}",
+            true,
+            1);
+      }
+      catch (Exception ex)
+      {
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка выбора источника напряжения",
+            ex.Message,
+            false,
+            1);
+
+        throw VoltageExceptionFactory.SetSourceFailed(label, ex.Message);
+      }
     }
 
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
     {
-      await _voltageManager.SetVoltageLevelAsync(integerPart, decimalPart);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _device,
-        "Установка уровня напряжения",
-        $"Напряжение: {integerPart}.{decimalPart:D3} В",
-        true,
-        1
-      );
+      string value = $"{integerPart}.{decimalPart:D3}";
+
+      try
+      {
+        await _voltageManager.SetVoltageLevelAsync(integerPart, decimalPart);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка уровня напряжения",
+            $"Напряжение: {value} В",
+            true,
+            1);
+      }
+      catch (Exception ex)
+      {
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка установки напряжения",
+            ex.Message,
+            false,
+            1);
+
+        throw VoltageExceptionFactory.SetLevelFailed(value, ex.Message);
+      }
     }
   }
 }

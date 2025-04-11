@@ -29,11 +29,6 @@ namespace MainWindowProgram.Events
     private readonly MultiWindowControl _multiWindow;
 
     /// <summary>
-    /// Контейнер для управления несколькими редакторами внутри интерфейса.
-    /// </summary>
-    private readonly MultiWindowService _multiWindowService;
-
-    /// <summary>
     /// Свойство, указывающее, открыто ли окно поиска.
     /// </summary>
     public bool IsSearchWindowOpen { get; set; }

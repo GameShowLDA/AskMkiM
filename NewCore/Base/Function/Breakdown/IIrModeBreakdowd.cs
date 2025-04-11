@@ -17,7 +17,7 @@ namespace NewCore.Base.Function.Breakdown
     /// <summary>
     /// Возвращает текущий режим работы.
     /// </summary>
-    Task<string> GetModeAsync();
+    Task<(bool Success, string Message)> GetModeAsync();
 
     #endregion
 

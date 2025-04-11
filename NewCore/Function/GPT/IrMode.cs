@@ -2,12 +2,11 @@
 using System.Text.RegularExpressions;
 using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
-using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
+using static AppConfiguration.Execution.ExecutionConfig;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -24,6 +23,7 @@ namespace NewCore.Function.GPT
 
     #region Mode
 
+    /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetModeAsync()
     {
       LogInformation("Устанавливаем режим IR на GPT-79904");
@@ -35,54 +35,70 @@ namespace NewCore.Function.GPT
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         await _gptModel.DeviceProtocol.QueryAsync(command);
-        string check = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?", timeout: 1000);
-        if (check.Trim().Equals("IR", StringComparison.OrdinalIgnoreCase))
-          return (true, string.Empty);
+        var check = await GetModeAsync();
 
-        LogWarning($"Попытка {attempt} неудачна. Ответ: {check}");
+        if (check.Success)
+        {
+          return (true, string.Empty);
+        }
+
+        LogWarning($"Попытка {attempt} неудачна. Ответ: {check.Message}");
       }
 
       return (false, "Не удалось установить режим IR после 2 попыток.");
     }
 
-    public async Task<string> GetModeAsync()
+    /// <inheritdoc />
+    public async Task<(bool Success, string Message)> GetModeAsync()
     {
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?", timeout: 1000);
-      return response.Trim();
+      var actual = response.Trim();
+      return actual.Equals("IR", StringComparison.OrdinalIgnoreCase)
+        ? (true, actual)
+        : (false, actual);
     }
 
     #endregion
 
     #region Voltage
 
+    /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetVoltageAsync(double value)
     {
       LogInformation($"Устанавливаем напряжение IR: {value} В");
 
-      if (await GetIsIdleModeEnabled()) return (true, string.Empty);
+      if (await GetIsIdleModeEnabled())
+        return (true, string.Empty);
 
-      string kv = (value / 1000).ToString("F3", CultureInfo.InvariantCulture);
-      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {kv}";
+      string kvFormatted = (value / 1000).ToString("F3", CultureInfo.InvariantCulture);
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {kvFormatted}";
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         await _gptModel.DeviceProtocol.QueryAsync(command);
         double actual = await GetVoltageAsync();
+
         if (Math.Abs(actual - value) < 1.0)
           return (true, string.Empty);
 
-        LogWarning($"Попытка {attempt} установки напряжения IR неудачна. Ответ: {actual} В");
+        LogWarning($"Попытка {attempt} установки напряжения не удалась. Получено: {actual:F1} В, ожидалось: {value:F1} В.");
       }
 
-      return (false, $"Не удалось установить напряжение IR: {value} В.");
+      return (false, $"Не удалось установить напряжение IR. Устройство не приняло значение {value} В.");
     }
 
+    /// <inheritdoc />
     public async Task<double> GetVoltageAsync()
     {
-      var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?", timeout: 1000);
-      if (double.TryParse(response.Replace("kV", "").Trim().Replace(".", ","), out var kv))
+      string query = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+
+      string cleaned = response.Replace("kV", "").Trim().Replace(".", ",");
+
+      if (double.TryParse(cleaned, out var kv))
         return kv * 1000;
 
+      LogError($"Ошибка чтения напряжения IR. Ответ: '{response}'");
       return -1;
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 

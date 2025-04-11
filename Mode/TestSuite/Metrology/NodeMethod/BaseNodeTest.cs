@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
@@ -83,12 +84,11 @@ namespace Mode.TestSuite.Metrology.NodeMethod
       var busSwitcher = Devices.OfType<ISwitchingDevice>().FirstOrDefault();
       var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-      await protocolUI.ShowMessageAsync(new ShowMessageModel($"Подключение {breakDown.Name}({breakDown.Number}) к {busSwitcher.Name}({busSwitcher.Number})"));
       await busSwitcher.ConnectorManager.ConnectBreakdownTester();
 
       foreach (var module in relayModules)
       {
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", ShowMessageModel.SuccessMessage.Item2, message: $"Подключение к шинам A1B1"));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", ShowMessageModel.SuccessMessage.TitleColor, message: $"Подключение к шинам A1B1"));
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1);
 
@@ -121,7 +121,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
 
         await module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", ShowMessageModel.SuccessMessage.Item2, message: $"Подключение точек к шинам"));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", ShowMessageModel.SuccessMessage.TitleColor, message: $"Подключение точек к шинам"));
         for (int i = startPoint; i <= endPoint; i++)
         {
           _pointsToProcess.Add(new PointModel { DeviceNumber = module.NumberChassis, ModuleNumber = module.Number, PointNumber = i });
@@ -198,6 +198,8 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// <returns>Задача, представляющая операцию подключения.</returns>
     public virtual async Task<(bool Connect, string Message)> ConnectDevicesAsync()
     {
+      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования", ShowMessageModel.SuccessMessage.TitleColor));
+
       foreach (var device in Devices)
       {
         if (device is IDevice connectableDevice)

@@ -8,6 +8,7 @@ using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device.DeviceBusCommutation;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -34,7 +35,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> ConnectCapacitor(string number)
     {
       var result = await _capacitorManager.ConnectCapacitor(number);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение конденсатора", number, result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _deviceBusCommutation,
+          "Подключение конденсатора",
+          number,
+          result,
+          1);
+
+      if (!result)
+        throw CapacitorExceptionFactory.ConnectFailed(number);
+
       return result;
     }
 
@@ -42,7 +53,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectCapacitor(string number)
     {
       var result = await _capacitorManager.DisconnectCapacitor(number);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение конденсатора", number, result, 1);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _deviceBusCommutation,
+          "Отключение конденсатора",
+          number,
+          result,
+          1);
+
+      if (!result)
+        throw CapacitorExceptionFactory.DisconnectFailed(number);
+
       return result;
     }
   }

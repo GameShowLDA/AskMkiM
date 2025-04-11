@@ -1,4 +1,5 @@
-﻿using TestConsole.GPT;
+﻿using DataBaseConfiguration;
+using TestConsole.GPT;
 using TestConsole.MINT;
 
 namespace TestConsole
@@ -7,7 +8,7 @@ namespace TestConsole
   {
     static async Task Main(string[] args)
     {
-      var db = DataBaseConfiguration.Configurations.DataBaseConfig.InitializeDB();
+      var db = DataBaseConfig.InitializeDB();
       Console.ForegroundColor = ConsoleColor.White;
 
       Console.WriteLine("=== Главное меню ===");

@@ -13,7 +13,6 @@ using static Utilities.LoggerUtility;
 using System.Windows;
 using UI.Components.ArchiveManager.Models;
 
-
 namespace UI.Components.ArchiveManager.ArchiveFiles.Index
 {
   public class IndexEditor
@@ -86,8 +85,10 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
               string jsonContent = reader.ReadToEnd();
               jsonArray = TryRemoveDataFromIndex(fileName, jsonContent);
             }
+
             indexEntry.Delete();
           }
+
           RewriteIndexEntry(archive, jsonArray);
         }
       }
@@ -96,7 +97,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
         throw new Exception($"Ошибка при обновлении индекса: {ex.Message}", ex);
       }
     }
-
 
     // TODO: шифрование индекса    
     public void DeleteDataFromIndex(string fileName)
@@ -110,7 +110,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
       {
         writer.Write(jsonArray.ToString(Formatting.Indented));
       }
-
     }
 
     /// <summary>

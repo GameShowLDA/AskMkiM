@@ -5,6 +5,7 @@ using AppConfiguration.Execution;
 using AppConfiguration.MeasurementError;
 using AppConfiguration.Protocol;
 using AppConfiguration.Theme;
+using DataBaseConfiguration;
 using static Utilities.LoggerUtility;
 
 namespace TestWPF
@@ -44,7 +45,7 @@ namespace TestWPF
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
         var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-        var db = DataBaseConfiguration.Configurations.DataBaseConfig.InitializeDB();
+        var db = DataBaseConfig.InitializeDB();
 
         await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
         await ThemeSettingsManager.ReadThemeModeAsync();

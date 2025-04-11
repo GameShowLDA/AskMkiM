@@ -5,6 +5,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
+using Utilities.Error.Device;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -27,11 +28,16 @@ namespace NewCore.FunctionAdapters.GPT
       var (result, answer) = await _manager.ConnectAsync();
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _device,
-        "Подключение пробойной установки",
-        string.IsNullOrWhiteSpace(answer) ? "Успешно" : answer,
-        result,
-        1);
+          _device,
+          "Инициализация пробойной установки",
+          string.IsNullOrWhiteSpace(answer) ? "Успешно" : answer,
+          result,
+          1);
+
+      if (!result)
+      {
+        throw ConnectionExceptionFactory.ConnectFailed(_device.Name, _device.NumberChassis, _device.Number, answer);
+      }
 
       return (result, answer);
     }
@@ -41,11 +47,16 @@ namespace NewCore.FunctionAdapters.GPT
       var result = await _manager.DisconnectAsync();
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _device,
-        "Отключение пробойной установки",
-        result ? "Успешно" : "Ошибка отключения",
-        result,
-        1);
+          _device,
+          "Отключение пробойной установки",
+          result ? "Успешно" : "Ошибка отключения",
+          result,
+          1);
+
+      if (!result)
+      {
+        throw ConnectionExceptionFactory.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
+      }
 
       return result;
     }
@@ -55,18 +66,26 @@ namespace NewCore.FunctionAdapters.GPT
       var (result, answer) = await _manager.InitializeAsync();
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        _device,
-        "Инициализация пробойной установки",
-        string.IsNullOrWhiteSpace(answer) ? "ОК" : answer,
-        result,
-        1);
+          _device,
+          "Инициализация пробойной установки",
+          string.IsNullOrWhiteSpace(answer) ? "ОК" : answer,
+          result,
+          1);
+
+      if (!result)
+        throw ConnectionExceptionFactory.InitializeFailed(_device.Name, _device.NumberChassis, _device.Number, answer);
 
       return (result, answer);
     }
 
-    public Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync()
     {
-      return _manager.ResetAsync();
+      var result = await _manager.ResetAsync();
+
+      if (!result)
+        throw ConnectionExceptionFactory.ResetFailed(_device.Name, _device.NumberChassis, _device.Number);
+
+      return result;
     }
   }
 }

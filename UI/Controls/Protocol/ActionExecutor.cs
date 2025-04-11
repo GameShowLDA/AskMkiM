@@ -33,8 +33,6 @@ namespace UI.Controls.Protocol
     #endregion
 
     #region Свойства.
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
 
     /// <summary>
     /// Экземпляр подключаемого класса.
@@ -86,11 +84,12 @@ namespace UI.Controls.Protocol
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null)
     {
+      await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled())
       {
         if (!await GetIsActivePower())
         {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", errorText.Item2));
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
           await ProtocolSelfCheck.FinalizeAsync();
           return;
         }
@@ -103,7 +102,7 @@ namespace UI.Controls.Protocol
 
       if (startDelegate == null)
       {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", errorText.Item2));
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
         await ProtocolSelfCheck.FinalizeAsync();
         LogError("Системная ошибка выполнения, обратитесь к администратору");
         return;
@@ -460,7 +459,7 @@ namespace UI.Controls.Protocol
       ShowMessageModel showMessage = new ShowMessageModel()
       {
         Header = $"Завершено.",
-        HeaderColor = goodText.Item2,
+        HeaderColor = SuccessMessage.TitleColor,
         CanBeDeleted = false,
       };
       await ProtocolSelfCheck.ShowMessageAsync(showMessage);
