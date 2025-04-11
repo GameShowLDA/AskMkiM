@@ -32,6 +32,8 @@ namespace MainWindowProgram.Services
 
     private bool _isSearchWindowOpen;
 
+    private Action SearchWindowClosing;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
     /// </summary>
@@ -43,6 +45,12 @@ namespace MainWindowProgram.Services
       _mainWindow = mainWindow;
       _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
+      EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
+    }
+
+    private void OnSearchWindowClosing(bool closing)
+    {
+      _isSearchWindowOpen = false;
     }
 
     /// <summary>
@@ -58,8 +66,7 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          // TODO: расширения файлов изменить
-          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf",
+          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK",
           Title = "Выберите текстовый файл",
         };
 
