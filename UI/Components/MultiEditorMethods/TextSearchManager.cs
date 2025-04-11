@@ -463,6 +463,7 @@ namespace UI.Components.MultiEditorMethods
       MatchCollection matches = FindMatches(fullText, pattern, options);
       ProcessMatches(matches);
 
+      EventAggregator.RaiseInfoMessage($"Найдено {foundResults.Count} вхождений");
       return foundResults.Count > 0 ? foundResults : HandleNoMatches(searchText);
     }
 
@@ -600,10 +601,6 @@ namespace UI.Components.MultiEditorMethods
       for (int i = 0; i < lines.Length; i++)
       {
         string line = lines[i];
-        if (line.Equals("    for (int i = 0; i < header.NumberOfSignals; i++)"))
-        {
-          Console.WriteLine("Дошли до строки с пробелами в начале");
-        }
 
         MatchCollection matches = Regex.Matches(line, pattern, options);
         if (Regex.IsMatch(lines[i], pattern, options))
@@ -838,7 +835,7 @@ namespace UI.Components.MultiEditorMethods
       {
         if (textEditor.MarkerService == null)
         {
-          Console.WriteLine("❌ markerService == null");
+          LogError("markerService == null");
           return;
         }
 

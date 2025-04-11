@@ -29,7 +29,6 @@ namespace MainWindowProgram.Engine
     {
       CheckStatusProgram();
       await StartSettingsAsync();
-
       // TODO: разобраться с горячими клавишами
       // RegisterHotkeys(); // при необходимости можно передать делегат или событие
     }

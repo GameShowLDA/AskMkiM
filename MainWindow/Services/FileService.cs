@@ -51,6 +51,7 @@ namespace MainWindowProgram.Services
     private void OnSearchWindowClosing(bool closing)
     {
       _isSearchWindowOpen = false;
+      EventAggregator.RaiseInfoMessage(string.Empty);
     }
 
     /// <summary>
@@ -134,17 +135,17 @@ namespace MainWindowProgram.Services
       if (_isSearchWindowOpen == false)
       {
         _mainWindow.SearchWindow.Owner = _mainWindow;
-
-        TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
-        string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-        if (!string.IsNullOrEmpty(selectedText))
-        {
-          EventAggregator.RaiseSearchTextRequested(selectedText);
-        }
         _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
         _mainWindow.SearchWindow.ShowWindow();
         _isSearchWindowOpen = true;
+      }
+
+      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+      string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        EventAggregator.RaiseSearchTextRequested(selectedText);
       }
     }
 

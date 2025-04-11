@@ -13,7 +13,7 @@ namespace MainWindowProgram
   /// </summary>
   internal class MessageHandler
   {
-    private TextBlock _infoBlock;
+    static private TextBlock _infoBlock;
     private static System.Timers.Timer timer = new System.Timers.Timer();
 
     /// <summary>

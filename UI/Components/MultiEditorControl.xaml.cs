@@ -325,7 +325,6 @@ namespace UI.Components
       }
     }
 
-
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
     {
       SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
