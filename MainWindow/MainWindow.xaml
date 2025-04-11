@@ -175,11 +175,11 @@
                     <MenuItem Header="Сохранить как" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
                     <MenuItem Header="Печать" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
                     <MenuItem Header="Поиск" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
-                    <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                     <MenuItem Header="Открыть" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
                     <MenuItem Header="Создать" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
+                    <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                     <MenuItem Header="Выход" Command="{Binding File.ExitApplicationCommand}"/>

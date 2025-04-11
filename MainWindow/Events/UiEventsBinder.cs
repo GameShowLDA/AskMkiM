@@ -77,7 +77,6 @@ namespace MainWindowProgram.Events
       _mainWindow.saveAsMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
-      _mainWindow.compareMenuItem.Visibility = visibility;
     }
 
     /// <summary>
