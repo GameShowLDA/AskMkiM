@@ -14,10 +14,10 @@ using static AppConfiguration.Protocol.ProtocolConfig;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 
-namespace UI.Controls.Protocol
+namespace UI.Controls.ProtocolController
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserMessageService
+  public partial class ProtocolController : IUserMessageService
   {
     #region Поля.
 
@@ -98,23 +98,6 @@ namespace UI.Controls.Protocol
       }
     }
 
-    /// <summary>
-    /// Настраивает события для элементов управления.
-    /// </summary>
-    public void SetEventControls()
-    {
-      StartMeasureResistanceButtonPreviewMouseDown += async (sender, e) => await StartAsync();
-      PauseButtonPreviewMouseDown += async (sender, e) => await PauseAsync();
-
-      TopLayerButtonPreviewMouseDown += StepAround_PreviewMouseDown;
-      BottomLayerButtonPreviewMouseDown += StepIn_PreviewMouseDown;
-
-      NextButtonPreviewMouseDown += (sender, e) => Resume();
-      ExitButtonPreviewMouseDown += async (sender, e) => await StopAsync();
-
-      LoopMeasureResistanceButtonPreviewMouseDown += (sender, e) => LoopMeasureEvent();
-      ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
-    }
 
     #endregion
 
@@ -230,7 +213,7 @@ namespace UI.Controls.Protocol
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
-    {   
+    {
       if (!await GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)

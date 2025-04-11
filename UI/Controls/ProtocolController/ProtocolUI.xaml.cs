@@ -1,0 +1,95 @@
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using static Utilities.LoggerUtility;
+
+namespace UI.Controls.ProtocolController
+{
+  /// <summary>
+  /// Класс управления пользовательским интерфейсом протокола выполнения.
+  /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
+  /// </summary>
+  public partial class ProtocolController : UserControl
+  {
+    /// <summary>
+    /// Свойство зависимости для заголовка.
+    /// Позволяет изменять заголовок через XAML или код.
+    /// </summary>
+    public static readonly DependencyProperty HeaderProperty =
+        DependencyProperty.Register(
+            nameof(Header),
+            typeof(string),
+            typeof(ProtocolController),
+            new PropertyMetadata(string.Empty, OnHeaderChanged));
+
+    /// <summary>
+    /// Получает или задает текст заголовка.
+    /// </summary>
+    public string Header
+    {
+      get => (string)GetValue(HeaderProperty);
+      set => SetValue(HeaderProperty, value);
+    }
+
+    /// <summary>
+    /// Обработчик изменения заголовка, чтобы обновлять TextBlock.
+    /// </summary>
+    private static void OnHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is ProtocolController control)
+      {
+        control.header.Text = e.NewValue as string;
+      }
+    }
+
+    /// <summary>
+    /// Свойство зависимости для установки динамического контента.
+    /// Позволяет добавить стандартный элемент (Button, TextBlock и т. д.) или UserControl.
+    /// </summary>
+    public static readonly DependencyProperty ContentViewProperty =
+        DependencyProperty.Register(
+            nameof(ContentView),
+            typeof(FrameworkElement),
+            typeof(ProtocolController),
+            new PropertyMetadata(null));
+
+    /// <summary>
+    /// Получает или задает контент (стандартный элемент или UserControl).
+    /// </summary>
+    public FrameworkElement ContentView
+    {
+      get => (FrameworkElement)GetValue(ContentViewProperty);
+      set => SetValue(ContentViewProperty, value);
+    }
+
+    /// <summary>
+    /// Команда для установки динамического контента из XAML.
+    /// </summary>
+    public ICommand SetContentCommand { get; }
+
+    /// <summary>
+    /// Коллекция элементов, используемых в протоколе.
+    /// </summary>
+    public ObservableCollection<object> Items { get; }
+
+    /// <summary>
+    /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
+    /// Инициализирует компоненты и устанавливает обработчики событий PreviewMouseDown для кнопок.
+    /// </summary>
+    public ProtocolController()
+    {
+      InitializeComponent();
+      this.DataContext = this;
+
+      loopButton.Visibility = Visibility.Collapsed;
+      returnButton.Visibility = Visibility.Collapsed;
+      Items = new ObservableCollection<object>();
+
+      AppConfiguration.Services.UserMessageServiceProvider.Instance = this;
+
+      SetupButtons();
+      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+    }
+  }
+}

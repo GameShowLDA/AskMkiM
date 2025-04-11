@@ -1,0 +1,208 @@
+﻿<UserControl x:Class="UI.Controls.ProtocolController.ProtocolController"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.ProtocolController"
+             xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+
+        <Style x:Key="BorderedTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="Wheat"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style x:Key="BorderStyle" TargetType="Border">
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <DataTemplate x:Key="DynamicContentTemplate">
+            <StackPanel>
+                <ContentPresenter Content="{Binding}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="ShadowButtonStyle" TargetType="Button" BasedOn="{StaticResource ConfigButtonStyle}">
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" BlurRadius="15" ShadowDepth="4" Opacity="0.5"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Border CornerRadius="0,0,0,0" Background="{StaticResource PrimarySolidColorBrush}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border  Padding="0,10" Margin="5" CornerRadius="20">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="{StaticResource SecondaryColor}" Offset="0"/>
+                        <GradientStop Color="{StaticResource IsCheckedColor}" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <Border.Effect>
+                    <DropShadowEffect Color="{StaticResource ForegroundColor}" BlurRadius="15" ShadowDepth="4" Opacity="0.5"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Name="header" 
+                               Text="Ваша надпись" 
+                               Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               Padding="20,10,10,10" 
+                               FontSize="25"
+                               TextWrapping="Wrap" TextTrimming="None"
+                               />
+
+                    <ContentControl Content="{Binding ContentView}" Grid.Row="1" Margin="20,10,20,10"/>
+
+                    <StackPanel Grid.Row="2" Margin="20,0,20,20">
+
+                        <Button x:Name="startButton" Content="ЗАПУСТИТЬ" Cursor="Hand" 
+                                Style="{StaticResource ShadowButtonStyle}" 
+                        />
+                        
+                        <Button x:Name="returnButton" Content="ПОВТОРИТЬ" Margin="0,10,0,0" Cursor="Hand" 
+                        Style="{StaticResource ShadowButtonStyle}" 
+                        />
+
+                        <Button x:Name="loopButton" Content="ЗАЦИКЛИТЬ" Margin="0,10,0,0" Cursor="Hand" 
+                        Style="{StaticResource ShadowButtonStyle}" 
+                        />
+
+                        <Button x:Name="pauseButton" Content="ОСТАНОВИТЬ" Cursor="Hand" Margin="0,10,0,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#fcaa3f" Offset="1"/>
+                                                <GradientStop Color="#f47842" Offset="0"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="#f3f0f9"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#fcaa3f" Offset="1"/>
+                                                        <GradientStop Color="#f47842" Offset="0"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button x:Name="stepOverButton" Content="Поверх(F10)" FontSize="18" Grid.Column="0" Margin="0,10,5,0" Cursor="Hand" Style="{StaticResource ShadowButtonStyle}" />
+                            <Button x:Name="stepIntoButton" Content="Вглубь(F11)" FontSize="18" Grid.Column="1" Margin="5,10,0,0" Cursor="Hand" Style="{StaticResource ShadowButtonStyle}" />
+
+                        </Grid>
+
+                        <Button  x:Name="continueButton" Content="ПРОДОЛЖИТЬ" FontSize="18" Grid.Column="0" Margin="0,10,0,0" Cursor="Hand" >
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#67c66e" Offset="1"/>
+                                                <GradientStop Color="#459c3c" Offset="0"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="#f3f0f9"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#67c66e" Offset="1"/>
+                                                        <GradientStop Color="#459c3c" Offset="0"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Button  x:Name="exitButton" Content="ЗАВЕРШИТЬ" FontSize="18" Grid.Column="1" Margin="0,10,0,0" Cursor="Hand" >
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#fcaa3f" Offset="1"/>
+                                                <GradientStop Color="#f47842" Offset="0"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="#f3f0f9"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#fcaa3f" Offset="1"/>
+                                                        <GradientStop Color="#f47842" Offset="0"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <InvokeConrols:InvokeRichTextBoxUI 
+                Margin="5" 
+                x:Name="protocolTextBox"
+                IsReadOnly="True"
+                />
+            </Grid>
+
+        </Grid>
+    </Border>
+</UserControl>
