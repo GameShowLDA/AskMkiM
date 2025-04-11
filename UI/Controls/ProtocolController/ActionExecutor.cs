@@ -84,12 +84,12 @@ namespace UI.Controls.ProtocolController
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null)
     {
-      await ProtocolSelfCheck.ClearAllMessagesAsync();
+      await ProtocolSelfCheck.MessageManager.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled())
       {
         if (!await GetIsActivePower())
         {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
+          await ProtocolSelfCheck.MessageManager.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
           await ProtocolSelfCheck.FinalizeAsync();
           return;
         }
@@ -102,7 +102,7 @@ namespace UI.Controls.ProtocolController
 
       if (startDelegate == null)
       {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
+        await ProtocolSelfCheck.MessageManager.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
         await ProtocolSelfCheck.FinalizeAsync();
         LogError("Системная ошибка выполнения, обратитесь к администратору");
         return;
@@ -158,37 +158,6 @@ namespace UI.Controls.ProtocolController
 
       await DisplayCompletionMessage();
       StartProcessing?.Invoke(false);
-    }
-
-    /// <summary>
-    /// Ставит выполнение метода на паузу.
-    /// </summary>
-    internal async Task PauseAsync()
-    {
-      if (!IsPaused)
-      {
-        LogInformation("Срабатывание паузы при самоконтроле");
-        IsPaused = true;
-        PauseCompletionSource = new TaskCompletionSource<bool>();
-        ProtocolSelfCheck.ShowButtonsOnPause();
-      }
-
-      await WaitWhilePausedAsync();
-    }
-
-    /// <summary>
-    /// Возобновляет выполнение метода после паузы.
-    /// </summary>
-    /// <param name="stepMode">Флаг, указывающий, нужно ли возобновить в пошаговом режиме.</param>
-    internal void Resume(bool stepMode)
-    {
-      LogInformation("Срабатывание возобновления при самоконтроле");
-      if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
-      {
-        PauseCompletionSource.SetResult(true);
-      }
-
-      IsPaused = false;
     }
 
     /// <summary>
@@ -310,53 +279,7 @@ namespace UI.Controls.ProtocolController
 
     #region Дополнительные методы управления.
 
-    /// <summary>
-    /// Ожидает, пока выполнение процесса находится в состоянии паузы.
-    /// </summary>
-    /// <param name="protocolSelfCheck">Объект интерфейса.</param>
-    /// <returns>Задача ожидания паузы.</returns>
-    public async Task WaitWhilePausedAsync(ProtocolController protocolSelfCheck = null)
-    {
-      if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
-      {
-        LogInformation("Срабатывание ожидания при самоконтроле");
-        if (protocolSelfCheck != null)
-        {
-          if (ShouldShowPauseMessage)
-          {
-            ShouldShowPauseMessage = false;
-            ShouldShowResumeMessage = true;
-
-            ShowMessageModel showMessage = new ShowMessageModel()
-            {
-              Header = "Выполнение поставлено на паузу!",
-              CanBeDeleted = false,
-            };
-
-            await protocolSelfCheck.ShowMessageAsync(showMessage);
-          }
-        }
-
-        await PauseCompletionSource.Task;
-        ShouldShowPauseMessage = true;
-      }
-
-      if (protocolSelfCheck != null)
-      {
-        if (ShouldShowResumeMessage)
-        {
-          ShouldShowResumeMessage = false;
-
-          ShowMessageModel showMessage = new ShowMessageModel()
-          {
-            Header = "Выполнение снято с паузы!",
-            CanBeDeleted = false,
-          };
-          await protocolSelfCheck.ShowMessageAsync(showMessage);
-        }
-      }
-    }
-
+   
     /// <summary>
     /// Проверка на пошаговый режим.
     /// </summary>
@@ -394,25 +317,6 @@ namespace UI.Controls.ProtocolController
       }
     }
 
-    /// <summary>
-    /// Проверка на паузу или завершение программы.
-    /// </summary>
-    /// <param name="token">Токен отмены.</param>
-    /// <returns>True, если программа должна продолжить выполнение; false, если программа должна завершиться.</returns>
-    public async Task<bool> CheckStatusProgram(CancellationToken token)
-    {
-      if (token.IsCancellationRequested)
-      {
-        return false;
-      }
-
-      if (IsPaused)
-      {
-        await WaitWhilePausedAsync().ConfigureAwait(true);
-      }
-
-      return true;
-    }
 
     /// <summary>
     /// Проверяет, выполняется ли уже процесс.
@@ -604,12 +508,12 @@ namespace UI.Controls.ProtocolController
     {
       if (await GetSaveProtocol())
       {
-        await ProtocolSelfCheck.SaveProtocolAsync();
+        await ProtocolSelfCheck.ExportService.SaveProtocolAsync();
       }
 
       if (await GetPrintProtocol())
       {
-        ProtocolSelfCheck.PrintProtocol();
+        ProtocolSelfCheck.ExportService.PrintProtocol();
       }
 
       await SetIsLocked(false);

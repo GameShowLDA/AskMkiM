@@ -21,10 +21,6 @@ namespace UI.Controls.ProtocolController
   {
     #region Поля.
 
-    /// <summary>
-    /// Последнее отображенное сообщение в протоколе.
-    /// </summary>
-    ShowMessageModel LastModelMeassage;
 
     /// <summary>
     /// Возвращает текущий статус пошагового режима.
@@ -41,62 +37,11 @@ namespace UI.Controls.ProtocolController
     /// </summary>
     readonly ActionExecutor ActionExecutor;
 
-    #region Делегаты выполнения.
-
-    /// <summary>
-    /// Делегат, вызываемый для начала действия.
-    /// </summary>
-    StartDelegate _startDelegate;
-
-    /// <summary>
-    /// Делегат, вызываемый для остановки действия.
-    /// </summary>
-    StopDelegate _stopDelegate;
-
-    /// <summary>
-    /// Делегат, вызываемый для возврата к предыдущему состоянию.
-    /// </summary>
-    ReturnDelegate _returnDelegate;
-
-    PreActionDelegate _preActionDelegate;
-
-    bool _isRepeatEnabled;
-    #endregion
-
     #endregion
 
     #region Основные настройки.
 
-    /// <summary>
-    /// Устанавливает основные настройки выполнения действий.
-    /// </summary>
-    /// <param name="MainWindow">Главное окно приложения.</param>
-    /// <param name="StartDelegate">Делегат запуска.</param>
-    /// <param name="isRepeatEnabled">Флаг разрешения повторного выполнения.</param>
-    /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
-    /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
-    /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
-    public void SetSettings(UIElement MainWindow, StartDelegate StartDelegate, bool isRepeatEnabled, StopDelegate StopDelegate = null, ReturnDelegate ReturnDelegate = null, PreActionDelegate preActionDelegate = null)
-    {
-      try
-      {
-        _mainWindow = MainWindow;
-        _stopDelegate = StopDelegate;
-        _startDelegate = StartDelegate;
-        _returnDelegate = ReturnDelegate;
-        _preActionDelegate = preActionDelegate;
 
-        if (ReturnDelegate != null)
-        {
-          _isRepeatEnabled = true;
-        }
-      }
-      catch (Exception ex)
-      {
-        LoggerUtility.LogException("Ошибка загрузки элемента", ex);
-        throw;
-      }
-    }
 
 
     #endregion
@@ -109,19 +54,19 @@ namespace UI.Controls.ProtocolController
     /// Прерывает выполнение текущего процесса.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
-    public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate);
+    public async Task AbortExecution() => await ActionExecutor.StopAsync(DelegateRegistry.StopDelegate);
 
     /// <summary>
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    private async Task StartAsync() => await ActionExecutor.StartAsync(_startDelegate, _stopDelegate, header.Text, _isRepeatEnabled, _preActionDelegate);
+    private async Task StartAsync() => await ActionExecutor.StartAsync(DelegateRegistry.StartDelegate, DelegateRegistry.StopDelegate, header.Text, DelegateRegistry.IsRepeatEnabled, DelegateRegistry.PreActionDelegate);
 
     /// <summary>
-    /// Завершение текущей выполняемой задачи.
+    /// Завершение текущей выполняемой задачи.Ну т
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate);
+    private async Task StopAsync() => await ActionExecutor.StopAsync(DelegateRegistry.StopDelegate);
 
     /// <summary>
     /// Выполняет завершающие действия после завершения процесса.
@@ -138,12 +83,12 @@ namespace UI.Controls.ProtocolController
     /// Приостанавливает метод на паузу.
     /// </summary>
     /// <returns></returns>
-    public async Task PauseAsync() => await ActionExecutor.PauseAsync();
+    public async Task PauseAsync() => await PauseManager.PauseAsync();
 
     /// <summary>
     /// Возобновляет метод после паузы.
     /// </summary>
-    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode);
+    public void Resume() => PauseManager.Resume();
 
     #endregion
 
@@ -152,12 +97,12 @@ namespace UI.Controls.ProtocolController
     /// <summary>
     /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
     /// </summary>
-    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_returnDelegate, _stopDelegate);
+    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(DelegateRegistry.ReturnDelegate, DelegateRegistry.StopDelegate);
 
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
     /// </summary>
-    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(_returnDelegate, _stopDelegate);
+    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(DelegateRegistry.ReturnDelegate, DelegateRegistry.StopDelegate);
 
     #endregion
 
@@ -182,7 +127,7 @@ namespace UI.Controls.ProtocolController
     /// <summary>
     /// Обрабатывает пошаговый режим.
     /// </summary>
-    private async Task<bool> ProcessStepModeAsync(bool stepMode)
+    internal async Task<bool> ProcessStepModeAsync(bool stepMode)
     {
       bool result = false;
       await Application.Current.Dispatcher.Invoke(async () => result = await ActionExecutor.ProcessStepModeAsync(stepMode, _mainWindow.CommandBindings, _mainWindow.InputBindings));
@@ -207,107 +152,6 @@ namespace UI.Controls.ProtocolController
       await ActionExecutor.CheckStepModeAsync(commandBindings, inputBindings);
     }
 
-    /// <summary>
-    /// Выводит информацию в протокол.
-    /// </summary>
-    /// <param name="showMessageModel">Модель сообщения.</param>
-    /// <returns>Возвращает режим по шагам.</returns>
-    public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
-    {
-      if (!await GetShowDetailedProtocol())
-      {
-        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
-        {
-          await protocolTextBox.RemoveLastLinesAsync();
-        }
-
-        LastModelMeassage = showMessageModel;
-      }
-
-      await protocolTextBox.AppendLineAsync(showMessageModel);
-
-      if (ActionExecutor.IsPaused)
-      {
-        await ActionExecutor.WaitWhilePausedAsync(this);
-      }
-
-      return await ProcessStepModeAsync(ActionExecutor.StepMode);
-    }
-
-    /// <summary>
-    /// Полностью очищает протокол и сбрасывает последнее сообщение.
-    /// </summary>
-    /// <returns>Возвращает признак успешного завершения операции.</returns>
-    public async Task<bool> ClearAllMessagesAsync()
-    {
-      await protocolTextBox.ClearAsync();
-      LastModelMeassage = null;
-
-      if (ActionExecutor.IsPaused)
-      {
-        await ActionExecutor.WaitWhilePausedAsync(this);
-      }
-
-      return await ProcessStepModeAsync(ActionExecutor.StepMode);
-    }
-
-    /// <summary>
-    /// Асинхронно удаляет блок, содержащий указанную строку, из RichTextBox.
-    /// </summary>
-    /// <param name="textToRemove">Строка для поиска и удаления.</param>
-    /// <returns>True, если блок был найден и удален; иначе False.</returns>
-    public async Task<bool> RemoveLineContainingTextAsync(string textToRemove) => await protocolTextBox.RemoveLineContainingTextAsync(textToRemove);
-
-    /// <summary>
-    /// Сохраняет протокол в файл с автоматически сгенерированным именем в фоновом режиме асинхронно.
-    /// </summary>
-    public async Task SaveProtocolAsync()
-    {
-      string dateTime = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss", CultureInfo.CurrentCulture);
-      string filename = $"KC_{dateTime}.rtf";
-      TextRange range = new TextRange(ProtocolTextBox.Document.ContentStart, ProtocolTextBox.Document.ContentEnd);
-
-      await Task.Run(async () =>
-      {
-        using (FileStream fileStream = new FileStream($"{FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
-        {
-          await Task.Run(() => range.Save(fileStream, DataFormats.Rtf)).ConfigureAwait(true);
-        }
-      }).ConfigureAwait(true);
-    }
-
-    /// <summary>
-    /// Выводит протокол на печать.
-    /// </summary>
-    public void PrintProtocol()
-    {
-      PrintDialog printDialog = new PrintDialog();
-      if (printDialog.ShowDialog() == true)
-      {
-        FlowDocument document = new FlowDocument
-        {
-          PagePadding = new Thickness(50),
-          ColumnWidth = double.PositiveInfinity,
-        };
-
-        TextRange range = new TextRange(ProtocolTextBox.Document.ContentStart, ProtocolTextBox.Document.ContentEnd);
-        using (MemoryStream stream = new MemoryStream())
-        {
-          range.Save(stream, DataFormats.Xaml);
-          stream.Position = 0;
-
-          TextRange documentRange = new TextRange(document.ContentStart, document.ContentEnd);
-          documentRange.Load(stream, DataFormats.Xaml);
-
-          documentRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
-          documentRange.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
-        }
-
-        IDocumentPaginatorSource source = document;
-        printDialog.PrintDocument(source.DocumentPaginator, "Печать протокола...");
-      }
-    }
-
     #endregion
 
     /// <summary>
@@ -319,5 +163,6 @@ namespace UI.Controls.ProtocolController
       return ActionExecutor.CancellationTokenSource.Token;
     }
 
+    public Task<bool> ShowMessageAsync(ShowMessageModel model) => this.MessageManager.ShowMessageAsync(model);
   }
 }
