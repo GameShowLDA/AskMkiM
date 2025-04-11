@@ -28,5 +28,12 @@ namespace UI.Components.FileComparerControls
     {
 
     }
+    private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.ChangedButton == MouseButton.Left)
+      {
+        this.DragMove();
+      }
+    }
   }
 }
