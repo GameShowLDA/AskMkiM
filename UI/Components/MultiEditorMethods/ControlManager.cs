@@ -32,10 +32,8 @@ namespace UI.Components.MultiEditorMethods
         int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
         if (control is TextEditorUI)
         {
-          if (ShowSaveDialogForControl(control))
-          {
-            HandleClosingEvents(control, tabButton);
-          }
+          ShowSaveDialogForControl(control);
+          HandleClosingEvents(control, tabButton);
         }
 
         RemoveTabAndControl(tabButton, control);
@@ -173,6 +171,12 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Создает кнопку вкладки для нового контрола.
+    /// </summary>
+    /// <param name="header">Заголовок для вкладки.</param>
+    /// <param name="description">Описание вкладки.</param>
+    /// <returns>Созданная кнопка вкладки.</returns>
     private OpenFileButton CreateTabButton(string header, string description, TypeWindow tabType)
     {
       OpenFileButton tabButton = new OpenFileButton
@@ -188,12 +192,14 @@ namespace UI.Components.MultiEditorMethods
       return tabButton;
     }
 
+
     /// <summary>
     /// Создает кнопку вкладки для нового контрола.
     /// </summary>
     /// <param name="header">Заголовок для вкладки.</param>
     /// <param name="description">Описание вкладки.</param>
     /// <returns>Созданная кнопка вкладки.</returns>
+
     private OpenFileButton CreateTabButton(string header, string description)
     {
       OpenFileButton tabButton = new OpenFileButton();

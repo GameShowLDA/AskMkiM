@@ -145,6 +145,10 @@ namespace UI.Components.MultiEditorMethods
       {
         var fileName = activeTab.Text;
         int index = OpenPages.IndexOf(activeTab);
+        if (fileName.Contains(".opk")) 
+        {
+          return false;
+        }
         if (FilePaths[fileName] == string.Empty)
         {
           if (UserControls[index] is TextEditorUI)

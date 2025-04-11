@@ -1,7 +1,14 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using AppConfiguration.Base;
 using MainWindowProgram.Infrastructure;
 using Microsoft.Win32;
+using UI.Components.ArchiveControls;
+using UI.Components.ArchiveManager.Models;
+using UI.Controls.Search;
+using UI.Controls.TextEditor;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
 {
@@ -16,19 +23,25 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly MultiWindowService _multiWindow;
 
+    private readonly MainWindow _mainWindow;
+
     /// <summary>
-    /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
+    /// Делегат, предоставляющий актуальное знанчение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
+
+    private bool _isSearchWindowOpen;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
     /// </summary>
     /// <param name="multiWindow">Сервис для работы с окнами редакторов.</param>
     /// <param name="isLockedProvider">Функция, возвращающая признак блокировки интерфейса.</param>
-    public FileService(MultiWindowService multiWindow, Func<bool> isLockedProvider)
+    public FileService(MainWindow mainWindow, MultiWindowService multiWindow, Func<bool> isLockedProvider)
     {
       _multiWindow = multiWindow;
+      _mainWindow = mainWindow;
+      _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
     }
 
@@ -45,7 +58,8 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Filter = "All files (*.*)|*.*|Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf",
+          // TODO: расширения файлов изменить
+          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf",
           Title = "Выберите текстовый файл",
         };
 
@@ -110,7 +124,21 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      throw new Exception("Настроить поиск в файле");
+      if (_isSearchWindowOpen == false)
+      {
+        _mainWindow.SearchWindow.Owner = _mainWindow;
+
+        TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+        string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          EventAggregator.RaiseSearchTextRequested(selectedText);
+        }
+        _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
+        _mainWindow.SearchWindow.ShowWindow();
+        _isSearchWindowOpen = true;
+      }
     }
 
     /// <summary>
@@ -124,9 +152,25 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Открывает диалог выбора архива и загружает его в редактор.
     /// </summary>
-    public Task OpenArchiveAsync()
+    public async Task OpenArchiveAsync()
     {
-      throw new Exception("Настроить открытие архива");
+      //throw new Exception("Настроить открытие архива");
+      var allArchives = new TableAllArchivesControl();
+      await _multiWindow.AddControlAsync("Архив", allArchives, TypeWindow.Files);
+      allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
+    }
+
+    private async void ArchiveControl_ArchiveSelected(object sender, MouseButtonEventArgs e)
+    {
+      var dataGrid = e.Source as DataGrid;
+      if (dataGrid?.SelectedItem is ApkArchive selectedArchive)
+      {
+        if (selectedArchive != null)
+        {
+          var archiveName = selectedArchive.ArchiveName;
+          await _multiWindow.AddControlAsync(archiveName, new TableApkArchiveControl(archiveName), TypeWindow.Files);
+        }
+      }
     }
   }
 }

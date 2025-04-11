@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
 using UI.Components;
+using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -51,6 +52,16 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
+    /// Добавляет новый MultiEditorControl в контейнер.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    public Task OpenFileFromEvent(string filePath)
+    {
+      _multiWindowControl.OpenFileInEditor(filePath);
+      return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Создает новый файл в редакторе.
     /// </summary>
     /// <remarks>
@@ -79,6 +90,12 @@ namespace MainWindowProgram.Services
     {
       _multiWindowControl.PrintFile();
       return Task.CompletedTask;
+    }
+
+    public Task<TextEditorUI> GetActiveTextEditor()
+    {
+      var foundEditor = _multiWindowControl.GetActiveTextEditor();
+      return Task.FromResult(foundEditor);
     }
   }
 }

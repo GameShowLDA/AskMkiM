@@ -23,7 +23,7 @@ namespace MainWindowProgram.Engine
     {
       var multi = new MultiWindowService(window.MultiWindow);
       var usb = new UsbServices();
-      var file = new FileService(multi, () => window.IsLocked);
+      var file = new FileService(window, multi, () => window.IsLocked);
       var metrology = new MetrologyService(multi);
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);

@@ -57,6 +57,11 @@ namespace MainWindowProgram
     /// </summary>
     public bool IsTextEditorActive { get; set; }
 
+    /// <summary>
+    /// Сервис управления многооконным интерфейсом.
+    /// </summary>
+    public SearchWindow SearchWindow;
+
     #endregion
 
     /// <summary>

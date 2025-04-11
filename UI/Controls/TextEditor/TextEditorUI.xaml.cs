@@ -46,6 +46,15 @@ namespace UI.Controls.TextEditor
     }
 
     /// <summary>
+    /// Устанавливает, является ли текстовый редактор доступным только для чтения.
+    /// </summary>
+    public bool IsReadOnly
+    {
+      get => textEditor.IsReadOnly;
+      set => textEditor.IsReadOnly = value;
+    }
+
+    /// <summary>
     /// Получает экземпляр сервиса маркеров для подсветки текста в редакторе.
     /// </summary>
     /// <value>
