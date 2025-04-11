@@ -100,7 +100,6 @@ namespace MainWindowProgram
         {
           HotkeyBinderManager.AttachAllHotkeys(this, this.DataContext);
         }, DispatcherPriority.Loaded);
-
       }
       catch (InvalidOperationException exception)
       {

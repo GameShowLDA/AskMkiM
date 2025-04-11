@@ -40,9 +40,6 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
         throw new InvalidOperationException("Коммутационное устройство или ППУ не найдены в списке устройств.");
       }
 
-      await protocolUI.ShowMessageAsync(new ShowMessageModel(
-          $"Подключение {breakdown.Name}({breakdown.Number}) к {busSwitcher.Name}({busSwitcher.Number})"));
-
       await busSwitcher.ConnectorManager.ConnectBreakdownTester();
 
       var relayModules = _devices.OfType<IRelaySwitchModule>().ToList();

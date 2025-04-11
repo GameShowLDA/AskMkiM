@@ -19,9 +19,6 @@ namespace Mode.SelfControl.NewModule.DeviceBusCommutation
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
-
     private ISwitchingDevice deviceBusCommutation;
     IFastMeter meter;
 
@@ -61,11 +58,11 @@ namespace Mode.SelfControl.NewModule.DeviceBusCommutation
     {
       if (deviceBusCommutation == null)
       {
-        await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Модель УКШ не найдена!", goodText.Item2));
+        await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Модель УКШ не найдена!", SuccessMessage.TitleColor));
         return;
       }
 
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Запуск проверки оборудования", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Запуск проверки оборудования", SuccessMessage.TitleColor));
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
 
       //if (!await ProtocolSelfCheckControl.AttemptDeviceConnection(new List<IDevice>() { deviceBusCommutation, meter }, ProtocolSelfCheckControl.ShowMessageAsync))
@@ -100,7 +97,7 @@ namespace Mode.SelfControl.NewModule.DeviceBusCommutation
     {
       LogInformation($"Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
       LogInformation($"Завершён метод завершения самоконтроля");
     }
     #endregion

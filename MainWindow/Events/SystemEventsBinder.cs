@@ -53,7 +53,7 @@ namespace MainWindowProgram.Events
 
     static private void MessageProtocol(Exception ex)
     {
-      // AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("FATAL ERROR", ShowMessageModel.ErrorMessage.Item2, ex.Message)).ConfigureAwait(true);
+      // AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("FATAL ERROR", ShowMessageModel.ErrorMessage.TitleColor, ex.Message)).ConfigureAwait(true);
     }
   }
 }

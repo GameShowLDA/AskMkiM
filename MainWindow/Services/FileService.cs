@@ -154,7 +154,6 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task OpenArchiveAsync()
     {
-      //throw new Exception("Настроить открытие архива");
       var allArchives = new TableAllArchivesControl();
       await _multiWindow.AddControlAsync("Архив", allArchives, TypeWindow.Files);
       allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;

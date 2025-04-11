@@ -49,7 +49,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
         return;
       }
 
@@ -62,7 +62,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -106,14 +106,14 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
 
             var answer = await breakDown.DcwManger.MeasureCurrentAsync();
-            var successMessage = ShowMessageModel.SuccessMessage.Item1;
-            var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+            var successMessage = ShowMessageModel.ErrorMessage.Title;
+            var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
 
             bool error = false;
             if (answer >= dataModel.Param)
             {
               successMessage = ShowMessageModel.ErrorMessage.Item1;
-              colorMessage = ShowMessageModel.ErrorMessage.Item2;
+              colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
               error = true;
             }
 

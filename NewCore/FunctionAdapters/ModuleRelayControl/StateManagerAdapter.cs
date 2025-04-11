@@ -46,7 +46,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
           "Инициализация модуля коммутации реле",
-          answer,
+          !result ? answer : string.Empty,
           result,
           1);
 

@@ -11,16 +11,27 @@ using AppConfiguration.Base;
 namespace UI.Components.ArchiveControls
 {
   /// <summary>
-  /// Логика взаимодействия для CreateApkwWindow.xaml
+  /// Логика взаимодействия для CreateApkwWindow.xaml.
   /// </summary>
   public partial class CreateApkwWindow : Window
   {
+    /// <summary>
+    /// Указывает, активно ли главное окно или основной диалог.
+    /// </summary>
     public static bool IsMainActive
     {
       get;
       set;
     }
+
+    /// <summary>
+    /// Определяет, разрешено ли закрытие окна или диалога.
+    /// </summary>
     private bool _allowClose;
+
+    /// <summary>
+    /// Событие, возникающее при закрытии диалога.
+    /// </summary>
     public event EventHandler DialogClosed;
 
     private void NewArchiveName_GotFocus(object sender, RoutedEventArgs e)
@@ -40,6 +51,7 @@ namespace UI.Components.ArchiveControls
         newArchiveName.Foreground = Brushes.Gray;
       }
     }
+
     private void NewArchiveDescription_GotFocus(object sender, RoutedEventArgs e)
     {
       string richtextValue = GetRichTexBoxValue(newArchiveDescription);
@@ -64,6 +76,9 @@ namespace UI.Components.ArchiveControls
       }
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="CreateApkwWindow"/>.
+    /// </summary>
     public CreateApkwWindow()
     {
       InitializeComponent();
@@ -112,7 +127,15 @@ namespace UI.Components.ArchiveControls
       };
     }
 
-
+    /// <summary>
+    /// Показывает диалоговое окно с фокусировкой и активацией перед отображением.
+    /// Переопределяет базовый метод <see cref="System.Windows.Window.ShowDialog"/>.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> — если пользователь подтвердил действие;
+    /// <c>false</c> — если отменил;
+    /// <c>null</c> — если результат не определён.
+    /// </returns>
     public new bool? ShowDialog()
     {
       this.Activate();
@@ -121,6 +144,10 @@ namespace UI.Components.ArchiveControls
       return base.ShowDialog();
     }
 
+    /// <summary>
+    /// Закрывает диалоговое окно, разрешая его закрытие через флаг <c>_allowClose</c>.
+    /// Используется для программного завершения работы диалога.
+    /// </summary>
     public void CloseDialog()
     {
       _allowClose = true;
@@ -130,7 +157,9 @@ namespace UI.Components.ArchiveControls
     private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       if (e.ChangedButton == MouseButton.Left)
+      {
         this.DragMove();
+      }
     }
 
     private async void CreateApkButton_Click(object sender, MouseButtonEventArgs e)
@@ -172,10 +201,12 @@ namespace UI.Components.ArchiveControls
       {
         var archiveEditor = new ArchiveEditor();
         var mainChecked = main.IsChecked;
+
         if (mainChecked == null)
         {
           mainChecked = false;
         }
+
         var result = await archiveEditor.CreateArchive(ArchiveSettings.ArchivePath, archiveName, archiveDescription, (bool)mainChecked);
         if (result)
         {
@@ -223,7 +254,6 @@ namespace UI.Components.ArchiveControls
         {
           textBox.Text = string.Empty;
         }
-
       };
 
       textBox.LostFocus += (sender, e) =>
@@ -242,7 +272,6 @@ namespace UI.Components.ArchiveControls
     /// <param name="defaultText">Текст по умолчанию для TextBox.</param>
     static public void DefaultGotAndLostEvent(RichTextBox textBox, string defaultText)
     {
-
       textBox.GotFocus += (sender, e) =>
       {
         string richtextValue = GetRichTexBoxValue(textBox);
@@ -251,7 +280,6 @@ namespace UI.Components.ArchiveControls
           textBox.Document.Blocks.Clear();
           textBox.Document.Blocks.Add(new Paragraph(new Run(string.Empty)));
         }
-
       };
 
       textBox.LostFocus += (sender, e) =>

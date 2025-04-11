@@ -120,7 +120,7 @@ namespace Mode.Metrology.MeasurementSystem
         return (false, ex.Message);
       }
 
-      await protocolUI.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", ShowMessageModel.SuccessMessage.Item2));
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", ShowMessageModel.SuccessMessage.TitleColor));
 
       try
       {
@@ -191,7 +191,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public virtual async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
     { 
-      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", ShowMessageModel.SuccessMessage.Item2));
+      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", ShowMessageModel.SuccessMessage.TitleColor));
     }
 
     /// <summary>
@@ -346,7 +346,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="modeDevice">Тип метрологического устройства.</param>
     private async Task ConnectBusesAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice, ProtocolUI protocolUI)
     {
-      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин", ShowMessageModel.SuccessMessage.Item2));
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин", ShowMessageModel.SuccessMessage.TitleColor));
 
       foreach (var relayModule in relayModules)
       {
@@ -377,7 +377,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="point2">Вторая точка коммутации.</param>
     private async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, ProtocolUI protocolUI)
     {
-      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек", ShowMessageModel.SuccessMessage.Item2));
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек", ShowMessageModel.SuccessMessage.TitleColor));
 
       await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
       await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);

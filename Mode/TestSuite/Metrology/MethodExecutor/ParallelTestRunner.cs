@@ -133,7 +133,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
 
         // await _protocolUI.ShowMessageAsync(new ShowMessageModel(
         //   $"\t{point.DeviceNumber}.{point.ModuleNumber}.{point.PointNumber}",
-        //   ShowMessageModel.SuccessMessage.Item2,
+        //   ShowMessageModel.SuccessMessage.TitleColor,
         //   $"Подключение к шине {bus}"));
 
         var time = await module.PointManager.ConnectRelayAsync(bus, point.PointNumber);

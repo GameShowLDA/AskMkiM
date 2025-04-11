@@ -23,8 +23,6 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
   internal class Handler
   {
     ProtocolUI ProtocolSelfCheckControl;
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
     private IPowerSourceModule moduleVoltageCurrentSource;
     private IFastMeter meter;
     private ISwitchingDevice switchingDevice;
@@ -70,7 +68,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     {
       LogInformation($"Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{goodText.Item1}]", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
       LogInformation($"Завершён метод завершения самоконтроля");
     }
 
@@ -100,7 +98,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
       //  }
       //}
 
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль МИНТ", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль МИНТ", SuccessMessage.TitleColor));
 
       await GenerateDiscreteVoltageCheck(token);
       ProtocolSelfCheckControl.PauseButtonVisibility = Visibility.Collapsed;
@@ -176,7 +174,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
       int a = (int)voltage;
       int b = (int)((voltage - a) * 10);
       LogInformation($"Установка напряжения {a}.{b} В");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tУстанавливаем напряжение {a}.{b} В", goodText.Item2));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tУстанавливаем напряжение {a}.{b} В", SuccessMessage.TitleColor));
     }
 
     /// <summary>
@@ -254,7 +252,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     /// <param name="error">Флаг ошибки.</param>
     private async Task ShowMeasurementResult(double firstNorm, double lastNorm, double result, bool error)
     {
-      Color messageType = !error ? goodText.Item2 : errorText.Item2;
+      Color messageType = !error ? SuccessMessage.TitleColor : ErrorMessage.TitleColor;
       var statusText = !error ? "В норме" : "Вне нормы";
       LogInformation($"Результат измерения: {result} В ({firstNorm} - {lastNorm}). Статус: {statusText}");
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\t\tРезультат измерений ({Math.Round(firstNorm, 2)} - {Math.Round(lastNorm, 2)})", null, Math.Round(result, 2).ToString(CultureInfo.CurrentCulture) + "\r\n", messageType));

@@ -66,7 +66,7 @@ namespace Mode.Metrology.PI
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, Data.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message));
         return;
       }
 
@@ -79,7 +79,7 @@ namespace Mode.Metrology.PI
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -111,7 +111,7 @@ namespace Mode.Metrology.PI
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         var meterDevice = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.Item2));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         // TODO : позже прописать погрешность в настрйоках
         double firstNorm = param - (param / 100.0 * 5);
@@ -139,23 +139,23 @@ namespace Mode.Metrology.PI
           }
         });
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}", ShowMessageModel.SuccessMessage.Item2));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}", ShowMessageModel.SuccessMessage.TitleColor));
         if (!string.IsNullOrEmpty(result) && double.TryParse(result, out var value))
         {
           double pog = value - param;
 
           var answer = (value >= firstNorm && value <= lastNorm) ? false : true; ;
 
-          ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения напряжения", null, $"{result:F2} [{(!answer ? ShowMessageModel.SuccessMessage.Item1 : ShowMessageModel.ErrorMessage.Item1)}]");
-          showMessageModel.MessageColor = (value >= firstNorm && value <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
+          ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения напряжения", null, $"{result:F2} [{(!answer ? ShowMessageModel.ErrorMessage.Title : ShowMessageModel.ErrorMessage.Item1)}]");
+          showMessageModel.MessageColor = (value >= firstNorm && value <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
           showMessageModel.ExecutionError = (value >= firstNorm && value <= lastNorm) ? false : true;
           showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
           await protocolUI.ShowMessageAsync(showMessageModel);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В [{(!answer ? ShowMessageModel.SuccessMessage.Item1 : ShowMessageModel.ErrorMessage.Item1)}]", messageColor: showMessageModel.MessageColor));
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В [{(!answer ? ShowMessageModel.ErrorMessage.Title : ShowMessageModel.ErrorMessage.Item1)}]", messageColor: showMessageModel.MessageColor));
         }
         else
         {
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, "Некорректно введённое эталонное значение напряжения."));
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, "Некорректно введённое эталонное значение напряжения."));
         }
       }
 
