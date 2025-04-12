@@ -31,11 +31,11 @@ namespace UI.Components.FileComparerControls
       {
         var newIndexFirst = i + diffCountFirst;
         var newIndexSecond = i + diffCountSecond;
-        if (newIndexFirst > lines1.Length)
+        if (newIndexFirst >= lines1.Length)
         {
           newIndexFirst = lines1.Length - 1;
         }
-        if (newIndexSecond > lines2.Length)
+        if (newIndexSecond >= lines2.Length)
         {
           newIndexSecond = lines2.Length - 1;
         }
@@ -56,7 +56,7 @@ namespace UI.Components.FileComparerControls
             differenceFirstFile.Add(newIndexFirst, lines1[newIndexFirst]);
           }
         }
-        if (string.IsNullOrEmpty(line2) && i < lines2.Length)
+        else if (string.IsNullOrEmpty(line2) && i < lines2.Length)
         {
           line2 = lines2[newIndexSecond + 1];
           var temp = line1.Equals(line2);
@@ -67,7 +67,18 @@ namespace UI.Components.FileComparerControls
           }
           else
           {
-            differenceFirstFile.Add(newIndexFirst, lines2[newIndexSecond]);
+            differencesecondFile.Add(newIndexFirst, lines2[newIndexSecond]);
+          }
+        }
+        else
+        {
+          if (!differenceFirstFile.ContainsKey(newIndexFirst))
+          {
+            differenceFirstFile.Add(newIndexFirst, lines1[newIndexFirst]);
+          }
+          if (!differencesecondFile.ContainsKey(newIndexSecond))
+          {
+            differencesecondFile.Add(newIndexSecond, lines2[newIndexSecond]);
           }
         }
       }
