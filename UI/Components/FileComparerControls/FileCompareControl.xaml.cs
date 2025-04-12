@@ -4,6 +4,7 @@ using System.IO.Packaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Win32;
 
 namespace UI.Components.FileComparerControls
 {
@@ -19,11 +20,13 @@ namespace UI.Components.FileComparerControls
       InitializeComponent();
       this.FirstFilePath = firstFilePath;
       this.SecondFilePath = secondFilePath;
+      var fileComparer = FileCompare.CompareFileContents(this.FirstFilePath, this.SecondFilePath);
       LoadFiles();
     }
 
     private void LoadFiles()
     {
+      // TODO: Заменить на сравнение в дальнейшем
       var firstFileText = File.ReadAllText(this.FirstFilePath);
       var secondFileText = File.ReadAllText(this.SecondFilePath);
       if (HorizontalPanel.Visibility == Visibility.Visible)
@@ -56,6 +59,42 @@ namespace UI.Components.FileComparerControls
       {
         (LeftBox.Text, RightBox.Text) = (TopBox.Text, BottomBox.Text);
       }
+    }
+
+    private void ChangeFile_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      var newFilePath = ChangeFile();
+      if (!string.IsNullOrEmpty(newFilePath) && File.Exists(newFilePath))
+      {
+        bool changeFirstFile = sender == ChangeFirstFile;
+        if (changeFirstFile)
+        {
+          this.FirstFilePath = newFilePath;
+        }
+        else
+        {
+          this.SecondFilePath = newFilePath;
+        }
+        LoadFiles();
+      }
+    }
+
+    private string ChangeFile()
+    {
+      OpenFileDialog openFileDialog = new OpenFileDialog
+      {
+        Title = "Выберите файл",
+        Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|PK files (*.pk;*.Pk;*.PK)|*.pk;*.Pk;*.PK|All files (*.*)|*.*",
+        Multiselect = false
+      };
+
+      if (openFileDialog.ShowDialog() == true)
+      {
+        string filePath = openFileDialog.FileName;
+
+        return filePath;
+      }
+      return string.Empty;
     }
   }
 }

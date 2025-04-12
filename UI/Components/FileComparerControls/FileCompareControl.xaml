@@ -11,9 +11,12 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
         <StackPanel x:Name="TopPanel" 
             Grid.Row="0" 
             Grid.ColumnSpan="5"
@@ -22,51 +25,51 @@
             />
 
         <!-- Горизонтальный режим -->
-        <Grid x:Name="HorizontalPanel" Grid.Row="2">
+        <Grid x:Name="HorizontalPanel" Grid.Column="1" Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" MinHeight="10"/>
                 <RowDefinition Height="5" />
                 <RowDefinition Height="*" MinHeight="10"/>
             </Grid.RowDefinitions>
             <Controls:TextEditorUI Grid.Row="0" x:Name="TopBox"/>
-            <GridSplitter Grid.Row="1" Height="5" Background="{StaticResource LightPrimarySolidColorBrush}" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
+            <GridSplitter Grid.Row="1" Height="5" Background="{StaticResource RedColorSolidColorBrush}" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
             <Controls:TextEditorUI Grid.Row="2" x:Name="BottomBox"/>
         </Grid>
 
         <!-- Вертикальный режим -->
-        <Grid x:Name="VerticalPanel" Grid.Column="0" Visibility="Collapsed" Grid.Row="2">
+        <Grid x:Name="VerticalPanel" Grid.Column="1" Visibility="Collapsed" Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="20"/>
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" MinWidth="20" />
             </Grid.ColumnDefinitions>
             <Controls:TextEditorUI Grid.Column="0"  x:Name="LeftBox"/>
-            <GridSplitter Grid.Column="1" Width="5" Background="{StaticResource LightPrimarySolidColorBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+            <GridSplitter Grid.Column="1" Width="5" Background="{StaticResource RedColorSolidColorBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
             <Controls:TextEditorUI Grid.Column="2" x:Name="RightBox"/>
         </Grid>
 
-        <Grid x:Name="ButtonsGrid" Grid.Row="1">
+        <Grid x:Name="ButtonsGrid" Grid.Row="1" Grid.Column="0" Background="{StaticResource SecondarySolidColorBrush}">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button Name="ChangeFirstFile" Grid.Row="1" Grid.Column="0" Content="Заменить первый файл" 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="60"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="ChangeFirstFile" Grid.Row="0" Content="Заменить первый файл" PreviewMouseDown="ChangeFile_PreviewMouseDown"
                 Style="{StaticResource CompareButtonStyle}" 
                 />
 
-            <Button Name="ChangeSecondFile" Grid.Row="1" Grid.Column="1" Content="Заменить второй файл" 
+            <Button x:Name="ChangeSecondFile" Grid.Row="1"  Content="Заменить второй файл" PreviewMouseDown="ChangeFile_PreviewMouseDown"
                             Style="{StaticResource CompareButtonStyle}" />
 
-            <Button Name="CompareFiles" Grid.Row="1" Grid.Column="2" Content="Сравнить" 
+            <Button Name="CompareFiles" Grid.Row="2"  Content="Сравнить" 
                             Style="{StaticResource CompareButtonStyle}" />
 
-            <Button x:Name="UpDown" Grid.Row="1" Grid.Column="3" Content="Сверху/снизу" 
+            <Button x:Name="UpDown" Grid.Row="3" Content="Сверху/снизу" 
                             Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" Visibility="Collapsed"/>
 
-            <Button x:Name="LeftRight" Grid.Row="1" Grid.Column="3" Content="Слева/справа"                
+            <Button x:Name="LeftRight" Grid.Row="3"  Content="Слева/справа"                
                     Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" />
         </Grid>
     </Grid>
