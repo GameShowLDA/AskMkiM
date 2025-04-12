@@ -1,5 +1,9 @@
-﻿using System.Windows;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System.IO;
+using System.IO.Packaging;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace UI.Components.FileComparerControls
 {
@@ -8,44 +12,50 @@ namespace UI.Components.FileComparerControls
   /// </summary>
   public partial class FileCompareControl : UserControl
   {
-    public FileCompareControl()
+    public string FirstFilePath { get; set; }
+    public string SecondFilePath { get; set; }
+    public FileCompareControl(string firstFilePath, string secondFilePath)
     {
       InitializeComponent();
+      this.FirstFilePath = firstFilePath;
+      this.SecondFilePath = secondFilePath;
+      LoadFiles();
     }
 
-    private void UpDown_Click(object sender, RoutedEventArgs e)
+    private void LoadFiles()
     {
-      // Показать горизонтальные
-      TopBox.Visibility = Visibility.Visible;
-      BottomBox.Visibility = Visibility.Visible;
-      ContentGrid.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
-      ContentGrid.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
-      ContentGrid.RowDefinitions[1].Height = new GridLength(5);
-
-      // Скрыть вертикальные
-      LeftBox.Visibility = Visibility.Collapsed;
-      RightBox.Visibility = Visibility.Collapsed;
-      ContentGrid.ColumnDefinitions[0].Width = new GridLength(0);
-      ContentGrid.ColumnDefinitions[2].Width = new GridLength(0);
-      ContentGrid.ColumnDefinitions[1].Width = new GridLength(0);
+      var firstFileText = File.ReadAllText(this.FirstFilePath);
+      var secondFileText = File.ReadAllText(this.SecondFilePath);
+      if (HorizontalPanel.Visibility == Visibility.Visible)
+      {
+        TopBox.Text = firstFileText;
+        BottomBox.Text = secondFileText;
+      }
+      else
+      {
+        LeftBox.Text = firstFileText;
+        RightBox.Text = secondFileText;
+      }
     }
 
-    private void LeftRight_Click(object sender, RoutedEventArgs e)
+    private void ToggleOrientation(object sender, MouseButtonEventArgs e)
     {
-      // Показать вертикальные
-      LeftBox.Visibility = Visibility.Visible;
-      RightBox.Visibility = Visibility.Visible;
-      ContentGrid.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
-      ContentGrid.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star);
-      ContentGrid.ColumnDefinitions[1].Width = new GridLength(5);
+      bool toVertical = sender == LeftRight;
 
-      // Скрыть горизонтальные
-      TopBox.Visibility = Visibility.Collapsed;
-      BottomBox.Visibility = Visibility.Collapsed;
-      ContentGrid.RowDefinitions[0].Height = new GridLength(0);
-      ContentGrid.RowDefinitions[2].Height = new GridLength(0);
-      ContentGrid.RowDefinitions[1].Height = new GridLength(0);
+      HorizontalPanel.Visibility = toVertical ? Visibility.Collapsed : Visibility.Visible;
+      VerticalPanel.Visibility = toVertical ? Visibility.Visible : Visibility.Collapsed;
+
+      UpDown.Visibility = toVertical ? Visibility.Visible : Visibility.Collapsed;
+      LeftRight.Visibility = toVertical ? Visibility.Collapsed : Visibility.Visible;
+
+      if (HorizontalPanel.Visibility == Visibility.Visible)
+      {
+        (TopBox.Text, BottomBox.Text) = (LeftBox.Text, RightBox.Text);
+      }
+      else
+      {
+        (LeftBox.Text, RightBox.Text) = (TopBox.Text, BottomBox.Text);
+      }
     }
-
   }
 }

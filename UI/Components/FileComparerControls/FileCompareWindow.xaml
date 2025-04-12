@@ -92,6 +92,7 @@
                                 VerticalAlignment="Center" 
                                  FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
                                  Name="FirstFileTextBlock"
+                                    PreviewMouseDoubleClick="FirstFileTextBlock_PreviewMouseDoubleClick"
                                  />
                             </Border>
                         </Grid>
@@ -119,6 +120,7 @@
                                 VerticalAlignment="Center" 
                                  FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
                                  Name="SecondFileTextBlock"
+                                    PreviewMouseDoubleClick="FirstFileTextBlock_PreviewMouseDoubleClick"
                                  />
                             </Border>
                         </Grid>
@@ -126,6 +128,7 @@
                     <Button Name="SaveButton" Grid.Row="3" Grid.Column="1" Content="Сравнить" 
                             Style="{StaticResource ConfigButtonStyle}" 
                             Width="250" HorizontalAlignment="Right" 
+                            PreviewMouseDown="CompareButton_PreviewMouseDown"
                             />
                 </Grid>
             </Border>

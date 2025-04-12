@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components.FileComparerControls"
+             xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="Transparent">
 
@@ -13,13 +14,6 @@
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
         <StackPanel x:Name="TopPanel" 
             Grid.Row="0" 
             Grid.ColumnSpan="5"
@@ -27,46 +21,53 @@
             Orientation="Horizontal" 
             />
 
-        <Grid x:Name="ContentGrid" Grid.Row="2" Grid.ColumnSpan="5" Background="Transparent">
+        <!-- Горизонтальный режим -->
+        <Grid x:Name="HorizontalPanel" Grid.Row="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
+                <RowDefinition Height="*" MinHeight="10"/>
                 <RowDefinition Height="5" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="*" MinHeight="10"/>
             </Grid.RowDefinitions>
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <!-- Горизонтальное деление по умолчанию -->
-            <RichTextBox Grid.Row="0" Grid.ColumnSpan="3" x:Name="TopBox" Background="Transparent"/>
-            <GridSplitter Grid.Row="1" Grid.ColumnSpan="3" Height="5" Background="Gray" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
-            <RichTextBox Grid.Row="2" Grid.ColumnSpan="3" x:Name="BottomBox" Background="Transparent"/>
-
-            <!-- Вертикальное деление (скрыто по умолчанию) -->
-            <RichTextBox Grid.Column="0" Grid.RowSpan="3" x:Name="LeftBox" Visibility="Collapsed" Background="Transparent"/>
-            <GridSplitter Grid.Column="1" Grid.RowSpan="3" Width="5" Background="Gray" ResizeDirection="Columns" Visibility="Collapsed"/>
-            <RichTextBox Grid.Column="2" Grid.RowSpan="3" x:Name="RightBox" Visibility="Collapsed" Background="Transparent"/>
+            <Controls:TextEditorUI Grid.Row="0" x:Name="TopBox"/>
+            <GridSplitter Grid.Row="1" Height="5" Background="{StaticResource LightPrimarySolidColorBrush}" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
+            <Controls:TextEditorUI Grid.Row="2" x:Name="BottomBox"/>
         </Grid>
 
-        <Button Name="ChangeFirstFile" Grid.Row="1" Grid.Column="0" Content="Заменить первый файл" 
+        <!-- Вертикальный режим -->
+        <Grid x:Name="VerticalPanel" Grid.Column="0" Visibility="Collapsed" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="20"/>
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="20" />
+            </Grid.ColumnDefinitions>
+            <Controls:TextEditorUI Grid.Column="0"  x:Name="LeftBox"/>
+            <GridSplitter Grid.Column="1" Width="5" Background="{StaticResource LightPrimarySolidColorBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+            <Controls:TextEditorUI Grid.Column="2" x:Name="RightBox"/>
+        </Grid>
+
+        <Grid x:Name="ButtonsGrid" Grid.Row="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Name="ChangeFirstFile" Grid.Row="1" Grid.Column="0" Content="Заменить первый файл" 
                 Style="{StaticResource CompareButtonStyle}" 
                 />
 
-        <Button Name="ChangeSecondFile" Grid.Row="1" Grid.Column="1" Content="Заменить второй файл" 
-                        Style="{StaticResource CompareButtonStyle}" 
+            <Button Name="ChangeSecondFile" Grid.Row="1" Grid.Column="1" Content="Заменить второй файл" 
+                            Style="{StaticResource CompareButtonStyle}" />
 
-        />
+            <Button Name="CompareFiles" Grid.Row="1" Grid.Column="2" Content="Сравнить" 
+                            Style="{StaticResource CompareButtonStyle}" />
 
-        <Button Name="CompareFiles" Grid.Row="1" Grid.Column="2" Content="Сравнить" 
-                        Style="{StaticResource CompareButtonStyle}" />
+            <Button x:Name="UpDown" Grid.Row="1" Grid.Column="3" Content="Сверху/снизу" 
+                            Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" Visibility="Collapsed"/>
 
-        <Button Name="UpDown" Grid.Row="1" Grid.Column="3" Content="Сверху/снизу" 
-                        Style="{StaticResource CompareButtonStyle}" />
-
-        <Button Name="LeftRight" Grid.Row="1" Grid.Column="4" Content="Слева/справа"                
-                Style="{StaticResource CompareButtonStyle}" />
+            <Button x:Name="LeftRight" Grid.Row="1" Grid.Column="3" Content="Слева/справа"                
+                    Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" />
+        </Grid>
     </Grid>
 </UserControl>

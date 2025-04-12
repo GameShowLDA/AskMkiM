@@ -1,6 +1,10 @@
 ﻿using AppConfiguration.Base;
+using Microsoft.Win32;
+using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using static Utilities.LoggerUtility;
 
 namespace UI.Components.FileComparerControls
 {
@@ -28,6 +32,8 @@ namespace UI.Components.FileComparerControls
       ShowInTaskbar = false;
       WindowStyle = WindowStyle.None;
       ResizeMode = ResizeMode.NoResize;
+
+
 
       this.Closed += (s, e) =>
       {
@@ -62,10 +68,6 @@ namespace UI.Components.FileComparerControls
       return base.ShowDialog();
     }
 
-    private void CompareButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-
-    }
     private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       if (e.ChangedButton == MouseButton.Left)
@@ -83,6 +85,68 @@ namespace UI.Components.FileComparerControls
     {
       _allowClose = true;
       this.Close();
+    }
+
+    private void FirstFileTextBlock_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      OpenFileDialog openFileDialog = new OpenFileDialog
+      {
+        Title = "Выберите файл",
+        Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|PK files (*.pk;*.Pk;*.PK)|*.pk;*.Pk;*.PK|All files (*.*)|*.*",
+        Multiselect = false
+      };
+
+      if (openFileDialog.ShowDialog() == true)
+      {
+        string filePath = openFileDialog.FileName;
+
+        // Пример: отобразим путь в текстблоке
+        if (sender is TextBox textBox)
+        {
+          textBox.Text = filePath;
+        }
+      }
+    }
+
+    private void CompareButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      var firstPath = FirstFileTextBlock.Text;
+      var secondPath = SecondFileTextBlock.Text;
+
+      if (string.IsNullOrEmpty(firstPath) || string.IsNullOrEmpty(secondPath))
+      {
+        MessageBox.Show("Укажите путь к файлу для сравнения", "Не указан путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+        LogWarning("Не указан путь к одному или нескольким файлам для сравнения");
+      }
+      else
+      {
+        if (CheckFileExists(firstPath, secondPath))
+        {
+          EventAggregator.RaiseCompareFiles(firstPath, secondPath);
+          LogInformation("Вызвано сравнение файлов");
+          CloseDialog();
+        }
+      }
+    }
+
+    private bool CheckFileExists(string firstPath, string secondPath)
+    {
+      if (!File.Exists(firstPath))
+      {
+        var message = "Неверно указан путь к первому файлу для сравнения";
+        MessageBox.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Неверно указан путь к первому файлу для сравнения");
+        return false;
+      }
+      if (!File.Exists(secondPath))
+      {
+        var message = "Неверно указан путь ко второму файлу для сравнения";
+        MessageBox.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError(message);
+        return false;
+      }
+
+      return true;
     }
   }
 }
