@@ -1,5 +1,6 @@
 ﻿using AppConfiguration.Base;
 using Microsoft.Win32;
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -103,7 +104,18 @@ namespace UI.Components.FileComparerControls
         // Пример: отобразим путь в текстблоке
         if (sender is TextBox textBox)
         {
-          textBox.Text = filePath;
+          var bothTextBoxEmpty = string.IsNullOrEmpty(FirstFileTextBlock.Text) && string.IsNullOrEmpty(SecondFileTextBlock.Text);
+          var pathsNotEquals = (!string.Equals(FirstFileTextBlock.Text, filePath) && !string.IsNullOrEmpty(FirstFileTextBlock.Text))
+            || (!string.Equals(SecondFileTextBlock.Text, filePath) && !string.IsNullOrEmpty(SecondFileTextBlock.Text));
+          if (bothTextBoxEmpty || pathsNotEquals)
+          {
+            textBox.Text = filePath;
+          }
+          else
+          {
+            MessageBox.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+            LogWarning("Попытка сравнить один и тот же файл");
+          }
         }
       }
     }

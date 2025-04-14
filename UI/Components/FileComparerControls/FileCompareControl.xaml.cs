@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Win32;
+using System.Windows.Media;
+using UI.Controls.TextEditor;
 
 namespace UI.Components.FileComparerControls
 {
@@ -20,13 +22,13 @@ namespace UI.Components.FileComparerControls
       InitializeComponent();
       this.FirstFilePath = firstFilePath;
       this.SecondFilePath = secondFilePath;
-      var fileComparer = FileCompare.CompareFileContents(this.FirstFilePath, this.SecondFilePath);
       LoadFiles();
     }
 
     private void LoadFiles()
     {
       // TODO: Заменить на сравнение в дальнейшем
+
       var firstFileText = File.ReadAllText(this.FirstFilePath);
       var secondFileText = File.ReadAllText(this.SecondFilePath);
       if (HorizontalPanel.Visibility == Visibility.Visible)
@@ -43,7 +45,36 @@ namespace UI.Components.FileComparerControls
         FirstVerticalFileName.Text = Path.GetFileName(this.FirstFilePath);
         SecondVerticalFileName.Text = Path.GetFileName(this.SecondFilePath);
       }
+      var fileComparer = FileCompare.CompareFileContents(this.FirstFilePath, this.SecondFilePath);
+      HighlightDifferences(fileComparer[0], fileComparer[1]);
+
     }
+
+    private void HighlightDifferences(Dictionary<int, string> leftDiffs, Dictionary<int, string> rightDiffs)
+    {
+      var leftEditor = HorizontalPanel.Visibility == Visibility.Visible ? TopBox : LeftBox;
+      var rightEditor = HorizontalPanel.Visibility == Visibility.Visible ? BottomBox : RightBox;
+
+      // Очистим предыдущие маркеры
+      leftEditor.MarkerService.ClearAllMarkers();
+      rightEditor.MarkerService.ClearAllMarkers();
+
+      HighlightLines(leftEditor, leftDiffs.Keys, Colors.DarkRed);
+      HighlightLines(rightEditor, rightDiffs.Keys, Colors.DarkRed);
+    }
+
+    private void HighlightLines(TextEditorUI editor, IEnumerable<int> lineNumbers, Color color)
+    {
+      foreach (var lineNumber in lineNumbers)
+      {
+        var docLine = editor.Document.GetLineByNumber(lineNumber + 1); // AvalonEdit: строки с 1, не с 0
+        if (docLine != null)
+        {
+          editor.MarkerService.AddMarker(docLine.Offset, docLine.Length, color);
+        }
+      }
+    }
+
 
     private void ToggleOrientation(object sender, MouseButtonEventArgs e)
     {
