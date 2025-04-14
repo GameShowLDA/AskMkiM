@@ -24,17 +24,67 @@
             Orientation="Horizontal" 
             />
 
-        <!-- Горизонтальный режим -->
         <Grid x:Name="HorizontalPanel" Grid.Column="1" Grid.Row="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" MinHeight="10"/>
-                <RowDefinition Height="5" />
-                <RowDefinition Height="*" MinHeight="10"/>
+                <RowDefinition Height="*" MinHeight="60"/>
+                <!-- верхний блок -->
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*" MinHeight="60"/>
+                <!-- нижний блок -->
             </Grid.RowDefinitions>
-            <Controls:TextEditorUI Grid.Row="0" x:Name="TopBox"/>
-            <GridSplitter Grid.Row="1" Height="5" Background="{StaticResource RedColorSolidColorBrush}" HorizontalAlignment="Stretch" ResizeDirection="Rows"/>
-            <Controls:TextEditorUI Grid.Row="2" x:Name="BottomBox"/>
+
+            <!-- Верхняя часть: название + редактор -->
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                BorderThickness="0,0,0,1"
+                Background="{StaticResource IsCheckedColorSolidColorBrush}">
+                    <TextBlock 
+                x:Name="FirstFileName"
+                Text="test1.txt"
+                Margin="10,5"
+                FontWeight="SemiBold"
+                FontSize="14"
+                Foreground="{StaticResource LightPrimarySolidColorBrush}"/>
+                </Border>
+
+                <Controls:TextEditorUI Grid.Row="1" x:Name="TopBox"/>
+            </Grid>
+
+            <!-- Сплиттер -->
+            <GridSplitter Grid.Row="1"
+                  Height="5"
+                  Background="{StaticResource RedColorSolidColorBrush}"
+                  HorizontalAlignment="Stretch"
+                  ResizeDirection="Rows"/>
+
+            <!-- Нижняя часть: название + редактор -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                BorderThickness="0,0,0,1"
+                Background="{StaticResource IsCheckedColorSolidColorBrush}">
+                    <TextBlock 
+                x:Name="SecondFileName"
+                Text="test2.txt"
+                Margin="10,5"
+                FontWeight="SemiBold"
+                FontSize="14"
+                Foreground="{StaticResource LightPrimarySolidColorBrush}"/>
+                </Border>
+
+                <Controls:TextEditorUI Grid.Row="1" x:Name="BottomBox"/>
+            </Grid>
         </Grid>
+
 
         <!-- Вертикальный режим -->
         <Grid x:Name="VerticalPanel" Grid.Column="1" Visibility="Collapsed" Grid.Row="2">
@@ -43,9 +93,42 @@
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" MinWidth="20" />
             </Grid.ColumnDefinitions>
-            <Controls:TextEditorUI Grid.Column="0"  x:Name="LeftBox"/>
-            <GridSplitter Grid.Column="1" Width="5" Background="{StaticResource RedColorSolidColorBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
-            <Controls:TextEditorUI Grid.Column="2" x:Name="RightBox"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" MinHeight="10"/>
+                <RowDefinition Height="*" MinHeight="10"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Grid.Column="0"
+                    BorderThickness="0,0,0,1"
+                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="30">
+                <Grid>
+                    <TextBlock 
+                        x:Name="FirstVerticalFileName"
+                        Text="Сравнение файлов"
+                        Margin="10,5"
+                        FontWeight="SemiBold"
+                        FontSize="14"
+                        Foreground="{StaticResource LightPrimarySolidColorBrush}"/>
+
+                </Grid>
+            </Border>
+            <Controls:TextEditorUI Grid.Column="0" Grid.Row="1" x:Name="LeftBox"/>
+            <GridSplitter Grid.Column="1" Width="5" Grid.RowSpan="2" Background="{StaticResource RedColorSolidColorBrush}" 
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+            <Border Grid.Row="0" Grid.Column="2"
+                    BorderThickness="0,0,0,1"
+                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="30">
+                <Grid>
+                    <TextBlock 
+                        x:Name="SecondVerticalFileName"
+                        Text="Сравнение файлов"
+                        Margin="10,5"
+                        FontWeight="SemiBold"
+                        FontSize="14"
+                        Foreground="{StaticResource LightPrimarySolidColorBrush}"/>
+
+                </Grid>
+            </Border>
+            <Controls:TextEditorUI Grid.Column="2"  Grid.Row="1" x:Name="RightBox"/>
         </Grid>
 
         <Grid x:Name="ButtonsGrid" Grid.Row="1" Grid.Column="0" Background="{StaticResource SecondarySolidColorBrush}">

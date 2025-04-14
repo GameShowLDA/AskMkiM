@@ -33,11 +33,15 @@ namespace UI.Components.FileComparerControls
       {
         TopBox.Text = firstFileText;
         BottomBox.Text = secondFileText;
+        FirstFileName.Text = Path.GetFileName(this.FirstFilePath);
+        SecondFileName.Text = Path.GetFileName(this.SecondFilePath);
       }
       else
       {
         LeftBox.Text = firstFileText;
         RightBox.Text = secondFileText;
+        FirstVerticalFileName.Text = Path.GetFileName(this.FirstFilePath);
+        SecondVerticalFileName.Text = Path.GetFileName(this.SecondFilePath);
       }
     }
 
@@ -53,11 +57,13 @@ namespace UI.Components.FileComparerControls
 
       if (HorizontalPanel.Visibility == Visibility.Visible)
       {
-        (TopBox.Text, BottomBox.Text) = (LeftBox.Text, RightBox.Text);
+        (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text) = 
+          (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text);
       }
       else
       {
-        (LeftBox.Text, RightBox.Text) = (TopBox.Text, BottomBox.Text);
+        (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text) = 
+          (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text);
       }
     }
 
