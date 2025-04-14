@@ -5,20 +5,30 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core.Model;
+using AppConfiguration.Base;
+using AppConfiguration.Interface;
+using NewCore.Base.Device;
+using Utilities;
 using Utilities.Models;
-using static AppConfig.Config.ProtocolConfig;
+using static AppConfiguration.Protocol.ProtocolConfig;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 
 namespace UI.Controls.Protocol
 {
-  partial class ProtocolUI
+  /// <inheritdoc />
+  public partial class ProtocolUI : IUserMessageService
   {
     #region Поля.
 
+    /// <summary>
+    /// Последнее отображенное сообщение в протоколе.
+    /// </summary>
     ShowMessageModel LastModelMeassage;
 
+    /// <summary>
+    /// Возвращает текущий статус пошагового режима.
+    /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
     /// <summary>
@@ -53,66 +63,39 @@ namespace UI.Controls.Protocol
     bool _isRepeatEnabled;
     #endregion
 
-    #region Для работа с текстовым редактором.
-
-    /// <summary>
-    /// Сообщение и цвет, используемые для отображения успешного выполнения операции.
-    /// </summary>
-    readonly Tuple<string, Color> goodText = SuccessMessage;
-
-    /// <summary>
-    /// Сообщение и цвет, используемые для отображения ошибки выполнения операции.
-    /// </summary>
-    readonly Tuple<string, Color> errorText = ErrorMessage;
-
     #endregion
-
-
-    #region Работа с оборудованием?
-
-    /// <summary>
-    /// Список моделей устройств, используемых в действиях.
-    /// </summary>
-    List<DeviceModel> DeviceModels;
-
-    #endregion
-
-    #endregion
-
-    /// <summary>
-    /// Возвращает токен отмены для текущего действия.
-    /// </summary>
-    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
-    public CancellationToken GetCancellationToken()
-    {
-      return ActionExecutor.CancellationTokenSource.Token;
-    }
 
     #region Основные настройки.
 
     /// <summary>
-    /// Устанавливает основные настройки для выполнения действий.
+    /// Устанавливает основные настройки выполнения действий.
     /// </summary>
     /// <param name="MainWindow">Главное окно приложения.</param>
-    /// <param name="StartDelegate">Делегат, вызываемый для начала действия.</param>
-    /// <param name="StopDelegate">Делегат, вызываемый для остановки действия.</param>
-    /// <param name="ReturnDelegate">Делегат, вызываемый для возврата к предыдущему состоянию.</param>
+    /// <param name="StartDelegate">Делегат запуска.</param>
+    /// <param name="isRepeatEnabled">Флаг разрешения повторного выполнения.</param>
+    /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
+    /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
+    /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
     public void SetSettings(UIElement MainWindow, StartDelegate StartDelegate, bool isRepeatEnabled, StopDelegate StopDelegate = null, ReturnDelegate ReturnDelegate = null, PreActionDelegate preActionDelegate = null)
     {
-      _mainWindow = MainWindow;
-      _stopDelegate = StopDelegate;
-      _startDelegate = StartDelegate;
-      _returnDelegate = ReturnDelegate;
-      _preActionDelegate = preActionDelegate;
-    }
+      try
+      {
+        _mainWindow = MainWindow;
+        _stopDelegate = StopDelegate;
+        _startDelegate = StartDelegate;
+        _returnDelegate = ReturnDelegate;
+        _preActionDelegate = preActionDelegate;
 
-    /// <summary>
-    /// Устанавливает список моделей устройств для использования в действиях.
-    /// </summary>
-    /// <param name="deviceModels">Список моделей устройств <see cref="DeviceModel"/>.</param>
-    public void SetDevices(List<DeviceModel> deviceModels)
-    {
-      DeviceModels = deviceModels;
+        if (ReturnDelegate != null)
+        {
+          _isRepeatEnabled = true;
+        }
+      }
+      catch (Exception ex)
+      {
+        LoggerUtility.LogException("Ошибка загрузки элемента", ex);
+        throw;
+      }
     }
 
     /// <summary>
@@ -139,6 +122,10 @@ namespace UI.Controls.Protocol
 
     #region Начало и конец.
 
+    /// <summary>
+    /// Прерывает выполнение текущего процесса.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
     public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate);
 
     /// <summary>
@@ -154,8 +141,10 @@ namespace UI.Controls.Protocol
     private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate);
 
     /// <summary>
-    /// Выполняет завершающие действия после завершения самоконтроля или режима.
+    /// Выполняет завершающие действия после завершения процесса.
     /// </summary>
+    /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
     public async Task FinalizeAsync(StopDelegate stopDelegate = null) => await ActionExecutor.FinalizeAsync(stopDelegate);
 
     #endregion
@@ -220,28 +209,56 @@ namespace UI.Controls.Protocol
     /// <summary>
     /// Проверка на пошаговый режим.
     /// </summary>
-    public async Task CheckStepModeAsync() => await ActionExecutor.CheckStepModeAsync(this.CommandBindings, this.InputBindings);
+    public async Task CheckStepModeAsync()
+    {
+      CommandBindingCollection commandBindings = null;
+      InputBindingCollection inputBindings = null;
+
+      // Получаем доступ к свойствам из UI-потока
+      await Dispatcher.InvokeAsync(() =>
+      {
+        commandBindings = this.CommandBindings;
+        inputBindings = this.InputBindings;
+      });
+
+      await ActionExecutor.CheckStepModeAsync(commandBindings, inputBindings);
+    }
 
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
-    /// <param name="header">Заголовок.</param>
-    /// <param name="headerColor">Цвет заголовка.</param>
-    /// <param name="description">Описание.</param>
-    /// <param name="descriptionColor">Цвет описания.</param>
-    /// <returns></returns>
+    /// <param name="showMessageModel">Модель сообщения.</param>
+    /// <returns>Возвращает режим по шагам.</returns>
     public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
-    {
+    {   
       if (!await GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
         {
           await protocolTextBox.RemoveLastLinesAsync();
         }
+
         LastModelMeassage = showMessageModel;
       }
 
-      await protocolTextBox.AppendLineAsync(showMessageModel.Header, showMessageModel.Message, showMessageModel.HeaderColor, showMessageModel.MessageColor);
+      await protocolTextBox.AppendLineAsync(showMessageModel);
+
+      if (ActionExecutor.IsPaused)
+      {
+        await ActionExecutor.WaitWhilePausedAsync(this);
+      }
+
+      return await ProcessStepModeAsync(ActionExecutor.StepMode);
+    }
+
+    /// <summary>
+    /// Полностью очищает протокол и сбрасывает последнее сообщение.
+    /// </summary>
+    /// <returns>Возвращает признак успешного завершения операции.</returns>
+    public async Task<bool> ClearAllMessagesAsync()
+    {
+      await protocolTextBox.ClearAsync();
+      LastModelMeassage = null;
 
       if (ActionExecutor.IsPaused)
       {
@@ -269,7 +286,7 @@ namespace UI.Controls.Protocol
 
       await Task.Run(async () =>
       {
-        using (FileStream fileStream = new FileStream($"{AppConfig.FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
+        using (FileStream fileStream = new FileStream($"{FileLocations.DataSaveDirectory}\\{filename}", FileMode.Create))
         {
           await Task.Run(() => range.Save(fileStream, DataFormats.Rtf)).ConfigureAwait(true);
         }
@@ -284,8 +301,11 @@ namespace UI.Controls.Protocol
       PrintDialog printDialog = new PrintDialog();
       if (printDialog.ShowDialog() == true)
       {
-        FlowDocument document = new FlowDocument();
-        document.PagePadding = new Thickness(50);
+        FlowDocument document = new FlowDocument
+        {
+          PagePadding = new Thickness(50),
+          ColumnWidth = double.PositiveInfinity,
+        };
 
         TextRange range = new TextRange(ProtocolTextBox.Document.ContentStart, ProtocolTextBox.Document.ContentEnd);
         using (MemoryStream stream = new MemoryStream())
@@ -295,6 +315,9 @@ namespace UI.Controls.Protocol
 
           TextRange documentRange = new TextRange(document.ContentStart, document.ContentEnd);
           documentRange.Load(stream, DataFormats.Xaml);
+
+          documentRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
+          documentRange.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
         }
 
         IDocumentPaginatorSource source = document;
@@ -305,9 +328,12 @@ namespace UI.Controls.Protocol
     #endregion
 
     /// <summary>
-    /// Пытается подключиться к устройствам и возвращает ответ о попытке подключения.
+    /// Возвращает токен отмены для текущего действия.
     /// </summary>
-    public async Task<bool> AttemptDeviceConnection(List<DeviceModel> deviceModels, MessageDelegate messageDelegate) => await ActionExecutor.AttemptDeviceConnection(deviceModels, messageDelegate);
-
+    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
+    public CancellationToken GetCancellationToken()
+    {
+      return ActionExecutor.CancellationTokenSource.Token;
+    }
   }
 }

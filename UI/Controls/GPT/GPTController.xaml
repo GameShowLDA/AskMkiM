@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="UI.Controls.GPT.GPTController"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.GPT"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Foreground="{StaticResource ForegroundSolidColorBrush}">
+
+    <UserControl.Resources>
+        <Style x:Key="RadioCustom" TargetType="RadioButton">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Кастомный кругляш -->
+                            <Border x:Name="OuterCircle" Width="20" Height="20" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="2" 
+                            CornerRadius="10" 
+                            Background="Transparent">
+                                <Ellipse x:Name="InnerCircle" Width="12" Height="12" 
+                                 Fill="{TemplateBinding Foreground}" 
+                                 Visibility="Collapsed" />
+                            </Border>
+                            <!-- Текст -->
+                            <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <!-- Показываем внутренний круг, если элемент выбран -->
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="InnerCircle" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Определение столбцов -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <!-- Левая колонка для режимов -->
+            <ColumnDefinition Width="*" />
+            <!-- Правая колонка для управления -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Левая колонка: Список режимов -->
+        <StackPanel Grid.Column="0" Background="{StaticResource CategoryPanelBackgroundColor}">
+            <TextBlock Text="Режимы ППУ" FontSize="20" FontWeight="Bold" Margin="5,0,0,10" />
+            <RadioButton Margin="20,0,0,0" Style="{StaticResource RadioCustom}" GroupName="Modes" Content="ACW" Tag="Mode1" Checked="Mode_Checked" />
+            <RadioButton Margin="20,0,0,0" Style="{StaticResource RadioCustom}" GroupName="Modes" Content="DCW" Tag="Mode2" Checked="Mode_Checked" />
+            <RadioButton Margin="20,0,0,0" Style="{StaticResource RadioCustom}" GroupName="Modes" Content="IR" Tag="Mode3" Checked="Mode_Checked" />
+            <RadioButton Margin="20,0,0,0" Style="{StaticResource RadioCustom}" GroupName="Modes" Content="Общее" Tag="Mode4" Checked="Mode_Checked" />
+        </StackPanel>
+
+        <!-- Правая колонка: Управление -->
+        <Grid Grid.Column="1" Name="Content">
+
+        </Grid>
+    </Grid>
+</UserControl>

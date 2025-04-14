@@ -1,0 +1,65 @@
+﻿<Window x:Class="MainWindowProgram.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Загрузка | АСК-МКИ-М"
+        Height="400" Width="600"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        Topmost="True">
+    
+    <Window.Resources>
+        <Storyboard x:Key="LoadingAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                         From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"/>
+        </Storyboard>
+    </Window.Resources>
+
+    <Border Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="30">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+
+            <!-- Логотип -->
+            <Image Source="/Resources/logo.png" Width="120" Height="120" Margin="0,0,0,20"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   SnapsToDevicePixels="True"
+                   UseLayoutRounding="True"/>
+
+            <!-- Название системы -->
+            <TextBlock Text="АСК-МКИ-М" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ActiveBorderSolidColorBrush}"
+                       TextAlignment="Center">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="0"/>
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <!-- Название организации -->
+            <TextBlock Text="АО «Ижевский мотозавод «Аксион-холдинг»" FontSize="16" Foreground="#B0B3BA"
+                       Margin="0,8,0,0" TextAlignment="Center"/>
+
+            <!-- Индикатор загрузки -->
+            <Grid Width="40" Height="40" Margin="0,30,0,0">
+                <Ellipse Width="40" Height="40" StrokeThickness="4"
+                         Stroke="White" Opacity="0.2"/>
+
+                <Ellipse Width="40" Height="40" StrokeThickness="4"
+                         Stroke="White" StrokeDashArray="4 6">
+                    <Ellipse.RenderTransform>
+                        <RotateTransform x:Name="spinnerRotation" Angle="0" CenterX="20" CenterY="20"/>
+                    </Ellipse.RenderTransform>
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Window.Loaded">
+                            <BeginStoryboard x:Name="LoadingAnimation">
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                     From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

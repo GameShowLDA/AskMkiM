@@ -4,9 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainWindowProgram"
-        Title="Управление ключами" Height="330" Width="400"
-        WindowStyle="None" AllowsTransparency="True" Background="{StaticResource IsCheckedColorSolidColorBrush}" ShowInTaskbar="False"
-        Topmost="True" WindowStartupLocation="CenterScreen">
+        Title="Управление ключами" 
+        Height="330" 
+        Width="400"
+        WindowStyle="None" 
+        AllowsTransparency="True" Background="{StaticResource IsCheckedColorSolidColorBrush}" ShowInTaskbar="False"
+        Topmost="True" WindowStartupLocation="CenterScreen"
+        >
     <Grid>
         <StackPanel Margin="10">
 

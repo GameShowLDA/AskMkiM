@@ -1,108 +1,118 @@
-﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static AppConfig.EventAggregator;
-using static AppConfig.SettingsFileReader;
+using System.Windows.Threading;
+using AppConfiguration.SystemState;
+using ConsoleUtilities;
+using ConsoleUtilities.Engine;
+using ConsoleUtilities.Services;
+using MainWindowProgram.Engine;
+using MainWindowProgram.Events;
+using MainWindowProgram.HotkeyBindings;
+using MainWindowProgram.Services;
+using MainWindowProgram.ViewModels;
+using UI.Controls.Search;
+using Utilities.USB;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
 {
-  /// <summary>
-  /// Основной класс MainWindow, представляющий главное окно приложения.
-  /// </summary>
-  /// <remarks>
-  /// Этот класс содержит логику инициализации главного окна приложения, а также обработки ошибок и отображения сообщений.
-  /// Включает в себя таймер для анимации затухания сообщений, статический экземпляр TextBlock для отображения информации,
-  /// и асинхронный метод для начальной конфигурации приложения.
-  /// </remarks>
   public partial class MainWindow : Window
   {
-    /// <summary>
-    /// Таймер для анимации затухания сообщений.
-    /// </summary>
-    static System.Timers.Timer timer = new System.Timers.Timer();
+    #region Поля.
 
     /// <summary>
-    /// Статический экземпляр TextBlock для отображения информации в InfoBlock.
+    /// Обработчик сообщений, передаёт текст в интерфейс через связанный блок информации.
+    /// Используется для отображения логов, статусов, ошибок и другой информации в UI.
     /// </summary>
-    static TextBlock _infoBlock;
+    internal MessageHandler messageHandler { get; set; }
 
     /// <summary>
-    /// Флаг блокировки состояния.
+    /// Статический UI-элемент, в который выводятся сообщения от системы.
+    /// Используется как главный информационный блок в окне приложения.
     /// </summary>
-    private bool isLocked = false;
+    internal static TextBlock _infoBlock;
 
     /// <summary>
-    /// Обработчик сообщений, использующий TextBlock для отображения информации.
+    /// Флаг, указывающий, заблокировано ли текущее состояние интерфейса.
+    /// Используется для предотвращения повторных операций, если процесс уже запущен.
     /// </summary>
-    MessageHandler messageHandler = new MessageHandler(infoBlock: _infoBlock);
+    internal bool IsLocked = false;
 
     /// <summary>
-    /// Конструктор MainWindow.
+    /// Сервис управления USB-устройствами.
+    /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    /// <remarks>
-    /// Инициализирует компоненты главного окна и запускает асинхронную задачу по чтению настроек конфигурации.
-    /// В случае возникновения исключения выводит сообщение об ошибке и логирует её.
-    /// </remarks>
+    private readonly UsbServices _usbServices;
+
+    /// <summary>
+    /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
+    /// Связывает интерфейс с бизнес-логикой.
+    /// </summary>
+    private readonly MainWindowViewModel _viewModel;
+
+    /// <summary>
+    /// Показывает, активен ли в данный момент текстовый редактор.
+    /// Значение true означает, что текстовый редактор находится в фокусе или используется пользователем.
+    /// </summary>
+    public bool IsTextEditorActive { get; set; }
+
+    /// <summary>
+    /// Сервис управления многооконным интерфейсом.
+    /// </summary>
+    public SearchWindow SearchWindow;
+
+    #endregion
+
+    /// <summary>
+    /// Инициализирует новое окно приложения и настраивает события, командную строку, мониторинг USB и конфигурацию.
+    /// </summary>
     public MainWindow()
     {
       InitializeComponent();
+      this.Visibility = Visibility.Hidden;
 
-      Task.Run(async () =>
+      (var vm, var usb) = AppServices.Build(this);
+      _viewModel = vm;
+      _usbServices = usb;
+
+      this.DataContext = _viewModel;
+      GuiInitializer.Apply(this);
+    }
+
+    /// <summary>
+    /// Запускает асинхронную инициализацию окна.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+      var lifecycle = new ApplicationLifecycleManager();
+      lifecycle.Initialize(this, _usbServices, App._consoleManager);
+      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+      ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
+
+      try
       {
-        try
+        await Task.Run(async () =>
         {
-          await StartConfigAsync();
-        }
-        catch (Exception ex)
+          await applicationInitializer.InitializeAsync();
+        });
+
+        await this.Dispatcher.InvokeAsync(() =>
         {
-          string errorDetails = GetErrorDetails(ex);
-          LogError($"Ошибка выполнения программы: {errorDetails}");
-          MessageBox.Show($"Ошибка: {errorDetails}");
-        }
-      });
+          HotkeyBinderManager.AttachAllHotkeys(this, this.DataContext);
+        }, DispatcherPriority.Loaded);
 
-      SettingsGUI();
-    }
-
-    private void SettingsGUI()
-    {
-      _infoBlock = InfoBlock;
-      this.Admin.Visibility = Visibility.Collapsed;
-      this.Closing += MainWindow_Closing;
-
-      this.CommandBindings.Add(new CommandBinding(ActivateMenuItemCommand, ExecuteActivateMenuItem));
-      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
-
-      LockedChanged += ApplicationDataHandler_LockedChanged;
-      AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
-      LogInformation("Главное окно инициализировано.");
-    }
-
-    /// <summary>
-    /// Получает детали ошибки из исключения.
-    /// </summary>
-    /// <param name="ex">Исключение, содержащее информацию об ошибке.</param>
-    /// <returns>Строка с деталями ошибки, включая сообщение, файл и строку, где произошла ошибка.</returns>
-    private string GetErrorDetails(Exception ex)
-    {
-      StackTrace trace = new StackTrace(ex, true);
-      StackFrame frame = trace.GetFrame(0);
-      string fileName = frame?.GetFileName() ?? "Неизвестный файл";
-      int lineNumber = frame?.GetFileLineNumber() ?? -1;
-      return $"{ex.Message} (Файл: {fileName}, строка: {lineNumber})";
-    }
-
-    /// <summary>
-    /// Асинхронный метод для начала конфигурации приложения.
-    /// </summary>
-    /// <remarks>
-    /// Выполняет асинхронное чтение всех настроек из файла конфигурации.
-    /// </remarks>
-    private async Task StartConfigAsync()
-    {
-      await ReadAllSettingsAsync();
+      }
+      catch (InvalidOperationException exception)
+      {
+        LogException($"Ошибка загрузки темы программы", exception);
+        MessageBox.Show($"Ошибка загрузки темы: {exception.Message}");
+      }
+      catch (Exception ex)
+      {
+        LogException($"Ошибка выполнения программы", ex);
+        MessageBox.Show($"Ошибка: {ex.Message}");
+      }
     }
   }
 }

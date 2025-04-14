@@ -1,30 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace Mode.Settings.LoggerMessage
 {
   /// <summary>
-  /// Логика взаимодействия для PinCodeWindow.xaml
+  /// Окно для ввода PIN-кода.
   /// </summary>
   public partial class PinCodeWindow : Window
   {
+    /// <summary>
+    /// Получает значение, указывающее, является ли введённый PIN-код правильным.
+    /// </summary>
     public bool IsCorrectPin { get; private set; }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="PinCodeWindow"/>.
+    /// </summary>
     public PinCodeWindow()
     {
       InitializeComponent();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки подтверждения PIN-кода.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
     {
       if (PinCodeBox.Password == "0000")

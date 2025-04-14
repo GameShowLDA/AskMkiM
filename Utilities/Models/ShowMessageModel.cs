@@ -1,18 +1,22 @@
-﻿using System.Windows.Media;
+﻿using System.Windows;
+using System.Windows.Media;
 
 namespace Utilities.Models
 {
+  /// <summary>
+  /// Модель сообщения.
+  /// </summary>
   public class ShowMessageModel
   {
     /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
-    static public Tuple<string, Color> SuccessMessage => Tuple.Create("OK", Color.FromArgb(255, 79, 205, 101));
+    static public (string Title, Color TitleColor) SuccessMessage => ("НОРМА", Color.FromArgb(255, 79, 205, 101));
 
     /// <summary>
     /// Сообщение и цвет для ошибки.
     /// </summary>
-    static public Tuple<string, Color> ErrorMessage => Tuple.Create("NO", Color.FromArgb(255, 241, 48, 27));
+    static public (string Title, Color TitleColor) ErrorMessage => ("БРАК", Color.FromArgb(255, 241, 48, 27));
 
     /// <summary>
     /// Получает или задает заголовок сообщения.
@@ -44,12 +48,43 @@ namespace Utilities.Models
     /// </summary>
     public bool CanBeDeleted { get; set; }
 
+    /// <summary>
+    /// Показывает, связано ли сообщение с устройством.
+    /// True — сообщение от устройства или касается его работы; 
+    /// False — общее информационное сообщение.
+    /// </summary>
+    public bool IsDeviceMessage { get; set; }
+
+    /// <summary>
+    /// Размер табуляции перед строкой.
+    /// </summary>
+    public int IndentLevel { get; set; }
+
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/>.
+    /// </summary>
     public ShowMessageModel()
     {
       ExecutionError = false;
       CanBeDeleted = false;
+      IsDeviceMessage = false;
+      IndentLevel = 0;
+
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (Application.Current?.Resources["ForegroundSolidColorBrush"] is SolidColorBrush brush)
+        {
+          HeaderColor = brush.Color;
+          MessageColor = brush.Color;
+        }
+      });
     }
 
+    /// <summary>
+    /// Возвращает сообщение вида "Заголовок: Сообщение".
+    /// </summary>
+    /// <returns>Строковое представление объекта.</returns>
     public override string ToString()
     {
       if (!string.IsNullOrEmpty(Header) && !string.IsNullOrEmpty(Message))
@@ -69,12 +104,28 @@ namespace Utilities.Models
         return null;
       }
     }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/> с заданными параметрами.
+    /// </summary>
+    /// <param name="header">Текст заголовка сообщения (по умолчанию null).</param>
+    /// <param name="headerColor">Цвет заголовка сообщения (по умолчанию null).</param>
+    /// <param name="message">Основной текст сообщения (по умолчанию null).</param>
+    /// <param name="messageColor">Цвет основного текста сообщения (по умолчанию null).</param>
     public ShowMessageModel(string header = null, Color? headerColor = null, string message = null, Color? messageColor = null) : this()
     {
+      if (headerColor != null)
+      {
+        HeaderColor = headerColor;
+      }
+
+      if (messageColor != null)
+      {
+        MessageColor = messageColor;
+      }
+
       Header = header;
-      HeaderColor = headerColor;
       Message = message;
-      MessageColor = messageColor;
     }
   }
 }

@@ -10,7 +10,7 @@ namespace Utilities.FilesUtility
   /// Класс для работы с YAML файлами.
   /// Предоставляет методы для создания, чтения, удаления и перезаписи данных в YAML формате.
   /// </summary>
-  /// <typeparam name="T">Тип объекта для сериализации/десериализации</typeparam>
+  /// <typeparam name="T">Тип объекта для сериализации/десериализации.</typeparam>
   public class YamlUtility<T>
   {
     #region Поля.
@@ -37,7 +37,7 @@ namespace Utilities.FilesUtility
     /// <summary>
     /// Читает данные из YAML файла асинхронно.
     /// </summary>
-    /// <returns>Объект типа T, содержащий данные из файла</returns>
+    /// <returns>Объект типа T, содержащий данные из файла.</returns>
     public async Task<T> ReadAsync()
     {
       try
@@ -47,7 +47,7 @@ namespace Utilities.FilesUtility
         if (!File.Exists(YamlFilePath))
         {
           LoggerUtility.LogError($"Файл YAML не найден по пути: {YamlFilePath}");
-          return default(T);
+          return default;
         }
 
         var result = Activator.CreateInstance<T>();
@@ -66,15 +66,15 @@ namespace Utilities.FilesUtility
       }
       catch (Exception ex)
       {
-        LoggerUtility.LogError($"Ошибка чтения файла {YamlFilePath}: {ex}");
-        return default(T);
+        LoggerUtility.LogException($"Ошибка чтения файла {YamlFilePath}", ex);
+        return default;
       }
     }
 
     /// <summary>
     /// Перезаписывает данные в YAML файле.
     /// </summary>
-    /// <param name="value">Новое значение для записи в файл</param>
+    /// <param name="value">Новое значение для записи в файл.</param>
     public async Task RewriteAsync(T value)
     {
       LoggerUtility.LogInformation($"Начинаем перезапись YAML файла: {YamlFilePath}");
@@ -136,7 +136,7 @@ namespace Utilities.FilesUtility
     /// <summary>
     /// Читает все строки из YAML файла асинхронно.
     /// </summary>
-    /// <returns>Список строк файла</returns>
+    /// <returns>Список строк файла.</returns>
     private async Task<IEnumerable<string>> ReadYamlFileLinesAsync()
     {
       if (!File.Exists(YamlFilePath))
@@ -191,7 +191,7 @@ namespace Utilities.FilesUtility
     /// <summary>
     /// Конструктор класса YamlHelper.
     /// </summary>
-    /// <param name="pathYaml">Путь к YAML файлу</param>
+    /// <param name="pathYaml">Путь к YAML файлу.</param>
     public YamlUtility(string pathYaml)
     {
       YamlFilePath = pathYaml;

@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static AppConfig.Config.SystemStateManager;
+using static AppConfiguration.SystemState.SystemStateManager;
 
 namespace Mode.Settings.Execution
 {
@@ -59,15 +59,6 @@ namespace Mode.Settings.Execution
         CheckIsNumeric(e);
       }
     }
-
-    ///// <summary>
-    ///// Обрабатывает событие изменения текста.
-    ///// Вызывает метод сохранения новых данных.
-    ///// </summary>
-    //private async void TextChanged(object sender, TextChangedEventArgs e)
-    //{
-    //  await NewDataSaveAsync();
-    //}
 
     /// <summary>
     /// Обрабатывает событие установки флажка пошагового выполнения.

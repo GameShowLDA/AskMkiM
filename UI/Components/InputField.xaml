@@ -1,0 +1,132 @@
+﻿<UserControl x:Class="UI.Components.InputField"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="720" d:DesignWidth="250">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border  Margin="5" Grid.Row="0" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Начальная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..." Text="1.1.1"/>
+            </Grid>
+        </Border>
+
+        <Border  Margin="5" Grid.Row="1" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="headerSecondData" TextWrapping="Wrap" TextTrimming="None" Text="Конечная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..." Text="1.1.100"/>
+            </Grid>
+        </Border>
+
+
+        <Border  Margin="5" Grid.Row="2" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="headerElectricalData" TextWrapping="Wrap" TextTrimming="None" Text="Электрический параметр" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" Placeholder="Введите значение..."
+                                           Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+        </Border>
+
+        <Border  Margin="5" Grid.Row="3" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10"
+                 Visibility="{Binding IsTimeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
+                 >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="headerTimeData" TextWrapping="Wrap" TextTrimming="None" Text="Время выполнения в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" Placeholder="от 1 до 999 сек." 
+                                          Unit=",сек."/>
+            </Grid>
+        </Border>
+
+
+        <Border  Margin="5" Grid.Row="4" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10"
+                 Visibility="{Binding IsTimeRampVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
+                 >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="headerTimeRampData" TextWrapping="Wrap" TextTrimming="None" Text="Время нарастания в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" Placeholder="от 0.1 до 999.9 сек." Unit=",сек." />
+            </Grid>
+        </Border>
+
+
+        <Border  Margin="5" Grid.Row="5" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10"
+                  Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
+                 >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="headerVoltageData" TextWrapping="Wrap" TextTrimming="None" Text="Напряжение в В." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="VoltageTextBox" Grid.Row="5" Placeholder="Введите значение..." Unit=",В." />
+            </Grid>
+        </Border>
+
+        <Border Margin="5" Grid.Row="6" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10"
+                  Visibility="{Binding IsBusVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="headerBusData" TextWrapping="Wrap" TextTrimming="None"  Text="Шина для проверки" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Border Name="BusBorder" Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="10" Margin="0,5,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox x:Name="ShinaACheckBox" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
+                        <TextBlock Text="Шина A" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}" VerticalAlignment="Center" FontSize="18" />
+
+                        <CheckBox x:Name="ShinaBCheckBox" Grid.Row="1" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
+                        <TextBlock Grid.Row="1" Text="Шина B" Grid.Column="1" VerticalAlignment="Center" Foreground="{StaticResource ForegroundSolidColorBrush}" FontSize="18" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</UserControl>

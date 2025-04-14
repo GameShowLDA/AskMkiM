@@ -1,0 +1,232 @@
+﻿<Window x:Class="UI.Controls.Search.SearchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Elements="clr-namespace:UI.Components.SearchControls"
+        xmlns:UIC="clr-namespace:UI.Components" 
+        Title="SearchWindow" Height="Auto" Width="410"
+        MinWidth="410"
+        MaxWidth="410"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded"
+        AllowsTransparency="True"
+        SizeChanged="Window_SizeChanged"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        >
+    <Window.Resources>
+        <!-- Анимация появления сверху -->
+        <Storyboard x:Key="ShowAnimation">
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                From="-200" To="0" Duration="0:0:0.5" />
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="Opacity"
+                From="0" To="1" Duration="0:0:0.5" />
+        </Storyboard>
+
+        <Storyboard x:Key="HideAnimation">
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                From="0" To="-200" Duration="0:0:0.5" />
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="Opacity"
+                From="1" To="0" Duration="0:0:0.5" />
+        </Storyboard>
+    </Window.Resources>
+
+    <Grid x:Name="WindowContainer" RenderTransformOrigin="0.5,0.0">
+        <Grid.RenderTransform>
+            <TranslateTransform Y="0"/>
+        </Grid.RenderTransform>
+        <Border  Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="0,0,15,15">
+
+        <Grid x:Name="MainGrid">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="87"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition x:Name="ReplaceRow" Height="*"/>
+                <!-- Скрытая строка по умолчанию -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Строка 1 -->
+            <Elements:ArrowButton x:Name="ToggleArrow"
+                      Width="25" Height="25" 
+                      VerticalAlignment="Center" 
+                      HorizontalAlignment="Center"  
+                      ArrowColor="{StaticResource ForegroundSolidColorBrush}" 
+                      HoverArrowColor="{StaticResource ActiveBorderSolidColorBrush}" 
+                      IsArrowUp="False"
+                      PreviewMouseDown="ToggleArrow_PreviewMouseDown"/>
+
+            <TextBox
+             x:Name="SearchTextBox"  Grid.Column="1" Grid.Row="0" Margin="2 3" Tag="Найти..." BorderThickness="0"
+             VerticalContentAlignment="Bottom"
+             HorizontalContentAlignment="Left"
+             Background="Transparent"
+             BorderBrush="Transparent"
+             Foreground="{StaticResource ForegroundSolidColorBrush}"
+             FontSize="14"
+             CaretBrush="{StaticResource ForegroundSolidColorBrush}"
+             GotFocus="SearchTextBox_GotFocus"
+             LostFocus="SearchTextBox_LostFocus"
+         />
+            <TextBlock x:Name="SearchPlaceholder" Grid.Column="1" Grid.Row="0"
+               Text="Найти..."
+               Foreground="{StaticResource ForegroundSolidColorBrush}"
+               IsHitTestVisible="False"
+               VerticalAlignment="Bottom"
+               HorizontalAlignment="Left"
+               Margin="2 3"/>
+
+            <UIC:WindowButtons
+            Style="{StaticResource WindowsButtonStyle}"
+             x:Name="exitButton"
+             ChoiceElement="Exit"  
+             Grid.Column="2"
+             Width="30"
+             Height="30"
+             HorizontalAlignment="Right"
+             PreviewMouseDown="exitButton_PreviewMouseDown"
+             />
+            <Rectangle Width="Auto" Grid.Column="1" Grid.Row="0" Margin="2 0" 
+                   HorizontalAlignment="Stretch" 
+                   Height="2" 
+                   VerticalAlignment="Bottom" Fill="{StaticResource ForegroundSolidColorBrush}">
+            </Rectangle>
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+
+                <Elements:SearchArrows x:Name="searchArrows" Grid.Column="0" Margin="3 0 0 0"/>
+
+            </Grid>
+
+            <!-- Строка 2 (По умолчанию скрыта) -->
+            <TextBox
+            x:Name="ReplaceTextBox"  Grid.Column="1" Grid.Row="1" Margin="2 3" Tag="Заменить..." BorderThickness="0"
+            VerticalContentAlignment="Bottom"
+            HorizontalContentAlignment="Left"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            Foreground="{StaticResource ForegroundSolidColorBrush}"
+            FontSize="14"
+            CaretBrush="{StaticResource ForegroundSolidColorBrush}"
+            GotFocus="ReplaceTextBox_GotFocus"
+            LostFocus="ReplaceTextBox_LostFocus"/>
+
+            <TextBlock x:Name="ReplcePlaceholder" Grid.Column="1" Grid.Row="1"
+             Text="Заменить..."
+             FontSize="14"
+             Foreground="{StaticResource ForegroundSolidColorBrush}"
+             IsHitTestVisible="False"
+             VerticalAlignment="Bottom"
+             HorizontalAlignment="Left"
+             Margin="2 3"/>
+
+            <Rectangle Width="Auto" Grid.Column="1" Grid.Row="1" Margin="2 0" 
+            HorizontalAlignment="Stretch" 
+            Height="2" 
+            VerticalAlignment="Bottom" Fill="{StaticResource ForegroundSolidColorBrush}">
+            </Rectangle>
+
+            <Grid Grid.Row="1" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+                <Elements:ReplaseWordButton Height="25" Width="25"/>
+                <Elements:ReplaseAllWordsButton Height="25" Width="25" Grid.Column="1"/>
+            </Grid>
+
+            <!-- Строка 3 -->
+            <Grid Grid.Row="2" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="12*"/>
+                    <ColumnDefinition Width="12*"/>
+                    <ColumnDefinition Width="52*"/>
+                </Grid.ColumnDefinitions>
+
+                <Elements:CaseToggleButton x:Name="caseButton" Grid.Row="2" Grid.Column="0" 
+                           Width="25" Height="25"
+                           Foreground="Black"
+                           Cursor="Hand"
+                           ToolTip="Учитывать регистр"
+                           />
+                <Elements:WholeWordToggleButton x:Name="wholeWordButton" Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Слово целиком"/>
+
+                <ComboBox x:Name="searchAreaParameters" Grid.Column="2" Margin="2" VerticalAlignment="Stretch" SelectedIndex="0"
+                SelectionChanged="PART_EditableTextBox_SelectionChanged">
+
+                    <ComboBoxItem Content="Текущий документ" Tag="FindInThisFile"/>
+                    <ComboBoxItem Content="Все открытые документы" Tag="FindInOpenedFiles" />
+                    <ComboBoxItem Content="Найти в файле" Tag="FindInFile" />
+                    <ComboBox.Template>
+                        <ControlTemplate TargetType="ComboBox">
+                            <Grid>
+                                <!-- Текстовое поле -->
+                                <TextBox x:Name="PART_EditableTextBox"
+                                 Text="{Binding Path=Text, RelativeSource={RelativeSource TemplatedParent}}"
+                                 IsReadOnly="True"
+                                 Background="Transparent"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 Padding="{TemplateBinding Padding}"
+                                 BorderThickness="0"
+                                 Cursor="Hand" 
+                                 MouseEnter="PART_EditableTextBox_MouseEnter"
+                                 MouseLeave="PART_EditableTextBox_MouseLeave"
+                                 PreviewMouseDown="PART_EditableTextBox_PreviewMouseDown"/>
+
+                                <!-- Нижняя граница -->
+                                <Rectangle x:Name="BottomRectangle" Height="2" VerticalAlignment="Bottom" Fill="{StaticResource ForegroundSolidColorBrush}" />
+                                <!-- Кнопка раскрытия -->
+                                <ToggleButton x:Name="ComboBoxToggleButton"
+                                Width="20"
+                                Height="20"
+                                HorizontalAlignment="Right"
+                                Content="▼"
+                                Foreground="{StaticResource ForegroundSolidColorBrush}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Focusable="False"
+                                Cursor="Hand" 
+                                IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
+                                MouseEnter="ToggleButton_MouseEnter"
+                                MouseLeave="ToggleButton_MouseLeave"/>
+
+                                <!-- Выпадающий список -->
+                                <Popup x:Name="PART_Popup"
+                                 Placement="Bottom"
+                                 Cursor="Hand" 
+                                 IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                 Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}}">
+                                    <Border BorderThickness="0">
+                                        <ScrollViewer>
+                                            <ItemsPresenter />
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </ControlTemplate>
+                    </ComboBox.Template>
+
+                </ComboBox>
+            </Grid>
+        </Grid>
+    </Border>
+    </Grid>
+</Window>
+    
+    

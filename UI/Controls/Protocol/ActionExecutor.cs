@@ -1,35 +1,38 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using Core;
-using Core.Communication;
-using Core.Model;
+using NewCore.Base.Device;
 using UI.Management;
 using Utilities.Models;
 using WindowsInput;
-using static AppConfig.Config.ExecutionConfig;
-using static AppConfig.Config.ProtocolConfig;
-using static AppConfig.Config.SystemStateManager;
-using static AppConfig.EventAggregator;
+using static AppConfiguration.Execution.ExecutionConfig;
+using static AppConfiguration.Protocol.ProtocolConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
+using static AppConfiguration.Base.EventAggregator;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
 
 namespace UI.Controls.Protocol
 {
+  /// <summary>
+  /// Класс, отвечающий за выполнение процессов самоконтроля и управления процессами системы.
+  /// Обеспечивает запуск, остановку, паузу и пошаговый режим выполнения задач.
+  /// </summary>
   public class ActionExecutor
   {
+    static public event Action<bool> StartProcessing;
 
     #region Проверка токена.
 
+    /// <summary>
+    /// Источник токена отмены для управления выполняемыми задачами.
+    /// </summary>
     internal CancellationTokenSource CancellationTokenSource;
-
 
     #endregion
 
     #region Свойства.
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
 
     /// <summary>
     /// Экземпляр подключаемого класса.
@@ -56,7 +59,6 @@ namespace UI.Controls.Protocol
     /// </summary>
     internal TaskCompletionSource<bool> PauseCompletionSource { get; set; }
 
-
     /// <summary>
     /// Задача выполнения.
     /// </summary>
@@ -75,15 +77,19 @@ namespace UI.Controls.Protocol
     /// Запуск самоконтроля/режима.
     /// </summary>
     /// <param name="startDelegate">Делегат для выполнения задачи.</param>
+    /// <param name="stop">Делегат для завершения задачи.</param>
     /// <param name="name">Имя запускаемого процесса.</param>
-    /// <returns>Задача, представляющая асинхронную операцию.</returns>
+    /// <param name="isRepeatEnabled">Флаг, указывающий, повторять ли операцию.</param>
+    /// <param name="preActionDelegate">Необязательный делегат для выполнения предварительных действий.</param>
+    /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null)
     {
+      await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled())
       {
         if (!await GetIsActivePower())
         {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", errorText.Item2));
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
           await ProtocolSelfCheck.FinalizeAsync();
           return;
         }
@@ -96,13 +102,14 @@ namespace UI.Controls.Protocol
 
       if (startDelegate == null)
       {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", errorText.Item2));
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
         await ProtocolSelfCheck.FinalizeAsync();
         LogError("Системная ошибка выполнения, обратитесь к администратору");
         return;
       }
 
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
+      StartProcessing?.Invoke(true);
 
       if (IsProcessRunning(name))
       {
@@ -123,8 +130,7 @@ namespace UI.Controls.Protocol
     /// Завершение текущей выполняемой задачи.
     /// </summary>
     /// <param name="stopDelegate">Делегат для завершения задачи.</param>
-    /// <param name="name">Имя завершаемого процесса.</param>
-    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
     internal async Task StopAsync(StopDelegate stopDelegate)
     {
       await FinalizeAsync(stopDelegate);
@@ -151,8 +157,8 @@ namespace UI.Controls.Protocol
       ProtocolSelfCheck.ShowOnlyStartButton();
 
       await DisplayCompletionMessage();
+      StartProcessing?.Invoke(false);
     }
-
 
     /// <summary>
     /// Ставит выполнение метода на паузу.
@@ -181,6 +187,7 @@ namespace UI.Controls.Protocol
       {
         PauseCompletionSource.SetResult(true);
       }
+
       IsPaused = false;
     }
 
@@ -210,6 +217,8 @@ namespace UI.Controls.Protocol
     /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
     /// </summary>
     /// <param name="returnDelegate">Делегат, выполняющий операцию измерения. Если null, выполняется завершение.</param>
+    /// <param name="stop">Делегат для остановки операции.</param>
+    /// <returns>Задача, представляющая асинхронную операцию цикла измерения.</returns>
     internal async Task LoopMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
     {
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
@@ -227,33 +236,47 @@ namespace UI.Controls.Protocol
     }
 
     /// <summary>
-    /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
+    /// Выполняет операцию измерения один раз.
     /// </summary>
-    /// <param name="returnDelegate">Делегат, выполняющий операцию измерения. Если null, выполняется завершение.</param>
+    /// <param name="returnDelegate">Делегат измерения.</param>
+    /// <param name="stop">Делегат остановки.</param>
+    /// <returns>Задача, представляющая измерение.</returns>
     internal async Task ReturnMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
     {
       try
       {
+        var token = CancellationTokenSource?.Token ?? new CancellationToken();
+
         if (returnDelegate != null)
         {
-          await returnDelegate(CancellationTokenSource.Token);
+          await returnDelegate(token);
         }
         else
         {
           await FinalizeAsync(stop);
         }
       }
+      catch (ObjectDisposedException ex)
+      {
+        LogException("Token уже утилизирован", ex);
+        MessageBox.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
+        await FinalizeAsync(stop);
+      }
       catch (Exception ex)
       {
-        LogError("Системная ошибка: " + ex.ToString());
+        LogException("Системная ошибка", ex);
         MessageBox.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
     }
 
     /// <summary>
-    /// Обрабатывает пошаговый режим.
+    /// Обрабатывает пошаговый режим выполнения.
     /// </summary>
+    /// <param name="stepMode">Флаг пошагового режима.</param>
+    /// <param name="commandBinding">Привязка команд.</param>
+    /// <param name="inputBinding">Привязка ввода.</param>
+    /// <returns>Задача, представляющая обработку пошагового режима.</returns>
     internal async Task<bool> ProcessStepModeAsync(bool stepMode, CommandBindingCollection commandBinding, InputBindingCollection inputBinding)
     {
       try
@@ -278,7 +301,7 @@ namespace UI.Controls.Protocol
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка: {ex}");
+        LogException($"Ошибка", ex);
       }
 
       return stepMode;
@@ -288,8 +311,10 @@ namespace UI.Controls.Protocol
     #region Дополнительные методы управления.
 
     /// <summary>
-    /// Ожидает, пока метод находится на паузе, если пауза активна.
+    /// Ожидает, пока выполнение процесса находится в состоянии паузы.
     /// </summary>
+    /// <param name="protocolSelfCheck">Объект интерфейса.</param>
+    /// <returns>Задача ожидания паузы.</returns>
     public async Task WaitWhilePausedAsync(ProtocolUI protocolSelfCheck = null)
     {
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
@@ -311,9 +336,11 @@ namespace UI.Controls.Protocol
             await protocolSelfCheck.ShowMessageAsync(showMessage);
           }
         }
+
         await PauseCompletionSource.Task;
         ShouldShowPauseMessage = true;
       }
+
       if (protocolSelfCheck != null)
       {
         if (ShouldShowResumeMessage)
@@ -383,6 +410,7 @@ namespace UI.Controls.Protocol
       {
         await WaitWhilePausedAsync().ConfigureAwait(true);
       }
+
       return true;
     }
 
@@ -398,6 +426,7 @@ namespace UI.Controls.Protocol
         LogWarning($"Попытка запустить \"{name}\", когда уже выполняется другая задача.");
         return true;
       }
+
       return false;
     }
 
@@ -430,7 +459,7 @@ namespace UI.Controls.Protocol
       ShowMessageModel showMessage = new ShowMessageModel()
       {
         Header = $"Завершено.",
-        HeaderColor = goodText.Item2,
+        HeaderColor = SuccessMessage.TitleColor,
         CanBeDeleted = false,
       };
       await ProtocolSelfCheck.ShowMessageAsync(showMessage);
@@ -449,34 +478,40 @@ namespace UI.Controls.Protocol
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
     private async Task ExecuteTaskAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled)
     {
-      using (CancellationTokenSource = new CancellationTokenSource())
+      // Освобождаем старый токен, если был
+      CancellationTokenSource?.Dispose();
+
+      // Создаём новый токен
+      CancellationTokenSource = new CancellationTokenSource();
+      PauseCompletionSource = new TaskCompletionSource<bool>();
+
+      if (startDelegate != null)
       {
-        PauseCompletionSource = new TaskCompletionSource<bool>();
-
-        if (startDelegate != null)
+        try
         {
-          try
-          {
-            _stopwatch.Restart();
+          _stopwatch.Restart();
 
-            ProcessTask = Task.Run(() => startDelegate(CancellationTokenSource.Token));
-            await SetIsLocked(true);
-            await ProcessTask;
-            if (isRepeatEnabled)
-            {
-              ProtocolSelfCheck.ShowAdditionalFunctionButtons();
-            }
-            else
-            {
-              await ProtocolSelfCheck.FinalizeAsync(stop);
-            }
-          }
-          catch (Exception ex)
+          // Запускаем задачу с новым токеном
+          ProcessTask = Task.Run(() => startDelegate(CancellationTokenSource.Token));
+          await SetIsLocked(true);
+          await ProcessTask;
+
+          // После выполнения задачи
+          if (isRepeatEnabled)
           {
-            LogError($"Ошибка при запуске \"{name}\": {ex.Message}");
-            await SetIsLocked(false);
-            _stopwatch.Stop();
+            ProtocolSelfCheck.ShowAdditionalFunctionButtons();
           }
+          else
+          {
+            await ProtocolSelfCheck.FinalizeAsync(stop);
+          }
+        }
+        catch (Exception ex)
+        {
+          LogException($"Ошибка при запуске \"{name}\"", ex);
+          await SetIsLocked(false);
+          _stopwatch.Stop();
+          await ProtocolSelfCheck.FinalizeAsync(stop);
         }
       }
     }
@@ -493,14 +528,13 @@ namespace UI.Controls.Protocol
       {
         try
         {
-          CancellationTokenSource.Cancel();
-          ProcessTask = null;
-
+          // Отмена токена
+          CancellationTokenSource?.Cancel();
           LogInformation($"Процесс \"{name}\" успешно завершен.");
         }
         catch (Exception ex)
         {
-          LogError($"Ошибка при завершении \"{name}\": {ex.Message}");
+          LogException($"Ошибка при завершении \"{name}\"", ex);
         }
       }
       else
@@ -510,8 +544,13 @@ namespace UI.Controls.Protocol
 
       if (stopDelegate != null)
       {
-        await stopDelegate(CancellationTokenSource.Token);
+        var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+        await stopDelegate(token);
       }
+
+      CancellationTokenSource?.Dispose();
+      CancellationTokenSource = null;
+      ProcessTask = null;
     }
 
     /// <summary>
@@ -544,7 +583,7 @@ namespace UI.Controls.Protocol
       {
         if (!await GetIsIdleModeEnabled())
         {
-          await CommunicationManager.ResetAllSystem();
+          await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
         }
 
         await SetIsLocked(false);
@@ -577,66 +616,20 @@ namespace UI.Controls.Protocol
     }
     #endregion
 
-    #region Оборудование.
-
-    /// <summary>
-    /// Пытается подключиться к устройствам.
-    /// </summary>
-    internal async Task<bool> AttemptDeviceConnection(List<DeviceModel> deviceModels, MessageDelegate messageDelegate)
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
-      var tasks = new List<Task<bool>>();
-
-      foreach (var task in deviceModels)
-      {
-        tasks.Add(DeviceChecker.CheckConnectDevice(task, messageDelegate));
-      }
-
-      try
-      {
-        bool[] results = await Task.WhenAll(tasks);
-        if (results.All(result => result))
-        {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Все устройства успешно подключены.", goodText.Item2));
-          LogInformation("Все устройства успешно подключены.");
-          return true;
-        }
-        else
-        {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Некоторые устройства не удалось подключить.", errorText.Item2));
-          LogError("Некоторые устройства не удалось подключить.");
-          return false;
-        }
-      }
-      catch (Exception ex)
-      {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Ошибка при подключении к устройствам: {ex.Message}", errorText.Item2));
-        LogError($"Ошибка при подключении к устройствам: {ex.Message}");
-        return false;
-      }
-    }
-
-    #endregion
-
     #region Настройки подключения к классу.
 
     /// <summary>
-    /// Метод, создающий экземпляр класса.
+    /// Создает экземпляр <see cref="ActionExecutor"/>.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="parentClass"></param>
-    /// <returns></returns>
+    /// <typeparam name="T">Тип родительского класса.</typeparam>
+    /// <param name="parentClass">Экземпляр родительского класса.</param>
+    /// <returns>Настроенный экземпляр <see cref="ActionExecutor"/>.</returns>
     public static async Task<ActionExecutor> CreateInstanceAsync<T>(T parentClass)
     {
       try
       {
         if (parentClass != null)
         {
-
           if (parentClass.GetType() == typeof(ProtocolUI))
           {
             return await DefaultSettings(parentClass as ProtocolUI);
@@ -653,10 +646,10 @@ namespace UI.Controls.Protocol
     }
 
     /// <summary>
-    /// Заполняет данные класса по умолчанию.
+    /// Устанавливает настройки <see cref="ActionExecutor"/> по умолчанию.
     /// </summary>
-    /// <param name="parentClass">Родительский класс ProtocolSelfCheck.</param>
-    /// <returns></returns>
+    /// <param name="parentClass">Экземпляр <see cref="ProtocolUI"/>.</param>
+    /// <returns>Настроенный экземпляр <see cref="ActionExecutor"/>.</returns>
     static private async Task<ActionExecutor> DefaultSettings(ProtocolUI parentClass)
     {
       var actionExecutor = new ActionExecutor();

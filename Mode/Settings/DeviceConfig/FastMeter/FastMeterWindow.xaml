@@ -1,0 +1,26 @@
+﻿<Window x:Class="Mode.Settings.DeviceConfig.FastMeter.FastMeterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Mode.Settings.DeviceConfig.FastMeter"
+        xmlns:Data ="clr-namespace:Mode.Settings.DeviceConfig.Base.BaseSettingsConfig"
+    
+    mc:Ignorable="d"
+    Title="DeviceBusCommutationWindow" 
+    
+    Height="600" 
+    Width="800"
+    MaxHeight="600"
+    MaxWidth="800"
+    WindowStyle="None" 
+    AllowsTransparency="True"
+    ShowInTaskbar="False"
+    Topmost="True" 
+    WindowStartupLocation="CenterScreen"
+    Background="Transparent">
+
+    <Data:DeviceSettingsControl x:Name="deviceSettingsWindow">
+
+    </Data:DeviceSettingsControl>
+</Window>

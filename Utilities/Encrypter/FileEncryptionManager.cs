@@ -95,6 +95,7 @@ namespace Utilities.Encrypter
               sw.Write(plainText);
             }
           }
+
           return Convert.ToBase64String(ms.ToArray());
         }
       }
