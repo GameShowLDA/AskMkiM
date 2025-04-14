@@ -7,6 +7,8 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using System.Windows.Media;
 using UI.Controls.TextEditor;
+using static Utilities.LoggerUtility;
+
 
 namespace UI.Components.FileComparerControls
 {
@@ -17,6 +19,7 @@ namespace UI.Components.FileComparerControls
   {
     public string FirstFilePath { get; set; }
     public string SecondFilePath { get; set; }
+    private List<Dictionary<int, string>> _fileComparer;
     public FileCompareControl(string firstFilePath, string secondFilePath)
     {
       InitializeComponent();
@@ -27,8 +30,6 @@ namespace UI.Components.FileComparerControls
 
     private void LoadFiles()
     {
-      // TODO: Заменить на сравнение в дальнейшем
-
       var firstFileText = File.ReadAllText(this.FirstFilePath);
       var secondFileText = File.ReadAllText(this.SecondFilePath);
       if (HorizontalPanel.Visibility == Visibility.Visible)
@@ -45,22 +46,36 @@ namespace UI.Components.FileComparerControls
         FirstVerticalFileName.Text = Path.GetFileName(this.FirstFilePath);
         SecondVerticalFileName.Text = Path.GetFileName(this.SecondFilePath);
       }
-      var fileComparer = FileCompare.CompareFileContents(this.FirstFilePath, this.SecondFilePath);
-      HighlightDifferences(fileComparer[0], fileComparer[1]);
 
+      this._fileComparer = FileCompare.CompareFileContents(this.FirstFilePath, this.SecondFilePath);
+
+      if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
+      {
+        MessageBox.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
+        LogInformation($"Отличия в файлах {this.FirstFilePath} и {this.SecondFilePath} не найдены");
+        return;
+      }
+      else
+      {
+        HighlightDifferences(this._fileComparer[0], this._fileComparer[1]);
+      }
     }
 
     private void HighlightDifferences(Dictionary<int, string> leftDiffs, Dictionary<int, string> rightDiffs)
     {
-      var leftEditor = HorizontalPanel.Visibility == Visibility.Visible ? TopBox : LeftBox;
-      var rightEditor = HorizontalPanel.Visibility == Visibility.Visible ? BottomBox : RightBox;
-
-      // Очистим предыдущие маркеры
-      leftEditor.MarkerService.ClearAllMarkers();
-      rightEditor.MarkerService.ClearAllMarkers();
+      TextEditorUI leftEditor, rightEditor;
+      PrepareTexyEditor(out leftEditor, out rightEditor);
 
       HighlightLines(leftEditor, leftDiffs.Keys, Colors.DarkRed);
       HighlightLines(rightEditor, rightDiffs.Keys, Colors.DarkRed);
+    }
+
+    private void PrepareTexyEditor(out TextEditorUI leftEditor, out TextEditorUI rightEditor)
+    {
+      leftEditor = HorizontalPanel.Visibility == Visibility.Visible ? TopBox : LeftBox;
+      rightEditor = HorizontalPanel.Visibility == Visibility.Visible ? BottomBox : RightBox;
+      leftEditor.MarkerService.ClearAllMarkers();
+      rightEditor.MarkerService.ClearAllMarkers();
     }
 
     private void HighlightLines(TextEditorUI editor, IEnumerable<int> lineNumbers, Color color)
@@ -88,13 +103,15 @@ namespace UI.Components.FileComparerControls
 
       if (HorizontalPanel.Visibility == Visibility.Visible)
       {
-        (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text) = 
+        (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text) =
           (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text);
+        HighlightDifferences(this._fileComparer[0], this._fileComparer[1]);
       }
       else
       {
-        (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text) = 
+        (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text) =
           (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text);
+        HighlightDifferences(this._fileComparer[0], this._fileComparer[1]);
       }
     }
 
@@ -104,15 +121,24 @@ namespace UI.Components.FileComparerControls
       if (!string.IsNullOrEmpty(newFilePath) && File.Exists(newFilePath))
       {
         bool changeFirstFile = sender == ChangeFirstFile;
-        if (changeFirstFile)
+        if (!string.Equals(this.FirstFilePath, newFilePath) && !string.Equals(this.SecondFilePath, newFilePath))
         {
-          this.FirstFilePath = newFilePath;
+
+          if (changeFirstFile)
+          {
+            this.FirstFilePath = newFilePath;
+          }
+          else
+          {
+            this.SecondFilePath = newFilePath;
+          }
+          LoadFiles();
         }
         else
         {
-          this.SecondFilePath = newFilePath;
+          MessageBox.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+          LogWarning("Попытка сравнить один и тот же файл");
         }
-        LoadFiles();
       }
     }
 
@@ -132,6 +158,29 @@ namespace UI.Components.FileComparerControls
         return filePath;
       }
       return string.Empty;
+    }
+
+    private void CompareFiles_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      TextEditorUI firstEditor, secondEditor;
+      PrepareTexyEditor(out firstEditor, out secondEditor);
+      var firstText = firstEditor.Document.Text;
+      var secondText = secondEditor.Document.Text;
+      var firstLines = firstText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+      var secondLines = secondText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+      this._fileComparer.Clear();
+      this._fileComparer = FileCompare.CompareLineArrays(firstLines, secondLines);
+
+      if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
+      {
+        MessageBox.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
+        LogInformation($"Отличия в открытых файлах не найдены");
+        return;
+      }
+      else
+      {
+        HighlightDifferences(this._fileComparer[0], this._fileComparer[1]);
+      }
     }
   }
 }

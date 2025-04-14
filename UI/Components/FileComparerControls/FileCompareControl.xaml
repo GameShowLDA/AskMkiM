@@ -107,7 +107,7 @@
                         Margin="10,5"
                         FontWeight="SemiBold"
                         FontSize="14"
-                        Foreground="{StaticResource LightPrimarySolidColorBrush}"/>
+                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"/>
 
                 </Grid>
             </Border>
@@ -124,7 +124,7 @@
                         Margin="10,5"
                         FontWeight="SemiBold"
                         FontSize="14"
-                        Foreground="{StaticResource LightPrimarySolidColorBrush}"/>
+                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"/>
 
                 </Grid>
             </Border>
@@ -146,7 +146,7 @@
             <Button x:Name="ChangeSecondFile" Grid.Row="1"  Content="Заменить второй файл" PreviewMouseDown="ChangeFile_PreviewMouseDown"
                             Style="{StaticResource CompareButtonStyle}" />
 
-            <Button Name="CompareFiles" Grid.Row="2"  Content="Сравнить" 
+            <Button Name="CompareFiles" Grid.Row="2"  Content="Сравнить" PreviewMouseDown="CompareFiles_PreviewMouseDown"
                             Style="{StaticResource CompareButtonStyle}" />
 
             <Button x:Name="UpDown" Grid.Row="3" Content="Сверху/снизу" 
