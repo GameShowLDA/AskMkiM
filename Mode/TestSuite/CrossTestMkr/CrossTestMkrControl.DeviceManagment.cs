@@ -9,48 +9,48 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> BusConnectAsync(string bus, string module, CancellationToken cancellationToken = default, bool voltage = true)
     {
       //LogInformation($"Шина {bus} подключена в {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Шина {bus} подключена в {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Шина {bus} замкнута в БК{module}"));
       return true;
     }
     private async Task<bool> BusDisconnectAsync(string bus, string module, bool voltage = true, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Шина {bus} отключена в {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Шина {bus} отключена в {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Шина {bus} разомкнута в БК{module}"));
       return true;
     }
     private async Task<bool> InitializeModule(string module, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Модуль {module} инициализирован");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Модуль типа \"МКР350\" инициализирован - {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Модуль типа \"БК\" инициализирован - {module}"));
       return true;
     }
     private async Task ResetModule(string module, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Сброс модуля {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Модуль типа \"МКР350\" сброшен - {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Модуль типа \"БК\" сброшен - {module}"));
     }
     private async Task<bool> PointConnectAsync(string module ,string bus, string point, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Реле {point} подключена к шине {bus} в модуле {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} подключена к шине {bus} в модуле {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} подключена к шине {bus} в модуле БК{module}"));
       return true;
     }
     private async Task<bool> PointDisconnectAsync(string module, string bus, string point, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Реле {point} отключена от шины {bus} в модуле {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} отключена от шины {bus} в модуле {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} отключена от шины {bus} в модуле БК{module}"));
       return true;
     }
     private async Task<bool> MeterEnableAsync(string module, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Вкл. измеритель в модуле {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Включен измеритель в модуле {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Включен измеритель в модуле БК{module}"));
       return true;
     }
     private async Task<bool> MeterDisableAsync(string module, CancellationToken cancellationToken = default)
     {
       //LogInformation($"Выкл. измеритель в модуле {module}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Выключен измеритель в модуле {module}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Выключен измеритель в модуле БК{module}"));
       return true;
     }
     private async Task<bool> GetMeterAnswer(string module, CancellationToken cancellationToken = default)
@@ -71,7 +71,12 @@ namespace Mode.TestSuite.CrossTestMkr
     ///    - Точка в МКР2 отключается от шины B1.
     ///    - Проверяется отсутствие замыкания между шинами A1 и B1. Если замыкание обнаружено – выдаётся сообщение и тест прерывается.
     /// </summary>
-    private async Task<bool> RunPart1(string tested_module, string verificat_module, List<int> rangePoints, CancellationToken cancellationToken, bool needRestartModuleAfter = true)
+    private async Task<bool> RunPart1(
+      string tested_module, 
+      string verificat_module, 
+      List<int> rangePoints,
+      CancellationToken cancellationToken, 
+      bool needRestartModuleAfter = true)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nЧАСТЬ 1\n"));
       return await RunPointTest(tested_module, verificat_module, rangePoints, "A1", "B1", cancellationToken, needRestartModuleAfter);
@@ -86,7 +91,12 @@ namespace Mode.TestSuite.CrossTestMkr
     ///    - Точка в МКР2 отключается от шины A1.
     ///    - Проверяется отсутствие замыкания между шинами A1 и B1. При обнаружении замыкания – сообщение и останов теста.
     /// </summary>
-    private async Task<bool> RunPart2(string tested_module, string verificat_module, List<int> rangePoints, CancellationToken cancellationToken, bool needRestartModuleAfter = true)
+    private async Task<bool> RunPart2(
+      string tested_module, 
+      string verificat_module, 
+      List<int> rangePoints, 
+      CancellationToken cancellationToken, 
+      bool needRestartModuleAfter = true)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nЧАСТЬ 2\n"));
       return await RunPointTest(tested_module, verificat_module, rangePoints, "B1", "A1", cancellationToken, needRestartModuleAfter);
@@ -105,7 +115,12 @@ namespace Mode.TestSuite.CrossTestMkr
     ///      При наличии замыкания – сообщение "замыкание при отключении МКР1 от шины B{i}" и тест останавливается.
     /// 15. Аналогичные проверки выполняются для всех пар шин.
     /// </summary>
-    private async Task<bool> RunPart3(string tested_module, string verificat_module, List<int> rangePoints, CancellationToken cancellationToken, bool needRestartModuleAfter = true)
+    private async Task<bool> RunPart3(
+      string tested_module, 
+      string verificat_module, 
+      List<int> rangePoints, 
+      CancellationToken cancellationToken, 
+      bool needRestartModuleAfter = true)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nЧАСТЬ 3\n"));
       // Подключаем МКР2 ко всем 8 шинам
@@ -114,6 +129,14 @@ namespace Mode.TestSuite.CrossTestMkr
         cancellationToken.ThrowIfCancellationRequested();
         await BusConnectAsync($"A{i}", verificat_module);
         await BusConnectAsync($"B{i}", verificat_module);
+      }
+
+      // Подключаем точку 1 в МКР1 ко всем 8 шинам
+      for (int i = 1; i <= 4; i++)
+      {
+        cancellationToken.ThrowIfCancellationRequested();
+        await PointConnectAsync(tested_module, $"A{i}", "1");
+        await PointConnectAsync(tested_module, $"B{i}", "1");
       }
 
       // Для каждой пары шин (A{i}, B{i})
@@ -127,11 +150,11 @@ namespace Mode.TestSuite.CrossTestMkr
         // Проверяем наличие замыкания между шинами A{i} и B{i}
         if (!await GetMeterAnswer(verificat_module))
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]", errorText.Item2, $"обрыв МКР1 от шин A{i}, B{i}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ОБРЫВ ШИНЫ]", errorText.Item2, $"обрыв БК{tested_module} от шин A{i}, B{i}"));
         }
         else
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание шин A{i}, B{i} на МКР1"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание шин A{i}, B{i}"));
         }
 
           cancellationToken.ThrowIfCancellationRequested();
@@ -139,11 +162,11 @@ namespace Mode.TestSuite.CrossTestMkr
         await BusDisconnectAsync($"A{i}", verificat_module);
         if (await GetMeterAnswer(verificat_module))
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]", errorText.Item2, $"замыкание при отключении МКР1 от шины A{i}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", errorText.Item2, $"замыкание при отключении БК{tested_module} от шины A{i}"));
         }
         else
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание МКР1 на шине A{i} отсутствует"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание на шине A{i} отсутствует"));
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -152,11 +175,11 @@ namespace Mode.TestSuite.CrossTestMkr
         await BusDisconnectAsync($"B{i}", verificat_module);
         if (await GetMeterAnswer(verificat_module))
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]", errorText.Item2, $"замыкание при отключении МКР1 от шины B{i}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", errorText.Item2, $"замыкание при отключении БК{tested_module} от шины B{i}"));
         }
         else 
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание МКР1 на шине B{i} отсутствует"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание на шине B{i} отсутствует"));
         }
 
           cancellationToken.ThrowIfCancellationRequested();
@@ -221,6 +244,7 @@ namespace Mode.TestSuite.CrossTestMkr
       // Проверка на отмену перед началом выполнения
       cancellationToken.ThrowIfCancellationRequested();
 
+      // 1. Подключаем модули к заданным шинам
       await BusConnectAsync(bus1, tested_module, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
       await BusConnectAsync(bus2, tested_module, cancellationToken);
@@ -230,37 +254,47 @@ namespace Mode.TestSuite.CrossTestMkr
       await BusConnectAsync(bus2, verificat_module, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
 
+      // Подключаем все точки в МКР2 к выбранной шине
       foreach (int point in rangePoints)
       {
         cancellationToken.ThrowIfCancellationRequested();
         await PointConnectAsync(verificat_module, bus2, point.ToString(), cancellationToken);
       }
 
+      // Обработка точек
       foreach (int point in rangePoints)
       {
+        // Подключаем точку МКР1 к своей шине
         cancellationToken.ThrowIfCancellationRequested();
         await PointConnectAsync(tested_module, bus1, point.ToString(), cancellationToken);
 
+        // Проверяем наличие замыкания между шинами
         if (!await GetMeterAnswer(verificat_module, cancellationToken))
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]", errorText.Item2, $"обрыв точки {point} от шины {tested_module}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НЕТ ПОДКЛЮЧЕНИЯ]", errorText.Item2, $"обрыв точки {point} от шины {bus1} в БК{tested_module}"));
         }
         else
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"точка {point} замкнута на шине {tested_module}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"точка {point} замкнута"));
         }
 
+        // Отключаем соответствующую точку МКР2 от своей шины
         cancellationToken.ThrowIfCancellationRequested();
         await PointDisconnectAsync(verificat_module, bus2, point.ToString(), cancellationToken);
 
+        // Проверяем отсутствие замыкания между шинами
         if (await GetMeterAnswer(verificat_module, cancellationToken))
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]", errorText.Item2, $"замыкание при отключении точки {point} от шины {tested_module}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[ЛИШНЕЕ ПОДКЛЮЧЕНИЕ]", errorText.Item2, $"замыкание при отключении точки {point} от шины {bus2} в БК{verificat_module}"));
         }
         else 
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание точки {point} отсутствует на шине {tested_module}"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание точки {point} отсутствует"));
         }
+
+        // Отключаем соответствующую точку МКР1 от своей шины
+        cancellationToken.ThrowIfCancellationRequested();
+        await PointDisconnectAsync(tested_module, bus1, point.ToString(), cancellationToken);
       }
 
       if (needRestartModuleAfter)
