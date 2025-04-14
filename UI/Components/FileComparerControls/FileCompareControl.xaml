@@ -5,21 +5,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components.FileComparerControls"
              xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
+             xmlns:CustomControls="clr-namespace:UI.Components"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="Transparent">
 
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" Name="PanelManagment"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
         <StackPanel x:Name="TopPanel" 
             Grid.Row="0" 
-            Grid.ColumnSpan="5"
+            Grid.ColumnSpan="2"
             Background="{StaticResource SecondarySolidColorBrush}"  
             Orientation="Horizontal" 
             />
@@ -36,7 +37,7 @@
             <!-- Верхняя часть: название + редактор -->
             <Grid Grid.Row="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="40"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -44,12 +45,15 @@
                 BorderThickness="0,0,0,1"
                 Background="{StaticResource IsCheckedColorSolidColorBrush}">
                     <TextBlock 
-                x:Name="FirstFileName"
-                Text="test1.txt"
-                Margin="10,5"
-                FontWeight="SemiBold"
-                FontSize="14"
-                Foreground="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                         x:Name="FirstFileName"
+                         Text="test1.txt"
+                         Margin="10,5"
+                         FontWeight="SemiBold"
+                         FontSize="14"
+                         Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Stretch" 
+                         TextWrapping="Wrap"/>
                 </Border>
 
                 <Controls:TextEditorUI Grid.Row="1" x:Name="TopBox"/>
@@ -65,7 +69,7 @@
             <!-- Нижняя часть: название + редактор -->
             <Grid Grid.Row="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="40"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -73,12 +77,15 @@
                 BorderThickness="0,0,0,1"
                 Background="{StaticResource IsCheckedColorSolidColorBrush}">
                     <TextBlock 
-                x:Name="SecondFileName"
-                Text="test2.txt"
-                Margin="10,5"
-                FontWeight="SemiBold"
-                FontSize="14"
-                Foreground="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                        x:Name="SecondFileName"
+                        Text="test2.txt"
+                        Margin="10,5"
+                        FontWeight="SemiBold"
+                        FontSize="14"
+                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Stretch" 
+                        TextWrapping="Wrap"/>
                 </Border>
 
                 <Controls:TextEditorUI Grid.Row="1" x:Name="BottomBox"/>
@@ -94,44 +101,69 @@
                 <ColumnDefinition Width="*" MinWidth="20" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" MinHeight="10"/>
+                <RowDefinition Height="40" MinHeight="10"/>
                 <RowDefinition Height="*" MinHeight="10"/>
             </Grid.RowDefinitions>
             <Border Grid.Row="0" Grid.Column="0"
                     BorderThickness="0,0,0,1"
-                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="30">
-                <Grid>
+                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
                     <TextBlock 
                         x:Name="FirstVerticalFileName"
                         Text="Сравнение файлов"
                         Margin="10,5"
                         FontWeight="SemiBold"
                         FontSize="14"
-                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"/>
-
-                </Grid>
+                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Stretch" 
+                        TextWrapping="Wrap"/>
             </Border>
             <Controls:TextEditorUI Grid.Column="0" Grid.Row="1" x:Name="LeftBox"/>
             <GridSplitter Grid.Column="1" Width="5" Grid.RowSpan="2" Background="{StaticResource RedColorSolidColorBrush}" 
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
             <Border Grid.Row="0" Grid.Column="2"
                     BorderThickness="0,0,0,1"
-                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="30">
-                <Grid>
+                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
                     <TextBlock 
                         x:Name="SecondVerticalFileName"
                         Text="Сравнение файлов"
                         Margin="10,5"
                         FontWeight="SemiBold"
                         FontSize="14"
-                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                        Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Stretch" 
+                        TextWrapping="Wrap"/>
 
-                </Grid>
             </Border>
             <Controls:TextEditorUI Grid.Column="2"  Grid.Row="1" x:Name="RightBox"/>
         </Grid>
 
-        <Grid x:Name="ButtonsGrid" Grid.Row="1" Grid.Column="0" Background="{StaticResource SecondarySolidColorBrush}">
+        <Grid Grid.Row="1" Grid.Column="0" Background="{StaticResource CategoryPanelBackgroundColor}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid >
+            
+            <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+            <CustomControls:MenuButton x:Name="MenuButton" 
+                               Margin="3" 
+                               Grid.Column="1" 
+                               PreviewMouseDown="MenuButton_PreviewMouseDownAsync" 
+                               Style="{StaticResource MenuButtonActive}"/>
+
+            <Border Background="{StaticResource CategoryPanelBackgroundColor}" PreviewMouseDown="MenuButton_PreviewMouseDownAsync" Grid.Column="2">
+                <TextBlock Style="{StaticResource MetrologyTextBlockStyle}" Foreground="{StaticResource ActiveBorderSolidColorBrush}" Margin="10,0" HorizontalAlignment="Center" VerticalAlignment="Center">Меню</TextBlock>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="ButtonsGrid" Grid.Row="2" Grid.Column="0" Background="{StaticResource SecondarySolidColorBrush}">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
@@ -154,6 +186,7 @@
 
             <Button x:Name="LeftRight" Grid.Row="3"  Content="Слева/справа"                
                     Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" />
+        </Grid>
         </Grid>
     </Grid>
 </UserControl>
