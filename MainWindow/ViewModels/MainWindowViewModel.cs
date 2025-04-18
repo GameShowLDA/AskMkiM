@@ -1,4 +1,5 @@
-﻿using MainWindowProgram.Services;
+﻿using DataBaseConfiguration.Services.Device;
+using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
 {
@@ -12,6 +13,11 @@ namespace MainWindowProgram.ViewModels
     /// ViewModel для раздела метрологии.
     /// </summary>
     public MetrologyViewModel Metrology { get; }
+
+    /// <summary>
+    /// ViewModel для раздела сервиса.
+    /// </summary>
+    public ServiceViewModel Service { get; }
 
     /// <summary>
     /// ViewModel для работы с тестами.
@@ -42,6 +48,7 @@ namespace MainWindowProgram.ViewModels
     /// Инициализирует новый экземпляр класса <see cref="MainWindowViewModel"/>, создавая все дочерние ViewModel.
     /// </summary>
     /// <param name="metrologyService">Сервис для метрологических режимов.</param>
+    /// <param name="serviceMode">Сервис для сервисного режима.</param>
     /// <param name="fileService">Сервис для работы с файлами.</param>
     /// <param name="testService">Сервис для проведения тестов.</param>
     /// <param name="settingsService">Сервис для конфигурации и настроек.</param>
@@ -49,6 +56,7 @@ namespace MainWindowProgram.ViewModels
     /// <param name="window">Сервис для управления главным окном.</param>
     public MainWindowViewModel(
       MetrologyService metrologyService,
+      ServiceMode serviceMode,
       FileService fileService,
       TestService testService,
       SettingsService settingsService,
@@ -56,6 +64,7 @@ namespace MainWindowProgram.ViewModels
       WindowService window)
     {
       Metrology = new MetrologyViewModel(metrologyService);
+      Service = new ServiceViewModel(serviceMode);
       Test = new TestViewModel(testService);
       File = new FileViewModel(fileService);
       Settings = new SettingsViewModel(settingsService);

@@ -1,6 +1,4 @@
-﻿using Core.Communication;
-using Mode.Base.SearchDevices;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -13,8 +11,8 @@ namespace Mode.TestSuite.CrossTestMkr
 {
   public partial class CrossTestMkrControl : UserControl
   {
-    private readonly Tuple<string, Color> goodText = SuccessMessage;
-    private readonly Tuple<string, Color> errorText = ErrorMessage;
+    private readonly (string Title, Color TitleColor) goodText = SuccessMessage;
+    private readonly (string Title, Color TitleColor) errorText = ErrorMessage;
 
     private InvokeBorder testedNumberBorder = new InvokeBorder();
     private InvokeTextBox testedNumberData = new InvokeTextBox();
@@ -46,7 +44,7 @@ namespace Mode.TestSuite.CrossTestMkr
         ProtocolSelfCheckControl.Header = "Перекрёстный тест";
 
         // 2. Очищаем предыдущий контент
-        await ProtocolSelfCheckControl.ClearContent();
+        //await ProtocolSelfCheckControl.ClearContent();
                  
         // 3. Создаём StackPanel (можно использовать InputControlSettings при желании)
         //    Или вручную:
@@ -57,7 +55,7 @@ namespace Mode.TestSuite.CrossTestMkr
         AddInputFields(contentStack);
 
         // 5. Добавляем StackPanel в ProtocolUI
-        ProtocolSelfCheckControl.AddContent(contentStack);
+        //ProtocolSelfCheckControl.AddContent(contentStack);
 
         LogInformation("Настройка CrossTestMKRControl завершена");
       }
@@ -83,7 +81,7 @@ namespace Mode.TestSuite.CrossTestMkr
 
       testedNumberData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
       testedNumberData.Text = "Номер проверяемого X.X";
-      InputControlSettings.DefaultGotAndLostEvent(testedNumberData, "Номер проверяемого X.X");
+      //InputControlSettings.DefaultGotAndLostEvent(testedNumberData, "Номер проверяемого X.X");
       testedNumberData.PreviewTextInput += DevicesNumberData_PreviewTextInput;
 
       Grid.SetColumn(testedNumberData, 0);
@@ -103,7 +101,7 @@ namespace Mode.TestSuite.CrossTestMkr
 
       verificatNumberData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
       verificatNumberData.Text = "Номер проверяющего X.X";
-      InputControlSettings.DefaultGotAndLostEvent(verificatNumberData, "Номер проверяющего X.X");
+      //InputControlSettings.DefaultGotAndLostEvent(verificatNumberData, "Номер проверяющего X.X");
       verificatNumberData.PreviewTextInput += DevicesNumberData_PreviewTextInput;
 
       Grid.SetColumn(verificatNumberData, 0);
@@ -123,7 +121,7 @@ namespace Mode.TestSuite.CrossTestMkr
 
       rangeData.Style = (Style)Application.Current.Resources["MetrologyTextBox"];
       rangeData.Text = "Диапазон проверки 1, 2-25";
-      InputControlSettings.DefaultGotAndLostEvent(rangeData, "Диапазон проверки 1, 2-25");
+      //InputControlSettings.DefaultGotAndLostEvent(rangeData, "Диапазон проверки 1, 2-25");
       rangeData.PreviewTextInput += RangeData_PreviewTextInput;
 
       Grid.SetColumn(rangeData, 0);
@@ -182,7 +180,7 @@ namespace Mode.TestSuite.CrossTestMkr
         )
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel("Поле 'Номер проверяемого' не заполнено корректно!", errorText.Item2));
+            new ShowMessageModel("Поле 'Номер проверяемого' не заполнено корректно!", ErrorMessage.TitleColor));
         return false;
       }
 
@@ -195,7 +193,7 @@ namespace Mode.TestSuite.CrossTestMkr
         )
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel("Поле 'Номер проверяющего' не заполнено корректно!", errorText.Item2));
+            new ShowMessageModel("Поле 'Номер проверяющего' не заполнено корректно!", ErrorMessage.TitleColor));
         return false;
       }
 
@@ -203,7 +201,7 @@ namespace Mode.TestSuite.CrossTestMkr
       if (rangeData.Text.Trim() == defaultRange)
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel("Поле 'Диапазон проверки' не заполнено корректно!", errorText.Item2));
+            new ShowMessageModel("Поле 'Диапазон проверки' не заполнено корректно!", ErrorMessage.TitleColor));
         return false;
       }
 
@@ -211,7 +209,7 @@ namespace Mode.TestSuite.CrossTestMkr
       if (!ValidateRangeInput(rangeData.Text.Trim(), out string rangeError))
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"Поле 'Диапазон проверки' не заполнено корректно: {rangeError}", errorText.Item2));
+            new ShowMessageModel($"Поле 'Диапазон проверки' не заполнено корректно: {rangeError}", ErrorMessage.TitleColor));
         return false;
       }
 
@@ -219,7 +217,7 @@ namespace Mode.TestSuite.CrossTestMkr
       if (testedNumberData.Text.Trim() == verificatNumberData.Text.Trim())
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel("Значения полей 'Номер проверяемого' и 'Номер проверяющего' не должны совпадать!", errorText.Item2));
+            new ShowMessageModel("Значения полей 'Номер проверяемого' и 'Номер проверяющего' не должны совпадать!", ErrorMessage.TitleColor));
         return false;
       }
 
@@ -342,7 +340,7 @@ namespace Mode.TestSuite.CrossTestMkr
       await ResetModule(testedNumberData.Text);
       await ResetModule(verificatNumberData.Text);
 
-      await CommunicationManager.ResetAllSystem();
+      //await CommunicationManager.ResetAllSystem();
     }
 
   }

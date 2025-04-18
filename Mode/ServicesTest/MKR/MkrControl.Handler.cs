@@ -192,7 +192,7 @@ namespace Mode.ServicesTest.MKR
     {
       if (protocolTextBox != null)
       {
-        protocolTextBox.ShowMessageAsync($"{text}\n");
+        protocolTextBox.ShowMessageAsync(new Utilities.Models.ShowMessageModel(text));
         protocolTextBox.ScrollToEnd();
       }
       return Task.CompletedTask;

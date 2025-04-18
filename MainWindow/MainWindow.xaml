@@ -197,6 +197,10 @@
 
                 </MenuItem>
 
+                <MenuItem Header="Сервис" Name="Services">
+                    <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
+                </MenuItem>
+
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
 
                     <MenuItem 
