@@ -36,52 +36,39 @@ namespace UI.Components.FileComparerControls
     /// </returns>
     public static List<Dictionary<int, string>> CompareLineArrays(string[] lines1, string[] lines2)
     {
-      int maxLines = Math.Max(lines1.Length, lines2.Length);
-      int diffCountFirst = 0;
-      int diffCountSecond = 0;
-
       var differencesFirst = new Dictionary<int, string>();
       var differencesSecond = new Dictionary<int, string>();
 
-      for (int i = 0; i < maxLines; i++)
+      int i = 0, j = 0;
+
+      while (i < lines1.Length || j < lines2.Length)
       {
-        int index1 = Math.Min(i + diffCountFirst, lines1.Length - 1);
-        int index2 = Math.Min(i + diffCountSecond, lines2.Length - 1);
+        // Пропускаем пустые строки (или состоящие только из пробелов)
+        while (i < lines1.Length && string.IsNullOrWhiteSpace(lines1[i]))
+          i++;
+        while (j < lines2.Length && string.IsNullOrWhiteSpace(lines2[j]))
+          j++;
 
-        string line1 = i < lines1.Length ? lines1[index1] : string.Empty;
-        string line2 = i < lines2.Length ? lines2[index2] : string.Empty;
+        if (i >= lines1.Length && j >= lines2.Length)
+          break;
 
-        if (line1 == line2)
-          continue;
+        string line1 = i < lines1.Length ? lines1[i].Trim() : string.Empty;
+        string line2 = j < lines2.Length ? lines2[j].Trim() : string.Empty;
 
-        if (string.IsNullOrEmpty(line1) && i + 1 < lines1.Length)
+        if (line1 != line2)
         {
-          string nextLine1 = lines1[index1 + 1];
-          if (nextLine1 == line2)
-          {
-            diffCountFirst++;
-            continue;
-          }
+          if (i < lines1.Length)
+            differencesFirst[i] = lines1[i];
+          if (j < lines2.Length)
+            differencesSecond[j] = lines2[j];
         }
 
-        if (string.IsNullOrEmpty(line2) && i + 1 < lines2.Length)
-        {
-          string nextLine2 = lines2[index2 + 1];
-          if (nextLine2 == line1)
-          {
-            diffCountSecond++;
-            continue;
-          }
-        }
-
-        if (i < lines1.Length && !differencesFirst.ContainsKey(index1))
-          differencesFirst.Add(index1, lines1[index1]);
-
-        if (i < lines2.Length && !differencesSecond.ContainsKey(index2))
-          differencesSecond.Add(index2, lines2[index2]);
+        i++;
+        j++;
       }
 
       return new List<Dictionary<int, string>> { differencesFirst, differencesSecond };
     }
+
   }
 }
