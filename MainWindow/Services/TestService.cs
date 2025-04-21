@@ -1,9 +1,10 @@
-﻿using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using MainWindowProgram.Infrastructure;
+using Mode.TestSuite.CrossTestMkr;
 using Mode.TestSuite.Metrology.MethodExecutor.CI;
 using Mode.TestSuite.Metrology.MethodExecutor.PI;
 using Mode.TestSuite.Metrology.NodeMethod.CI;
 using Mode.TestSuite.Metrology.NodeMethod.PI;
+using System.Windows.Input;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -62,5 +63,11 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task AddPiDCWMethodExecutorControlAsync() =>
       await _multiWindow.AddControlAsync("Групповой метод ПИ(DCW)", new PiDCWMethodExecutorControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для перекрёстного теста МКР в multiEditors.
+    /// </summary>
+    public async Task AddCrossTestMkrExecutorControlAsync() =>
+      await _multiWindow.AddControlAsync("Перекрёстный тест МКР", new CrossTestMkrControl(), TypeWindow.DeviceControl);
   }
 }
