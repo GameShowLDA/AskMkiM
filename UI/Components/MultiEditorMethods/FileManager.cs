@@ -52,18 +52,50 @@ namespace UI.Components.MultiEditorMethods
 
         var textEditor = CreateTextEditor(fileContent);
 
-        AddFileToControlManager(nameFile, textEditor);
-
         if (!FilePaths.ContainsKey(nameFile))
         {
           FilePaths.Add(nameFile, path);
         }
+        else
+        {
+          var fileWithSameNamePath = FilePaths.FirstOrDefault(file => file.Key == nameFile);
+          if (fileWithSameNamePath.Value != path)
+          {
+            nameFile = GetDifferenceBetweenPaths(fileWithSameNamePath.Value, path);
+            FilePaths.Add(nameFile, path);
+          }
+        }
+        
+        AddFileToControlManager(nameFile, textEditor);
       }
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
+    }
+
+    public string GetDifferenceBetweenPaths(string path1, string path2)
+    {
+      // Ищем точку различия
+      var path1Parts = path1.Split(Path.DirectorySeparatorChar);
+      var path2Parts = path2.Split(Path.DirectorySeparatorChar);
+
+      int minLength = Math.Min(path1Parts.Length, path2Parts.Length);
+      int diffIndex = 0;
+
+      // Ищем точку, где пути начинают различаться
+      for (int i = 0; i < minLength; i++)
+      {
+        if (path1Parts[i] != path2Parts[i])
+        {
+          diffIndex = i;
+          break;
+        }
+      }
+
+      // Возвращаем оставшуюся часть пути после различия
+      return string.Join(Path.DirectorySeparatorChar.ToString(), path1Parts.Skip(diffIndex));
     }
 
     /// <summary>
