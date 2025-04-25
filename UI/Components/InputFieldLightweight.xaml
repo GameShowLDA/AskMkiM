@@ -85,6 +85,7 @@
                 <local:TextBoxPlaceholder x:Name="TestRangeBox"
                                          Grid.Row="1"
                                          Placeholder="Введите диапазон..."
+                                         IsNumberInputEnabled="False"
                                          Margin="0"/>
             </Grid>
         </Border>

@@ -1,19 +1,22 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using UI.Controls.Protocol;
-using Utilities.Events;
 
 namespace UI.Components
 {
   /// <summary>
-  /// Логика взаимодействия для InputFieldLightweight.xaml
+  /// Компонент для лёгкого ввода тестовых данных:
+  /// содержит поля для ввода проверяемого номера, проверяющего и диапазона проверки,
+  /// а также логику валидации и подсветки ошибок.
   /// </summary>
   public partial class InputFieldLightweight : UserControl
   {
     #region Свойства доступа к данным
 
     /// <summary>
-    /// Номер проверяемого устройства
+    /// Получает или задаёт номер проверяемого устройства в формате "a.b".
     /// </summary>
     public string TestedNumber
     {
@@ -22,7 +25,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Номер проверяющего устройства
+    /// Получает или задаёт номер проверяющего устройства в формате "a.b".
     /// </summary>
     public string TesterNumber
     {
@@ -31,7 +34,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Диапазон проверки
+    /// Получает или задаёт диапазон проверки в формате "x-y".
     /// </summary>
     public string TestRange
     {
@@ -41,17 +44,117 @@ namespace UI.Components
 
     #endregion
 
+    #region Конструктор и инициализация
+
     /// <summary>
-    /// Инициализирует новый экземпляр класса
+    /// Инициализирует новый экземпляр <see cref="InputFieldLightweight"/>.
+    /// Выполняет инициализацию компонентов и подписку на события.
     /// </summary>
     public InputFieldLightweight()
     {
       InitializeComponent();
       SubscribeToEvents();
+
+      // Подписываемся на события ввода текста и вставки для внутреннего TextBox диапазона
+      TestRangeBox.Loaded += (_, _) =>
+      {
+        if (TestRangeBox.FindName("InputBox") is TextBox inner)
+        {
+          inner.PreviewTextInput += Range_PreviewTextInput;
+          DataObject.AddPastingHandler(inner, Range_Pasting);
+        }
+      };
+    }
+
+    #endregion
+
+    #region Обработка ввода диапазона
+
+    /// <summary>
+    /// Обработчик события PreviewTextInput для поля диапазона.
+    /// Ограничивает ввод символов: цифр, запятой, тире, пробела;
+    /// запрещает некорректные сочетания символов.
+    /// </summary>
+    /// <param name="sender">Источник события (TextBox).</param>
+    /// <param name="e">Данные события ввода текста.</param>
+    private void Range_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+      var textBox = (TextBox)sender;
+      char c = e.Text.FirstOrDefault();
+      int pos = textBox.CaretIndex;
+      string txt = textBox.Text;
+
+      // 1) Нельзя начинать с ',' или '-'
+      if (pos == 0 && (c == ',' || c == '-'))
+      {
+        e.Handled = true;
+        return;
+      }
+
+      // 2) Если вводим не цифру, запятую, тире или пробел — блокируем
+      if (!(char.IsDigit(c) || c == ',' || c == '-' || char.IsWhiteSpace(c)))
+      {
+        e.Handled = true;
+        return;
+      }
+
+      // 3) Проверяем предыдущий символ для запрета некорректных сочетаний
+      if (pos > 0)
+      {
+        char prev = txt[pos - 1];
+
+        // После тире нельзя вводить ',', '-' или пробел
+        if (prev == '-' && (c == ',' || c == '-' || char.IsWhiteSpace(c)))
+        {
+          e.Handled = true;
+          return;
+        }
+
+        // После запятой нельзя вводить ',' или '-'
+        if (prev == ',' && (c == ',' || c == '-'))
+        {
+          e.Handled = true;
+          return;
+        }
+
+        // После цифры нельзя вводить пробел
+        if (char.IsDigit(prev) && char.IsWhiteSpace(c))
+        {
+          e.Handled = true;
+          return;
+        }
+      }
+
+      // Ввод корректен
+      e.Handled = false;
     }
 
     /// <summary>
-    /// Подписка на необходимые события
+    /// Обработчик события вставки данных в поле диапазона.
+    /// Блокирует вставку текста, содержащего недопустимые символы.
+    /// </summary>
+    /// <param name="sender">Источник события (TextBox).</param>
+    /// <param name="e">Данные события вставки.</param>
+    private void Range_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+      if (e.DataObject.GetDataPresent(DataFormats.Text))
+      {
+        var text = (string)e.DataObject.GetData(DataFormats.Text)!;
+        if (text.Any(c => !char.IsDigit(c) && c != ',' && c != '-'))
+          e.CancelCommand();
+      }
+      else
+      {
+        e.CancelCommand();
+      }
+    }
+
+    #endregion
+
+    #region Событийные методы
+
+    /// <summary>
+    /// Подписывается на события запуска обработки данных.
     /// </summary>
     private void SubscribeToEvents()
     {
@@ -59,13 +162,15 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Обработчик запуска процесса обработки
+    /// Обработчик события начала или завершения процесса обработки.
+    /// Переключает видимость полей ввода и обновляет заголовки с текущими значениями.
     /// </summary>
+    /// <param name="isProcessing">Признак, что процесс обработки запущен.</param>
     private void ActionExecutor_StartProcessing(bool isProcessing)
     {
-      var testedBaseText = "Номер проверяемого";
-      var testerBaseText = "Номер проверяющего";
-      var rangeBaseText = "Диапазон проверки";
+      const string testedBaseText = "Номер проверяемого";
+      const string testerBaseText = "Номер проверяющего";
+      const string rangeBaseText = "Диапазон проверки";
 
       var visibility = isProcessing ? Visibility.Collapsed : Visibility.Visible;
       TestedNumberBox.Visibility = visibility;
@@ -86,10 +191,12 @@ namespace UI.Components
       }
     }
 
+    #endregion
+
     #region Методы подсветки ошибок
 
     /// <summary>
-    /// Подсветка поля проверяемого номера
+    /// Подсвечивает поле ввода проверяемого номера при ошибке.
     /// </summary>
     public void HighlightTestedNumber()
     {
@@ -97,7 +204,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Подсветка поля проверяющего номера
+    /// Подсвечивает поле ввода проверяющего номера при ошибке.
     /// </summary>
     public void HighlightTesterNumber()
     {
@@ -105,7 +212,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Подсветка поля диапазона проверки
+    /// Подсвечивает поле ввода диапазона проверки при ошибке.
     /// </summary>
     public void HighlightTestRange()
     {
