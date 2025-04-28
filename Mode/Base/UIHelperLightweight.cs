@@ -1,8 +1,5 @@
-﻿using System;
-using System.Windows;
-using UI.Components;
+﻿using UI.Components;
 using UI.Controls.Protocol;
-using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Base
 {
@@ -11,6 +8,8 @@ namespace Mode.Base
   /// </summary>
   public static class UIHelperLightweight
   {
+    #region Методы получения значений
+
     /// <summary>
     /// Безопасно извлекает значения из InputFieldLightweight: проверяемый номер, номер проверяющего и диапазон.
     /// </summary>
@@ -22,6 +21,7 @@ namespace Mode.Base
       string tester = string.Empty;
       string range = string.Empty;
 
+      // Локальный метод для чтения значений
       void ReadValues()
       {
         tested = inputField.TestedNumber;
@@ -29,6 +29,7 @@ namespace Mode.Base
         range = inputField.TestRange;
       }
 
+      // Проверка, доступен ли диспетчер
       if (inputField.Dispatcher.CheckAccess())
       {
         ReadValues();
@@ -41,6 +42,10 @@ namespace Mode.Base
       return (tested, tester, range);
     }
 
+    #endregion
+
+    #region Методы работы с ProtocolUI
+
     /// <summary>
     /// Безопасно извлекает экземпляр InputFieldLightweight из ProtocolUI.ContentView.
     /// </summary>
@@ -48,11 +53,13 @@ namespace Mode.Base
     /// <returns>InputFieldLightweight или null, если не найден.</returns>
     public static InputFieldLightweight? GetInputFieldLightweightSafe(this ProtocolUI protocolUI)
     {
+      // Проверка на null для предотвращения возможных ошибок
       if (protocolUI == null)
         return null;
 
       InputFieldLightweight? result = null;
 
+      // Локальный метод для извлечения значения
       void TryGet()
       {
         if (protocolUI.ContentView is InputFieldLightweight lw)
@@ -61,6 +68,7 @@ namespace Mode.Base
         }
       }
 
+      // Проверка, доступен ли диспетчер
       if (protocolUI.Dispatcher.CheckAccess())
       {
         TryGet();
@@ -72,5 +80,7 @@ namespace Mode.Base
 
       return result;
     }
+
+    #endregion
   }
 }

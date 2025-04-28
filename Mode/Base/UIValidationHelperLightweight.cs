@@ -1,11 +1,6 @@
-﻿using Mode.Models;
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using UI.Components;
 using UI.Controls.Protocol;
-using Utilities.Events;
 using Utilities.Models;
 
 namespace Mode.Base
@@ -16,6 +11,8 @@ namespace Mode.Base
   public static class UIValidationHelperLightweight
   {
     static InputFieldLightweight? input;
+
+    #region Методы валидации
 
     /// <summary>
     /// Извлекает и проверяет строки «тестируемого» и «тестирующего» номера и диапазона.
@@ -70,7 +67,7 @@ namespace Mode.Base
       if (t1 == t2)
       {
         _ = protocolUI.ShowMessageAsync(
-            new ShowMessageModel("Номера не должны совпадать!", ShowMessageModel.ErrorMessage.TitleColor));
+            new ShowMessageModel("Номера проверяемого и проверяющего блоков совпадают!", ShowMessageModel.ErrorMessage.TitleColor));
         input.HighlightTestedNumber();
         input.HighlightTesterNumber();
         return (false, "Повтор параметров.", "", "", "");
@@ -97,9 +94,16 @@ namespace Mode.Base
       return (true, "OK", t1, t2, rg);
     }
 
+    #endregion
+
+    #region Проверка диапазона
+
     /// <summary>
     /// Проверяет строку диапазона вида "1,2-5,7" на корректность.
     /// </summary>
+    /// <param name="rangeText">Входные значения в виде строки</param>
+    /// <param name="errorMessage">Сообщение об ошибке при некорректной валидации</param>
+    /// <returns>True, если не было найдено ошибок</returns>
     private static bool ValidateRangeInput(string rangeText, out string errorMessage)
     {
       errorMessage = "";
@@ -128,17 +132,33 @@ namespace Mode.Base
             errorMessage = $"неверный диапазон '{s}'";
             return false;
           }
+
+          // Проверка, чтобы значения диапазона не превышали 350
+          if (end > 350)
+          {
+            errorMessage = $"Диапазон не может превышать 350 (для '{s}')";
+            return false;
+          }
         }
         else
         {
-          if (!int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
+          if (!int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
           {
             errorMessage = $"не число '{s}'";
+            return false;
+          }
+
+          // Проверка, чтобы значение не превышало 350
+          if (value > 350)
+          {
+            errorMessage = $"Значение не может превышать 350 (для '{s}')";
             return false;
           }
         }
       }
       return true;
     }
+
+    #endregion
   }
 }
