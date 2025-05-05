@@ -52,7 +52,7 @@ namespace NewCore.Function.ModuleRelayControl
         string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
         var parsed = BaseResponse.FromJson(response);
 
-        if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}")
+        if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
         {
           return true;
         }
