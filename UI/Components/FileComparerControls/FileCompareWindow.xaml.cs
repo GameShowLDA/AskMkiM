@@ -28,13 +28,9 @@ namespace UI.Components.FileComparerControls
     public FileCompareWindow()
     {
       InitializeComponent();
-      Owner = Application.Current.MainWindow;
-
       ShowInTaskbar = false;
       WindowStyle = WindowStyle.None;
       ResizeMode = ResizeMode.NoResize;
-
-
 
       this.Closed += (s, e) =>
       {

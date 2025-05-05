@@ -160,6 +160,8 @@ namespace MainWindowProgram.Services
       _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
       var fileCompareWindow = new FileCompareWindow();
       fileCompareWindow.DialogClosed += Dialog_Closed;
+      fileCompareWindow.Owner = _mainWindow;
+      fileCompareWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
       fileCompareWindow.ShowDialog();
       _mainWindow.Effect = null;
     }
