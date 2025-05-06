@@ -41,6 +41,16 @@ namespace MainWindowProgram.ViewModels
     public ICommand PIACWCommand { get; }
 
     /// <summary>
+    /// Команда открытия режима ПИ (контроль напряжения) в режиме ACW.
+    /// </summary>
+    public ICommand KNACWCommand { get; }
+
+    /// <summary>
+    /// Команда открытия режима ПИ (контроль напряжения) в режиме DCW.
+    /// </summary>
+    public ICommand KNDCWCommand { get; }
+
+    /// <summary>
     /// Сервис для работы с режимами метрологии.
     /// </summary>
     private readonly MetrologyService _service;
@@ -59,6 +69,8 @@ namespace MainWindowProgram.ViewModels
       PRCommand = new AsyncRelayCommand(_service.OpenPRModeAsync);
       PIDCWCommand = new AsyncRelayCommand(_service.OpenPIDCWModeAsync);
       PIACWCommand = new AsyncRelayCommand(_service.OpenPIACWModeAsync);
+      KNACWCommand = new AsyncRelayCommand(_service.OpenKNACWModeAsync);
+      KNDCWCommand = new AsyncRelayCommand(_service.OpenKNDCWModeAsync);
     }
   }
 }

@@ -41,7 +41,7 @@ namespace Mode.SelfControl.NewModule
     /// <summary>
     /// Скрывает выбор устройства перед началом самоконтроля.
     /// </summary>
-    private void PreAction()
+    private async Task PreAction(CancellationToken cancellationToken)
     {
       choiceDevice.Visibility = Visibility.Collapsed;
     }

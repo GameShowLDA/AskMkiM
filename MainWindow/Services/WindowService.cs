@@ -135,6 +135,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
+        Application.Current.Shutdown();
         // TODO : Раскомментировать, когда будет готово
         // await Core.Communication.CommunicationManager.ResetAllSystem();
         // await Task.Delay(1000);
