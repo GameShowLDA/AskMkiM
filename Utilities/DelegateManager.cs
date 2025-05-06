@@ -8,7 +8,7 @@ namespace Utilities
     /// Делегат для выполнения предварительных действий.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
-    public delegate void PreActionDelegate();
+    public delegate Task PreActionDelegate(CancellationToken cancellationToken);
 
     /// <summary>
     /// Делегат для метода запуска.

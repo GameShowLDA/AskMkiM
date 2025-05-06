@@ -262,7 +262,9 @@ namespace Mode.Metrology.MeasurementSystem
       {
         case MetrologicalModeRole.IE:
         case MetrologicalModeRole.KC:
+        case MetrologicalModeRole.KN:
           return MetrologicalDeviceType.FastMeter;
+
         case MetrologicalModeRole.PR:
           return MetrologicalDeviceType.Mint;
 

@@ -76,7 +76,14 @@ namespace UI.Controls.Protocol
     /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
     /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
     /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
-    public void SetSettings(UIElement MainWindow, StartDelegate StartDelegate, bool isRepeatEnabled, StopDelegate StopDelegate = null, ReturnDelegate ReturnDelegate = null, PreActionDelegate preActionDelegate = null)
+    public void SetSettings(
+      UIElement MainWindow, 
+      StartDelegate StartDelegate, 
+      bool isRepeatEnabled, 
+      StopDelegate StopDelegate = null, 
+      ReturnDelegate ReturnDelegate = null, 
+      PreActionDelegate preActionDelegate = null
+      )
     {
       try
       {

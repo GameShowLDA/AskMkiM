@@ -97,7 +97,7 @@ namespace UI.Controls.Protocol
 
       if (preActionDelegate != null)
       {
-        preActionDelegate();
+        preActionDelegate(ProtocolSelfCheck.GetCancellationToken());
       }
 
       if (startDelegate == null)

@@ -194,6 +194,8 @@
                     <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
                     <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
                     <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
+                    <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
+                    <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
 
                 </MenuItem>
 
