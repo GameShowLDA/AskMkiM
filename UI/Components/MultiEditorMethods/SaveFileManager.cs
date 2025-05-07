@@ -8,6 +8,7 @@ using MessageBox = System.Windows.MessageBox;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using System.Windows;
+using System.Text;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -161,7 +162,15 @@ namespace UI.Components.MultiEditorMethods
       {
         var textEditor = fileManager.UserControls[index] as TextEditorUI;
         fileData = textEditor.Text;
-        File.WriteAllText(filePath, fileData);
+        if (filePath.ToLower().Contains(".pk") && !filePath.ToLower().Contains(".pkw"))
+        {
+          Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+          File.WriteAllText(filePath, fileData, Encoding.GetEncoding(866));
+        }
+        else
+        {
+          File.WriteAllText(filePath, fileData);
+        }
         LogInformation($"Файл {filePath} сохранен");
         MessageBox.Show($"Файл {filePath} сохранен");
         return true;
