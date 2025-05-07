@@ -242,6 +242,10 @@
 
                 </MenuItem>
 
+                <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
+                    
+                </MenuItem>
+
                 <MenuItem Header="Администрирование" Name="Admin">
 
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
