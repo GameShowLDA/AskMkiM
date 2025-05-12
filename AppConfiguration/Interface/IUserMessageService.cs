@@ -13,7 +13,7 @@ namespace AppConfiguration.Interface
     /// </summary>
     /// <param name="model">Модель отображаемого сообщения.</param>
     /// <returns>True, если пользователь подтвердил действие.</returns>
-    Task<bool> ShowMessageAsync(ShowMessageModel model);
+    Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false);
 
     string Header { get; set; }
   }

@@ -236,7 +236,7 @@ namespace UI.Controls.Protocol
     /// </summary>
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
-    public async Task<bool> ShowMessageAsync(ShowMessageModel showMessageModel)
+    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false)
     {   
       if (!await GetShowDetailedProtocol())
       {
@@ -255,7 +255,7 @@ namespace UI.Controls.Protocol
         await ActionExecutor.WaitWhilePausedAsync(this);
       }
 
-      return await ProcessStepModeAsync(ActionExecutor.StepMode);
+      await ProcessStepModeAsync(ActionExecutor.StepMode);
     }
 
     /// <summary>

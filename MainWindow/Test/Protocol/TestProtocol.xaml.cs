@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UI.Components.ProtocolListBox;
 using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 
 namespace MainWindowProgram.Test.Protocol
@@ -55,6 +56,11 @@ namespace MainWindowProgram.Test.Protocol
          while (true)
          {
            Test.GetCancellationToken().ThrowIfCancellationRequested();
+
+           if (i % 100 == 0)
+           {
+             await Test.ShowMessageAsync(new ShowMessageModel($"БЛОК {i / 100 + 1}", message: "Вложенный шаг", messageColor: Colors.Yellow), true);
+           }
 
            await Test.ShowMessageAsync(new ShowMessageModel("Тест", message: i.ToString() + $"[{ShowMessageModel.SuccessMessage.Title}]", messageColor: ShowMessageModel.SuccessMessage.TitleColor));
            i++;

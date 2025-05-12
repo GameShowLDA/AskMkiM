@@ -91,5 +91,17 @@ namespace UI.Controls.ProtocolNew
       SetupButtons();
       ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
     }
+
+    private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      StepControlManager.IsStepInto = false;
+      KeyboardManager.TriggerStep();
+    }
+
+    private void stepIntoButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      StepControlManager.IsStepInto = true;
+      KeyboardManager.TriggerStep();
+    }
   }
 }

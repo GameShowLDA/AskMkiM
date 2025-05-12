@@ -19,7 +19,7 @@ using static AppConfiguration.SystemState.SystemStateManager;
 namespace UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI
+  public partial class ProtocolUI : IUserMessageService
   {
     #region Поля.
 
@@ -210,8 +210,15 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
-    public async Task ShowMessageAsync(ShowMessageModel showMessageModel)
+    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false)
     {
+
+      if (IsBlockStart)
+      {
+        StepControlManager.ExitBlock();
+        StepControlManager.EnterBlock();
+      }
+
       if (await GetTimeStart())
       {
         showMessageModel.Time = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", System.Globalization.CultureInfo.InvariantCulture);
@@ -236,11 +243,17 @@ namespace UI.Controls.ProtocolNew
 
       if (StepControlManager.StepMode)
       {
-        if (StepControlManager.IsStepInto && StepControlManager.InsideBlock)
+        if (!StepControlManager.IsStepInto && StepControlManager.InsideBlock)
+        {
+          // Поверх — внутри блока, пропускаем ожидание
+        }
+        else
         {
           await KeyboardManager.WaitForNextStepKeyAsync();
         }
       }
+
+      await Task.Delay(1);
     }
 
     /// <summary>

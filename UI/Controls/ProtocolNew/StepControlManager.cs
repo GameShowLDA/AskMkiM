@@ -14,7 +14,10 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Флаг, указывающий, активен ли пошаговый режим.
     /// </summary>
-    public static bool StepMode { get; set; } = false;
+    public static bool StepMode => _stepMode;
+
+    private static bool _stepMode;
+
 
     /// <summary>
     /// True — если нажато F11 (вглубь), false — если F10 (поверх).
@@ -29,7 +32,11 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Войти в блок (до ShowMessageAsync).
     /// </summary>
-    public static void EnterBlock() => InsideBlock = true;
+    public static void EnterBlock()
+    {
+      InsideBlock = true;
+      IsStepInto = true;
+    }
 
     /// <summary>
     /// Выйти из блока (если нужно вручную).
@@ -41,10 +48,21 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public static void Reset()
     {
-      StepMode = false;
       IsStepInto = false;
       InsideBlock = false;
     }
+
+    public static async Task InitializeAsync()
+    {
+      _stepMode = await AppConfiguration.Execution.ExecutionConfig.GetIsStepByStepModeEnabled();
+      if (_stepMode)
+      {
+        IsStepInto = true;
+      }
+    }
+    static StepControlManager()
+    {
+      InitializeAsync().ConfigureAwait(true);
+    }
   }
 }
-
