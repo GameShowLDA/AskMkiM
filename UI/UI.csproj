@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controls\Archive\**" />
+    <EmbeddedResource Remove="Controls\Archive\**" />
+    <None Remove="Controls\Archive\**" />
+    <Page Remove="Controls\Archive\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
     <PackageReference Include="InputSimulator" Version="1.0.4" />
     <PackageReference Include="NLog" Version="5.4.0" />
@@ -25,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controls\Archive\" />
     <Folder Include="Management\" />
   </ItemGroup>
 

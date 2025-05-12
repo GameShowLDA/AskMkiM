@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestWPF"
         xmlns:ChassisManager ="clr-namespace:Mode.Settings.DeviceConfig;assembly=Mode"
+        xmlns:Protocol="clr-namespace:UI.Controls.Protocol;assembly=UI"
         mc:Ignorable="d"
         MinWidth="800"
         MinHeight="600"
         Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}">
+    <Protocol:ProtocolUI Header="Привет" x:Name="Test">
+        
+    </Protocol:ProtocolUI>
 </Window>

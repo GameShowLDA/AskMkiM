@@ -251,10 +251,13 @@
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
                     <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
                     <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
-                    <MenuItem Header="Управление" Name="DeviceManagment">
 
+                    <MenuItem Header="Управление" Name="DeviceManagment">
                         <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
-                        
+                    </MenuItem>
+
+                    <MenuItem Header="Тесты ПО">
+                        <MenuItem Header="Протокол" Name="ProtocolTest" Command="{Binding Admin.ProtocolCommand}"/>
                     </MenuItem>
 
                 </MenuItem>

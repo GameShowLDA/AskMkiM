@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using MainWindowProgram.Test.Protocol;
 using Mode.Settings.LoggerMessage;
 using Mode.Settings.SendCommand;
 using UI.Controls.GPT;
@@ -68,6 +69,11 @@ namespace MainWindowProgram.Services
       });
 
       _mainWindow.Effect = null;
+    }
+
+    public async Task ProtocolTest()
+    { 
+      await _multiWindow.AddControlAsync("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
     }
   }
 }

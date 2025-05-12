@@ -31,6 +31,8 @@ namespace MainWindowProgram.ViewModels
     /// </summary>
     public ICommand UsbCommand { get; }
 
+    public ICommand ProtocolCommand { get; }
+
     /// <summary>
     /// Сервис административных функций.
     /// </summary>
@@ -47,6 +49,7 @@ namespace MainWindowProgram.ViewModels
       SendCommandCommand = new AsyncRelayCommand(_service.OpenSendCommand);
       LoggerCommand = new AsyncRelayCommand(_service.OpenLogger);
       UsbCommand = new AsyncRelayCommand(_service.OpenUsbServiceAsync);
+      ProtocolCommand = new AsyncRelayCommand(_service.ProtocolTest);
     }
   }
 }
