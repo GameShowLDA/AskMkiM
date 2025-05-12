@@ -70,7 +70,11 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Флаг, указывающий, находится ли выполнение в пошаговом режиме.
     /// </summary>
-    internal bool StepMode { get; set; }
+    internal bool StepMode 
+    { 
+      get; 
+      set; 
+    }
 
     #endregion
 
@@ -384,13 +388,6 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     private async Task DisplayCompletionMessage()
     {
-      bool originalStepMode = StepMode;
-
-      if (StepMode)
-      {
-        StepMode = false;
-      }
-
       ShowMessageModel showMessage = new ShowMessageModel()
       {
         Header = $"Завершено.",
@@ -398,11 +395,6 @@ namespace UI.Controls.ProtocolNew
         CanBeDeleted = false,
       };
       await ProtocolSelfCheck.ShowMessageAsync(showMessage);
-
-      if (originalStepMode)
-      {
-        StepMode = true;
-      }
     }
 
     /// <summary>
@@ -420,6 +412,11 @@ namespace UI.Controls.ProtocolNew
       // Создаём новый токен
       CancellationTokenSource = new CancellationTokenSource();
       PauseCompletionSource = new TaskCompletionSource<bool>();
+
+      if (await GetIsStepByStepModeEnabled())
+      {
+        StepControlManager.EnableStepMode(true);
+      }
 
       if (startDelegate != null)
       {
@@ -494,8 +491,8 @@ namespace UI.Controls.ProtocolNew
     private void ResetState()
     {
       ProcessTask = null;
-      IsPaused = false;
-      StepMode = false;
+      //IsPaused = false;
+      //StepMode = false;
       ShouldShowPauseMessage = true;
 
       Application.Current.Dispatcher.Invoke(() =>

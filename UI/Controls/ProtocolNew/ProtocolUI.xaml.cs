@@ -90,6 +90,16 @@ namespace UI.Controls.ProtocolNew
 
       SetupButtons();
       ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+
+      this.Loaded += (s, e) =>
+      {
+        KeyboardManager.RegisterGlobalStepHooks();
+      };
+
+      this.Unloaded += (s, e) =>
+      {
+        KeyboardManager.UnregisterGlobalStepHooks();
+      };
     }
 
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)

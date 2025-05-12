@@ -12,43 +12,71 @@ namespace UI.Controls.ProtocolNew
   public static class KeyboardManager
   {
     private static TaskCompletionSource<bool> _tcs;
+
+    public static void RegisterGlobalStepHooks()
+    {
+      InputManager.Current.PreProcessInput += OnGlobalKeyPressed;
+    }
+
+    public static void UnregisterGlobalStepHooks()
+    {
+      InputManager.Current.PreProcessInput -= OnGlobalKeyPressed;
+    }
+
+    private static void OnGlobalKeyPressed(object sender, PreProcessInputEventArgs e)
+    {
+      if (_tcs == null) return;
+
+      var args = e.StagingItem.Input as KeyEventArgs;
+      if (args == null || args.RoutedEvent != Keyboard.KeyDownEvent) return;
+
+      var key = args.Key == Key.System ? args.SystemKey : args.Key;
+
+      LogInformation($"[KEYBOARD] Detected key: {key}");
+
+      switch (key)
+      {
+        case Key.F10:
+          StepControlManager.IsStepInto = false;
+          _tcs.TrySetResult(true);
+          args.Handled = true;
+
+          Application.Current.Dispatcher.InvokeAsync(() =>
+          {
+            var win = Application.Current.MainWindow;
+            win?.Focus();
+            Keyboard.Focus(win);
+          });
+          break;
+
+
+        case Key.F11:
+          StepControlManager.IsStepInto = true;
+          _tcs.TrySetResult(true);
+          break;
+
+        case Key.F5:
+          StepControlManager.DisableStepMode();
+          LogInformation("[KEYBOARD] Step mode DISABLED via F5");
+          if (_tcs != null && !_tcs.Task.IsCompleted)
+          {
+            _tcs.TrySetResult(true);
+          }
+          args.Handled = true;
+          break;
+
+        default:
+          break;
+      }
+    }
+
     public static async Task WaitForNextStepKeyAsync()
     {
-      try
-      {
-        _tcs = new TaskCompletionSource<bool>();
-
-        KeyEventHandler handler = null;
-        handler = (s, e) =>
-        {
-          if (e.Key == Key.F10)
-          {
-            StepControlManager.IsStepInto = false;
-            _tcs.TrySetResult(true);
-          }
-          else if (e.Key == Key.F11)
-          {
-            StepControlManager.IsStepInto = true;
-            _tcs.TrySetResult(true);
-          }
-        };
-
-        Window mainWindow = await Application.Current.Dispatcher.InvokeAsync(() => Application.Current.MainWindow);
-        mainWindow.PreviewKeyDown += handler;
-
-        await _tcs.Task;
-
-        mainWindow.PreviewKeyDown -= handler;
-      }
-      catch (Exception ex)
-      {
-        LogException(ex);
-      }
+      _tcs = new TaskCompletionSource<bool>();
+      await _tcs.Task;
+      _tcs = null;
     }
-
-    public static void TriggerStep()
-    {
-      _tcs?.TrySetResult(true);
-    }
+    public static void TriggerStep() => _tcs?.TrySetResult(true);
   }
+
 }

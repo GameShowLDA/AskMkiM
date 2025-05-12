@@ -18,6 +18,8 @@ namespace UI.Controls.ProtocolNew
 
     private static bool _stepMode;
 
+    private static bool _stepBypassRequested;
+    public static bool StepBypassRequested => _stepBypassRequested;
 
     /// <summary>
     /// True — если нажато F11 (вглубь), false — если F10 (поверх).
@@ -59,6 +61,18 @@ namespace UI.Controls.ProtocolNew
       {
         IsStepInto = true;
       }
+    }
+    public static void EnableStepMode(bool isStepInto)
+    {
+      _stepMode = true;
+      IsStepInto = isStepInto;
+      _stepBypassRequested = false;
+    }
+
+    public static void DisableStepMode()
+    {
+      _stepMode = false;
+      _stepBypassRequested = true;
     }
     static StepControlManager()
     {
