@@ -20,7 +20,7 @@ namespace NewCore.Device
       BusManager = new BusManagerAdapter(this);
       MeterManager = new MeterManagerAdapter(this);
       PointManager = new PointManagerAdapter(this);
-      ConnectableManager = new StateManagerAdapter(this);
+      StateManager = new StateManagerAdapter(this);
 
       DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";
@@ -46,5 +46,7 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IPointManager PointManager { get; set; }
+
+    public IStateManager StateManager { get; set; }
   }
 }

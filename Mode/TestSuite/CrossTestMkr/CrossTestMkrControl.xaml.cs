@@ -1,9 +1,12 @@
-﻿using Mode.Base;
+﻿using DataBaseConfiguration.Services.Device;
+using Mode.Base;
 using NewCore.Base.Interface.Main;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Utilities.Models;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
+using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.CrossTestMkr
 {
@@ -56,6 +59,109 @@ namespace Mode.TestSuite.CrossTestMkr
       LogInformation("Настройка CrossTestMKRControl завершена");
     }
 
+    /// <summary>
+    /// Ищет релейные модули по строкам "шасси.модуль" и сохраняет их в поля
+    /// testedModuleRelayControl и verificatModuleRelayControl.
+    /// </summary>
+    /// <param name="numTestedModule">Строка вида "chassis.module" для тестируемого модуля.</param>
+    /// <param name="numVerificatModule">Строка вида "chassis.module" для проверяющего модуля.</param>
+    /// <returns>True, если оба модуля найдены и инициализированы; иначе — false.</returns>
+    private async Task<bool> SearchAndInitializeRelaySwitchModules(string numTestedModule, string numVerificatModule)
+    {
+      var searchService = new RelaySwitchModuleServices();
+      var searckChassis = new ChassisManagerServices();
+
+      // Разбираем "шасси.модуль" на две части
+      var testedCoords = numTestedModule.Split('.').Select(int.Parse).ToArray();
+      var verificatCoords = numVerificatModule.Split('.').Select(int.Parse).ToArray();
+
+      var chassis = searckChassis.GetEntityById(testedCoords[0]);
+
+      // 1) Получить список модулей из шасси тестируемого
+      if (chassis == null)
+      {
+        await ProtocolSelfCheckControl
+            .ShowMessageAsync(new ShowMessageModel(
+                "Шасси тестируемого модуля не найдено!",
+                ShowMessageModel.ErrorMessage.TitleColor));
+        return false;
+      }
+
+      var list = searchService.GetDevicesByNumberChassis(testedCoords[0]);
+
+      // 2) Найти сам модуль по его Id
+      testedModuleRelayControl = list.FirstOrDefault(m => m.Number == testedCoords[1]);
+      if (testedModuleRelayControl == null)
+      {
+        await ProtocolSelfCheckControl
+            .ShowMessageAsync(new ShowMessageModel(
+                "Тестируемый модуль не найден!",
+                ShowMessageModel.ErrorMessage.TitleColor));
+        return false;
+      }
+
+      // 3) То же самое для проверяющего модуля
+      list = searchService.GetDevicesByNumberChassis(verificatCoords[0]);
+      if (list == null || list.Count == 0)
+      {
+        await ProtocolSelfCheckControl
+            .ShowMessageAsync(new ShowMessageModel(
+                "Шасси проверяющего модуля не найдено!",
+                ShowMessageModel.ErrorMessage.TitleColor));
+        return false;
+      }
+
+      verificatModuleRelayControl = list
+          .FirstOrDefault(m => m.Number == verificatCoords[1]);
+      if (verificatModuleRelayControl == null)
+      {
+        await ProtocolSelfCheckControl
+            .ShowMessageAsync(new ShowMessageModel(
+                "Проверяющий модуль не найден!",
+                ShowMessageModel.ErrorMessage.TitleColor));
+        return false;
+      }
+
+      // Оба модуля найдены
+      return true;
+    }
+
+
+    //private async Task<bool> SearchAndInitializeRelaySwitchModules(string numTestedModule, string numVerificatModule)
+    //{
+    //  var searcher = new RelaySwitchModuleServices();
+    //  int[] coordinatesTestedModule = numTestedModule.Split('.').Select(int.Parse).ToArray();
+    //  int[] coordinatesVerificatModule = numVerificatModule.Split('.').Select(int.Parse).ToArray();
+
+    //  var list = searcher.GetDevicesByNumberChassis(coordinatesTestedModule[0]);
+    //  if (list == null || list.Count == 0) 
+    //  {
+    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Шасси тестируемого модуля не найдено!", ErrorMessage.TitleColor));
+    //    return false; 
+    //  }
+    //  foreach (var device in list) if (device.Id == coordinatesTestedModule[1]) { testedModuleRelayControl = device; break; }
+    //  if (testedModuleRelayControl == null) 
+    //  {
+    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Тестируемый модуль не найден!", ErrorMessage.TitleColor));
+    //    return false; 
+    //  }
+
+    //  list = searcher.GetDevicesByNumberChassis(coordinatesVerificatModule[0]);
+    //  if (list == null || list.Count == 0) 
+    //  {
+    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Шасси проверяющего модуля не найдено!", ErrorMessage.TitleColor));
+    //    return false; 
+    //  }
+    //  foreach (var device in list) if (device.Id == coordinatesVerificatModule[1]) { verificatModuleRelayControl = device; break; }
+    //  if (verificatModuleRelayControl == null) 
+    //  {
+    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Проверяющий модуль не найден!", ErrorMessage.TitleColor));
+    //    return false;
+    //  }
+
+    //  return true;
+    //}
+
     #endregion
 
     #region Методы тестирования
@@ -75,26 +181,33 @@ namespace Mode.TestSuite.CrossTestMkr
         return;
       }
 
+      // 2. Присваивание ссылок на модули
+      if (!(await SearchAndInitializeRelaySwitchModules(tested, tester)))
+      {
+        LogError("Не были присвоены ссылки на модули");
+        return;
+      }
+
       LogInformation("Запуск теста CrossTestMKR...");
 
       // Устанавливаем флаг сброса
       needReset = true;
 
-      // 2. Преобразуем диапазон в список точек
+      // 3. Преобразуем диапазон в список точек
       List<int> points = ParseRange(range);
 
-      // 3. Подготовка оборудования
-      await InitializeModule(tested);
-      await InitializeModule(tester);
-      await MeterEnableAsync(tester);
+      // 4. Подготовка оборудования
+      await InitializeModule(testedModuleRelayControl);
+      await InitializeModule(verificatModuleRelayControl);
+      await MeterEnableAsync(verificatModuleRelayControl);
 
-      // 4. Собственно сам тест
-      await RunPart1(tested, tester, points, cancellationToken);
-      await RunPart2(tested, tester, points, cancellationToken);
-      await RunPart3(tested, tester, points, cancellationToken, false);
+      // 5. Собственно сам тест
+      await RunPart1(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
+      await RunPart2(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
+      await RunPart3(testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
 
-      // 5. Отключение измерителя
-      await MeterDisableAsync(tester);
+      // 6. Отключение измерителя
+      await MeterDisableAsync(verificatModuleRelayControl);
     }
 
     /// <summary>
@@ -112,9 +225,9 @@ namespace Mode.TestSuite.CrossTestMkr
       if (input == null) return;
 
       // Отключаем измеритель и сбрасываем модули
-      await MeterDisableAsync(input.TesterNumber);
-      await ResetModule(input.TestedNumber);
-      await ResetModule(input.TesterNumber);
+      await MeterDisableAsync(verificatModuleRelayControl);
+      await ResetModule(testedModuleRelayControl);
+      await ResetModule(verificatModuleRelayControl);
 
       // Сбрасываем флаг необходимости сброса
       needReset = false;

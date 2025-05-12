@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,14 +10,14 @@ namespace UI.Components
   /// <summary>
   /// Компонент для лёгкого ввода тестовых данных:
   /// содержит поля для ввода проверяемого номера, проверяющего и диапазона проверки,
-  /// а также логику валидации и подсветки ошибок.
+  /// а также логику фильтрации ввода и подсветки ошибок.
   /// </summary>
   public partial class InputFieldLightweight : UserControl
   {
     #region Свойства доступа к данным
 
     /// <summary>
-    /// Получает или задаёт номер проверяемого устройства в формате "a.b".
+    /// Получает или задаёт номер проверяемого устройства в формате a.b.
     /// </summary>
     public string TestedNumber
     {
@@ -25,7 +26,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Получает или задаёт номер проверяющего устройства в формате "a.b".
+    /// Получает или задаёт номер проверяющего устройства в формате a.b.
     /// </summary>
     public string TesterNumber
     {
@@ -34,7 +35,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Получает или задаёт диапазон проверки в формате "x-y".
+    /// Получает или задаёт диапазон проверки в формате списка чисел и диапазонов (например, "1-3,5").
     /// </summary>
     public string TestRange
     {
@@ -48,76 +49,181 @@ namespace UI.Components
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="InputFieldLightweight"/>.
-    /// Выполняет инициализацию компонентов и подписку на события.
+    /// Выполняет настройку фильтров ввода и подписку на события.
     /// </summary>
     public InputFieldLightweight()
     {
       InitializeComponent();
       SubscribeToEvents();
 
-      // Подписываемся на события ввода текста и вставки для внутреннего TextBox диапазона
-      TestRangeBox.Loaded += (_, _) =>
+      // Отключаем встроенную числовую валидацию у TextBoxPlaceholder
+      TestedNumberBox.IsNumberInputEnabled = false;
+      TesterNumberBox.IsNumberInputEnabled = false;
+      TestRangeBox.IsNumberInputEnabled = false;
+
+      // Навешиваем фильтры ввода для полей
+      AttachCoordinateFilter(TestedNumberBox);
+      AttachCoordinateFilter(TesterNumberBox);
+      AttachRangeFilter(TestRangeBox);
+    }
+
+    #endregion
+
+    #region Привязка фильтра к полям
+
+    /// <summary>
+    /// Привязывает фильтр для ввода координат (формат a.b) к указанному <see cref="TextBoxPlaceholder"/>.
+    /// </summary>
+    /// <param name="placeholder">Элемент-заполнитель, содержащий внутренний TextBox.</param>
+    private void AttachCoordinateFilter(TextBoxPlaceholder placeholder)
+    {
+      placeholder.Loaded += (_, _) =>
       {
-        if (TestRangeBox.FindName("InputBox") is TextBox inner)
+        if (placeholder.FindName("InputBox") is TextBox tb)
         {
-          inner.PreviewTextInput += Range_PreviewTextInput;
-          DataObject.AddPastingHandler(inner, Range_Pasting);
+          // Перехватываем событие PreviewTextInput до внутренних обработчиков
+          tb.AddHandler(
+            TextBox.PreviewTextInputEvent,
+            new TextCompositionEventHandler(Coordinate_PreviewTextInput),
+            handledEventsToo: true);
+
+          // Обработка вставки из буфера
+          DataObject.AddPastingHandler(tb, new DataObjectPastingEventHandler(Coordinate_Pasting));
+        }
+      };
+    }
+
+    /// <summary>
+    /// Привязывает фильтр для ввода диапазона (формат "1,2-5") к указанному <see cref="TextBoxPlaceholder"/>.
+    /// </summary>
+    /// <param name="placeholder">Элемент-заполнитель, содержащий внутренний TextBox.</param>
+    private void AttachRangeFilter(TextBoxPlaceholder placeholder)
+    {
+      placeholder.Loaded += (_, _) =>
+      {
+        if (placeholder.FindName("InputBox") is TextBox tb)
+        {
+          // Перехватываем событие PreviewTextInput до внутренних обработчиков
+          tb.AddHandler(
+            TextBox.PreviewTextInputEvent,
+            new TextCompositionEventHandler(Range_PreviewTextInput),
+            handledEventsToo: true);
+
+          // Обработка вставки из буфера
+          DataObject.AddPastingHandler(tb, new DataObjectPastingEventHandler(Range_Pasting));
         }
       };
     }
 
     #endregion
 
-    #region Обработка ввода диапазона
+    #region Фильтрация координат (формат a.b)
 
     /// <summary>
-    /// Обработчик события PreviewTextInput для поля диапазона.
-    /// Ограничивает ввод символов: цифр, запятой, тире, пробела;
-    /// запрещает некорректные сочетания символов.
+    /// Обработчик события PreviewTextInput для фильтрации ввода координат.
+    /// Разрешает ввод цифр и одной точки не в начале строки и не более одного.
     /// </summary>
-    /// <param name="sender">Источник события (TextBox).</param>
-    /// <param name="e">Данные события ввода текста.</param>
+    private void Coordinate_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+      var tb = (TextBox)sender;
+      char c = e.Text.FirstOrDefault();
+      string txt = tb.Text;
+      int pos = tb.CaretIndex;
+
+      // Разрешаем только цифры и одну точку
+      if (!char.IsDigit(c) && c != '.')
+      {
+        e.Handled = true;
+        return;
+      }
+
+      if (c == '.')
+      {
+        // Запрещаем точку в начале
+        if (pos == 0)
+        {
+          e.Handled = true;
+          return;
+        }
+        // Точка только одна
+        if (txt.Contains('.'))
+        {
+          e.Handled = true;
+          return;
+        }
+      }
+
+      // Всё остальное разрешено
+      e.Handled = false;
+    }
+
+    /// <summary>
+    /// Обработчик события вставки для фильтрации координат.
+    /// Допускает только строки вида: цифры, точка, цифры.
+    /// </summary>
+    private void Coordinate_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+      if (!e.DataObject.GetDataPresent(DataFormats.Text))
+      {
+        e.CancelCommand();
+        return;
+      }
+
+      var paste = (string)e.DataObject.GetData(DataFormats.Text)!;
+      // Используем регулярное выражение для проверки формата
+      if (!Regex.IsMatch(paste, @"^[0-9]+\.[0-9]+$"))
+      {
+        e.CancelCommand();
+      }
+    }
+
+    #endregion
+
+    #region Фильтрация диапазона (формат "1,2-5")
+
+    /// <summary>
+    /// Обработчик события PreviewTextInput для фильтрации ввода диапазона.
+    /// Ограничивает ввод цифр, запятых, тире и пробелов, запрещая некорректные сочетания.
+    /// </summary>
     private void Range_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-      var textBox = (TextBox)sender;
+      var tb = (TextBox)sender;
       char c = e.Text.FirstOrDefault();
-      int pos = textBox.CaretIndex;
-      string txt = textBox.Text;
+      int pos = tb.CaretIndex;
+      string txt = tb.Text;
 
-      // 1) Нельзя начинать с ',' или '-'
+      // Запрет символов ',' или '-' в начале
       if (pos == 0 && (c == ',' || c == '-'))
       {
         e.Handled = true;
         return;
       }
 
-      // 2) Если вводим не цифру, запятую, тире или пробел — блокируем
+      // Допускаем только цифры, запятую, тире и пробел
       if (!(char.IsDigit(c) || c == ',' || c == '-' || char.IsWhiteSpace(c)))
       {
         e.Handled = true;
         return;
       }
 
-      // 3) Проверяем предыдущий символ для запрета некорректных сочетаний
+      // Контекст предыдущего символа
       if (pos > 0)
       {
         char prev = txt[pos - 1];
 
-        // После тире нельзя вводить ',', '-' или пробел
+        // После '-' запрещаем ',', '-' и пробел
         if (prev == '-' && (c == ',' || c == '-' || char.IsWhiteSpace(c)))
         {
           e.Handled = true;
           return;
         }
-
-        // После запятой нельзя вводить ',' или '-'
+        // После ',' запрещаем ',' и '-'
         if (prev == ',' && (c == ',' || c == '-'))
         {
           e.Handled = true;
           return;
         }
-
-        // После цифры нельзя вводить пробел
+        // После цифры запрещаем пробел
         if (char.IsDigit(prev) && char.IsWhiteSpace(c))
         {
           e.Handled = true;
@@ -125,16 +231,13 @@ namespace UI.Components
         }
       }
 
-      // Ввод корректен
       e.Handled = false;
     }
 
     /// <summary>
-    /// Обработчик события вставки данных в поле диапазона.
+    /// Обработчик события вставки для фильтрации диапазона.
     /// Блокирует вставку текста, содержащего недопустимые символы.
     /// </summary>
-    /// <param name="sender">Источник события (TextBox).</param>
-    /// <param name="e">Данные события вставки.</param>
     private void Range_Pasting(object sender, DataObjectPastingEventArgs e)
     {
       if (e.DataObject.GetDataPresent(DataFormats.Text))
@@ -154,7 +257,7 @@ namespace UI.Components
     #region Событийные методы
 
     /// <summary>
-    /// Подписывается на события запуска обработки данных.
+    /// Подписывается на события ActionExecutor для смены режима редактирования и отображения.
     /// </summary>
     private void SubscribeToEvents()
     {
@@ -162,16 +265,16 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Обработчик события начала или завершения процесса обработки.
-    /// Переключает видимость полей ввода и обновляет заголовки с текущими значениями.
+    /// Обработчик события начала/окончания обработки:
+    /// переключает видимость полей ввода и обновляет заголовки с введёнными или подсказочными значениями.
     /// </summary>
-    /// <param name="isProcessing">Признак, что процесс обработки запущен.</param>
     private void ActionExecutor_StartProcessing(bool isProcessing)
     {
       const string testedBaseText = "Номер проверяемого";
       const string testerBaseText = "Номер проверяющего";
       const string rangeBaseText = "Диапазон проверки";
 
+      // Переключаем видимость полей ввода
       var visibility = isProcessing ? Visibility.Collapsed : Visibility.Visible;
       TestedNumberBox.Visibility = visibility;
       TesterNumberBox.Visibility = visibility;
@@ -179,12 +282,14 @@ namespace UI.Components
 
       if (isProcessing)
       {
+        // При обработке показываем введённые данные
         headerTestedNumber.Text = $"{testedBaseText}: {TestedNumber}";
         headerTesterNumber.Text = $"{testerBaseText}: {TesterNumber}";
         headerTestRange.Text = $"{rangeBaseText}: {TestRange}";
       }
       else
       {
+        // В режиме ввода показываем подсказки
         headerTestedNumber.Text = $"{testedBaseText}: вида a.b";
         headerTesterNumber.Text = $"{testerBaseText}: вида a.b";
         headerTestRange.Text = rangeBaseText;
@@ -198,26 +303,17 @@ namespace UI.Components
     /// <summary>
     /// Подсвечивает поле ввода проверяемого номера при ошибке.
     /// </summary>
-    public void HighlightTestedNumber()
-    {
-      TestedNumberBox.DataError();
-    }
+    public void HighlightTestedNumber() => TestedNumberBox.DataError();
 
     /// <summary>
     /// Подсвечивает поле ввода проверяющего номера при ошибке.
     /// </summary>
-    public void HighlightTesterNumber()
-    {
-      TesterNumberBox.DataError();
-    }
+    public void HighlightTesterNumber() => TesterNumberBox.DataError();
 
     /// <summary>
     /// Подсвечивает поле ввода диапазона проверки при ошибке.
     /// </summary>
-    public void HighlightTestRange()
-    {
-      TestRangeBox.DataError();
-    }
+    public void HighlightTestRange() => TestRangeBox.DataError();
 
     #endregion
   }

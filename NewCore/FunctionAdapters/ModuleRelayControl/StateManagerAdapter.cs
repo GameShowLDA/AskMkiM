@@ -5,13 +5,14 @@ using NewCore.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Base.Device;
 using Utilities.Error.Device;
+using NewCore.Base.Function.ModuleRelayControl;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
   /// <summary>
   /// Адаптер для управления состоянием модуля коммутации реле (МКР) с сообщениями.
   /// </summary>
-  internal class StateManagerAdapter : IConnectable
+  internal class StateManagerAdapter : NewCore.Base.Function.ModuleRelayControl.IStateManager
   {
     private readonly Device.ModuleRelayControl _moduleRelayControl;
     private readonly StateManager _stateManager;
@@ -29,7 +30,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync()
     {
-      return await InitializeAsync();
+      return await Initialize();
     }
 
     /// <inheritdoc />
@@ -38,8 +39,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       return await ResetAsync();
     }
 
-    /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> Initialize()
     {
       var (result, answer) = await _stateManager.ConnectAsync();
 
@@ -72,6 +72,11 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         throw ConnectionExceptionFactory.ResetFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, "Ошибка выполнения команды");
 
       return result;
+    }
+
+    Task IStateManager.ResetAsync()
+    {
+      return ResetAsync();
     }
   }
 }
