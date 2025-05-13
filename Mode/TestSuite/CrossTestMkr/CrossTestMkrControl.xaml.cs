@@ -16,7 +16,14 @@ namespace Mode.TestSuite.CrossTestMkr
   /// </summary>
   public partial class CrossTestMkrControl : UserControl
   {
+    /// <summary>
+    /// Поле для общения с тестируемым БК
+    /// </summary>
     private IRelaySwitchModule testedModuleRelayControl;
+
+    /// <summary>
+    /// Поле для общения с проверяющим БК
+    /// </summary>
     private IRelaySwitchModule verificatModuleRelayControl;
 
     /// <summary>
@@ -126,50 +133,15 @@ namespace Mode.TestSuite.CrossTestMkr
       return true;
     }
 
-
-    //private async Task<bool> SearchAndInitializeRelaySwitchModules(string numTestedModule, string numVerificatModule)
-    //{
-    //  var searcher = new RelaySwitchModuleServices();
-    //  int[] coordinatesTestedModule = numTestedModule.Split('.').Select(int.Parse).ToArray();
-    //  int[] coordinatesVerificatModule = numVerificatModule.Split('.').Select(int.Parse).ToArray();
-
-    //  var list = searcher.GetDevicesByNumberChassis(coordinatesTestedModule[0]);
-    //  if (list == null || list.Count == 0) 
-    //  {
-    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Шасси тестируемого модуля не найдено!", ErrorMessage.TitleColor));
-    //    return false; 
-    //  }
-    //  foreach (var device in list) if (device.Id == coordinatesTestedModule[1]) { testedModuleRelayControl = device; break; }
-    //  if (testedModuleRelayControl == null) 
-    //  {
-    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Тестируемый модуль не найден!", ErrorMessage.TitleColor));
-    //    return false; 
-    //  }
-
-    //  list = searcher.GetDevicesByNumberChassis(coordinatesVerificatModule[0]);
-    //  if (list == null || list.Count == 0) 
-    //  {
-    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Шасси проверяющего модуля не найдено!", ErrorMessage.TitleColor));
-    //    return false; 
-    //  }
-    //  foreach (var device in list) if (device.Id == coordinatesVerificatModule[1]) { verificatModuleRelayControl = device; break; }
-    //  if (verificatModuleRelayControl == null) 
-    //  {
-    //    await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Проверяющий модуль не найден!", ErrorMessage.TitleColor));
-    //    return false;
-    //  }
-
-    //  return true;
-    //}
-
     #endregion
 
     #region Методы тестирования
 
     /// <summary>
-    /// Метод, который вызывается при нажатии кнопки "Старт".
-    /// Выполняет валидацию данных, подготовку оборудования и сам тест.
+    /// Выполняет основную логику теста: валидация, инициализация модулей,
+    /// подготовка диапазона точек, выполнение трёх этапов перекрёстного теста.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(CancellationToken cancellationToken)
     {
       // 1. Валидация и парсинг трёх полей
@@ -197,8 +169,8 @@ namespace Mode.TestSuite.CrossTestMkr
       List<int> points = ParseRange(range);
 
       // 4. Подготовка оборудования
-      await InitializeModule(testedModuleRelayControl);
-      await InitializeModule(verificatModuleRelayControl);
+      await InitializeModule(testedModuleRelayControl, "тестируемый");
+      await InitializeModule(verificatModuleRelayControl, "проверяющий");
       await MeterEnableAsync(verificatModuleRelayControl);
 
       // 5. Собственно сам тест
@@ -213,13 +185,12 @@ namespace Mode.TestSuite.CrossTestMkr
     ///  • сбрасывает оба модуля;
     ///  • выполняет общий Reset всей системы.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken)
     {
       if (!needReset) return;
 
-      // Получаем контроллер, чтобы достать текущие значения
-      var input = ProtocolSelfCheckControl.GetInputFieldLightweightSafe();
-      if (input == null) return;
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\n"));
 
       // Отключаем измеритель и сбрасываем модули
       await MeterDisableAsync(verificatModuleRelayControl);

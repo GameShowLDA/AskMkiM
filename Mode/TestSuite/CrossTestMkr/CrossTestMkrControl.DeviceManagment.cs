@@ -10,51 +10,112 @@ namespace Mode.TestSuite.CrossTestMkr
   {
     #region Методы для общения
 
-    private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, bool lowVoltage = true)
+    /// <summary>
+    /// Подключает заданный БК к указанной шине.
+    /// </summary>
+    /// <param name="bus">Шина</param>
+    /// <param name="module">Блок коммутации</param>
+    /// <param name="lowVoltage">
+    /// Флаг режима низкого вольтажа:
+    /// <c>true</c> — использовать низкий уровень напряжения,
+    /// <c>false</c> — использовать стандартный (высокий) уровень напряжения.
+    /// </param>
+    private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, bool lowVoltage = false)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Шина {bus} подключена в БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"БК {module.Number} подключен к шине {bus}"));
       return await module.BusManager.ConnectBusAsync(bus, lowVoltage);
     }
-    private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, bool lowVoltage = true)
+
+    /// <summary>
+    /// Отключает заданный БК от указанной шины.
+    /// </summary>
+    /// <param name="bus">Коммутационная шина</param>
+    /// <param name="module">Блок коммутации</param>
+    /// <param name="lowVoltage">
+    /// Флаг режима низкого вольтажа:
+    /// <c>true</c> — использовать низкий уровень напряжения,
+    /// <c>false</c> — использовать стандартный (высокий) уровень напряжения.
+    /// </param>
+    private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, bool lowVoltage = false)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Шина {bus} подключена в БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"БК {module.Number} отключен от шины {bus}"));
       return await module.BusManager.DisconnectBusAsync(bus, lowVoltage);
     }
-    private async Task<bool> InitializeModule(IRelaySwitchModule module)
+
+    /// <summary>
+    /// Инициализирует БК и отображает сообщение об инициализации.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
+    /// <param name="roleName">Название роли блока коммутации</param>
+    private async Task<bool> InitializeModule(IRelaySwitchModule module, string roleName = null)
     {
-      var (state, answer) =await module.StateManager.Initialize();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Модуль БК {module.Number} инициализирован"));
+      var (state, answer) = await module.StateManager.Initialize();
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel(roleName == null ? $"БК {module.Number} инициализирован" : $"БК {module.Number} инициализирован - роль: {roleName}"));
       LogInformation($"Ответ модуля - {answer}");
       return state;
     }
+
+    /// <summary>
+    /// Выполняет сброс указанного БК.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
     private async Task ResetModule(IRelaySwitchModule module)
     {
       await module.StateManager.ResetAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Модуль БК {module.Number} сброшен"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"БК {module.Number} сброшен"));
     }
+
+    /// <summary>
+    /// Подключает точку (реле) заданного БК к указанной шине.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
+    /// <param name="bus">Шина</param>
+    /// <param name="point">Точка (реле)</param>
     private async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} подключена к шине {bus} в модуле БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} подключена к шине {bus} в БК {module.Number}"));
       return await module.PointManager.ConnectRelayAsync(bus, point);
     }
+
+    /// <summary>
+    /// Отключает точку (реле) заданного БК от указанной шины.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
+    /// <param name="bus">Шина</param>
+    /// <param name="point">Точка (реле)</param>
     private async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} отключена от шины {bus} в модуле БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} отключена от шины {bus} в БК {module.Number}"));
       return await module.PointManager.DisconnectRelayAsync(bus, point);
     }
+
+    /// <summary>
+    /// Включает измеритель БК.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
     private async Task<bool> MeterEnableAsync(IRelaySwitchModule module)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Включен измеритель в модуле БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Включен измеритель в БК {module.Number}"));
       return await module.MeterManager.ConnectMeterAsync();
     }
+
+    /// <summary>
+    /// Отключает измеритель БК.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
     private async Task<bool> MeterDisableAsync(IRelaySwitchModule module)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Выключен измеритель в модуле БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Выключен измеритель в БК {module.Number}"));
       return await module.MeterManager.DisconnectMeterAsync();
     }
+
+    /// <summary>
+    /// Получает ответ измерителя указанного БК и отображает сообщение об измерении.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
     private async Task<bool> GetMeterAnswer(IRelaySwitchModule module)
     {
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Проведение измерения БК {module.Number}"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Проводятся измерения БК {module.Number}"));
       return await module.MeterManager.GetMeterResponseAsync();
     }
 
@@ -63,14 +124,25 @@ namespace Mode.TestSuite.CrossTestMkr
     #region Логика теста
 
     /// <summary>
-    /// ЧАСТЬ 1
-    /// 1. МКР1 подключается к шине A1, МКР2 – к шине B1, точки заданного диапазона в МКР2 подключаются к шине B1.
-    /// 2. Для каждой точки: 
-    ///    - Подключается соответствующая точка в МКР1 к шине A1.
-    ///    - Проверяется наличие замыкания между шинами A1 и B1. Если замыкания нет, выдаётся сообщение об обрыве и тест прерывается.
-    ///    - Точка в МКР2 отключается от шины B1.
-    ///    - Проверяется отсутствие замыкания между шинами A1 и B1. Если замыкание обнаружено – выдаётся сообщение и тест прерывается.
+    /// Выполняет первую часть перекрёстного теста:
+    /// проверяет замыкания точек при подключении к A1,
+    /// в диапазоне <paramref name="rangePoints"/>:
+    ///  • проверяется наличие замыкания при подключении,
+    ///  • затем — его отсутствие после отключения.
     /// </summary>
+    /// <param name="tested_module">Тестируемый БК</param>
+    /// <param name="verificat_module">Проверяющий БК</param>
+    /// <param name="rangePoints">Список номеров точек для проверки.</param>
+    /// <param name="switchingBus1">Шина, к которой подключается тестируемый БК</param>
+    /// <param name="switchingBus2">Шина, к которой подключается проверяющий БК</param>
+    /// <param name="bus1">Шина точка в тестируемом БК</param>
+    /// <param name="bus2">Шина точка в проверяющем БК</param>
+    /// <param name="cancellationToken">Токен отмены операции</param>
+    /// <param name="needRestartModuleAfter">
+    /// Флаг сброса обоих БК по завершении:
+    /// <c>true</c> — БК сбросятся по завершению,
+    /// </param>
+    /// <returns>True, если тест выполнен успешно</returns>
     private async Task<bool> RunPart1(
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module, 
@@ -82,19 +154,30 @@ namespace Mode.TestSuite.CrossTestMkr
       CancellationToken cancellationToken, 
       bool needRestartModuleAfter = true)
     {
-      //await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nЧАСТЬ 1\n"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 1: проверка замыкания точек при подключении к A1\n", goodText.TitleColor));
       return await RunPointTest(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
     }
 
     /// <summary>
-    /// ЧАСТЬ 2
-    /// 6. Точки заданного диапазона в МКР2 сбрасываются с шины B1 и подключаются к шине A1.
-    /// 7. Для каждой точки:
-    ///    - Точка в МКР1 подключается к шине B1.
-    ///    - Проверяется наличие замыкания между шинами A1 и B1. Если замыкания нет – сообщение об обрыве точки и останов теста.
-    ///    - Точка в МКР2 отключается от шины A1.
-    ///    - Проверяется отсутствие замыкания между шинами A1 и B1. При обнаружении замыкания – сообщение и останов теста.
+    /// Выполняет первую часть перекрёстного теста:
+    /// проверяет замыкания точек при подключении к B1,
+    /// в диапазоне <paramref name="rangePoints"/>:
+    ///  • проверяется наличие замыкания при подключении,
+    ///  • затем — его отсутствие после отключения.
     /// </summary>
+    /// <param name="tested_module">Тестируемый БК</param>
+    /// <param name="verificat_module">Проверяющий БК</param>
+    /// <param name="rangePoints">Список номеров точек для проверки.</param>
+    /// <param name="switchingBus1">Шина, к которой подключается тестируемый БК</param>
+    /// <param name="switchingBus2">Шина, к которой подключается проверяющий БК</param>
+    /// <param name="bus1">Шина точка в тестируемом БК</param>
+    /// <param name="bus2">Шина точка в проверяющем БК</param>
+    /// <param name="cancellationToken">Токен отмены операции</param>
+    /// <param name="needRestartModuleAfter">
+    /// Флаг сброса обоих БК по завершении:
+    /// <c>true</c> — БК сбросятся по завершению,
+    /// </param>
+    /// <returns>True, если тест выполнен успешно</returns>
     private async Task<bool> RunPart2(
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module, 
@@ -106,29 +189,32 @@ namespace Mode.TestSuite.CrossTestMkr
       CancellationToken cancellationToken, 
       bool needRestartModuleAfter = true)
     {
-      //await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nЧАСТЬ 2\n"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 2: проверка замыкания точек при подключении к B1\n", goodText.TitleColor));
       return await RunPointTest(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
     }
 
     /// <summary>
-    /// ЧАСТЬ 3
-    /// 11. МКР2 подключается к 8 шинам: A1, A2, A3, A4, B1, B2, B3, B4.
-    /// 12. Для каждой пары шин (A{i}, B{i}), i = 1..4:
-    ///    - МКР1 подключается к шинам A{i} и B{i} и проверяется наличие замыкания между ними.
-    ///      Если замыкания нет – сообщение "обрыв МКР1 от шин A{i}, B{i}" и тест останавливается.
-    /// 13. МКР2 отключается от шины A{i} и проверяется отсутствие замыкания между A{i} и B{i}.
-    ///      При наличии замыкания – сообщение "замыкание при отключении МКР1 от шины A{i}" и тест останавливается.
-    /// 14. МКР2 повторно подключается к шине A{i} и отключается от шины B{i},
-    ///      после чего проверяется отсутствие замыкания между A{i} и B{i}.
-    ///      При наличии замыкания – сообщение "замыкание при отключении МКР1 от шины B{i}" и тест останавливается.
-    /// 15. Аналогичные проверки выполняются для всех пар шин.
+    /// Выполняет третью часть перекрёстного теста:
+    /// проверка замыканий между всеми шинами.
+    /// Для каждой пары шин проверяется корректность замыкания при подключении
+    /// и его отсутствие при поочерёдном отключении.
     /// </summary>
+    /// <param name="tested_module">Тестируемый БК</param>
+    /// <param name="verificat_module">Проверяющий БК</param>
+    /// <param name="cancellationToken">Токен отмены операции</param>
+    /// <param name="needRestartModuleAfter">
+    /// Флаг сброса обоих БК по завершении:
+    /// <c>true</c> — БК сбросятся по завершению,
+    /// </param>
+    /// <returns>True, если тест успешно завершён</returns>
     private async Task<bool> RunPart3(
     IRelaySwitchModule tested_module,
     IRelaySwitchModule verificat_module,
     CancellationToken cancellationToken,
     bool needRestartModuleAfter = true)
     {
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 3: проверка замыканий между всеми шинами\n", goodText.TitleColor));
+
       // Подключаем МКР2 ко всем 8 шинам
       var allVerifBuses = new[] {
         SwitchingBus.A1, SwitchingBus.B1,
@@ -235,6 +321,13 @@ namespace Mode.TestSuite.CrossTestMkr
 
     #region Вспомогательные методы
 
+    /// <summary>
+    /// Преобразует строку диапазонов в уникальный список точек.
+    /// Поддерживаются форматы: одиночные значения (например, "5"),
+    /// и диапазоны (например, "2-4") через запятую.
+    /// </summary>
+    /// <param name="rangeText">Строка с диапазонами точек (например: "1, 2-5, 8").</param>
+    /// <returns>Список уникальных номеров точек.</returns>
     private List<int> ParseRange(string rangeText)
     {
       // Используем HashSet для автоматического удаления дубликатов
@@ -266,6 +359,25 @@ namespace Mode.TestSuite.CrossTestMkr
       return pointsSet.ToList();
     }
 
+    /// <summary>
+    /// Выполняет тест подключения каждой точки из <paramref name="rangePoints"/> к шинам.
+    /// Для каждой точки проверяется:
+    ///  • наличие замыкания после подключения к <paramref name="bus1"/> и <paramref name="bus2"/>,
+    ///  • отсутствие замыкания после отключения с одной из шин.
+    /// </summary>
+    /// <param name="tested_module">Тестируемый БК</param>
+    /// <param name="verificat_module">Проверяющий БК</param>
+    /// <param name="rangePoints">Список номеров точек для проверки.</param>
+    /// <param name="switchingBus1">Шина, к которой подключается тестируемый БК</param>
+    /// <param name="switchingBus2">Шина, к которой подключается проверяющий БК</param>
+    /// <param name="bus1">Шина точка в тестируемом БК</param>
+    /// <param name="bus2">Шина точка в проверяющем БК</param>
+    /// <param name="cancellationToken">Токен отмены операции</param>
+    /// <param name="needRestartModuleAfter">
+    /// Флаг сброса обоих БК по завершении:
+    /// <c>true</c> — БК сбросятся по завершению,
+    /// </param>
+    /// <returns>True, если все проверки прошли успешно</returns>
     private async Task<bool> RunPointTest(
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
@@ -312,7 +424,7 @@ namespace Mode.TestSuite.CrossTestMkr
         }
         else
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"точка {point} замкнута"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"точка {point} подключена"));
         }
 
         // Отключаем соответствующую точку МКР2 от своей шины
@@ -326,11 +438,12 @@ namespace Mode.TestSuite.CrossTestMkr
         }
         else 
         {
-          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"замыкание точки {point} отсутствует"));
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[НОРМА]", goodText.Item2, $"подключение точки {point} отсутствует"));
         }
 
-        // Отключаем соответствующую точку МКР1 от своей шины
+        // Подключаем точку МКР2 обратно и отключаем соответствующую точку МКР1 от своей шины
         cancellationToken.ThrowIfCancellationRequested();
+        await PointConnectAsync(verificat_module, bus2, point);
         await PointDisconnectAsync(tested_module, bus1, point);
       }
 
