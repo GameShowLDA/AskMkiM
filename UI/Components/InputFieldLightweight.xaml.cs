@@ -290,8 +290,8 @@ namespace UI.Components
       else
       {
         // В режиме ввода показываем подсказки
-        headerTestedNumber.Text = $"{testedBaseText}: вида a.b";
-        headerTesterNumber.Text = $"{testerBaseText}: вида a.b";
+        headerTestedNumber.Text = $"{testedBaseText} a.b";
+        headerTesterNumber.Text = $"{testerBaseText} a.b";
         headerTestRange.Text = rangeBaseText;
       }
     }

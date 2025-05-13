@@ -54,6 +54,7 @@ namespace Mode.TestSuite.CrossTestMkr
     }
     private async Task<bool> GetMeterAnswer(IRelaySwitchModule module)
     {
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Проведение измерения БК {module.Number}"));
       return await module.MeterManager.GetMeterResponseAsync();
     }
 

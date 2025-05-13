@@ -205,9 +205,6 @@ namespace Mode.TestSuite.CrossTestMkr
       await RunPart1(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
       await RunPart2(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
       await RunPart3(testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
-
-      // 6. Отключение измерителя
-      await MeterDisableAsync(verificatModuleRelayControl);
     }
 
     /// <summary>
