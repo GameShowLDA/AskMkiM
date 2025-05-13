@@ -1,10 +1,9 @@
-﻿using DataBaseConfiguration.Services;
-using DataBaseConfiguration.Services.Device;
+﻿using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 

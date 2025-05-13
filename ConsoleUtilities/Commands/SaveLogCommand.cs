@@ -1,5 +1,6 @@
 ﻿using ConsoleUtilities.Core;
 using ConsoleUtilities.Models;
+using System.IO;
 using System.Text;
 
 namespace ConsoleUtilities.Commands

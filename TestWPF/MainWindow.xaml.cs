@@ -1,7 +1,4 @@
 ﻿using System.Windows;
-using Mode.Base;
-using static NewCore.Enum.MetrologyEnum;
-using UI.Controls.Protocol;
 using Utilities.Models;
 
 namespace TestWPF

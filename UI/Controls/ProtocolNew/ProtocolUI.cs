@@ -210,7 +210,7 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
-    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false)
+    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false)
     {
 
       if (IsBlockStart)
@@ -241,7 +241,7 @@ namespace UI.Controls.ProtocolNew
         await ActionExecutor.WaitWhilePausedAsync(this);
       }
 
-      if (StepControlManager.StepMode)
+      if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
         if (!StepControlManager.IsStepInto && StepControlManager.InsideBlock)
         {

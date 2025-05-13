@@ -6,6 +6,7 @@ using System.Windows.Media;
 using AppConfiguration.Base;
 using AppConfiguration.Execution;
 using AppConfiguration.SystemState;
+using ConsoleUI.ConsoleLogic;
 using ConsoleUtilities;
 using ConsoleUtilities.Commands;
 using ConsoleUtilities.Services;
@@ -67,7 +68,7 @@ namespace MainWindowProgram.Events
       _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
 
-      _hotkey = new HotkeyListenerService(_mainWindow, () => _consoleManager.ToggleConsole());
+      // _hotkey = new HotkeyListenerService(_mainWindow, () => _consoleManager.ToggleConsole());
     }
 
     /// <summary>
@@ -174,9 +175,10 @@ namespace MainWindowProgram.Events
     /// <param name="e">Аргументы события нажатия клавиши.</param>
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
+
       if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
       {
-        _consoleManager.ToggleConsole();
+        ConsoleVisibilityController.ToggleConsole();
         e.Handled = true;
       }
     }
