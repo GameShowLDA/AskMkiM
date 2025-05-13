@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
+using ConsoleUI.ConsoleUI;
 
 namespace ConsoleUI.ConsoleLogic
 {
@@ -43,6 +44,24 @@ namespace ConsoleUI.ConsoleLogic
         foreach (var entry in _buffer)
           callback(entry); // при подписке отдаём всё ранее накопленное
       }
+    }
+
+    public void Clear()
+    {
+      lock (_lock)
+      {
+        _buffer.Clear();
+      }
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (Application.Current.Windows.OfType<ConsoleOverlay>().FirstOrDefault() is ConsoleOverlay overlay)
+        {
+          overlay.ClearConsoleUI();
+        }
+
+        _buffer.Clear(); // также очищаем буфер, если ты его используешь
+      });
+
     }
 
     private Brush ParseColor(string text)

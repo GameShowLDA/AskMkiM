@@ -1,34 +1,44 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ConsoleUI.ConsoleCommanding.Commands;
-using ConsoleUI.ConsoleCommanding;
+using ConsoleUI.ConsoleCommanding.Engine;
+using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
 
 namespace ConsoleUI.ConsoleUI
 {
   public partial class ConsoleOverlay : Window
   {
-    public ConsoleOverlay()
-    {
-      InitializeComponent();
-
-      ConsoleTextManager.Instance.Subscribe(AppendLogEntry);
-    }
-
     private readonly List<string> _commandHistory = new();
     private int _historyIndex = -1;
     private List<string> _commandSuggestions = new();
     private int _autocompleteIndex = -1;
 
-    private readonly CommandRouter _router = new CommandRouter(new ConsoleCommanding.ICommand[]
+    private readonly CommandHandler _handler;
+    private readonly ConsoleManager _manager;
+    private TaskCompletionSource<string> _readLineTcs;
+
+
+    public ConsoleOverlay()
     {
-      new HelpCommand(new ConsoleCommanding.ICommand[] {
-        new HelpCommand(null), new EchoCommand(), new ClearCommand()
-      }),
-      new EchoCommand(),
-      new ClearCommand()
-    });
+      InitializeComponent();
+
+      // Инициализация консольной логики
+      var writer = new ConsoleWriterAdapter();
+      var factory = new CommandFactory();
+      var commands = factory.CreateAll(writer);
+      _handler = new CommandHandler(commands);
+      ConsoleTextManager.Instance.Append("[DEBUG] Handler инициализирован, команд: " + commands.Count);
+      _manager = new ConsoleManager(writer, _handler);
+
+      // Подписка на вывод
+      ConsoleTextManager.Instance.Subscribe(AppendLogEntry);
+      Loaded += (_, _) => CommandInput.Focus();
+    }
+
     private void AppendLogEntry(LogEntry entry)
     {
       var block = new TextBlock
@@ -45,26 +55,29 @@ namespace ConsoleUI.ConsoleUI
       ConsoleScroll.ScrollToEnd();
     }
 
-    private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-      if (e.ButtonState == MouseButtonState.Pressed)
-        DragMove();
-    }
-
-    private void CommandInput_KeyDown(object sender, KeyEventArgs e)
+    private async void CommandInput_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.Enter)
       {
         string input = CommandInput.Text.Trim();
+
+        if (_readLineTcs != null)
+        {
+          CommandInput.Clear();
+          CommandInput.IsReadOnly = false;
+          _readLineTcs.TrySetResult(input);
+          _readLineTcs = null;
+          return;
+        }
+
         if (!string.IsNullOrEmpty(input))
         {
           ConsoleTextManager.Instance.Append($"> {input}");
           _commandHistory.Add(input);
           _historyIndex = _commandHistory.Count;
 
-          var context = new CommandContext(ConsoleTextManager.Instance.Append);
-          _ = _router.RouteAsync(input, context);
-
+          CommandInput.Clear();
+          await _manager.RunCommandAsync(input);
           CommandInput.Clear();
         }
 
@@ -93,6 +106,7 @@ namespace ConsoleUI.ConsoleUI
         CommandInput.SelectionStart = CommandInput.Text.Length;
         e.Handled = true;
       }
+
       else if (e.Key == Key.Tab)
       {
         e.Handled = true;
@@ -105,7 +119,8 @@ namespace ConsoleUI.ConsoleUI
         }
         else if (_commandSuggestions.Count > 1)
         {
-          AutocompleteBox.Focus();
+          AutocompleteBox.ItemsSource = _commandSuggestions;
+          AutocompleteBox.Visibility = Visibility.Visible;
           AutocompleteBox.SelectedIndex = 0;
         }
       }
@@ -127,7 +142,7 @@ namespace ConsoleUI.ConsoleUI
         return;
       }
 
-      _commandSuggestions = _router.GetCommandNames()
+      _commandSuggestions = _handler.GetAllCommandNames()
         .Where(c => c.StartsWith(text, StringComparison.OrdinalIgnoreCase))
         .OrderBy(c => c)
         .ToList();
@@ -144,6 +159,11 @@ namespace ConsoleUI.ConsoleUI
       }
     }
 
+    public void ClearConsoleUI()
+    {
+      ConsolePanel.Children.Clear();
+    }
+
     private void AutocompleteBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
       if (AutocompleteBox.SelectedItem is string selected)
@@ -155,5 +175,23 @@ namespace ConsoleUI.ConsoleUI
       }
     }
 
+    private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.ButtonState == MouseButtonState.Pressed)
+        DragMove();
+    }
+
+    public async Task<string> ReadLineAsync()
+    {
+      _readLineTcs = new TaskCompletionSource<string>();
+
+      await Dispatcher.InvokeAsync(() =>
+      {
+        CommandInput.IsReadOnly = false;
+        CommandInput.Focus();
+      });
+
+      return await _readLineTcs.Task;
+    }
   }
 }
