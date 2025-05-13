@@ -3,27 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleUI.ConsoleCommanding.Core;
 
 namespace ConsoleUI.ConsoleCommanding.Commands
 {
   public class HelpCommand : ICommand
   {
-    private readonly IEnumerable<ICommand> _allCommands;
+    private readonly IEnumerable<ICommand> _commands;
 
     public string Name => "help";
 
-    public HelpCommand(IEnumerable<ICommand> allCommands)
+    public HelpCommand(IEnumerable<ICommand> commands)
     {
-      _allCommands = allCommands;
+      _commands = commands;
     }
 
-    public Task ExecuteAsync(string[] args, CommandContext context)
+    public async Task ExecuteAsync(string[] args, CommandContext context)
     {
-      context.WriteLine("Доступные команды:");
-      foreach (var cmd in _allCommands.OrderBy(c => c.Name))
-        context.WriteLine($"  - {cmd.Name}");
+      context.Console.WriteLine("Список доступных команд:");
+      foreach (var command in _commands.OrderBy(c => c.Name))
+      {
+        context.Console.WriteLine($"  • {command.Name}");
+      }
 
-      return Task.CompletedTask;
+      await Task.CompletedTask;
     }
   }
 }

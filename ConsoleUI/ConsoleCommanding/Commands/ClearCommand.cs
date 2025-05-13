@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleUI.ConsoleCommanding.Core;
 using ConsoleUI.ConsoleLogic;
 
 namespace ConsoleUI.ConsoleCommanding.Commands
@@ -11,10 +12,10 @@ namespace ConsoleUI.ConsoleCommanding.Commands
   {
     public string Name => "clear";
 
-    public Task ExecuteAsync(string[] args, CommandContext context)
+    public async Task ExecuteAsync(string[] args, CommandContext context)
     {
-      // ConsoleTextManager.Instance.Clear(); // Ты должен реализовать метод Clear
-      return Task.CompletedTask;
+      context.Console.Clear();
+      await Task.CompletedTask;
     }
   }
 }

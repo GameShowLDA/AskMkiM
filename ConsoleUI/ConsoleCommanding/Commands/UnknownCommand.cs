@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleUI.ConsoleCommanding.Core;
 
 namespace ConsoleUI.ConsoleCommanding.Commands
 {
@@ -10,10 +11,12 @@ namespace ConsoleUI.ConsoleCommanding.Commands
   {
     public string Name => "unknown";
 
-    public Task ExecuteAsync(string[] args, CommandContext context)
+    public async Task ExecuteAsync(string[] args, CommandContext context)
     {
-      context.WriteLine("Неизвестная команда. Введите 'help' для списка.");
-      return Task.CompletedTask;
+      var input = string.Join(" ", args);
+      context.Console.WriteLine($"Неизвестная команда: {input}");
+      context.Console.WriteLine("Введите 'help' для просмотра доступных команд.");
+      await Task.CompletedTask;
     }
   }
 }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ConsoleUI.ConsoleCommanding.Core;
 
-namespace ConsoleUI.ConsoleCommanding
+namespace ConsoleUI.ConsoleCommanding.Models
 {
   public class CommandContext
   {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleUI.ConsoleCommanding
+namespace ConsoleUI.ConsoleCommanding.Core
 {
   public interface ICommand
   {
