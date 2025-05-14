@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows;
 using ConsoleUI.ConsoleCommanding.Core;
+using ConsoleUI.ConsoleUI;
 
 namespace ConsoleUI.ConsoleCommanding.Commands
 {
@@ -14,6 +16,17 @@ namespace ConsoleUI.ConsoleCommanding.Commands
 
     public async Task ExecuteAsync(string[] args, CommandContext context)
     {
+      context.Console.WriteLine("Введите пароль:");
+
+      ((ConsoleOverlay)Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is ConsoleOverlay))?.SetPasswordMode(true);
+      string password = await context.Console.ReadLineAsync();
+
+      if (password.ToLower() != "admin")
+      {
+        context.Console.WriteLine("|ERROR| Не верный пароль.");
+        return;
+      }
+
       context.Console.WriteLine("Режим администратора:");
       context.Console.WriteLine("1. Включить");
       context.Console.WriteLine("2. Выключить");
@@ -43,7 +56,15 @@ namespace ConsoleUI.ConsoleCommanding.Commands
     private void SetAdminMode(bool enable, CommandContext context)
     {
       IsAdminModeEnabled = enable;
-      AdminModeChanged?.Invoke(this, enable);
+      
+      if (enable)
+      {
+        AdminModeChanged?.Invoke(null, true);
+      }
+      else
+      {
+        AdminModeChanged?.Invoke(null, false);
+      }
 
       context.Console.WriteLine(enable
         ? "Режим администратора включён."

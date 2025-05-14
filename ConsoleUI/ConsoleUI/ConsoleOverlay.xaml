@@ -42,6 +42,7 @@
                  BorderThickness="1"
                  BorderBrush="#555"
                      TextChanged="CommandInput_TextChanged"
+                     PreviewTextInput="CommandInput_PreviewTextInput"
                  KeyDown="CommandInput_KeyDown"/>
 
             <ListBox x:Name="AutocompleteBox"

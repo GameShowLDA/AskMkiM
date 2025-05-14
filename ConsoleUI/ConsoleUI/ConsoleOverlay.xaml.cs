@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,6 +22,8 @@ namespace ConsoleUI.ConsoleUI
     private readonly ConsoleManager _manager;
     private TaskCompletionSource<string> _readLineTcs;
 
+    private bool _isPasswordMode = false;
+    private StringBuilder _passwordBuffer = new();
 
     public ConsoleOverlay()
     {
@@ -59,12 +62,15 @@ namespace ConsoleUI.ConsoleUI
     {
       if (e.Key == Key.Enter)
       {
-        string input = CommandInput.Text.Trim();
+        string input = _isPasswordMode ? _passwordBuffer.ToString() : CommandInput.Text.Trim();
 
         if (_readLineTcs != null)
         {
+
           CommandInput.Clear();
           CommandInput.IsReadOnly = false;
+          _isPasswordMode = false;
+
           _readLineTcs.TrySetResult(input);
           _readLineTcs = null;
           return;
@@ -133,6 +139,21 @@ namespace ConsoleUI.ConsoleUI
       }
     }
 
+    private void CommandInput_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+      if (_isPasswordMode)
+      {
+        e.Handled = true;
+
+        string clean = new string(e.Text.Where(char.IsLetterOrDigit).ToArray());
+
+        _passwordBuffer.Append(clean);
+        CommandInput.Text += new string('*', clean.Length);
+        CommandInput.SelectionStart = CommandInput.Text.Length;
+      }
+    }
+
+
     private void CommandInput_TextChanged(object sender, TextChangedEventArgs e)
     {
       var text = CommandInput.Text.Trim();
@@ -192,6 +213,15 @@ namespace ConsoleUI.ConsoleUI
       });
 
       return await _readLineTcs.Task;
+    }
+
+    public void SetPasswordMode(bool enabled)
+    {
+      _isPasswordMode = enabled;
+      _passwordBuffer.Clear();
+
+      CommandInput.Clear();
+      CommandInput.Focus();
     }
   }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
+using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
-using ConsoleUtilities.Engine;
-using ConsoleUtilities.Services;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
