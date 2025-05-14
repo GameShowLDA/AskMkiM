@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UI.Components;
-using UI.Controls.Protocol;
+﻿using UI.Components;
+using UI.Controls.ProtocolNew;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Base
@@ -93,7 +88,7 @@ namespace Mode.Base
         inputField.Dispatcher.Invoke(ReadValues);
       }
 
-      return time.Replace('.',',');
+      return time.Replace('.', ',');
     }
 
     /// <summary>

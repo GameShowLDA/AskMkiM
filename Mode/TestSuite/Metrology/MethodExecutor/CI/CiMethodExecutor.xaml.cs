@@ -1,20 +1,9 @@
 ﻿using System.Windows.Controls;
 using AppConfiguration.Execution;
 using Mode.Base;
-using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
-using Mode.TestSuite.Metrology.MethodExecutor;
-using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using Newtonsoft.Json.Linq;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using YamlDotNet.Core.Tokens;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
-using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.CI
 {
@@ -51,7 +40,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg), SkipStepModeCheck: true);
         return;
       }
 
@@ -65,7 +54,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
         var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
         if (!connect.Connect)
         {
-          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
+          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
           return;
         }
 

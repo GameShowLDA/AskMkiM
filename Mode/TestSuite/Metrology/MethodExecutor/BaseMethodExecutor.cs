@@ -1,7 +1,7 @@
 ﻿using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor

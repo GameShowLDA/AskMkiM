@@ -1,10 +1,9 @@
-﻿using DataBaseConfiguration.Services;
-using DataBaseConfiguration.Services.Device;
+﻿using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
@@ -190,7 +189,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public virtual async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
-    { 
+    {
       await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", ShowMessageModel.SuccessMessage.TitleColor));
     }
 

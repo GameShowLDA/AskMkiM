@@ -1,10 +1,7 @@
 ﻿using System.Windows;
-using System.Windows.Media;
-using DataBaseConfiguration.Services;
 using Mode.SelfControl.Module.ModuleRelayControl;
-using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.DelegateManager;

@@ -1,6 +1,7 @@
 ﻿using ConsoleUtilities.Core;
 using ConsoleUtilities.Models;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace ConsoleUtilities.Commands

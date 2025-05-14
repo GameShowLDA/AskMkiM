@@ -188,7 +188,7 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" Margin="5">
                 <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox"/>
             </Grid>
 

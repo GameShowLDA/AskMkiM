@@ -1,18 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using NewCore.Base.Device;
-using UI.Management;
 using Utilities.Models;
 using WindowsInput;
+using static AppConfiguration.Base.EventAggregator;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static AppConfiguration.Protocol.ProtocolConfig;
 using static AppConfiguration.SystemState.SystemStateManager;
-using static AppConfiguration.Base.EventAggregator;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
-using System.Collections.Generic;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -70,10 +66,10 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Флаг, указывающий, находится ли выполнение в пошаговом режиме.
     /// </summary>
-    internal bool StepMode 
-    { 
-      get; 
-      set; 
+    internal bool StepMode
+    {
+      get;
+      set;
     }
 
     #endregion
@@ -91,6 +87,7 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null)
     {
+
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled())
       {
@@ -133,6 +130,7 @@ namespace UI.Controls.ProtocolNew
       await ExecuteTaskAsync(startDelegate, stop, name, isRepeatEnabled);
     }
 
+
     /// <summary>
     /// Завершение текущей выполняемой задачи.
     /// </summary>
@@ -156,6 +154,8 @@ namespace UI.Controls.ProtocolNew
 
       isExit = true;
 
+      StartProcessing?.Invoke(false);
+
       LogInformation($"Завершение \"{name}\"");
 
       await CancelProcessTaskAsync(stopDelegate, name);
@@ -169,7 +169,6 @@ namespace UI.Controls.ProtocolNew
       ProtocolSelfCheck.ShowOnlyStartButton();
 
       await DisplayCompletionMessage();
-      StartProcessing?.Invoke(false);
     }
 
     /// <summary>

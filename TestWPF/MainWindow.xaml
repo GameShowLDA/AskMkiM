@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestWPF"
         xmlns:ChassisManager ="clr-namespace:Mode.Settings.DeviceConfig;assembly=Mode"
-        xmlns:Protocol="clr-namespace:UI.Controls.Protocol;assembly=UI"
+        xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew;assembly=UI"
         mc:Ignorable="d"
         MinWidth="800"
         MinHeight="600"

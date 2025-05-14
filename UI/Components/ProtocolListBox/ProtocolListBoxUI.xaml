@@ -11,8 +11,9 @@
     </UserControl.Resources>
 
     <Grid>
-        <ListBox x:Name="ProtocolListBox"
-                 Background="{StaticResource SecondarySolidColorBrush}"
+        <Border CornerRadius="20" Background="{StaticResource SecondarySolidColorBrush}">
+            <ListBox x:Name="ProtocolListBox"
+                 Background="Transparent"
                  BorderThickness="0"
                  ItemsSource="{Binding Messages, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     VirtualizingStackPanel.IsVirtualizing="True"
@@ -23,26 +24,28 @@
                     Focusable="True"
                     IsHitTestVisible="True"
                  >
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock TextWrapping="Wrap" FontSize="20">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock TextWrapping="Wrap" FontSize="20">
                         <Run Text="{Binding Header}" Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Run Text=": " Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
                         <Run Text="{Binding Message}" Foreground="{Binding MessageColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Run Text="{Binding Time}" Foreground="YellowGreen" />
-                    </TextBlock>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
 
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="Focusable" Value="False" />
-                    <Setter Property="IsHitTestVisible" Value="False" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="BorderThickness" Value="0" />
-                </Style>
-            </ListBox.ItemContainerStyle>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="IsHitTestVisible" Value="False" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="FontFamily" Value="Consolas" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
 
-        </ListBox>
+            </ListBox>
+        </Border>
     </Grid>
 </UserControl>
