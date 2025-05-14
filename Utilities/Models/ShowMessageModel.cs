@@ -28,6 +28,8 @@ namespace Utilities.Models
     /// </summary>
     public string Message { get; set; }
 
+    public string Time { get; set; }
+
     /// <summary>
     /// Получает или задает цвет заголовка сообщения.
     /// </summary>

@@ -40,6 +40,11 @@ namespace NewCore.Enum
       /// Прочность изоляции (ППУ).
       /// </summary>
       PI,
+
+      /// <summary>
+      /// Контроль напряжения (КН).
+      /// </summary>
+      KN,
     }
   }
 }

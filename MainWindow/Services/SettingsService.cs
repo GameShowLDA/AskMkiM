@@ -1,6 +1,9 @@
-﻿using Mode.Settings.DeviceConfig;
+﻿using System.Diagnostics;
+using System.IO;
+using Mode.Settings.DeviceConfig;
 using Mode.Settings.Execution;
 using Mode.Settings.MeasurementError;
+using Utilities.Help;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -52,5 +55,9 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая операцию открытия интерфейса протокола.</returns>
     public async Task OpenProtocolAsync() =>
       await _multiWindow.AddControlAsync("Протокол", new Mode.Settings.ProtocolManager.ProtocolManagerControl(), TypeWindow.Settings);
+
+    public async Task HelpTextAsync() =>
+      HelpProvider.ShowHelp("index");
+    
   }
 }

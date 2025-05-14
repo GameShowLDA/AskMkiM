@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Events;
 using static NewCore.Enum.DeviceEnum;
 
@@ -216,7 +204,7 @@ namespace UI.Components
         headerVoltageData.Text = $"{voltageBaseText}: {VoltageTextBox.Text} {VoltageTextBox.Unit}";
         headerBusData.Text = $"{BusBaseText}: {ActiveBus}";
       }
-      else 
+      else
       {
         headerFirstData.Text = $"{firstBaseText}: вида a.b.c";
         headerSecondData.Text = $"{secondBaseText}: вида a.b.c";

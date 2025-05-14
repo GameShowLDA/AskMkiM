@@ -1,19 +1,9 @@
 ﻿using System.Windows.Controls;
 using Mode.Base;
-using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
 using Mode.TestSuite.Metrology.MethodExecutor;
-using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using Newtonsoft.Json.Linq;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using YamlDotNet.Core.Tokens;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
-using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace TestWPF
 {

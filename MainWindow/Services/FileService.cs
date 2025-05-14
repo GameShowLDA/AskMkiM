@@ -5,7 +5,10 @@ using AppConfiguration.Base;
 using MainWindowProgram.Infrastructure;
 using Microsoft.Win32;
 using UI.Components.ArchiveControls;
+using UI.Components.ArchiveManager.ArchiveFiles.Index;
+using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.Models;
+using UI.Components.FileComparerControls;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
@@ -154,7 +157,33 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task CompareFileAsync()
     {
-      throw new Exception("Настроить сравнение файлов");
+      _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
+      var fileCompareWindow = new FileCompareWindow();
+      fileCompareWindow.DialogClosed += Dialog_Closed;
+      fileCompareWindow.Owner = _mainWindow;
+      fileCompareWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+      fileCompareWindow.ShowDialog();
+      _mainWindow.Effect = null;
+    }
+
+    private async void Dialog_Closed(object sender, EventArgs e)
+    {
+      _mainWindow.Effect = null;
+    }
+
+    private async Task LoadFilesToDataGridAsync()
+    {
+      try
+      {
+        await Task.Run(async () =>
+        {
+          // TODO: открыть файлы в соответсвующих частях окна и перенести этот метод в отдельный класс
+        });
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Ошибка при загрузке файлов: {ex.Message}");
+      }
     }
 
     /// <summary>

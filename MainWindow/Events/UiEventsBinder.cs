@@ -9,6 +9,8 @@ using static UI.Components.Invoke.OpenFileButton;
 using UI.Controls.TextEditor;
 using System.Windows.Controls;
 using MainWindowProgram.Services;
+using System.IO;
+using UI.Components.FileComparerControls;
 
 namespace MainWindowProgram.Events
 {
@@ -61,6 +63,16 @@ namespace MainWindowProgram.Events
       _mainWindow.SearchWindow.ClearHighlights += _multiWindow.OnSearchWindowClosing;
 
       EventAggregator.OpenOpk += OnOpenOpk;
+
+      EventAggregator.CompareFiles += OnCompareFiles;
+    }
+
+    private void OnCompareFiles(string firstFilePath, string secondFilePath)
+    {
+      var firstFileName = Path.GetFileName(firstFilePath);
+      var secondFileName = Path.GetFileName(secondFilePath);
+      var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
+      _multiWindow.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
     }
 
     /// <summary>
@@ -77,7 +89,6 @@ namespace MainWindowProgram.Events
       _mainWindow.saveAsMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
-      _mainWindow.compareMenuItem.Visibility = visibility;
     }
 
     /// <summary>

@@ -1,12 +1,5 @@
 ﻿using System.Windows;
-using System.Windows.Input;
-using AppConfiguration.Base;
-using AppConfiguration.Execution;
-using AppConfiguration.MeasurementError;
-using AppConfiguration.Protocol;
-using AppConfiguration.Theme;
-using DataBaseConfiguration;
-using static Utilities.LoggerUtility;
+using Utilities.Models;
 
 namespace TestWPF
 {
@@ -17,55 +10,43 @@ namespace TestWPF
   {
     public MainWindow()
     {
+      InitializeComponent();
+      InitializeSettings();
+    }
 
+
+    /// <summary>
+    /// Инициализирует все необходимые настройки для компонента.
+    /// Очищает предыдущий контент и добавляет новые элементы управления.
+    /// </summary>
+    public void InitializeSettings()
+    {
+      Test.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true);
+    }
+
+    /// <summary>
+    /// Выполнение контроля.
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <returns></returns>
+    private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
+    {
       Task.Run(async () =>
       {
-        try
+        int i = 0;
+        while (true)
         {
-          await StartConfigAsync();
+          await Test.ShowMessageAsync(new ShowMessageModel("Тест", message: i.ToString() + $"[{ShowMessageModel.SuccessMessage.Title}]", messageColor: ShowMessageModel.SuccessMessage.TitleColor));
+          i++;
+
+          await Task.Delay(10);
         }
-        catch (InvalidOperationException exception)
-        {
-          LogError($"Ошибка загрузки темы программы: {exception}");
-          return;
-        }
-        catch (Exception ex)
-        {
-          LogError($"Ошибка выполнения программы: {ex}");
-        }
-      }).Wait();
-
-      InitializeComponent();
-    }
-
-    private async Task StartConfigAsync()
-    {
-      try
-      {
-        var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
-        var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
-        var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
-        var db = DataBaseConfig.InitializeDB();
-
-        await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
-        await ThemeSettingsManager.ReadThemeModeAsync();
-      }
-      catch (Exception ex)
-      {
-        var stackTrace = new System.Diagnostics.StackTrace();
-        var callingFrame = stackTrace.GetFrame(1);
-        var method = callingFrame.GetMethod();
-        var className = method.DeclaringType.FullName;
-        var methodName = method.Name;
-
-        LogError($"Ошибка в методе {className}.{methodName}: {ex.Message}");
-      }
+      });
     }
 
 
-    private void Button_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      new UI.Controls.Search.SearchWindow().ShowDialog();
-    }
   }
 }
