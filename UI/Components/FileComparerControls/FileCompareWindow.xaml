@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI.Components.FileComparerControls"
-          xmlns:WinButton="clr-namespace:UI.Components"
+        xmlns:Components="clr-namespace:UI.Components"
         mc:Ignorable="d"
         Title="Создание нового архива программ контроля" 
         Height="Auto" 
@@ -21,7 +21,7 @@
         WindowState="Normal"
         Focusable="True">
     <Window.Resources>
-        <Style TargetType="WinButton:WindowButtons">
+        <Style TargetType="Components:WindowButtons">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
             <Style.Triggers>
@@ -47,7 +47,7 @@
                      Margin="10,5"
                      FontWeight="SemiBold"
                        FontSize="18"/>
-                    <WinButton:WindowButtons 
+                    <Components:WindowButtons 
                     HorizontalAlignment="Right"
                     ChoiceElement="Exit"  
                     Width="45" 
@@ -69,62 +69,55 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{StaticResource PrimarySolidColorBrush}" 
+                    
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{StaticResource ActiveBorderSolidColorBrush}" 
                         CornerRadius="10" Margin="0,10"
                         Name="FirstFileContainer"
                         >
                         <Grid >
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
-                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
                                 <TextBlock Text="Путь к первому файлу для сравнения" Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                                       FontSize="20" FontWeight="Bold" Margin="7,0"
+                                       FontSize="20" FontWeight="Bold" Margin="7"
                                        />
-                            </Border>
 
-                            <Border Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" Margin="5,5">
-                                <TextBox 
-                                Background="Transparent" 
-                                 BorderThickness="0" 
-                                VerticalAlignment="Center" 
-                                 FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
-                                 Name="FirstFileTextBlock"
-                                    PreviewMouseDoubleClick="FirstFileTextBlock_PreviewMouseDoubleClick"
-                                 />
-                            </Border>
+                                <Components:TextBoxPlaceholder x:Name="FirstFileTextBlock" 
+                                                               Grid.Row="1"
+                                                               Text="Укажите путь к первому файлу"
+                                                               Placeholder="Укажите путь к первому файлу" 
+                                                               ToolTip="Введите путь к файлу или выпоните двойной щелчок по полю ввода для выбора файла"
+                                                               PreviewMouseDoubleClick="FirstFileTextBlock_PreviewMouseDoubleClick"/>
+
                         </Grid>
                     </Border>
-                    <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource PrimarySolidColorBrush}" 
-                        CornerRadius="10" Margin="0,10"
+                    
+                    <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource ActiveBorderSolidColorBrush}" 
+                        CornerRadius="10" Margin="0, 10"
                         Name="SecondFileContainer"
                         >
                         <Grid >
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
-                                <RowDefinition Height="40"/>
+                                <RowDefinition/>
                             </Grid.RowDefinitions>
 
-                            <Border CornerRadius="10" Background="{StaticResource ActiveBorderSolidColorBrush}" Height="40" Padding="5">
                                 <TextBlock Text="Путь ко второму файлу для сравнения" Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                                       FontSize="20" FontWeight="Bold" Margin="7,0"
+                                       FontSize="20" FontWeight="Bold" Margin="7"
                                        />
-                            </Border>
 
-                            <Border Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" Margin="5,5">
-                                <TextBox 
-                                Background="Transparent" 
-                                 BorderThickness="0" 
-                                VerticalAlignment="Center" 
-                                 FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
-                                 Name="SecondFileTextBlock"
-                                    PreviewMouseDoubleClick="FirstFileTextBlock_PreviewMouseDoubleClick"
-                                 />
-                            </Border>
+                            <Components:TextBoxPlaceholder x:Name="SecondFileTextBlock" 
+                               Grid.Row="1"
+                               VerticalAlignment="Center"
+                               Placeholder="Укажите путь ко второму файлу" 
+                               Text="Укажите путь ко второму файлу"
+                              ToolTip="Введите путь к файлу или выпоните двойной щелчок по полю ввода для выбора файла"
+                               PreviewMouseDoubleClick="FirstFileTextBlock_PreviewMouseDoubleClick"/>
                         </Grid>
                     </Border>
+                    
                     <Button Name="SaveButton" Grid.Row="3" Grid.Column="1" Content="Сравнить" 
                             Style="{StaticResource ConfigButtonStyle}" 
                             Width="250" HorizontalAlignment="Right" 
