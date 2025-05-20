@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AppConfiguration.Interface;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 
@@ -21,9 +22,10 @@ namespace UI.Components.ProtocolListBox
   /// <summary>
   /// Логика взаимодействия для ProtocolListBoxUI.xaml
   /// </summary>
-  public partial class ProtocolListBoxUI : UserControl
+  public partial class ProtocolListBoxUI : UserControl, IUserMessageService
   {
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
+    public string Header { get; set ; }
 
     public ProtocolListBoxUI()
     {
@@ -96,6 +98,11 @@ namespace UI.Components.ProtocolListBox
         Messages.Add(showMessageModel);
         ProtocolListBox.ScrollIntoView(showMessageModel);
       });
+    }
+
+    public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false)
+    {
+      await AppendLineAsync(model);
     }
   }
 }

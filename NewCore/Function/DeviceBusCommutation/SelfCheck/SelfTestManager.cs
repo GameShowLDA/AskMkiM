@@ -1,15 +1,19 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using AppConfiguration.Interface;
 using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Communication;
 using static Utilities.LoggerUtility;
 using static AppConfiguration.Execution.ExecutionConfig;
 
-namespace NewCore.Function.DeviceBusCommutation
+namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 {
-  /// <summary>
-  /// Класс для управления самоконтроля устройства коммутации шин.
-  /// </summary>
-  public class SelfTestManager : ISelfTestChecker
+  public class SelfTestManager : ISelfTestCheckerDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.
@@ -20,7 +24,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// Словарь допустимых комбинаций шины и контактов для каждого типа проверки.
     /// </summary>
     public static readonly Dictionary<TypeConnector, List<int>> ValidBusContacts = new()
-    {
+        {
             { TypeConnector.BlockingRelay, new List<int> { 11, 21 } },
             { TypeConnector.Multimeter, new List<int> { 11,12,13,14,21,22,23,24} },
             { TypeConnector.ADC, new List<int> { 11,12,13,14,21,22,23,24} },
@@ -28,13 +32,13 @@ namespace NewCore.Function.DeviceBusCommutation
             { TypeConnector.PINT, new List<int> { 12, 13, 22, 23 } },
             { TypeConnector.Shunt, new List<int> { 1, 2 } },
             { TypeConnector.BreakdownTester, new List<int> { 11, 21 } },
-    };
+        };
 
     /// <summary>
     /// Словарь, содержащий названия цепей для каждого типа проверки.
     /// </summary>
     public static readonly Dictionary<TypeConnector, string> CircuitNames = new()
-    {
+        {
             { TypeConnector.BlockingRelay, "Блокировочное реле" },
             { TypeConnector.Multimeter, "Мультиметр" },
             { TypeConnector.ADC, "АЦП" },
@@ -42,7 +46,7 @@ namespace NewCore.Function.DeviceBusCommutation
             { TypeConnector.PINT, "ПИНТ" },
             { TypeConnector.Shunt, "Шунт" },
             { TypeConnector.BreakdownTester, "ППУ" },
-    };
+        };
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
@@ -147,6 +151,17 @@ namespace NewCore.Function.DeviceBusCommutation
 
       await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
       return true;
+    }
+
+    /// <summary>
+    /// Запуск самоконтроля устройства.
+    /// </summary>
+    /// <param name="userMessageService">Элемент управления для вывода информации.</param>
+    /// <returns></returns>l
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task StartSelfCheck(IUserMessageService userMessageService)
+    {
+      throw new NotImplementedException();
     }
   }
 }

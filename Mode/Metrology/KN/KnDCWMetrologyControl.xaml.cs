@@ -1,6 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
+using Mode.Metrology.PI;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
@@ -99,8 +101,44 @@ namespace Mode.Metrology.KN
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
 
-        await Task.Delay(1000);
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param);
+        await fastMeter.DcVoltageManager.MeasureDCVoltageAsync();
+
+        string result = await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+          VoltageValue chassisManagerWindow = new VoltageValue();
+          protocolUI.Effect = new System.Windows.Media.Effects.BlurEffect();
+
+          bool? dialogResult = chassisManagerWindow.ShowDialog();
+          protocolUI.Effect = null;
+
+          if (dialogResult == true)
+          {
+            return chassisManagerWindow.VoltageResult;
+          }
+          else
+          {
+            return string.Empty;
+          }
+        });
+
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}", ShowMessageModel.SuccessMessage.TitleColor));
+        if (!string.IsNullOrEmpty(result) && double.TryParse(result, out var value))
+        {
+          double pog = value - param;
+
+          var answer = (value >= firstNorm && value <= lastNorm) ? false : true; ;
+
+          ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения напряжения", null, $"{result:F2} [{(!answer ? ShowMessageModel.SuccessMessage.Title : ShowMessageModel.ErrorMessage.Title)}]");
+          showMessageModel.MessageColor = (value >= firstNorm && value <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
+          showMessageModel.ExecutionError = (value >= firstNorm && value <= lastNorm) ? false : true;
+          showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
+          await protocolUI.ShowMessageAsync(showMessageModel);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В [{(!answer ? ShowMessageModel.SuccessMessage.Title : ShowMessageModel.ErrorMessage.Title)}]", messageColor: showMessageModel.MessageColor));
+        }
+        else
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, "Некорректно введённое эталонное значение напряжения."));
+        }
       }
     }
   }

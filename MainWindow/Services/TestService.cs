@@ -62,5 +62,6 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task AddPiDCWMethodExecutorControlAsync() =>
       await _multiWindow.AddControlAsync("Групповой метод ПИ(DCW)", new PiDCWMethodExecutorControl(), TypeWindow.DeviceControl);
+
   }
 }

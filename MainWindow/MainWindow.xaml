@@ -201,10 +201,7 @@
 
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
 
-                    <MenuItem 
-                        Header="Модуль" 
-                        Name="SelfControlMenuItem"
-                        />
+                    <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
 
                 </MenuItem>
 
@@ -258,6 +255,8 @@
 
                     <MenuItem Header="Тесты ПО">
                         <MenuItem Header="Протокол" Name="ProtocolTest" Command="{Binding Admin.ProtocolCommand}"/>
+                        <MenuItem Header="Выбор устройства" Name="ChoiceTest" Command="{Binding Admin.ChoiceCommand}"/>
+                        <MenuItem Header="Cfvjrjynhjkm" Name="SelfTest" Command="{Binding Admin.SelfCommand}"/>
                     </MenuItem>
 
                 </MenuItem>

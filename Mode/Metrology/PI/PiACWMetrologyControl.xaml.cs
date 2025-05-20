@@ -110,6 +110,7 @@ namespace Mode.Metrology.PI
         // double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI);
 
         await meterDevice.AcwManger.MeasureCurrentAsync();
+
         string result = await Application.Current.Dispatcher.InvokeAsync(() =>
         {
           VoltageValue chassisManagerWindow = new VoltageValue();

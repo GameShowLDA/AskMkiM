@@ -56,7 +56,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     {
       try
       {
-        double result = await _measurement.MeasureACVoltageAsync(param);
+          double result = await _measurement.MeasureACVoltageAsync(param);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,

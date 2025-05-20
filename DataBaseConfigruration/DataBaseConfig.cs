@@ -24,7 +24,8 @@ namespace DataBaseConfiguration
       {
         var tempDir = Path.Combine(Path.GetTempPath(), "AskMkiM");
         Directory.CreateDirectory(tempDir);
-        return Path.Combine(tempDir, "_config.db");
+        string path = Path.Combine(tempDir, "_config.db");
+        return path;
       }
     }
 

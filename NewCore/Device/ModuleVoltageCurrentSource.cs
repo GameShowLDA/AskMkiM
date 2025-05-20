@@ -21,7 +21,7 @@ namespace NewCore.Device
     /// </summary>
     public ModuleVoltageCurrentSource()
     {
-      Name = "Модуль источника напряжения и тока";
+      Name = "Модуль МиНТ";
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
 
       DeviceType = DeviceEnum.DeviceType.PowerSourceModule;

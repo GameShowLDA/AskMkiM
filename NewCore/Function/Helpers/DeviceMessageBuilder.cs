@@ -3,6 +3,7 @@ using NewCore.Base.Device;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Device;
 using Utilities.Models;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.Helpers
 {
@@ -63,7 +64,14 @@ namespace NewCore.Function.Helpers
     {
       if (!result || await AppConfiguration.Protocol.ProtocolConfig.GetDeviceInfo())
       {
-        await UserMessageServiceProvider.Instance.ShowMessageAsync(showMessageModel);
+        if (UserMessageServiceProvider.Instance != null)
+        {
+          await UserMessageServiceProvider.Instance.ShowMessageAsync(showMessageModel);
+        }
+        else
+        {
+          LogError($"{showMessageModel.Header}: {showMessageModel.Message}");
+        }
       }
     }
 

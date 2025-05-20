@@ -73,14 +73,24 @@ namespace Utilities.Models
       IsDeviceMessage = false;
       IndentLevel = 0;
 
-      Application.Current.Dispatcher.Invoke(() =>
+      try
       {
-        if (Application.Current?.Resources["ForegroundSolidColorBrush"] is SolidColorBrush brush)
+        if (Application.Current != null)
         {
-          HeaderColor = brush.Color;
-          MessageColor = brush.Color;
+          Application.Current.Dispatcher.Invoke(() =>
+          {
+            if (Application.Current?.Resources["ForegroundSolidColorBrush"] is SolidColorBrush brush)
+            {
+              HeaderColor = brush.Color;
+              MessageColor = brush.Color;
+            }
+          });
         }
-      });
+      }
+      catch (Exception)
+      {
+
+      }
     }
 
     /// <summary>
