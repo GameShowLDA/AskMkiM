@@ -35,7 +35,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима прозвонки",
-          "CONF:CONT",
+          string.Empty,
           true,
           1);
       }
@@ -54,6 +54,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> CheckContinuityAsync()
     {
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       try
       {
         var result = await _measurement.CheckContinuityAsync();
@@ -61,7 +66,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Результат прозвонки",
-          result ? "Контакт есть (проводимость обнаружена)" : "Контакт отсутствует",
+          string.Empty,
           true,
           2);
 

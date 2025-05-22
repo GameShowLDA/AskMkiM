@@ -31,6 +31,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
+      await Task.Delay(100);
       return await ResetAsync();
     }
 

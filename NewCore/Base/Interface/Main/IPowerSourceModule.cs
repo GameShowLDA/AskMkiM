@@ -24,6 +24,7 @@ namespace NewCore.Base.Interface.Main
     /// Управление настройками напряжения.
     /// </summary>
     public IVoltageManager VoltageManager { get; set; }
+    public ISelfTestCheckerModuleVoltageCurrentSource SelfTestManager { get; set; }
 
     /// <summary>
     /// JSON-строка с калибровочными коэффициентами по диапазонам сопротивления

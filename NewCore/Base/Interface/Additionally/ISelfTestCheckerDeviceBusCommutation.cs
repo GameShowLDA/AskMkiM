@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Main;
 
 namespace NewCore.Base.Interface.Additionally
 {
@@ -12,14 +13,16 @@ namespace NewCore.Base.Interface.Additionally
   /// Интерфейс для выполнения проверки цепочек самоконтроля.
   /// Позволяет реализовать логику для разных устройств УКШ.
   /// </summary>
-  public interface ISelfTestCheckerDeviceBusCommutation : ISelfCheck
+  public interface ISelfTestCheckerDeviceBusCommutation
   {
     /// <summary>
-    /// Запуск самоконтроля устройства коммутации шин.
+    /// Запуск самоконтроля устройства коммутации шин для выбранного типа проверки.
     /// </summary>
-    /// <param name="messageService"></param>
-    /// <returns></returns>
-    Task StartSelfCheck(IUserMessageService messageService);
+    /// <param name="messageService">Сервис отображения сообщений.</param>
+    /// <param name="selectedType">Выбранное значение перечисления.</param>
+    /// <param name="device">Устройство коммутации шин (необязательно).</param>
+    /// <param name="meter">Измеритель (необязательно).</param>
+    Task StartSelfCheck(IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null);
 
     /// <summary>
     /// Выполняет проверку цепи самоконтроля.
@@ -62,5 +65,15 @@ namespace NewCore.Base.Interface.Additionally
     /// <param name="action">Действие (1 - замкнуть, 2 - разомкнуть).</param>
     /// <returns><c>true</c>, если команда успешно отправлена, иначе <c>false</c>.</returns>
     Task<bool> ControlRelayAsync(TypeConnector testType, int relayNumber, int busContact, int action);
+
+    /// <summary>
+    /// Возвращает список поддерживаемых значений перечисления.
+    /// </summary>
+    IEnumerable<object> GetSupportedTestTypes();
+
+    /// <summary>
+    /// Возвращает тип перечисления, используемый как тип проверки.
+    /// </summary>
+    Type GetTestTypeEnum();
   }
 }

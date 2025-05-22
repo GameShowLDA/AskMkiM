@@ -85,18 +85,15 @@ namespace UI.Controls.ProtocolNew
     /// <param name="isRepeatEnabled">Флаг, указывающий, повторять ли операцию.</param>
     /// <param name="preActionDelegate">Необязательный делегат для выполнения предварительных действий.</param>
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
-    internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null)
+    internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null, bool checkPower = true)
     {
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
-      if (!await GetIsIdleModeEnabled())
+      if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
       {
-        if (!await GetIsActivePower())
-        {
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
           await ProtocolSelfCheck.FinalizeAsync();
           return;
-        }
       }
 
       if (preActionDelegate != null)

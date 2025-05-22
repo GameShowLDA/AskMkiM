@@ -31,6 +31,7 @@ namespace MainWindowProgram
     protected override async void OnStartup(StartupEventArgs e)
     {
       base.OnStartup(e);
+
       CommandLineArgs = e.Args; // Сохраняем аргументы
 
       Console.SetOut(new ConsoleRedirector());

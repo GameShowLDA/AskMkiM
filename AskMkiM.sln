@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleUI", "ConsoleUI\Cons
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleUtilities", "ConsoleUtilities\ConsoleUtilities.csproj", "{F7032DA4-245E-9AB8-CCD8-E1C6EC47E562}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCommandAnalyser", "ControlCommandAnalyser\ControlCommandAnalyser.csproj", "{F49B175E-973E-4C8F-A602-00CC60B7E104}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +84,10 @@ Global
 		{F7032DA4-245E-9AB8-CCD8-E1C6EC47E562}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7032DA4-245E-9AB8-CCD8-E1C6EC47E562}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7032DA4-245E-9AB8-CCD8-E1C6EC47E562}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49B175E-973E-4C8F-A602-00CC60B7E104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49B175E-973E-4C8F-A602-00CC60B7E104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49B175E-973E-4C8F-A602-00CC60B7E104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49B175E-973E-4C8F-A602-00CC60B7E104}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

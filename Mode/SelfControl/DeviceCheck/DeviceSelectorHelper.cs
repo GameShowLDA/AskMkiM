@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NewCore.Base.Interface.Main;
 using UI.Components;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using static UI.Components.DeviceSelectorPanel;
 
 namespace Mode.SelfControl.DeviceCheck
@@ -177,6 +178,53 @@ namespace Mode.SelfControl.DeviceCheck
         panel.Dispatcher.Invoke(TryGet);
 
       return device;
+    }
+
+    /// <summary>
+    /// Безопасно извлекает выбранное значение перечисления из поля "Тип проверки".
+    /// </summary>
+    /// <typeparam name="TEnum">Тип перечисления.</typeparam>
+    /// <param name="panel">Экземпляр <see cref="DeviceSelectorPanel"/>.</param>
+    /// <returns>Выбранное значение enum или null.</returns>
+    public static TEnum? GetSelectedSelfControlEnumSafe<TEnum>(this DeviceSelectorPanel panel)
+      where TEnum : struct, Enum
+    {
+      TEnum? result = null;
+
+      void TryGet()
+      {
+        result = panel.GetSelectedSelfControlEnum<TEnum>();
+      }
+
+      if (panel.Dispatcher.CheckAccess())
+        TryGet();
+      else
+        panel.Dispatcher.Invoke(TryGet);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Безопасно извлекает выбранное значение enum из PartData, не зная точного типа.
+    /// </summary>
+    /// <param name="panel">Экземпляр <see cref="DeviceSelectorPanel"/>.</param>
+    /// <returns>Значение перечисления (System.Enum) или null.</returns>
+    public static System.Enum? GetSelectedSelfControlEnumUntypedSafe(this DeviceSelectorPanel panel)
+    {
+      System.Enum? result = null;
+
+      void TryGet()
+      {
+        if (panel.PartDataControl.SelectedItem is EnumDisplayItem item)
+          result = item.Value;
+      }
+
+      if (panel.Dispatcher.CheckAccess())
+        TryGet();
+      else
+        panel.Dispatcher.Invoke(TryGet);
+
+      return result;
     }
 
   }

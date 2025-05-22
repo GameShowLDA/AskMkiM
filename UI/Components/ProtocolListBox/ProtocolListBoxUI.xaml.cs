@@ -100,6 +100,21 @@ namespace UI.Components.ProtocolListBox
       });
     }
 
+    public Task AppendEmptyLineAsync(int indentLevel = 0)
+    {
+      var emptyLine = new ShowMessageModel
+      {
+        Header = string.Empty,
+        Message = string.Empty,
+        Time = string.Empty,
+        HeaderColor = Colors.Transparent,
+        MessageColor = Colors.Transparent,
+        IndentLevel = indentLevel
+      };
+
+      return AppendLineAsync(emptyLine);
+    }
+
     public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false)
     {
       await AppendLineAsync(model);

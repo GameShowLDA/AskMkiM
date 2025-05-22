@@ -26,7 +26,8 @@ namespace Mode.SelfControl.DeviceCheck
       ProtocolUI.SetSettings(
         this,
         StartDelegate: ExecuteMeasurementProcess,
-        true);
+        true, 
+        checkPower: false);
     }
 
     /// <summary>
@@ -39,13 +40,19 @@ namespace Mode.SelfControl.DeviceCheck
 
       var device = DeviceSelectorHelper.GetSelectedRelayDeviceByTypeSafe(deviceSelector);
       var type = deviceSelector.GetSelectedRelayDeviceType();
+      var part = deviceSelector.GetSelectedSelfControlEnumUntypedSafe();
 
       if (device != null)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
-          "Тип данных",
-          message: $"{type}",
-          messageColor: ShowMessageModel.SuccessMessage.TitleColor));
+        var meter = DeviceSelectorHelper.GetFastMeterSafe(deviceSelector);
+        if (meter == null)
+        {
+          await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
+            "Ошибка",
+            message: "Не удалось преобразовать объект в измеритель!",
+            messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+          return;
+        }
 
         switch (type)
         {
@@ -54,7 +61,7 @@ namespace Mode.SelfControl.DeviceCheck
             break;
 
           case RelayDeviceType.SwitchingDevice when device is ISwitchingDevice switcher:
-            // обработка switcher
+            await switcher.SelfTestManager.StartSelfCheck(ProtocolUI, part, switcher, meter);
             break;
 
           case RelayDeviceType.PowerSourceModule when device is IPowerSourceModule mint:
@@ -71,15 +78,7 @@ namespace Mode.SelfControl.DeviceCheck
         return;
       }
 
-      var meter = DeviceSelectorHelper.GetFastMeterSafe(deviceSelector);
-      if (meter == null)
-      {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
-          "Ошибка",
-          message: "Не удалось преобразовать объект в измеритель!",
-          messageColor: ShowMessageModel.ErrorMessage.TitleColor));
-        return;
-      }
+
 
       // продолжение работы с meter и device
     }

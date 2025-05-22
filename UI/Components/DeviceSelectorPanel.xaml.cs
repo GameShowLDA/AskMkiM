@@ -1,7 +1,12 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Drawing.Drawing2D;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using DataBaseConfiguration.Services.Device;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
+using Utilities;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components
@@ -20,6 +25,8 @@ namespace UI.Components
       PowerSourceModule
     }
 
+    public ChoiceDevice PartDataControl;
+
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceSelectorPanel"/>.
     /// Загружает все доступные устройства для выбора.
@@ -28,11 +35,50 @@ namespace UI.Components
     {
       InitializeComponent();
       ChassisData.DeviceSelected += OnChassisManagerSelected;
+      RelayData.DeviceSelected += RelayData_DeviceSelected;
+      PartData.DeviceSelected += PartData_DeviceSelected;
+
       SelectedDeviceInfoVisibility = Visibility.Collapsed;
       FastMeterSelectionVisibility = Visibility.Collapsed;
+      SelfControlPartSelectionVisibility = Visibility.Collapsed;
 
       LoadManagerChassis();
+
+      PartDataControl = PartData;
     }
+
+    private void PartData_DeviceSelected(object obj)
+    {
+      FastMeterSelectionVisibility = Visibility.Visible;
+      LoadMeter();
+    }
+
+    private void RelayData_DeviceSelected(object obj)
+    {
+      SelfControlPartSelectionVisibility = Visibility.Visible;
+
+      var selectedDevice = RelayData.SelectedItem;
+
+      if (selectedDevice is ISwitchingDevice switchingDevice &&
+          switchingDevice.SelfTestManager is ISelfTestCheckerDeviceBusCommutation checker)
+      {
+        var enumType = checker.GetTestTypeEnum();
+        SetSelfControlEnum(enumType);
+      }
+      else if (selectedDevice is IPowerSourceModule powerSource &&
+               powerSource.SelfTestManager is ISelfTestCheckerDeviceBusCommutation checker2)
+      {
+        var enumType = checker2.GetTestTypeEnum();
+        SetSelfControlEnum(enumType);
+      }
+      // else if (selectedDevice is IRelaySwitchModule relayModule &&
+      //          relayModule.SelfTestManager is ISelfTestCheckerDeviceBusCommutation checker3)
+      // {
+      //   var enumType = checker3.GetTestTypeEnum();
+      //   SetSelfControlEnum(enumType);
+      // }
+    }
+
 
     /// <summary>
     /// Загружает список всех доступных управляющих шасси и отображает их в поле выбора.
@@ -152,6 +198,7 @@ namespace UI.Components
       set => SelectedDeviceInfoBlock.Visibility = value;
 
     }
+
     /// <summary>
     /// Управляет видимостью элемента интерфейса, отображающего выбранный измеритель (FastMeter).
     /// </summary>
@@ -159,6 +206,15 @@ namespace UI.Components
     {
       get => FastMeterSelectionControl.Visibility;
       set => FastMeterSelectionControl.Visibility = value;
+    }
+
+    /// <summary>
+    /// Управляет видимостью элемента интерфейса, отображающего выбранный измеритель (FastMeter).
+    /// </summary>
+    public Visibility SelfControlPartSelectionVisibility
+    {
+      get => SelfControlPartSelector.Visibility;
+      set => SelfControlPartSelector.Visibility = value;
     }
 
     /// <summary>
@@ -170,15 +226,11 @@ namespace UI.Components
       if (obj is IChassisManager)
       {
         SelectedDeviceInfoVisibility = Visibility.Visible;
-        FastMeterSelectionVisibility = Visibility.Visible;
-
         LoadAllSelectableDevices();
-        LoadMeter();
       }
       else
       {
         SelectedDeviceInfoVisibility = Visibility.Collapsed;
-        FastMeterSelectionVisibility = Visibility.Collapsed;
       }
     }
 
@@ -228,5 +280,51 @@ namespace UI.Components
         _ => null
       };
     }
+
+    /// <summary>
+    /// Устанавливает перечисление в поле выбора "Тип проверки".
+    /// Работает с любым enum.
+    /// </summary>
+    /// <param name="enumType">Тип перечисления.</param>
+    /// <param name="defaultSelected">Значение, которое нужно выбрать по умолчанию (необязательно).</param>
+    public void SetSelfControlEnum(Type enumType, Enum? defaultSelected = null)
+    {
+      if (!enumType.IsEnum)
+        throw new ArgumentException("Тип должен быть перечислением (enum).", nameof(enumType));
+
+      var values = Enum.GetValues(enumType).Cast<Enum>();
+
+      var items = values.Select(e =>
+      {
+        var field = enumType.GetField(e.ToString());
+        var attr = field?.GetCustomAttribute<DescriptionAttribute>();
+        var desc = attr?.Description ?? e.ToString();
+        return new EnumDisplayItem { Description = desc, Value = e };
+      }).ToList();
+
+      PartData.ItemsSource = items;
+      PartData.DisplayFields = items.Select(i => i.Description).ToList();
+
+      if (defaultSelected != null)
+      {
+        var selectedItem = items.FirstOrDefault(i => i.Value.Equals(defaultSelected));
+        if (selectedItem != null)
+          PartData.SelectedItem = selectedItem;
+      }
+    }
+
+    /// <summary>
+    /// Получает выбранное значение enum из поля "Тип проверки".
+    /// </summary>
+    /// <typeparam name="TEnum">Тип перечисления.</typeparam>
+    public TEnum? GetSelectedSelfControlEnum<TEnum>() where TEnum : struct, Enum
+    {
+      if (PartData.SelectedItem is EnumDisplayItem item && item.Value is TEnum enumValue)
+        return enumValue;
+
+      return null;
+    }
+
+
   }
 }

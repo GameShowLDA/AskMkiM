@@ -198,8 +198,6 @@ namespace UI.Components
     /// <param name="e">Данные события клавиатуры.</param>
     private void MultiWindowControl_KeyDown(object sender, KeyEventArgs e)
     {
-      Console.WriteLine($"e.Key = {e.Key}; e.SystemKey = {e.SystemKey}; Keyboard.Modifiers = {Keyboard.Modifiers}");
-
       if (e.Key == Key.System && e.SystemKey == Key.X && Keyboard.Modifiers == ModifierKeys.Alt)
       {
         var activeTab = fileManager.OpenPages.FirstOrDefault(page =>

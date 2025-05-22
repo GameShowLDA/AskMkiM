@@ -43,6 +43,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     readonly ActionExecutor ActionExecutor;
 
+    bool _checkPower = true;
+
     #region Делегаты выполнения.
 
     /// <summary>
@@ -84,8 +86,8 @@ namespace UI.Controls.ProtocolNew
       bool isRepeatEnabled,
       StopDelegate StopDelegate = null,
       ReturnDelegate ReturnDelegate = null,
-      PreActionDelegate preActionDelegate = null
-      )
+      PreActionDelegate preActionDelegate = null,
+      bool checkPower = true)
     {
       try
       {
@@ -94,6 +96,7 @@ namespace UI.Controls.ProtocolNew
         _startDelegate = StartDelegate;
         _returnDelegate = ReturnDelegate;
         _preActionDelegate = preActionDelegate;
+        _checkPower = checkPower;
 
         if (ReturnDelegate != null)
         {
@@ -141,7 +144,7 @@ namespace UI.Controls.ProtocolNew
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    private async Task StartAsync() => await ActionExecutor.StartAsync(_startDelegate, _stopDelegate, header.Text, _isRepeatEnabled, _preActionDelegate);
+    private async Task StartAsync() => await ActionExecutor.StartAsync(_startDelegate, _stopDelegate, header.Text, _isRepeatEnabled, _preActionDelegate, _checkPower);
 
     /// <summary>
     /// Завершение текущей выполняемой задачи.
@@ -215,13 +218,14 @@ namespace UI.Controls.ProtocolNew
 
       if (IsBlockStart)
       {
+        await protocolTextBox.AppendEmptyLineAsync();
         StepControlManager.ExitBlock();
         StepControlManager.EnterBlock();
       }
 
       if (await GetTimeStart())
       {
-        showMessageModel.Time = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", System.Globalization.CultureInfo.InvariantCulture);
+        showMessageModel.Time = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", CultureInfo.InvariantCulture);
       }
 
       if (!await GetShowDetailedProtocol())

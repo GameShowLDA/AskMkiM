@@ -27,7 +27,6 @@ namespace AppConfiguration.Services
       {
         if (!ReferenceEquals(_instance, value))
         {
-          Console.WriteLine($"Активный элемент сменен на \"{value.Header}\"");
           _instance = value;
           InstanceChanged?.Invoke(_instance);
         }

@@ -8,6 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <local:IndentToMarginConverter x:Key="IndentToMarginConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -26,7 +27,7 @@
                  >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock TextWrapping="Wrap" FontSize="20">
+                        <TextBlock TextWrapping="Wrap" FontSize="20"  Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
                         <Run Text="{Binding Header}" Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Run Text=": " Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
                         <Run Text="{Binding Message}" Foreground="{Binding MessageColor, Converter={StaticResource ColorToBrushConverter}}" />

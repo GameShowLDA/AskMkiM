@@ -3,6 +3,7 @@ using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using static Utilities.LoggerUtility;
 
@@ -188,7 +189,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
-    private static async Task<bool> PerformCircuitTestAsync(ISelfTestChecker selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
     {
       LogInformation($"Запуск теста: {circuitName}");
 
@@ -245,7 +246,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если все реле прошли проверку, иначе false.</returns>
-    private static async Task<bool> PerformRelayCheck(ISelfTestChecker selfTestChecker, TypeConnector testType, string circuitName, int busContact, IFastMeter meter)
+    private static async Task<bool> PerformRelayCheck(ISelfTestCheckerDeviceBusCommutation selfTestChecker, TypeConnector testType, string circuitName, int busContact, IFastMeter meter)
     {
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)
