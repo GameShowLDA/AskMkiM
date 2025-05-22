@@ -62,7 +62,6 @@ namespace UI.Components.FileComparerControls
 
     private void FileCompareWindow_Loaded(object sender, RoutedEventArgs e)
     {
-      FirstFileTextBlock.Text = "Укажите путь к первому файлу";
     }
 
     public new bool? ShowDialog()
