@@ -31,6 +31,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
+      await Task.Delay(100);
       return await ResetAsync();
     }
 
@@ -39,7 +40,7 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (await GetIsIdleModeEnabled())
       {
-        return (true, "Включен холостой режим");
+        return (true, string.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
@@ -83,7 +84,7 @@ namespace NewCore.Function.DeviceBusCommutation
       }
 
       DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout:1000);
       return result == "2.0.1";
     }
   }

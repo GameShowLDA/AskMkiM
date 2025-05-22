@@ -1,18 +1,8 @@
 ﻿using System.Windows.Controls;
 using Mode.Base;
-using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
-using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using Newtonsoft.Json.Linq;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using YamlDotNet.Core.Tokens;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
-using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.PI
 {
@@ -36,15 +26,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>
@@ -57,7 +39,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
         return;
       }
 
@@ -70,7 +52,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -114,14 +96,14 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
 
             var answer = await breakDown.DcwManger.MeasureCurrentAsync();
-            var successMessage = ShowMessageModel.SuccessMessage.Item1;
-            var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+            var successMessage = ShowMessageModel.ErrorMessage.Title;
+            var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
 
             bool error = false;
             if (answer >= dataModel.Param)
             {
               successMessage = ShowMessageModel.ErrorMessage.Item1;
-              colorMessage = ShowMessageModel.ErrorMessage.Item2;
+              colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
               error = true;
             }
 

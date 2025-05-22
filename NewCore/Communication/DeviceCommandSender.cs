@@ -11,10 +11,6 @@ namespace NewCore.Communication
   /// </summary>
   static public class DeviceCommandSender
   {
-    /// <summary>
-    /// Порт для входящих сообщений.
-    /// </summary>
-    private static readonly int _portInput = 8800;
 
     /// <summary>
     /// Порт для отправки сообщений.
@@ -46,7 +42,7 @@ namespace NewCore.Communication
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка пинга: {ex.Message}");
+        LogException($"Ошибка пинга", ex);
         return false;
       }
     }
@@ -85,19 +81,19 @@ namespace NewCore.Communication
       }
       catch (SocketException ex)
       {
-        LogError($"Ошибка соединения: {ex.Message}");
+        LogException($"Ошибка соединения", ex);
       }
       catch (TimeoutException ex)
       {
-        LogError($"Превышено время ожидания: {ex.Message}");
+        LogException($"Превышено время ожидания", ex);
       }
       catch (ArgumentException ex)
       {
-        LogError($"Неверные аргументы: {ex.Message}");
+        LogException($"Неверные аргументы", ex);
       }
       catch (Exception ex)
       {
-        LogError($"Непредвиденная ошибка: {ex.Message}");
+        LogException($"Непредвиденная ошибка", ex);
         throw;
       }
     }

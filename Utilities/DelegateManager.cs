@@ -5,15 +5,10 @@ namespace Utilities
   public static class DelegateManager
   {
     /// <summary>
-    /// Делегат для отображения сообщений.
-    /// </summary>
-    public delegate Task MessageDelegate(ShowMessageModel showMessageModel);
-
-    /// <summary>
     /// Делегат для выполнения предварительных действий.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
-    public delegate void PreActionDelegate();
+    public delegate Task PreActionDelegate(CancellationToken cancellationToken);
 
     /// <summary>
     /// Делегат для метода запуска.

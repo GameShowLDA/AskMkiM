@@ -1,19 +1,9 @@
 ﻿using System.Windows.Controls;
 using Mode.Base;
-using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
 using Mode.TestSuite.Metrology.MethodExecutor;
-using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using Newtonsoft.Json.Linq;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using YamlDotNet.Core.Tokens;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
-using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace TestWPF
 {
@@ -34,15 +24,7 @@ namespace TestWPF
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>
@@ -55,7 +37,7 @@ namespace TestWPF
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
         return;
       }
 
@@ -73,7 +55,7 @@ namespace TestWPF
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
         return;
       }
 
@@ -106,12 +88,12 @@ namespace TestWPF
 
       // var answer = await breakDown.IrManger.MeasureResistanceAsync();
       var answer = 0;
-      var successMessage = ShowMessageModel.SuccessMessage.Item1;
-      var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+      var successMessage = ShowMessageModel.ErrorMessage.Title;
+      var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
       if (answer < (dataModel.Param * 1000))
       {
         successMessage = ShowMessageModel.ErrorMessage.Item1;
-        colorMessage = ShowMessageModel.ErrorMessage.Item2;
+        colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
       }
 
       await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм [{successMessage}]", messageColor: colorMessage));

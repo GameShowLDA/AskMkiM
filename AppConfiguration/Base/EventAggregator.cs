@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static AppConfiguration.SystemState.SystemStateManager;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace AppConfiguration.Base
 {
@@ -44,14 +46,13 @@ namespace AppConfiguration.Base
     /// </summary>
     static public event Action<bool> AdminRightsChanged;
 
-
     /// <summary>
     /// Событие, которое вызывается, когда активно окно типа TextEditor.
     /// </summary>
     static public event Action<bool> TextEditorActive;
 
     /// <summary>
-    /// Событие, которое вызывается, когда активно окно типа TextEditor.
+    /// Событие, которое вызывается, когда закрывается окно типа TextEditor.
     /// </summary>
     static public event Action<bool, string> TextEditorClosing;
 
@@ -76,14 +77,27 @@ namespace AppConfiguration.Base
     static public event Action<string> SearchButtonPressed;
 
     /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замены одного слова в тексте.
+    /// </summary>
+    static public event Action ReplaceWordButtonPressed;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замены ысех найденных вхождений в тексте.
+    /// </summary>
+    static public event Action ReplaceAllWordsButtonPressed;
+
+    /// <summary>
     /// Событие, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
     /// </summary>
     public static event Action<string> SearchTextRequested;
 
+    /// <summary>
+    /// Событие, которое вызывается, когда обновляется искомый текст.
+    /// </summary>
     public static event Action<string> SearchTextUpdated;
 
     /// <summary>
-    /// Событие, которое вызывается, когда происходиити переключение активного окна.
+    /// Событие, которое вызывается, когда происходит переключение активного окна.
     /// </summary>
     public static event Action<bool> ActiveEditorChanged;
 
@@ -98,6 +112,11 @@ namespace AppConfiguration.Base
     public static event Action<string, bool?, bool?, int, string> SearchText;
 
     /// <summary>
+    /// Событие, которое вызывается, когда нажата кнопка замена слова.
+    /// </summary>
+    public static event Action<string, string, bool?, bool?, int, string> ReplaceText;
+
+    /// <summary>
     /// Событие для запроса показа окна прогресса с блюром на главном окне
     /// </summary>
     public static event Action RequestShowProgress;
@@ -106,6 +125,16 @@ namespace AppConfiguration.Base
     /// Событие для запроса закрытия окна прогресса и снятия блюра с главного окна
     /// </summary>
     public static event Action RequestCloseProgress;
+
+    /// <summary>
+    /// Событие, которое вызывается для открытия нового Opk-файла.
+    /// </summary>
+    static public event Action<UserControl, string, string> OpenOpk;
+
+    /// <summary>
+    /// Событие, которое вызывается при нажатии на кнопку "Сравнить".
+    /// </summary>
+    public static event Action<string, string> CompareFiles;
 
     /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
@@ -156,6 +185,17 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
+    /// Возвращает текущий статус прав администратора.
+    /// </summary>
+    /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
+    static public bool GetAdminRights()
+    {
+      bool result = false;
+      Application.Current.Dispatcher.Invoke(() => result = IsAdmin);
+      return result;
+    }
+
+    /// <summary>
     /// Метод вывода ошибки в блок информации программы.
     /// </summary>
     /// <param name="message">Сообщение.</param>
@@ -195,7 +235,7 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// Метод для вызова события, когда активное окно - TextEditor закрывается.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
     static public void RaiseTextEditorClosing(bool isTextEditor, string textEditorName)
@@ -204,7 +244,7 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// Метод для вызова события, когда закрывается SearchWindow.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
     static public void RaiseSearchWindowClosing(bool isOpen)
@@ -213,7 +253,7 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// Метод для вызова события, когда начинается поиск по тексту.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
     static public void RaiseSearchText(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
@@ -222,7 +262,16 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// Метод для вызова события при замене текста.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseReplaceText(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      ReplaceText?.Invoke(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда SearchWindow закрывается.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
     public static void RaiseCloseSearchWindow()
@@ -231,7 +280,7 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// Метод для вызова события, когда SearchWindow вновь становится активным.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
     static public void RaiseSearchWindowActivated(bool isActivated)
@@ -240,13 +289,17 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту.
+    /// Метод для вызова события, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту и есть выделенный текст, который передается в окно поиска.
     /// </summary>
     public static void RaiseSearchTextRequested(string selectedText)
     {
       SearchTextRequested?.Invoke(selectedText);
     }
 
+    /// <summary>
+    /// Метод для вызова события, которое вызывается, когда искомы текст в окне поиска обновляется.
+    /// </summary>
+    /// <param name="text"></param>
     public static void RaiseSearchTextUpdated(string text)
     {
       SearchTextUpdated?.Invoke(text);
@@ -259,6 +312,22 @@ namespace AppConfiguration.Base
     static public void RaiseSearchButtonPressed(string searchParameters)
     {
       SearchButtonPressed?.Invoke(searchParameters);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка замены одного найденного вхождения в тексте.
+    /// </summary>
+    static public void RaiseReplaceWordButtonPressed()
+    {
+      ReplaceWordButtonPressed?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда нажата кнопка замены всех найденных вхождений в тексте.
+    /// </summary>
+    static public void RaiseReplaceAllWordsButtonPressed()
+    {
+      ReplaceAllWordsButtonPressed?.Invoke();
     }
 
     /// <summary>
@@ -287,6 +356,24 @@ namespace AppConfiguration.Base
     public static void RaiseRequestCloseProgress()
     {
       RequestCloseProgress?.Invoke();
+    }
+
+    /// <summary>
+    /// Метод для вызова события добавления нового элемента.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseOpenOpk(UserControl userControl,string elementName, string elementData)
+    {
+      OpenOpk?.Invoke(userControl, elementName, elementData);
+    }
+
+    /// <summary>
+    /// Метод для вызова события сравнения файлов.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    public static void RaiseCompareFiles(string firstFilePath, string secondFilePath)
+    {
+      CompareFiles?.Invoke(firstFilePath, secondFilePath);
     }
   }
 }

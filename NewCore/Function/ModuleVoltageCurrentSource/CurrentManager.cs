@@ -39,7 +39,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
         return;
       }
 
-      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(4, integerPart, decimalPart).ToString());
+      await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(4, integerPart, decimalPart).ToString(), timeout: 2000);
     }
 
     /// <summary>

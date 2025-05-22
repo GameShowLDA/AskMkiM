@@ -1,4 +1,5 @@
-﻿using NewCore.Base.Function.ModuleVoltageCurrentSource;
+﻿using NewCore.Base.DeviceResponses;
+using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
 
 namespace NewCore.Base.Interface.Main
@@ -8,6 +9,7 @@ namespace NewCore.Base.Interface.Main
   /// </summary>
   public interface IPowerSourceModule : IAttachableDevice
   {
+
     /// <summary>
     /// Управление подключением и отключением шин.
     /// </summary>
@@ -22,5 +24,11 @@ namespace NewCore.Base.Interface.Main
     /// Управление настройками напряжения.
     /// </summary>
     public IVoltageManager VoltageManager { get; set; }
+    public ISelfTestCheckerModuleVoltageCurrentSource SelfTestManager { get; set; }
+
+    /// <summary>
+    /// JSON-строка с калибровочными коэффициентами по диапазонам сопротивления
+    /// </summary>
+    public string? ResistanceCalibrationJson { get; set; }
   }
 }

@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Справка</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Справочная система</h1>
+    </header>
+
+    <div class="container">
+        <nav class="sidebar">
+            <ul>
+                <li>
+                    <details open>
+                        <summary>✎ Редактор</summary>
+                        <ul>
+                            <li><a href="?section=hotkeys">✦ Горячие клавиши</a></li>
+                            <li><a href="?section=description">✦ Описание работы</a></li>
+                        </ul>
+                    </details>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <iframe id="content-frame" name="content-frame" frameborder="0"></iframe>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2025 Справочная система | Версия 1.0</p>
+    </footer>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const section = params.get('section') || 'hotkeys';
+        const frame = document.getElementById("content-frame");
+        frame.src = `TextEditor/${section}.html`;
+    </script>
+</body>
+</html>

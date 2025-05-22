@@ -1,4 +1,5 @@
-﻿using TestConsole.GPT;
+﻿using DataBaseConfiguration;
+using TestConsole.GPT;
 using TestConsole.MINT;
 
 namespace TestConsole
@@ -7,6 +8,7 @@ namespace TestConsole
   {
     static async Task Main(string[] args)
     {
+      var db = DataBaseConfig.InitializeDB();
       Console.ForegroundColor = ConsoleColor.White;
 
       Console.WriteLine("=== Главное меню ===");
@@ -22,11 +24,12 @@ namespace TestConsole
         Console.WriteLine("5. Самоконтроль МИНТ");
         Console.WriteLine("6. Проверка ввода данных");
         Console.WriteLine("7. ППУ");
+        Console.WriteLine("8. МИНТ колибровка");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 7)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 8)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -71,6 +74,7 @@ namespace TestConsole
 
 
           case 8:
+            await ResistanceCalibrationEditor.RunAsync();
             break;
 
           case 0:

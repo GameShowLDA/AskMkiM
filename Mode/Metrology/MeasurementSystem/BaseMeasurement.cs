@@ -1,9 +1,9 @@
-﻿using DataBaseConfiguration.Services;
+﻿using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
@@ -119,44 +119,48 @@ namespace Mode.Metrology.MeasurementSystem
         return (false, ex.Message);
       }
 
-      var connectedDevices = new HashSet<object>();
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", ShowMessageModel.SuccessMessage.TitleColor));
 
-      foreach (var role in Devices.Keys)
+      try
       {
-        foreach (var device in Devices[role])
+        var connectedDevices = new HashSet<object>();
+
+        foreach (var role in Devices.Keys)
         {
-          if (connectedDevices.Contains(device))
+          foreach (var device in Devices[role])
           {
-            continue;
-          }
-
-          connectedDevices.Add(device);
-
-          if (device is IDevice connectableDevice)
-          {
-            var (connected, message) = (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled()) ? await connectableDevice.ConnectableManager.ConnectAsync() : (true, string.Empty);
-            if (!connected)
+            if (connectedDevices.Contains(device))
             {
-              return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
-
-              throw new InvalidOperationException($"Не удалось подключить устройство с ролью {role}: {message}");
+              continue;
             }
 
-            if (await AppConfiguration.Protocol.ProtocolConfig.GetDeviceInfo())
-            {
-              await protocolUI.ShowMessageAsync(new ShowMessageModel($"{connectableDevice.Name}({connectableDevice.Number})", message: $"[{ShowMessageModel.SuccessMessage.Item1}]", messageColor: ShowMessageModel.SuccessMessage.Item2));
-            }
+            connectedDevices.Add(device);
 
-            LogInformation($"Устройство с ролью {role} успешно подключено.");
-          }
-          else
-          {
-            LogWarning($"Устройство с ролью {role} не поддерживает подключение.");
+            if (device is IDevice connectableDevice)
+            {
+              var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync();
+              if (!connected)
+              {
+                return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
+
+                throw new InvalidOperationException($"Не удалось подключить устройство с ролью {role}: {message}");
+              }
+
+              LogInformation($"Устройство с ролью {role} успешно подключено.");
+            }
+            else
+            {
+              LogWarning($"Устройство с ролью {role} не поддерживает подключение.");
+            }
           }
         }
-      }
 
-      return (true, string.Empty);
+        return (true, string.Empty);
+      }
+      catch (Exception ex)
+      {
+        return (false, ex.Message);
+      }
     }
 
     /// <summary>
@@ -175,9 +179,8 @@ namespace Mode.Metrology.MeasurementSystem
 
       ValidateDevices(relayModules, busSwitcher, mint, modeDevice);
 
-      await ConnectBusesAsync(relayModules, modeDevice);
-      await ConnectRelayPointsAsync(relayModules, point1, point2);
-      await ConnectDevicesToBusAsync(busSwitcher, mint, modeDevice);
+      await ConnectBusesAsync(busSwitcher, mint, relayModules, modeDevice, protocolUI);
+      await ConnectRelayPointsAsync(relayModules, point1, point2, protocolUI);
     }
 
     /// <summary>
@@ -185,7 +188,10 @@ namespace Mode.Metrology.MeasurementSystem
     /// </summary>
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
-    public abstract Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null);
+    public virtual async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+    {
+      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", ShowMessageModel.SuccessMessage.TitleColor));
+    }
 
     /// <summary>
     /// Выполняет измерение.
@@ -255,7 +261,9 @@ namespace Mode.Metrology.MeasurementSystem
       {
         case MetrologicalModeRole.IE:
         case MetrologicalModeRole.KC:
+        case MetrologicalModeRole.KN:
           return MetrologicalDeviceType.FastMeter;
+
         case MetrologicalModeRole.PR:
           return MetrologicalDeviceType.Mint;
 
@@ -337,35 +345,16 @@ namespace Mode.Metrology.MeasurementSystem
     /// </summary>
     /// <param name="relayModules">Список модулей коммутации реле.</param>
     /// <param name="modeDevice">Тип метрологического устройства.</param>
-    private async Task ConnectBusesAsync(List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice)
+    private async Task ConnectBusesAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice, ProtocolUI protocolUI)
     {
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин", ShowMessageModel.SuccessMessage.TitleColor));
+
       foreach (var relayModule in relayModules)
       {
         await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
         await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
       }
-    }
 
-    /// <summary>
-    /// Подключает реле к заданным точкам коммутации.
-    /// </summary>
-    /// <param name="relayModules">Список модулей коммутации реле.</param>
-    /// <param name="point1">Первая точка коммутации.</param>
-    /// <param name="point2">Вторая точка коммутации.</param>
-    private async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2)
-    {
-      await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
-      await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);
-    }
-
-    /// <summary>
-    /// Подключает измерительные устройства к соответствующим шинам в зависимости от режима.
-    /// </summary>
-    /// <param name="busSwitcher">Устройство коммутации шин.</param>
-    /// <param name="mint">Модуль источника напряжения и тока (если используется).</param>
-    /// <param name="modeDevice">Тип метрологического устройства.</param>
-    private async Task ConnectDevicesToBusAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, MetrologicalDeviceType modeDevice)
-    {
       if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
         await busSwitcher.ConnectorManager.ConnectBreakdownTester();
@@ -379,6 +368,20 @@ namespace Mode.Metrology.MeasurementSystem
         }
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
       }
+    }
+
+    /// <summary>
+    /// Подключает реле к заданным точкам коммутации.
+    /// </summary>
+    /// <param name="relayModules">Список модулей коммутации реле.</param>
+    /// <param name="point1">Первая точка коммутации.</param>
+    /// <param name="point2">Вторая точка коммутации.</param>
+    private async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, ProtocolUI protocolUI)
+    {
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек", ShowMessageModel.SuccessMessage.TitleColor));
+
+      await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
+      await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);
     }
     #endregion
   }

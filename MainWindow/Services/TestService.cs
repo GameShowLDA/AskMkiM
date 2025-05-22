@@ -1,0 +1,67 @@
+﻿using System.Windows.Input;
+using MainWindowProgram.Infrastructure;
+using Mode.TestSuite.Metrology.MethodExecutor.CI;
+using Mode.TestSuite.Metrology.MethodExecutor.PI;
+using Mode.TestSuite.Metrology.NodeMethod.CI;
+using Mode.TestSuite.Metrology.NodeMethod.PI;
+using static UI.Components.Invoke.OpenFileButton;
+
+namespace MainWindowProgram.Services
+{
+  /// <summary>
+  /// Реализация сервиса для добавления элементов управления для тестов.
+  /// </summary>
+  public class TestService
+  {
+    /// <summary>
+    /// Сервис управления многооконным интерфейсом.
+    /// </summary>
+    private readonly MultiWindowService _multiWindow;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TestService"/>.
+    /// </summary>
+    /// <param name="multiWindow">Сервис управления многооконным интерфейсом.</param>
+    public TestService(MultiWindowService multiWindow)
+    {
+      _multiWindow = multiWindow;
+    }
+
+    /// <summary>
+    /// Добавляет элемент управления для теста методом узла СИ в multiEditors.
+    /// </summary>
+    public async Task AddCiNodeMethodControlAsync() =>
+      await _multiWindow.AddControlAsync("Метод узла СИ", new CiNodeMethodControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для теста методом узла ПИ(DCW) в multiEditors.
+    /// </summary>
+    public async Task AddPiDCWNodeMethodControlAsync() =>
+      await _multiWindow.AddControlAsync("Метод узла ПИ(DCW)", new PiDCWNodeMethodControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для теста методом узла ПИ(ACW) в multiEditors.
+    /// </summary>
+    public async Task AddPiACWNodeMethodControlAsync() =>
+      await _multiWindow.AddControlAsync("Метод узла ПИ(ACW)", new PiACWNodeMethodControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для теста групповым методом СИ в multiEditors.
+    /// </summary>
+    public async Task AddCiMethodExecutorControlAsync() =>
+      await _multiWindow.AddControlAsync("Групповой метод СИ", new CiMethodExecutor(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для теста групповым методом ПИ(ACW) в multiEditors.
+    /// </summary>
+    public async Task AddPiACWMethodExecutorControlAsync() =>
+      await _multiWindow.AddControlAsync("Групповой метод ПИ(ACW)", new PiACWMethodExecutorControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для теста групповым методом ПИ(DCW) в multiEditors.
+    /// </summary>
+    public async Task AddPiDCWMethodExecutorControlAsync() =>
+      await _multiWindow.AddControlAsync("Групповой метод ПИ(DCW)", new PiDCWMethodExecutorControl(), TypeWindow.DeviceControl);
+
+  }
+}

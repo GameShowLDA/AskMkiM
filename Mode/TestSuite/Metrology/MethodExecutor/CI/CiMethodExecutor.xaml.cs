@@ -1,20 +1,9 @@
 ﻿using System.Windows.Controls;
 using AppConfiguration.Execution;
 using Mode.Base;
-using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
-using Mode.TestSuite.Metrology.MethodExecutor;
-using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using Newtonsoft.Json.Linq;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using YamlDotNet.Core.Tokens;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
-using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.CI
 {
@@ -38,15 +27,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>
@@ -59,7 +40,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg), SkipStepModeCheck: true);
         return;
       }
 
@@ -67,19 +48,13 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
       var second = dataModel.SecondPoint;
       var param = dataModel.Param;
 
-      // ManagerChassis managerChassis = new ManagerChassis();
-      // managerChassis.ConnectionDetails = "192.168.1.0";
-      // await managerChassis.PowerManager.StartPowerAsync();
-      // await Task.Delay(5000);
-      // await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-
       TestMeasurement testMeasurement = new TestMeasurement();
       try
       {
         var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
         if (!connect.Connect)
         {
-          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
           return;
         }
 
@@ -113,14 +88,14 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
-        var answer = await breakDown.IrManger.MeasureResistanceAsync();
+        var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, dataModel.Param, 60000);
         var pause = false;
-        var successMessage = ShowMessageModel.SuccessMessage.Item1;
-        var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+        var successMessage = ShowMessageModel.ErrorMessage.Title;
+        var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
         if (answer < (dataModel.Param * 1000))
         {
           successMessage = ShowMessageModel.ErrorMessage.Item1;
-          colorMessage = ShowMessageModel.ErrorMessage.Item2;
+          colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
           if (await ExecutionConfig.GetIsStopOnErrorEnabled())
           {
             pause = true;

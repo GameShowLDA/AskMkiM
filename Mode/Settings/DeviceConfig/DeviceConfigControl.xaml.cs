@@ -1,7 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using Mode.Settings.DeviceConfig.BreakDown;
 using Mode.Settings.DeviceConfig.ChassisManager;
 using Mode.Settings.DeviceConfig.DeviceBusCommutation;

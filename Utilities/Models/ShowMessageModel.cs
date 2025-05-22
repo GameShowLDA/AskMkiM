@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Windows;
+using System.Windows.Media;
 
 namespace Utilities.Models
 {
@@ -10,12 +11,12 @@ namespace Utilities.Models
     /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
-    static public Tuple<string, Color> SuccessMessage => Tuple.Create("НОРМА", Color.FromArgb(255, 79, 205, 101));
+    static public (string Title, Color TitleColor) SuccessMessage => ("НОРМА", Color.FromArgb(255, 79, 205, 101));
 
     /// <summary>
     /// Сообщение и цвет для ошибки.
     /// </summary>
-    static public Tuple<string, Color> ErrorMessage => Tuple.Create("БРАК", Color.FromArgb(255, 241, 48, 27));
+    static public (string Title, Color TitleColor) ErrorMessage => ("БРАК", Color.FromArgb(255, 241, 48, 27));
 
     /// <summary>
     /// Получает или задает заголовок сообщения.
@@ -26,6 +27,8 @@ namespace Utilities.Models
     /// Получает или задает текст сообщения.
     /// </summary>
     public string Message { get; set; }
+
+    public string Time { get; set; }
 
     /// <summary>
     /// Получает или задает цвет заголовка сообщения.
@@ -48,12 +51,46 @@ namespace Utilities.Models
     public bool CanBeDeleted { get; set; }
 
     /// <summary>
+    /// Показывает, связано ли сообщение с устройством.
+    /// True — сообщение от устройства или касается его работы; 
+    /// False — общее информационное сообщение.
+    /// </summary>
+    public bool IsDeviceMessage { get; set; }
+
+    /// <summary>
+    /// Размер табуляции перед строкой.
+    /// </summary>
+    public int IndentLevel { get; set; }
+
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/>.
     /// </summary>
     public ShowMessageModel()
     {
       ExecutionError = false;
       CanBeDeleted = false;
+      IsDeviceMessage = false;
+      IndentLevel = 0;
+
+      try
+      {
+        if (Application.Current != null)
+        {
+          Application.Current.Dispatcher.Invoke(() =>
+          {
+            if (Application.Current?.Resources["ForegroundSolidColorBrush"] is SolidColorBrush brush)
+            {
+              HeaderColor = brush.Color;
+              MessageColor = brush.Color;
+            }
+          });
+        }
+      }
+      catch (Exception)
+      {
+
+      }
     }
 
     /// <summary>
@@ -89,10 +126,18 @@ namespace Utilities.Models
     /// <param name="messageColor">Цвет основного текста сообщения (по умолчанию null).</param>
     public ShowMessageModel(string header = null, Color? headerColor = null, string message = null, Color? messageColor = null) : this()
     {
+      if (headerColor != null)
+      {
+        HeaderColor = headerColor;
+      }
+
+      if (messageColor != null)
+      {
+        MessageColor = messageColor;
+      }
+
       Header = header;
-      HeaderColor = headerColor;
       Message = message;
-      MessageColor = messageColor;
     }
   }
 }

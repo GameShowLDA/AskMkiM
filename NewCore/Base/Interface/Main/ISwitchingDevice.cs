@@ -31,6 +31,6 @@ namespace NewCore.Base.Interface.Main
     /// <summary>
     /// Задаёт иди возвращает объект для самоконтроля устройства.
     /// </summary>
-    public ISelfTestChecker SelfTestManager { get; set; }
+    public ISelfTestCheckerDeviceBusCommutation SelfTestManager { get; set; }
   }
 }

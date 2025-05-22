@@ -1,11 +1,12 @@
-﻿using NewCore.Base.Function.Breakdown;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
-using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
+using static AppConfiguration.Execution.ExecutionConfig;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -14,403 +15,272 @@ namespace NewCore.Function.GPT
   /// </summary>
   public class IrMode : IIrModeBreakdown
   {
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="IrMode"/>.
-    /// </summary>
-    /// <param name="gpt79904">Объект <see cref="GPT79904"/> для управления устройством.</param>
+    private GPT79904 _gptModel { get; set; }
+    private static double timeDelay = 2;
+    private static int delayBeforeCall = 100;
+
     public IrMode(GPT79904 gpt79904) => _gptModel = gpt79904;
 
-    /// <summary>
-    /// Экземпляр устройства GPT79904.
-    /// </summary>
-    GPT79904 _gptModel { get; set; }
+    #region Mode
 
-    static private double timeDelay = 2;
-
-    static private int delayBeforeCall = 100;
-
-    /// <summary>
-    /// Gets or sets значения напряжения пробойной установки.
-    /// </summary>
-    public double Voltage { get; set; }
-
-    /// <summary>
-    /// Gets or sets значения высокого сопротивления пробойной установки.
-    /// </summary>
-    public double Rhiset { get; set; }
-
-    /// <summary>
-    /// Gets or sets значения низкого сопротивления пробойной установки.
-    /// </summary>
-    public double Rloset { get; set; }
-
-    /// <summary>
-    /// Устанавливает режим сопротивления изоляции на пробойке.
-    /// </summary>
-    public async Task SetModeAsync()
+    /// <inheritdoc />
+    public async Task<(bool Success, string Message)> SetModeAsync()
     {
-      LogInformation("Устанавливаем режим СИ на GPT-79904");
+      LogInformation("Устанавливаем режим IR на GPT-79904");
 
-      if (await GetIsIdleModeEnabled())
+      if (await GetIsIdleModeEnabled()) return (true, string.Empty);
+
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
+
+      for (int attempt = 1; attempt <= 2; attempt++)
       {
-        return;
-      }
+        await _gptModel.DeviceProtocol.QueryAsync(command);
+        var check = await GetModeAsync();
 
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
-      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-    }
-
-    /// <summary>
-    /// Устанавливает напряжения на пробойном устройстве.
-    /// </summary>
-    /// <param name="value">Устанавливаемое значение.</param>
-    public async Task SetVoltageAsync(double value)
-    {
-      LogInformation($"Устанавливаем напряжение {value} для режима СИ на GPT-79904");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      string valueResult = (value / 1000).ToString().Replace(",", ".");
-      var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {valueResult}";
-      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-    }
-
-    /// <summary>
-    /// Устанавливает время теста IR.
-    /// </summary>
-    /// <param name="value">Устанавливаемое значение (в секундах).</param>
-    public async Task SetTestTimeAsync(double value)
-    {
-      LogInformation($"Устанавливаем время измерения {value} для режима СИ на GPT-79904");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value}";
-      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-      timeDelay = value;
-    }
-
-    /// <summary>
-    /// Возвращает напряжение на пробойном устройстве.
-    /// </summary>
-    /// <returns>Значение напряжения (в В).</returns>
-    public async Task<double> GetVoltageAsync()
-    {
-      LogInformation("Считывание данных с ПУ");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return 0;
-      }
-
-      var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
-      var return_value = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 10, delayBeforeCall: delayBeforeCall);
-
-      string numericPart = return_value.Replace("kV", string.Empty).Trim().Replace(".", ",");
-
-      if (double.TryParse(numericPart, out double voltageInVolts))
-      {
-        double voltageInMillivolts = voltageInVolts * 1000;
-        LogInformation($"Напряжение при режиме СИ: {voltageInMillivolts} В");
-        return voltageInMillivolts;
-      }
-      else
-      {
-        LogError("Ошибка чтения напряжение в режиме СИ: не удалось преобразовать строку в число.");
-        return -1.0;
-      }
-    }
-
-    /// <summary>
-    /// Измерение сопротивления с преобразованием результата в МОм.
-    /// </summary>
-    /// <returns>Результат измерения в МОм.</returns>
-    public async Task<double> MeasureResistanceAsync()
-    {
-      LogInformation("Запуск измерений режима СИ");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return 0;
-      }
-
-      var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
-      query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
-      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
-
-      var result = answerDevice.Split(',');
-      var measureResulte = result[3];
-
-      LogInformation($"Результат измерения режима СИ: {measureResulte}");
-
-      double multiplier = 1.0;
-      string numericPart = measureResulte.ToLower();
-
-      if (numericPart.EndsWith("gohm"))
-      {
-        multiplier = 1_000; // ГОм -> МОм
-        numericPart = numericPart.Replace("gohm", "").Trim();
-      }
-      else if (numericPart.EndsWith("mohm"))
-      {
-        multiplier = 1; // МОм -> МОм
-        numericPart = numericPart.Replace("mohm", "").Trim();
-      }
-      else if (numericPart.EndsWith("kohm"))
-      {
-        multiplier = 0.001; // кОм -> МОм
-        numericPart = numericPart.Replace("kohm", "").Trim();
-      }
-      else
-      {
-        LogError($"Неизвестный формат результата: {measureResulte}");
-        throw new FormatException("Неподдерживаемый формат результата измерения.");
-      }
-
-      numericPart = numericPart.Replace('.', ',');
-
-      // Преобразование числовой части
-      if (double.TryParse(numericPart, out var resistanceValue))
-      {
-        var resistanceInMegaOhms = resistanceValue * multiplier;
-        LogInformation($"Перевод в МОм: {resistanceInMegaOhms}");
-        return resistanceInMegaOhms;
-      }
-      else
-      {
-        LogError($"Ошибка преобразования значения: {measureResulte}");
-        throw new FormatException("Не удалось преобразовать значение сопротивления.");
-      }
-    }
-
-    /// <summary>
-    /// Возвращает список напряжений для заданного сопротивления.
-    /// </summary>
-    /// <param name="resistance">Сопротивление в МОм.</param>
-    /// <returns>Список напряжений.</returns>
-    public List<int> GetVoltagesForResistance(double resistance)
-    {
-      var voltages = new List<int>();
-
-      if (resistance >= 0.1 && resistance <= 0.3)
-      {
-        voltages.Add(50);
-        voltages.Add(100);
-      }
-      else if (resistance > 0.3 && resistance <= 1.0)
-      {
-        voltages.Add(100);
-        voltages.Add(200);
-      }
-      else if (resistance > 1.0 && resistance <= 3.0)
-      {
-        voltages.Add(200);
-        voltages.Add(500);
-      }
-      else if (resistance > 3.0 && resistance <= 10.0)
-      {
-        voltages.Add(200);
-        voltages.Add(500);
-      }
-      else if (resistance > 10.0 && resistance <= 30.0)
-      {
-        voltages.Add(200);
-        voltages.Add(500);
-      }
-      else if (resistance > 30.0 && resistance <= 100.0)
-      {
-        voltages.Add(200);
-        voltages.Add(500);
-      }
-      else if (resistance > 100.0 && resistance <= 300.0)
-      {
-        voltages.Add(200);
-        voltages.Add(500);
-      }
-      else if (resistance > 300.0 && resistance <= 1000.0)
-      {
-        voltages.Add(200);
-        voltages.Add(500);
-      }
-      else
-      {
-        LogError("Сопротивление вне поддерживаемого диапазона.");
-      }
-
-      return voltages;
-    }
-
-    /// <summary>
-    /// Устанавливает высокий предел сопротивления IR.
-    /// </summary>
-    /// <param name="value">Устанавливаемое значение (в ГОм).</param>
-    public async Task SetHighResistanceLimitAsync(double value)
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}";
-      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-    }
-
-    /// <summary>
-    /// Устанавливает низкий предел сопротивления IR.
-    /// </summary>
-    /// <param name="value">Устанавливаемое значение (в МОм).</param>
-    public async Task SetLowResistanceLimitAsync(double value)
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      string query = string.Empty;
-      if (value == 1000)
-      {
-        value = 999;
-      }
-
-      query = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
-      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-    }
-
-    /// <summary>
-    /// Устанавливает смещение IR.
-    /// </summary>
-    /// <param name="value">Устанавливаемое значение (в ГОм).</param>
-    public async Task SetOffsetAsync(double value)
-    {
-      LogInformation($"Устанавливаем смещение IR: {value} M");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} {value}M";
-      await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-    }
-
-    /// <summary>
-    /// Считывает текущую конфигурацию IR.
-    /// </summary>
-    /// <returns>Объект с текущими настройками IR.</returns>
-    public async Task<IrConfiguration> ReadConfigurationAsync()
-    {
-      try
-      {
-        LogInformation("Чтение конфигурации режима IR");
-
-        if (await GetIsIdleModeEnabled())
+        if (check.Success)
         {
-          return new IrConfiguration();
+          return (true, string.Empty);
         }
 
-        // Чтение напряжения
-        var voltageQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
-        var voltageResponse = await _gptModel.DeviceProtocol.QueryAsync(voltageQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
-        double voltage = ParseVoltage(voltageResponse);
+        LogWarning($"Попытка {attempt} неудачна. Ответ: {check.Message}");
+      }
 
-        // Чтение высокого предела сопротивления
-        var rhiQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?";
-        var rhiResponse = await _gptModel.DeviceProtocol.QueryAsync(rhiQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
-        double rhi = ParseResistanceG(rhiResponse);
+      return (false, "Не удалось установить режим IR после 2 попыток.");
+    }
 
-        // Чтение низкого предела сопротивления
-        var rloQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?";
-        var rloResponse = await _gptModel.DeviceProtocol.QueryAsync(rloQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
-        double rlo = ParseResistanceM(rloResponse);
+    /// <inheritdoc />
+    public async Task<(bool Success, string Message)> GetModeAsync()
+    {
+      var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?", timeout: 1000);
+      var actual = response.Trim();
+      return actual.Equals("IR", StringComparison.OrdinalIgnoreCase)
+        ? (true, actual)
+        : (false, actual);
+    }
 
-        // Чтение времени теста
-        var timeQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} ?";
-        var timeResponse = await _gptModel.DeviceProtocol.QueryAsync(timeQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
-        double time = ParseTime(timeResponse);
+    #endregion
 
-        // Чтение смещения
-        var refQuery = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} ?";
-        var refResponse = await _gptModel.DeviceProtocol.QueryAsync(refQuery, 1000, 10, delayBeforeCall: delayBeforeCall);
-        double reference = ParseResistanceG(refResponse);
+    #region Voltage
 
-        // Возвращаем объект конфигурации
-        return new IrConfiguration
+    /// <inheritdoc />
+    public async Task<(bool Success, string Message)> SetVoltageAsync(double value)
+    {
+      LogInformation($"Устанавливаем напряжение IR: {value} В");
+
+      if (await GetIsIdleModeEnabled())
+        return (true, string.Empty);
+
+      string kvFormatted = (value / 1000).ToString("F3", CultureInfo.InvariantCulture);
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {kvFormatted}";
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        await _gptModel.DeviceProtocol.QueryAsync(command);
+        double actual = await GetVoltageAsync();
+
+        if (Math.Abs(actual - value) < 1.0)
+          return (true, string.Empty);
+
+        LogWarning($"Попытка {attempt} установки напряжения не удалась. Получено: {actual:F1} В, ожидалось: {value:F1} В.");
+      }
+
+      return (false, $"Не удалось установить напряжение IR. Устройство не приняло значение {value} В.");
+    }
+
+    /// <inheritdoc />
+    public async Task<double> GetVoltageAsync()
+    {
+      string query = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} ?";
+      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+
+      string cleaned = response.Replace("kV", "").Trim().Replace(".", ",");
+
+      if (double.TryParse(cleaned, out var kv))
+        return kv * 1000;
+
+      LogError($"Ошибка чтения напряжения IR. Ответ: '{response}'");
+      return -1;
+    }
+
+    #endregion
+
+    #region HighResistanceLimit
+
+    public async Task<(bool Success, string Message)> SetHighResistanceLimitAsync(double value)
+    {
+      if (await GetIsIdleModeEnabled()) return (true, string.Empty);
+
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}".Replace(',', '.');
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        await _gptModel.DeviceProtocol.QueryAsync(command);
+        double actual = await GetHighResistanceLimitAsync();
+        if (Math.Abs(actual - value) < 0.1)
+          return (true, string.Empty);
+
+        LogWarning($"Попытка {attempt} установки высокого предела сопротивления неудачна. Ответ: {actual} ГОм");
+      }
+
+      return (false, $"Не удалось установить высокий предел IR: {value} ГОм.");
+    }
+
+    public async Task<double> GetHighResistanceLimitAsync()
+    {
+      var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?", timeout: 1000);
+      return ParseDouble(response, "G");
+    }
+
+    #endregion
+
+    #region LowResistanceLimit
+
+    public async Task<(bool Success, string Message)> SetLowResistanceLimitAsync(double value)
+    {
+      if (await GetIsIdleModeEnabled()) return (true, string.Empty);
+      if (value == 1000) value = 999;
+
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        await _gptModel.DeviceProtocol.QueryAsync(command);
+        double actual = await GetLowResistanceLimitAsync();
+        if (Math.Abs(actual - value) < 0.5)
+          return (true, string.Empty);
+
+        LogWarning($"Попытка {attempt} установки нижнего предела сопротивления неудачна. Ответ: {actual} МОм");
+      }
+
+      return (false, $"Не удалось установить нижний предел IR: {value} МОм.");
+    }
+
+    public async Task<double> GetLowResistanceLimitAsync()
+    {
+      var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?", timeout: 1000);
+      return ParseDouble(response, "M");
+    }
+
+    #endregion
+
+    #region TestTime
+
+    public async Task<(bool Success, string Message)> SetTestTimeAsync(double value)
+    {
+      LogInformation($"Устанавливаем время теста IR: {value} сек");
+
+      if (await GetIsIdleModeEnabled()) return (true, string.Empty);
+
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} {value:F1}".Replace(',', '.');
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        await _gptModel.DeviceProtocol.QueryAsync(command);
+        double actual = await GetTestTimeAsync();
+        if (Math.Abs(actual - value) < 0.5)
         {
-          Voltage = voltage,
-          HighResistanceLimit = rhi,
-          LowResistanceLimit = rlo,
-          TestTime = time,
-          Offset = reference,
-        };
+          timeDelay = value;
+          return (true, string.Empty);
+        }
+
+        LogWarning($"Попытка {attempt} установки времени теста IR неудачна. Ответ: {actual} сек");
       }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при чтении конфигурации IR: {ex.Message}");
-        throw;
-      }
+
+      return (false, $"Не удалось установить время теста IR: {value} сек.");
     }
 
-    /// <summary>
-    /// Парсит значение напряжения из строки ответа устройства.
-    /// </summary>
-    private double ParseVoltage(string response)
+    public async Task<double> GetTestTimeAsync()
     {
-      string numericPart = response.Replace("kV", "").Trim().Replace(".", ",");
-      if (double.TryParse(numericPart, out double voltage))
-      {
-        return voltage * 1000; // Преобразование кВ в В
-      }
-
-      throw new FormatException("Некорректный формат напряжения.");
+      var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_TTIME)} ?", timeout: 1000);
+      return ParseDouble(response, "S");
     }
 
-    /// <summary>
-    /// Парсит значение сопротивления из строки ответа устройства.
-    /// </summary>
-    private double ParseResistanceG(string response)
+    #endregion
+
+    #region Offset
+
+    public async Task<(bool Success, string Message)> SetOffsetAsync(double value)
     {
-      string numericPart = response.Replace("G", "").Trim().Replace(".", ",");
-      if (double.TryParse(numericPart, out double resistance))
+      LogInformation($"Устанавливаем смещение IR: {value} ГОм");
+
+      if (await GetIsIdleModeEnabled()) return (true, string.Empty);
+
+      string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} {value}M";
+
+      for (int attempt = 1; attempt <= 2; attempt++)
       {
-        return resistance; // Значение уже в ГОм
+        await _gptModel.DeviceProtocol.QueryAsync(command);
+        double actual = await GetOffsetAsync();
+        if (Math.Abs(actual - value) < 0.1)
+          return (true, string.Empty);
+
+        LogWarning($"Попытка {attempt} установки смещения неудачна. Ответ: {actual} ГОм");
       }
 
-      return 0.0;
+      return (false, $"Не удалось установить смещение IR: {value} ГОм.");
     }
 
-    /// <summary>
-    /// Парсит значение сопротивления из строки ответа устройства.
-    /// </summary>
-    private double ParseResistanceM(string response)
+    public async Task<double> GetOffsetAsync()
     {
-      string numericPart = response.Replace("M", "").Trim().Replace(".", ",");
-      if (double.TryParse(numericPart, out double resistance))
-      {
-        return resistance; // Значение уже в ГОм
-      }
-
-      return 0.0;
+      var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_REF)} ?", timeout: 1000);
+      return ParseDouble(response, "M");
     }
 
-    /// <summary>
-    /// Парсит значение времени из строки ответа устройства.
-    /// </summary>
-    private double ParseTime(string response)
+    #endregion
+
+    #region Measure & Config
+
+    public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1)
     {
-      string numericPart = response.Replace("S", "").Trim().Replace(".", ",");
-      if (double.TryParse(numericPart, out double time))
-      {
-        return time; // Значение уже в секундах
-      }
+      if (await GetIsIdleModeEnabled()) return param;
 
-      return 0.0;
+      var testCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
+      await _gptModel.DeviceProtocol.QueryAsync(testCommand, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
+
+      string response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
+      var parts = response.Split(',');
+
+      string raw = parts.ElementAtOrDefault(3)?.ToLower() ?? throw new FormatException("Нет результата измерения.");
+      double multiplier = raw.EndsWith("gohm") ? 1000 : raw.EndsWith("mohm") ? 1 : raw.EndsWith("kohm") ? 0.001 : throw new FormatException("Неизвестный формат.");
+      raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
+
+      return double.TryParse(raw, out var value) ? value * multiplier : throw new FormatException("Ошибка преобразования значения сопротивления.");
     }
+
+    public async Task<IrConfiguration> ReadConfigurationAsync()
+    {
+      return new IrConfiguration
+      {
+        Voltage = await GetVoltageAsync(),
+        HighResistanceLimit = await GetHighResistanceLimitAsync(),
+        LowResistanceLimit = await GetLowResistanceLimitAsync(),
+        TestTime = await GetTestTimeAsync(),
+        Offset = await GetOffsetAsync()
+      };
+    }
+
+    public List<int> GetVoltagesForResistance(double resistance)
+    {
+      return resistance switch
+      {
+        <= 0.3 => new() { 50, 100 },
+        <= 1.0 => new() { 100, 200 },
+        <= 3.0 => new() { 200, 500 },
+        <= 1000.0 => new() { 200, 500 },
+        _ => throw new ArgumentOutOfRangeException(nameof(resistance), "Сопротивление вне диапазона.")
+      };
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private double ParseDouble(string input, string suffix)
+    {
+      string cleaned = input.Replace(suffix, "").Trim().Replace(".", ",");
+      return double.TryParse(cleaned, out var result) ? result : 0.0;
+    }
+
+    #endregion
   }
 }

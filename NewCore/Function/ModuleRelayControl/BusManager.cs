@@ -5,6 +5,7 @@ using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 using static AppConfiguration.Execution.ExecutionConfig;
+using NewCore.Base.DeviceResponses;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -42,10 +43,26 @@ namespace NewCore.Function.ModuleRelayControl
 
       int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
+      string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{cmd.ToString()}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return true;
+      LogInformation($"Команда: \"{commandText}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
+        {
+          return true;
+        }
+
+        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.");
+        await Task.Delay(100);
+      }
+
+      LogError("Не удалось получить корректный ответ от устройства.");
+      return false;
     }
 
     /// <summary>
@@ -69,10 +86,26 @@ namespace NewCore.Function.ModuleRelayControl
 
       int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 2);
+      string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{cmd.ToString()}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(new DeviceCommand(4, typeBus, typeVoltage, 2).ToString());
-      return true;
+      LogInformation($"Команда: \"{commandText}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}")
+        {
+          return true;
+        }
+
+        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.");
+        await Task.Delay(100);
+      }
+
+      LogError("Не удалось получить корректный ответ от устройства.");
+      return false;
     }
 
     /// <summary>

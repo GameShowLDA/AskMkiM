@@ -49,7 +49,7 @@ namespace AppConfiguration.Theme
       }
       catch (Exception ex)
       {
-        LogError(ex.Message);
+        LogException(ex);
         throw;
       }
     }
@@ -60,6 +60,13 @@ namespace AppConfiguration.Theme
     /// <param name="themeModel">Модель темы с цветами.</param>
     private static void ApplyThemeToResources(ThemeModel themeModel)
     {
+      // Проверка потока и переключение при необходимости
+      if (!Application.Current.Dispatcher.CheckAccess())
+      {
+        Application.Current.Dispatcher.Invoke(() => ApplyThemeToResources(themeModel));
+        return;
+      }
+
       var resourceDictionary = new ResourceDictionary
       {
         Source = new Uri("pack://application:,,,/UI;component/Style.xaml"),
@@ -85,6 +92,7 @@ namespace AppConfiguration.Theme
         LogError("Ошибка: Ресурс не найден в MergedDictionaries.");
       }
 
+      // Дублирующий вызов — возможно, его нужно удалить?
       Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
     }
 

@@ -2,9 +2,8 @@
 using AppConfiguration.Execution;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static Utilities.LoggerUtility;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.PI
 {
@@ -28,15 +27,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      try
-      {
-        ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
-      }
-      catch (Exception ex)
-      {
-        var methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        LogError($"Ошибка загрузки элемента метрологии СИ в методе {methodName}: {ex.Message}");
-      }
+      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
     }
 
     /// <summary>
@@ -49,7 +40,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg), SkipStepModeCheck: true);
         return;
       }
 
@@ -63,7 +54,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
         if (!connect.Connect)
         {
-          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
           return;
         }
 
@@ -103,12 +94,12 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
 
         var answer = await breakDown.AcwManger.MeasureCurrentAsync();
         var pause = false;
-        var successMessage = ShowMessageModel.SuccessMessage.Item1;
-        var colorMessage = ShowMessageModel.SuccessMessage.Item2;
+        var successMessage = ShowMessageModel.ErrorMessage.Title;
+        var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
         if (answer > dataModel.Param)
         {
           successMessage = ShowMessageModel.ErrorMessage.Item1;
-          colorMessage = ShowMessageModel.ErrorMessage.Item2;
+          colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
           if (await ExecutionConfig.GetIsStopOnErrorEnabled())
           {
             pause = true;

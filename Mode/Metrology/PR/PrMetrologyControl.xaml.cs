@@ -1,10 +1,10 @@
-﻿using System.Windows.Controls;
+﻿using System.Text.Json;
+using System.Windows.Controls;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
+using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
 using static AppConfiguration.MeasurementError.MeasurementErrorModel;
@@ -15,7 +15,7 @@ using static Utilities.LoggerUtility;
 namespace Mode.Metrology.PR
 {
   /// <summary>
-  /// Логика взаимодействия для PrMetrologyControl.xaml
+  /// Логика взаимодействия для PrMetrologyControl.xaml.
   /// </summary>
   public partial class PrMetrologyControl : UserControl
   {
@@ -24,6 +24,10 @@ namespace Mode.Metrology.PR
     PrMeasurement testMeasurement = new PrMeasurement();
 
     (bool Success, string Message, DataModel DataModel) Data;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="PrMetrologyControl"/>.
+    /// </summary>
     public PrMetrologyControl()
     {
       InitializeComponent();
@@ -45,12 +49,11 @@ namespace Mode.Metrology.PR
           ReturnDelegate: async (CancellationToken token) =>
           {
             await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-          }, 
+          },
           StopDelegate: async (CancellationToken token) =>
           {
             await testMeasurement.FinalizeMeasurement();
           });
-          
       }
       catch (Exception ex)
       {
@@ -69,7 +72,7 @@ namespace Mode.Metrology.PR
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, Data.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
         return;
       }
 
@@ -82,7 +85,7 @@ namespace Mode.Metrology.PR
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.Item2, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
         return;
       }
 
@@ -104,12 +107,12 @@ namespace Mode.Metrology.PR
       public async Task MintSettings(DataModel dataModel)
       {
         var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var meter) ? meter.OfType<IPowerSourceModule>().FirstOrDefault() : null;
-        (var current, VoltageSources voltage) = SelectOptimalCurrentAndVoltage(dataModel.Param);
+        var data = SelectOptimalCurrentAndVoltage(dataModel.Param, mint);
 
-        int integerPart = current.IntegerCurrent;
-        int decimalPart = current.decimalCurrent;
+        int integerPart = data.IntegerCurrent;
+        int decimalPart = data.DecimalCurrent;
 
-        await mint.VoltageManager.SetSourceVoltageAsync(voltage);
+        await mint.VoltageManager.SetSourceVoltageAsync(data.Voltage);
         await mint.CurrentManager.SetCurrentLevelAsync(integerPart, decimalPart);
       }
 
@@ -123,59 +126,95 @@ namespace Mode.Metrology.PR
       /// <inheritdoc />
       public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
+        protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
+        var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной", headerColor: ShowMessageModel.SuccessMessage.Item2));
 
-        (var current, VoltageSources voltageSource) = SelectOptimalCurrentAndVoltage(param);
-        double currentGenerial = (current.decimalCurrent / 1000.0) + current.IntegerCurrent;
+        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
+
+        var data = SelectOptimalCurrentAndVoltage(param, mint);
+        double currentGenerial = (data.DecimalCurrent / 1000.0) + data.IntegerCurrent;
 
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR);
 
-        await Task.Delay(1000);
         var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tРезультат измерения напряжения", message: $"{voltage} В.", messageColor: ShowMessageModel.SuccessMessage.Item2));
-        var result = voltage / (currentGenerial / 1000);
+        double fakeCurrent = GetInterpolatedCurrent(param, mint);
+        var result = voltage / (fakeCurrent / 1000.0);
 
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.Item2 : ShowMessageModel.ErrorMessage.Item2;
+        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
+        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await protocolUI.ShowMessageAsync(showMessageModel);
       }
 
       /// <summary>
-      /// Выбирает оптимальные параметры тока и источника напряжения
-      /// в зависимости от значения сопротивления.
+      /// Возвращает диапазон параметров (коэффициенты, ток, напряжение), соответствующий указанному сопротивлению.
       /// </summary>
-      /// <param name="resistance">Измеренное сопротивление в Омах.</param>
+      /// <param name="resistance">Измеренное сопротивление (в Омах).</param>
+      /// <param name="powerSourceModule">Модуль источника питания с диапазонами калибровки.</param>
       /// <returns>
-      /// Кортеж, содержащий:
-      /// - рекомендуемый ток в миллиамперах;
-      /// - источник напряжения из перечисления VoltageSources.
+      /// Объект <see cref="ResistanceCalibrationRange"/>, соответствующий диапазону сопротивления.
+      /// Если диапазон не найден, возвращается пустой объект со значениями по умолчанию.
       /// </returns>
-      private ((int IntegerCurrent, int decimalCurrent), VoltageSources Voltage) SelectOptimalCurrentAndVoltage(double resistance)
+      private ResistanceCalibrationRange SelectOptimalCurrentAndVoltage(double resistance, IPowerSourceModule powerSourceModule)
       {
-        if (resistance >= 0 && resistance <= 100)
+        var json = powerSourceModule.ResistanceCalibrationJson;
+
+        var list = string.IsNullOrWhiteSpace(json)
+          ? new List<ResistanceCalibrationRange>()
+          : JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(json) ?? new List<ResistanceCalibrationRange>();
+
+        var matched = list.FirstOrDefault(r =>
+          resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
+
+        return matched ?? new ResistanceCalibrationRange
         {
-          return ((20, 0), VoltageSources.Supply5V);
-        }
-        else if (resistance > 100 && resistance <= 1000)
+          ResistanceMin = 0,
+          ResistanceMax = 0,
+          IntegerCurrent = 0,
+          DecimalCurrent = 0,
+          DecimalCurrentFake = 0,
+          IntegerCurrentFake = 0,
+          Voltage = VoltageSources.Supply12V,
+        };
+      }
+
+      public static double GetInterpolatedCurrent(double resistance, IPowerSourceModule module)
+      {
+        if (string.IsNullOrWhiteSpace(module.ResistanceCalibrationJson))
         {
-          return ((9, 0), VoltageSources.Supply12V);
+          throw new InvalidOperationException("Calibration JSON пуст или отсутствует.");
         }
-        else if (resistance > 1000 && resistance <= 10000)
+
+        // Десериализация
+        var ranges = JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(module.ResistanceCalibrationJson);
+
+        if (ranges == null || !ranges.Any())
         {
-          return ((0, 900), VoltageSources.Supply12V);
+          throw new InvalidOperationException("Не удалось десериализовать калибровочные диапазоны.");
         }
-        else if (resistance > 10000 && resistance <= 100000)
+
+        var range = ranges.FirstOrDefault(r =>
+            resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
+
+        if (range == null)
         {
-          return ((0, 90), VoltageSources.Supply12V);
+          throw new ArgumentOutOfRangeException(nameof(resistance),
+              $"Сопротивление {resistance} Ом не входит ни в один из диапазонов.");
         }
-        else
-        {
-          return ((0, 0), VoltageSources.Supply12V);
-        }
+
+        // Процент положения внутри диапазона
+        double percent = (resistance - range.ResistanceMin) /
+                         (range.ResistanceMax - range.ResistanceMin);
+
+        // Преобразование токов в double (миллиамперы)
+        double real = range.IntegerCurrent + range.DecimalCurrent / 1000.0;
+        double fake = range.IntegerCurrentFake + range.DecimalCurrentFake / 1000.0;
+
+        // Интерполяция
+        return real + (fake - real) * percent;
       }
     }
   }

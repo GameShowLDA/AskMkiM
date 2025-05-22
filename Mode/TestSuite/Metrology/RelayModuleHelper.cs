@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 
 namespace Mode.TestSuite.Metrology

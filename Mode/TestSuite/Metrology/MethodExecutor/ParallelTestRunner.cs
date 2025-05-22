@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Mode.Base;
+﻿using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 
@@ -133,7 +128,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
 
         // await _protocolUI.ShowMessageAsync(new ShowMessageModel(
         //   $"\t{point.DeviceNumber}.{point.ModuleNumber}.{point.PointNumber}",
-        //   ShowMessageModel.SuccessMessage.Item2,
+        //   ShowMessageModel.SuccessMessage.TitleColor,
         //   $"Подключение к шине {bus}"));
 
         var time = await module.PointManager.ConnectRelayAsync(bus, point.PointNumber);

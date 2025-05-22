@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
+using ConsoleUI.ConsoleCommanding.Services;
+using ConsoleUI.ConsoleLogic;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -9,28 +12,12 @@ namespace MainWindowProgram
   /// </summary>
   public partial class App : Application
   {
-    /// <summary>
-    /// Обрабатывает необработанные исключения домена приложения.
-    /// </summary>
-    /// <param name="sender">Источник исключения.</param>
-    /// <param name="e">Аргументы события с информацией об исключении.</param>
-    static internal void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-      Exception ex = (Exception)e.ExceptionObject;
-      LogError("Необработанное исключение в AppDomain: " + ex.Message);
-    }
+    [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    private const int SW_HIDE = 0;
 
-    /// <summary>
-    /// Обрабатывает необработанные исключения в главном потоке (UI).
-    /// </summary>
-    /// <param name="sender">Источник исключения.</param>
-    /// <param name="e">Аргументы события с информацией об исключении.</param>
-    static internal new void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
-    {
-      Exception ex = e.Exception;
-      LogError("Необработанное исключение в Dispatcher: " + ex.Message);
-      e.Handled = true;
-    }
+    // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
+    static internal ConsoleManager _consoleManager { get; private set; }
 
     /// <summary>
     /// Содержит аргументы командной строки, переданные при запуске приложения.
@@ -44,31 +31,43 @@ namespace MainWindowProgram
     protected override async void OnStartup(StartupEventArgs e)
     {
       base.OnStartup(e);
+
       CommandLineArgs = e.Args; // Сохраняем аргументы
+
+      Console.SetOut(new ConsoleRedirector());
 
       SplashWindow loadWindow = new SplashWindow();
       loadWindow.Show();
 
-      MainWindow mainWindow = null;
-
-      // 2. Создаем MainWindow в UI-потоке
-      Dispatcher.Invoke(() =>
+      try
       {
-        mainWindow = new MainWindow();
-        mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow
-      });
+        MainWindow mainWindow = null;
 
-      // 3. Инициализируем MainWindow (в фоне)
-      await mainWindow.InitializeAsync();
+        // 2. Создаем MainWindow в UI-потоке
+        Dispatcher.Invoke(() =>
+        {
+          mainWindow = new MainWindow();
+          mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow
+        });
 
-      // 4. Ждём завершения анимации SplashWindow
-      await loadWindow.WaitForCloseAsync(); // Ждёт плавное исчезновение
+        // 3. Инициализируем MainWindow (в фоне)
+        await mainWindow.InitializeAsync();
 
-      // 5. Только теперь показываем основное окно
-      await Dispatcher.InvokeAsync(() =>
+        // 4. Ждём завершения анимации SplashWindow
+        await loadWindow.WaitForCloseAsync(); // Ждёт плавное исчезновение
+
+        // 5. Только теперь показываем основное окно
+        await Dispatcher.InvokeAsync(() =>
+        {
+          mainWindow.Visibility = Visibility.Visible;
+        });
+      }
+      catch (Exception ex) 
       {
-        mainWindow.Visibility = Visibility.Visible;
-      });
+        LogException(ex, "Произошла ошибка запуска приложения.");
+        MessageBox.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        Application.Current.Shutdown();
+      }
     }
   }
 }

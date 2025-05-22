@@ -10,6 +10,22 @@ namespace UI.Components
   /// </summary>
   public partial class WindowButtons : UserControl
   {
+    public static readonly DependencyProperty CommandProperty =
+       DependencyProperty.Register(
+           nameof(Command),
+           typeof(ICommand),
+           typeof(WindowButtons),
+           new PropertyMetadata(null));
+
+    /// <summary>
+    /// Команда, вызываемая при нажатии на кнопку.
+    /// </summary>
+    public ICommand Command
+    {
+      get => (ICommand)GetValue(CommandProperty);
+      set => SetValue(CommandProperty, value);
+    }
+
     /// <summary>
     /// Перечисление, представляющее варианты выбора для кнопок окна.
     /// </summary>
@@ -81,6 +97,15 @@ namespace UI.Components
       ChoiceElement = Choice.None;
       Width = Height = 20;
       Cursor = Cursors.Hand;
+      this.PreviewMouseDown += WindowButtons_PreviewMouseDown;
+    }
+
+    private void WindowButtons_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      if (Command?.CanExecute(null) == true)
+      {
+        Command.Execute(null);
+      }
     }
   }
 }

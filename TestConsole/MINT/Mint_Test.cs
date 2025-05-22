@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using static NewCore.Enum.DeviceEnum;

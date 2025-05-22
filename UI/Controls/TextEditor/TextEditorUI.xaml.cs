@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ControlCommandAnalyser.Parsing;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -43,6 +44,15 @@ namespace UI.Controls.TextEditor
     {
       get => textEditor.Text;
       set => textEditor.Text = value;
+    }
+
+    /// <summary>
+    /// Устанавливает, является ли текстовый редактор доступным только для чтения.
+    /// </summary>
+    public bool IsReadOnly
+    {
+      get => textEditor.IsReadOnly;
+      set => textEditor.IsReadOnly = value;
     }
 
     /// <summary>
@@ -314,5 +324,33 @@ namespace UI.Controls.TextEditor
       var parent = this.Parent as Panel;
       parent?.Children.Remove(this);
     }
+
+    public void ApplyHighlighting(List<HighlightRange> ranges)
+    {
+      if (_markerService == null)
+        InitializeMarkerService();
+
+      _markerService.ClearAllMarkers();
+
+      foreach (var range in ranges)
+      {
+        if (range.Line < 0 || range.Length <= 0) continue;
+
+        var line = textEditor.Document.GetLineByNumber(range.Line + 1);
+        int offset = line.Offset + range.Start;
+
+        var color = range.Target switch
+        {
+          HighlightTarget.CommandNumber => Colors.DeepSkyBlue,
+          HighlightTarget.Mnemonic => Colors.LightGreen,
+          _ => Colors.Transparent
+        };
+
+        _markerService.AddStyledMarker(offset, range.Length, color, FontWeights.Bold);
+      }
+
+      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
   }
 }

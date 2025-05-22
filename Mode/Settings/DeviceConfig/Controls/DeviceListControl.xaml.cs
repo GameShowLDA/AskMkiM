@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 

@@ -1,0 +1,152 @@
+﻿using System;
+using System.Windows;
+using System.Windows.Media.Effects;
+using AppConfiguration.Base;
+using ICSharpCode.AvalonEdit;
+using UI.Components;
+using UI.Controls.Search;
+using static UI.Components.Invoke.OpenFileButton;
+using UI.Controls.TextEditor;
+using System.Windows.Controls;
+using MainWindowProgram.Services;
+using System.IO;
+using UI.Components.FileComparerControls;
+
+namespace MainWindowProgram.Events
+{
+  /// <summary>
+  /// Класс <c>UiEventsBinder</c> подписывает обработчики событий пользовательского интерфейса (UI),
+  /// и управляет реакцией главного окна на эти события.
+  /// </summary>
+  public class UiEventsBinder
+  {
+    /// <summary>
+    /// Ссылка на главное окно приложения, используемая для управления его элементами.
+    /// </summary>
+    private readonly MainWindow _mainWindow;
+
+    /// <summary>
+    /// Контейнер для управления несколькими редакторами внутри интерфейса.
+    /// </summary>
+    private readonly MultiWindowControl _multiWindow;
+
+    /// <summary>
+    /// Свойство, указывающее, открыто ли окно поиска.
+    /// </summary>
+    public bool IsSearchWindowOpen { get; set; }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="UiEventsBinder"/>.
+    /// </summary>
+    /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
+    public UiEventsBinder(MainWindow mainWindow, MultiWindowControl multiWindow)
+    {
+      _mainWindow = mainWindow;
+      _multiWindow = multiWindow;
+    }
+
+    /// <summary>
+    /// Подписывает обработчики на события пользовательского интерфейса.
+    /// </summary>
+    public void Bind()
+    {
+      EventAggregator.TextEditorActive += OnTextEditorActive;
+      EventAggregator.TextEditorClosing += OnTextEditorClosing;
+
+      EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
+      EventAggregator.SearchWindowAtivated += OnSearchWindowActivated;
+
+      EventAggregator.SearchText += SearchWindow_SearchTextHandler;
+
+      EventAggregator.ReplaceText += SearchWindow_ReplaceTextHandler;
+
+      _mainWindow.SearchWindow.ClearHighlights += _multiWindow.OnSearchWindowClosing;
+
+      EventAggregator.OpenOpk += OnOpenOpk;
+
+      EventAggregator.CompareFiles += OnCompareFiles;
+    }
+
+    private void OnCompareFiles(string firstFilePath, string secondFilePath)
+    {
+      var firstFileName = Path.GetFileName(firstFilePath);
+      var secondFileName = Path.GetFileName(secondFilePath);
+      var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
+      _multiWindow.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
+    }
+
+    /// <summary>
+    /// Обрабатывает событие активации текстового редактора, обновляя видимость связанных элементов интерфейса.
+    /// </summary>
+    /// <param name="isActive">Флаг, указывающий, активен ли редактор.</param>
+    private void OnTextEditorActive(bool isActive)
+    {
+      _mainWindow.IsTextEditorActive = isActive;
+      Visibility visibility = isActive ? Visibility.Visible : Visibility.Collapsed;
+
+      _mainWindow.fileActionsSeparator.Visibility = visibility;
+      _mainWindow.saveMenuItem.Visibility = visibility;
+      _mainWindow.saveAsMenuItem.Visibility = visibility;
+      _mainWindow.printMenuItem.Visibility = visibility;
+      _mainWindow.searchMenuItem.Visibility = visibility;
+    }
+
+    /// <summary>
+    /// Обрабатывает событие закрытия редактора. Если он был активен — отключает его.
+    /// </summary>
+    /// <param name="isActive">Флаг активности редактора.</param>
+    /// <param name="name">Имя закрываемого редактора.</param>
+    private void OnTextEditorClosing(bool isActive, string name)
+    {
+      if (isActive)
+      {
+        OnTextEditorActive(false);
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает событие закрытия окна поиска.
+    /// </summary>
+    /// <param name="closing">Флаг, указывающий, закрыто ли окно поиска.</param>
+    private void OnSearchWindowClosing(bool closing)
+    {
+      IsSearchWindowOpen = closing;
+    }
+
+    /// <summary>
+    /// Обрабатывает событие активации окна поиска.
+    /// Также удаляет подписку на событие поиска текста.
+    /// </summary>
+    /// <param name="activated">Флаг, указывающий, активировано ли окно поиска.</param>
+    private void OnSearchWindowActivated(bool activated)
+    {
+      IsSearchWindowOpen = activated;
+      EventAggregator.SearchText -= SearchWindow_SearchTextHandler;
+    }
+
+    /// <summary>
+    /// Обрабатывает событие поиска текста и передаёт параметры в <see cref="MultiWindowControl"/>.
+    /// </summary>
+    /// <param name="searchText">Текст для поиска.</param>
+    /// <param name="wholeWord">Флаг поиска только целых слов.</param>
+    /// <param name="caseWord">Флаг учёта регистра.</param>
+    /// <param name="searchArea">Область, в которой выполняется поиск.</param>
+    /// <param name="searchParameters">Дополнительные параметры поиска.</param>
+    public void SearchWindow_SearchTextHandler(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      _multiWindow.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void SearchWindow_ReplaceTextHandler(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      _multiWindow.ReplaceData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void OnOpenOpk(UserControl userControl, string elementName, string elementData)
+    {
+      var texteditor = userControl as TextEditorUI;
+      texteditor.IsReadOnly = true;
+      _multiWindow.AddControl(elementName, texteditor, TypeWindow.Files);
+    }
+  }
+}
