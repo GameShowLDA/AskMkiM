@@ -230,7 +230,11 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_5">
+                <MenuItem Header="Трансляция" Name="Translation" Tag="menuHeader_5">
+                    <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
+                </MenuItem>
+
+                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_6">
 
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
@@ -260,6 +264,8 @@
                     </MenuItem>
 
                 </MenuItem>
+
+
             </Menu>
 
             <StackPanel  

@@ -30,6 +30,7 @@ namespace MainWindowProgram.Engine
       var settings = new SettingsService(multi);
       var windowService = new WindowService(window, window.mainMenu, window.ButtonsPanel, () => window.IsLocked);
       var selfTest = new SelfTestServices(multi);
+      var translation = new TranslationServices(window, multi);
 
       var viewModel = new MainWindowViewModel(
           metrology,
@@ -38,7 +39,8 @@ namespace MainWindowProgram.Engine
           settings,
           admin,
           windowService,
-          selfTest
+          selfTest,
+          translation
       );
 
       HelpProvider.RegisterHelp(window);
