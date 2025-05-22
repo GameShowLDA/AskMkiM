@@ -32,7 +32,9 @@ namespace ConsoleUtilities.Services
 
       if (!RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_CONTROL, VK_OEM3))
       {
-        throw new InvalidOperationException("Не удалось зарегистрировать глобальный хоткей Ctrl + ~");
+        var errorCode = Marshal.GetLastWin32Error();
+        MessageBox.Show($"Не удалось зарегистрировать глобальный хоткей Ctrl + ~. Код ошибки: {errorCode}");
+        // throw new InvalidOperationException($"Не удалось зарегистрировать глобальный хоткей Ctrl + ~. Код ошибки: {errorCode}");
       }
 
       ComponentDispatcher.ThreadPreprocessMessage += OnThreadPreprocessMessage;

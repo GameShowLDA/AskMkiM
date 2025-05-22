@@ -32,6 +32,7 @@ namespace UI.Components.FileComparerControls
       WindowStyle = WindowStyle.None;
       ResizeMode = ResizeMode.NoResize;
 
+
       this.Closed += (s, e) =>
       {
         if (Owner != null)
@@ -55,6 +56,12 @@ namespace UI.Components.FileComparerControls
         this.Activate();
         this.Focus();
       };
+
+      this.Loaded += FileCompareWindow_Loaded; 
+    }
+
+    private void FileCompareWindow_Loaded(object sender, RoutedEventArgs e)
+    {
     }
 
     public new bool? ShowDialog()
@@ -98,7 +105,7 @@ namespace UI.Components.FileComparerControls
         string filePath = openFileDialog.FileName;
 
         // Пример: отобразим путь в текстблоке
-        if (sender is TextBox textBox)
+        if (sender is TextBoxPlaceholder textBox)
         {
           var bothTextBoxEmpty = string.IsNullOrEmpty(FirstFileTextBlock.Text) && string.IsNullOrEmpty(SecondFileTextBlock.Text);
           var pathsNotEquals = (!string.Equals(FirstFileTextBlock.Text, filePath) && !string.IsNullOrEmpty(FirstFileTextBlock.Text))
