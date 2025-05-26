@@ -58,6 +58,7 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
+          await Task.Delay(100);
           using var cts = new CancellationTokenSource(timeout);
 
           try
@@ -69,7 +70,7 @@ namespace NewCore.Communication
 
             if (completedTask == receiveTask)
             {
-              UdpReceiveResult result = await receiveTask; // исключения ловим здесь
+              UdpReceiveResult result = await receiveTask;
               string response = Encoding.UTF8.GetString(result.Buffer);
               LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
               return response;
