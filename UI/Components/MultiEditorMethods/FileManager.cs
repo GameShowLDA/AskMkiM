@@ -78,22 +78,6 @@ namespace UI.Components.MultiEditorMethods
 
         var textEditor = CreateTextEditor(fileContent);
 
-        if (Path.GetExtension(path).Equals(".pk", StringComparison.OrdinalIgnoreCase))
-        {
-          var lines = fileContent.Split('\n');
-
-          var recognizer = new LineRecognizer();
-          var parsed = lines.Select((line, index) => recognizer.Parse(line, index)).ToList();
-
-          var highlighter = new SyntaxHighlightPlanner();
-          var highlights = highlighter.Build(parsed);
-
-          if (textEditor is TextEditorUI editorUI)
-          {
-            editorUI.ApplyHighlighting(highlights);
-          }
-        }
-
         if (!FilePaths.ContainsKey(nameFile))
         {
           FilePaths.Add(nameFile, path);

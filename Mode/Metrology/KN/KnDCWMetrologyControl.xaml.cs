@@ -44,6 +44,10 @@ namespace Mode.Metrology.KN
         ReturnDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
         });
     }
 
@@ -75,7 +79,6 @@ namespace Mode.Metrology.KN
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
     }
 
     private class KnMeasurement : BaseMeasurement
@@ -98,8 +101,8 @@ namespace Mode.Metrology.KN
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения напряжения(DCW)", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
-        double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
+        double firstNorm = param - ((param / 100.0 * 1) + 0.01);
+        double lastNorm = param + ((param / 100.0 * 1) + 0.01);
 
         await fastMeter.DcVoltageManager.MeasureDCVoltageAsync();
 

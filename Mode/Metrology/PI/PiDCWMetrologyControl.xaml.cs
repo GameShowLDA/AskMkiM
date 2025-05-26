@@ -90,7 +90,7 @@ namespace Mode.Metrology.PI
         await breakDown.DcwManger.SetModeAsync();
         await breakDown.DcwManger.SetVoltageAsync(dataModel.Param);
         await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time);
-        await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime);
+        // await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.DcwManger.SetLowCurrentLimitAsync(0);
         await breakDown.DcwManger.SetHighCurrentLimitAsync(10);
       }

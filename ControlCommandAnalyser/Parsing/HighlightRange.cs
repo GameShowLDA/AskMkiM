@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace ControlCommandAnalyser.Parsing
 {
@@ -15,6 +16,7 @@ namespace ControlCommandAnalyser.Parsing
     public int Start { get; set; }          // Смещение в строке
     public int Length { get; set; }         // Длина подсвечиваемого участка
     public HighlightTarget Target { get; set; } // Тип подсветки
+    public Color? ColorOverride { get; set; } = null;
 
     public HighlightRange(int line, int start, int length, HighlightTarget target)
     {

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Utilities;
 
 namespace UI.Controls.GPT.Mode
 {
@@ -16,8 +17,20 @@ namespace UI.Controls.GPT.Mode
     public AcwMode()
     {
       InitializeComponent();
-      GPTPunchControl.ModelGPT.AcwManger.SetModeAsync().ConfigureAwait(true);
-      LoadConfigurationAsync().ConfigureAwait(true);
+      _ = InitializeAsync();
+    }
+
+    private async Task InitializeAsync()
+    {
+      try
+      {
+        await GPTPunchControl.ModelGPT.AcwManger.SetModeAsync();
+        await LoadConfigurationAsync();
+      }
+      catch (Exception ex)
+      {
+        LoggerUtility.LogException($"Ошибка в {nameof(InitializeAsync)}", ex);
+      }
     }
 
     /// <summary>
@@ -129,16 +142,23 @@ namespace UI.Controls.GPT.Mode
           string frequencyText = selectedItem.Content.ToString();
           if (double.TryParse(frequencyText.Replace("Гц", "").Trim(), out double frequency))
           {
-            await GPTPunchControl.ModelGPT.AcwManger.SetFrequencyAsync((int)frequency);
-            FrequencyValueText.Text = $"Частота ACW: {frequency} Гц";
+            await GPTPunchControl.ModelGPT.AcwManger.SetFrequencyAsync((int)frequency).ConfigureAwait(false);
+            Dispatcher.Invoke(() =>
+            {
+              FrequencyValueText.Text = $"Частота ACW: {frequency} Гц";
+            });
           }
         }
         catch (Exception ex)
         {
-          MessageBox.Show($"Ошибка при установке частоты: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          Dispatcher.Invoke(() =>
+          {
+            MessageBox.Show($"Ошибка при установке частоты: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          });
         }
       }
     }
+
 
     /// <summary>
     /// Обработчик нажатия на кнопку для считывания конфигурации.

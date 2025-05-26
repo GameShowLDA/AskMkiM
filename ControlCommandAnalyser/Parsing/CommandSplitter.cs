@@ -21,7 +21,9 @@ namespace ControlCommandAnalyser.Parsing
       for (int i = 0; i < lines.Length; i++)
       {
         string line = lines[i];
-        if (Regex.IsMatch(line, @"^\s*\d{2,3}\s+\S{2,4}\b"))
+
+        // Обновлённое регулярное выражение: \d+ вместо \d{2,3}, чтобы поддерживать любые длины номера
+        if (Regex.IsMatch(line, @"^\s*\d+\s+\S{2,4}\b"))
         {
           if (current != null)
             blocks.Add(current);
@@ -43,5 +45,6 @@ namespace ControlCommandAnalyser.Parsing
 
       return blocks;
     }
+
   }
 }

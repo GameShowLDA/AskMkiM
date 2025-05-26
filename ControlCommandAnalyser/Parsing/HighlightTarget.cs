@@ -12,6 +12,7 @@ namespace ControlCommandAnalyser.Parsing
   public enum HighlightTarget
   {
     CommandNumber,
-    Mnemonic
+    Mnemonic,
+    Parameter // ⬅️ новое значение
   }
 }

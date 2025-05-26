@@ -105,7 +105,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
       var result = new List<string>();
       foreach (string line in pkContent)
       {
-        if (line.StartsWith("10"))
+        if (line.Contains(" ОК "))
         {
           start = true;
           result.Add(line);
