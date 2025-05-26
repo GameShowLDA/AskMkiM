@@ -295,6 +295,7 @@ namespace NewCore.Function.GPT
 
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} {value:F3}".Replace(',', '.');
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
 
         var actual = await GetLowCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)
@@ -376,8 +377,9 @@ namespace NewCore.Function.GPT
 
         await Task.Delay(delay);
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_TTIME)} {value:F1}".Replace(',', '.');
-
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
+
         var actual = await GetTestTimeAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
@@ -429,8 +431,8 @@ namespace NewCore.Function.GPT
           return testTime;
         }
 
-        LogWarning($"{nameof(GetTestTimeAsync)}: Не удалось разобрать время. Возвращаем 0.");
-        return 0.0;
+        LogWarning($"{nameof(GetTestTimeAsync)}: Не удалось разобрать время. Возвращаем -1.");
+        return -1;
       }
       catch (Exception ex)
       {
@@ -458,8 +460,9 @@ namespace NewCore.Function.GPT
 
         await Task.Delay(delay);
         string command = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
-
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
+
         var actual = await GetRampTimeAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
@@ -543,8 +546,9 @@ namespace NewCore.Function.GPT
 
         await Task.Delay(delay);
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} {frequency}";
-
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
+
         var actual = await GetFrequencyAsync();
         if (actual == frequency)
         {
@@ -587,6 +591,7 @@ namespace NewCore.Function.GPT
 
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
+
         LogDebug($"Ответ на {nameof(GetFrequencyAsync)}: \"{response}\"");
 
         if (int.TryParse(response.Replace("Hz", "").Trim(), out var freq))
@@ -624,6 +629,7 @@ namespace NewCore.Function.GPT
 
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_REF)} {value:F3}".Replace(',', '.');
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
 
         var actual = await GetOffsetAsync();
         if (Math.Abs(actual - value) < 0.1)
@@ -703,7 +709,9 @@ namespace NewCore.Function.GPT
         }
 
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_ARCCURRENT)} {value:F3}".Replace(',', '.');
+
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
 
         var actual = await GetArcCurrentAsync();
         if (Math.Abs(actual - value) < 0.1)
@@ -829,9 +837,12 @@ namespace NewCore.Function.GPT
 
         var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
         var timeDelay = Convert.ToInt32(await GetRampTimeAsync() + await GetTestTimeAsync());
+        timeDelay *= 1000;
 
-        await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
+        await _gptModel.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
         query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
+
+        await Task.Delay(timeDelay);
         var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
         var result = answerDevice.Split(',');
