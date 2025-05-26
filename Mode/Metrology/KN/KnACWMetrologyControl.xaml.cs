@@ -41,6 +41,10 @@ namespace Mode.Metrology.KN
         ReturnDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
         });
     }
 
@@ -72,7 +76,6 @@ namespace Mode.Metrology.KN
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
     }
 
     private class KnMeasurement : BaseMeasurement

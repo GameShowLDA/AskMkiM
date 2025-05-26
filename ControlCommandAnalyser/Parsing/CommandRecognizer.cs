@@ -25,14 +25,13 @@ namespace ControlCommandAnalyser.Parsing
     public async Task<List<CommandParseResult>> RecognizeAsync(List<CommandBlock> blocks)
     {
       var results = new List<CommandParseResult>();
-      var tasks = new List<Task>();
 
       foreach (var block in blocks)
       {
         var firstLine = block.Lines.FirstOrDefault()?.Trim();
         if (string.IsNullOrWhiteSpace(firstLine)) continue;
 
-        var match = Regex.Match(firstLine, @"^\s*(\d{2,3})\s+(\S+)");
+        var match = Regex.Match(firstLine, @"^\s*(\d+)\s+(\S+)");
         if (!match.Success) continue;
 
         string number = match.Groups[1].Value;
@@ -40,27 +39,24 @@ namespace ControlCommandAnalyser.Parsing
 
         bool recognized = _parsers.TryGetValue(mnemonic, out var parser);
 
-        results.Add(new CommandParseResult
+        var result = new CommandParseResult
         {
           LineIndex = block.StartLine,
           CommandNumber = number,
           Mnemonic = mnemonic,
           IsRecognized = recognized
-        });
+        };
 
         if (recognized)
         {
-          tasks.Add(parser!.ParseAsync(block));
+          await parser!.ParseAsync(block);
+          result.ExtraHighlight = block.ExtraHighlight;
         }
-        else
-        {
-          LogWarning($"⚠ Неизвестная команда: {mnemonic} (строка {block.StartLine + 1})");
-        }
+
+        results.Add(result);
       }
 
-      await Task.WhenAll(tasks);
       return results;
     }
-
   }
 }

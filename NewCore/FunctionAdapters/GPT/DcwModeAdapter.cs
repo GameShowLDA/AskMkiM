@@ -47,7 +47,7 @@ namespace NewCore.FunctionAdapters.GPT
     /// <inheritdoc />
     public async Task<(bool, string)> SetVoltageAsync(double value)
     {
-      var result = await _dcwMode.SetVoltageAsync(value);
+      var result = await _dcwMode.SetVoltageAsync(value*1000);
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения DCW", result.Success ? $"{value} В" : result.Message, result.Success, 1);
 
       if (!result.Success)

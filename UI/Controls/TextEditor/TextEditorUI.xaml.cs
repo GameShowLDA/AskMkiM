@@ -334,12 +334,28 @@ namespace UI.Controls.TextEditor
 
       foreach (var range in ranges)
       {
-        if (range.Line < 0 || range.Length <= 0) continue;
+        if (range.Line < 0 || range.Length <= 0)
+        {
+          LogWarning($"⚠ Пропущен недопустимый диапазон: line={range.Line}, length={range.Length}");
+          continue;
+        }
+
+        if (range.Line >= textEditor.Document.LineCount)
+        {
+          LogWarning($"⚠ Строка вне диапазона документа: {range.Line + 1}");
+          continue;
+        }
 
         var line = textEditor.Document.GetLineByNumber(range.Line + 1);
         int offset = line.Offset + range.Start;
 
-        var color = range.Target switch
+        if (offset + range.Length > textEditor.Document.TextLength)
+        {
+          LogWarning($"⚠ Подсветка выходит за пределы текста: offset={offset}, length={range.Length}, doc={textEditor.Document.TextLength}");
+          continue;
+        }
+
+        Color color = range.ColorOverride ?? range.Target switch
         {
           HighlightTarget.CommandNumber => Colors.DeepSkyBlue,
           HighlightTarget.Mnemonic => Colors.LightGreen,
@@ -350,7 +366,9 @@ namespace UI.Controls.TextEditor
       }
 
       textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      textEditor.TextArea.TextView.EnsureVisualLines();
+      textEditor.TextArea.TextView.Redraw();
+      textEditor.TextArea.TextView.InvalidateVisual();
     }
-
   }
 }

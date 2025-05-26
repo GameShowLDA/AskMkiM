@@ -52,7 +52,7 @@ namespace Mode.Metrology.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
+      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, timeRampCheck:true);
       if (!Data.Success)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
@@ -88,12 +88,12 @@ namespace Mode.Metrology.PI
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Param);
         await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.AcwManger.SetFrequencyAsync(50);
         await breakDown.AcwManger.SetLowCurrentLimitAsync(0);
         await breakDown.AcwManger.SetHighCurrentLimitAsync(10);
+        await breakDown.AcwManger.SetVoltageAsync(dataModel.Param);
       }
 
       /// <inheritdoc />

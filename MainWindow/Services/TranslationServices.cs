@@ -34,22 +34,30 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает элемент управления для работы с программируемой пробойной установкой (ППУ).
+    /// Запускает процесс трансляции текущего открытого текста из редактора.
+    /// Выполняет распознавание команд, логирует результат и применяет подсветку
+    /// в соответствии с успешностью распознавания.
     /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию.</returns>
+    /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task StartTranslationAsync()
     {
       var editor = await _multiWindow.GetActiveTextEditor();
 
       if (editor == null)
       {
+        MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         return;
       }
 
       string text = editor.Text;
 
-      var translator = new TranslationManager();
+      var translator = new TranslationManager
+      {
+        HighlightCallback = editor.ApplyHighlighting
+      };
+
       await translator.Translate(text);
     }
+
   }
 }
