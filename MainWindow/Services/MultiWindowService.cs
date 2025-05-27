@@ -97,5 +97,19 @@ namespace MainWindowProgram.Services
       var foundEditor = _multiWindowControl.GetActiveTextEditor();
       return Task.FromResult(foundEditor);
     }
+
+    public Task CreateTranslationFileAsync()
+    {
+      string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
+
+      var editor = new TextEditorUI
+      {
+        Text = "// Результат трансляции появится здесь...",
+        IsReadOnly = true
+      };
+
+      _multiWindowControl.AddControl(fileName, editor, TypeWindow.Translation);
+      return Task.CompletedTask;
+    }
   }
 }

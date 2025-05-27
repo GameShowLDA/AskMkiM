@@ -213,6 +213,7 @@ namespace NewCore.Function.GPT
 
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} {value:F3}".Replace(',', '.');
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
 
         var actual = await GetHighCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)

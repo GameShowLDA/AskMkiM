@@ -8,9 +8,22 @@
     <UseWPF>true</UseWPF>
     <SignAssembly>False</SignAssembly>
     <ApplicationIcon>Resources\АСКМ.ico</ApplicationIcon>
+    <PackageOutputPath>$(OutputPath)</PackageOutputPath>
+	<OutputPath>D:\AskMkiM\Bin\</OutputPath>
+	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+	<Target Name="CreateEmptyFolder" AfterTargets="Build">
+		<MakeDir Directories="D:\AskMkiM\Тесты ПК" />
+	</Target>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>9999</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <WarningLevel>9999</WarningLevel>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\loading.mp4" />
