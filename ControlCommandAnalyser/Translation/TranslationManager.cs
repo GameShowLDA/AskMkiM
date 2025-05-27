@@ -57,8 +57,8 @@ namespace ControlCommandAnalyser.Translation
           ColorOverride = result.IsRecognized ? Colors.LightGreen : Colors.Gray
         });
 
-        if (result.ExtraHighlight is not null)
-          highlights.Add(result.ExtraHighlight);
+        if (result.ExtraHighlights is not null)
+          highlights.AddRange(result.ExtraHighlights);
       }
 
       LogDebug($"Передаётся {highlights.Count} участков подсветки");

@@ -50,7 +50,7 @@ namespace ControlCommandAnalyser.Parsing
         if (recognized)
         {
           await parser!.ParseAsync(block);
-          result.ExtraHighlight = block.ExtraHighlight;
+          result.ExtraHighlights = block.ExtraHighlights.ToList(); // Копируем список
         }
 
         results.Add(result);

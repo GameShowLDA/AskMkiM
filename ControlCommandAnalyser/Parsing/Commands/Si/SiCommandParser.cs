@@ -23,11 +23,13 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
       if (string.IsNullOrWhiteSpace(line))
         return;
 
-      // Собираем шаблон вида: \b(\d{2,4})(В|v|мВ|кВ|MV|KV)\b
       string unitGroup = string.Join("|", KnownUnits.VoltageUnits.Select(Regex.Escape));
       string voltagePattern = $@"\b(\d{{2,4}})({unitGroup})\b";
-      var voltageMatch = Regex.Match(line, voltagePattern, RegexOptions.IgnoreCase);
+      string parameterPattern = @"\b\d+<МОМ\b";
 
+      block.ExtraHighlights.Clear();
+
+      var voltageMatch = Regex.Match(line, voltagePattern, RegexOptions.IgnoreCase);
       if (voltageMatch.Success)
       {
         string voltage = voltageMatch.Value;
@@ -35,35 +37,49 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
 
         block.IsRecognized = true;
 
-        // Подсветка найденного напряжения (например, 100В)
-        block.ExtraHighlight = new HighlightRange(
-          line: block.StartLine,
-          start: voltageMatch.Index,
-          length: voltageMatch.Length,
-          target: HighlightTarget.Parameter
+        block.ExtraHighlights.Add(new HighlightRange(
+            line: block.StartLine,
+            start: voltageMatch.Index,
+            length: voltageMatch.Length,
+            target: HighlightTarget.Parameter
         )
         {
           ColorOverride = Colors.Gold
-        };
+        });
       }
       else
       {
         LogWarning($"⚠ Команда СИ в строке {block.StartLine + 1} не содержит напряжения.");
         block.IsRecognized = false;
 
-        // Подсветим саму мнемонику СИ жёлтым как предупреждение
-        block.ExtraHighlight = new HighlightRange(
-          line: block.StartLine,
-          start: line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase),
-          length: 2,
-          target: HighlightTarget.Mnemonic
+        block.ExtraHighlights.Add(new HighlightRange(
+            line: block.StartLine,
+            start: line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase),
+            length: 2,
+            target: HighlightTarget.Mnemonic
         )
         {
           ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
-        };
+        });
+      }
+
+      // Поиск и подсветка X<МОМ
+      var parameterMatches = Regex.Matches(line, parameterPattern, RegexOptions.IgnoreCase);
+      foreach (Match parameterMatch in parameterMatches)
+      {
+        block.ExtraHighlights.Add(new HighlightRange(
+            line: block.StartLine,
+            start: parameterMatch.Index,
+            length: parameterMatch.Length,
+            target: HighlightTarget.Parameter
+        )
+        {
+          ColorOverride = Colors.LightSkyBlue
+        });
       }
 
       await Task.CompletedTask;
     }
+
   }
 }

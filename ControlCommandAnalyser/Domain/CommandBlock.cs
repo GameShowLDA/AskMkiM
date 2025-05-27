@@ -23,8 +23,8 @@ namespace ControlCommandAnalyser.Domain
     public bool IsRecognized { get; set; } = false;
 
     /// <summary>
-    /// Диапазон дополнительной подсветки.
+    /// Список диапазонов дополнительной подсветки.
     /// </summary>
-    public HighlightRange? ExtraHighlight { get; set; }
+    public List<HighlightRange> ExtraHighlights { get; set; } = new();
   }
 }
