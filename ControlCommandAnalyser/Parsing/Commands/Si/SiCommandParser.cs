@@ -17,69 +17,55 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
   {
     public string Mnemonic => "СИ";
 
+    private readonly VoltageParser _voltageParser = new();
+    private readonly ParameterMomParser _parameterParser = new();
+
     public async Task ParseAsync(CommandBlock block)
     {
       var line = block.Lines.FirstOrDefault();
       if (string.IsNullOrWhiteSpace(line))
         return;
 
-      string unitGroup = string.Join("|", KnownUnits.VoltageUnits.Select(Regex.Escape));
-      string voltagePattern = $@"\b(\d{{2,4}})({unitGroup})\b";
-      string parameterPattern = @"\b\d+<МОМ\b";
-
       block.ExtraHighlights.Clear();
+      bool hasVoltage = false;
 
-      var voltageMatch = Regex.Match(line, voltagePattern, RegexOptions.IgnoreCase);
-      if (voltageMatch.Success)
+      // Парсинг напряжения
+      var voltageResult = _voltageParser.Parse(line, block.StartLine);
+      if (voltageResult != null)
       {
-        string voltage = voltageMatch.Value;
-        LogInformation($"Найдена команда № {block.CommandNumber} СИ — Сопротивление изоляции со значением {voltage} на строке {block.StartLine + 1}");
-
-        block.IsRecognized = true;
-
+        hasVoltage = true;
         block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: voltageMatch.Index,
-            length: voltageMatch.Length,
-            target: HighlightTarget.Parameter
+            line: voltageResult.LineIndex,
+            start: voltageResult.Start,
+            length: voltageResult.Length,
+            target: voltageResult.Target
         )
         {
-          ColorOverride = Colors.Gold
+          ColorOverride = voltageResult.Color
         });
-      }
-      else
-      {
-        LogWarning($"⚠ Команда СИ в строке {block.StartLine + 1} не содержит напряжения.");
-        block.IsRecognized = false;
 
-        block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase),
-            length: 2,
-            target: HighlightTarget.Mnemonic
-        )
-        {
-          ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
-        });
+        LogInformation(voltageResult.Description);
       }
 
-      // Поиск и подсветка X<МОМ
-      var parameterMatches = Regex.Matches(line, parameterPattern, RegexOptions.IgnoreCase);
-      foreach (Match parameterMatch in parameterMatches)
+      // Парсинг X<МОМ
+      var momResult = _parameterParser.Parse(line, block.StartLine);
+      if (momResult != null)
       {
         block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: parameterMatch.Index,
-            length: parameterMatch.Length,
-            target: HighlightTarget.Parameter
+            line: momResult.LineIndex,
+            start: momResult.Start,
+            length: momResult.Length,
+            target: momResult.Target
         )
         {
-          ColorOverride = Colors.LightSkyBlue
+          ColorOverride = momResult.Color
         });
+
+        LogInformation(momResult.Description);
       }
 
+      block.IsRecognized = hasVoltage;
       await Task.CompletedTask;
     }
-
   }
 }
