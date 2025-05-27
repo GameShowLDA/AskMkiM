@@ -11,7 +11,7 @@ using Utilities.Models;
 using static Utilities.LoggerUtility;
 
 
-namespace ControlCommandAnalyser.Parsing.Commands
+namespace ControlCommandAnalyser.Parsing.Commands.Si
 {
   public class SiCommandParser : ICommandParser
   {
@@ -43,7 +43,7 @@ namespace ControlCommandAnalyser.Parsing.Commands
           target: HighlightTarget.Parameter
         )
         {
-          ColorOverride = System.Windows.Media.Colors.Gold
+          ColorOverride = Colors.Gold
         };
       }
       else
