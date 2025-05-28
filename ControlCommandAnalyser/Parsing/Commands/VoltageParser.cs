@@ -8,6 +8,7 @@ using ControlCommandAnalyser.Constants;
 
 namespace ControlCommandAnalyser.Parsing.Commands
 {
+  [CommandSyntax("СИ")]
   public class VoltageParser : ISyntaxParser
   {
     private readonly string _pattern;

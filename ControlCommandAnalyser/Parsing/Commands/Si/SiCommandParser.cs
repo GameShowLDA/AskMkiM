@@ -1,93 +1,90 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Reflection;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using ControlCommandAnalyser.Constants;
+using System.Collections.Generic;
 using ControlCommandAnalyser.Domain;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 
-
 namespace ControlCommandAnalyser.Parsing.Commands.Si
 {
+  /// <summary>
+  /// Парсер команды СИ.
+  /// Выполняет вызов всех подключенных синтаксических парсеров для анализа строки команды.
+  /// Поддерживает фильтрацию парсеров по атрибуту CommandSyntaxAttribute.
+  /// </summary>
   public class SiCommandParser : ICommandParser
   {
+    /// <summary>
+    /// Мнемоника команды СИ.
+    /// </summary>
     public string Mnemonic => "СИ";
 
-    private readonly VoltageParser _voltageParser = new();
-    private readonly ParameterMomParser _parameterParser = new();
+    private readonly List<ISyntaxParser> _syntaxParsers;
 
+    /// <summary>
+    /// Инициализирует парсер СИ.
+    /// Выполняет поиск и подключение всех парсеров, помеченных атрибутом CommandSyntax("СИ").
+    /// </summary>
+    public SiCommandParser()
+    {
+      _syntaxParsers = Assembly
+          .GetExecutingAssembly()
+          .GetTypes()
+          .Where(t => typeof(ISyntaxParser).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+          .Where(t =>
+              t.GetCustomAttributes(typeof(CommandSyntaxAttribute), true)
+              .OfType<CommandSyntaxAttribute>()
+              .Any(attr => attr.Mnemonic == "СИ"))
+          .Select(t => (ISyntaxParser)Activator.CreateInstance(t)!)
+          .ToList();
+    }
+
+    /// <summary>
+    /// Выполняет парсинг блока команды СИ.
+    /// Использует все подключенные парсеры для поиска параметров в строке.
+    /// Добавляет подсветку для найденных элементов.
+    /// В случае отсутствия обязательных параметров подсвечивает мнемонику СИ красным цветом.
+    /// </summary>
+    /// <param name="block">Блок команд для обработки.</param>
     public async Task ParseAsync(CommandBlock block)
     {
       var line = block.Lines.FirstOrDefault();
       if (string.IsNullOrWhiteSpace(line))
         return;
 
-      string unitGroup = string.Join("|", KnownUnits.VoltageUnits.Select(Regex.Escape));
-      string voltagePattern = $@"\b(\d{{2,4}})({unitGroup})\b";
-      string parameterPattern = @"\b\d+<МОМ\b";
-      string timePattern = @"\b\d+[сc]\b";
-
       block.ExtraHighlights.Clear();
 
-      // Поиск напряжения
-      var voltageMatch = Regex.Match(line, voltagePattern, RegexOptions.IgnoreCase);
       bool voltageFound = false;
-      if (voltageMatch.Success)
-      {
-        voltageFound = true;
-        block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: voltageMatch.Index,
-            length: voltageMatch.Length,
-            target: HighlightTarget.Parameter
-        )
-        {
-          ColorOverride = Colors.Gold
-        });
+      bool parameterFound = false;
+      bool timeFound = false;
 
-        LogInformation($"Найдено напряжение: {voltageMatch.Value}");
+      foreach (var parser in _syntaxParsers)
+      {
+        var result = parser.Parse(line, block.StartLine);
+        if (result != null)
+        {
+          block.ExtraHighlights.Add(new HighlightRange(
+              line: result.LineIndex,
+              start: result.Start,
+              length: result.Length,
+              target: result.Target
+          )
+          {
+            ColorOverride = result.Color
+          });
+
+          LogInformation(result.Description);
+
+          // Флаги найденных параметров
+          if (parser is VoltageParser) voltageFound = true;
+          if (parser is ParameterMomParser) parameterFound = true;
+          if (parser is TimeParser) timeFound = true;
+        }
       }
 
-      // Поиск X<МОМ
-      var parameterMatches = Regex.Matches(line, parameterPattern, RegexOptions.IgnoreCase);
-      bool parameterFound = parameterMatches.Count > 0;
-      foreach (Match parameterMatch in parameterMatches)
-      {
-        block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: parameterMatch.Index,
-            length: parameterMatch.Length,
-            target: HighlightTarget.Parameter
-        )
-        {
-          ColorOverride = Colors.LightSkyBlue
-        });
-
-        LogInformation($"Найден параметр X<МОМ: {parameterMatch.Value}");
-      }
-
-      // Поиск времени Xс (кириллица/латиница)
-      var timeMatches = Regex.Matches(line, timePattern, RegexOptions.IgnoreCase);
-      bool timeFound = timeMatches.Count > 0;
-      foreach (Match timeMatch in timeMatches)
-      {
-        block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: timeMatch.Index,
-            length: timeMatch.Length,
-            target: HighlightTarget.Parameter
-        )
-        {
-          ColorOverride = Colors.Gold
-        });
-
-        LogInformation($"Найден параметр времени: {timeMatch.Value}");
-      }
-
+      // Проверка на корректность команды СИ
       if (voltageFound && parameterFound && timeFound)
       {
         block.IsRecognized = true;
@@ -95,25 +92,33 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
       else
       {
         block.IsRecognized = false;
-        int siIndex = line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase);
-        if (siIndex >= 0)
-        {
-          block.ExtraHighlights.Add(new HighlightRange(
-              line: block.StartLine,
-              start: siIndex,
-              length: 2,
-              target: HighlightTarget.Mnemonic
-          )
-          {
-            ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
-          });
-        }
-
+        HighlightSiAsError(block, line);
         LogWarning($"⚠ Команда СИ в строке {block.StartLine + 1} не содержит напряжения, параметра X<МОМ или времени.");
       }
 
       await Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Добавляет подсветку на мнемонику СИ красным цветом, если команда некорректна.
+    /// </summary>
+    /// <param name="block">Блок команды, в который добавляется подсветка.</param>
+    /// <param name="line">Исходная строка команды.</param>
+    private void HighlightSiAsError(CommandBlock block, string line)
+    {
+      int siIndex = line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase);
+      if (siIndex >= 0)
+      {
+        block.ExtraHighlights.Add(new HighlightRange(
+            line: block.StartLine,
+            start: siIndex,
+            length: 2,
+            target: HighlightTarget.Mnemonic
+        )
+        {
+          ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
+        });
+      }
+    }
   }
 }

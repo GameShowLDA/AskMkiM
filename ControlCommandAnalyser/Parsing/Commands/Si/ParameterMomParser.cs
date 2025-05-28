@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ControlCommandAnalyser.Parsing.Commands.Si
 {
+  [CommandSyntax("СИ")]
   public class ParameterMomParser : ISyntaxParser
   {
     private readonly string _pattern = @"\b\d+<МОМ\b";
