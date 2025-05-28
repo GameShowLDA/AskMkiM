@@ -31,13 +31,18 @@ namespace NewCore.Communication
     public UdpDeviceProtocol(DeviceWithIP device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
+      OperationLock = new SemaphoreSlim(1, 1);
     }
+
+    public SemaphoreSlim OperationLock { get; set; }
 
     /// <inheritdoc />
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
       try
       {
+        await OperationLock.WaitAsync();
+
         int lastOctet = GetLastOctet(_device.IPAddress);
         int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
         int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
@@ -92,6 +97,10 @@ namespace NewCore.Communication
       {
         LogException($"[{_device.Name}] Общая ошибка QueryAsync", ex);
         return $"[{_device.Name}] Общая ошибка QueryAsync: {ex.Message}";
+      }
+      finally
+      { 
+        OperationLock.Release();
       }
     }
 

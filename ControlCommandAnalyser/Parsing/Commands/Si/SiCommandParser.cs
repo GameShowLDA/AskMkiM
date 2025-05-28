@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using ControlCommandAnalyser.Domain;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
+using ControlCommandAnalyser.Parsing.Interface;
+using System.Windows.Media;
+using System.Text.RegularExpressions;
 
 namespace ControlCommandAnalyser.Parsing.Commands.Si
 {
@@ -43,11 +46,9 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
 
     /// <summary>
     /// Выполняет парсинг блока команды СИ.
-    /// Использует все подключенные парсеры для поиска параметров в строке.
-    /// Добавляет подсветку для найденных элементов.
-    /// В случае отсутствия обязательных параметров подсвечивает мнемонику СИ красным цветом.
+    /// Подсвечивает все параметры, а также некорректные (неопознанные) части строки.
     /// </summary>
-    /// <param name="block">Блок команд для обработки.</param>
+    /// <param name="block">Блок команды для обработки.</param>
     public async Task ParseAsync(CommandBlock block)
     {
       var line = block.Lines.FirstOrDefault();
@@ -56,69 +57,81 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
 
       block.ExtraHighlights.Clear();
 
-      bool voltageFound = false;
-      bool parameterFound = false;
-      bool timeFound = false;
+      // Изначально красим всю строку в красный как "по умолчанию"
+      block.ExtraHighlights.Add(new HighlightRange(
+        line: block.StartLine,
+        start: 0,
+        length: line.Length,
+        target: HighlightTarget.Parameter)
+      {
+        ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
+      });
 
+      // Список найденных параметров
+      var foundParameters = new HashSet<string>();
+
+      // Парсим параметры через подключённые парсеры
       foreach (var parser in _syntaxParsers)
       {
         var result = parser.Parse(line, block.StartLine);
         if (result != null)
         {
           block.ExtraHighlights.Add(new HighlightRange(
-              line: result.LineIndex,
-              start: result.Start,
-              length: result.Length,
-              target: result.Target
-          )
+            line: result.LineIndex,
+            start: result.Start,
+            length: result.Length,
+            target: result.Target)
           {
             ColorOverride = result.Color
           });
 
+          foundParameters.Add(parser.ParameterName);
           LogInformation(result.Description);
-
-          // Флаги найденных параметров
-          if (parser is VoltageParser) voltageFound = true;
-          if (parser is ParameterMomParser) parameterFound = true;
-          if (parser is TimeParser) timeFound = true;
         }
       }
 
+      // Всегда подсвечиваем номер команды и мнемонику как корректные
+      var match = Regex.Match(line, @"^\s*(\d+)\s+(СИ)", RegexOptions.IgnoreCase);
+      if (match.Success)
+      {
+        // Номер команды
+        block.ExtraHighlights.Add(new HighlightRange(
+          line: block.StartLine,
+          start: match.Groups[1].Index,
+          length: match.Groups[1].Length,
+          target: HighlightTarget.CommandNumber)
+        {
+          ColorOverride = Colors.DeepSkyBlue
+        });
+
+        // Мнемоника СИ
+        block.ExtraHighlights.Add(new HighlightRange(
+          line: block.StartLine,
+          start: match.Groups[2].Index,
+          length: match.Groups[2].Length,
+          target: HighlightTarget.Mnemonic)
+        {
+          ColorOverride = Colors.LightGreen
+        });
+      }
+
       // Проверка на корректность команды СИ
+      bool voltageFound = foundParameters.Contains("Voltage");
+      bool parameterFound = foundParameters.Contains("Mom");
+      bool timeFound = foundParameters.Contains("Time");
+
       if (voltageFound && parameterFound && timeFound)
       {
         block.IsRecognized = true;
+        LogInformation($"✅ Команда СИ в строке {block.StartLine + 1} успешно распознана.");
       }
       else
       {
         block.IsRecognized = false;
-        HighlightSiAsError(block, line);
-        LogWarning($"⚠ Команда СИ в строке {block.StartLine + 1} не содержит напряжения, параметра X<МОМ или времени.");
+        LogWarning($"⚠ Команда СИ в строке {block.StartLine + 1} содержит ошибки: напряжение={voltageFound}, X<МОМ={parameterFound}, время={timeFound}");
       }
 
       await Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Добавляет подсветку на мнемонику СИ красным цветом, если команда некорректна.
-    /// </summary>
-    /// <param name="block">Блок команды, в который добавляется подсветка.</param>
-    /// <param name="line">Исходная строка команды.</param>
-    private void HighlightSiAsError(CommandBlock block, string line)
-    {
-      int siIndex = line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase);
-      if (siIndex >= 0)
-      {
-        block.ExtraHighlights.Add(new HighlightRange(
-            line: block.StartLine,
-            start: siIndex,
-            length: 2,
-            target: HighlightTarget.Mnemonic
-        )
-        {
-          ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
-        });
-      }
     }
   }
 }

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
 using ControlCommandAnalyser.Domain;
 using ControlCommandAnalyser.Parsing;
 using static Utilities.LoggerUtility;
@@ -10,6 +11,7 @@ namespace ControlCommandAnalyser.Translation
 {
   /// <summary>
   /// Отвечает за трансляцию текста ПК в команды.
+  /// Выполняет распознавание, форматирование, сборку текста и подсветку.
   /// </summary>
   public class TranslationManager
   {
@@ -18,12 +20,17 @@ namespace ControlCommandAnalyser.Translation
     /// </summary>
     public Action<List<HighlightRange>>? HighlightCallback { get; set; }
 
-    public async Task Translate(string text)
+    /// <summary>
+    /// Выполняет трансляцию текста, возвращает блоки и подсветку.
+    /// </summary>
+    /// <param name="text">Исходный текст из редактора.</param>
+    /// <returns>Кортеж: список блоков и подсветок.</returns>
+    public async Task<(List<CommandBlock> Blocks, List<HighlightRange> Highlights)> Translate(string text)
     {
       if (string.IsNullOrWhiteSpace(text))
       {
         LogError("Пустой входной текст для трансляции.");
-        return;
+        return (new List<CommandBlock>(), new List<HighlightRange>());
       }
 
       var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -39,22 +46,22 @@ namespace ControlCommandAnalyser.Translation
       {
         // Подсветка номера команды
         highlights.Add(new HighlightRange(
-          line: result.LineIndex,
-          start: 0,
-          length: result.CommandNumber.Length,
-          target: HighlightTarget.CommandNumber)
+            line: result.LineIndex,
+            start: 0,
+            length: result.CommandNumber.Length,
+            target: HighlightTarget.CommandNumber)
         {
-          ColorOverride = Colors.DeepSkyBlue
+          ColorOverride = System.Windows.Media.Colors.DeepSkyBlue
         });
 
         // Подсветка мнемоники
         highlights.Add(new HighlightRange(
-          line: result.LineIndex,
-          start: result.CommandNumber.Length + 1, // пробел между номером и мнемоникой
-          length: result.Mnemonic.Length,
-          target: HighlightTarget.Mnemonic)
+            line: result.LineIndex,
+            start: result.CommandNumber.Length + 1,
+            length: result.Mnemonic.Length,
+            target: HighlightTarget.Mnemonic)
         {
-          ColorOverride = result.IsRecognized ? Colors.LightGreen : Colors.Gray
+          ColorOverride = result.IsRecognized ? System.Windows.Media.Colors.LightGreen : System.Windows.Media.Colors.Gray
         });
 
         if (result.ExtraHighlights is not null)
@@ -63,12 +70,32 @@ namespace ControlCommandAnalyser.Translation
 
       LogDebug($"Передаётся {highlights.Count} участков подсветки");
 
-      await Application.Current.Dispatcher.InvokeAsync(async () =>
+      return (blocks, highlights);
+    }
+
+    /// <summary>
+    /// Собирает новый текст из блоков после трансляции.
+    /// Использует отформатированные строки, если команда распознана, или исходные строки.
+    /// </summary>
+    /// <param name="blocks">Список блоков после трансляции.</param>
+    /// <returns>Обновлённый текст для редактора.</returns>
+    public string GetFormattedText(List<CommandBlock> blocks)
+    {
+      var result = new List<string>();
+
+      foreach (var block in blocks)
       {
-        await Task.Delay(1);
-        HighlightCallback?.Invoke(highlights);
-      }, System.Windows.Threading.DispatcherPriority.Render);
+        if (block.IsRecognized && block.FormattedLines.Count > 0)
+        {
+          result.AddRange(block.FormattedLines);
+        }
+        else
+        {
+          result.AddRange(block.Lines);
+        }
+      }
+
+      return string.Join(Environment.NewLine, result);
     }
   }
-
 }

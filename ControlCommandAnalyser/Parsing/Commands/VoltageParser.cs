@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using ControlCommandAnalyser.Constants;
+using ControlCommandAnalyser.Parsing.Interface;
 
 namespace ControlCommandAnalyser.Parsing.Commands
 {
@@ -12,6 +14,9 @@ namespace ControlCommandAnalyser.Parsing.Commands
   public class VoltageParser : ISyntaxParser
   {
     private readonly string _pattern;
+
+    public string ParameterName => "Voltage";
+    public Color HighlightColor => Colors.Gold;
 
     public VoltageParser()
     {
@@ -21,7 +26,7 @@ namespace ControlCommandAnalyser.Parsing.Commands
 
     public SyntaxParseResult? Parse(string line, int lineNumber)
     {
-      var match = Regex.Match(line, _pattern, RegexOptions.IgnoreCase);
+      var match = Regex.Match(line, @"\b\d{2,4}(В|v|мВ|кВ|MV|KV)\b", RegexOptions.IgnoreCase);
       if (!match.Success) return null;
 
       return new SyntaxParseResult
@@ -30,7 +35,7 @@ namespace ControlCommandAnalyser.Parsing.Commands
         Start = match.Index,
         Length = match.Length,
         Target = HighlightTarget.Parameter,
-        Color = System.Windows.Media.Colors.Gold,
+        Color = HighlightColor,
         Description = $"Найдено напряжение: {match.Value}"
       };
     }

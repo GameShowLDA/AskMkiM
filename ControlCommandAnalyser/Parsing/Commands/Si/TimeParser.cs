@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using ControlCommandAnalyser.Parsing.Interface;
+using System.Windows.Media;
 
 namespace ControlCommandAnalyser.Parsing.Commands.Si
 {
@@ -10,6 +12,16 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
   public class TimeParser : ISyntaxParser
   {
     private readonly string _pattern = @"\b\d+[сc]\b";
+
+    /// <summary>
+    /// Имя параметра для идентификации в парсере команды.
+    /// </summary>
+    public string ParameterName => "Time";
+
+    /// <summary>
+    /// Цвет подсветки для данного параметра.
+    /// </summary>
+    public Color HighlightColor => Colors.Gold;
 
     /// <summary>
     /// Выполняет парсинг строки на наличие времени Xс.
@@ -28,7 +40,7 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
         Start = match.Index,
         Length = match.Length,
         Target = HighlightTarget.Parameter,
-        Color = System.Windows.Media.Colors.Gold,
+        Color = HighlightColor,
         Description = $"Найден параметр времени: {match.Value}"
       };
     }

@@ -24,6 +24,7 @@ namespace NewCore.Communication
     /// TCP-клиент для установления соединения с устройством.
     /// </summary>
     static internal TcpClient Client { get; set; }
+    public SemaphoreSlim OperationLock { get ; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KeysightDeviceProtocol"/>.
@@ -34,6 +35,7 @@ namespace NewCore.Communication
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _port = port;
+      OperationLock = new SemaphoreSlim(1,1);
     }
 
     /// <inheritdoc />
@@ -41,6 +43,7 @@ namespace NewCore.Communication
     {
       try
       {
+        await OperationLock.WaitAsync();
         if (Client == null || !Client.Connected)
         {
           await EstablishConnection();
@@ -88,6 +91,7 @@ namespace NewCore.Communication
         LogException(ex); // Глобальный отлов
       }
 
+      OperationLock.Release();
       return string.Empty;
     }
 

@@ -44,14 +44,13 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task StartTranslationAsync()
     {
-      // Создаем файл для трансляции
-
       var editor = await _multiWindow.GetActiveTextEditor();
       if (editor == null)
       {
         MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         return;
       }
+
       string text = editor.Text;
 
       await _fileService.CreateTranslationFileAsync();
@@ -63,8 +62,15 @@ namespace MainWindowProgram.Services
         HighlightCallback = editor.ApplyHighlighting
       };
 
-      await translator.Translate(text);
-    }
+      var (blocks, highlights) = await translator.Translate(text);
 
+      // ВАЖНО: сначала обновляем текст
+      string formattedText = translator.GetFormattedText(blocks);
+      editor.Text = formattedText;
+
+      // Повторный вызов Translate для корректных позиций подсветки
+      var (newBlocks, newHighlights) = await translator.Translate(formattedText);
+      editor.ApplyHighlighting(newHighlights);
+    }
   }
 }

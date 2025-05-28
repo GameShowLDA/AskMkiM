@@ -87,6 +87,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
+      await _moduleVoltageCurrentSource.DeviceProtocol.OperationLock.WaitAsync();
       return await ResetAsync();
     }
   }

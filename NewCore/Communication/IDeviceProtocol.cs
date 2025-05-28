@@ -23,5 +23,7 @@ namespace NewCore.Communication
     /// <param name="delayBeforeCall">Выполняет задержку перед запуском измерения. По умолчанию 0.</param>
     /// <returns>Ответ от устройства или пустая строка.</returns>
     Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0);
+
+    SemaphoreSlim OperationLock { get;  set; }
   }
 }

@@ -327,13 +327,21 @@ namespace UI.Controls.TextEditor
 
     public void ApplyHighlighting(List<HighlightRange> ranges)
     {
+      LogDebug($"--- Начало ApplyHighlighting ---");
+      LogDebug($"Всего блоков подсветки: {ranges.Count}");
+      LogDebug($"Всего строк в документе: {textEditor.Document.LineCount}");
+
       if (_markerService == null)
         InitializeMarkerService();
 
       _markerService.ClearAllMarkers();
 
+      int totalLines = textEditor.Document.LineCount;
+
       foreach (var range in ranges)
       {
+        LogDebug($"Обрабатываем подсветку: Line={range.Line}, Start={range.Start}, Length={range.Length}");
+
         if (range.Line < 0 || range.Length <= 0)
         {
           LogWarning($"⚠ Пропущен недопустимый диапазон: line={range.Line}, length={range.Length}");
@@ -342,16 +350,40 @@ namespace UI.Controls.TextEditor
 
         if (range.Line >= textEditor.Document.LineCount)
         {
-          LogWarning($"⚠ Строка вне диапазона документа: {range.Line + 1}");
+          LogWarning($"⚠ Строка вне диапазона документа: {range.Line + 1} (документ содержит {textEditor.Document.LineCount} строк)");
           continue;
         }
 
         var line = textEditor.Document.GetLineByNumber(range.Line + 1);
-        int offset = line.Offset + range.Start;
+        LogDebug($"Строка {range.Line} (AvalonEdit: {range.Line + 1}): Offset={line.Offset}, EndOffset={line.EndOffset}, Length={line.Length}");
 
-        if (offset + range.Length > textEditor.Document.TextLength)
+        int startOffset = line.Offset + range.Start;
+        int endOffset = startOffset + range.Length;
+        endOffset = Math.Min(endOffset, line.EndOffset);
+        int safeLength = Math.Max(0, endOffset - startOffset);
+        if (safeLength == 0)
         {
-          LogWarning($"⚠ Подсветка выходит за пределы текста: offset={offset}, length={range.Length}, doc={textEditor.Document.TextLength}");
+          LogWarning($"⚠ Диапазон подсветки длиной 0: line={range.Line}, start={range.Start}");
+          continue;
+        }
+
+        LogDebug($"startOffset={startOffset}, endOffset={endOffset}");
+
+        if (startOffset < line.Offset)
+        {
+          LogWarning($"⚠ StartOffset меньше начала строки: startOffset={startOffset}, line.Offset={line.Offset}");
+          continue;
+        }
+
+        if (endOffset > line.EndOffset + 1)
+        {
+          LogWarning($"⚠ EndOffset больше конца строки: endOffset={endOffset}, line.EndOffset={line.EndOffset}");
+          endOffset = line.EndOffset;
+        }
+
+        if (safeLength == 0)
+        {
+          LogWarning($"⚠ Диапазон подсветки длиной 0: line={range.Line}, start={range.Start}");
           continue;
         }
 
@@ -362,13 +394,18 @@ namespace UI.Controls.TextEditor
           _ => Colors.Transparent
         };
 
-        _markerService.AddStyledMarker(offset, range.Length, color, FontWeights.Bold);
+        LogDebug($"✅ Добавлена подсветка: StartOffset={startOffset}, Length={safeLength}, Цвет={color}");
+
+        _markerService.AddStyledMarker(startOffset, safeLength, color, FontWeights.Bold);
       }
 
       textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
       textEditor.TextArea.TextView.EnsureVisualLines();
       textEditor.TextArea.TextView.Redraw();
       textEditor.TextArea.TextView.InvalidateVisual();
+
+      LogDebug($"--- Конец ApplyHighlighting ---");
     }
+
   }
 }

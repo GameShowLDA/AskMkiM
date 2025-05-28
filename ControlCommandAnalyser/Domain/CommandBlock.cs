@@ -26,5 +26,10 @@ namespace ControlCommandAnalyser.Domain
     /// Список диапазонов дополнительной подсветки.
     /// </summary>
     public List<HighlightRange> ExtraHighlights { get; set; } = new();
+
+    /// <summary>
+    /// Готовая строка команды после форматирования (для вывода в редактор).
+    /// </summary>
+    public List<string> FormattedLines { get; set; } = new();
   }
 }

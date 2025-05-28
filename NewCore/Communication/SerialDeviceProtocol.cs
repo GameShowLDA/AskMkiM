@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO.Ports;
+using System.Text;
 using System.Threading.Tasks;
 using NewCore.Base.Device;
 using static Utilities.LoggerUtility;
@@ -16,6 +18,9 @@ namespace NewCore.Communication
 
     private static readonly SemaphoreSlim _portLock = new SemaphoreSlim(1, 1);
 
+    public SemaphoreSlim OperationLock { get; set; }
+
+
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="SerialDeviceProtocol"/>.
     /// </summary>
@@ -25,13 +30,17 @@ namespace NewCore.Communication
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _serialPort = serialPort ?? throw new ArgumentNullException(nameof(serialPort));
+      SerialPortHelper.RegisterSerialPort(_serialPort);
+      OperationLock = new SemaphoreSlim(1, 1);
     }
 
     /// <inheritdoc />
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
-      await _portLock.WaitAsync();  // Ждём, пока порт освободится
-      
+      LogDebug($"[{_device.Name}] Захват _portLock");
+      await OperationLock.WaitAsync();
+
+
       try
       {
         if (delayBeforeCall > 0)
@@ -68,26 +77,45 @@ namespace NewCore.Communication
           {
             _serialPort.ReadTimeout = timeout;
 
-            return await Task.Run(() =>
+            // Чтение в цикле с таймаутом
+            var responseBuilder = new StringBuilder();
+            var stopwatch = Stopwatch.StartNew();
+
+            while (stopwatch.ElapsedMilliseconds < timeout)
             {
               try
               {
-                LogDebug("Ожидание ответа от устройства...");
-                string response = _serialPort.ReadLine();
-                LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
-                return response;
-              }
-              catch (TimeoutException)
-              {
-                LogWarning($"[{_device.Name}] Время ожидания ответа истекло ({timeout} мс)");
-                return string.Empty;
+                int availableBytes = _serialPort.BytesToRead;
+                if (availableBytes > 0)
+                {
+                  string chunk = _serialPort.ReadExisting();
+                  responseBuilder.Append(chunk);
+                  LogDebug($"Принятый фрагмент: {chunk.Trim()}");
+                  if (chunk.Contains("\n") || chunk.Contains("\r")) break;  // Можно уточнить по протоколу устройства
+                }
+                else
+                {
+                  await Task.Delay(10); // Небольшая пауза
+                }
               }
               catch (Exception ex)
               {
-                LogError($"[{_device.Name}] Ошибка при чтении из порта: {ex.Message}");
-                return string.Empty;
+                LogException(ex, $"Ошибка при чтении из порта");
+                break;
               }
-            });
+            }
+
+            string response = responseBuilder.ToString().Trim();
+            if (string.IsNullOrWhiteSpace(response))
+            {
+              LogWarning($"[{_device.Name}] Таймаут: данных от устройства нет за {timeout} мс");
+            }
+            else
+            {
+              LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
+            }
+
+            return response;
           }
 
           LogDebug("Таймаут чтения не задан, возвращается пустой ответ.");
@@ -95,21 +123,14 @@ namespace NewCore.Communication
         }
         catch (Exception ex)
         {
-          LogError($"[{_device.Name}] Ошибка при работе с COM-портом: {ex.Message}");
+          LogException(ex, $"[{_device.Name}] Ошибка при работе с COM-портом");
           return string.Empty;
-        }
-        finally
-        {
-          if (_serialPort.IsOpen)
-          {
-            LogDebug("Закрытие COM-порта.");
-            _serialPort.Close();
-          }
         }
       }
       finally
       {
-        _portLock.Release();  // Освобождаем порт
+        LogDebug($"[{_device.Name}] Освобождение _portLock");
+        OperationLock.Release();
       }
     }
 
