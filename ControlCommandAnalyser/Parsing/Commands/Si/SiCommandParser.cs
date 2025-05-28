@@ -26,46 +26,94 @@ namespace ControlCommandAnalyser.Parsing.Commands.Si
       if (string.IsNullOrWhiteSpace(line))
         return;
 
+      string unitGroup = string.Join("|", KnownUnits.VoltageUnits.Select(Regex.Escape));
+      string voltagePattern = $@"\b(\d{{2,4}})({unitGroup})\b";
+      string parameterPattern = @"\b\d+<МОМ\b";
+      string timePattern = @"\b\d+[сc]\b";
+
       block.ExtraHighlights.Clear();
-      bool hasVoltage = false;
 
-      // Парсинг напряжения
-      var voltageResult = _voltageParser.Parse(line, block.StartLine);
-      if (voltageResult != null)
+      // Поиск напряжения
+      var voltageMatch = Regex.Match(line, voltagePattern, RegexOptions.IgnoreCase);
+      bool voltageFound = false;
+      if (voltageMatch.Success)
       {
-        hasVoltage = true;
+        voltageFound = true;
         block.ExtraHighlights.Add(new HighlightRange(
-            line: voltageResult.LineIndex,
-            start: voltageResult.Start,
-            length: voltageResult.Length,
-            target: voltageResult.Target
+            line: block.StartLine,
+            start: voltageMatch.Index,
+            length: voltageMatch.Length,
+            target: HighlightTarget.Parameter
         )
         {
-          ColorOverride = voltageResult.Color
+          ColorOverride = Colors.Gold
         });
 
-        LogInformation(voltageResult.Description);
+        LogInformation($"Найдено напряжение: {voltageMatch.Value}");
       }
 
-      // Парсинг X<МОМ
-      var momResult = _parameterParser.Parse(line, block.StartLine);
-      if (momResult != null)
+      // Поиск X<МОМ
+      var parameterMatches = Regex.Matches(line, parameterPattern, RegexOptions.IgnoreCase);
+      bool parameterFound = parameterMatches.Count > 0;
+      foreach (Match parameterMatch in parameterMatches)
       {
         block.ExtraHighlights.Add(new HighlightRange(
-            line: momResult.LineIndex,
-            start: momResult.Start,
-            length: momResult.Length,
-            target: momResult.Target
+            line: block.StartLine,
+            start: parameterMatch.Index,
+            length: parameterMatch.Length,
+            target: HighlightTarget.Parameter
         )
         {
-          ColorOverride = momResult.Color
+          ColorOverride = Colors.LightSkyBlue
         });
 
-        LogInformation(momResult.Description);
+        LogInformation($"Найден параметр X<МОМ: {parameterMatch.Value}");
       }
 
-      block.IsRecognized = hasVoltage;
+      // Поиск времени Xс (кириллица/латиница)
+      var timeMatches = Regex.Matches(line, timePattern, RegexOptions.IgnoreCase);
+      bool timeFound = timeMatches.Count > 0;
+      foreach (Match timeMatch in timeMatches)
+      {
+        block.ExtraHighlights.Add(new HighlightRange(
+            line: block.StartLine,
+            start: timeMatch.Index,
+            length: timeMatch.Length,
+            target: HighlightTarget.Parameter
+        )
+        {
+          ColorOverride = Colors.Gold
+        });
+
+        LogInformation($"Найден параметр времени: {timeMatch.Value}");
+      }
+
+      if (voltageFound && parameterFound && timeFound)
+      {
+        block.IsRecognized = true;
+      }
+      else
+      {
+        block.IsRecognized = false;
+        int siIndex = line.IndexOf("СИ", StringComparison.OrdinalIgnoreCase);
+        if (siIndex >= 0)
+        {
+          block.ExtraHighlights.Add(new HighlightRange(
+              line: block.StartLine,
+              start: siIndex,
+              length: 2,
+              target: HighlightTarget.Mnemonic
+          )
+          {
+            ColorOverride = ShowMessageModel.ErrorMessage.TitleColor
+          });
+        }
+
+        LogWarning($"⚠ Команда СИ в строке {block.StartLine + 1} не содержит напряжения, параметра X<МОМ или времени.");
+      }
+
       await Task.CompletedTask;
     }
+
   }
 }

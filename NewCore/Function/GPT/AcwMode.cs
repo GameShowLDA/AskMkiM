@@ -29,7 +29,7 @@ namespace NewCore.Function.GPT
 
     static private int delayBeforeCall = 100;
 
-    int delay = 50;
+    int delay = 300;
 
     #region Mode
 
@@ -158,6 +158,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetVoltageAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -192,6 +196,7 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(GetVoltageAsync)}", ex);
         throw;
       }
+
     }
 
     #endregion
@@ -239,6 +244,10 @@ namespace NewCore.Function.GPT
       {
         LogException($"Ошибка в {nameof(SetHighCurrentLimitAsync)}", ex);
         throw;
+      }
+      finally
+      {
+        await Task.Delay(delay);
       }
     }
 
@@ -322,6 +331,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetLowCurrentLimitAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
 
@@ -404,6 +417,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetTestTimeAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -485,6 +502,10 @@ namespace NewCore.Function.GPT
       {
         LogException($"Ошибка в {nameof(SetRampTimeAsync)}", ex);
         throw;
+      }
+      finally
+      {
+        await Task.Delay(delay);
       }
     }
 
@@ -571,6 +592,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetFrequencyAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -651,6 +676,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetOffsetAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -730,6 +759,10 @@ namespace NewCore.Function.GPT
       {
         LogException($"Ошибка в {nameof(SetArcCurrentAsync)}", ex);
         throw;
+      }
+      finally
+      {
+        await Task.Delay(delay);
       }
     }
 

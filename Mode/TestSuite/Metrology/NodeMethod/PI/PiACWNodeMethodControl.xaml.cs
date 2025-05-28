@@ -72,11 +72,11 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
         await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.AcwManger.SetHighCurrentLimitAsync(dataModel.Param);
         await breakDown.AcwManger.SetFrequencyAsync(50);
+        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
       }
 
       /// <inheritdoc />

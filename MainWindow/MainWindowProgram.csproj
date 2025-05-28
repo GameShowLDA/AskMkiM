@@ -1,17 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-    <SignAssembly>False</SignAssembly>
-    <ApplicationIcon>Resources\АСКМ.ico</ApplicationIcon>
-    <PackageOutputPath>$(OutputPath)</PackageOutputPath>
-	<OutputPath>D:\AskMkiM\Bin\</OutputPath>
-	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<SignAssembly>False</SignAssembly>
+		<ApplicationIcon>Resources\АСКМ.ico</ApplicationIcon>
+		<PackageOutputPath>$(OutputPath)</PackageOutputPath>
+		<OutputPath>D:\AskMkiM\Bin\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+		<SelfContained>true</SelfContained>
+		<PublishTrimmed>false</PublishTrimmed>
+		<PublishDir>$(OutputPath)publish\</PublishDir>
+	</PropertyGroup>
+
+
 
 	<Target Name="CreateEmptyFolder" AfterTargets="Build">
 		<MakeDir Directories="D:\AskMkiM\Тесты ПК" />
@@ -60,4 +66,18 @@
     <Content Include="Resources\АСКМ.ico" />
   </ItemGroup>
 
+	<Target Name="FixPublishOutput" AfterTargets="Publish">
+		<ItemGroup>
+			<PublishFiles Include="$(PublishDir)**\*" />
+		</ItemGroup>
+
+		<Move
+		  SourceFiles="@(PublishFiles)"
+		  DestinationFolder="D:\AskMkiM\Bin\"
+		  SkipUnchangedFiles="true"
+		  OverwriteReadOnlyFiles="true" />
+
+		<RemoveDir Directories="$(PublishDir)" />
+	</Target>
+	
 </Project>
