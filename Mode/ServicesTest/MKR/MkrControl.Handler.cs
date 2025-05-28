@@ -1,6 +1,8 @@
 ﻿using Mode.Models;
+using NewCore.Enum;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Utilities.Models;
 
 namespace Mode.ServicesTest.MKR
 {
@@ -10,6 +12,11 @@ namespace Mode.ServicesTest.MKR
   public partial class MkrControl
   {
     /// <summary>
+    /// Текущая кнопка группы шин.
+    /// </summary>
+    private RadioButton currentBus;
+
+    /// <summary>
     /// Обрабатывает изменение выбранного элемента в ComboBox (SerialNumComboBox).
     /// Если устройство уже подключено, изменение недопустимо. При выборе пустого элемента происходит сброс устройства.
     /// </summary>
@@ -17,36 +24,41 @@ namespace Mode.ServicesTest.MKR
     /// <param name="e">Аргументы события изменения выбора.</param>
     private async void SerialNumComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      if (isConnected)
+
+      var selectedSerial = (SerialNumComboBox.SelectedItem as string).Split('.');
+
+      if (currentDevice != null) await ResetMkrDevice();
+
+      if (selectedSerial[0] == "<пусто>")
       {
-        await ShowMessageAsync("Нельзя сменить устройство: уже подключено!");
+        currentDevice = null;
+
+        points.Clear();
+        pointsView.Refresh();
+
+        UpdateMkrUI(false);
         return;
       }
 
-      var selectedItem = SerialNumComboBox.SelectedItem as string;
+      currentDevice = _devices
+                      .FirstOrDefault(
+                      d => 
+                      d.NumberChassis.ToString() == selectedSerial[0]
+                      && d.Number.ToString() == selectedSerial[1]
+                      );
 
-      if (string.IsNullOrEmpty(selectedItem) || selectedItem == "<пусто>")
+      if (currentDevice == null)
       {
-        if (isMkrInitialized)
-        {
-          await ResetMkrDevice();
-          await ShowMessageAsync("Устройство отключено");
-        }
+        await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]: ", errorText.TitleColor, "не удалось найти устройство!"));
+        return;
+      }
 
-        isMkrInitialized = false;
-        currentDeviceName = string.Empty;
-        await UpdateMkrUI(false, skipLog: true);
-      }
-      else
-      {
-        if (isMkrInitialized)
-        {
-          await ResetMkrDevice();
-        }
-        isMkrInitialized = true;
-        currentDeviceName = selectedItem;
-        await UpdateMkrUI(true, skipLog: false);
-      }
+      InitializePoints();
+
+      UpdateMkrUI(true);
+
+      await currentDevice.StateManager.Initialize();
+      await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"[ИНИЦИАЛИЗАЦИЯ БК {currentDevice.NumberChassis}.{currentDevice.Number}]", goodText.TitleColor));
     }
 
     /// <summary>
@@ -57,22 +69,6 @@ namespace Mode.ServicesTest.MKR
     private async void BtnMkrReset_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       await ResetMkrDevice();
-    }
-
-    /// <summary>
-    /// Обрабатывает нажатие на кнопку "ЗАПУСТИТЬ"/"ОСТАНОВИТЬ" (BtnConnect).
-    /// После попытки подключения обновляются состояния радиокнопок, списка точек и ComboBox.
-    /// </summary>
-    /// <param name="sender">Источник события, ожидается Button.</param>
-    /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void BtnConnect_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      await AttemptDeviceConnectionAsync();
-
-      ToggleRadioButtonState(!isConnected);
-      PointsListBox.IsEnabled = !isConnected;
-      SerialNumComboBox.IsEnabled = !isConnected;
-      BtnMkrReset.IsEnabled = !isConnected;
     }
 
     /// <summary>
@@ -105,7 +101,6 @@ namespace Mode.ServicesTest.MKR
 
     /// <summary>
     /// Обрабатывает нажатие на кнопку точки.
-    /// Здесь реализуйте логику подключения точки к шине.
     /// </summary>
     /// <param name="sender">Источник события, ожидается Button с привязанной моделью MkrPointModel.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
@@ -120,82 +115,62 @@ namespace Mode.ServicesTest.MKR
     /// <summary>
     /// Обрабатывает событие ухода мыши с ContextMenu.
     /// Выводит сообщение о состоянии подключения точки, основываясь на данных модели, и закрывает меню.
+    /// Здесь реализовано управление подключения точек к шинам.
     /// </summary>
     /// <param name="sender">Источник события, ожидается ContextMenu.</param>
     /// <param name="e">Аргументы события ухода мыши.</param>
     private async void ContextMenu_MouseLeave(object sender, MouseEventArgs e)
     {
-      if (sender is ContextMenu ctxMenu)
-      {
-        if (ctxMenu.PlacementTarget is Button btn)
-        {
-          string buttonNumber = btn.Content?.ToString() ?? "{неизвестно}";
+      ContextMenu ctxMenu = sender as ContextMenu;
+      Button btn = ctxMenu.PlacementTarget as Button;
+      MkrPointModel point = btn.DataContext as MkrPointModel;
 
-          if (btn.DataContext is MkrPointModel point)
-          {
-            if (point.A && point.B)
-              await ShowMessageAsync($"Точка {buttonNumber} подключена к A и B.");
-            else if (point.A)
-              await ShowMessageAsync($"Точка {buttonNumber} подключена к A.");
-            else if (point.B)
-              await ShowMessageAsync($"Точка {buttonNumber} подключена к B.");
-            else
-              await ShowMessageAsync($"Точка {buttonNumber} отключена.");
-          }
-        }
-        ctxMenu.IsOpen = false;
-      }
+      ctxMenu.IsOpen = false;
+
+      if (!point.changeFlag) return;
+
+      int buttonNumber = int.Parse(btn.Content.ToString());
+
+      if (point.A) await currentDevice.PointManager.ConnectRelayAsync(DeviceEnum.BusPoint.A, buttonNumber);
+      else if (!point.A) await currentDevice.PointManager.DisconnectRelayAsync(DeviceEnum.BusPoint.A, buttonNumber);
+
+      if (point.B) await currentDevice.PointManager.ConnectRelayAsync(DeviceEnum.BusPoint.B, buttonNumber);
+      else if (!point.B) await currentDevice.PointManager.DisconnectRelayAsync(DeviceEnum.BusPoint.B, buttonNumber);
+
+      if (point.A && point.B) await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} подключена к A и B."));
+      else if (point.A) await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} подключена к A."));
+      else if (point.B) await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} подключена к B."));
+      else await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} отключена."));
+
+      point.ResetChangeFlag();
     }
 
     /// <summary>
     /// Обрабатывает нажатие на RadioButton для выбора шины.
     /// Выводит сообщение о текущем состоянии шины, основываясь на имени элемента.
+    /// Здесь реализовано управление подключения шин.
     /// </summary>
     /// <param name="sender">Источник события, ожидается RadioButton.</param>
     /// <param name="e">Аргументы события нажатия мыши.</param>
     private async void RadioButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (sender is RadioButton rb)
-      {
-        //string busState = rb.Name switch
-        //{
-        //  "RbOffA" => "Шина A отключена",
-        //  "RbOffB" => "Шина B отключена",
-        //  _ => $"Шина {rb.Name} подключена"
-        //};
+      RadioButton rb = sender as RadioButton;
 
-        string busState = rb.Name == "RbOff" ? "Группа шин отключена" : $"Группа шин {rb.Content} подключена";
-
-        await ShowMessageAsync(busState);
+      if (currentBus != RbOff)
+      { 
+        await DisconnectBusGroup();
+        await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Группа шин {currentBus.Content} отключена"));
       }
-    }
+      currentBus.IsHitTestVisible = true;
+      currentBus.IsChecked = false;
 
-    /// <summary>
-    /// Переключает доступность группы RadioButton для шины A и шины B.
-    /// </summary>
-    /// <param name="enable">Если true, все RadioButton становятся доступными.</param>
-    private void ToggleRadioButtonState(bool enable)
-    {
-      RbAB1.IsEnabled = enable;
-      RbAB2.IsEnabled = enable;
-      RbAB3.IsEnabled = enable;
-      RbAB4.IsEnabled = enable;
-      RbOff.IsEnabled = enable;
-    }
+      currentBus = rb;
+      if (currentBus != RbOff) await ConnectBusGroup();
+      currentBus.IsHitTestVisible = false;
+      currentBus.IsChecked = true;
 
-    /// <summary>
-    /// Выводит сообщение в элемент протокола (protocolTextBox).
-    /// </summary>
-    /// <param name="text">Текст сообщения.</param>
-    /// <returns>Задача, представляющая завершение асинхронной операции.</returns>
-    private Task ShowMessageAsync(string text)
-    {
-      if (protocolTextBox != null)
-      {
-        protocolTextBox.ShowMessageAsync(new Utilities.Models.ShowMessageModel(text));
-        protocolTextBox.ScrollToEnd();
-      }
-      return Task.CompletedTask;
+      string busState = rb.Name == "RbOff" ? "Все группы шин отключены" : $"Группа шин {rb.Content} подключена";
+      await protocolTextBox.ShowMessageAsync(new ShowMessageModel(busState));
     }
   }
 }

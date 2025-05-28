@@ -1,4 +1,7 @@
-﻿namespace Mode.ServicesTest.MKR
+﻿using NewCore.Enum;
+using Utilities.Models;
+
+namespace Mode.ServicesTest.MKR
 {
   /// <summary>
   /// Управляет состоянием устройства МКР, включая его инициализацию, сброс параметров и обновление пользовательского интерфейса.
@@ -6,46 +9,69 @@
   public partial class MkrControl
   {
     /// <summary>
-    /// Подключает или отключает устройство (вместо ToggleModuleButton).
-    /// Возвращает текущее состояние подключения: <c>true</c> – устройство подключено, <c>false</c> – отключено.
+    /// Отключает группу шин на текущем устройстве в зависимости от имени выбранного переключателя.
     /// </summary>
-    /// <returns>Состояние подключения устройства.</returns>
-    public async Task<bool> AttemptDeviceConnectionAsync()
+    /// <remarks>
+    /// Проверяется свойство <c>currentBus.Name</c>, и для каждого поддерживаемого значения
+    /// выполняется асинхронный вызов метода <c>DisconnectBusAsync</c> с соответствующим значением <see cref="DeviceEnum.SwitchingBus"/>.
+    /// </remarks>
+    private async Task DisconnectBusGroup()
     {
-      if (!isMkrInitialized)
+      switch (currentBus.Name)
       {
-        await ShowMessageAsync("Сначала выберите устройство!");
-        return false;
+        case "RbAB1":
+          await currentDevice.BusManager.DisconnectBusAsync(DeviceEnum.SwitchingBus.AB1, false);
+          break;
+        case "RbAB2":
+          await currentDevice.BusManager.DisconnectBusAsync(DeviceEnum.SwitchingBus.AB2, false);
+          break;
+        case "RbAB3":
+          await currentDevice.BusManager.DisconnectBusAsync(DeviceEnum.SwitchingBus.AB3, false);
+          break;
+        case "RbAB4":
+          await currentDevice.BusManager.DisconnectBusAsync(DeviceEnum.SwitchingBus.AB4, false);
+          break;
       }
+    }
 
-      isConnected = !isConnected;
-
-      if (isConnected)
+    /// <summary>
+    /// Подключает группу шин на текущем устройстве в зависимости от имени выбранного переключателя.
+    /// </summary>
+    /// <remarks>
+    /// Аналогично <see cref="DisconnectBusGroup"/>, но вызывает <c>ConnectBusAsync</c> для указанной шины.
+    /// </remarks>
+    private async Task ConnectBusGroup()
+    {
+      switch (currentBus.Name)
       {
-        BtnConnect.Content = "ОСТАНОВИТЬ";
-        await ShowMessageAsync($"Подключение измерителя: {currentDeviceName}");
+        case "RbAB1":
+          await currentDevice.BusManager.ConnectBusAsync(DeviceEnum.SwitchingBus.AB1, false);
+          break;
+        case "RbAB2":
+          await currentDevice.BusManager.ConnectBusAsync(DeviceEnum.SwitchingBus.AB2, false);
+          break;
+        case "RbAB3":
+          await currentDevice.BusManager.ConnectBusAsync(DeviceEnum.SwitchingBus.AB3, false);
+          break;
+        case "RbAB4":
+          await currentDevice.BusManager.ConnectBusAsync(DeviceEnum.SwitchingBus.AB4, false);
+          break;
       }
-      else
-      {
-        BtnConnect.Content = "ЗАПУСТИТЬ";
-        await ShowMessageAsync($"Отключение измерителя: {currentDeviceName}");
-      }
-
-      return isConnected;
     }
 
     /// <summary>
     /// Сбрасывает устройство, приводя его к начальному состоянию.
     /// Осуществляется отключение подключения, сброс состояния радиокнопок и точек.
     /// </summary>
-    public async Task ResetMkrDevice()
+    private async Task ResetMkrDevice()
     {
-      if (isConnected)
-      {
-        await AttemptDeviceConnectionAsync();
-      }
+      await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[СБРОС МОДУЛЯ]", goodText.TitleColor));
 
+      currentBus.IsChecked = false;
+      currentBus.IsHitTestVisible = true;
+      currentBus = RbOff;
       RbOff.IsChecked = true;
+      RbOff.IsHitTestVisible = false;
 
       // Сброс состояния точек с использованием DeferRefresh для минимизации обновлений UI.
       using (pointsView.DeferRefresh())
@@ -57,10 +83,7 @@
         }
       }
 
-      if (!string.IsNullOrEmpty(currentDeviceName))
-        await ShowMessageAsync($"Сброс {currentDeviceName}");
-      else
-        await ShowMessageAsync("Сброс устройства (не выбрано имя)");
+      await currentDevice.StateManager.ResetAsync();
     }
 
     /// <summary>
@@ -71,35 +94,26 @@
     /// Если <c>true</c>, элементы управления становятся доступными (устройство инициализировано);
     /// если <c>false</c>, они отключаются.
     /// </param>
-    /// <param name="skipLog">
-    /// Если <c>true</c>, логирование изменений состояния не производится.
-    /// </param>
-    public async Task UpdateMkrUI(bool enable, bool skipLog = false)
+    private void UpdateMkrUI(bool enable)
     {
-      isMkrInitialized = enable;
-
       BtnMkrReset.IsEnabled = enable;
-      BtnConnect.IsEnabled = enable;
 
       ToggleRadioButtonState(enable);
 
       SearchBox.IsEnabled = enable;
-      PointsListBox.IsEnabled = enable;
+    }
 
-      // Если устройство подключено, отключаем выбор устройства в ComboBox.
-      SerialNumComboBox.IsEnabled = !isConnected;
-
-      if (!skipLog)
-      {
-        if (enable)
-        {
-          await ShowMessageAsync($"Инициализация {currentDeviceName}");
-        }
-        else if (!string.IsNullOrEmpty(currentDeviceName))
-        {
-          await ShowMessageAsync($"Отключение {currentDeviceName}");
-        }
-      }
+    /// <summary>
+    /// Переключает доступность группы RadioButton для шины A и шины B.
+    /// </summary>
+    /// <param name="enable">Если true, все RadioButton становятся доступными.</param>
+    private void ToggleRadioButtonState(bool enable)
+    {
+      RbAB1.IsEnabled = enable;
+      RbAB2.IsEnabled = enable;
+      RbAB3.IsEnabled = enable;
+      RbAB4.IsEnabled = enable;
+      RbOff.IsEnabled = enable;
     }
   }
 }

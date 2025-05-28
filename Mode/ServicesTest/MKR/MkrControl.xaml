@@ -31,18 +31,18 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0"
-                                   Text="Номер:"
+                                   Text="Номер блока a.b:"
                                    FontSize="20"
                                    VerticalAlignment="Center"
                                    Margin="10,0" 
-                                   Padding="10,0,0,0"
+                                   Padding="0,0,0,0"
                                    Foreground="{StaticResource ForegroundSolidColorBrush}" />
 
                         <ComboBox x:Name="SerialNumComboBox"
                                   Grid.Column="1"
                                   Margin="10"
                                   Height="30"
-                                  Width="180"
+                                  Width="100"
                                   Style="{StaticResource CustomComboBoxStyle}"
                                   ItemsSource="{Binding ComboBoxItems}"
                                   SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}" 
@@ -61,17 +61,6 @@
                         PreviewMouseDown="BtnMkrReset_PreviewMouseDown"
                         IsEnabled="False"/>
 
-                <!-- Кнопка "ЗАПУСТИТЬ"/"ОСТАНОВИТЬ" —
-                     заменяем логику "Подключение измерителя"/"Отключение измерителя" -->
-                <Button x:Name="BtnConnect"
-                        Content="ЗАПУСТИТЬ"
-                        Width="310"
-                        Height="35"
-                        Margin="0,0,0,15"
-                        Style="{StaticResource MetrologyButtonStyle}"
-                        PreviewMouseDown="BtnConnect_PreviewMouseDown"
-                        IsEnabled="False" />
-
                 <!-- Группа RadioButton для шины A (по аналогии с исходным проектом) -->
                 <GroupBox Header="Группы шин" Foreground="White" Margin="0,0,0,10">
                     <WrapPanel>
@@ -84,17 +73,19 @@
                 </GroupBox>
 
                 <!-- Поисковая строка и список точек (из исходного кода) -->
-                <TextBox x:Name="SearchBox"
-                         Margin="0,0,0,10"
-                         Height="30"
-                         TextChanged="SearchBox_TextChanged"
-                         IsEnabled="False"/>
+                <GroupBox Header="Поиск точки" Foreground="White" Margin="0,0,0,10">
+                    <TextBox x:Name="SearchBox"
+                            Margin="0,0,0,0"
+                            Height="20"
+                            TextChanged="SearchBox_TextChanged"
+                            IsEnabled="True"/>
+                </GroupBox>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               MaxHeight="250">
                     <ItemsControl x:Name="PointsListBox"
-                                  IsEnabled="False">
+                                  >
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal"/>
@@ -103,9 +94,15 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="2">
-                                    <Button Width="90" Height="30" PreviewMouseDown="Point_PreviewMouseDown">
+                                    <Button Width="90"
+                                        Height="30"
+                                        PreviewMouseDown="Point_PreviewMouseDown"
+                                        Style="{StaticResource MkrPointStyle}">
                                         <Button.ContextMenu>
-                                            <ContextMenu StaysOpen="True" MouseLeave="ContextMenu_MouseLeave" Background="#303843" BorderBrush="#303843">
+                                            <ContextMenu StaysOpen="True"
+                                                MouseLeave="ContextMenu_MouseLeave"
+                                                Background="#303843"
+                                                BorderBrush="#303843">
                                                 <MenuItem Header="Шина A">
                                                     <MenuItem.Icon>
                                                         <CheckBox IsChecked="{Binding A}" />
@@ -118,28 +115,6 @@
                                                 </MenuItem>
                                             </ContextMenu>
                                         </Button.ContextMenu>
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Content" Value="{Binding PointNumber}"/>
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding A}" Value="True">
-                                                        <Setter Property="Background" Value="Aqua"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding B}" Value="True">
-                                                        <Setter Property="Background" Value="Plum"/>
-                                                    </DataTrigger>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding A}" Value="True"/>
-                                                            <Condition Binding="{Binding B}" Value="True"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="Background" Value="DarkViolet"/>
-                                                    </MultiDataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
                                     </Button>
                                 </Grid>
                             </DataTemplate>

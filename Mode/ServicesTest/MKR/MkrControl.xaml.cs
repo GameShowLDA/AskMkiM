@@ -1,46 +1,35 @@
-﻿using Mode.Models;
+﻿using DataBaseConfiguration.Services.Device;
+using Mode.Models;
+using NewCore.Base.Interface.Main;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
+using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.ServicesTest.MKR
 {
   /// <summary>
   /// Логика взаимодействия для MkrControl.xaml.
-  /// Этот контрол предназначен для отображения и управления точками измерения устройства.
+  /// Этот контроллер предназначен для отображения и управления точками измерения устройства.
   /// </summary>
   public partial class MkrControl : UserControl
   {
     /// <summary>
-    /// Флаг, указывающий, что устройство МКР было инициализировано.
+    /// Статусное сообщение для успешного выполнения теста.
     /// </summary>
-    private bool isMkrInitialized = false;
+    private readonly (string Title, Color TitleColor) goodText = SuccessMessage;
 
     /// <summary>
-    /// Флаг подключения устройства.
+    /// Статусное сообщение для ошибки в процессе выполнения теста.
     /// </summary>
-    private bool isConnected = false;
-
-    /// <summary>
-    /// Текущее имя выбранного устройства.
-    /// </summary>
-    private string currentDeviceName = string.Empty;
-
-    /// <summary>
-    /// Общее количество точек, используемых в контроле.
-    /// </summary>
-    public readonly short numPoints = 350;
+    private readonly (string Title, Color TitleColor) errorText = ErrorMessage;
 
     /// <summary>
     /// Коллекция точек для привязки к пользовательскому интерфейсу.
     /// </summary>
     private ObservableCollection<MkrPointModel> points;
-
-    /// <summary>
-    /// Список всех точек, если требуется дополнительная логика работы с коллекцией.
-    /// </summary>
-    private System.Collections.Generic.List<MkrPointModel> allPoints;
 
     /// <summary>
     /// Представление коллекции точек для фильтрации.
@@ -53,6 +42,21 @@ namespace Mode.ServicesTest.MKR
     private ViewModel _viewModel;
 
     /// <summary>
+    /// Сервис для работы с модулями коммутации.
+    /// </summary>
+    private readonly RelaySwitchModuleServices _relayService;
+
+    /// <summary>
+    /// Текущее выбранное устройство модуля коммутации.
+    /// </summary>
+    private IRelaySwitchModule currentDevice;
+
+    /// <summary>
+    /// Список всех доступных устройств модулей коммутации.
+    /// </summary>
+    private List<IRelaySwitchModule> _devices;
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MkrControl"/>.
     /// Устанавливает DataContext и инициализирует коллекцию точек.
     /// </summary>
@@ -61,24 +65,43 @@ namespace Mode.ServicesTest.MKR
       InitializeComponent();
 
       _viewModel = new ViewModel();
+      _relayService = new RelaySwitchModuleServices();
       DataContext = _viewModel;
 
-      InitializePoints();
+      points = new ObservableCollection<MkrPointModel>();
+      pointsView = CollectionViewSource.GetDefaultView(points);
+      PointsListBox.ItemsSource = pointsView;
 
-      // По умолчанию кнопки "ЗАПУСТИТЬ" и "СБРОС" могут быть отключены, если требуется дополнительная логика
-      // BtnConnect.IsEnabled = false;
-      // BtnMkrReset.IsEnabled = false;
+      LoadDevicesIntoCombo();
+
+      currentBus = RbOff;
     }
 
     /// <summary>
-    /// Инициализирует коллекцию точек от 1 до <see cref="numPoints"/> и устанавливает представление для фильтрации.
+    /// Подгружает список модулей из БД и кладёт их в ComboBoxItems View-Model’и.
+    /// </summary>
+    private void LoadDevicesIntoCombo()
+    {
+      _devices = _relayService.GetAllDevices();
+
+      _viewModel.ComboBoxItems.Clear();
+      _viewModel.ComboBoxItems.Add("<пусто>");
+
+      foreach (var d in _devices)
+      {
+        _viewModel.ComboBoxItems.Add($"{d.NumberChassis}.{d.Number}");
+      }
+
+      _viewModel.SelectedComboBoxItem = _viewModel.ComboBoxItems[0];
+    }
+
+    /// <summary>
+    /// Инициализирует коллекцию точек и устанавливает представление для фильтрации.
     /// </summary>
     private void InitializePoints()
     {
       points = new ObservableCollection<MkrPointModel>();
-      // Если требуется, можно также использовать allPoints для дополнительной логики,
-      // но для фильтрации достаточно коллекции points.
-      for (short i = 1; i <= numPoints; i++)
+      for (short i = 1; i <= currentDevice.PointCount; i++)
       {
         points.Add(new MkrPointModel(i));
       }

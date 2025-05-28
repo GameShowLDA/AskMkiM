@@ -876,4 +876,27 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <!-- Стиль для списка кнопок в MkrControl -->
+    <Style x:Key="MkrPointStyle" TargetType="Button">
+        <Setter Property="Content" Value="{Binding PointNumber}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding A}" Value="True">
+                <Setter Property="Background" Value="Aqua"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding B}" Value="True">
+                <Setter Property="Background" Value="Plum"/>
+            </DataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding A}" Value="True"/>
+                    <Condition Binding="{Binding B}" Value="True"/>
+                </MultiDataTrigger.Conditions>
+                <Setter Property="Background" Value="DarkViolet"/>
+            </MultiDataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

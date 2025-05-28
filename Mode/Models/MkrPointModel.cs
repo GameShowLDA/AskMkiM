@@ -13,6 +13,8 @@ namespace Mode.Models
     private bool _b;
     public short PointNumber { get; private set; }
 
+    public bool changeFlag { get; private set; }
+
     public bool A
     {
       get => _a;
@@ -20,6 +22,7 @@ namespace Mode.Models
       {
         if (_a != value)
         {
+          changeFlag = true;
           _a = value;
           OnPropertyChanged(nameof(A));
         }
@@ -33,6 +36,7 @@ namespace Mode.Models
       {
         if (_b != value)
         {
+          changeFlag = true;
           _b = value;
           OnPropertyChanged(nameof(B));
         }
@@ -44,6 +48,16 @@ namespace Mode.Models
       PointNumber = number;
       _a = A;
       _b = B;
+      changeFlag = false;
+    }
+
+    public void ResetChangeFlag() => changeFlag = false;
+
+    public void ResetAll()
+    {
+      _a = false;
+      _b = false;
+      changeFlag = false;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
