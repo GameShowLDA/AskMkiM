@@ -31,6 +31,11 @@ namespace Mode.ServicesTest.MKR
 
       if (selectedSerial[0] == "<пусто>")
       {
+        if (currentDevice != null)
+        {
+          await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[ОТКЛЮЧЕНИЕ]", goodText.TitleColor));
+          await currentDevice.ConnectableManager.DisconnectAsync(); 
+        }
         currentDevice = null;
 
         points.Clear();
@@ -57,8 +62,11 @@ namespace Mode.ServicesTest.MKR
 
       UpdateMkrUI(true);
 
-      await currentDevice.StateManager.Initialize();
+      await currentDevice.ConnectableManager.InitializeAsync();
       await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"[ИНИЦИАЛИЗАЦИЯ БК {currentDevice.NumberChassis}.{currentDevice.Number}]", goodText.TitleColor));
+
+      await currentDevice.ConnectableManager.ConnectAsync();
+      await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[ПОДКЛЮЧЕНИЕ]", goodText.TitleColor));
     }
 
     /// <summary>

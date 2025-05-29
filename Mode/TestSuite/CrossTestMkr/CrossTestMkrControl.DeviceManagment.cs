@@ -47,11 +47,37 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </summary>
     /// <param name="module">Блок коммутации</param>
     /// <param name="roleName">Название роли блока коммутации</param>
+    /// <returns>Возвращает <c>true</c>, если инициализация прошла успешно; иначе — <c>false</c>.</returns>
     private async Task<bool> InitializeModule(IRelaySwitchModule module, string roleName = null)
     {
-      var (state, answer) = await module.StateManager.Initialize();
+      var (state, answer) = await module.ConnectableManager.InitializeAsync();
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel(roleName == null ? $"БК {module.Number} инициализирован" : $"БК {module.Number} инициализирован - роль: {roleName}"));
       LogInformation($"Ответ модуля - {answer}");
+      return state;
+    }
+
+    /// <summary>
+    /// Подключает БК и отображает сообщение о подключении.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
+    /// <returns>Возвращает <c>true</c>, если подключение прошло успешно; иначе — <c>false</c>.</returns>
+    private async Task<bool> ConnectModule(IRelaySwitchModule module)
+    {
+      var (state, answer) = await module.ConnectableManager.ConnectAsync();
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Подключение к БК {module.Number}"));
+      LogInformation($"Ответ модуля - {answer}");
+      return state;
+    }
+
+    /// <summary>
+    /// Отключает БК и отображает сообщение об отключении.
+    /// </summary>
+    /// <param name="module">Блок коммутации</param>
+    /// <returns>Возвращает <c>true</c>, если отключение прошло успешно; иначе — <c>false</c>.</returns>
+    private async Task<bool> DisconnectModule(IRelaySwitchModule module)
+    {
+      var state = await module.ConnectableManager.DisconnectAsync();
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Отключение от БК {module.Number}"));
       return state;
     }
 
@@ -61,7 +87,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="module">Блок коммутации</param>
     private async Task ResetModule(IRelaySwitchModule module)
     {
-      await module.StateManager.ResetAsync();
+      await module.ConnectableManager.ResetAsync();
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"БК {module.Number} сброшен"));
     }
 
@@ -71,6 +97,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="module">Блок коммутации</param>
     /// <param name="bus">Шина</param>
     /// <param name="point">Точка (реле)</param>
+    /// <returns>Возвращает <c>true</c>, если точка успешно подключена; иначе — <c>false</c>.</returns>
     private async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} подключена к шине {bus} в БК {module.Number}"));
@@ -83,6 +110,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="module">Блок коммутации</param>
     /// <param name="bus">Шина</param>
     /// <param name="point">Точка (реле)</param>
+    /// <returns>Возвращает <c>true</c>, если точка успешно отключена; иначе — <c>false</c>.</returns>
     private async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Точка {point} отключена от шины {bus} в БК {module.Number}"));
@@ -93,6 +121,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// Включает измеритель БК.
     /// </summary>
     /// <param name="module">Блок коммутации</param>
+    /// <returns>Возвращает <c>true</c>, устройство включилось; иначе — <c>false</c>.</returns>
     private async Task<bool> MeterEnableAsync(IRelaySwitchModule module)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Включен измеритель в БК {module.Number}"));
@@ -103,6 +132,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// Отключает измеритель БК.
     /// </summary>
     /// <param name="module">Блок коммутации</param>
+    /// <returns>Возвращает <c>true</c>, если устройство выключилось; иначе — <c>false</c>.</returns>
     private async Task<bool> MeterDisableAsync(IRelaySwitchModule module)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Выключен измеритель в БК {module.Number}"));
@@ -113,6 +143,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// Получает ответ измерителя указанного БК и отображает сообщение об измерении.
     /// </summary>
     /// <param name="module">Блок коммутации</param>
+    /// <returns>Возвращает <c>true</c>, если есть замыкание; иначе — <c>false</c>.</returns>
     private async Task<bool> GetMeterAnswer(IRelaySwitchModule module)
     {
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Проводятся измерения БК {module.Number}"));

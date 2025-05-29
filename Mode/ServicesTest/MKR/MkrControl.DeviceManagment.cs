@@ -83,7 +83,7 @@ namespace Mode.ServicesTest.MKR
         }
       }
 
-      await currentDevice.StateManager.ResetAsync();
+      await currentDevice.ConnectableManager.ResetAsync();
     }
 
     /// <summary>

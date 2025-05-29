@@ -171,6 +171,8 @@ namespace Mode.TestSuite.CrossTestMkr
       // 4. Подготовка оборудования
       await InitializeModule(testedModuleRelayControl, "тестируемый");
       await InitializeModule(verificatModuleRelayControl, "проверяющий");
+      await ConnectModule(testedModuleRelayControl);
+      await ConnectModule(verificatModuleRelayControl);
       await MeterEnableAsync(verificatModuleRelayControl);
 
       // 5. Собственно сам тест
@@ -196,6 +198,8 @@ namespace Mode.TestSuite.CrossTestMkr
       await MeterDisableAsync(verificatModuleRelayControl);
       await ResetModule(testedModuleRelayControl);
       await ResetModule(verificatModuleRelayControl);
+      await DisconnectModule(testedModuleRelayControl);
+      await DisconnectModule(verificatModuleRelayControl);
 
       // Сбрасываем флаг необходимости сброса
       needReset = false;
