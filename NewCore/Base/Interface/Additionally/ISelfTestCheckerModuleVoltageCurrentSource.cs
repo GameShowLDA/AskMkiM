@@ -15,6 +15,11 @@ namespace NewCore.Base.Interface.Additionally
     /// </summary>
     /// <param name="messageService"></param>
     /// <returns></returns>
-    Task StartSelfCheck(IUserMessageService messageService, ISwitchingDevice device = null, IPowerSourceModule powerDevice = null, IFastMeter meter = null);
+    Task StartSelfCheck(CancellationToken cancellationToken, IUserMessageService messageService, System.Enum selectedType,  ISwitchingDevice device = null, IPowerSourceModule powerDevice = null, IFastMeter meter = null);
+
+    /// <summary>
+    /// Возвращает тип перечисления, используемый как тип проверки.
+    /// </summary>
+    Type GetTestTypeEnum();
   }
 }

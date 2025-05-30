@@ -43,7 +43,6 @@ namespace NewCore.Communication
     {
       try
       {
-        await OperationLock.WaitAsync();
         if (Client == null || !Client.Connected)
         {
           await EstablishConnection();
@@ -91,7 +90,6 @@ namespace NewCore.Communication
         LogException(ex); // Глобальный отлов
       }
 
-      OperationLock.Release();
       return string.Empty;
     }
 

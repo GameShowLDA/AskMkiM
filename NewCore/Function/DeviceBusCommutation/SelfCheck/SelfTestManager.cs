@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using AppConfiguration.Interface;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Additionally;
-using NewCore.Communication;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
 using NewCore.Base.Interface.Main;
-using static NewCore.Enum.DeviceEnum;
+using NewCore.Communication;
 using Utilities.Models;
+using static AppConfiguration.Execution.ExecutionConfig;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 {
