@@ -1,20 +1,16 @@
-﻿<Window x:Class="TestManyWindows.MainWindow"
+﻿<Window x:Class="TestDocking.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:TestManyWindows"
-        Title="Dock Example" Height="600" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <Menu Grid.Row="0">
-            <MenuItem Header="Файл">
-                <MenuItem Header="Создать новый" Click="NewFile_Click"/>
-            </MenuItem>
-        </Menu>
-
-        <local:DockingPanel x:Name="DockPanel" Grid.Row="1"/>
-    </Grid>
+        xmlns:dz="http://schemas.devzest.com/presentation/docking"
+        xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
+        xmlns:local="clr-namespace:UI.Controls.TextEditor;assembly=UI"
+        Title="DevZest Docking" Height="450" Width="800">
+    <dz:DockControl x:Name="DockManager">
+        <dz:DockItem TabText="Editor 1" Title="Editor 1" ShowAction="{dz:ShowAsDockPositionAction DockPosition=Document}">
+            <local:TextEditorUI/>
+        </dz:DockItem>
+        <dz:DockItem TabText="Output" Title="Output" ShowAction="{dz:ShowAsDockPositionAction DockPosition=Bottom}">
+            <TextBox Text="Log output..." />
+        </dz:DockItem>
+    </dz:DockControl>
 </Window>
