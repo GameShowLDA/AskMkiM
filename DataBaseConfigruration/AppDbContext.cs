@@ -54,9 +54,11 @@ namespace DataBaseConfiguration
     public DbSet<RackEntity> Rack { get; set; }
 
     /// <summary>
-    /// Таблица горячих главиш файлов.
+    /// Таблица горячих клавиш файлов.
     /// </summary>
     public DbSet<FileHotkeyEntity> FileHotKeys { get; set; }
+
+    public DbSet<MeasurementErrorEntity> MeasurementErrors { get; set; }
 
     /// <summary>
     /// Конфигурация базы данных.
@@ -93,6 +95,7 @@ namespace DataBaseConfiguration
       modelBuilder.ApplyConfiguration(new PrecisionMeterConfiguration());
       modelBuilder.ApplyConfiguration(new RackConfiguration());
       modelBuilder.ApplyConfiguration(new FileHotkeyEntityConfiguration());
+      modelBuilder.ApplyConfiguration(new MeasurementErrorEntityConfiguration());
 
       base.OnModelCreating(modelBuilder);
     }

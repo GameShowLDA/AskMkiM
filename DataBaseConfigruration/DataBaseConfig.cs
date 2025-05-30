@@ -11,11 +11,6 @@ namespace DataBaseConfiguration
   static public class DataBaseConfig
   {
     /// <summary>
-    /// Путь к файлу настроек конфигурации.
-    /// </summary>
-    //static public string ConfigFilePath => ".\\Settings\\_config.db";
-
-    /// <summary>
     /// Путь к временной базе данных в системной папке Temp.
     /// </summary>
     static public string ConfigFilePath
