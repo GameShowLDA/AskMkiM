@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Domain;
 
-namespace ControlCommandAnalyser.Parsing.Commands
+namespace ControlCommandAnalyser.Parsing.Interface
 {
   /// <summary>
   /// Интерфейс транслятора одной команды.

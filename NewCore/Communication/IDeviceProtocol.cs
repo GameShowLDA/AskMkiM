@@ -22,6 +22,8 @@ namespace NewCore.Communication
     /// <param name="port">Порт для связи с оборудованием. По умолчанию 0.</param>
     /// <param name="delayBeforeCall">Выполняет задержку перед запуском измерения. По умолчанию 0.</param>
     /// <returns>Ответ от устройства или пустая строка.</returns>
-    Task<string> QueryAsync(string command, double responseDelay = 100, int timeout = 0, int port = 0, int delayBeforeCall = 0);
+    Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0);
+
+    SemaphoreSlim OperationLock { get;  set; }
   }
 }

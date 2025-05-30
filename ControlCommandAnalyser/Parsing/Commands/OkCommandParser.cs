@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Domain;
+using ControlCommandAnalyser.Parsing.Interface;
 using static Utilities.LoggerUtility;
 
 namespace ControlCommandAnalyser.Parsing.Commands

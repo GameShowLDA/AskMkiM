@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using NewCore.Communication;
 using Utilities.Models;
 using WindowsInput;
 using static AppConfiguration.Base.EventAggregator;
@@ -92,7 +93,7 @@ namespace UI.Controls.ProtocolNew
       if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
       {
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
-          await ProtocolSelfCheck.FinalizeAsync();
+          await FinalizeAsync();
           return;
       }
 
@@ -104,7 +105,7 @@ namespace UI.Controls.ProtocolNew
       if (startDelegate == null)
       {
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
-        await ProtocolSelfCheck.FinalizeAsync();
+        await FinalizeAsync();
         LogError("Системная ошибка выполнения, обратитесь к администратору");
         return;
       }
@@ -151,9 +152,10 @@ namespace UI.Controls.ProtocolNew
 
       isExit = true;
 
-      StartProcessing?.Invoke(false);
 
       LogInformation($"Завершение \"{name}\"");
+
+      SerialPortHelper.CloseAllRegisteredSerialPorts();
 
       await CancelProcessTaskAsync(stopDelegate, name);
 
@@ -166,6 +168,8 @@ namespace UI.Controls.ProtocolNew
       ProtocolSelfCheck.ShowOnlyStartButton();
 
       await DisplayCompletionMessage();
+
+      StartProcessing?.Invoke(false);
     }
 
     /// <summary>

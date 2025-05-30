@@ -30,6 +30,11 @@ namespace UI.Components.Invoke
       /// Окно работы с оборудованием.
       /// </summary>
       DeviceControl,
+
+      /// <summary>
+      /// Окно трансляции программ.
+      /// </summary>
+      Translation,
     }
 
     /// <summary>

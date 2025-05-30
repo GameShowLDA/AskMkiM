@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Domain;
+using ControlCommandAnalyser.Parsing.Interface;
 using static Utilities.LoggerUtility;
 
 namespace ControlCommandAnalyser.Parsing.Commands

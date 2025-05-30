@@ -66,7 +66,7 @@ namespace UI.Components
         SetSelfControlEnum(enumType);
       }
       else if (selectedDevice is IPowerSourceModule powerSource &&
-               powerSource.SelfTestManager is ISelfTestCheckerDeviceBusCommutation checker2)
+               powerSource.SelfTestManager is ISelfTestCheckerModuleVoltageCurrentSource checker2)
       {
         var enumType = checker2.GetTestTypeEnum();
         SetSelfControlEnum(enumType);

@@ -260,6 +260,11 @@ namespace UI.Controls.ProtocolNew
       await Task.Delay(1);
     }
 
+    public async Task AppendEmptyLineAsync(int indentLevel = 0)
+    {
+      await protocolTextBox.AppendEmptyLineAsync();
+    }
+
     /// <summary>
     /// Полностью очищает протокол и сбрасывает последнее сообщение.
     /// </summary>
@@ -354,6 +359,7 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
     public CancellationToken GetCancellationToken() =>
       ActionExecutor.CancellationTokenSource?.Token ?? CancellationToken.None;
+
 
   }
 }

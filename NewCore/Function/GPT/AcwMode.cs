@@ -29,7 +29,7 @@ namespace NewCore.Function.GPT
 
     static private int delayBeforeCall = 100;
 
-    int delay = 50;
+    int delay = 300;
 
     #region Mode
 
@@ -158,6 +158,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetVoltageAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -192,6 +196,7 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(GetVoltageAsync)}", ex);
         throw;
       }
+
     }
 
     #endregion
@@ -213,6 +218,7 @@ namespace NewCore.Function.GPT
 
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} {value:F3}".Replace(',', '.');
         await _gptModel.DeviceProtocol.QueryAsync(command);
+        await Task.Delay(delay);
 
         var actual = await GetHighCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)
@@ -238,6 +244,10 @@ namespace NewCore.Function.GPT
       {
         LogException($"Ошибка в {nameof(SetHighCurrentLimitAsync)}", ex);
         throw;
+      }
+      finally
+      {
+        await Task.Delay(delay);
       }
     }
 
@@ -322,6 +332,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetLowCurrentLimitAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
 
@@ -405,6 +419,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetTestTimeAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -487,6 +505,10 @@ namespace NewCore.Function.GPT
       {
         LogException($"Ошибка в {nameof(SetRampTimeAsync)}", ex);
         throw;
+      }
+      finally
+      {
+        await Task.Delay(delay);
       }
     }
 
@@ -574,6 +596,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetFrequencyAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -656,6 +682,10 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка в {nameof(SetOffsetAsync)}", ex);
         throw;
       }
+      finally
+      {
+        await Task.Delay(delay);
+      }
     }
 
     /// <inheritdoc />
@@ -737,6 +767,10 @@ namespace NewCore.Function.GPT
       {
         LogException($"Ошибка в {nameof(SetArcCurrentAsync)}", ex);
         throw;
+      }
+      finally
+      {
+        await Task.Delay(delay);
       }
     }
 

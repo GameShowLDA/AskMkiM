@@ -17,6 +17,6 @@ namespace ControlCommandAnalyser.Domain
     /// <summary>
     /// Дополнительная подсветка, например "100В"
     /// </summary>
-    public HighlightRange? ExtraHighlight { get; set; }
+    public List<HighlightRange> ExtraHighlights { get; set; } = new();
   }
 }

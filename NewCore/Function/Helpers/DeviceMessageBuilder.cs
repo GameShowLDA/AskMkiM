@@ -48,7 +48,7 @@ namespace NewCore.Function.Helpers
       }
       else
       {
-        message.Message += $"{baseMessage} [{ShowMessageModel.SuccessMessage.Title}]";
+        message.Message += $"[{ShowMessageModel.SuccessMessage.Title}]";
         message.MessageColor = ShowMessageModel.SuccessMessage.TitleColor;
       }
 
@@ -108,6 +108,7 @@ namespace NewCore.Function.Helpers
       var showMessageModel = GetDefaultSettings(device);
       showMessageModel.Header += $" - {headerSuffix}";
       showMessageModel.IndentLevel = indentLevel;
+      showMessageModel.Message = baseMessage;
       BuildMessage(ref showMessageModel, baseMessage, isError: !result);
       await ShowDeviceMessage(showMessageModel, result);
     }

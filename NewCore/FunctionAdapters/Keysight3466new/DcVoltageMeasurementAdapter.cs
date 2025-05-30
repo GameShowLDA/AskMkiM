@@ -61,7 +61,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Результат измерения постоянного напряжения",
-          $"{result} В",
+          $"{result}В",
           result >= 0, 
           2);
 
