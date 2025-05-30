@@ -92,6 +92,26 @@ namespace UI.Components
       set => SetValue(IsNumberInputEnabledProperty, value);
     }
 
+    public static readonly new DependencyProperty BackgroundProperty = DependencyProperty.Register(
+        nameof(Background),
+        typeof(Brush),
+        typeof(TextBoxPlaceholder),
+        new PropertyMetadata(Brushes.Transparent, OnBackgroundChanged));
+
+    private static void OnBackgroundChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is TextBoxPlaceholder control && control.BorderData != null)
+      {
+        control.BorderData.Background = (Brush)e.NewValue;
+      }
+    }
+
+    public new Brush Background
+    {
+      get => (Brush)GetValue(BackgroundProperty);
+      set => SetValue(BackgroundProperty, value);
+    }
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextBoxPlaceholder"/>.
     /// </summary>

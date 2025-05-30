@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseConfiguration.Models
+namespace DataBaseConfiguration.Models.MeasurementError
 {
   public class MeasurementErrorEntity
   {
@@ -13,21 +13,25 @@ namespace DataBaseConfiguration.Models
     /// </summary>
     public enum TypeCommand
     {
+      [CommandInfo("КС", "Ом")]
       /// <summary>
       /// Тип команды KC.
       /// </summary>
       KC,
 
+      [CommandInfo("ПР", "Ом")]
       /// <summary>
       /// Тип команды PR.
       /// </summary>
       PR,
 
+      [CommandInfo("СИ", "МОм")]
       /// <summary>
       /// Тип команды CI.
       /// </summary>
       CI,
 
+      [CommandInfo("ИЕ", "нФ")]
       /// <summary>
       /// Тип команды IE.
       /// </summary>

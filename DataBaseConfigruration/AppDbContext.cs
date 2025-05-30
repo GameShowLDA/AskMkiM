@@ -1,9 +1,9 @@
 ﻿using DataBaseConfiguration.Configurations;
 using DataBaseConfiguration.Configurations.Device;
 using DataBaseConfiguration.Configurations.Hotkey;
-using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Models.Hotkey;
+using DataBaseConfiguration.Models.MeasurementError;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration

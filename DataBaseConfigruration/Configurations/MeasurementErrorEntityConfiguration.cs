@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Hotkey;
+using DataBaseConfiguration.Models.MeasurementError;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

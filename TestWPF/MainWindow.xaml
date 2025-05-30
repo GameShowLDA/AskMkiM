@@ -9,8 +9,8 @@
         mc:Ignorable="d"
         MinWidth="800"
         MinHeight="600"
-        Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}">
-    <Protocol:ProtocolUI Header="Привет" x:Name="Test">
-        
-    </Protocol:ProtocolUI>
+        Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}"
+        xmlns:Error ="clr-namespace:TestWPF"
+        >
+    <Error:TestError/>
 </Window>
