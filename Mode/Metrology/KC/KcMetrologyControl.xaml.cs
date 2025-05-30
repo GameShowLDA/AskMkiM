@@ -1,15 +1,12 @@
-﻿using System.Diagnostics.Metrics;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
 using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace Mode.Metrology.KC
 {
@@ -46,6 +43,10 @@ namespace Mode.Metrology.KC
         ReturnDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
         });
     }
 
@@ -59,8 +60,8 @@ namespace Mode.Metrology.KC
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message));
-        return;
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
+        throw new Exception();
       }
 
       var first = Data.DataModel.FirstPoint;
@@ -70,14 +71,13 @@ namespace Mode.Metrology.KC
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
-        return;
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
+        throw new Exception();
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
     }
 
     private class KcMeasurement : BaseMeasurement
@@ -101,7 +101,6 @@ namespace Mode.Metrology.KC
         double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
         double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
 
-        await Task.Delay(1000);
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, firstNorm, lastNorm);
       }
     }

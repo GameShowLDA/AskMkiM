@@ -103,7 +103,7 @@ namespace NewCore.Function.ModuleRelayControl
         Number = 11,
         FirstParameter = firstPoint,
         SecondParameter = lastPoint,
-        ThirdParameter = 10 + (int)bus  // A-11, B-12
+        ThirdParameter = (int)bus * 10 + 1, 
       };
 
       string commandText = cmd.ToString();
@@ -113,7 +113,7 @@ namespace NewCore.Function.ModuleRelayControl
         string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 3000);
         var parsed = BaseResponse.FromJson(response);
 
-        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{10 + (int)bus}")
+        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{(int)bus * 10 + 1}")
           return true;
 
         LogWarning($"Ответ на команду подключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.");
@@ -141,7 +141,7 @@ namespace NewCore.Function.ModuleRelayControl
         Number = 11,
         FirstParameter = firstPoint,
         SecondParameter = lastPoint,
-        ThirdParameter = 20 + (int)bus
+        ThirdParameter = (int)bus * 10 + 2
       };
 
       string commandText = cmd.ToString();
@@ -151,7 +151,7 @@ namespace NewCore.Function.ModuleRelayControl
         string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 3000);
         var parsed = BaseResponse.FromJson(response);
 
-        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{20 + (int)bus}")
+        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{(int)bus * 10 + 2}")
         {
           return true;
         }

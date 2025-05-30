@@ -2,6 +2,7 @@
 using System.Net;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
@@ -59,7 +60,7 @@ namespace DataBaseConfiguration.Models.Device
 
     /// <inheritdoc />
     [NotMapped]
-    public ISelfTestChecker SelfTestManager { get; set; }
+    public ISelfTestCheckerDeviceBusCommutation SelfTestManager { get; set; }
 
     /// <inheritdoc />
     [NotMapped]

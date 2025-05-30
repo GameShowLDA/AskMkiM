@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
 using NewCore.Function.DeviceBusCommutation;
@@ -27,7 +28,7 @@ namespace NewCore.Device
       RelayManager = new RelayManagerAdapter(this);
       ResistorManager = new ResistorManagerAdapter(this);
       ConnectableManager = new StateManagerAdapter(this);
-      SelfTestManager = new SelfTestManager(this);
+      SelfTestManager = new Function.DeviceBusCommutation.SelfCheck.SelfTestManager(this);
     }
 
     /// <inheritdoc />
@@ -43,7 +44,7 @@ namespace NewCore.Device
     public IResistorDeviceBusCommutation ResistorManager { get; set; }
 
     /// <inheritdoc />
-    public ISelfTestChecker SelfTestManager { get; set; }
+    public ISelfTestCheckerDeviceBusCommutation SelfTestManager { get; set; }
 
     /// <summary>
     /// Устанавливает или возвращает номер шасси.

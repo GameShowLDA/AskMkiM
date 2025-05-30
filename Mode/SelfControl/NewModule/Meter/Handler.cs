@@ -1,11 +1,8 @@
 ﻿using System.Globalization;
 using System.Windows;
-using System.Windows.Media;
-using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
-using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.DelegateManager;

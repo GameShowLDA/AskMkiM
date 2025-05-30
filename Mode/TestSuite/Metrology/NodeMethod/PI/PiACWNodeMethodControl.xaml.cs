@@ -1,19 +1,9 @@
 ﻿using System.Windows.Controls;
 using Mode.Base;
-using Mode.Metrology.MeasurementSystem;
-using Mode.Models;
-using Mode.TestSuite.Metrology.NodeMethod;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using Newtonsoft.Json.Linq;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using YamlDotNet.Core.Tokens;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.PI
 {
@@ -22,6 +12,8 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
   /// </summary>
   public partial class PiACWNodeMethodControl : UserControl
   {
+    PiNodeMethod testMeasurement = new PiNodeMethod();
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="PiACWNodeMethodControl"/>.
     /// </summary>
@@ -37,7 +29,14 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeAsync();
+        });
     }
 
     /// <summary>
@@ -59,7 +58,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var param = dataModel.Param;
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
-      PiNodeMethod testMeasurement = new PiNodeMethod();
+
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
@@ -70,7 +69,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
       await testMeasurement.ConfigureMeter(dataModel);
       await testMeasurement.PerformMeasurement(ProtocolUI, dataModel);
-      await testMeasurement.FinalizeAsync();
+
     }
 
     private class PiNodeMethod : BaseNodeTest
@@ -83,11 +82,11 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
         await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.AcwManger.SetHighCurrentLimitAsync(dataModel.Param);
         await breakDown.AcwManger.SetFrequencyAsync(50);
+        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
       }
 
       /// <inheritdoc />

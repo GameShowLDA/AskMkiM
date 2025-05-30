@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
-using ConsoleUtilities.Engine;
-using ConsoleUtilities.Services;
+using ConsoleUI.ConsoleCommanding.Services;
+using ConsoleUI.ConsoleLogic;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -31,13 +31,10 @@ namespace MainWindowProgram
     protected override async void OnStartup(StartupEventArgs e)
     {
       base.OnStartup(e);
+
       CommandLineArgs = e.Args; // Сохраняем аргументы
 
-      var hwnd = GetConsoleWindow();
-      ShowWindow(hwnd, SW_HIDE); // ← Просто скрыть, НЕ уничтожать!
-
-      var handler = ConsoleAppBootstrapper.Build();
-      _consoleManager = new ConsoleManager(handler);
+      Console.SetOut(new ConsoleRedirector());
 
       SplashWindow loadWindow = new SplashWindow();
       loadWindow.Show();

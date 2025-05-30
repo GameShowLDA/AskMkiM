@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -97,5 +98,7 @@ namespace AppConfiguration.SystemState
     /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
     static public async Task<bool> GetAdminRights() => await Task.Run(() => IsAdmin);
     #endregion
+
+
   }
 }

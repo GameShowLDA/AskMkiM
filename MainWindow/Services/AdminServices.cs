@@ -1,4 +1,7 @@
 ﻿using System.Windows;
+using MainWindowProgram.Test.ChoiceDevice;
+using MainWindowProgram.Test.Protocol;
+using Mode.SelfControl.DeviceCheck;
 using Mode.Settings.LoggerMessage;
 using Mode.Settings.SendCommand;
 using UI.Controls.GPT;
@@ -68,6 +71,21 @@ namespace MainWindowProgram.Services
       });
 
       _mainWindow.Effect = null;
+    }
+
+    public async Task ProtocolTest()
+    { 
+      await _multiWindow.AddControlAsync("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
+    }
+
+    public async Task ChoiceTest()
+    {
+      await _multiWindow.AddControlAsync("Тест выбора", new TestChoiceDevice(), TypeWindow.DeviceControl);
+    }
+
+    public async Task SelfCheckTest()
+    {
+      await _multiWindow.AddControlAsync("Самоконтроль", new ModuleSelfControl(), TypeWindow.DeviceControl);
     }
   }
 }

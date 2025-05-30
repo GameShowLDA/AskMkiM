@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
@@ -46,9 +47,31 @@ namespace MainWindowProgram.Events
     private void App_TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
       Exception ex = e.Exception;
-      LogException("Необработанное исключение в TaskScheduler", ex, onlyProjectStack: true);
+
+      // Отметить исключение как обработанное, чтобы не падало приложение
       e.SetObserved();
-      MessageProtocol(ex);
+
+      // Логирование основной ошибки
+      LogException("Необработанное исключение в TaskScheduler", ex);
+
+      // Отладочный вывод полного стека вызова
+      LogDebug("=== UnobservedTaskException ===");
+      LogDebug(ex.ToString());
+
+      // Обработка AggregateException
+      if (ex is AggregateException aggEx)
+      {
+        foreach (var inner in aggEx.InnerExceptions)
+        {
+          LogException("Вложенное исключение в TaskScheduler", inner);
+          LogDebug(inner.ToString());
+        }
+      }
+      else if (ex.InnerException is not null)
+      {
+        LogException("Вложенное исключение в TaskScheduler", ex.InnerException);
+        LogDebug(ex.InnerException.ToString());
+      }
     }
 
     static private void MessageProtocol(Exception ex)

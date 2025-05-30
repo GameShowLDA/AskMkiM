@@ -19,7 +19,7 @@ namespace AppConfiguration.Base
     /// <summary>
     /// Директория для сохранения данных.
     /// </summary>
-    static public string DataSaveDirectory => ".\\Saves";
+    static public string DataSaveDirectory => ".\\History";
 
     /// <summary>
     /// Директория для сохранения текста из консоли.

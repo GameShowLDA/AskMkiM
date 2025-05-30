@@ -78,6 +78,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
+
       DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
       string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return result == "2.0.1";
@@ -92,6 +93,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
+      await _moduleRelayControl.DeviceProtocol.OperationLock.WaitAsync();
       return await ResetAsync();
     }
   }

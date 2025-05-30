@@ -71,7 +71,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
 
       if (!result)
       {
-        throw ConnectionExceptionFactory.ResetFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, "Операция завершилась с ошибкой");
+
       }
 
       return result;

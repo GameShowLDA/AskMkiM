@@ -2,19 +2,18 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Shapes;
-using static UI.Controls.Protocol.ProtocolUI;
+using AppConfiguration.Base;
+using ControlCommandAnalyser.Translation;
+using Microsoft.Win32;
+using UI.Components.ArchiveManager;
+using UI.Components.ArchiveManager.ArchiveFiles;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
-using UI.Components.ArchiveManager.ArchiveFiles;
 using UI.Components.ArchiveManager.Models;
-using UI.Components.ArchiveManager;
-using AppConfiguration.Base;
-using Path = System.IO.Path;
-using Microsoft.Win32;
-using static Utilities.LoggerUtility;
 using UI.Controls.TextEditor;
-using ICSharpCode.AvalonEdit;
+using static UI.Controls.ProtocolNew.ProtocolUI;
+using static Utilities.LoggerUtility;
+using Path = System.IO.Path;
 
 namespace UI.Components.ArchiveControls
 {
@@ -310,6 +309,13 @@ namespace UI.Components.ArchiveControls
       var content = File.ReadAllText(foundOpkPath);
       var textEditor = new TextEditorUI();
       textEditor.Text = content;
+
+      var translator = new TranslationManager
+      {
+        HighlightCallback = textEditor.ApplyHighlighting
+      };
+      await translator.Translate(content);
+
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }
   }

@@ -1,6 +1,7 @@
 ﻿using Mode.Metrology.CI;
 using Mode.Metrology.IE;
 using Mode.Metrology.KC;
+using Mode.Metrology.KN;
 using Mode.Metrology.PI;
 using Mode.Metrology.PR;
 using static UI.Components.Invoke.OpenFileButton;
@@ -62,5 +63,17 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task OpenPIACWModeAsync() =>
         await _multiWindow.AddControlAsync("Режим ПИ(ACW)", new PiACWMetrologyControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Открывает пользовательский элемент управления режима КН (ACW).
+    /// </summary>
+    public async Task OpenKNACWModeAsync() =>
+        await _multiWindow.AddControlAsync("Режим КН(ACW)", new KnACWMetrologyControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Открывает пользовательский элемент управления режима КН (DCW).
+    /// </summary>
+    public async Task OpenKNDCWModeAsync() =>
+        await _multiWindow.AddControlAsync("Режим КН(DCW)", new KnDCWMetrologyControl(), TypeWindow.DeviceControl);
   }
 }

@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
 using NewCore.Function.ModuleVoltageCurrentSource;
@@ -21,7 +22,7 @@ namespace NewCore.Device
     /// </summary>
     public ModuleVoltageCurrentSource()
     {
-      Name = "Модуль источника напряжения и тока";
+      Name = "Модуль МиНТ";
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
 
       DeviceType = DeviceEnum.DeviceType.PowerSourceModule;
@@ -30,6 +31,7 @@ namespace NewCore.Device
       CurrentManager = new CurrentManagerAdapter(this);
       ConnectableManager = new StateManagerAdapter(this);
       VoltageManager = new VoltageManagerAdapter(this);
+      SelfTestManager = new Function.ModuleVoltageCurrentSource.SelfCheck.SelfTestManager();
       DeviceClass = GetType().FullName;
     }
 
@@ -52,7 +54,8 @@ namespace NewCore.Device
     /// Менеджер управления напряжением модуля.
     /// </summary>
     public IVoltageManager VoltageManager { get; set; }
-    public string? ResistanceCalibrationJson { get; set ; }
+    public ISelfTestCheckerModuleVoltageCurrentSource SelfTestManager { get; set; }
+    public string? ResistanceCalibrationJson { get; set; }
 
     /// <summary>
     /// Десериализованные калибровочные диапазоны сопротивления

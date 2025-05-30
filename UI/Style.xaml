@@ -324,6 +324,40 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="CompareButtonStyle" TargetType="Button">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Width" Value="Auto"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="Padding" Value="10"/>
+        <Setter Property="Background" Value="{StaticResource LightPrimarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                    CornerRadius="15" 
+                    BorderThickness="{TemplateBinding BorderThickness}" 
+                    BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                <!-- Меняем фон на красный -->
+                <Setter Property="Foreground" Value="{StaticResource PrimarySolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
     <Style x:Key="CustomButtonStyle" TargetType="Button">
         <Setter Property="Height" Value="50"/>

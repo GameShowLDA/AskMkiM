@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NewCore.Base.Interface.Main;
+﻿using NewCore.Base.Interface.Main;
+using UI.Controls.ProtocolNew;
 using static NewCore.Enum.DeviceEnum;
-using UI.Controls.Protocol;
-using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor
 {

@@ -175,11 +175,11 @@
                     <MenuItem Header="Сохранить как" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
                     <MenuItem Header="Печать" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
                     <MenuItem Header="Поиск" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
-                    <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                     <MenuItem Header="Открыть" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
                     <MenuItem Header="Создать" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
+                    <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                     <MenuItem Header="Выход" Command="{Binding File.ExitApplicationCommand}"/>
@@ -194,6 +194,8 @@
                     <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
                     <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
                     <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
+                    <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
+                    <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
 
                 </MenuItem>
 
@@ -206,10 +208,7 @@
 
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
 
-                    <MenuItem 
-                        Header="Модуль" 
-                        Name="SelfControlMenuItem"
-                        />
+                    <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
 
                 </MenuItem>
 
@@ -242,7 +241,11 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_5">
+                <MenuItem Header="Трансляция" Name="Translation" Tag="menuHeader_5">
+                    <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
+                </MenuItem>
+
+                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_6">
 
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
@@ -251,18 +254,29 @@
 
                 </MenuItem>
 
+                <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
+                    
+                </MenuItem>
+
                 <MenuItem Header="Администрирование" Name="Admin">
 
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
                     <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
                     <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
-                    <MenuItem Header="Управление" Name="DeviceManagment">
 
+                    <MenuItem Header="Управление" Name="DeviceManagment">
                         <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
-                        
+                    </MenuItem>
+
+                    <MenuItem Header="Тесты ПО">
+                        <MenuItem Header="Протокол" Name="ProtocolTest" Command="{Binding Admin.ProtocolCommand}"/>
+                        <MenuItem Header="Выбор устройства" Name="ChoiceTest" Command="{Binding Admin.ChoiceCommand}"/>
+                        <MenuItem Header="Cfvjrjynhjkm" Name="SelfTest" Command="{Binding Admin.SelfCommand}"/>
                     </MenuItem>
 
                 </MenuItem>
+
+
             </Menu>
 
             <StackPanel  

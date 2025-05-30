@@ -53,7 +53,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
 
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
     {
-      string value = $"{integerPart}.{decimalPart:D3}";
+      string value = $"{integerPart}.{decimalPart}";
 
       try
       {

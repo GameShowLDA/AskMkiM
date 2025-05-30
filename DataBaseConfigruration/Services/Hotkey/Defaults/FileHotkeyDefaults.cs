@@ -31,6 +31,7 @@ namespace DataBaseConfiguration.Services.Hotkey.Defaults
         { "PrintFile", "Ctrl+P" },
         { "SearchFile", "Ctrl+F" },
         { "CompareFile", "Ctrl+K" },
+        { "StartTranslation", "Ctrl+F9" },
 
         // Выход
         { "ExitApplication", "Alt+F4" }

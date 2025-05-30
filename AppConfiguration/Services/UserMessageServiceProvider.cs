@@ -27,7 +27,6 @@ namespace AppConfiguration.Services
       {
         if (!ReferenceEquals(_instance, value))
         {
-          Console.WriteLine($"Активный элемент сменен на \"{value.Header}\"");
           _instance = value;
           InstanceChanged?.Invoke(_instance);
         }
@@ -37,7 +36,7 @@ namespace AppConfiguration.Services
     /// <summary>
     /// Асинхронный вызов отображения сообщения.
     /// </summary>
-    public static Task<bool> ShowMessageAsync(ShowMessageModel model)
+    public static Task ShowMessageAsync(ShowMessageModel model)
     {
       return Instance?.ShowMessageAsync(model) ?? Task.FromResult(false);
     }

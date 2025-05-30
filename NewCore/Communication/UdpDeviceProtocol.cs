@@ -31,25 +31,27 @@ namespace NewCore.Communication
     public UdpDeviceProtocol(DeviceWithIP device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
+      OperationLock = new SemaphoreSlim(1, 1);
     }
+
+    public SemaphoreSlim OperationLock { get; set; }
 
     /// <inheritdoc />
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
       try
       {
-        int lastOctet = GetLastOctet(_device.IPAddress);
+        await OperationLock.WaitAsync();
 
+        int lastOctet = GetLastOctet(_device.IPAddress);
         int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
         int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
 
         IPEndPoint deviceEndpoint = new IPEndPoint(_device.IPAddress, outputPort);
         using UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort));
 
-        // Гарантированно слушаем ДО отправки
-        Task<UdpReceiveResult> receiveTask = udpClient.ReceiveAsync();
-
         byte[] buffer = Encoding.UTF8.GetBytes(command);
+
         await udpClient.SendAsync(buffer, buffer.Length, deviceEndpoint);
         LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}");
 
@@ -61,16 +63,32 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
-          Task timeoutTask = Task.Delay(timeout);
-          if (await Task.WhenAny(receiveTask, timeoutTask) == receiveTask)
+          await Task.Delay(100);
+          using var cts = new CancellationTokenSource(timeout);
+
+          try
           {
-            string response = Encoding.UTF8.GetString((await receiveTask).Buffer);
-            LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
-            return response;
+            var receiveTask = udpClient.ReceiveAsync();
+            var delayTask = Task.Delay(Timeout.Infinite, cts.Token);
+
+            var completedTask = await Task.WhenAny(receiveTask, delayTask);
+
+            if (completedTask == receiveTask)
+            {
+              UdpReceiveResult result = await receiveTask;
+              string response = Encoding.UTF8.GetString(result.Buffer);
+              LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
+              return response;
+            }
+            else
+            {
+              return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
+            }
           }
-          else
+          catch (Exception ex)
           {
-            return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
+            LogException($"[{_device.Name}] Исключение при получении ответа", ex);
+            return $"[{_device.Name}] Ошибка при получении ответа: {ex.Message}";
           }
         }
 
@@ -78,9 +96,12 @@ namespace NewCore.Communication
       }
       catch (Exception ex)
       {
-        LogException($"[{_device.Name}] Ошибка при отправке/приёме", ex);
-        var message = $"[{_device.Name}] Ошибка при отправке/приёме: {ex.Message}";
-        return message;
+        LogException($"[{_device.Name}] Общая ошибка QueryAsync", ex);
+        return $"[{_device.Name}] Общая ошибка QueryAsync: {ex.Message}";
+      }
+      finally
+      { 
+        OperationLock.Release();
       }
     }
 

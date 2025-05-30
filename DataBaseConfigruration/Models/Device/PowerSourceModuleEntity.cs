@@ -2,6 +2,7 @@
 using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
@@ -60,6 +61,10 @@ namespace DataBaseConfiguration.Models.Device
     /// <inheritdoc />
     [NotMapped]
     public IDeviceProtocol DeviceProtocol { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public ISelfTestCheckerModuleVoltageCurrentSource SelfTestManager { get; set; }
 
     /// <inheritdoc />
     public string? ResistanceCalibrationJson { get; set; }

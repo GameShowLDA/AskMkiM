@@ -95,7 +95,8 @@ namespace NewCore.Function.Keysight3466new
       {
         return true;
       }
-      
+      await _device.DeviceProtocol.OperationLock.WaitAsync();
+
       _device.Stream?.Close();
       _device.Stream = null;
 

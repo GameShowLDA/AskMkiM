@@ -1,6 +1,8 @@
 ﻿using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using ControlCommandAnalyser.Parsing;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
@@ -48,22 +50,74 @@ namespace UI.Components.MultiEditorMethods
 
       try
       {
-        string fileContent = ReadFileContent(path);
+        string fileContent = string.Empty;
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        if (nameFile.ToLower().Contains(".pk") && !nameFile.ToLower().Contains(".pkw"))
+        {
+          var content = new List<string>();
+          foreach (string line in File.ReadLines(path, Encoding.GetEncoding(866)))
+          {
+            if (!string.IsNullOrEmpty(line))
+            {
+              content.Add(line);
+            }
+          }
+          if (content.Count > 0)
+          {
+            fileContent = string.Join("\n", content);
+          }
+        }
+        else if (nameFile.ToLower().Contains(".rtf"))
+        {
+          fileContent = File.ReadAllText(path, Encoding.GetEncoding(1251)); // или UTF-8, если знаешь точно
+        }
+        else
+        {
+          fileContent = ReadFileContent(path);
+        }
 
         var textEditor = CreateTextEditor(fileContent);
-
-        AddFileToControlManager(nameFile, textEditor);
 
         if (!FilePaths.ContainsKey(nameFile))
         {
           FilePaths.Add(nameFile, path);
         }
+        else
+        {
+          var fileWithSameNamePath = FilePaths.FirstOrDefault(file => file.Key == nameFile);
+          if (fileWithSameNamePath.Value != path)
+          {
+            nameFile = GetDifferenceBetweenPaths(fileWithSameNamePath.Value, path);
+            FilePaths.Add(nameFile, path);
+          }
+        }
+
+        AddFileToControlManager(nameFile, textEditor);
       }
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
+    }
+
+    public string GetDifferenceBetweenPaths(string path1, string path2)
+    {
+      var path1Parts = path1.Split(Path.DirectorySeparatorChar);
+      var path2Parts = path2.Split(Path.DirectorySeparatorChar);
+      int minLength = Math.Min(path1Parts.Length, path2Parts.Length);
+      int diffIndex = 0;
+
+      for (int i = 0; i < minLength; i++)
+      {
+        if (path1Parts[i] != path2Parts[i])
+        {
+          diffIndex = i;
+          break;
+        }
+      }
+
+      return string.Join(Path.DirectorySeparatorChar.ToString(), path1Parts.Skip(diffIndex));
     }
 
     /// <summary>
@@ -145,7 +199,7 @@ namespace UI.Components.MultiEditorMethods
       {
         var fileName = activeTab.Text;
         int index = OpenPages.IndexOf(activeTab);
-        if (fileName.Contains(".opk")) 
+        if (fileName.Contains(".opk"))
         {
           return false;
         }
@@ -162,15 +216,23 @@ namespace UI.Components.MultiEditorMethods
         else
         {
           var filePath = FilePaths[fileName];
-          var content = File.ReadAllText(filePath);
-
-          if (UserControls[index] is TextEditorUI)
+          if (File.Exists(filePath))
           {
-            var textEditor = UserControls[index] as TextEditorUI;
-            return content != textEditor.Text;
-          }
 
-          return false;
+            var content = File.ReadAllText(filePath);
+
+            if (UserControls[index] is TextEditorUI)
+            {
+              var textEditor = UserControls[index] as TextEditorUI;
+              return content != textEditor.Text;
+            }
+
+            return false;
+          }
+          else
+          {
+            MessageBox.Show("Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+          }
         }
       }
 

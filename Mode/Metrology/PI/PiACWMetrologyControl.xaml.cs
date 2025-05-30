@@ -1,22 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
-using Mode.Settings.DeviceConfig.ChassisManager;
 using NewCore.Base.Interface.Main;
-using NewCore.Device;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
-using static Utilities.LoggerUtility;
 
 namespace Mode.Metrology.PI
 {
@@ -44,7 +33,7 @@ namespace Mode.Metrology.PI
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
     /// </summary>
-    public void InitializeSettings()
+    public async void InitializeSettings()
     {
       ProtocolUI.SetSettings(
         this,
@@ -53,6 +42,10 @@ namespace Mode.Metrology.PI
         ReturnDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
         });
     }
 
@@ -63,10 +56,10 @@ namespace Mode.Metrology.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
+      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, timeRampCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
         return;
       }
 
@@ -79,14 +72,13 @@ namespace Mode.Metrology.PI
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
         return;
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
     }
 
     private class PiMeasurement : BaseMeasurement
@@ -99,12 +91,12 @@ namespace Mode.Metrology.PI
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Param);
         await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.AcwManger.SetFrequencyAsync(50);
         await breakDown.AcwManger.SetLowCurrentLimitAsync(0);
         await breakDown.AcwManger.SetHighCurrentLimitAsync(10);
+        await breakDown.AcwManger.SetVoltageAsync(dataModel.Param);
       }
 
       /// <inheritdoc />
@@ -120,7 +112,8 @@ namespace Mode.Metrology.PI
         // double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI));
         // double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.CI)) + GetNumericError(TypeCommand.CI);
 
-        await meterDevice.AcwManger.MeasureCurrentAsync();
+        await meterDevice.AcwManger.MeasureCurrentAsync(param);
+
         string result = await Application.Current.Dispatcher.InvokeAsync(() =>
         {
           VoltageValue chassisManagerWindow = new VoltageValue();

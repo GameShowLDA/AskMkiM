@@ -45,6 +45,12 @@ namespace MainWindowProgram.ViewModels
     public WindowViewModel Window { get; }
 
     /// <summary>
+    /// ViewModel для управления самоконтролем.
+    /// </summary>
+    public SelfTestViewModel SelfTest { get; }
+    public TranslationViewModel Translation { get; }
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MainWindowViewModel"/>, создавая все дочерние ViewModel.
     /// </summary>
     /// <param name="metrologyService">Сервис для метрологических режимов.</param>
@@ -61,7 +67,10 @@ namespace MainWindowProgram.ViewModels
       TestService testService,
       SettingsService settingsService,
       AdminServices adminServices,
-      WindowService window)
+      WindowService window,
+      SelfTestServices selfTest,
+      TranslationServices translationServices
+      )
     {
       Metrology = new MetrologyViewModel(metrologyService);
       Service = new ServiceViewModel(serviceMode);
@@ -70,6 +79,8 @@ namespace MainWindowProgram.ViewModels
       Settings = new SettingsViewModel(settingsService);
       Admin = new AdminViewModel(adminServices);
       Window = new WindowViewModel(window);
+      SelfTest = new SelfTestViewModel(selfTest);
+      Translation = new TranslationViewModel(translationServices);
     }
   }
 }

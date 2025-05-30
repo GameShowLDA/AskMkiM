@@ -5,7 +5,10 @@ using AppConfiguration.Base;
 using MainWindowProgram.Infrastructure;
 using Microsoft.Win32;
 using UI.Components.ArchiveControls;
+using UI.Components.ArchiveManager.ArchiveFiles.Index;
+using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.Models;
+using UI.Components.FileComparerControls;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
@@ -67,7 +70,7 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK",
+          Filter = "PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK|Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|All files (*.*)|*.*",
           Title = "Выберите текстовый файл",
         };
 
@@ -154,8 +157,20 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task CompareFileAsync()
     {
-      throw new Exception("Настроить сравнение файлов");
+      _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
+      var fileCompareWindow = new FileCompareWindow();
+      fileCompareWindow.DialogClosed += Dialog_Closed;
+      fileCompareWindow.Owner = _mainWindow;
+      fileCompareWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+      fileCompareWindow.ShowDialog();
+      _mainWindow.Effect = null;
     }
+
+    private async void Dialog_Closed(object sender, EventArgs e)
+    {
+      _mainWindow.Effect = null;
+    }
+
 
     /// <summary>
     /// Открывает диалог выбора архива и загружает его в редактор.
@@ -177,6 +192,21 @@ namespace MainWindowProgram.Services
           var archiveName = selectedArchive.ArchiveName;
           await _multiWindow.AddControlAsync(archiveName, new TableApkArchiveControl(archiveName), TypeWindow.Files);
         }
+      }
+    }
+
+    /// <summary>
+    /// Создает новый файл трансляции (.opkw) в редакторе.
+    /// </summary>
+    public async Task CreateTranslationFileAsync()
+    {
+      if (_isLockedProvider())
+      {
+        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+      }
+      else
+      {
+        await _multiWindow.CreateTranslationFileAsync();
       }
     }
   }

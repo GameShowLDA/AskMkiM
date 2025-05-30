@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="MainWindowProgram.Test.ChoiceDevice.TestChoiceDevice"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MainWindowProgram.Test.ChoiceDevice"
+             mc:Ignorable="d" 
+             xmlns:Custom="clr-namespace:UI.Components;assembly=UI"
+             d:DesignHeight="450" d:DesignWidth="300" MaxWidth="300" Background="LightBlue">
+    <Grid Width="300">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+
+        <Custom:ChoiceDevice Name="choiceDeviceTop" Margin="20"/>
+        <Custom:ChoiceDevice Name="choiceDeviceBottom" Margin="20" Grid.Row="1"/>
+        <Custom:ChoiceDevice Name="choiceDeviceMeter" Margin="20" Grid.Row="2"/>
+    </Grid>
+</UserControl>
