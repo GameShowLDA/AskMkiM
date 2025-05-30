@@ -239,7 +239,6 @@
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
                     <MenuItem Header="Протокол" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
-                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Settings.ErrorCommand}"/>
 
                 </MenuItem>
 
@@ -249,6 +248,7 @@
 
                 <MenuItem Header="Администрирование" Name="Admin">
 
+                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Admin.ErrorCommand}"/>
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
                     <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
                     <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>

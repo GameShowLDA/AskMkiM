@@ -36,6 +36,11 @@ namespace MainWindowProgram.ViewModels
     public ICommand SelfCommand { get; }
 
     /// <summary>
+    /// Команда открытия настроек погрешностей выполнения режимов.
+    /// </summary>
+    public ICommand ErrorCommand { get; }
+
+    /// <summary>
     /// Сервис административных функций.
     /// </summary>
     private readonly AdminServices _service;
@@ -54,6 +59,7 @@ namespace MainWindowProgram.ViewModels
       ProtocolCommand = new AsyncRelayCommand(_service.ProtocolTest);
       ChoiceCommand = new AsyncRelayCommand(_service.ChoiceTest);
       SelfCommand = new AsyncRelayCommand(_service.SelfCheckTest);
+      ErrorCommand = new AsyncRelayCommand(_service.OpenErrorSync);
     }
   }
 }

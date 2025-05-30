@@ -220,6 +220,12 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public abstract Task ConfigureMeter(DataModel dataModel = null);
 
+    public void ResetPoints()
+    {
+      _pointsToProcess.Clear();
+      _currentPointIndex = 0;
+    }
+
     /// <summary>
     /// Подключает все устройства, собранные в коллекции <see cref="Devices"/>.
     /// Если устройство уже подключено, повторное подключение не выполняется.

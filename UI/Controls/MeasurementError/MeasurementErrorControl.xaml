@@ -6,25 +6,15 @@
              xmlns:local="clr-namespace:UI.Controls.MeasurementError"
              mc:Ignorable="d" 
              xmlns:ErrCard="clr-namespace:UI.Components" 
-             d:DesignHeight="450" d:DesignWidth="800" Background="{StaticResource SecondarySolidColorBrush}">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <ErrCard:MeasurementErrorCard Margin="5" HorizontalAlignment="Left" Width="280" Height="270" TypeCommand="KC"/>
-            <ErrCard:MeasurementErrorCard Margin="5" HorizontalAlignment="Left" Width="280" Height="270" TypeCommand="PR" Grid.Column="1"/>
-            <ErrCard:MeasurementErrorCard Margin="5" HorizontalAlignment="Left" Width="280" Height="270" TypeCommand="CI"  Grid.Column="2"/>
-        </Grid>
-        
-
-    </Grid>
+             d:DesignHeight="450" d:DesignWidth="800" Background="{StaticResource IsCheckedColorSolidColorBrush}">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10">
+        <WrapPanel ItemWidth="280" ItemHeight="270" Orientation="Horizontal">
+            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="KC"/>
+            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="PR"/>
+            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="CI"/>
+            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="IE"/>
+        </WrapPanel>
+    </ScrollViewer>
+    
 </UserControl>

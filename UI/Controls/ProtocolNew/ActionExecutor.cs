@@ -88,6 +88,7 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null, bool checkPower = true)
     {
+      isExit = false;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
@@ -234,7 +235,7 @@ namespace UI.Controls.ProtocolNew
     internal async Task LoopMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
     {
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
-      while (true)
+      while (!CancellationTokenSource?.IsCancellationRequested ?? true)
       {
         try
         {
@@ -463,11 +464,25 @@ namespace UI.Controls.ProtocolNew
         {
           // Отмена токена
           CancellationTokenSource?.Cancel();
-          LogInformation($"Процесс \"{name}\" успешно завершен.");
+          LogInformation($"Процесс \"{name}\" запрошен на завершение.");
         }
         catch (Exception ex)
         {
           LogException($"Ошибка при завершении \"{name}\"", ex);
+        }
+
+        try
+        {
+          // Ждём завершения задачи
+          await ProcessTask;
+        }
+        catch (OperationCanceledException)
+        {
+          LogInformation($"Процесс \"{name}\" был отменён.");
+        }
+        catch (Exception ex)
+        {
+          LogException($"Ошибка при ожидании завершения задачи \"{name}\"", ex);
         }
       }
       else
@@ -485,14 +500,15 @@ namespace UI.Controls.ProtocolNew
       ProcessTask = null;
     }
 
+
     /// <summary>
     /// Сбрасывает состояние выполнения и интерфейса.
     /// </summary>
     private void ResetState()
     {
       ProcessTask = null;
-      //IsPaused = false;
-      //StepMode = false;
+      IsPaused = false;
+      StepMode = false;
       ShouldShowPauseMessage = true;
 
       Application.Current.Dispatcher.Invoke(() =>
