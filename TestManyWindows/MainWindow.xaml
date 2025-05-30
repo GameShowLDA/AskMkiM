@@ -5,12 +5,13 @@
         xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
         xmlns:local="clr-namespace:UI.Controls.TextEditor;assembly=UI"
         Title="DevZest Docking" Height="450" Width="800">
-    <dz:DockControl x:Name="DockManager">
-        <dz:DockItem TabText="Editor 1" Title="Editor 1" ShowAction="{dz:ShowAsDockPositionAction DockPosition=Document}">
-            <local:TextEditorUI/>
-        </dz:DockItem>
-        <dz:DockItem TabText="Output" Title="Output" ShowAction="{dz:ShowAsDockPositionAction DockPosition=Bottom}">
-            <TextBox Text="Log output..." />
-        </dz:DockItem>
-    </dz:DockControl>
+    <DockPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Background="LightGray">
+            <Button Content="Открыть файл" Click="OpenFile_Click" Margin="5" />
+        </StackPanel>
+
+        <dz:DockControl x:Name="DockManager">
+            <!-- Вкладки будут добавляться динамически -->
+        </dz:DockControl>
+    </DockPanel>
 </Window>
