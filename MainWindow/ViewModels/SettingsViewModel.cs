@@ -25,11 +25,6 @@ namespace MainWindowProgram.ViewModels
     /// </summary>
     public ICommand ProtocolCommand { get; }
 
-    /// <summary>
-    /// Команда открытия настроек погрешностей выполнения режимов.
-    /// </summary>
-    public ICommand ErrorCommand { get; }
-
     public ICommand HelpCommand { get; }
 
     /// <summary>
@@ -48,7 +43,6 @@ namespace MainWindowProgram.ViewModels
       ExecutionCommand = new AsyncRelayCommand(_service.OpenExecutionAsync);
       ConfigCommand = new AsyncRelayCommand(_service.OpenConfigurationAsync);
       ProtocolCommand = new AsyncRelayCommand(_service.OpenProtocolAsync);
-      ErrorCommand = new AsyncRelayCommand(_service.OpenErrorSync);
       HelpCommand = new AsyncRelayCommand(_service.HelpTextAsync);
     }
   }

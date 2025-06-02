@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using AppConfiguration.Interface;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
@@ -16,6 +17,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 {
   public class SelfTestManager : ISelfTestCheckerModuleVoltageCurrentSource
   {
+
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice dbc = null, IPowerSourceModule powerDevice = null, IFastMeter meter = null)
     {
@@ -35,6 +37,23 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
       switch (type)
       {
+
+        case TypeConnector.FullCheck:
+          await DeviceCommandSender.ResetAllSystem();
+          await SettingsMeter(meter);
+          await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
+          await powerDevice.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B2);
+          await dbc.DeviceProtocol.QueryAsync(new DeviceCommand(5, 2, 2, 1).ToString());
+          await VoltageCheckService.GenerateDiscreteVoltageCheck(cancellationToken, messageService, meter, powerDevice);
+
+          await DeviceCommandSender.ResetAllSystem();
+          await SwitchingSelfControl.CheckSwitching(cancellationToken, messageService, meter, powerDevice, dbc);
+
+          await DeviceCommandSender.ResetAllSystem();
+          await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
+          break;
+
+
         case TypeConnector.OutputVoltageCheck:
           await SettingsMeter(meter);
           await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
@@ -44,10 +63,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
           break;
 
         case TypeConnector.CommutationCheck:
-          await messageService.ShowMessageAsync(new ShowMessageModel("Проверка коммутации временно не работает", ShowMessageModel.ErrorMessage.TitleColor) { IndentLevel = 1 });
+          await DeviceCommandSender.ResetAllSystem();
+          await SwitchingSelfControl.CheckSwitching(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
 
         case TypeConnector.OutputCurrentCheck:
+          await DeviceCommandSender.ResetAllSystem();
           await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
       }

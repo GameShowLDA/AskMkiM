@@ -21,32 +21,8 @@ namespace TestWPF
     /// </summary>
     public void InitializeSettings()
     {
-      Test.SetSettings(
-        this,
-        StartDelegate: ExecuteMeasurementProcess,
-        true);
+
     }
-
-    /// <summary>
-    /// Выполнение контроля.
-    /// </summary>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    /// <returns></returns>
-    private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
-    {
-      Task.Run(async () =>
-      {
-        int i = 0;
-        while (true)
-        {
-          await Test.ShowMessageAsync(new ShowMessageModel("Тест", message: i.ToString() + $"[{ShowMessageModel.SuccessMessage.Title}]", messageColor: ShowMessageModel.SuccessMessage.TitleColor));
-          i++;
-
-          await Task.Delay(10);
-        }
-      });
-    }
-
 
   }
 }

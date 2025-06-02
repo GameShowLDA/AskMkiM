@@ -57,10 +57,9 @@ namespace MainWindowProgram.Engine
       {
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
-        var measurementErrorTask = MeasurementErrorSettingsManager.ReadMeasurementErrorMode();
         var db = DataBaseConfig.InitializeDB();
 
-        await Task.WhenAll(executionTask, protocolTask, measurementErrorTask, db);
+        await Task.WhenAll(executionTask, protocolTask, db);
         await ThemeSettingsManager.ReadThemeModeAsync();
       }
       catch (Exception ex)

@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfiguration.MeasurementError;
 using DataBaseConfiguration.Services.Hotkey.Defaults;
+using DataBaseConfiguration.Services.MeasurementError;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration
 {
   static public class DataBaseConfig
   {
-    /// <summary>
-    /// Путь к файлу настроек конфигурации.
-    /// </summary>
-    //static public string ConfigFilePath => ".\\Settings\\_config.db";
-
     /// <summary>
     /// Путь к временной базе данных в системной папке Temp.
     /// </summary>
@@ -52,6 +49,8 @@ namespace DataBaseConfiguration
         await context.Database.MigrateAsync();
 
         FileHotkeySeeder.Seed(context);
+        MeasurementErrorSeeder.Seed(context);
+        ErrorProviderLocator.Provider = new MeasurementErrorServices();
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("✅ База данных инициализирована, миграции применены.");

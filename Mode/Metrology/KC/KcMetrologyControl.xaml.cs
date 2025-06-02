@@ -1,11 +1,11 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Enums;
+using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 
 namespace Mode.Metrology.KC
@@ -98,8 +98,11 @@ namespace Mode.Metrology.KC
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
-        double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
+
+        var error = ErrorProviderLocator.Provider.GetErrorParameters(TypeCommand.KC);
+
+        double firstNorm = param - ((param / 100.0 * error.Percent) + error.Numeric);
+        double lastNorm = param + ((param / 100.0 * error.Percent) + error.Numeric);
 
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, firstNorm, lastNorm);
       }

@@ -1,13 +1,13 @@
 ﻿using System.Text.Json;
 using System.Windows.Controls;
+using AppConfiguration.Enums;
+using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.DeviceEnum;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
@@ -135,8 +135,7 @@ namespace Mode.Metrology.PR
         var data = SelectOptimalCurrentAndVoltage(param, mint);
         double currentGenerial = (data.DecimalCurrent / 1000.0) + data.IntegerCurrent;
 
-        double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR);
+        var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.PR, param);
 
         var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
         double fakeCurrent = GetInterpolatedCurrent(param, mint);

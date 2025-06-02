@@ -41,8 +41,6 @@ namespace NewCore.Communication
     {
       try
       {
-        await OperationLock.WaitAsync();
-
         int lastOctet = GetLastOctet(_device.IPAddress);
         int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
         int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
@@ -101,7 +99,6 @@ namespace NewCore.Communication
       }
       finally
       { 
-        OperationLock.Release();
       }
     }
 

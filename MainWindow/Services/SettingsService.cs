@@ -2,7 +2,6 @@
 using System.IO;
 using Mode.Settings.DeviceConfig;
 using Mode.Settings.Execution;
-using Mode.Settings.MeasurementError;
 using Utilities.Help;
 using static UI.Components.Invoke.OpenFileButton;
 
@@ -34,13 +33,6 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая операцию открытия интерфейса конфигурации.</returns>
     public async Task OpenConfigurationAsync() =>
       await _multiWindow.AddControlAsync("Конфигурация оборудования", new DeviceConfigControl(), TypeWindow.Settings);
-
-    /// <summary>
-    /// Открывает пользовательский элемент управления с настройками погрешностей выполнения режимов.
-    /// </summary>
-    /// <returns>Задача, представляющая операцию открытия интерфейса погрешностей.</returns>
-    public async Task OpenErrorSync() =>
-      await _multiWindow.AddControlAsync("Погрешности измерений", new MeasurementErrorControl(), TypeWindow.Settings);
 
     /// <summary>
     /// Открывает пользовательский элемент управления с настройками выполнения режимов.

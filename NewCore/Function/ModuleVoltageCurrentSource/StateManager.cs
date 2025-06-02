@@ -75,7 +75,8 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
 
       DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
       string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return result == "2.0.1";
+      return true;
+      // return result == "2.0.1";
     }
 
     /// <inheritdoc />

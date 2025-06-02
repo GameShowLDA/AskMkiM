@@ -69,7 +69,6 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
       await testMeasurement.ConfigureMeter(dataModel);
       await testMeasurement.PerformMeasurement(ProtocolUI, dataModel);
-
     }
 
     private class PiNodeMethod : BaseNodeTest
@@ -98,8 +97,6 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         while (true)
         {
           token.ThrowIfCancellationRequested();
-
-          protocolUI.GetCancellationToken();
 
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
@@ -137,6 +134,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         await base.FinalizeAsync();
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.DisconnectAsync();
+        ResetPoints();
       }
     }
   }

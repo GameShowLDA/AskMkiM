@@ -4,13 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Interface.Main;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 using NewCore.Base.DeviceResponses;
 using System.Text.Json;
 using Utilities.Models;
+using AppConfiguration.Enums;
+using AppConfiguration.MeasurementError;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 {
@@ -73,8 +73,10 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         await ConnectResistorByNumberAsync(relayModule, resistorNumber);
 
 
-        double firstNorm = resistance - ((resistance / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR));
-        double lastNorm = resistance + (resistance / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR);
+        var error = ErrorProviderLocator.Provider.GetErrorParameters(TypeCommand.PR);
+
+        double firstNorm = resistance - ((resistance / 100.0 * error.Percent) + error.Numeric);
+        double lastNorm = resistance + ((resistance / 100.0 * error.Percent) + error.Numeric);
 
         var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(currentAmps);
         var result = voltage / currentAmps;
