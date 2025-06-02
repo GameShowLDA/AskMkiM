@@ -4,9 +4,9 @@
         xmlns:dz="http://schemas.devzest.com/presentation/docking"
         xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
         xmlns:local="clr-namespace:UI.Controls.TextEditor;assembly=UI"
-        Title="DevZest Docking" Height="450" Width="800">
-    <DockPanel>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Background="LightGray">
+        Title="DevZest Docking" Height="450" Width="800" Background="LightGray">
+    <DockPanel Background="Transparent">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Background="Transparent">
             <Button Content="Открыть файл" Click="OpenFile_Click" Margin="5" />
         </StackPanel>
 
