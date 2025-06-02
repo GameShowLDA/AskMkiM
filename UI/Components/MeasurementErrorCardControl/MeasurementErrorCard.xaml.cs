@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AppConfiguration.Enums;
 using DataBaseConfiguration.Models.MeasurementError;
 using UI.Components.MeasurementErrorCard;
 using UI.Helpers;
@@ -37,16 +38,16 @@ namespace UI.Components.MeasurementErrorCardControl
 
     public static readonly DependencyProperty TypeCommandProperty = DependencyProperty.Register(
         nameof(TypeCommand),
-        typeof(MeasurementErrorEntity.TypeCommand),
+        typeof(TypeCommand),
         typeof(MeasurementErrorCard),
-        new PropertyMetadata(MeasurementErrorEntity.TypeCommand.KC, OnTypeCommandChanged));
+        new PropertyMetadata(TypeCommand.KC, OnTypeCommandChanged));
 
     /// <summary>
     /// Тип команды, определяющий режим метрологии.
     /// </summary>
-    public MeasurementErrorEntity.TypeCommand TypeCommand
+    public TypeCommand TypeCommand
     {
-      get => (MeasurementErrorEntity.TypeCommand)GetValue(TypeCommandProperty);
+      get => (TypeCommand)GetValue(TypeCommandProperty);
       set => SetValue(TypeCommandProperty, value);
     }
 
@@ -106,9 +107,9 @@ namespace UI.Components.MeasurementErrorCardControl
       UnitTextBlock.Text = unit;
     }
 
-    private static (string DisplayName, string Unit) GetCommandInfo(MeasurementErrorEntity.TypeCommand type)
+    private static (string DisplayName, string Unit) GetCommandInfo(TypeCommand type)
     {
-      var memberInfo = typeof(MeasurementErrorEntity.TypeCommand).GetMember(type.ToString()).FirstOrDefault();
+      var memberInfo = typeof(TypeCommand).GetMember(type.ToString()).FirstOrDefault();
       var attribute = memberInfo?.GetCustomAttributes(typeof(CommandInfoAttribute), false)
           .FirstOrDefault() as CommandInfoAttribute;
 

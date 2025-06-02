@@ -17,6 +17,7 @@ using DataBaseConfiguration;
 using DataBaseConfiguration.Services.MeasurementError;
 using UI.Components.MeasurementErrorCardControl;
 using UI.Components.MeasurementErrorCard;
+using AppConfiguration.Enums;
 
 namespace UI.Controls.MeasurementError
 {
@@ -27,7 +28,7 @@ namespace UI.Controls.MeasurementError
   {
 
     // Словарь для быстрого доступа к карточкам по TypeCommand
-    private Dictionary<MeasurementErrorEntity.TypeCommand, MeasurementErrorCard> _cards;
+    private Dictionary<TypeCommand, MeasurementErrorCard> _cards;
 
     public MeasurementErrorControl()
     {
@@ -35,12 +36,12 @@ namespace UI.Controls.MeasurementError
       Loaded += MeasurementErrorControl_Loaded;
 
       // Инициализируем словарь
-      _cards = new Dictionary<MeasurementErrorEntity.TypeCommand, MeasurementErrorCard>
+      _cards = new Dictionary<TypeCommand, MeasurementErrorCard>
             {
-                { MeasurementErrorEntity.TypeCommand.KC, KcErrorCard },
-                { MeasurementErrorEntity.TypeCommand.PR, PrErrorCard },
-                { MeasurementErrorEntity.TypeCommand.CI, CiErrorCard },
-                { MeasurementErrorEntity.TypeCommand.IE, IeErrorCard }
+                { TypeCommand.KC, KcErrorCard },
+                { TypeCommand.PR, PrErrorCard },
+                { TypeCommand.CI, CiErrorCard },
+                { TypeCommand.IE, IeErrorCard }
             };
 
       // Подписываемся на событие SaveButtonClicked у всех карточек
@@ -60,22 +61,22 @@ namespace UI.Controls.MeasurementError
         {
           switch (error.Type)
           {
-            case MeasurementErrorEntity.TypeCommand.KC:
+            case TypeCommand.KC:
               KcErrorCard.PercentageValue = error.PercentageError;
               KcErrorCard.NumericValue = error.NumericError;
               break;
 
-            case MeasurementErrorEntity.TypeCommand.PR:
+            case TypeCommand.PR:
               PrErrorCard.PercentageValue = error.PercentageError;
               PrErrorCard.NumericValue = error.NumericError;
               break;
 
-            case MeasurementErrorEntity.TypeCommand.CI:
+            case TypeCommand.CI:
               CiErrorCard.PercentageValue = error.PercentageError;
               CiErrorCard.NumericValue = error.NumericError;
               break;
 
-            case MeasurementErrorEntity.TypeCommand.IE:
+            case TypeCommand.IE:
               IeErrorCard.PercentageValue = error.PercentageError;
               IeErrorCard.NumericValue = error.NumericError;
               break;
@@ -95,7 +96,7 @@ namespace UI.Controls.MeasurementError
     /// <summary>
     /// Универсальный метод обновления карточки по данным.
     /// </summary>
-    public void UpdateCard(MeasurementErrorEntity.TypeCommand type, double percentage, double numeric)
+    public void UpdateCard(TypeCommand type, double percentage, double numeric)
     {
       if (_cards.TryGetValue(type, out var card))
       {

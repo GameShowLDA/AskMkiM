@@ -1,11 +1,11 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Enums;
+using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 
 namespace Mode.Metrology.IE
@@ -95,9 +95,7 @@ namespace Mode.Metrology.IE
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения ёмкости", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
-        double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.IE)) + GetNumericError(TypeCommand.IE));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.IE)) + GetNumericError(TypeCommand.IE);
-
+        var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.IE, param);
         var result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync();
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат ёмкости ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");

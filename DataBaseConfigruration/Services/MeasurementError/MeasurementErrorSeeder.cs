@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Models.MeasurementError;
+﻿using AppConfiguration.Enums;
+using DataBaseConfiguration.Models.MeasurementError;
 using System.Reflection;
 
 namespace DataBaseConfiguration.Services.MeasurementError
@@ -16,9 +17,9 @@ namespace DataBaseConfiguration.Services.MeasurementError
 
       var defaults = new List<MeasurementErrorEntity>();
 
-      foreach (var type in Enum.GetValues(typeof(MeasurementErrorEntity.TypeCommand)).Cast<MeasurementErrorEntity.TypeCommand>())
+      foreach (var type in Enum.GetValues(typeof(TypeCommand)).Cast<TypeCommand>())
       {
-        var member = typeof(MeasurementErrorEntity.TypeCommand).GetMember(type.ToString()).FirstOrDefault();
+        var member = typeof(TypeCommand).GetMember(type.ToString()).FirstOrDefault();
         var attribute = member?.GetCustomAttribute<CommandInfoAttribute>();
 
         if (attribute != null)
