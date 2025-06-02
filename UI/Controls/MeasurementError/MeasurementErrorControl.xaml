@@ -5,15 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.MeasurementError"
              mc:Ignorable="d" 
-             xmlns:ErrCard="clr-namespace:UI.Components" 
+             xmlns:ErrCard="clr-namespace:UI.Components.MeasurementErrorCardControl" 
              d:DesignHeight="450" d:DesignWidth="800" Background="{StaticResource IsCheckedColorSolidColorBrush}">
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10">
         <WrapPanel ItemWidth="280" ItemHeight="270" Orientation="Horizontal">
-            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="KC"/>
-            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="PR"/>
-            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="CI"/>
-            <ErrCard:MeasurementErrorCard Margin="10" TypeCommand="IE"/>
+            <ErrCard:MeasurementErrorCard x:Name="KcErrorCard" Margin="10" TypeCommand="KC"/>
+            <ErrCard:MeasurementErrorCard x:Name="PrErrorCard" Margin="10" TypeCommand="PR"/>
+            <ErrCard:MeasurementErrorCard x:Name="CiErrorCard" Margin="10" TypeCommand="CI"/>
+            <ErrCard:MeasurementErrorCard x:Name="IeErrorCard" Margin="10" TypeCommand="IE"/>
         </WrapPanel>
     </ScrollViewer>
     

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DataBaseConfiguration.Models.MeasurementError;
 using DataBaseConfiguration.Repositories;
 
-namespace DataBaseConfiguration.Services
+namespace DataBaseConfiguration.Services.MeasurementError
 {
   public class MeasurementErrorServices : Repository<MeasurementErrorEntity>
   {

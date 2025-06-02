@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataBaseConfiguration.Services.Hotkey.Defaults;
+using DataBaseConfiguration.Services.MeasurementError;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration
@@ -47,6 +48,7 @@ namespace DataBaseConfiguration
         await context.Database.MigrateAsync();
 
         FileHotkeySeeder.Seed(context);
+        MeasurementErrorSeeder.Seed(context);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("✅ База данных инициализирована, миграции применены.");

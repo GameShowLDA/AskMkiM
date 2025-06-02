@@ -13,25 +13,25 @@ namespace DataBaseConfiguration.Models.MeasurementError
     /// </summary>
     public enum TypeCommand
     {
-      [CommandInfo("КС", "Ом")]
+      [CommandInfo("КС", "Ом", 1.0, 0.5)]
       /// <summary>
       /// Тип команды KC.
       /// </summary>
       KC,
 
-      [CommandInfo("ПР", "Ом")]
+      [CommandInfo("ПР", "Ом", 1.0, 0.1)]
       /// <summary>
       /// Тип команды PR.
       /// </summary>
       PR,
 
-      [CommandInfo("СИ", "МОм")]
+      [CommandInfo("СИ", "МОм", 1.0, 0.1)]
       /// <summary>
       /// Тип команды CI.
       /// </summary>
       CI,
 
-      [CommandInfo("ИЕ", "нФ")]
+      [CommandInfo("ИЕ", "нФ", 1.0, 0.1)]
       /// <summary>
       /// Тип команды IE.
       /// </summary>

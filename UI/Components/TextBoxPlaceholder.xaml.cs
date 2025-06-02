@@ -112,6 +112,7 @@ namespace UI.Components
       set => SetValue(BackgroundProperty, value);
     }
 
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextBoxPlaceholder"/>.
     /// </summary>
@@ -155,6 +156,8 @@ namespace UI.Components
       {
         Text = InputBox.Text;
       }
+
+      BorderData.Background = Background;
     }
 
     /// <summary>
