@@ -25,12 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Desktop\WpfDocking-master\Src\WpfDocking.csproj" />
     <ProjectReference Include="..\AppConfiguration\AppConfiguration.csproj" />
     <ProjectReference Include="..\ControlCommandAnalyser\ControlCommandAnalyser.csproj" />
     <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
     <ProjectReference Include="..\NewCore\NewCore.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\WpfDocking-master\Src\WpfDocking.csproj" />
   </ItemGroup>
 
 </Project>

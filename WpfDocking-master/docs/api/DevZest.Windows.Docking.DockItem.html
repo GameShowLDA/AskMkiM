@@ -1,0 +1,2369 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class DockItem
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class DockItem
+   ">
+    <meta name="generator" content="docfx 2.40.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="DevZest.Windows.Docking.DockItem">
+  
+  
+  <h1 id="DevZest_Windows_Docking_DockItem" data-uid="DevZest.Windows.Docking.DockItem" class="text-break">Class DockItem
+  </h1>
+  <div class="markdown level0 summary"><p>Represents a dockable item hosted by a <a class="xref" href="DevZest.Windows.Docking.DockControl.html">DockControl</a>.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">System.Windows.Threading.DispatcherObject</span></div>
+    <div class="level2"><span class="xref">System.Windows.DependencyObject</span></div>
+    <div class="level3"><span class="xref">System.Windows.Media.Visual</span></div>
+    <div class="level4"><span class="xref">System.Windows.UIElement</span></div>
+    <div class="level5"><span class="xref">System.Windows.FrameworkElement</span></div>
+    <div class="level6"><span class="xref">System.Windows.Controls.Control</span></div>
+    <div class="level7"><span class="xref">System.Windows.Controls.ContentControl</span></div>
+    <div class="level8"><span class="xref">DockItem</span></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.Windows.Media.Animation.IAnimatable</span></div>
+    <div><span class="xref">System.Windows.IFrameworkInputElement</span></div>
+    <div><span class="xref">System.Windows.IInputElement</span></div>
+    <div><span class="xref">System.ComponentModel.ISupportInitialize</span></div>
+    <div><span class="xref">System.Windows.Markup.IAddChild</span></div>
+    <div><a class="xref" href="DevZest.Windows.Docking.IDockItemUndoRedoReference.html">IDockItemUndoRedoReference</a></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.HasContentProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentTemplateProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentTemplateSelectorProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentStringFormatProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.System.Windows.Markup.IAddChild.AddChild(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.AddChild(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.System.Windows.Markup.IAddChild.AddText(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.AddText(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.OnContentChanged(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.OnContentTemplateChanged(System.Windows.DataTemplate, System.Windows.DataTemplate)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.OnContentTemplateSelectorChanged(System.Windows.Controls.DataTemplateSelector, System.Windows.Controls.DataTemplateSelector)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.OnContentStringFormatChanged(System.String, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.LogicalChildren</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.Content</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.HasContent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentTemplate</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentTemplateSelector</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.ContentControl.ContentStringFormat</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.BorderBrushProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.BorderThicknessProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.BackgroundProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.ForegroundProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontFamilyProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontSizeProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontStretchProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontStyleProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontWeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.HorizontalContentAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.VerticalContentAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.TabIndexProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.IsTabStopProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.PaddingProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.TemplateProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.PreviewMouseDoubleClickEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.MouseDoubleClickEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.OnTemplateChanged(System.Windows.Controls.ControlTemplate, System.Windows.Controls.ControlTemplate)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.OnPreviewMouseDoubleClick(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.OnMouseDoubleClick(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.ArrangeOverride(System.Windows.Size)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.BorderBrush</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.BorderThickness</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.Background</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.Foreground</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontFamily</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontSize</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontStretch</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontStyle</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.FontWeight</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.HorizontalContentAlignment</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.VerticalContentAlignment</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.TabIndex</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.IsTabStop</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.Padding</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.Template</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.HandlesScrolling</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.PreviewMouseDoubleClick</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Controls.Control.MouseDoubleClick</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.StyleProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OverridesDefaultStyleProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.DefaultStyleKeyProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.DataContextProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BindingGroupProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.LanguageProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.NameProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.TagProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.InputScopeProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.RequestBringIntoViewEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SizeChangedEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ActualWidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ActualHeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.LayoutTransformProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.WidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MinWidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MaxWidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.HeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MinHeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MaxHeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.FlowDirectionProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MarginProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.HorizontalAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.VerticalAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.FocusVisualStyleProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.CursorProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ForceCursorProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.LoadedEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.UnloadedEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ToolTipProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ContextMenuProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ToolTipOpeningEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ToolTipClosingEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ContextMenuOpeningEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ContextMenuClosingEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnStyleChanged(System.Windows.Style, System.Windows.Style)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ParentLayoutInvalidated(System.Windows.UIElement)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ApplyTemplate()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BeginStoryboard(System.Windows.Media.Animation.Storyboard)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BeginStoryboard(System.Windows.Media.Animation.Storyboard, System.Windows.Media.Animation.HandoffBehavior)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BeginStoryboard(System.Windows.Media.Animation.Storyboard, System.Windows.Media.Animation.HandoffBehavior, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.GetVisualChild(System.Int32)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.GetTemplateChild(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.FindResource(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.TryFindResource(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SetResourceReference(System.Windows.DependencyProperty, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnPropertyChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnVisualParentChanged(System.Windows.DependencyObject)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.GetBindingExpression(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SetBinding(System.Windows.DependencyProperty, System.Windows.Data.BindingBase)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SetBinding(System.Windows.DependencyProperty, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.GetUIParentCore()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BringIntoView()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BringIntoView(System.Windows.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.GetFlowDirection(System.Windows.DependencyObject)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SetFlowDirection(System.Windows.DependencyObject, System.Windows.FlowDirection)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MeasureCore(System.Windows.Size)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ArrangeCore(System.Windows.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnRenderSizeChanged(System.Windows.SizeChangedInfo)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.GetLayoutClip(System.Windows.Size)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MoveFocus(System.Windows.Input.TraversalRequest)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.PredictFocus(System.Windows.Input.FocusNavigationDirection)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnGotFocus(System.Windows.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BeginInit()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.EndInit()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnInitialized(System.EventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnToolTipOpening(System.Windows.Controls.ToolTipEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnToolTipClosing(System.Windows.Controls.ToolTipEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnContextMenuOpening(System.Windows.Controls.ContextMenuEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OnContextMenuClosing(System.Windows.Controls.ContextMenuEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.RegisterName(System.String, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.UnregisterName(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.FindName(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.AddLogicalChild(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.RemoveLogicalChild(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Style</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.OverridesDefaultStyle</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.DefaultStyleKey</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Triggers</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.TemplatedParent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.VisualChildrenCount</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Resources</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.InheritanceBehavior</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.DataContext</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.BindingGroup</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Language</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Name</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Tag</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.InputScope</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ActualWidth</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ActualHeight</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.LayoutTransform</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Width</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MinWidth</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MaxWidth</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Height</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MinHeight</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.MaxHeight</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.FlowDirection</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Margin</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.HorizontalAlignment</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.VerticalAlignment</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.FocusVisualStyle</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Cursor</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ForceCursor</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.IsInitialized</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.IsLoaded</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ToolTip</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ContextMenu</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Parent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.TargetUpdated</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SourceUpdated</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.DataContextChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.RequestBringIntoView</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.SizeChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Initialized</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Loaded</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.Unloaded</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ToolTipOpening</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ToolTipClosing</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ContextMenuOpening</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.FrameworkElement.ContextMenuClosing</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseLeftButtonDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseLeftButtonDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseLeftButtonUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseLeftButtonUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseRightButtonDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseRightButtonDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseRightButtonUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseRightButtonUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseMoveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseMoveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseWheelEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseWheelEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseEnterEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseLeaveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotMouseCaptureEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostMouseCaptureEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.QueryCursorEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusMoveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusMoveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusInAirMoveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusInAirMoveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusEnterEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusLeaveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusInRangeEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusInRangeEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusOutOfRangeEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusOutOfRangeEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusSystemGestureEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusSystemGestureEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotStylusCaptureEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostStylusCaptureEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusButtonDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusButtonUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusButtonDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusButtonUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewKeyDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.KeyDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewKeyUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.KeyUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewGotKeyboardFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotKeyboardFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewLostKeyboardFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostKeyboardFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewTextInputEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.TextInputEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewQueryContinueDragEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.QueryContinueDragEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewGiveFeedbackEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GiveFeedbackEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDragEnterEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DragEnterEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDragOverEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DragOverEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDragLeaveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DragLeaveEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDropEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DropEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseDirectlyOverProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseOverProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusOverProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsKeyboardFocusWithinProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseCapturedProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseCaptureWithinProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusDirectlyOverProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusCapturedProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusCaptureWithinProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsKeyboardFocusedProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.AllowDropProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RenderTransformProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RenderTransformOriginProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OpacityProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OpacityMaskProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.BitmapEffectProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.EffectProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.BitmapEffectInputProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.UidProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.VisibilityProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ClipToBoundsProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ClipProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.SnapsToDevicePixelsProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsFocusedProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsEnabledProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsHitTestVisibleProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsVisibleProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.FocusableProperty</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ApplyAnimationClock(System.Windows.DependencyProperty, System.Windows.Media.Animation.AnimationClock)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ApplyAnimationClock(System.Windows.DependencyProperty, System.Windows.Media.Animation.AnimationClock, System.Windows.Media.Animation.HandoffBehavior)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.BeginAnimation(System.Windows.DependencyProperty, System.Windows.Media.Animation.AnimationTimeline)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.BeginAnimation(System.Windows.DependencyProperty, System.Windows.Media.Animation.AnimationTimeline, System.Windows.Media.Animation.HandoffBehavior)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GetAnimationBaseValue(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RaiseEvent(System.Windows.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.AddHandler(System.Windows.RoutedEvent, System.Delegate)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.AddHandler(System.Windows.RoutedEvent, System.Delegate, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RemoveHandler(System.Windows.RoutedEvent, System.Delegate)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.AddToEventRoute(System.Windows.EventRoute, System.Windows.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseDown(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseUp(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseUp(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseLeftButtonDown(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseLeftButtonDown(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseLeftButtonUp(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseLeftButtonUp(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseRightButtonDown(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseRightButtonDown(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseRightButtonUp(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseRightButtonUp(System.Windows.Input.MouseButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseMove(System.Windows.Input.MouseEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseMove(System.Windows.Input.MouseEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewMouseWheel(System.Windows.Input.MouseWheelEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseWheel(System.Windows.Input.MouseWheelEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseEnter(System.Windows.Input.MouseEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnMouseLeave(System.Windows.Input.MouseEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnGotMouseCapture(System.Windows.Input.MouseEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnLostMouseCapture(System.Windows.Input.MouseEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnQueryCursor(System.Windows.Input.QueryCursorEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusDown(System.Windows.Input.StylusDownEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusDown(System.Windows.Input.StylusDownEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusUp(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusUp(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusMove(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusMove(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusInAirMove(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusInAirMove(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusEnter(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusLeave(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusInRange(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusInRange(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusOutOfRange(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusOutOfRange(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusSystemGesture(System.Windows.Input.StylusSystemGestureEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusSystemGesture(System.Windows.Input.StylusSystemGestureEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnGotStylusCapture(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnLostStylusCapture(System.Windows.Input.StylusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusButtonDown(System.Windows.Input.StylusButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnStylusButtonUp(System.Windows.Input.StylusButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusButtonDown(System.Windows.Input.StylusButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewStylusButtonUp(System.Windows.Input.StylusButtonEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewKeyDown(System.Windows.Input.KeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnKeyDown(System.Windows.Input.KeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewKeyUp(System.Windows.Input.KeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnKeyUp(System.Windows.Input.KeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnGotKeyboardFocus(System.Windows.Input.KeyboardFocusChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewLostKeyboardFocus(System.Windows.Input.KeyboardFocusChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnLostKeyboardFocus(System.Windows.Input.KeyboardFocusChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewTextInput(System.Windows.Input.TextCompositionEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnTextInput(System.Windows.Input.TextCompositionEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewQueryContinueDrag(System.Windows.QueryContinueDragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnQueryContinueDrag(System.Windows.QueryContinueDragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewGiveFeedback(System.Windows.GiveFeedbackEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnGiveFeedback(System.Windows.GiveFeedbackEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewDragEnter(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnDragEnter(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewDragOver(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnDragOver(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewDragLeave(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnDragLeave(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnPreviewDrop(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnDrop(System.Windows.DragEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsMouseDirectlyOverChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsMouseCapturedChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsMouseCaptureWithinChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsStylusDirectlyOverChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsStylusCapturedChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsStylusCaptureWithinChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnIsKeyboardFocusedChanged(System.Windows.DependencyPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.InvalidateMeasure()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.InvalidateArrange()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.InvalidateVisual()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnChildDesiredSizeChanged(System.Windows.UIElement)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Measure(System.Windows.Size)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Arrange(System.Windows.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnRender(System.Windows.Media.DrawingContext)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.UpdateLayout()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.TranslatePoint(System.Windows.Point, System.Windows.UIElement)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.InputHitTest(System.Windows.Point)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.CaptureMouse()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ReleaseMouseCapture()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.CaptureStylus()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ReleaseStylusCapture()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Focus()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnAccessKey(System.Windows.Input.AccessKeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.HitTestCore(System.Windows.Media.PointHitTestParameters)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.HitTestCore(System.Windows.Media.GeometryHitTestParameters)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnLostFocus(System.Windows.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OnCreateAutomationPeer()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.HasAnimatedProperties</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.InputBindings</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.CommandBindings</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.AllowDrop</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusPlugIns</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DesiredSize</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMeasureValid</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsArrangeValid</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RenderSize</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RenderTransform</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.RenderTransformOrigin</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseDirectlyOver</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseOver</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusOver</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsKeyboardFocusWithin</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseCaptured</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseCaptureWithin</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusDirectlyOver</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusCaptured</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusCaptureWithin</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsKeyboardFocused</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsInputMethodEnabled</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Opacity</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.OpacityMask</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.BitmapEffect</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Effect</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.BitmapEffectInput</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Uid</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Visibility</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.ClipToBounds</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Clip</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.SnapsToDevicePixels</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsFocused</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsEnabled</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsEnabledCore</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsHitTestVisible</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsVisible</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Focusable</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PersistId</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseLeftButtonDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseLeftButtonDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseLeftButtonUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseLeftButtonUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseRightButtonDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseRightButtonDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseRightButtonUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseRightButtonUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseMove</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseMove</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewMouseWheel</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseWheel</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseEnter</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.MouseLeave</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotMouseCapture</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostMouseCapture</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.QueryCursor</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusMove</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusMove</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusInAirMove</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusInAirMove</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusEnter</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusLeave</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusInRange</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusInRange</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusOutOfRange</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusOutOfRange</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusSystemGesture</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusSystemGesture</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotStylusCapture</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostStylusCapture</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusButtonDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.StylusButtonUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusButtonDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewStylusButtonUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewKeyDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.KeyDown</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewKeyUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.KeyUp</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewGotKeyboardFocus</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotKeyboardFocus</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewLostKeyboardFocus</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostKeyboardFocus</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewTextInput</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.TextInput</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewQueryContinueDrag</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.QueryContinueDrag</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewGiveFeedback</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GiveFeedback</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDragEnter</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DragEnter</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDragOver</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DragOver</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDragLeave</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.DragLeave</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.PreviewDrop</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.Drop</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseDirectlyOverChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsKeyboardFocusWithinChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseCapturedChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsMouseCaptureWithinChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusDirectlyOverChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusCapturedChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsStylusCaptureWithinChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsKeyboardFocusedChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LayoutUpdated</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.GotFocus</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.LostFocus</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsEnabledChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsHitTestVisibleChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.IsVisibleChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.UIElement.FocusableChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.AddVisualChild(System.Windows.Media.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.RemoveVisualChild(System.Windows.Media.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.OnVisualChildrenChanged(System.Windows.DependencyObject, System.Windows.DependencyObject)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.IsAncestorOf(System.Windows.DependencyObject)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.IsDescendantOf(System.Windows.DependencyObject)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.FindCommonVisualAncestor(System.Windows.DependencyObject)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.TransformToAncestor(System.Windows.Media.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.TransformToAncestor(System.Windows.Media.Media3D.Visual3D)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.TransformToDescendant(System.Windows.Media.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.TransformToVisual(System.Windows.Media.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.PointToScreen(System.Windows.Point)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.PointFromScreen(System.Windows.Point)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualParent</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualTransform</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualEffect</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualBitmapEffect</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualBitmapEffectInput</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualClip</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualOffset</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualOpacity</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualEdgeMode</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualBitmapScalingMode</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualOpacityMask</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualXSnappingGuidelines</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Media.Visual.VisualYSnappingGuidelines</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.GetValue(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.SetValue(System.Windows.DependencyProperty, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.SetValue(System.Windows.DependencyPropertyKey, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.ClearValue(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.ClearValue(System.Windows.DependencyPropertyKey)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.CoerceValue(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.InvalidateProperty(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.ShouldSerializeProperty(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.ReadLocalValue(System.Windows.DependencyProperty)</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.GetLocalValueEnumerator()</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.DependencyObjectType</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.DependencyObject.IsSealed</span>
+    </div>
+    <div>
+      <span class="xref">System.Windows.Threading.DispatcherObject.Dispatcher</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="DevZest.Windows.Docking.html">DevZest.Windows.Docking</a></h6>
+  <h6><strong>Assembly</strong>: DevZest.WpfDocking.dll</h6>
+  <h5 id="DevZest_Windows_Docking_DockItem_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class DockItem : ContentControl, DUCE.IResource, IAnimatable, IFrameworkInputElement, IInputElement, ISupportInitialize, IHaveResources, IAddChild, IDockItemUndoRedoReference</code></pre>
+  </div>
+  <h5 id="DevZest_Windows_Docking_DockItem_remarks"><strong>Remarks</strong></h5>
+  <div class="markdown level0 remarks"><p>Content Model: <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> derives from <span class="xref">System.Windows.Controls.ContentControl</span> class, set the
+<span class="xref">System.Windows.Controls.ContentControl.Content</span> property to organize the UI of the dockable item.</p>
+<p>Use <a class="xref" href="DevZest.Windows.Docking.DockItem.AllowedDockTreePositions.html#DevZest_Windows_Docking_DockItem_AllowedDockTreePositions">AllowedDockTreePositions</a>, <a class="xref" href="DevZest.Windows.Docking.DockItem.AutoHideSize.html#DevZest_Windows_Docking_DockItem_AutoHideSize">AutoHideSize</a>, <a class="xref" href="DevZest.Windows.Docking.DockItem.DefaultDockPosition.html#DevZest_Windows_Docking_DockItem_DefaultDockPosition">DefaultDockPosition</a>, 
+<a class="xref" href="DevZest.Windows.Docking.DockItem.Description.html#DevZest_Windows_Docking_DockItem_Description">Description</a>, <a class="xref" href="DevZest.Windows.Docking.DockItem.Icon.html#DevZest_Windows_Docking_DockItem_Icon">Icon</a>, <a class="xref" href="DevZest.Windows.Docking.DockItem.TabContextMenu.html#DevZest_Windows_Docking_DockItem_TabContextMenu">TabContextMenu</a>,
+<a class="xref" href="DevZest.Windows.Docking.DockItem.TabText.html#DevZest_Windows_Docking_DockItem_TabText">TabText</a> and <a class="xref" href="DevZest.Windows.Docking.DockItem.Title.html#DevZest_Windows_Docking_DockItem_Title">Title</a> properties to customize the DockItem.</p>
+<p>Call <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_">Show(DockControl)</a> method to show the DockItem; call
+<a class="xref" href="DevZest.Windows.Docking.DockItem.Activate.html#DevZest_Windows_Docking_DockItem_Activate">Activate()</a> method to activate the DockItem; call
+<a class="xref" href="DevZest.Windows.Docking.DockItem.Close.html#DevZest_Windows_Docking_DockItem_Close">Close()</a> method to close the DockItem (disconnect the DockItem from DockControl); call
+<a class="xref" href="DevZest.Windows.Docking.DockItem.PerformClose.html#DevZest_Windows_Docking_DockItem_PerformClose">PerformClose()</a> method to close or hide the DockItem, depending on the value of
+<a class="xref" href="DevZest.Windows.Docking.DockItem.HideOnPerformClose.html#DevZest_Windows_Docking_DockItem_HideOnPerformClose">HideOnPerformClose</a> property. You may intercept the <a class="xref" href="DevZest.Windows.Docking.DockItem.Closing.html">Closing</a> event to
+cancel the DockItem closing.</p>
+<p>The <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> has the following state reflected by its <a class="xref" href="DevZest.Windows.Docking.DockItem.DockPosition.html#DevZest_Windows_Docking_DockItem_DockPosition">DockPosition</a>
+and other properties:</p>
+<table><thead><tr><th>State</th><th>DockPositionDescription</th></tr></thead><tbody><tr><td>Disconnected</td><td>UnknownThe DockItem is not connected to any DockControl. The values of its <a class="xref" href="DevZest.Windows.Docking.DockItem.DockControl.html#DevZest_Windows_Docking_DockItem_DockControl">DockControl</a>,
+<a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPane.html#DevZest_Windows_Docking_DockItem_FirstPane">FirstPane</a> and <a class="xref" href="DevZest.Windows.Docking.DockItem.SecondPane.html#DevZest_Windows_Docking_DockItem_SecondPane">SecondPane</a> properties are all <span class="xref">null</span>.</td></tr><tr><td>Hidden</td><td>HiddenThe DockItem is hidden with its <a class="xref" href="DevZest.Windows.Docking.DockItem.IsHidden.html#DevZest_Windows_Docking_DockItem_IsHidden">IsHidden</a> property set to <span class="xref">true</span>.
+</td></tr><tr><td>Visible</td><td>other valuesThe DockItem is visible with its <a class="xref" href="DevZest.Windows.Docking.DockItem.IsHidden.html#DevZest_Windows_Docking_DockItem_IsHidden">IsHidden</a> property set to <span class="xref">false</span>,
+plus the following properties to reflect the state:
+<ul><li></li><li></li><li></li><li></li></ul>
+<p>Call <a class="xref" href="DevZest.Windows.Docking.DockItem.ToggleAutoHide.html#DevZest_Windows_Docking_DockItem_ToggleAutoHide_DevZest_Windows_Docking_DockItemShowMethod_">ToggleAutoHide(DockItemShowMethod)</a> method to toggle the auto hide
+state of the DockItem&apos;s <a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPane.html#DevZest_Windows_Docking_DockItem_FirstPane">FirstPane</a>; call <a class="xref" href="DevZest.Windows.Docking.DockItem.ToggleFloating.html#DevZest_Windows_Docking_DockItem_ToggleFloating_DevZest_Windows_Docking_DockItemShowMethod_">ToggleFloating(DockItemShowMethod)</a>
+method to toggle the floating state of the DockItem.</p>
+</td></tr></tbody></table>
+<p>You may intercept the <a class="xref" href="DevZest.Windows.Docking.DockItem.StateChanging.html">StateChanging</a> or <a class="xref" href="DevZest.Windows.Docking.DockItem.StateChanged.html">StateChanged</a> event, which occurs before or after the
+state of DockItem changed.</p>
+<p>Derived class may override the <a class="xref" href="DevZest.Windows.Docking.DockItem.Save.html#DevZest_Windows_Docking_DockItem_Save">Save()</a> method to return a object instance represents
+this DockItem for saving/loading the window layout, or override the <a class="xref" href="DevZest.Windows.Docking.DockItem.UndoRedoReference.html#DevZest_Windows_Docking_DockItem_UndoRedoReference">UndoRedoReference</a> property
+to return a DockItem reference for undo/redo.</p>
+</div>
+  <h3 id="fields">Fields
+  </h3>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_AllowedDockTreePositionsProperty" data-uid="DevZest.Windows.Docking.DockItem.AllowedDockTreePositionsProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.AllowedDockTreePositionsProperty.html">AllowedDockTreePositionsProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.AllowedDockTreePositions.html#DevZest_Windows_Docking_DockItem_AllowedDockTreePositions">AllowedDockTreePositions</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_AutoHideSizeProperty" data-uid="DevZest.Windows.Docking.DockItem.AutoHideSizeProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.AutoHideSizeProperty.html">AutoHideSizeProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.AutoHideSize.html#DevZest_Windows_Docking_DockItem_AutoHideSize">AutoHideSize</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DefaultDockPositionProperty" data-uid="DevZest.Windows.Docking.DockItem.DefaultDockPositionProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DefaultDockPositionProperty.html">DefaultDockPositionProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.DefaultDockPosition.html#DevZest_Windows_Docking_DockItem_DefaultDockPosition">DefaultDockPosition</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DescriptionProperty" data-uid="DevZest.Windows.Docking.DockItem.DescriptionProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DescriptionProperty.html">DescriptionProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.Description.html#DevZest_Windows_Docking_DockItem_Description">Description</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DockControlProperty" data-uid="DevZest.Windows.Docking.DockItem.DockControlProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DockControlProperty.html">DockControlProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.DockControl.html#DevZest_Windows_Docking_DockItem_DockControl">DockControl</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DockPositionProperty" data-uid="DevZest.Windows.Docking.DockItem.DockPositionProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DockPositionProperty.html">DockPositionProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.DockPosition.html#DevZest_Windows_Docking_DockItem_DockPosition">DockPosition</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_FirstPaneProperty" data-uid="DevZest.Windows.Docking.DockItem.FirstPaneProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPaneProperty.html">FirstPaneProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPane.html#DevZest_Windows_Docking_DockItem_FirstPane">FirstPane</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_HideOnPerformCloseProperty" data-uid="DevZest.Windows.Docking.DockItem.HideOnPerformCloseProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.HideOnPerformCloseProperty.html">HideOnPerformCloseProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.HideOnPerformClose.html#DevZest_Windows_Docking_DockItem_HideOnPerformClose">HideOnPerformClose</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IconProperty" data-uid="DevZest.Windows.Docking.DockItem.IconProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IconProperty.html">IconProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.Icon.html#DevZest_Windows_Docking_DockItem_Icon">Icon</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsActiveDocumentProperty" data-uid="DevZest.Windows.Docking.DockItem.IsActiveDocumentProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsActiveDocumentProperty.html">IsActiveDocumentProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.IsActiveDocument.html#DevZest_Windows_Docking_DockItem_IsActiveDocument">IsActiveDocument</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsActiveItemProperty" data-uid="DevZest.Windows.Docking.DockItem.IsActiveItemProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsActiveItemProperty.html">IsActiveItemProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.IsActiveItem.html#DevZest_Windows_Docking_DockItem_IsActiveItem">IsActiveItem</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsHiddenProperty" data-uid="DevZest.Windows.Docking.DockItem.IsHiddenProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsHiddenProperty.html">IsHiddenProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.IsHidden.html#DevZest_Windows_Docking_DockItem_IsHidden">IsHidden</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsSelectedProperty" data-uid="DevZest.Windows.Docking.DockItem.IsSelectedProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsSelectedProperty.html">IsSelectedProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.IsSelected.html#DevZest_Windows_Docking_DockItem_IsSelected">IsSelected</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_SecondPaneProperty" data-uid="DevZest.Windows.Docking.DockItem.SecondPaneProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.SecondPaneProperty.html">SecondPaneProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.SecondPane.html#DevZest_Windows_Docking_DockItem_SecondPane">SecondPane</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_TabContextMenuProperty" data-uid="DevZest.Windows.Docking.DockItem.TabContextMenuProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.TabContextMenuProperty.html">TabContextMenuProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.TabContextMenu.html#DevZest_Windows_Docking_DockItem_TabContextMenu">TabContextMenu</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_TabTextProperty" data-uid="DevZest.Windows.Docking.DockItem.TabTextProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.TabTextProperty.html">TabTextProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.TabText.html#DevZest_Windows_Docking_DockItem_TabText">TabText</a> dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_TitleProperty" data-uid="DevZest.Windows.Docking.DockItem.TitleProperty">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.TitleProperty.html">TitleProperty</a>
+        </td>
+        <td class="markdown level1 summary"><p>Identifies the <a class="xref" href="DevZest.Windows.Docking.DockItem.Title.html#DevZest_Windows_Docking_DockItem_Title">Title</a> dependency property.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_AllowedDockTreePositions" data-uid="DevZest.Windows.Docking.DockItem.AllowedDockTreePositions">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.AllowedDockTreePositions.html#DevZest_Windows_Docking_DockItem_AllowedDockTreePositions">AllowedDockTreePositions</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the allowed dock tree positions for this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_AutoHideSize" data-uid="DevZest.Windows.Docking.DockItem.AutoHideSize">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.AutoHideSize.html#DevZest_Windows_Docking_DockItem_AutoHideSize">AutoHideSize</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the size of this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> when in auto hide mode. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_CanToggleAutoHide" data-uid="DevZest.Windows.Docking.DockItem.CanToggleAutoHide">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.CanToggleAutoHide.html#DevZest_Windows_Docking_DockItem_CanToggleAutoHide">CanToggleAutoHide</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether the auto hide mode of this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> can be toggled.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_CanToggleFloating" data-uid="DevZest.Windows.Docking.DockItem.CanToggleFloating">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.CanToggleFloating.html#DevZest_Windows_Docking_DockItem_CanToggleFloating">CanToggleFloating</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether the floating mode of this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> can be toggled.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DefaultDockPosition" data-uid="DevZest.Windows.Docking.DockItem.DefaultDockPosition">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DefaultDockPosition.html#DevZest_Windows_Docking_DockItem_DefaultDockPosition">DefaultDockPosition</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the default <a class="xref" href="DevZest.Windows.Docking.DockItem.DockPosition.html#DevZest_Windows_Docking_DockItem_DockPosition">DockPosition</a> for this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Description" data-uid="DevZest.Windows.Docking.DockItem.Description">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Description.html#DevZest_Windows_Docking_DockItem_Description">Description</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the description of this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DockControl" data-uid="DevZest.Windows.Docking.DockItem.DockControl">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DockControl.html#DevZest_Windows_Docking_DockItem_DockControl">DockControl</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets the <a class="xref" href="DevZest.Windows.Docking.DockControl.html">DockControl</a> object associated with this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DockPosition" data-uid="DevZest.Windows.Docking.DockItem.DockPosition">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DockPosition.html#DevZest_Windows_Docking_DockItem_DockPosition">DockPosition</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets the dock position of this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DockTreePosition" data-uid="DevZest.Windows.Docking.DockItem.DockTreePosition">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DockTreePosition.html#DevZest_Windows_Docking_DockItem_DockTreePosition">DockTreePosition</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets the dock tree position of this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_FirstPane" data-uid="DevZest.Windows.Docking.DockItem.FirstPane">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPane.html#DevZest_Windows_Docking_DockItem_FirstPane">FirstPane</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets the first <a class="xref" href="DevZest.Windows.Docking.DockPane.html">DockPane</a> that this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> associated with. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_HideOnPerformClose" data-uid="DevZest.Windows.Docking.DockItem.HideOnPerformClose">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.HideOnPerformClose.html#DevZest_Windows_Docking_DockItem_HideOnPerformClose">HideOnPerformClose</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the value indicates whether hides or closes this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> when calling <a class="xref" href="DevZest.Windows.Docking.DockItem.PerformClose.html#DevZest_Windows_Docking_DockItem_PerformClose">PerformClose()</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Icon" data-uid="DevZest.Windows.Docking.DockItem.Icon">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Icon.html#DevZest_Windows_Docking_DockItem_Icon">Icon</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> object's icon. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsActiveDocument" data-uid="DevZest.Windows.Docking.DockItem.IsActiveDocument">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsActiveDocument.html#DevZest_Windows_Docking_DockItem_IsActiveDocument">IsActiveDocument</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is active document. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsActiveItem" data-uid="DevZest.Windows.Docking.DockItem.IsActiveItem">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsActiveItem.html#DevZest_Windows_Docking_DockItem_IsActiveItem">IsActiveItem</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is active. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsAutoHide" data-uid="DevZest.Windows.Docking.DockItem.IsAutoHide">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsAutoHide.html#DevZest_Windows_Docking_DockItem_IsAutoHide">IsAutoHide</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is in auto hide mode.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsHidden" data-uid="DevZest.Windows.Docking.DockItem.IsHidden">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsHidden.html#DevZest_Windows_Docking_DockItem_IsHidden">IsHidden</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is invisible. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_IsSelected" data-uid="DevZest.Windows.Docking.DockItem.IsSelected">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.IsSelected.html#DevZest_Windows_Docking_DockItem_IsSelected">IsSelected</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value indicates whether this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is selected. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_SecondPane" data-uid="DevZest.Windows.Docking.DockItem.SecondPane">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.SecondPane.html#DevZest_Windows_Docking_DockItem_SecondPane">SecondPane</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets the second <a class="xref" href="DevZest.Windows.Docking.DockPane.html">DockPane</a> that this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> associated with. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_ShowAction" data-uid="DevZest.Windows.Docking.DockItem.ShowAction">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.ShowAction.html#DevZest_Windows_Docking_DockItem_ShowAction">ShowAction</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the show action in XAML initialization.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_TabContextMenu" data-uid="DevZest.Windows.Docking.DockItem.TabContextMenu">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.TabContextMenu.html#DevZest_Windows_Docking_DockItem_TabContextMenu">TabContextMenu</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> object's context menu to display for the tab. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_TabText" data-uid="DevZest.Windows.Docking.DockItem.TabText">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.TabText.html#DevZest_Windows_Docking_DockItem_TabText">TabText</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> object's text when shown as tabbed. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Title" data-uid="DevZest.Windows.Docking.DockItem.Title">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Title.html#DevZest_Windows_Docking_DockItem_Title">Title</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets or sets the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> object's title. This is a dependency property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_UndoRedoReference" data-uid="DevZest.Windows.Docking.DockItem.UndoRedoReference">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.UndoRedoReference.html#DevZest_Windows_Docking_DockItem_UndoRedoReference">UndoRedoReference</a>
+        </td>
+        <td class="markdown level1 summary"><p>Gets a value provides a <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> reference for undo/redo.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Activate" data-uid="DevZest.Windows.Docking.DockItem.Activate">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Activate.html#DevZest_Windows_Docking_DockItem_Activate">Activate()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Activates the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> and gives it focus.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Close" data-uid="DevZest.Windows.Docking.DockItem.Close">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Close.html#DevZest_Windows_Docking_DockItem_Close">Close()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Closes the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Hide" data-uid="DevZest.Windows.Docking.DockItem.Hide">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Hide.html#DevZest_Windows_Docking_DockItem_Hide">Hide()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Makes the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> invisible.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_MeasureOverride_System_Windows_Size_" data-uid="DevZest.Windows.Docking.DockItem.MeasureOverride(System.Windows.Size)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.MeasureOverride.html#DevZest_Windows_Docking_DockItem_MeasureOverride_System_Windows_Size_">MeasureOverride(Size)</a>
+        </td>
+        <td class="markdown level1 summary"></td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_OnApplyTemplate" data-uid="DevZest.Windows.Docking.DockItem.OnApplyTemplate">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.OnApplyTemplate.html#DevZest_Windows_Docking_DockItem_OnApplyTemplate">OnApplyTemplate()</a>
+        </td>
+        <td class="markdown level1 summary"></td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_OnClosing_System_ComponentModel_CancelEventArgs_" data-uid="DevZest.Windows.Docking.DockItem.OnClosing(System.ComponentModel.CancelEventArgs)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.OnClosing.html#DevZest_Windows_Docking_DockItem_OnClosing_System_ComponentModel_CancelEventArgs_">OnClosing(CancelEventArgs)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Raises the <a class="xref" href="DevZest.Windows.Docking.DockItem.Closing.html">Closing</a> event.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_OnIsKeyboardFocusWithinChanged_System_Windows_DependencyPropertyChangedEventArgs_" data-uid="DevZest.Windows.Docking.DockItem.OnIsKeyboardFocusWithinChanged(System.Windows.DependencyPropertyChangedEventArgs)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.OnIsKeyboardFocusWithinChanged.html#DevZest_Windows_Docking_DockItem_OnIsKeyboardFocusWithinChanged_System_Windows_DependencyPropertyChangedEventArgs_">OnIsKeyboardFocusWithinChanged(DependencyPropertyChangedEventArgs)</a>
+        </td>
+        <td class="markdown level1 summary"></td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_OnPreviewGotKeyboardFocus_System_Windows_Input_KeyboardFocusChangedEventArgs_" data-uid="DevZest.Windows.Docking.DockItem.OnPreviewGotKeyboardFocus(System.Windows.Input.KeyboardFocusChangedEventArgs)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.OnPreviewGotKeyboardFocus.html#DevZest_Windows_Docking_DockItem_OnPreviewGotKeyboardFocus_System_Windows_Input_KeyboardFocusChangedEventArgs_">OnPreviewGotKeyboardFocus(KeyboardFocusChangedEventArgs)</a>
+        </td>
+        <td class="markdown level1 summary"></td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_OnStateChanged_DevZest_Windows_Docking_DockItemStateEventArgs_" data-uid="DevZest.Windows.Docking.DockItem.OnStateChanged(DevZest.Windows.Docking.DockItemStateEventArgs)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.OnStateChanged.html#DevZest_Windows_Docking_DockItem_OnStateChanged_DevZest_Windows_Docking_DockItemStateEventArgs_">OnStateChanged(DockItemStateEventArgs)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Raises the <a class="xref" href="DevZest.Windows.Docking.DockItem.StateChanged.html">StateChanged</a> event.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_OnStateChanging_DevZest_Windows_Docking_DockItemStateEventArgs_" data-uid="DevZest.Windows.Docking.DockItem.OnStateChanging(DevZest.Windows.Docking.DockItemStateEventArgs)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.OnStateChanging.html#DevZest_Windows_Docking_DockItem_OnStateChanging_DevZest_Windows_Docking_DockItemStateEventArgs_">OnStateChanging(DockItemStateEventArgs)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Raises the <a class="xref" href="DevZest.Windows.Docking.DockItem.StateChanging.html">StateChanging</a> event.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_PerformClose" data-uid="DevZest.Windows.Docking.DockItem.PerformClose">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.PerformClose.html#DevZest_Windows_Docking_DockItem_PerformClose">PerformClose()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Hides or closes the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>, depending on the value of <a class="xref" href="DevZest.Windows.Docking.DockItem.HideOnPerformClose.html#DevZest_Windows_Docking_DockItem_HideOnPerformClose">HideOnPerformClose</a> property.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Save" data-uid="DevZest.Windows.Docking.DockItem.Save">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Save.html#DevZest_Windows_Docking_DockItem_Save">Save()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Saves the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_">Show(DockControl)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> targeting specified <a class="xref" href="DevZest.Windows.Docking.DockControl.html">DockControl</a>, as activated.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockControl, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> targeting specified <a class="xref" href="DevZest.Windows.Docking.DockControl.html">DockControl</a>, using specified <a class="xref" href="DevZest.Windows.Docking.DockItemShowMethod.html">DockItemShowMethod</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_DevZest_Windows_Docking_DockPosition_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl,DevZest.Windows.Docking.DockPosition)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_DevZest_Windows_Docking_DockPosition_">Show(DockControl, DockPosition)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> to specified dock position, as activated.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_DevZest_Windows_Docking_DockPosition_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl,DevZest.Windows.Docking.DockPosition,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_DevZest_Windows_Docking_DockPosition_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockControl, DockPosition, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> to specified dock position, using specified show method.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_System_Windows_Controls_Dock_System_Boolean_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl,System.Windows.Controls.Dock,System.Boolean,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_System_Windows_Controls_Dock_System_Boolean_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockControl, Dock, Boolean, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> to the edge of <a class="xref" href="DevZest.Windows.Docking.DockControl.html">DockControl</a>, brings the respective dock tree to front
+or sends it to back, using specified show method.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_System_Windows_Rect_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl,System.Windows.Rect)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_System_Windows_Rect_">Show(DockControl, Rect)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as activated floating window.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_System_Windows_Rect_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockControl,System.Windows.Rect,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockControl_System_Windows_Rect_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockControl, Rect, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as floating window, using specified show method.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockItem_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockItem,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockItem_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockItem, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as tabeed, using specified show method.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>, using specified <a class="xref" href="DevZest.Windows.Docking.DockItemShowMethod.html">DockItemShowMethod</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPane_System_Int32_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockPane,System.Int32)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPane_System_Int32_">Show(DockPane, Int32)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as activated and tabbed.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPane_System_Int32_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockPane,System.Int32,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPane_System_Int32_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockPane, Int32, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as tabbed, using specified show method.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPaneNode_System_Boolean_System_Windows_Controls_Dock_DevZest_Windows_SplitterDistance_System_Boolean_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockPaneNode,System.Boolean,System.Windows.Controls.Dock,DevZest.Windows.SplitterDistance,System.Boolean,DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPaneNode_System_Boolean_System_Windows_Controls_Dock_DevZest_Windows_SplitterDistance_System_Boolean_DevZest_Windows_Docking_DockItemShowMethod_">Show(DockPaneNode, Boolean, Dock, SplitterDistance, Boolean, DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as <a class="xref" href="DevZest.Windows.Docking.DockPane.html">DockPane</a>, side by side of target <a class="xref" href="DevZest.Windows.Docking.DockPane.html">DockPane</a>, using
+specified auto hide state, size for target setting and show method.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPaneNode_System_Windows_Controls_Dock_DevZest_Windows_SplitterDistance_" data-uid="DevZest.Windows.Docking.DockItem.Show(DevZest.Windows.Docking.DockPaneNode,System.Windows.Controls.Dock,DevZest.Windows.SplitterDistance)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Show.html#DevZest_Windows_Docking_DockItem_Show_DevZest_Windows_Docking_DockPaneNode_System_Windows_Controls_Dock_DevZest_Windows_SplitterDistance_">Show(DockPaneNode, Dock, SplitterDistance)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Shows the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> as activated non auto hide <a class="xref" href="DevZest.Windows.Docking.DockPane.html">DockPane</a>, side by side of target <a class="xref" href="DevZest.Windows.Docking.DockPaneNode.html">DockPaneNode</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_ToggleAutoHide" data-uid="DevZest.Windows.Docking.DockItem.ToggleAutoHide">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.ToggleAutoHide.html#DevZest_Windows_Docking_DockItem_ToggleAutoHide">ToggleAutoHide()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Toggles the auto hide state of the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> object's <a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPane.html#DevZest_Windows_Docking_DockItem_FirstPane">FirstPane</a>, using
+default <a class="xref" href="DevZest.Windows.Docking.DockItemShowMethod.html">DockItemShowMethod</a> for this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_ToggleAutoHide_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.ToggleAutoHide(DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.ToggleAutoHide.html#DevZest_Windows_Docking_DockItem_ToggleAutoHide_DevZest_Windows_Docking_DockItemShowMethod_">ToggleAutoHide(DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Toggles the auto hide state of the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> object's <a class="xref" href="DevZest.Windows.Docking.DockItem.FirstPane.html#DevZest_Windows_Docking_DockItem_FirstPane">FirstPane</a>,
+using specified <a class="xref" href="DevZest.Windows.Docking.DockItemShowMethod.html">DockItemShowMethod</a> for this <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_ToggleFloating" data-uid="DevZest.Windows.Docking.DockItem.ToggleFloating">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.ToggleFloating.html#DevZest_Windows_Docking_DockItem_ToggleFloating">ToggleFloating()</a>
+        </td>
+        <td class="markdown level1 summary"><p>Toggles the floating state of the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>, as activated.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_ToggleFloating_DevZest_Windows_Docking_DockItemShowMethod_" data-uid="DevZest.Windows.Docking.DockItem.ToggleFloating(DevZest.Windows.Docking.DockItemShowMethod)">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.ToggleFloating.html#DevZest_Windows_Docking_DockItem_ToggleFloating_DevZest_Windows_Docking_DockItemShowMethod_">ToggleFloating(DockItemShowMethod)</a>
+        </td>
+        <td class="markdown level1 summary"><p>Toggles the floating state of the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a>, using specified show method.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="events">Events
+  </h3>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_Closing" data-uid="DevZest.Windows.Docking.DockItem.Closing">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.Closing.html">Closing</a>
+        </td>
+        <td class="markdown level1 summary"><p>Occurs when the <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is closing.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_StateChanged" data-uid="DevZest.Windows.Docking.DockItem.StateChanged">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.StateChanged.html">StateChanged</a>
+        </td>
+        <td class="markdown level1 summary"><p>Occurs when the state of <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is changed.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_StateChanging" data-uid="DevZest.Windows.Docking.DockItem.StateChanging">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.StateChanging.html">StateChanging</a>
+        </td>
+        <td class="markdown level1 summary"><p>Occurs when the state of <a class="xref" href="DevZest.Windows.Docking.DockItem.html">DockItem</a> is changing.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="eii">Explicit Interface Implementations
+  </h3>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="DevZest_Windows_Docking_DockItem_DevZest_Windows_Docking_IDockItemUndoRedoReference_DockItem" data-uid="DevZest.Windows.Docking.DockItem.DevZest#Windows#Docking#IDockItemUndoRedoReference#DockItem">
+          <a class="xref" href="DevZest.Windows.Docking.DockItem.DevZest-Windows-Docking-IDockItemUndoRedoReference-DockItem.html#DevZest_Windows_Docking_DockItem_DevZest_Windows_Docking_IDockItemUndoRedoReference_DockItem">IDockItemUndoRedoReference.DockItem</a>
+        </td>
+        <td class="markdown level1 summary"></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/DevZest/WpfDocking/new/master/apiSpec/new?filename=DevZest_Windows_Docking_DockItem.md&amp;value=---%0Auid%3A%20DevZest.Windows.Docking.DockItem%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/DevZest/WpfDocking/blob/master/Src/Windows/Docking/DockItem.cs/#L75" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            <span>Copyright © Weifen Luo | DevZest</span>
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
