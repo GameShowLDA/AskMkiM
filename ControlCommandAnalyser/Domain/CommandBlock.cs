@@ -1,34 +1,31 @@
-﻿using ControlCommandAnalyser.Parsing;
+﻿using System.Collections.Generic;
 
 namespace ControlCommandAnalyser.Domain
 {
+  /// <summary>
+  /// Представляет блок команды, извлечённый из исходного текста.
+  /// Содержит номер команды, мнемонику и все строки, относящиеся к данному блоку.
+  /// </summary>
   public class CommandBlock
   {
-    public int StartLine { get; set; }
+    /// <summary>
+    /// Номер команды (например, "30", "31", "15").
+    /// </summary>
+    public string CommandNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Мнемоника команды (например, "СИ", "ПР", "ЦУ").
+    /// </summary>
+    public string Mnemonic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Все строки, входящие в данный блок (первая — команда, остальные — параметры/описание).
+    /// </summary>
     public List<string> Lines { get; set; } = new();
 
     /// <summary>
-    /// Распознанная мнемоника команды, если найдена.
-    /// </summary>
-    public string? Mnemonic { get; set; }
-
-    /// <summary>
-    /// Номер команды, извлечённый из начала строки.
-    /// </summary>
-    public string? CommandNumber { get; set; }
-
-    /// <summary>
-    /// Признак, была ли команда успешно распознана.
-    /// </summary>
-    public bool IsRecognized { get; set; } = false;
-
-    /// <summary>
-    /// Список диапазонов дополнительной подсветки.
-    /// </summary>
-    public List<HighlightRange> ExtraHighlights { get; set; } = new();
-
-    /// <summary>
-    /// Готовая строка команды после форматирования (для вывода в редактор).
+    /// Отформатированные строки блока (если порядок или структура изменены парсером).
+    /// Если пусто — использовать Lines.
     /// </summary>
     public List<string> FormattedLines { get; set; } = new();
   }

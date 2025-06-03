@@ -2,7 +2,6 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
-using ControlCommandAnalyser.Parsing;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
