@@ -93,9 +93,15 @@ namespace ControlCommandAnalyser.Translation
         {
           result.AddRange(block.Lines);
         }
+
+        if (result.Count > 0 && !string.IsNullOrWhiteSpace(result.Last()))
+        {
+          result.Add(string.Empty);
+        }
       }
 
       return string.Join(Environment.NewLine, result);
     }
+
   }
 }
