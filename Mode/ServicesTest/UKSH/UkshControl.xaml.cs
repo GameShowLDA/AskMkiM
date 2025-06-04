@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
+using UI.Controls.ProtocolNew;
 
 namespace Mode.ServicesTest.UKSH
 {
@@ -11,6 +12,8 @@ namespace Mode.ServicesTest.UKSH
   /// </summary>
   public partial class UkshControl : UserControl
   {
+    ProtocolUI ProtocolSelfCheckControl;
+
     /// <summary>
     /// Флаг, указывающий, что устройство UKSH было инициализировано.
     /// </summary>

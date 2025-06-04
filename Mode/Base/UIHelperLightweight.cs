@@ -1,5 +1,5 @@
 ﻿using UI.Components;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 
 namespace Mode.Base
 {

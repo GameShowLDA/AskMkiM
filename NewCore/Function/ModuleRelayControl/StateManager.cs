@@ -93,7 +93,8 @@ namespace NewCore.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
-      await _moduleRelayControl.DeviceProtocol.OperationLock.WaitAsync();
+      //Лукашин сказал, шо это ховно
+      //await _moduleRelayControl.DeviceProtocol.OperationLock.WaitAsync();
       return await ResetAsync();
     }
   }

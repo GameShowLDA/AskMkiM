@@ -478,6 +478,10 @@ namespace UI.Controls.ProtocolNew
       if (stopDelegate != null)
       {
         var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+
+        StepControlManager.DisableStepMode();
+        KeyboardManager.TriggerStep();
+
         await stopDelegate(token);
       }
 

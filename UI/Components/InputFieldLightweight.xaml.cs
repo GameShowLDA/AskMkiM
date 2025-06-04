@@ -1,9 +1,8 @@
-﻿using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 
 namespace UI.Components
 {
@@ -314,6 +313,67 @@ namespace UI.Components
     /// Подсвечивает поле ввода диапазона проверки при ошибке.
     /// </summary>
     public void HighlightTestRange() => TestRangeBox.DataError();
+
+    #endregion
+
+    #region Свойства для управления видимостью Border
+
+    /// <summary>
+    /// Получает или устанавливает видимость Border с "Номер проверяемого".
+    /// </summary>
+    public Visibility TestedNumberBorderVisibility
+    {
+      get
+      {
+        return Application.Current.Dispatcher.Invoke(() =>
+          TestedNumberBorder.Visibility
+        );
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          TestedNumberBorder.Visibility = value
+        );
+      }
+    }
+
+    /// <summary>
+    /// Получает или устанавливает видимость Border с "Номер проверяющего".
+    /// </summary>
+    public Visibility TesterNumberBorderVisibility
+    {
+      get
+      {
+        return Application.Current.Dispatcher.Invoke(() =>
+          VerificateNumberBorder.Visibility
+        );
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          VerificateNumberBorder.Visibility = value
+        );
+      }
+    }
+
+    /// <summary>
+    /// Получает или устанавливает видимость Border с "Диапазон проверки".
+    /// </summary>
+    public Visibility TestRangeBorderVisibility
+    {
+      get
+      {
+        return Application.Current.Dispatcher.Invoke(() =>
+          TestRangeBorder.Visibility
+        );
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          TestRangeBorder.Visibility = value
+        );
+      }
+    }
 
     #endregion
   }

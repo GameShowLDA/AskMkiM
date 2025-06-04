@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Utilities.Models;
 
+
 namespace Mode.ServicesTest.MKR
 {
   /// <summary>
@@ -17,27 +18,29 @@ namespace Mode.ServicesTest.MKR
     private RadioButton currentBus;
 
     /// <summary>
-    /// Обрабатывает изменение выбранного элемента в ComboBox (SerialNumComboBox).
-    /// Если устройство уже подключено, изменение недопустимо. При выборе пустого элемента происходит сброс устройства.
+    /// Этот метод будет вызван из MkrContent, когда в ComboBox выбрано новое устройство.
     /// </summary>
-    /// <param name="sender">Источник события, ожидается ComboBox.</param>
-    /// <param name="e">Аргументы события изменения выбора.</param>
-    private async void SerialNumComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    /// <param name="selectedString">
+    /// Строка в формате "шасси.номер" или "<пусто>". 
+    /// Если null или пусто, считаем, что пользователь сбросил выбор.
+    /// </param>
+    public async Task HandleSerialSelectionAsync(string selectedString)
     {
-
-      var selectedSerial = (SerialNumComboBox.SelectedItem as string).Split('.');
-
       if (currentDevice != null) await ResetMkrDevice();
-
-      if (selectedSerial[0] == "<пусто>")
+      // Если родитель передал null или "<пусто>" — значит, надо сбросить устройство.
+      if (string.IsNullOrEmpty(selectedString) || selectedString == "<пусто>")
       {
         if (currentDevice != null)
         {
-          await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[ОТКЛЮЧЕНИЕ]", goodText.TitleColor));
-          await currentDevice.ConnectableManager.DisconnectAsync(); 
+          // Показываем сообщение об отключении
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel("[ОТКЛЮЧЕНИЕ]", goodText.TitleColor));
+          // сбрасываем
+          //await currentDevice.ConnectableManager.DisconnectAsync();
         }
         currentDevice = null;
 
+        // очищаем коллекцию точек
         points.Clear();
         pointsView.Refresh();
 
@@ -45,51 +48,72 @@ namespace Mode.ServicesTest.MKR
         return;
       }
 
-      currentDevice = _devices
-                      .FirstOrDefault(
-                      d => 
-                      d.NumberChassis.ToString() == selectedSerial[0]
-                      && d.Number.ToString() == selectedSerial[1]
-                      );
-
-      if (currentDevice == null)
+      // Разделяем строку "шасси.номер"
+      var parts = selectedString.Split('.');
+      if (parts.Length != 2)
       {
-        await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[ОШИБКА]: ", errorText.TitleColor, "не удалось найти устройство!"));
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("[ОШИБКА]", errorText.TitleColor, "некорректный формат выбора!"));
         return;
       }
 
+      // Ищем в списке _devices нужное устройство
+      if (_devices == null)
+      {
+        // Если _devices ещё не инициализирован (маловероятно),
+        // заново подгрузим его
+        _devices = _relayService.GetAllDevices();
+      }
+
+      currentDevice = _devices
+          .FirstOrDefault(d =>
+              d.NumberChassis.ToString() == parts[0]
+              && d.Number.ToString() == parts[1]);
+
+      if (currentDevice == null)
+      {
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("[ОШИБКА]", errorText.TitleColor, "не удалось найти устройство!"));
+        return;
+      }
+
+      // Запускаем инициализацию точек
       InitializePoints();
 
+      // Включаем UI (кнопка Reset, радио-кнопки и т. д.)
       UpdateMkrUI(true);
 
+      // Инициализируем устройство
       await currentDevice.ConnectableManager.InitializeAsync();
-      await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"[ИНИЦИАЛИЗАЦИЯ БК {currentDevice.NumberChassis}.{currentDevice.Number}]", goodText.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+          new ShowMessageModel($"[ИНИЦИАЛИЗАЦИЯ БК {currentDevice.NumberChassis}.{currentDevice.Number}]", goodText.TitleColor));
 
       await currentDevice.ConnectableManager.ConnectAsync();
-      await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[ПОДКЛЮЧЕНИЕ]", goodText.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+          new ShowMessageModel("[ПОДКЛЮЧЕНИЕ]", goodText.TitleColor));
     }
 
+
     /// <summary>
-    /// Обрабатывает нажатие на кнопку "Сброс устройства" (BtnMkrReset).
+    /// Вызывается, когда юзер нажал «Сброс устройства» в MkrContent.
+    /// Здесь мы просто делегируем на уже имеющийся приватный метод ResetMkrDevice().
     /// </summary>
-    /// <param name="sender">Источник события, ожидается Button.</param>
-    /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void BtnMkrReset_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    public async Task HandleResetDeviceAsync()
     {
+      // Можете добавить любую свою валидацию, 
+      // но просто вызываем ResetMkrDevice(), который у вас уже реализован.
       await ResetMkrDevice();
     }
 
-    /// <summary>
-    /// Обрабатывает изменение текста в поле поиска точек.
-    /// Если введенная строка пуста, фильтр снимается, иначе выполняется фильтрация по номеру точки.
-    /// </summary>
-    /// <param name="sender">Источник события, ожидается TextBox.</param>
-    /// <param name="e">Аргументы события изменения текста.</param>
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-      string searchText = SearchBox.Text.Trim();
 
-      if (string.IsNullOrEmpty(searchText))
+    /// <summary>
+    /// При любом изменении текста в строке «Поиск» в MkrContent.
+    /// Родитель фильтрует коллекцию точек.
+    /// </summary>
+    /// <param name="searchText">Текст, который ввёл пользователь.</param>
+    public void HandleSearchTextChanged(string searchText)
+    {
+      if (string.IsNullOrWhiteSpace(searchText))
       {
         pointsView.Filter = null;
       }
@@ -98,87 +122,122 @@ namespace Mode.ServicesTest.MKR
         pointsView.Filter = obj =>
         {
           if (obj is MkrPointModel p)
-          {
             return p.PointNumber.ToString().Contains(searchText);
-          }
           return false;
         };
       }
       pointsView.Refresh();
     }
 
+
     /// <summary>
-    /// Обрабатывает нажатие на кнопку точки.
+    /// Если пользователь нажал на кнопку-точку, мы просто запомним, 
+    /// что точка «отмечена» (UI-часть MkrContent установила свойство p.changeFlag = true),
+    /// но реальный вызов ConnectRelay/DisconnectRelay произойдёт после MouseLeave контекстного меню.
+    /// Поэтому здесь можно, например, только сохранить текущую модель, 
+    /// либо сделать ничегонезависимое, если не нужна дополнительная логика.
     /// </summary>
-    /// <param name="sender">Источник события, ожидается Button с привязанной моделью MkrPointModel.</param>
-    /// <param name="e">Аргументы события нажатия мыши.</param>
-    private void Point_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    public void HandlePointClick(MkrPointModel point)
     {
-      if (sender is Button btn && btn.DataContext is MkrPointModel point)
+      // Обычно в старом коде вы здесь ничего не делали,
+      // потому что реальное переключение шины было в ContextMenu_MouseLeave.
+      // Но если вам нужно сразу какое-то действие, то можно добавить.
+    }
+
+    /// <summary>
+    /// Когда уходит мышь с контекстного меню, 
+    /// нужно разобраться, какие флаги A/B у точки, 
+    /// и вызвать ConnectRelay/DisconnectRelay, а потом ShowMessageAsync.
+    /// </summary>
+    /// <param name="ctxMenu">Контекстное меню, из которого ушла мышь.</param>
+    public async Task HandleContextMenuMouseLeaveAsync(ContextMenu ctxMenu)
+    {
+      if (ctxMenu == null) return;
+      // Найдём кнопку, на которой было контекстное меню:
+      if (ctxMenu.PlacementTarget is Button btn
+          && btn.DataContext is MkrPointModel point)
       {
-        // Логика подключения точки к шине (реализуйте по необходимости)
+        ctxMenu.IsOpen = false;
+
+        if (!point.changeFlag)
+          return; // если флаг не выставлен, ничего не делаем
+
+        int buttonNumber = int.Parse(btn.Content.ToString());
+
+        // Логика подключения/отключения точек из вашего кода:
+        if (point.A)
+          await currentDevice.PointManager.ConnectRelayAsync(DeviceEnum.BusPoint.A, buttonNumber);
+        else
+          await currentDevice.PointManager.DisconnectRelayAsync(DeviceEnum.BusPoint.A, buttonNumber);
+
+        if (point.B)
+          await currentDevice.PointManager.ConnectRelayAsync(DeviceEnum.BusPoint.B, buttonNumber);
+        else
+          await currentDevice.PointManager.DisconnectRelayAsync(DeviceEnum.BusPoint.B, buttonNumber);
+
+        // Выводим сообщение, в зависимости от комбинации флагов:
+        if (point.A && point.B)
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel($"Точка {buttonNumber} подключена к A и B."));
+        else if (point.A)
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel($"Точка {buttonNumber} подключена к A."));
+        else if (point.B)
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel($"Точка {buttonNumber} подключена к B."));
+        else
+          await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel($"Точка {buttonNumber} отключена."));
+
+        // Сбросим флаг, чтобы при повторном открытии меню он не срабатывал зря:
+        point.ResetChangeFlag();
       }
     }
 
     /// <summary>
-    /// Обрабатывает событие ухода мыши с ContextMenu.
-    /// Выводит сообщение о состоянии подключения точки, основываясь на данных модели, и закрывает меню.
-    /// Здесь реализовано управление подключения точек к шинам.
+    /// При вызове из MkrContent означает, что юзер нажал на RadioButton шины.
+    /// <paramref name="radioName"/> — это, например, "RbAB1", "RbAB2" или "RbOff".
     /// </summary>
-    /// <param name="sender">Источник события, ожидается ContextMenu.</param>
-    /// <param name="e">Аргументы события ухода мыши.</param>
-    private async void ContextMenu_MouseLeave(object sender, MouseEventArgs e)
+    public async Task HandleBusRadioClickAsync(RadioButton newBus)
     {
-      ContextMenu ctxMenu = sender as ContextMenu;
-      Button btn = ctxMenu.PlacementTarget as Button;
-      MkrPointModel point = btn.DataContext as MkrPointModel;
-
-      ctxMenu.IsOpen = false;
-
-      if (!point.changeFlag) return;
-
-      int buttonNumber = int.Parse(btn.Content.ToString());
-
-      if (point.A) await currentDevice.PointManager.ConnectRelayAsync(DeviceEnum.BusPoint.A, buttonNumber);
-      else if (!point.A) await currentDevice.PointManager.DisconnectRelayAsync(DeviceEnum.BusPoint.A, buttonNumber);
-
-      if (point.B) await currentDevice.PointManager.ConnectRelayAsync(DeviceEnum.BusPoint.B, buttonNumber);
-      else if (!point.B) await currentDevice.PointManager.DisconnectRelayAsync(DeviceEnum.BusPoint.B, buttonNumber);
-
-      if (point.A && point.B) await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} подключена к A и B."));
-      else if (point.A) await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} подключена к A."));
-      else if (point.B) await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} подключена к B."));
-      else await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Точка {buttonNumber} отключена."));
-
-      point.ResetChangeFlag();
-    }
-
-    /// <summary>
-    /// Обрабатывает нажатие на RadioButton для выбора шины.
-    /// Выводит сообщение о текущем состоянии шины, основываясь на имени элемента.
-    /// Здесь реализовано управление подключения шин.
-    /// </summary>
-    /// <param name="sender">Источник события, ожидается RadioButton.</param>
-    /// <param name="e">Аргументы события нажатия мыши.</param>
-    private async void RadioButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      RadioButton rb = sender as RadioButton;
-
-      if (currentBus != RbOff)
-      { 
+      // Если уже есть текущая шина, отключаем её
+      if (currentBus != null && currentBus != _content.RbOff)
+      {
         await DisconnectBusGroup();
-        await protocolTextBox.ShowMessageAsync(new ShowMessageModel($"Группа шин {currentBus.Content} отключена"));
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel($"Группа шин {currentBus.Content} отключена"));
       }
-      currentBus.IsHitTestVisible = true;
-      currentBus.IsChecked = false;
 
-      currentBus = rb;
-      if (currentBus != RbOff) await ConnectBusGroup();
+      // Отмечаем старую шину как доступную
+      if (currentBus != null)
+      {
+        currentBus.IsHitTestVisible = true;
+        currentBus.IsChecked = false;
+      }
+
+      if (newBus == null)
+      {
+        // Если что-то пошло не так, сообщение об ошибке
+        await ProtocolSelfCheckControl.ShowMessageAsync(
+            new ShowMessageModel("[ОШИБКА]", errorText.TitleColor, "не удалось найти RadioButton!"));
+        return;
+      }
+
+      // Ставим новую шину как currentBus
+      currentBus = newBus;
+      if (currentBus != _content.RbOff)
+        await ConnectBusGroup();
+
+      // Блокируем её (чтобы нельзя было снова нажать до разблокировки)
       currentBus.IsHitTestVisible = false;
       currentBus.IsChecked = true;
 
-      string busState = rb.Name == "RbOff" ? "Все группы шин отключены" : $"Группа шин {rb.Content} подключена";
-      await protocolTextBox.ShowMessageAsync(new ShowMessageModel(busState));
+      // Выводим сообщение о состоянии шин
+      string busState = (newBus.Name == "RbOff")
+          ? "Все группы шин отключены"
+          : $"Группа шин {currentBus.Content} подключена";
+      await ProtocolSelfCheckControl.ShowMessageAsync(
+          new ShowMessageModel(busState));
     }
   }
 }

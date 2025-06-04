@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows;
 using static Utilities.Models.ShowMessageModel;
 
 namespace Mode.ServicesTest.MKR
@@ -16,6 +17,10 @@ namespace Mode.ServicesTest.MKR
   /// </summary>
   public partial class MkrControl : UserControl
   {
+    private MkrContent _content;
+
+    //ProtocolUI ProtocolSelfCheckControl;
+
     /// <summary>
     /// Статусное сообщение для успешного выполнения теста.
     /// </summary>
@@ -64,17 +69,40 @@ namespace Mode.ServicesTest.MKR
     {
       InitializeComponent();
 
+      HideProtocolSelfCheckControlButtons();
+
       _viewModel = new ViewModel();
       _relayService = new RelaySwitchModuleServices();
       DataContext = _viewModel;
 
       points = new ObservableCollection<MkrPointModel>();
       pointsView = CollectionViewSource.GetDefaultView(points);
-      PointsListBox.ItemsSource = pointsView;
 
       LoadDevicesIntoCombo();
 
-      currentBus = RbOff;
+      if (ProtocolSelfCheckControl.ContentView is MkrContent content)
+      {
+        _content = content;
+        _content.ParentControl = this;
+
+        _content.DataContext = _viewModel;
+
+        _content.PointsListBox.ItemsSource = pointsView;
+
+        currentBus = _content.RbOff;
+      }
+    }
+
+    private void HideProtocolSelfCheckControlButtons()
+    {
+      ProtocolSelfCheckControl.StartMeasureResistanceButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.ReturnMeasureResistanceButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.LoopMeasureResistanceButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.PauseButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.StepOverButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.StepIntoButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.NextButtonVisibility = Visibility.Collapsed;
+      ProtocolSelfCheckControl.ExitButtonVisibility = Visibility.Collapsed;
     }
 
     /// <summary>
@@ -107,7 +135,7 @@ namespace Mode.ServicesTest.MKR
       }
 
       pointsView = CollectionViewSource.GetDefaultView(points);
-      PointsListBox.ItemsSource = pointsView;
+      _content.PointsListBox.ItemsSource = pointsView;
     }
   }
 }

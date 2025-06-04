@@ -3,10 +3,11 @@ using Mode.Base;
 using NewCore.Base.Interface.Main;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
+using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
-using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.CrossTestMkr
 {
@@ -60,8 +61,12 @@ namespace Mode.TestSuite.CrossTestMkr
       LogInformation("Настройка CrossTestMKRControl");
 
       // Настройка контроля и передача необходимых делегатов
-      ProtocolSelfCheckControl.SetSettings(this, ExecuteTestProcess, true, Stop);
-      ProtocolSelfCheckControl.Header = "Перекрёстный тест";
+      ProtocolSelfCheckControl.SetSettings(
+        this, 
+        StartDelegate: ExecuteTestProcess, 
+        true, 
+        StopDelegate: Stop);
+      //ProtocolSelfCheckControl.Header = "Перекрёстный тест";
 
       LogInformation("Настройка CrossTestMKRControl завершена");
     }
@@ -169,11 +174,11 @@ namespace Mode.TestSuite.CrossTestMkr
       List<int> points = ParseRange(range);
 
       // 4. Подготовка оборудования
-      await InitializeModule(testedModuleRelayControl, "тестируемый");
-      await InitializeModule(verificatModuleRelayControl, "проверяющий");
-      await ConnectModule(testedModuleRelayControl);
-      await ConnectModule(verificatModuleRelayControl);
-      await MeterEnableAsync(verificatModuleRelayControl);
+      await InitializeModule(testedModuleRelayControl, cancellationToken, "тестируемый");
+      await InitializeModule(verificatModuleRelayControl, cancellationToken, "проверяющий");
+      await ConnectModule(testedModuleRelayControl, cancellationToken);
+      await ConnectModule(verificatModuleRelayControl, cancellationToken);
+      await MeterEnableAsync(verificatModuleRelayControl, cancellationToken);
 
       // 5. Собственно сам тест
       await RunPart1(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
@@ -190,6 +195,9 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken)
     {
+      //StepControlManager.DisableStepMode();
+      //KeyboardManager.TriggerStep();
+
       if (!needReset) return;
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\n"));

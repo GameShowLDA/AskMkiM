@@ -16,8 +16,7 @@ namespace NewCore.Communication
     private readonly SerialPort _serialPort;
     private readonly DeviceWithCOM _device;
 
-    private static readonly SemaphoreSlim _portLock = new(1, 1);
-    private bool _disposed;
+    private static readonly SemaphoreSlim _portLock = new SemaphoreSlim(1, 1);
 
     public SemaphoreSlim OperationLock { get; set; }
 
@@ -36,10 +35,12 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, double responseDelay = 100, int timeout = 0, int port = 0, int delayBeforeCall = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
       LogDebug($"[{_device.Name}] Захват _portLock");
       await OperationLock.WaitAsync();
+
+
       try
       {
         if (delayBeforeCall > 0)
@@ -48,20 +49,9 @@ namespace NewCore.Communication
           await Task.Delay(delayBeforeCall);
         }
 
-        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}");
-
-        _serialPort.DiscardInBuffer();
-        _serialPort.DiscardOutBuffer();
-        _serialPort.WriteLine(command);
-
-        if (timeout > 0)
+        try
         {
-          _serialPort.ReadTimeout = timeout;
-          int roundedDelay = (int)Math.Ceiling(responseDelay) + 100;
-          LogDebug($"Задержка перед чтением ответа: {roundedDelay} мс");
-          await Task.Delay(roundedDelay);
-
-          return await Task.Run(() =>
+          if (!EnsurePortOpen())
           {
             LogWarning($"COM-порт не удалось открыть: {_serialPort.PortName}");
             return string.Empty;
@@ -157,32 +147,28 @@ namespace NewCore.Communication
           _serialPort.Open();
           LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} успешно открыт.");
         }
+
         return true;
+      }
+      catch (UnauthorizedAccessException ex)
+      {
+        LogException($"[{_device.Name}] Доступ к порту запрещен", ex);
+        return false;
+      }
+      catch (IOException ex)
+      {
+        LogException($"[{_device.Name}] Ошибка ввода-вывода при открытии порта", ex);
+        return false;
+      }
+      catch (InvalidOperationException ex)
+      {
+        LogException($"[{_device.Name}] Порт уже используется другим процессом", ex);
+        return false;
       }
       catch (Exception ex)
       {
-        LogException($"[{_device.Name}] Ошибка при открытии порта", ex);
+        LogException($"[{_device.Name}] Неизвестная ошибка при открытии порта", ex);
         return false;
-      }
-    }
-
-    public void Dispose()
-    {
-      if (!_disposed)
-      {
-        try
-        {
-          if (_serialPort.IsOpen)
-          {
-            _serialPort.Close();
-            LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} закрыт.");
-          }
-        }
-        catch (Exception ex)
-        {
-          LogException($"[{_device.Name}] Ошибка при закрытии порта", ex);
-        }
-        _disposed = true;
       }
     }
   }

@@ -65,13 +65,13 @@ namespace Mode.ServicesTest.MKR
     /// </summary>
     private async Task ResetMkrDevice()
     {
-      await protocolTextBox.ShowMessageAsync(new ShowMessageModel("[СБРОС МОДУЛЯ]", goodText.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("[СБРОС МОДУЛЯ]", goodText.TitleColor));
 
       currentBus.IsChecked = false;
       currentBus.IsHitTestVisible = true;
-      currentBus = RbOff;
-      RbOff.IsChecked = true;
-      RbOff.IsHitTestVisible = false;
+      currentBus = _content.RbOff;
+      _content.RbOff.IsChecked = true;
+      _content.RbOff.IsHitTestVisible = false;
 
       // Сброс состояния точек с использованием DeferRefresh для минимизации обновлений UI.
       using (pointsView.DeferRefresh())
@@ -94,13 +94,13 @@ namespace Mode.ServicesTest.MKR
     /// Если <c>true</c>, элементы управления становятся доступными (устройство инициализировано);
     /// если <c>false</c>, они отключаются.
     /// </param>
-    private void UpdateMkrUI(bool enable)
+    public void UpdateMkrUI(bool enable)
     {
-      BtnMkrReset.IsEnabled = enable;
+      _content.BtnMkrReset.IsEnabled = enable;
 
       ToggleRadioButtonState(enable);
 
-      SearchBox.IsEnabled = enable;
+      _content.SearchBox.IsEnabled = enable;
     }
 
     /// <summary>
@@ -109,11 +109,11 @@ namespace Mode.ServicesTest.MKR
     /// <param name="enable">Если true, все RadioButton становятся доступными.</param>
     private void ToggleRadioButtonState(bool enable)
     {
-      RbAB1.IsEnabled = enable;
-      RbAB2.IsEnabled = enable;
-      RbAB3.IsEnabled = enable;
-      RbAB4.IsEnabled = enable;
-      RbOff.IsEnabled = enable;
+      _content.RbAB1.IsEnabled = enable;
+      _content.RbAB2.IsEnabled = enable;
+      _content.RbAB3.IsEnabled = enable;
+      _content.RbAB4.IsEnabled = enable;
+      _content.RbOff.IsEnabled = enable;
     }
   }
 }

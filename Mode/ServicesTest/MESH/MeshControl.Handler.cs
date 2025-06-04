@@ -82,8 +82,7 @@ namespace Mode.ServicesTest.MESH
     /// <returns>Задача, представляющая завершение асинхронной операции.</returns>
     private Task ShowMessageAsync(string text)
     {
-      protocolTextBox?.ShowMessageAsync(new Utilities.Models.ShowMessageModel(text));
-      protocolTextBox?.ScrollToEnd();
+      ProtocolSelfCheckControl?.ShowMessageAsync(new Utilities.Models.ShowMessageModel(text));
       return Task.CompletedTask;
     }
   }

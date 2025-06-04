@@ -2,6 +2,7 @@
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
+using NewCore.Function.GPT;
 using NewCore.Function.ModuleRelayControl;
 using NewCore.FunctionAdapters.ModuleRelayControl;
 
@@ -20,6 +21,7 @@ namespace NewCore.Device
       BusManager = new BusManagerAdapter(this);
       MeterManager = new MeterManagerAdapter(this);
       PointManager = new PointManagerAdapter(this);
+      ConnectableManager = new StateManagerAdapter(this);
 
       DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";

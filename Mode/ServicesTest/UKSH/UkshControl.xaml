@@ -116,7 +116,7 @@
 
             <!-- Правая панель (лог InvokeRichTextBoxUI) -->
             <Grid Grid.Column="1">
-                <InvokeConrols:InvokeRichTextBoxUI 
+                <InvokeConrols:InvokeRichTextBoxUI
                     x:Name="protocolTextBox"
                     Margin="10"
                     IsReadOnly="True" />

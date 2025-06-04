@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using UI.Components;
-using UI.Controls.Protocol;
+using UI.Controls.ProtocolNew;
 using Utilities.Models;
 
 namespace Mode.Base
@@ -104,7 +104,7 @@ namespace Mode.Base
     /// <param name="rangeText">Входные значения в виде строки</param>
     /// <param name="errorMessage">Сообщение об ошибке при некорректной валидации</param>
     /// <returns>True, если не было найдено ошибок</returns>
-    private static bool ValidateRangeInput(string rangeText, out string errorMessage)
+    private static bool ValidateRangeInput(string rangeText, out string errorMessage, int maxValue = 350)
     {
       errorMessage = "";
       var segments = rangeText.Split(',');
@@ -134,9 +134,9 @@ namespace Mode.Base
           }
 
           // Проверка, чтобы значения диапазона не превышали 350
-          if (end > 350)
+          if (end > maxValue)
           {
-            errorMessage = $"Диапазон не может превышать 350 (для '{s}')";
+            errorMessage = $"Значение не может превышать {maxValue} (для '{s}')";
             return false;
           }
         }
@@ -149,9 +149,9 @@ namespace Mode.Base
           }
 
           // Проверка, чтобы значение не превышало 350
-          if (value > 350)
+          if (value > maxValue)
           {
-            errorMessage = $"Значение не может превышать 350 (для '{s}')";
+            errorMessage = $"Значение не может превышать {maxValue} (для '{s}')";
             return false;
           }
         }

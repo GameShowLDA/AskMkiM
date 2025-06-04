@@ -1,157 +1,22 @@
 ﻿<UserControl x:Class="Mode.ServicesTest.MKR.MkrControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Mode.ServicesTest.MKR"
              xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox;assembly=UI"
-             mc:Ignorable="d" 
+             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew;assembly=UI"
+             mc:Ignorable="d"
              d:DesignHeight="470" d:DesignWidth="800">
-    <Border CornerRadius="0,0,0,0">
-        <Grid>
-            <!-- 
-                Две колонки:
-                1) Левая узкая (панель с управлением)
-                2) Правая основная, где InvokeRichTextBoxUI.
-            -->
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
 
-            <!-- Левая часть (панель управления) -->
-            <StackPanel Margin="20" Grid.Column="0" VerticalAlignment="Top">
-
-                <!-- Ваш локальный ComboBox + подпись "Номер:" во внутреннем Grid -->
-                <Border Style="{StaticResource ConfigAdditionalBlockStyle}" Margin="0,0,0,15">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0"
-                                   Text="Номер блока a.b:"
-                                   FontSize="20"
-                                   VerticalAlignment="Center"
-                                   Margin="10,0" 
-                                   Padding="0,0,0,0"
-                                   Foreground="{StaticResource ForegroundSolidColorBrush}" />
-
-                        <ComboBox x:Name="SerialNumComboBox"
-                                  Grid.Column="1"
-                                  Margin="10"
-                                  Height="30"
-                                  Width="100"
-                                  Style="{StaticResource CustomComboBoxStyle}"
-                                  ItemsSource="{Binding ComboBoxItems}"
-                                  SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}" 
-                                  SelectionChanged="SerialNumComboBox_SelectionChanged"
-                                  />
-                    </Grid>
-                </Border>
-
-                <!-- Кнопка "Сброс устройства" (пока без изменения стиля) -->
-                <Button x:Name="BtnMkrReset"
-                        Content="Сброс устройства"
-                        Width="310"
-                        Height="35"
-                        Margin="0,0,0,15"
-                        Style="{StaticResource MetrologyButtonStyle}"
-                        PreviewMouseDown="BtnMkrReset_PreviewMouseDown"
-                        IsEnabled="False"/>
-
-                <!-- Группа RadioButton для шины A (по аналогии с исходным проектом) -->
-                <GroupBox Header="Группы шин" Foreground="White" Margin="0,0,0,10">
-                    <WrapPanel>
-                        <RadioButton Content="AB-1" Foreground="White" GroupName="TireRb" Name="RbAB1" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="AB-2" Foreground="White" GroupName="TireRb" Name="RbAB2" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="AB-3" Foreground="White" GroupName="TireRb" Name="RbAB3" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="AB-4" Foreground="White" GroupName="TireRb" Name="RbAB4" Margin="5" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                        <RadioButton Content="Откл." Foreground="White" GroupName="TireRb" Name="RbOff" Margin="5" IsChecked="True" IsEnabled="False" PreviewMouseDown="RadioButton_PreviewMouseDown"/>
-                    </WrapPanel>
-                </GroupBox>
-
-                <!-- Поисковая строка и список точек (из исходного кода) -->
-                <GroupBox Header="Поиск точки" Foreground="White" Margin="0,0,0,10">
-                    <TextBox x:Name="SearchBox"
-                            Margin="0,0,0,0"
-                            Height="20"
-                            TextChanged="SearchBox_TextChanged"
-                            IsEnabled="True"/>
-                </GroupBox>
-
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              MaxHeight="250">
-                    <ItemsControl x:Name="PointsListBox"
-                                  >
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="2">
-                                    <Button Width="90"
-                                        Height="30"
-                                        PreviewMouseDown="Point_PreviewMouseDown"
-                                        Style="{StaticResource MkrPointStyle}">
-                                        <Button.ContextMenu>
-                                            <ContextMenu StaysOpen="True"
-                                                MouseLeave="ContextMenu_MouseLeave"
-                                                Background="#303843"
-                                                BorderBrush="#303843">
-                                                <MenuItem Header="Шина A">
-                                                    <MenuItem.Icon>
-                                                        <CheckBox IsChecked="{Binding A}" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
-                                                <MenuItem Header="Шина B">
-                                                    <MenuItem.Icon>
-                                                        <CheckBox IsChecked="{Binding B}" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
-                                            </ContextMenu>
-                                        </Button.ContextMenu>
-                                    </Button>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-
-                <!-- Примерно так можно вставить легенду, если нужно -->
-                <!-- Или, если легенда не поместится, пока оставляем не реализованной -->
-
-                <GroupBox Grid.Column="2" Header="Легенда" Foreground="White" Margin="0,10,0,0">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1" Fill="Aqua"/>
-                            <TextBlock Text=" - подключённой к шине A" Margin="5,0,0,0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1" Fill="Plum"/>
-                            <TextBlock Text=" - подключённой к шине B" Margin="5,0,0,0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1" Fill="DarkViolet"/>
-                            <TextBlock Text=" - подключённой к шинам A и B" Margin="5,0,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </GroupBox>
-
-            </StackPanel>
-
-            <!-- Правая часть (основное поле лога, заменяем TextBlock на InvokeRichTextBoxUI) -->
-            <Grid Grid.Column="1">
-                <InvokeConrols:InvokeRichTextBoxUI 
-                    x:Name="protocolTextBox"
-                    Margin="10"
-                    IsReadOnly="True"
-                    />
-            </Grid>
-        </Grid>
-    </Border>
+    <Grid>
+        <!-- ProtocolUI строит свою панель и ожидает ContentView -->
+        <Protocol:ProtocolUI x:Name="ProtocolSelfCheckControl"
+                             Header="Сервисный режим БК">
+            <Protocol:ProtocolUI.ContentView>
+                <!-- Вот здесь единственный дочерний элемент: наш MkrContent -->
+                <local:MkrContent/>
+            </Protocol:ProtocolUI.ContentView>
+        </Protocol:ProtocolUI>
+    </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using Mode.Models;
 using System.Windows.Controls;
+using UI.Controls.ProtocolNew;
 
 namespace Mode.ServicesTest.MINT
 {
@@ -9,6 +10,8 @@ namespace Mode.ServicesTest.MINT
   /// </summary>
   public partial class MintControl : UserControl
   {
+    ProtocolUI ProtocolSelfCheckControl;
+
     /// <summary>
     /// Флаг, указывающий, что устройство MINT было инициализировано.
     /// </summary>

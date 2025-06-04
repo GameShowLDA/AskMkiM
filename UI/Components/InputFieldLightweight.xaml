@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <!-- Проверяемый номер -->
-        <Border Margin="5" Grid.Row="0" 
+        <Border x:Name="TestedNumberBorder" Margin="5" Grid.Row="0" 
                 Background="{StaticResource ActiveBorderSolidColorBrush}" 
                 CornerRadius="10">
             <Grid>
@@ -40,7 +40,7 @@
         </Border>
 
         <!-- Проверяющий номер -->
-        <Border Margin="5" Grid.Row="1" 
+        <Border x:Name="VerificateNumberBorder" Margin="5" Grid.Row="1" 
                 Background="{StaticResource ActiveBorderSolidColorBrush}" 
                 CornerRadius="10">
             <Grid>
@@ -65,7 +65,7 @@
         </Border>
 
         <!-- Диапазон проверки -->
-        <Border Margin="5" Grid.Row="2" 
+        <Border x:Name="TestRangeBorder" Margin="5" Grid.Row="2" 
                 Background="{StaticResource ActiveBorderSolidColorBrush}" 
                 CornerRadius="10">
             <Grid>

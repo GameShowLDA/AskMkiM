@@ -1,5 +1,6 @@
 ﻿using Mode.Models;
 using System.Windows.Controls;
+using UI.Controls.ProtocolNew;
 
 namespace Mode.ServicesTest.MESH
 {
@@ -9,6 +10,8 @@ namespace Mode.ServicesTest.MESH
   /// </summary>
   public partial class MeshControl : UserControl
   {
+    ProtocolUI ProtocolSelfCheckControl;
+
     /// <summary>
     /// Флаг, указывающий, что устройство MESH инициализировано.
     /// </summary>
