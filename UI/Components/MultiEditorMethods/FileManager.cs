@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using ControlCommandAnalyser.Parsing;
+using DevZest.Windows.Docking;
+using DevZest.Windows.Docking.Primitives;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
-using ControlCommandAnalyser.Parsing;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
@@ -50,32 +52,16 @@ namespace UI.Components.MultiEditorMethods
 
       try
       {
+          // TODO: сделать вкладку активной
         string fileContent = string.Empty;
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        if (nameFile.ToLower().Contains(".pk") && !nameFile.ToLower().Contains(".pkw"))
+        fileContent = GetFileContent(path, nameFile, fileContent);
+        TextEditorContainer textEditorContainer = TextEditorContainerExists();
+        if (textEditorContainer == null)
         {
-          var content = new List<string>();
-          foreach (string line in File.ReadLines(path, Encoding.GetEncoding(866)))
-          {
-            if (!string.IsNullOrEmpty(line))
-            {
-              content.Add(line);
-            }
-          }
-          if (content.Count > 0)
-          {
-            fileContent = string.Join("\n", content);
-          }
+          textEditorContainer = new TextEditorContainer();
+          UserControls.Add(textEditorContainer);
+          AddFileToControlManager("Текстовый редактор", textEditorContainer);
         }
-        else if (nameFile.ToLower().Contains(".rtf"))
-        {
-          fileContent = File.ReadAllText(path, Encoding.GetEncoding(1251)); // или UTF-8, если знаешь точно
-        }
-        else
-        {
-          fileContent = ReadFileContent(path);
-        }
-
         var textEditor = CreateTextEditor(fileContent);
 
         if (Path.GetExtension(path).Equals(".pk", StringComparison.OrdinalIgnoreCase))
@@ -108,13 +94,70 @@ namespace UI.Components.MultiEditorMethods
           }
         }
 
-        AddFileToControlManager(nameFile, textEditor);
+        var dockItem = new DockItem
+        {
+          Title = Path.GetFileName(nameFile),
+          TabText = Path.GetFileName(nameFile),
+          Content = textEditor
+        };
+
+        if (!textEditorContainer.DockManager.IsLoaded)
+        {
+          textEditorContainer.DockManager.Loaded += (s, e) =>
+          {
+            dockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
+          };
+        }
+        else
+        {
+          dockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
+        }
+
+        //AddFileToControlManager(nameFile, textEditor);
       }
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
+    }
+
+    private TextEditorContainer TextEditorContainerExists()
+    {
+      foreach (var userControl in UserControls)
+      { 
+        if (userControl is TextEditorContainer textEditorContainer)
+        {
+          return textEditorContainer;
+        }
+      }
+      return null;
+    }
+
+    private string GetFileContent(string path, string nameFile, string fileContent)
+    {
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+      if (nameFile.ToLower().Contains(".pk") && !nameFile.ToLower().Contains(".pkw"))
+      {
+        var content = new List<string>();
+        foreach (string line in File.ReadLines(path, Encoding.GetEncoding(866)))
+        {
+          if (!string.IsNullOrEmpty(line))
+          {
+            content.Add(line);
+          }
+        }
+        if (content.Count > 0)
+        {
+          fileContent = string.Join("\n", content);
+        }
+      }
+      else
+      {
+        fileContent = ReadFileContent(path);
+      }
+
+      return fileContent;
     }
 
     public string GetDifferenceBetweenPaths(string path1, string path2)
@@ -141,10 +184,10 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="nameFile">Имя добавляемого файла.</param>
     /// <param name="textEditor">Экземпляр класса TextEditorUI.</param>
-    private void AddFileToControlManager(string nameFile, TextEditorUI textEditor)
+    private void AddFileToControlManager(string nameFile, TextEditorContainer textEditorContainer)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-      controlManager.AddControl(nameFile, textEditor, OpenFileButton.TypeWindow.Files);
+      controlManager.AddControl(nameFile, textEditorContainer, OpenFileButton.TypeWindow.Files);
     }
 
     /// <summary>

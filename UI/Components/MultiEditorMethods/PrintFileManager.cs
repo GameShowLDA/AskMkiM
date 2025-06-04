@@ -28,7 +28,7 @@ namespace UI.Components.MultiEditorMethods
       {
         int index = openPages.IndexOf(activeTab);
 
-        if (userControls[index] is TextEditorUI)
+        if (userControls[index] is TextEditorUI) // TODO: берем активную вкладку из TextEditorControl
         {
           var textEditor = userControls[index] as TextEditorUI;
           flowDocument.Blocks.Add(new Paragraph(new Run(textEditor.Text)));

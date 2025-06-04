@@ -3,6 +3,7 @@
                     xmlns:docking="clr-namespace:DevZest.Windows.Docking"
                     xmlns:primitives="clr-namespace:DevZest.Windows.Docking.Primitives">
 
+
     <Style TargetType="primitives:DocumentTab">
         <Setter Property="ToolTip" Value="{Binding Description}" />
         <Setter Property="primitives:DockManager.TargetItem" Value="{Binding}" />
@@ -15,7 +16,7 @@
                     <ControlTemplate.Resources>
                         <SolidColorBrush x:Key="BorderBrush" Color="#4D4D4D" />
                         <SolidColorBrush x:Key="UnselectedBrush" Color="#2E2E2E" />
-                        <SolidColorBrush x:Key="SelectedBrush" Color="#1E90FF" />
+                        <SolidColorBrush x:Key="SelectedBrush" Color="#4b7765" />
                         <SolidColorBrush x:Key="MouseOverBrush" Color="#3A3A3A" />
                     </ControlTemplate.Resources>
 

@@ -70,8 +70,8 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Filter = "Text files (*.txt)|*.txt|RTF files (*.rtf)|*.rtf|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK|All files (*.*)|*.*",
-          Title = "Выберите текстовый файл",
+          Filter = "PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+          Title = "Выберите файл",
         };
 
         if (openFileDialog.ShowDialog() == true)
