@@ -366,6 +366,7 @@ namespace Mode.Metrology.MeasurementSystem
           await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
           await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
         }
+
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
       }
     }

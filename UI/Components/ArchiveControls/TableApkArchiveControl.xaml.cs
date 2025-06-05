@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppConfiguration.Base;
-using ControlCommandAnalyser.Translation;
 using Microsoft.Win32;
 using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles;
@@ -309,13 +308,6 @@ namespace UI.Components.ArchiveControls
       var content = File.ReadAllText(foundOpkPath);
       var textEditor = new TextEditorUI();
       textEditor.Text = content;
-
-      var translator = new TranslationManager
-      {
-        HighlightCallback = textEditor.ApplyHighlighting
-      };
-      await translator.Translate(content);
-
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }
   }
