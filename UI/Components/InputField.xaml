@@ -27,8 +27,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Начальная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..." Text="1.1.1" Height="40"/>
+                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Начальная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"  Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..." Text="1.1.1" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 
@@ -39,7 +39,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <TextBlock Name="headerSecondData" TextWrapping="Wrap" TextTrimming="None" Text="Конечная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..." Text="1.1.100" Height="40"/>
+                <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..." Text="1.1.100" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 
@@ -52,7 +52,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock Name="headerElectricalData" TextWrapping="Wrap" TextTrimming="None" Text="Электрический параметр" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" Placeholder="Введите значение..." Height="40"
-                                           Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                           Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 

@@ -222,13 +222,8 @@ namespace UI.Controls.ProtocolNew
         showMessageModel.Time = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", CultureInfo.InvariantCulture);
       }
       await ShouldShowDetailedProtocol(showMessageModel);
+      CheckStatus(ref showMessageModel);
 
-      if (showMessageModel.Status != MessageType.Info)
-      {
-        showMessageModel.Message += showMessageModel.GetQualityPrefix();
-        showMessageModel.MessageColor = showMessageModel.GetColorMessage();
-      }
-      
       await protocolTextBox.AppendLineAsync(showMessageModel);
 
 
@@ -265,6 +260,22 @@ namespace UI.Controls.ProtocolNew
         await protocolTextBox.AppendEmptyLineAsync();
         StepControlManager.ExitBlock();
         StepControlManager.EnterBlock();
+      }
+    }
+
+    private void CheckStatus(ref ShowMessageModel showMessageModel)
+    {
+      if (showMessageModel.Status != MessageType.Info)
+      {
+        if (string.IsNullOrEmpty(showMessageModel.Message))
+        {
+          showMessageModel.Message += showMessageModel.GetQualityPrefix();
+        }
+        else
+        {
+          showMessageModel.Message += " " + showMessageModel.GetQualityPrefix();
+        }
+        showMessageModel.MessageColor = showMessageModel.GetColorMessage();
       }
     }
 

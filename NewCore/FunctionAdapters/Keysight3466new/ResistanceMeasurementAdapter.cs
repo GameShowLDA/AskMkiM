@@ -30,16 +30,6 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1)
     {
       var resistance = await _resistanceMeasurement.MeasureResistanceAsync(param, rangeFrom, rangeTo);
-
-      if (UserMessageServiceProvider.Instance != null)
-      {
-        var showMessage = DeviceMessageBuilder.GetDefaultSettings(_device);
-        var result = resistance >= rangeFrom && resistance <= rangeTo;
-        showMessage.Header = $"\tРезультат измеренного сопротивления({rangeFrom}-{rangeTo})";
-        DeviceMessageBuilder.BuildMessage(ref showMessage, $"{resistance:F2}", !result);
-        await DeviceMessageBuilder.ShowDeviceMessage(showMessage, result);
-      }
-
       return resistance;
     }
 

@@ -8,12 +8,12 @@ using System.Windows.Data;
 
 namespace UI.Components.ProtocolListBox
 {
-  public class MessageToColonConverter : IValueConverter
+  public class TimeToSeparatorConverter : IValueConverter
   {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      var message = value as string;
-      return string.IsNullOrEmpty(message) ? "" : ":";
+      var time = value as string;
+      return string.IsNullOrEmpty(time) ? "" : "|";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -21,4 +21,5 @@ namespace UI.Components.ProtocolListBox
       throw new NotImplementedException();
     }
   }
+
 }

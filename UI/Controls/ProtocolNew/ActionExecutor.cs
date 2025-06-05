@@ -114,6 +114,13 @@ namespace UI.Controls.ProtocolNew
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
       StartProcessing?.Invoke(true);
 
+
+      if (await GetIsStepByStepModeEnabled())
+      {
+        StepControlManager.EnableStepMode(true);
+        StepMode = true;
+      }
+
       if (IsProcessRunning(name))
       {
         return;
@@ -391,7 +398,7 @@ namespace UI.Controls.ProtocolNew
     {
       ShowMessageModel showMessage = new ShowMessageModel()
       {
-        Header = $"Завершено.",
+        Header = $"Завершено",
         HeaderColor = SuccessMessage.TitleColor,
         CanBeDeleted = false,
       };
@@ -413,11 +420,6 @@ namespace UI.Controls.ProtocolNew
       // Создаём новый токен
       CancellationTokenSource = new CancellationTokenSource();
       PauseCompletionSource = new TaskCompletionSource<bool>();
-
-      if (await GetIsStepByStepModeEnabled())
-      {
-        StepControlManager.EnableStepMode(true);
-      }
 
       if (startDelegate != null)
       {

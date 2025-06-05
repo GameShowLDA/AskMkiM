@@ -1,9 +1,13 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 using AppConfiguration.Enums;
 using AppConfiguration.MeasurementError;
+using AppConfiguration.Services;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
+using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
+using NewCore.Function.Helpers;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
@@ -105,6 +109,10 @@ namespace Mode.Metrology.KC
         double lastNorm = param + ((param / 100.0 * error.Percent) + error.Numeric);
 
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, firstNorm, lastNorm);
+
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления",  message: $"{result} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 });
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений",  message: $"от {firstNorm} до {lastNorm} Ом") { IndentLevel = 2});
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения",  message: $"{(Math.Abs(result - param))} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 });
       }
     }
   }
