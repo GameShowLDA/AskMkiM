@@ -9,6 +9,7 @@
     <UserControl.Resources>
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <local:IndentToMarginConverter x:Key="IndentToMarginConverter"/>
+        <local:MessageToColonConverter x:Key="MessageToColonConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -28,10 +29,10 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock TextWrapping="Wrap" FontSize="20"  Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
-                        <Run Text="{Binding Header}" Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}" />
-                        <Run Text=": " Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
-                        <Run Text="{Binding Message}" Foreground="{Binding MessageColor, Converter={StaticResource ColorToBrushConverter}}" />
-                        <Run Text="{Binding Time}" Foreground="YellowGreen" />
+                            <Run Text="{Binding Header}" Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}" />
+                            <Run Text="{Binding Message, Converter={StaticResource MessageToColonConverter}}"  Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
+                            <Run Text="{Binding Message}" Foreground="{Binding MessageColor, Converter={StaticResource ColorToBrushConverter}}" />
+                            <Run Text="{Binding Time}" Foreground="YellowGreen" />
                         </TextBlock>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

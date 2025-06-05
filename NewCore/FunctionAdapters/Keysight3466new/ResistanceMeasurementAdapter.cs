@@ -50,14 +50,12 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
       if (UserMessageServiceProvider.Instance != null)
       {
-        var showMessage = DeviceMessageBuilder.GetDefaultSettings(_device);
-        showMessage.Header += $" - Установка режима измерения сопротивления";
-        DeviceMessageBuilder.BuildMessage(ref showMessage);
 
-        if (await AppConfiguration.Protocol.ProtocolConfig.GetDeviceInfo())
-        {
-          await UserMessageServiceProvider.Instance.ShowMessageAsync(showMessage);
-        }
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Установка режима измерения сопротивления",
+          true,
+          1);
       }
     }
   }

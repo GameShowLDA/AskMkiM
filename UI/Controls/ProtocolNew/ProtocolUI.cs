@@ -215,30 +215,23 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Возвращает режим по шагам.</returns>
     public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false)
     {
+      await CheckBlockStart(IsBlockStart);
 
-      if (IsBlockStart)
-      {
-        await protocolTextBox.AppendEmptyLineAsync();
-        StepControlManager.ExitBlock();
-        StepControlManager.EnterBlock();
-      }
-
-      if (await GetTimeStart())
+      if (await GetTimeStart() && showMessageModel.Status != MessageType.Info)
       {
         showMessageModel.Time = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", CultureInfo.InvariantCulture);
       }
+      await ShouldShowDetailedProtocol(showMessageModel);
 
-      if (!await GetShowDetailedProtocol())
+      if (showMessageModel.Status != MessageType.Info)
       {
-        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
-        {
-          await protocolTextBox.RemoveLastLinesAsync();
-        }
-
-        LastModelMeassage = showMessageModel;
+        showMessageModel.Message += showMessageModel.GetQualityPrefix();
+        showMessageModel.MessageColor = showMessageModel.GetColorMessage();
       }
-
+      
       await protocolTextBox.AppendLineAsync(showMessageModel);
+
+
 
       if (ActionExecutor.IsPaused)
       {
@@ -263,6 +256,29 @@ namespace UI.Controls.ProtocolNew
     public async Task AppendEmptyLineAsync(int indentLevel = 0)
     {
       await protocolTextBox.AppendEmptyLineAsync();
+    }
+
+    private async Task CheckBlockStart(bool IsBlockStart)
+    {
+      if (IsBlockStart)
+      {
+        await protocolTextBox.AppendEmptyLineAsync();
+        StepControlManager.ExitBlock();
+        StepControlManager.EnterBlock();
+      }
+    }
+
+    private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
+    {
+      if (!await GetShowDetailedProtocol())
+      {
+        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
+        {
+          await protocolTextBox.RemoveLastLinesAsync();
+        }
+
+        LastModelMeassage = showMessageModel;
+      }
     }
 
     /// <summary>

@@ -9,6 +9,31 @@ namespace Utilities.Models
   public class ShowMessageModel
   {
     /// <summary>
+    /// Перечисление, определяющее тип сообщения для вывода или логирования.
+    /// Используется для обозначения информационных сообщений, успешных операций и ошибок.
+    /// </summary>
+    public enum MessageType
+    {
+      /// <summary>
+      /// Информационное сообщение, не содержащее ошибок или предупреждений.
+      /// Используется для отображения общих сведений о ходе работы программы.
+      /// </summary>
+      Info,
+
+      /// <summary>
+      /// Сообщение об успешном завершении операции.
+      /// Используется для уведомления пользователя о том, что действие выполнено корректно.
+      /// </summary>
+      Success,
+
+      /// <summary>
+      /// Сообщение об ошибке, возникшей в процессе выполнения.
+      /// Используется для информирования пользователя о возникновении проблем или некорректных действий.
+      /// </summary>
+      Error
+    }
+
+    /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
     static public (string Title, Color TitleColor) SuccessMessage => ("НОРМА", Color.FromArgb(255, 79, 205, 101));
@@ -62,6 +87,27 @@ namespace Utilities.Models
     /// </summary>
     public int IndentLevel { get; set; }
 
+    private MessageType? status;
+    public MessageType? Status 
+    {
+      get
+      {
+        return status;
+      }
+      set
+      {
+        status = value;
+        if (status == MessageType.Success && MessageColor == null)
+        {
+          MessageColor = SuccessMessage.TitleColor;
+        
+        }
+        else if (status == MessageType.Error && MessageColor == null)
+        {
+          MessageColor = ErrorMessage.TitleColor;
+        }
+      }
+    }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/>.
@@ -117,6 +163,38 @@ namespace Utilities.Models
       }
     }
 
+    public string GetQualityPrefix()
+    {
+      if (Status == MessageType.Success)
+      {
+        return $"[{SuccessMessage.Title}]";
+      }
+      else if (Status == MessageType.Error)
+      {
+        return $"[{ErrorMessage.Title}]";
+      }
+      else
+      { 
+        return string.Empty;
+      }
+    }
+
+    public Color? GetColorMessage()
+    {
+      if (Status == MessageType.Success)
+      {
+        return SuccessMessage.TitleColor;
+      }
+      else if (Status == MessageType.Error)
+      {
+        return ErrorMessage.TitleColor;
+      }
+      else
+      {
+        return null;
+      }
+    }
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ShowMessageModel"/> с заданными параметрами.
     /// </summary>
@@ -124,7 +202,7 @@ namespace Utilities.Models
     /// <param name="headerColor">Цвет заголовка сообщения (по умолчанию null).</param>
     /// <param name="message">Основной текст сообщения (по умолчанию null).</param>
     /// <param name="messageColor">Цвет основного текста сообщения (по умолчанию null).</param>
-    public ShowMessageModel(string header = null, Color? headerColor = null, string message = null, Color? messageColor = null) : this()
+    public ShowMessageModel(string header = null, Color? headerColor = null, string message = null, Color? messageColor = null, MessageType? type = MessageType.Info) : this()
     {
       if (headerColor != null)
       {
@@ -138,6 +216,7 @@ namespace Utilities.Models
 
       Header = header;
       Message = message;
+      Status = type;
     }
   }
 }

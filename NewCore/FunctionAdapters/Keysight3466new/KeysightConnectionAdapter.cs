@@ -34,7 +34,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
         _device,
         "Подключение к мультиметру Keysight",
-        string.IsNullOrWhiteSpace(answer) ? "Успешно" : answer,
+        string.IsNullOrWhiteSpace(answer) ? string.Empty : answer,
         result,
         1);
 

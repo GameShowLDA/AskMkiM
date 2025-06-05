@@ -60,7 +60,7 @@ namespace Mode.Metrology.KC
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         throw new Exception();
       }
 
@@ -71,7 +71,7 @@ namespace Mode.Metrology.KC
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         throw new Exception();
       }
 

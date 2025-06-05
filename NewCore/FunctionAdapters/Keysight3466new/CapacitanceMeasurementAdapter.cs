@@ -35,7 +35,6 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима измерения ёмкости",
-          "CONF:CAP",
           true,
           1);
       }
