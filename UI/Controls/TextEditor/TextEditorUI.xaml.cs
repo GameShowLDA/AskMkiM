@@ -11,6 +11,10 @@ using UI.Components;
 using UI.Components.SearchControls;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
+using ICSharpCode.AvalonEdit.Highlighting;
+using System.Xml;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using System.IO;
 
 namespace UI.Controls.TextEditor
 {
@@ -106,6 +110,14 @@ namespace UI.Controls.TextEditor
         {
           Console.WriteLine("⚠ TextMarkerService уже инициализирован.");
         }
+
+       using (var stream = File.OpenRead("MKI.xshd"))
+       using (var reader = new XmlTextReader(stream))
+       {
+         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+       }
+       
+        LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
       };
     }
 
