@@ -54,7 +54,7 @@ namespace AppConfiguration.Base
     /// <summary>
     /// Событие, которое вызывается, когда закрывается окно типа TextEditor.
     /// </summary>
-    static public event Action<bool, string> TextEditorClosing;
+    static public event Action<bool, string> TextEditorContainerClosing;
 
     /// <summary>
     /// Событие, которое вызывается, когда окно типа searchWindow закрывается.
@@ -229,18 +229,18 @@ namespace AppConfiguration.Base
     /// Метод для вызова события, когда активное окно - TextEditor.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
-    static public void RaiseTextEditorActive(bool isTextEditor)
+    static public void RaiseTextEditorActive(bool isTextEditorContainer)
     {
-      TextEditorActive?.Invoke(isTextEditor);
+      TextEditorActive?.Invoke(isTextEditorContainer);
     }
 
     /// <summary>
     /// Метод для вызова события, когда активное окно - TextEditor закрывается.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
-    static public void RaiseTextEditorClosing(bool isTextEditor, string textEditorName)
+    static public void RaiseTextEditorContainerClosing(bool isTextEditorContainer, string textEditorName)
     {
-      TextEditorClosing?.Invoke(isTextEditor, textEditorName);
+      TextEditorContainerClosing?.Invoke(isTextEditorContainer, textEditorName);
     }
 
     /// <summary>

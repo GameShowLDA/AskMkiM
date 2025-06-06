@@ -51,7 +51,7 @@ namespace MainWindowProgram.Events
     public void Bind()
     {
       EventAggregator.TextEditorActive += OnTextEditorActive;
-      EventAggregator.TextEditorClosing += OnTextEditorClosing;
+      EventAggregator.TextEditorContainerClosing += OnTextEditorClosing;
 
       EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
       EventAggregator.SearchWindowAtivated += OnSearchWindowActivated;

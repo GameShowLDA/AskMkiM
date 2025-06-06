@@ -5,9 +5,11 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
+using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components.MultiEditorMethods
@@ -52,68 +54,18 @@ namespace UI.Components.MultiEditorMethods
 
       try
       {
-          // TODO: сделать вкладку активной
         string fileContent = string.Empty;
+        // TODO: сделать вкладку активной
         fileContent = GetFileContent(path, nameFile, fileContent);
-        TextEditorContainer textEditorContainer = TextEditorContainerExists();
-        if (textEditorContainer == null)
-        {
-          textEditorContainer = new TextEditorContainer();
-          UserControls.Add(textEditorContainer);
-          AddFileToControlManager("Текстовый редактор", textEditorContainer);
-        }
+        TextEditorContainer textEditorContainer = GetTextEditorContainer();
         var textEditor = CreateTextEditor(fileContent);
 
         if (Path.GetExtension(path).Equals(".pk", StringComparison.OrdinalIgnoreCase))
         {
-          var lines = fileContent.Split('\n');
-
-          var recognizer = new LineRecognizer();
-          var parsed = lines.Select((line, index) => recognizer.Parse(line, index)).ToList();
-
-          var highlighter = new SyntaxHighlightPlanner();
-          var highlights = highlighter.Build(parsed);
-
-          if (textEditor is TextEditorUI editorUI)
-          {
-            editorUI.ApplyHighlighting(highlights);
-          }
+          PkFileEncoding(fileContent, textEditor);
         }
 
-        if (!FilePaths.ContainsKey(nameFile))
-        {
-          FilePaths.Add(nameFile, path);
-        }
-        else
-        {
-          var fileWithSameNamePath = FilePaths.FirstOrDefault(file => file.Key == nameFile);
-          if (fileWithSameNamePath.Value != path)
-          {
-            nameFile = GetDifferenceBetweenPaths(fileWithSameNamePath.Value, path);
-            FilePaths.Add(nameFile, path);
-          }
-        }
-
-        var dockItem = new DockItem
-        {
-          Title = Path.GetFileName(nameFile),
-          TabText = Path.GetFileName(nameFile),
-          Content = textEditor
-        };
-
-        if (!textEditorContainer.DockManager.IsLoaded)
-        {
-          textEditorContainer.DockManager.Loaded += (s, e) =>
-          {
-            dockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
-          };
-        }
-        else
-        {
-          dockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
-        }
-
-        //AddFileToControlManager(nameFile, textEditor);
+        ManageFilename(path, nameFile, textEditorContainer, textEditor);
       }
       catch (Exception ex)
       {
@@ -122,10 +74,111 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    private TextEditorContainer GetTextEditorContainer()
+    {
+      TextEditorContainer textEditorContainer = TextEditorContainerExists();
+      if (textEditorContainer == null)
+      {
+        textEditorContainer = new TextEditorContainer();
+        AddFileToControlManager("Текстовый редактор", textEditorContainer);
+      }
+
+      return textEditorContainer;
+    }
+
+    private void ManageFilename(string path, string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor)
+    {
+      if (!FilePaths.ContainsKey(nameFile))
+      {
+        FilePaths.Add(nameFile, path);
+        ShowNewDockItem(nameFile, textEditorContainer, textEditor);
+      }
+      else
+      {
+        var fileWithSameNamePath = FilePaths.FirstOrDefault(file => file.Key == nameFile);
+        if (fileWithSameNamePath.Value != path)
+        {
+          nameFile = GetDifferenceBetweenPaths(fileWithSameNamePath.Value, path);
+          FilePaths.Add(nameFile, path);
+          ShowNewDockItem(nameFile, textEditorContainer, textEditor);
+        }
+        else
+        {
+          var dockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.TabText == nameFile);
+          ShowDockItem(textEditorContainer, dockItem);
+        }
+      }
+    }
+
+    private static void PkFileEncoding(string fileContent, TextEditorUI textEditor)
+    {
+      var lines = fileContent.Split('\n');
+
+      var recognizer = new LineRecognizer();
+      var parsed = lines.Select((line, index) => recognizer.Parse(line, index)).ToList();
+
+      var highlighter = new SyntaxHighlightPlanner();
+      var highlights = highlighter.Build(parsed);
+
+      if (textEditor is TextEditorUI editorUI)
+      {
+        editorUI.ApplyHighlighting(highlights);
+      }
+    }
+
+    private async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor)
+    {
+      var dockItem = new DockItem
+      {
+        Title = nameFile,
+        TabText = nameFile,
+        Content = textEditor
+      };
+
+      dockItem.CloseItem += (sender) =>
+      {
+        if (dockItem.Content is TextEditorUI textEditor)
+        {
+          if (textEditorContainer != null)
+          {
+            FilePaths.Remove(dockItem.TabText);
+          }
+        }
+      };
+
+      await Task.Delay(1).ConfigureAwait(true);
+
+      ShowDockItem(textEditorContainer, dockItem);
+    }
+
+    private static void ShowDockItem(TextEditorContainer textEditorContainer, DockItem dockItem)
+    {
+      try
+      {
+        if (!textEditorContainer.DockManager.IsLoaded)
+        {
+          var capturedDockItem = dockItem;
+          textEditorContainer.DockManager.Loaded += (s, e) =>
+          {
+            capturedDockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
+          };
+        }
+        else
+        {
+          dockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
+        }
+      }
+      catch (Exception ex)
+      {
+        LogError($"Ошибка при открытии документа: {ex}");
+      }
+    }
+
+
     private TextEditorContainer TextEditorContainerExists()
     {
       foreach (var userControl in UserControls)
-      { 
+      {
         if (userControl is TextEditorContainer textEditorContainer)
         {
           return textEditorContainer;
@@ -160,24 +213,34 @@ namespace UI.Components.MultiEditorMethods
       return fileContent;
     }
 
-    public string GetDifferenceBetweenPaths(string path1, string path2)
+    public string GetDifferenceBetweenPaths(string existingPath, string newPath)
     {
-      var path1Parts = path1.Split(Path.DirectorySeparatorChar);
-      var path2Parts = path2.Split(Path.DirectorySeparatorChar);
-      int minLength = Math.Min(path1Parts.Length, path2Parts.Length);
-      int diffIndex = 0;
+      var existingParts = existingPath.Split(Path.DirectorySeparatorChar);
+      var newParts = newPath.Split(Path.DirectorySeparatorChar);
 
+      int minLength = Math.Min(existingParts.Length, newParts.Length);
+      int commonLength = 0;
+
+      // Находим индекс, где пути перестают совпадать
       for (int i = 0; i < minLength; i++)
       {
-        if (path1Parts[i] != path2Parts[i])
-        {
-          diffIndex = i;
+        if (!string.Equals(existingParts[i], newParts[i], StringComparison.OrdinalIgnoreCase))
           break;
-        }
+
+        commonLength++;
       }
 
-      return string.Join(Path.DirectorySeparatorChar.ToString(), path1Parts.Skip(diffIndex));
+      // Гарантируем, что хотя бы одна дополнительная папка будет в ключе
+      int startIndex = Math.Max(0, newParts.Length - 2); // минимум: папка + файл
+
+      // Но если всё отличается, берём всю вторую часть после общего пути
+      if (commonLength < newParts.Length - 1)
+        startIndex = commonLength;
+
+      return string.Join(Path.DirectorySeparatorChar.ToString(), newParts.Skip(startIndex));
     }
+
+
 
     /// <summary>
     /// Добавляет контрол в мультиэдитор.
@@ -227,6 +290,8 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     public void CreateNewFile()
     {
+      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+
       var controlName = "Новый";
       var counter = 0;
       while (FilePaths.ContainsKey(controlName))
@@ -241,8 +306,9 @@ namespace UI.Components.MultiEditorMethods
       }
 
       var textEditor = new TextEditorUI();
-      var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl as MultiEditorControl);
-      controlManager.AddControl(controlName, textEditor, OpenFileButton.TypeWindow.Files /*{ Text  = "Новый файл"}*/);
+      ShowNewDockItem(controlName, textEditorContainer, textEditor);
+      //var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl as MultiEditorControl);
+      //controlManager.AddControl(controlName, textEditor, OpenFileButton.TypeWindow.Files /*{ Text  = "Новый файл"}*/);
       FilePaths.Add(controlName, string.Empty);
     }
 

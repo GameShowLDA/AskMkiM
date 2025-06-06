@@ -252,7 +252,7 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Выполняет поиск по тектсу.
+    /// Выполняет поиск по тексту.
     /// </summary>
     /// <param name="replaceText">Текст, на который нужно заменить искомый текст.</param>
     /// <param name="searchText">Текст, который мы ищем.</param>

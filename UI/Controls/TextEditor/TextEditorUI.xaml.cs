@@ -99,11 +99,11 @@ namespace UI.Controls.TextEditor
             services.AddService(typeof(TextMarkerService), _markerService);
           }
 
-          Console.WriteLine("✅ TextMarkerService зарегистрирован.");
+          Console.WriteLine("TextMarkerService зарегистрирован.");
         }
         else
         {
-          Console.WriteLine("⚠ TextMarkerService уже инициализирован.");
+          Console.WriteLine("TextMarkerService уже инициализирован.");
         }
       };
     }
@@ -179,7 +179,7 @@ namespace UI.Controls.TextEditor
     {
       if (_markerService == null)
       {
-        Console.WriteLine("❌ MarkerService не инициализирован. Операция отклонена.");
+        Console.WriteLine("MarkerService не инициализирован. Операция отклонена.");
         return;
       }
 
@@ -193,7 +193,7 @@ namespace UI.Controls.TextEditor
         }
         else
         {
-          Console.WriteLine($"⚠ Некорректный диапазон: ({start}, {end})");
+          Console.WriteLine($"Некорректный диапазон: ({start}, {end})");
         }
       }
 

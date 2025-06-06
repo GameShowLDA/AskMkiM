@@ -38,7 +38,7 @@ namespace UI.Components
     public MultiWindowControl()
     {
       InitializeComponent();
-      EventAggregator.TextEditorClosing += OnTextEditorClosig;
+      EventAggregator.TextEditorContainerClosing += OnTextEditorClosig;
     }
 
     private void OnTextEditorClosig(bool textEditorClosing, string textEditorName)

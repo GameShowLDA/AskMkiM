@@ -22,12 +22,56 @@
                     </Grid>
                 </DataTemplate>
 
+                <Style TargetType="ContextMenu">
+                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                    <Setter Property="HasDropShadow" Value="False" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ContextMenu">
+                                <Border Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        SnapsToDevicePixels="True">             
+                                    <StackPanel IsItemsHost="True" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+
                 <Style x:Key="DropDownItemStyle" TargetType="MenuItem">
                     <Setter Property="local:StyleManager.IsAutoMerge" Value="True" />
-                    <Setter Property="Icon" Value="{StaticResource IconImage}" />
                     <Setter Property="Header" Value="{Binding TabText}" />
                     <Setter Property="CommandTarget" Value="{Binding}" />
                     <Setter Property="Command" Value="docking:DockCommands.Show" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Background" Value="#2E2E2E" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="MenuItem">
+                                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
+                        CornerRadius="0"
+                        SnapsToDevicePixels="True">
+                                    <ContentPresenter ContentSource="Header"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Left"
+                                      Margin="20,4,20,4"
+                                        RecognizesAccessKey="True" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#1E90FF" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
 
                 <DataTemplate x:Key="OverlayTemplate">
@@ -63,7 +107,7 @@
                             </Grid.ColumnDefinitions>
                             <primitives:DocumentTabStrip x:Name="tabStrip" ItemsSource="{Binding VisibleItems}"/>
                             <primitives:InertButton x:Name="dropDownButton" VerticalAlignment="Center" ContentTemplate="{StaticResource DropDownButtonTemplate}"
-                                Grid.Column="1" Margin="4,2,2,2" ToolTip="Active Files" DropDownItemStyle="{StaticResource DropDownItemStyle}">
+                                Grid.Column="1" Margin="4,2,2,2" ToolTip="Active Files" DropDownItemStyle="{StaticResource DropDownItemStyle}" Foreground="#f3f0f9">
                                 <primitives:InertButton.Resources>
                                     <local:ReverseCollectionViewSource x:Key="ActiveItemsView" Source="{Binding ActiveItems}" />
                                 </primitives:InertButton.Resources>
@@ -73,7 +117,7 @@
                             </primitives:InertButton>
                             <primitives:InertButton x:Name="performCloseButton" Command="docking:DockCommands.PerformClose" CommandTarget="{Binding SelectedItem}"
                                 Grid.Column="2" Margin="2,2,4,2" ToolTip="Close" ContentTemplate="{StaticResource CloseButtonTemplate}"
-                                VerticalAlignment="Center" />
+                                VerticalAlignment="Center" Foreground="#f3f0f9"/>
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>

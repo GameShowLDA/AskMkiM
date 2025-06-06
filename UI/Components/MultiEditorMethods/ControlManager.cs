@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Input;
 using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
+using DevZest.Windows.Docking;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -30,7 +31,12 @@ namespace UI.Components.MultiEditorMethods
       if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control))
       {
         int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
-        if (control is TextEditorUI)
+        if (control is TextEditorContainer)
+        {
+          // ShowSaveDialogForControl(control);
+          HandleClosingEvents(control, tabButton);
+        }
+        if (control is DockItem)
         {
           ShowSaveDialogForControl(control);
           HandleClosingEvents(control, tabButton);
@@ -66,7 +72,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="tabButton">Вкладка, которая будет закрыта.</param>
     private void HandleClosingEvents(UserControl control, OpenFileButton tabButton)
     {
-      EventAggregator.RaiseTextEditorClosing(control is TextEditorUI, tabButton.Text);
+      EventAggregator.RaiseTextEditorContainerClosing(control is TextEditorContainer, tabButton.Text);
     }
 
     /// <summary>
@@ -123,9 +129,9 @@ namespace UI.Components.MultiEditorMethods
         }
       }
 
-      bool isTextEditor = control is TextEditorUI;
-      EventAggregator.RaiseTextEditorActive(isTextEditor);
-      EventAggregator.RaiseActiveEditorChanged(isTextEditor);
+      bool isTextEditorContainer = control is TextEditorContainer;
+      EventAggregator.RaiseTextEditorActive(isTextEditorContainer);
+      EventAggregator.RaiseActiveEditorChanged(isTextEditorContainer);
     }
 
     /// <summary>
