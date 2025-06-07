@@ -167,7 +167,7 @@ namespace UI.Controls.ProtocolNew
     /// Приостанавливает метод на паузу.
     /// </summary>
     /// <returns></returns>
-    public async Task PauseAsync() => await ActionExecutor.PauseAsync();
+    public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken());
 
     /// <summary>
     /// Возобновляет метод после паузы.
@@ -229,7 +229,12 @@ namespace UI.Controls.ProtocolNew
 
       if (ActionExecutor.IsPaused)
       {
-        await ActionExecutor.WaitWhilePausedAsync(this);
+        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
+      }
+
+      if (showMessageModel.Status == MessageType.Error && await AppConfiguration.Execution.ExecutionConfig.GetIsStopOnErrorEnabled())
+      {
+        await PauseAsync();
       }
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
@@ -301,7 +306,7 @@ namespace UI.Controls.ProtocolNew
 
       if (ActionExecutor.IsPaused)
       {
-        await ActionExecutor.WaitWhilePausedAsync(this);
+        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
       }
 
       return ActionExecutor.StepMode;

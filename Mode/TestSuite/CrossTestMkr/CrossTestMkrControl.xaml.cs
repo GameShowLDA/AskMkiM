@@ -195,21 +195,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken)
     {
-      //StepControlManager.DisableStepMode();
-      //KeyboardManager.TriggerStep();
-
       if (!needReset) return;
-
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\n"));
-
-      // Отключаем измеритель и сбрасываем модули
-      await MeterDisableAsync(verificatModuleRelayControl);
-      await ResetModule(testedModuleRelayControl);
-      await ResetModule(verificatModuleRelayControl);
-      await DisconnectModule(testedModuleRelayControl);
-      await DisconnectModule(verificatModuleRelayControl);
-
-      // Сбрасываем флаг необходимости сброса
       needReset = false;
     }
 

@@ -184,7 +184,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Ставит выполнение метода на паузу.
     /// </summary>
-    internal async Task PauseAsync()
+    internal async Task PauseAsync(CancellationToken cancellationToken)
     {
       if (!IsPaused)
       {
@@ -194,7 +194,7 @@ namespace UI.Controls.ProtocolNew
         ProtocolSelfCheck.ShowButtonsOnPause();
       }
 
-      await WaitWhilePausedAsync();
+      await WaitWhilePausedAsync(cancellationToken);
     }
 
     /// <summary>
@@ -300,47 +300,69 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="protocolSelfCheck">Объект интерфейса.</param>
     /// <returns>Задача ожидания паузы.</returns>
-    public async Task WaitWhilePausedAsync(ProtocolUI protocolSelfCheck = null)
+    /// <summary>
+    /// Ожидает, пока выполнение процесса находится в состоянии паузы.
+    /// Поддерживает отмену ожидания через CancellationToken.
+    /// </summary>
+    /// <param name="protocolSelfCheck">Объект интерфейса для вывода сообщений.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Задача ожидания выхода из паузы или отмены.</returns>
+    public async Task WaitWhilePausedAsync(CancellationToken cancellationToken, ProtocolUI protocolSelfCheck = null)
     {
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
       {
         LogInformation("Срабатывание ожидания при самоконтроле");
-        if (protocolSelfCheck != null)
+
+        if (protocolSelfCheck != null && ShouldShowPauseMessage)
         {
-          if (ShouldShowPauseMessage)
+          ShouldShowPauseMessage = false;
+          ShouldShowResumeMessage = true;
+
+          ShowMessageModel showMessage = new ShowMessageModel
           {
-            ShouldShowPauseMessage = false;
-            ShouldShowResumeMessage = true;
-
-            ShowMessageModel showMessage = new ShowMessageModel()
-            {
-              Header = "Выполнение поставлено на паузу!",
-              CanBeDeleted = false,
-            };
-
-            await protocolSelfCheck.ShowMessageAsync(showMessage);
-          }
-        }
-
-        await PauseCompletionSource.Task;
-        ShouldShowPauseMessage = true;
-      }
-
-      if (protocolSelfCheck != null)
-      {
-        if (ShouldShowResumeMessage)
-        {
-          ShouldShowResumeMessage = false;
-
-          ShowMessageModel showMessage = new ShowMessageModel()
-          {
-            Header = "Выполнение снято с паузы!",
+            Header = "Выполнение поставлено на паузу!",
             CanBeDeleted = false,
           };
+
           await protocolSelfCheck.ShowMessageAsync(showMessage);
         }
+
+        using (cancellationToken.Register(() =>
+        {
+          LogInformation("Ожидание паузы прервано по отмене");
+          PauseCompletionSource.TrySetCanceled(cancellationToken);
+        }))
+        {
+          try
+          {
+            await PauseCompletionSource.Task;
+          }
+          catch (TaskCanceledException)
+          {
+            // Отмена ожидания — просто выйти
+            return;
+          }
+          finally
+          {
+            ShouldShowPauseMessage = true;
+          }
+        }
+      }
+
+      if (protocolSelfCheck != null && ShouldShowResumeMessage)
+      {
+        ShouldShowResumeMessage = false;
+
+        ShowMessageModel showMessage = new ShowMessageModel
+        {
+          Header = "Выполнение снято с паузы!",
+          CanBeDeleted = false,
+        };
+
+        await protocolSelfCheck.ShowMessageAsync(showMessage);
       }
     }
+
 
     /// <summary>
     /// Проверка на паузу или завершение программы.
@@ -356,7 +378,7 @@ namespace UI.Controls.ProtocolNew
 
       if (IsPaused)
       {
-        await WaitWhilePausedAsync().ConfigureAwait(true);
+        await WaitWhilePausedAsync(token).ConfigureAwait(true);
       }
 
       return true;
