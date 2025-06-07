@@ -207,7 +207,7 @@ namespace UI.Controls.ProtocolNew
     #endregion
 
     #region Методы.
-
+    
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
@@ -319,7 +319,6 @@ namespace UI.Controls.ProtocolNew
         LastModelMeassage = showMessageModel;
       }
     }
-
 
     /// <summary>
     /// Полностью очищает протокол и сбрасывает последнее сообщение.

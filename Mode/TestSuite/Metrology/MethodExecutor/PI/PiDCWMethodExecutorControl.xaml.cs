@@ -110,10 +110,6 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         }
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда ({GetBitString()})", message: $"{answer.ToString()} мА", type: type));
-        if (pause)
-        {
-          await protocolUI.PauseAsync();
-        }
       }
 
       public override async Task FinalizeAsync()

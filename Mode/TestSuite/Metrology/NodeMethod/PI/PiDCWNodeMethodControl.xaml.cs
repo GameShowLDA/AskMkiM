@@ -108,7 +108,6 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type));
             if (error)
             {
-              await protocolUI.PauseAsync();
               error = false;
             }
           }

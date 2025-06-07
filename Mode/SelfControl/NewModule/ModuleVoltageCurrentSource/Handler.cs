@@ -208,12 +208,6 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
       bool error = !(result >= firstNorm - tolerance && result <= lastNorm + tolerance);
       await ShowMeasurementResult(firstNorm, lastNorm, result, error);
 
-      if (error && await GetIsStopOnErrorEnabled())
-      {
-        LogWarning("Обнаружена ошибка при измерении напряжения. Пауза в выполнении.");
-        await ProtocolSelfCheckControl.PauseAsync();
-      }
-
       await Task.Delay(1, token);
     }
 

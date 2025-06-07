@@ -101,10 +101,6 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
         }
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type));
-        if (pause)
-        {
-          await protocolUI.PauseAsync();
-        }
       }
 
       public override async Task FinalizeAsync()

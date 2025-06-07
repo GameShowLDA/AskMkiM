@@ -167,7 +167,6 @@ namespace Mode.SelfControl.NewModule.Meter
             new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Error));
           if (await GetIsStopOnErrorEnabled())
           {
-            await ProtocolSelfCheckControl.PauseAsync();
             if (returnMeasure)
             {
               i--;
