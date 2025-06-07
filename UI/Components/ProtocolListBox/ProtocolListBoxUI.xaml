@@ -12,6 +12,7 @@
         <local:MessageToColonConverter x:Key="MessageToColonConverter"/>
         <local:TimeToSeparatorConverter x:Key="TimeToSeparatorConverter"/>
         <local:MessageToLeadingNewLineConverter x:Key="MessageToLeadingNewLineConverter"/>
+        <local:HeaderToBrushIfNoMessageConverter x:Key="HeaderToBrushIfNoMessageConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -31,8 +32,16 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock TextWrapping="Wrap" FontSize="20"  Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
-                             <Run Text="{Binding Message, Converter={StaticResource MessageToLeadingNewLineConverter}}" />
-                            <Run Text="{Binding Header}" Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}" />
+                            <Run Text="{Binding Message, Converter={StaticResource MessageToLeadingNewLineConverter}}" />
+                            <Run Text="{Binding Header}">
+                                <Run.Foreground>
+                                    <MultiBinding Converter="{StaticResource HeaderToBrushIfNoMessageConverter}">
+                                        <Binding Path="Header"/>
+                                        <Binding Path="Message"/>
+                                        <Binding Path="HeaderColor" Converter="{StaticResource ColorToBrushConverter}"/>
+                                    </MultiBinding>
+                                </Run.Foreground>
+                            </Run>
                             <Run Text="{Binding Message, Converter={StaticResource MessageToColonConverter}}"  Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
                             <Run Text="{Binding Message}" Foreground="{Binding MessageColor, Converter={StaticResource ColorToBrushConverter}}" />
                             <Run Text="{Binding Time, Converter={StaticResource TimeToSeparatorConverter}}" Foreground="YellowGreen"/>

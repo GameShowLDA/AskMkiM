@@ -39,7 +39,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: msg, type: ShowMessageModel.MessageType.Error));
         return;
       }
 
@@ -52,7 +52,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
         return;
       }
 
@@ -89,19 +89,18 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await protocolUI.ShowMessageAsync(new ShowMessageModel($"Подключение точки {connectResult.PointModel.PointNumber} к шине {AssignedBus}", message: $"[{ShowMessageModel.ErrorMessage.Title}]", messageColor: ShowMessageModel.SuccessMessage.TitleColor));
+            await protocolUI.ShowMessageAsync(new ShowMessageModel($"Подключение точки {connectResult.PointModel.PointNumber} к шине {AssignedBus}", type: ShowMessageModel.MessageType.Success));
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
             var answer = await breakDown.IrManger.MeasureResistanceAsync();
-            var successMessage = ShowMessageModel.ErrorMessage.Title;
-            var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
+            var type = ShowMessageModel.MessageType.Success;
+
             if (answer < (dataModel.Param * 1000))
             {
-              successMessage = ShowMessageModel.ErrorMessage.Item1;
-              colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
+              type = ShowMessageModel.MessageType.Error;
             }
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} МОм [{successMessage}]", messageColor: colorMessage));
+            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} МОм", type: type));
           }
           else
           {

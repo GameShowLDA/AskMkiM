@@ -24,8 +24,10 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       if (selectedType is not TypeConnector type)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel(
-          "Ошибка", ShowMessageModel.ErrorMessage.TitleColor,
-          "Неверный тип проверки: требуется TypeConnector"));
+          "Ошибка",
+          message: "Неверный тип проверки: требуется TypeConnector",
+          type: ShowMessageModel.MessageType.Error));
+
         return;
       }
 

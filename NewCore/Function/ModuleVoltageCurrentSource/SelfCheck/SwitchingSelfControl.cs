@@ -94,11 +94,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
         if (Math.Abs(result - 5.0) < 0.15)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", message: ShowMessageModel.SuccessMessage.Title, messageColor: ShowMessageModel.SuccessMessage.TitleColor) { IndentLevel = 2 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 2 });
         }
         else
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor) { IndentLevel = 2 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 2 });
         }
         await powerSource.BusManager.DisconnectBusToPositiveAsync(switchingBus);
       }
@@ -109,11 +109,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
         if (Math.Abs(result - 5.0) < 0.15)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", message: ShowMessageModel.SuccessMessage.Title, messageColor: ShowMessageModel.SuccessMessage.TitleColor) { IndentLevel = 2 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 2 });
         }
         else
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor) { IndentLevel = 2 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 2 });
         }
         await powerSource.BusManager.DisconnectBusToNegativeAsync(switchingBus);
       }

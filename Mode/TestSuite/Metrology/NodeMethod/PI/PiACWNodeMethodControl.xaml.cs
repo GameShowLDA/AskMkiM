@@ -49,7 +49,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: msg, type: ShowMessageModel.MessageType.Error));
         return;
       }
 
@@ -62,7 +62,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
         return;
       }
 
@@ -104,18 +104,16 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
 
             var answer = await breakDown.AcwManger.MeasureCurrentAsync();
-            var successMessage = ShowMessageModel.ErrorMessage.Title;
-            var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
+            var type = ShowMessageModel.MessageType.Success;
 
             bool error = false;
             if (answer >= dataModel.Param)
             {
-              successMessage = ShowMessageModel.ErrorMessage.Item1;
-              colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
+              type = ShowMessageModel.MessageType.Error;
               error = true;
             }
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА [{successMessage}]", messageColor: colorMessage));
+            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type));
             if (error)
             {
               await protocolUI.PauseAsync();

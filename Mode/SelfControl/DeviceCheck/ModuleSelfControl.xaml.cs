@@ -52,7 +52,7 @@ namespace Mode.SelfControl.DeviceCheck
           await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
             "Ошибка",
             message: "Не удалось преобразовать объект в измеритель!",
-            messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+            type: ShowMessageModel.MessageType.Error));
           return;
         }
 
@@ -79,14 +79,9 @@ namespace Mode.SelfControl.DeviceCheck
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
           "Ошибка",
           message: "Не удалось получить устройство.",
-          messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+          type: ShowMessageModel.MessageType.Error));
         return;
       }
-
-
-
-      // продолжение работы с meter и device
     }
-
   }
 }

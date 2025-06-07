@@ -40,7 +40,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: msg, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         return;
       }
 
@@ -54,7 +54,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
         var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
         if (!connect.Connect)
         {
-          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
+          await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
           return;
         }
 
@@ -90,19 +90,17 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
 
         var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, dataModel.Param, 60000);
         var pause = false;
-        var successMessage = ShowMessageModel.ErrorMessage.Title;
-        var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
+        var type = ShowMessageModel.MessageType.Success;
         if (answer < (dataModel.Param * 1000))
         {
-          successMessage = ShowMessageModel.ErrorMessage.Item1;
-          colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
+          type = ShowMessageModel.MessageType.Error;
           if (await ExecutionConfig.GetIsStopOnErrorEnabled())
           {
             pause = true;
           }
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм [{successMessage}]", messageColor: colorMessage));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type));
         if (pause)
         {
           await protocolUI.PauseAsync();

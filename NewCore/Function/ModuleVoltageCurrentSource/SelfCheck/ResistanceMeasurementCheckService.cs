@@ -83,8 +83,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
         await DisconnectResistorByNumberAsync(relayModule, resistorNumber);
 
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
+        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", 
+          message: $"{result:F2}",
+          type: (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error
+          );
+
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await messageService.ShowMessageAsync(showMessageModel);

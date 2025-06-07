@@ -36,9 +36,9 @@ namespace AppConfiguration.Services
     /// <summary>
     /// Асинхронный вызов отображения сообщения.
     /// </summary>
-    public static Task ShowMessageAsync(ShowMessageModel model)
+    public static Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false)
     {
-      return Instance?.ShowMessageAsync(model) ?? Task.FromResult(false);
+      return Instance?.ShowMessageAsync(model, IsBlockStart, SkipStepModeCheck) ?? Task.FromResult(false);
     }
   }
 }

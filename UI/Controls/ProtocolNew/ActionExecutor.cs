@@ -93,7 +93,7 @@ namespace UI.Controls.ProtocolNew
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
       {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error));
           await FinalizeAsync();
           return;
       }
@@ -105,7 +105,7 @@ namespace UI.Controls.ProtocolNew
 
       if (startDelegate == null)
       {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", type: MessageType.Error));
         await FinalizeAsync();
         LogError("Системная ошибка выполнения, обратитесь к администратору");
         return;
@@ -399,7 +399,6 @@ namespace UI.Controls.ProtocolNew
       ShowMessageModel showMessage = new ShowMessageModel()
       {
         Header = $"Завершено",
-        HeaderColor = SuccessMessage.TitleColor,
         CanBeDeleted = false,
       };
       await ProtocolSelfCheck.ShowMessageAsync(showMessage);

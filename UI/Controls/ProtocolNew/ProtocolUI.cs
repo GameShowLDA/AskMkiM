@@ -227,7 +227,6 @@ namespace UI.Controls.ProtocolNew
       await protocolTextBox.AppendLineAsync(showMessageModel);
 
 
-
       if (ActionExecutor.IsPaused)
       {
         await ActionExecutor.WaitWhilePausedAsync(this);
@@ -257,7 +256,6 @@ namespace UI.Controls.ProtocolNew
     {
       if (IsBlockStart)
       {
-        await protocolTextBox.AppendEmptyLineAsync();
         StepControlManager.ExitBlock();
         StepControlManager.EnterBlock();
       }
