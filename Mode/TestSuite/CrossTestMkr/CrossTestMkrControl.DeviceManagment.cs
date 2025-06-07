@@ -446,6 +446,7 @@ namespace Mode.TestSuite.CrossTestMkr
       // foreach (int point in rangePoints)
       //   await PointConnectAsync(verificat_module, bus2, point, cancellationToken);
 
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Подлючение точек"));
       await verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last());
 
 
