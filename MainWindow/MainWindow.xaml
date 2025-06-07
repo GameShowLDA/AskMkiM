@@ -199,6 +199,13 @@
 
                 </MenuItem>
 
+                <MenuItem Header="Сервис" Name="Services" Tag="menuHeader_6">
+                    <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
+                    <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
+                    <MenuItem Header="МКР" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
+                    <MenuItem Header="УКШ" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
+                </MenuItem>
+
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
 
                     <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
@@ -226,6 +233,10 @@
                         <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
                         <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
 
+                    </MenuItem>
+
+                    <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
+                        <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
                     </MenuItem>
 
                 </MenuItem>

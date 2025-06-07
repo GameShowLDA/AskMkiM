@@ -27,6 +27,7 @@ namespace MainWindowProgram.Engine
       var metrology = new MetrologyService(multi);
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
+      var service = new ServiceMode(multi);
       var settings = new SettingsService(multi);
       var windowService = new WindowService(window, window.mainMenu, window.ButtonsPanel, () => window.IsLocked);
       var selfTest = new SelfTestServices(multi);
@@ -34,6 +35,7 @@ namespace MainWindowProgram.Engine
 
       var viewModel = new MainWindowViewModel(
           metrology,
+          service,
           file,
           test,
           settings,
