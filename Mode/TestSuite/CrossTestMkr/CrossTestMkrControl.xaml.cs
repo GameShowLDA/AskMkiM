@@ -150,8 +150,7 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task ExecuteTestProcess(CancellationToken cancellationToken)
     {
       // 1. Валидация и парсинг трёх полей
-      var (ok, message, tested, tester, range) =
-          UIValidationHelperLightweight.TryValidateAndParseInput(ProtocolSelfCheckControl);
+      var (ok, message, tested, tester, range) = UIValidationHelperLightweight.TryValidateAndParseInput(ProtocolSelfCheckControl);
       if (!ok)
       {
         LogError($"Валидация не пройдена: {message}");
@@ -174,10 +173,11 @@ namespace Mode.TestSuite.CrossTestMkr
       List<int> points = ParseRange(range);
 
       // 4. Подготовка оборудования
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования"), IsBlockStart: true);
       await InitializeModule(testedModuleRelayControl, cancellationToken, "тестируемый");
       await InitializeModule(verificatModuleRelayControl, cancellationToken, "проверяющий");
-      await ConnectModule(testedModuleRelayControl, cancellationToken);
-      await ConnectModule(verificatModuleRelayControl, cancellationToken);
+
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"), IsBlockStart: true);
       await MeterEnableAsync(verificatModuleRelayControl, cancellationToken);
 
       // 5. Собственно сам тест
