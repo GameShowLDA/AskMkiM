@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Error.Device.DeviceBusCommutation
+namespace AppConfiguration.Error.Device.DeviceBusCommutation
 {
   /// <summary>
   /// Фабрика исключений для ошибок подключения и отключения реле устройства коммутации шин.

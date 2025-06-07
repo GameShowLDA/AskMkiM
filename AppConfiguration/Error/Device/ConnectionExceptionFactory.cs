@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Error.Device
+namespace AppConfiguration.Error.Device
 {
   /// <summary>
   /// Фабрика исключений, связанных с подключением и инициализацией устройств.

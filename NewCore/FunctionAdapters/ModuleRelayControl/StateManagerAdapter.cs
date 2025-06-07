@@ -4,7 +4,7 @@ using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Base.Device;
-using Utilities.Error.Device;
+using AppConfiguration.Error.Device;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {

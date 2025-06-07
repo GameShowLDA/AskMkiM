@@ -415,6 +415,10 @@ namespace UI.Controls.ProtocolNew
     public CancellationToken GetCancellationToken() =>
       ActionExecutor.CancellationTokenSource?.Token ?? CancellationToken.None;
 
-
+    public Task<bool> AwaitAdminDecisionAsync(string message)
+    {
+      MessageBox.Show("В будущем добавить сюда реализацию выбора");
+      return Task.FromResult(true);
+    }
   }
 }

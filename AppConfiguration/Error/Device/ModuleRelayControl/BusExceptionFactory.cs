@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Error.Device.ModuleRelayControl
+namespace AppConfiguration.Error.Device.ModuleRelayControl
 {
   /// <summary>
   /// Фабрика исключений, связанных с подключением и отключением шин.

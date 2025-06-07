@@ -119,5 +119,10 @@ namespace UI.Components.ProtocolListBox
     {
       await AppendLineAsync(model);
     }
+
+    public Task<bool> AwaitAdminDecisionAsync(string message)
+    {
+      throw new NotImplementedException();
+    }
   }
 }

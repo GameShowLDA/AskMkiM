@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device.ModuleVoltageCurrent;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleVoltageCurrentSource;
-using Utilities.Error.Device.ModuleVoltageCurrent;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device.Breakdown;
 using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.GPT.Data;
 using NewCore.Function.Helpers;
-using Utilities.Error.Device.Breakdown;
 
 namespace NewCore.FunctionAdapters.GPT
 {

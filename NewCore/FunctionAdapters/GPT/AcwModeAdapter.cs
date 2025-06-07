@@ -6,7 +6,6 @@ using NewCore.Function.GPT;
 using NewCore.Function.GPT.Data;
 using NewCore.Function.Helpers;
 using Utilities;
-using Utilities.Error.Device.Breakdown;
 
 namespace NewCore.FunctionAdapters.GPT
 {

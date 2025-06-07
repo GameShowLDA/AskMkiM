@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
-using Utilities.Error.Device;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {

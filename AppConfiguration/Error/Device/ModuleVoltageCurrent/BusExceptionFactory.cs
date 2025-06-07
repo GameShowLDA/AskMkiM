@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Error.Device.ModuleVoltageCurrent
+namespace AppConfiguration.Error.Device.ModuleVoltageCurrent
 {
   /// <summary>
   /// Фабрика исключений, связанных с подключением и отключением шин к выходам модуля МИНТ.
