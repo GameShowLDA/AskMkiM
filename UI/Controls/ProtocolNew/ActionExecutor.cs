@@ -144,6 +144,7 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
     internal async Task StopAsync(StopDelegate stopDelegate)
     {
+
       await FinalizeAsync(stopDelegate);
     }
 
@@ -494,6 +495,10 @@ namespace UI.Controls.ProtocolNew
       if (stopDelegate != null)
       {
         var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+
+        StepControlManager.DisableStepMode();
+        KeyboardManager.TriggerStep();
+
         await stopDelegate(token);
       }
 

@@ -240,7 +240,7 @@ namespace UI.Controls.ProtocolNew
         }
         else
         {
-          await KeyboardManager.WaitForNextStepKeyAsync();
+          await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
         }
       }
 
