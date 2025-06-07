@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AppConfiguration.Base;
 using static AppConfiguration.SystemState.SystemStateManager;
 
 namespace Mode.Settings.Execution
@@ -67,6 +68,42 @@ namespace Mode.Settings.Execution
     private async void StepByStep_Checked(object sender, RoutedEventArgs e)
     {
       await NewDataSaveAsync();
+    }
+
+    private void debugError_Checked(object sender, System.Windows.RoutedEventArgs e)
+    {
+      var control = sender as CheckBox;
+      if ((bool)control.IsChecked)
+      {
+        AppConfiguration.Admin.AdminConfig.ErrorDebug = true;
+      }
+      else
+      {
+        AppConfiguration.Admin.AdminConfig.ErrorDebug = false;
+      }
+    }
+
+    private void EventAggregator_AdminRightsChanged(bool obj)
+    {
+      if (obj)
+      {
+        AdminPanel.Visibility = Visibility.Visible;
+      }
+      else
+      {
+        AdminPanel.Visibility = Visibility.Collapsed;
+        debugError.IsChecked = false;
+      }
+    }
+
+    private void ExecutionControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+    {
+      EventAggregator.AdminRightsChanged += EventAggregator_AdminRightsChanged;
+
+      if (EventAggregator.GetAdminRights())
+      {
+        EventAggregator_AdminRightsChanged(true);
+      }
     }
   }
 }

@@ -11,6 +11,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid>
@@ -111,6 +112,47 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox  Name="stopOnError" Style="{StaticResource AnimatedSwitch}" Checked="StepByStep_Checked"  Unchecked="StepByStep_Checked"/>
                             <TextBlock Text="Остановка по ошибке" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}"  FontSize="18" />
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+
+            <Grid Grid.Row="2" Name="AdminPanel" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock 
+                    Text="Административная панель" 
+                    FontSize="20" 
+                    Padding="15,5,0,15" 
+                    Style="{StaticResource ConfigTextBlockHeaderStyle}"
+                    VerticalAlignment="Center" 
+                    Background="{StaticResource GreenColorSolidColorBrush}"
+                    />
+
+                <GroupBox Grid.Row="1" BorderThickness="0">
+
+                    <Grid >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="2" Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Name="debugError" Style="{StaticResource AnimatedSwitch}" Checked="debugError_Checked" Unchecked="debugError_Checked" />
+                            <TextBlock 
+                                Text="Отладка ошибок выполнения" 
+                                Grid.Column="1" 
+                                Foreground="{StaticResource ForegroundSolidColorBrush}"  
+                                FontSize="18" />
                         </Grid>
                     </Grid>
                 </GroupBox>

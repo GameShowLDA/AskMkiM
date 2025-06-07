@@ -17,11 +17,6 @@ namespace AppConfiguration.SystemState
     #region Properties.
 
     /// <summary>
-    /// Флаг, указывающий, запущено ли приложение с правами администратора.
-    /// </summary>
-    static internal bool IsAdmin { get; set; }
-
-    /// <summary>
     /// Таймер для измерения времени выполнения операций.
     /// </summary>
     static public readonly Stopwatch _stopwatch = new Stopwatch();
@@ -40,17 +35,6 @@ namespace AppConfiguration.SystemState
 
     #region Set.
 
-    /// <summary>
-    /// Устанавливает статус прав администратора.
-    /// </summary>
-    /// <param name="enable">true, если запущено с правами администратора; false в противном случае.</param>
-    static public async Task SetAdminRights(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        EventAggregator.AdminRightsFlag = enable;
-      });
-    }
 
     /// <summary>
     /// Включает или выключает питание системы.
@@ -92,13 +76,6 @@ namespace AppConfiguration.SystemState
     /// <returns>true, если активно; false, если не активно.</returns>
     public static async Task<bool> GetIsLocked() => await Task.Run(() => IsLocked);
 
-    /// <summary>
-    /// Возвращает текущий статус прав администратора.
-    /// </summary>
-    /// <returns>true, если запущено с правами администратора; false в противном случае.</returns>
-    static public async Task<bool> GetAdminRights() => await Task.Run(() => IsAdmin);
     #endregion
-
-
   }
 }
