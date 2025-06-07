@@ -223,19 +223,15 @@ namespace UI.Controls.ProtocolNew
       }
       await ShouldShowDetailedProtocol(showMessageModel);
       CheckStatus(ref showMessageModel);
-
+      
       await protocolTextBox.AppendLineAsync(showMessageModel);
-
 
       if (ActionExecutor.IsPaused)
       {
         await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
       }
 
-      if (showMessageModel.Status == MessageType.Error && await AppConfiguration.Execution.ExecutionConfig.GetIsStopOnErrorEnabled())
-      {
-        await PauseAsync();
-      }
+      await CheckPause(showMessageModel.Status);
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
@@ -252,11 +248,19 @@ namespace UI.Controls.ProtocolNew
       await Task.Delay(1);
     }
 
+    /// <summary>
+    /// Асинхронно добавляет пустую строку в протокол с заданным уровнем отступа.
+    /// </summary>
+    /// <param name="indentLevel">Уровень отступа (не используется в текущей реализации).</param>
     public async Task AppendEmptyLineAsync(int indentLevel = 0)
     {
       await protocolTextBox.AppendEmptyLineAsync();
     }
 
+    /// <summary>
+    /// Проверяет, необходимо ли начать новый блок. Если да — завершает предыдущий и начинает новый.
+    /// </summary>
+    /// <param name="IsBlockStart">Признак начала нового блока.</param>
     private async Task CheckBlockStart(bool IsBlockStart)
     {
       if (IsBlockStart)
@@ -266,6 +270,10 @@ namespace UI.Controls.ProtocolNew
       }
     }
 
+    /// <summary>
+    /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
+    /// </summary>
+    /// <param name="showMessageModel">Модель отображаемого сообщения, передаётся по ссылке.</param>
     private void CheckStatus(ref ShowMessageModel showMessageModel)
     {
       if (showMessageModel.Status != MessageType.Info)
@@ -282,6 +290,23 @@ namespace UI.Controls.ProtocolNew
       }
     }
 
+    /// <summary>
+    /// Если статус сообщения — ошибка и включена остановка при ошибке, выполнение ставится на паузу.
+    /// </summary>
+    /// <param name="Status">Тип сообщения (ошибка, информация, успех).</param>
+    private async Task CheckPause(ShowMessageModel.MessageType? Status)
+    {
+      if (Status == MessageType.Error && await AppConfiguration.Execution.ExecutionConfig.GetIsStopOnErrorEnabled())
+      {
+        await PauseAsync();
+      }
+    }
+
+    /// <summary>
+    /// Проверяет, нужно ли отображать детализированный протокол.
+    /// Если не нужно, удаляет последнее сообщение, если оно допускает удаление и не содержит ошибки выполнения.
+    /// </summary>
+    /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
     private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
     {
       if (!await GetShowDetailedProtocol())
@@ -294,6 +319,7 @@ namespace UI.Controls.ProtocolNew
         LastModelMeassage = showMessageModel;
       }
     }
+
 
     /// <summary>
     /// Полностью очищает протокол и сбрасывает последнее сообщение.
