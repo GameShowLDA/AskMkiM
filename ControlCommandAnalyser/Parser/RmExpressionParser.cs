@@ -120,6 +120,10 @@ namespace ControlCommandAnalyser.Parser
 
       LogDebug($"[ProcessExpression] Left: {left}, Middle: {middle}, Right: {right}");
 
+      // Новый обработчик для особого случая
+      if (TryProcessSynonymRangeWithStep(left, middle, right, result))
+        return;
+
       if (TryProcessGroupedRanges(left, right, middle, result))
         return;
 
@@ -162,7 +166,16 @@ namespace ControlCommandAnalyser.Parser
       var result = new List<string>();
       foreach (var line in rawLines)
       {
-        var matches = Regex.Matches(line, @"[^=]+=[^=]+");
+        var trimmed = line.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed)) continue;
+        // Если есть двойное ==, это отдельное выражение
+        if (trimmed.Contains("=="))
+        {
+          result.Add(trimmed);
+          continue;
+        }
+        // Обычные выражения
+        var matches = Regex.Matches(trimmed, @"[^=]+=[^=]+");
         foreach (Match m in matches)
         {
           var expr = m.Value.Trim();
@@ -433,6 +446,66 @@ namespace ControlCommandAnalyser.Parser
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Пытается обработать выражение с синонимами и шагами (например, "301-310 == XS1:1-10 = 1.6.2-20(2)").
+    /// </summary>
+    /// <param name="left">Левая часть выражения.</param>
+    /// <param name="middle">Синоним (средняя часть выражения).</param>
+    /// <param name="right">Правая часть выражения.</param>
+    /// <param name="result">Список для добавления результатов.</param>
+    /// <returns>True, если выражение успешно обработано; иначе False.</returns>
+    private static bool TryProcessSynonymRangeWithStep(string left, string middle, string right, List<RmPairModel> result)
+    {
+        // Левый диапазон: 301-310
+        var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
+        // Синоним: XS1:1-10
+        var middleMatch = Regex.Match(middle ?? "", @"^([A-Za-z]+)(\d+):(\d+)-(\d+)$");
+        // Правая часть: 1.6.2-20(2)
+        var rightMatch = Regex.Match(right, @"^(\d+\.\d+\.)(\d+)-(\d+)\((\d+)\)$");
+
+        if (leftMatch.Success && middleMatch.Success && rightMatch.Success)
+        {
+            int leftFrom = int.Parse(leftMatch.Groups[1].Value);
+            int leftTo = int.Parse(leftMatch.Groups[2].Value);
+
+            string synPrefix = middleMatch.Groups[1].Value;
+            int synBase = int.Parse(middleMatch.Groups[2].Value); // XS1
+            int synRangeFrom = int.Parse(middleMatch.Groups[3].Value); // 1
+            int synRangeTo = int.Parse(middleMatch.Groups[4].Value);   // 10
+
+            string rightPrefix = rightMatch.Groups[1].Value;
+            int rightFrom = int.Parse(rightMatch.Groups[2].Value);
+            int rightTo = int.Parse(rightMatch.Groups[3].Value);
+            int rightStep = int.Parse(rightMatch.Groups[4].Value);
+
+            int count = leftTo - leftFrom + 1;
+            if (count != (synRangeTo - synRangeFrom + 1) || count != ((rightTo - rightFrom) / rightStep + 1))
+                throw new Exception("Диапазоны не совпадают по количеству элементов.");
+
+            for (int i = 0; i < count; i++)
+            {
+                int leftVal = leftFrom + i;
+                int synNum = synRangeFrom + i;
+                int rightVal = rightFrom + i * rightStep;
+
+                result.Add(new RmPairModel
+                {
+                    OkPoint = leftVal.ToString(),
+                    Synonym = null,
+                    AskInput = $"{rightPrefix}{rightVal}"
+                });
+                result.Add(new RmPairModel
+                {
+                    OkPoint = $"{synPrefix}{synBase}:{synNum}",
+                    Synonym = null,
+                    AskInput = $"{rightPrefix}{rightVal}"
+                });
+            }
+            return true;
+        }
+        return false;
     }
   }
 }
