@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AppConfiguration.Interface;
+using DevZest.Windows.Docking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,11 +20,25 @@ namespace UI.Controls.TextEditor
   /// <summary>
   /// Логика взаимодействия для TextEditorContainer.xaml
   /// </summary>
-  public partial class TextEditorContainer : UserControl
+  public partial class TextEditorContainer : UserControl, ITextAdapter
   {
     public TextEditorContainer()
     {
       InitializeComponent();
+    }
+
+    public string GetText()
+    {
+      var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (foundDockItem != null)
+      {
+        if(foundDockItem.Content is TextEditorUI)
+        {
+          var textEditor = (TextEditorUI)foundDockItem.Content;
+          return textEditor.Text;
+        }
+      }
+      return string.Empty;
     }
   }
 }

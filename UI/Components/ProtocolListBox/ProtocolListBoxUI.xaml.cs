@@ -119,5 +119,19 @@ namespace UI.Components.ProtocolListBox
     {
       await AppendLineAsync(model);
     }
+
+    /// <summary>
+    /// Возвращает весь текст протокола в виде строки с учётом табуляции.
+    /// </summary>
+    /// <returns>Общий текст протокола.</returns>
+    public Task<string> GetPlainTextAsync()
+    {
+      return Task.FromResult(string.Join(Environment.NewLine, Messages.Select(m =>
+      {
+        string indent = new string(' ', m.IndentLevel * 2);
+        string header = string.IsNullOrWhiteSpace(m.Header) ? "" : $"{m.Header}: ";
+        return $"{indent}{header}{m.Message} | {m.Time}";
+      })));
+    }
   }
 }

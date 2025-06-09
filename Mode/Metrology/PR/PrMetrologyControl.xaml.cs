@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Windows.Controls;
+using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.DeviceResponses;
@@ -17,7 +18,7 @@ namespace Mode.Metrology.PR
   /// <summary>
   /// Логика взаимодействия для PrMetrologyControl.xaml.
   /// </summary>
-  public partial class PrMetrologyControl : UserControl
+  public partial class PrMetrologyControl : UserControl, IExecution
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.PR;
 
@@ -93,6 +94,11 @@ namespace Mode.Metrology.PR
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
       await testMeasurement.MintSettings(Data.DataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
+    }
+
+    public ITextAdapter GetControl()
+    {
+      return ProtocolUI;
     }
 
     private class PrMeasurement : BaseMeasurement

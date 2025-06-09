@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using AppConfiguration.Interface;
 using ControlCommandAnalyser.Parsing;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
@@ -16,7 +17,7 @@ namespace UI.Controls.TextEditor
   /// <summary>
   /// Логика взаимодействия для TextEditorUI.xaml.
   /// </summary>
-  public partial class TextEditorUI : UserControl
+  public partial class TextEditorUI : UserControl, ITextAdapter
   {
     /// <summary>
     /// Экземпляр <see cref="MultiEditorControl"/>, используемый для работы с вкладками редактора.
@@ -352,5 +353,9 @@ namespace UI.Controls.TextEditor
       textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
+    public string GetText()
+    {
+      return this.Text;
+    }
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
@@ -13,7 +14,7 @@ namespace Mode.Metrology.CI
   /// <summary>
   /// Логика взаимодействия для CiMetrologyControl.xaml.
   /// </summary>
-  public partial class CiMetrologyControl : UserControl
+  public partial class CiMetrologyControl : UserControl, IExecution
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.CI;
 
@@ -77,6 +78,11 @@ namespace Mode.Metrology.CI
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();
+    }
+
+    public ITextAdapter GetControl()
+    {
+      return ProtocolUI;
     }
 
     private class CiMeasurement : BaseMeasurement

@@ -1,7 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
+using System.Windows.Controls;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
@@ -13,7 +14,7 @@ namespace Mode.Metrology.IE
   /// <summary>
   /// Логика взаимодействия для IeMetrologyControl.xaml.
   /// </summary>
-  public partial class IeMetrologyControl : UserControl
+  public partial class IeMetrologyControl : UserControl, IExecution
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.IE;
 
@@ -76,6 +77,11 @@ namespace Mode.Metrology.IE
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();
+    }
+
+    public ITextAdapter GetControl()
+    {
+      return ProtocolUI;
     }
 
     private class IeMeasurement : BaseMeasurement

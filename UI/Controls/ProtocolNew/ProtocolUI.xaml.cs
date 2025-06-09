@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using AppConfiguration.Interface;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,7 +11,7 @@ namespace UI.Controls.ProtocolNew
   /// Класс управления пользовательским интерфейсом протокола выполнения.
   /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
-  public partial class ProtocolUI : UserControl
+  public partial class ProtocolUI : UserControl, ITextAdapter
   {
     /// <summary>
     /// Свойство зависимости для заголовка.
@@ -112,6 +113,11 @@ namespace UI.Controls.ProtocolNew
     {
       StepControlManager.IsStepInto = true;
       KeyboardManager.TriggerStep();
+    }
+
+    public string GetText()
+    {
+      return protocolTextBox.GetPlainTextAsync().Result;
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using Mode.Metrology.PI;
@@ -14,7 +15,7 @@ namespace Mode.Metrology.KN
   /// <summary>
   /// Логика взаимодействия для KnDCWMetrologyControl.xaml
   /// </summary>
-  public partial class KnDCWMetrologyControl : UserControl
+  public partial class KnDCWMetrologyControl : UserControl, IExecution
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.KN;
 
@@ -76,6 +77,11 @@ namespace Mode.Metrology.KN
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();
+    }
+
+    public ITextAdapter GetControl()
+    {
+      return ProtocolUI;
     }
 
     private class KnMeasurement : BaseMeasurement

@@ -1,9 +1,10 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using Mode.Metrology.PI;
 using NewCore.Base.Interface.Main;
+using System.Windows;
+using System.Windows.Controls;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
@@ -15,7 +16,7 @@ namespace Mode.Metrology.KN
   /// <summary>
   /// Логика взаимодействия для KnACWMetrologyControl.xaml
   /// </summary>
-  public partial class KnACWMetrologyControl : UserControl
+  public partial class KnACWMetrologyControl : UserControl, IExecution
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.KN;
 
@@ -73,6 +74,11 @@ namespace Mode.Metrology.KN
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();
+    }
+
+    public ITextAdapter GetControl()
+    {
+      return ProtocolUI;
     }
 
     private class KnMeasurement : BaseMeasurement

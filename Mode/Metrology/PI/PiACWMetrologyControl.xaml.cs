@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
@@ -12,7 +13,7 @@ namespace Mode.Metrology.PI
   /// <summary>
   /// Логика взаимодействия для PiACWMetrologyControl.xaml.
   /// </summary>
-  public partial class PiACWMetrologyControl : UserControl
+  public partial class PiACWMetrologyControl : UserControl, IExecution
   {
     MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.PI;
 
@@ -76,6 +77,11 @@ namespace Mode.Metrology.PI
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
       await testMeasurement.FinalizeMeasurement();
+    }
+
+    public ITextAdapter GetControl()
+    {
+      return ProtocolUI;
     }
 
     private class PiMeasurement : BaseMeasurement
