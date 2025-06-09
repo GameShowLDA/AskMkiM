@@ -226,7 +226,18 @@ namespace UI.Components
     {
       var activeTab = fileManager.OpenPages.FirstOrDefault(page =>
         page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      return saveFileManager.SaveFile(activeTab);
+      int index = fileManager.OpenPages.IndexOf(activeTab);
+      if (fileManager.UserControls[index] is TextEditorContainer)
+      {
+        var activeTextEditorContainer = fileManager.UserControls[index] as TextEditorContainer;
+        if (activeTextEditorContainer != null)
+        {
+          var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab =>
+            tab.IsActiveItem==true);
+          return saveFileManager.SaveFile(activeDockItem);
+        }
+      }
+      return false;
     }
 
     /// <summary>

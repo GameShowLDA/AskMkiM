@@ -21,6 +21,7 @@ namespace UI.Components.MultiEditorMethods
     public static void PrintFile(List<OpenFileButton> openPages, List<UserControl> userControls)
     {
       var activeTab = openPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      // TODO: починить печать файлов
       PrintDialog printDialog = new PrintDialog();
       FlowDocument flowDocument = new FlowDocument();
 

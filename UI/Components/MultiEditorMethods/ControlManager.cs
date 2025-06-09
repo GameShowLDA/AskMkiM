@@ -28,17 +28,36 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="control">Элемент управления для удаления.</param>
     public void RemoveControl(OpenFileButton tabButton, UserControl control)
     {
-      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control))
+      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control) || control is TextEditorUI)
       {
-        int index = multiEditorControl.ContentPanel.Children.IndexOf(control);
+        int index = -1;
+        if (control is TextEditorUI)
+        {
+          if (tabButton.Text == "Текстовый редактор")
+          {
+            var container = fileManager.UserControls.FirstOrDefault(textEditorContainer => textEditorContainer.GetType() == typeof(TextEditorContainer));
+            if (container is TextEditorContainer)
+            {
+              var foundContainer = container as TextEditorContainer;
+              var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
+              if (foundDockItem != null)
+              {
+                if (control is TextEditorUI)
+                {
+                  ShowSaveDialogForControl(foundDockItem);
+                  return;
+                }
+              }
+            }
+          }
+        }
+        else
+        {
+          index = multiEditorControl.ContentPanel.Children.IndexOf(control);
+        }
         if (control is TextEditorContainer)
         {
           // ShowSaveDialogForControl(control);
-          HandleClosingEvents(control, tabButton);
-        }
-        if (control is DockItem)
-        {
-          ShowSaveDialogForControl(control);
           HandleClosingEvents(control, tabButton);
         }
 
@@ -52,14 +71,16 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="control">Элемент управления для проверки.</param>
     /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
-    private bool ShowSaveDialogForControl(UserControl control)
+    private bool 
+      
+      ShowSaveDialogForControl(DockItem control)
     {
       var result = MessageBoxResult.No;
       var saveFileResult = false;
-      if (control is TextEditorUI)
-      {
+      if (control.Content is TextEditorUI)
+      { // TODO: индекс изменить
         var saveFileManager = new SaveFileManager(fileManager);
-        saveFileManager.SaveFileDialog(ref result, ref saveFileResult, multiEditorControl.ContentPanel.Children.IndexOf(control));
+        saveFileManager.SaveFileDialog(ref result, ref saveFileResult, control);
       }
 
       return saveFileResult;
@@ -303,7 +324,7 @@ namespace UI.Components.MultiEditorMethods
     {
       foreach (OpenFileButton child in multiEditorControl.TopPanel.Children)
       {
-        if (control == child)
+        if (control.Text == child.Text)
         {
           child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
         }

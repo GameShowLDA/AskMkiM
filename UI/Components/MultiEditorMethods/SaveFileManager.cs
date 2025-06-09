@@ -9,6 +9,7 @@ using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using System.Windows;
 using System.Text;
+using DevZest.Windows.Docking;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -28,19 +29,19 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="result">Результат выбора пользователя в диалоговом окне (Yes или No).</param>
     /// <param name="saveFileResult">Результат сохранения файла. <c>true</c> если файл был успешно сохранен, иначе <c>false</c>.</param>
     /// <param name="index">Индекс открытой страницы, для которой проверяется необходимость сохранения.</param>
-    public void SaveFileDialog(ref MessageBoxResult result, ref bool saveFileResult, int index)
+    public void SaveFileDialog(ref MessageBoxResult result, ref bool saveFileResult, DockItem control)
     {
-      var needToSave = fileManager.CompareFiles(fileManager.OpenPages[index]);
+      var needToSave = fileManager.CompareFiles(control);
       if (needToSave)
       {
         result = MessageBox.Show(
-            $"Сохранить файл {fileManager.OpenPages[index].Text} перед закрытием?",
+            $"Сохранить файл {control.Title} перед закрытием?",
             "Подтверждение",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
         if (result == MessageBoxResult.Yes)
         {
-          saveFileResult = SaveFile(fileManager.OpenPages[index]);
+          saveFileResult = SaveFile(control);
         }
       }
     }
@@ -50,19 +51,24 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="activeTab">Активная вкладка, для которой будет сохранен файл.</param>
     /// <returns><c>true</c>, если файл успешно сохранен, иначе <c>false</c>.</returns>
-    public bool SaveFile(OpenFileButton activeTab)
+    public bool SaveFile(DockItem control)
     {
-      if (activeTab != null)
+      if (control != null)
       {
-        var fileName = activeTab.Text;
+        var fileName = control.Title;
         if (fileManager.FilePaths[fileName] == string.Empty)
         {
+          // TODO: сохранение файла
           return SaveFileAs();
         }
         else
         {
           var filePath = fileManager.FilePaths[fileName];
-          return SaveDataFromTextEditor(activeTab, filePath);
+          if (control.Content is TextEditorUI)
+          {
+            var textEditor = control.Content as TextEditorUI;
+            return SaveDataFromTextEditor(textEditor, filePath);
+          }
         }
       }
 
@@ -80,15 +86,25 @@ namespace UI.Components.MultiEditorMethods
       if (saveFileDialog.ShowDialog() == DialogResult.OK)
       {
         string filePath = saveFileDialog.FileName;
-        var activeTab = GetActiveTab();
+        var activeTab = GetTextEditorContainerTab();
+        int index = fileManager.OpenPages.IndexOf(activeTab);
+        if (fileManager.UserControls[index] is TextEditorContainer)
+        {
+          var control = fileManager.UserControls[index] as TextEditorContainer;
+          if (control != null)
+          {
+            var activeDockItem = control.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
+            if (activeDockItem != null)
+            {
+              var activeTextEditor = activeDockItem as DockItem;
+              SaveDataFromTextEditor(activeTextEditor.Content as TextEditorUI, filePath);
+              RenamePage(activeTextEditor, filePath);
+            }
+          }
+          UpdateFilePaths(filePath);
 
-        SaveDataFromTextEditor(activeTab, filePath);
-
-        RenamePage(activeTab, filePath);
-
-        UpdateFilePaths(filePath);
-
-        return true;
+          return true;
+        }
       }
 
       return false;
@@ -114,9 +130,9 @@ namespace UI.Components.MultiEditorMethods
     /// Получает активную вкладку, которая будет использоваться для сохранения.
     /// </summary>
     /// <returns>Активная вкладка типа <see cref="OpenFileButton"/>.</returns>
-    private OpenFileButton GetActiveTab()
+    private OpenFileButton GetTextEditorContainerTab()
     {
-      return fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      return fileManager.OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
     }
 
     /// <summary>
@@ -125,8 +141,15 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Имя активной вкладки.</returns>
     private string GetActiveTabName()
     {
-      var activeTab = GetActiveTab();
-      return activeTab != null ? Path.GetFileNameWithoutExtension(activeTab.Text) : string.Empty;
+      var activeTextEditorContainerTab = GetTextEditorContainerTab();
+      int index = fileManager.OpenPages.IndexOf(activeTextEditorContainerTab);
+      if (fileManager.UserControls[index] is TextEditorContainer)
+      {
+        var activeTextEditorContainer = fileManager.UserControls[index] as TextEditorContainer;
+        var activeTab = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab => tab.Background == (Brush)Application.Current.Resources["GreenColorSolidColorBrush"]);
+        return activeTab != null ? Path.GetFileNameWithoutExtension(activeTab.Title) : string.Empty;
+      }
+      return string.Empty;
     }
 
     /// <summary>
@@ -153,30 +176,30 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="activeTab">Активная вкладка с документом.</param>
     /// <param name="filePath">Путь к открытому файлу.</param>
     /// <returns><c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
-    private bool SaveDataFromTextEditor(OpenFileButton activeTab, string filePath)
+    private bool SaveDataFromTextEditor(TextEditorUI textEditor, string filePath)
     {
-      string fileData = string.Empty;
+      //string fileData = string.Empty;
 
-      int index = fileManager.OpenPages.IndexOf(activeTab);
-      if (fileManager.UserControls[index] is TextEditorUI)
+      //int index = fileManager.OpenPages.IndexOf(activeTab);
+      //if (fileManager.UserControls[index] is TextEditorUI)
+      //{
+      //  var textEditor = fileManager.UserControls[index] as TextEditorUI;
+      var fileData = textEditor.Text;
+      if (filePath.ToLower().Contains(".pk") && !filePath.ToLower().Contains(".pkw"))
       {
-        var textEditor = fileManager.UserControls[index] as TextEditorUI;
-        fileData = textEditor.Text;
-        if (filePath.ToLower().Contains(".pk") && !filePath.ToLower().Contains(".pkw"))
-        {
-          Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-          File.WriteAllText(filePath, fileData, Encoding.GetEncoding(866));
-        }
-        else
-        {
-          File.WriteAllText(filePath, fileData);
-        }
-        LogInformation($"Файл {filePath} сохранен");
-        MessageBox.Show($"Файл {filePath} сохранен");
-        return true;
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        File.WriteAllText(filePath, fileData, Encoding.GetEncoding(866));
       }
+      else
+      {
+        File.WriteAllText(filePath, fileData);
+      }
+      LogInformation($"Файл {filePath} сохранен");
+      MessageBox.Show($"Файл {filePath} сохранен");
+      return true;
+      //}
 
-      return false;
+      //return false;
     }
 
     /// <summary>
@@ -184,13 +207,14 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="activeTab">Активная вкладка с документом.</param>
     /// <param name="filePath">Путь к файлу.</param>
-    private void RenamePage(OpenFileButton activeTab, string filePath)
+    private void RenamePage(DockItem activeTab, string filePath)
     {
-      var acivePage = fileManager.OpenPages.FirstOrDefault(p => p == activeTab);
-      if (acivePage != null)
-      {
-        activeTab.Header.Text = System.IO.Path.GetFileName(filePath);
-      }
+      //var acivePage = fileManager.OpenPages.FirstOrDefault(p => p == activeTab);
+      //if (acivePage != null)
+      //{
+      activeTab.TabText = System.IO.Path.GetFileName(filePath);
+      activeTab.Title = activeTab.TabText;
+      //}
     }
 
     /// <summary>

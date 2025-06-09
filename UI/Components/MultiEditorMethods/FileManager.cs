@@ -66,12 +66,21 @@ namespace UI.Components.MultiEditorMethods
         }
 
         ManageFilename(path, nameFile, textEditorContainer, textEditor);
+        ShowControl(textEditorContainer);
       }
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
+    }
+
+    private void ShowControl(TextEditorContainer textEditorContainer)
+    {
+      var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
+      var tabButton = new OpenFileButton();
+      tabButton.Header.Text = "Текстовый редактор";
+      controlManager.ShowControl(textEditorContainer, tabButton);
     }
 
     private TextEditorContainer GetTextEditorContainer()
@@ -141,7 +150,14 @@ namespace UI.Components.MultiEditorMethods
         {
           if (textEditorContainer != null)
           {
+            var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
+            var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+            controlManager.RemoveControl(foundPage, textEditor);
             FilePaths.Remove(dockItem.TabText);
+            if (FilePaths.Count == 0)
+            {
+              RemoveTextEditorContainer(textEditorContainer);
+            }
           }
         }
       };
@@ -149,6 +165,13 @@ namespace UI.Components.MultiEditorMethods
       await Task.Delay(1).ConfigureAwait(true);
 
       ShowDockItem(textEditorContainer, dockItem);
+    }
+
+    private void RemoveTextEditorContainer(TextEditorContainer textEditorContainer)
+    {
+      var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
+      var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+      controlManager.RemoveControl(foundPage, textEditorContainer);
     }
 
     private static void ShowDockItem(TextEditorContainer textEditorContainer, DockItem dockItem)
@@ -317,49 +340,49 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="openPage">Объект кнопки, представляющий открытую страницу.</param>
     /// <returns>Возвращает <c>true</c>, если файл не сохранен (содержимое изменилось), <c>false</c> в противном случае.</returns>
-    public bool CompareFiles(OpenFileButton openPage)
+    public bool CompareFiles(DockItem control)
     {
-      var activeTab = OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (activeTab != null)
+      //var activeTab = OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      //if (activeTab != null)
+      //{
+      var fileName = control.Title;
+      //int index = OpenPages.IndexOf(activeTab);
+      if (fileName.Contains(".opk"))
       {
-        var fileName = activeTab.Text;
-        int index = OpenPages.IndexOf(activeTab);
-        if (fileName.Contains(".opk"))
+        return false;
+      }
+      if (FilePaths[fileName] == string.Empty)
+      {
+        if (control.Content is TextEditorUI)
         {
-          return false;
+          var textEditor = control.Content as TextEditorUI;
+          return !string.IsNullOrEmpty(textEditor.Text) && !string.IsNullOrWhiteSpace(textEditor.Text);
         }
-        if (FilePaths[fileName] == string.Empty)
+
+        return false;
+      }
+      else
+      {
+        var filePath = FilePaths[fileName];
+        if (File.Exists(filePath))
         {
-          if (UserControls[index] is TextEditorUI)
+
+          var content = File.ReadAllText(filePath);
+
+          if (control.Content is TextEditorUI)
           {
-            var textEditor = UserControls[index] as TextEditorUI;
-            return !string.IsNullOrEmpty(textEditor.Text) && !string.IsNullOrWhiteSpace(textEditor.Text);
+            var textEditor = control.Content as TextEditorUI;
+            return content != textEditor.Text;
           }
 
           return false;
         }
         else
         {
-          var filePath = FilePaths[fileName];
-          if (File.Exists(filePath))
-          {
-
-            var content = File.ReadAllText(filePath);
-
-            if (UserControls[index] is TextEditorUI)
-            {
-              var textEditor = UserControls[index] as TextEditorUI;
-              return content != textEditor.Text;
-            }
-
-            return false;
-          }
-          else
-          {
-            MessageBox.Show("Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-          }
+          MessageBox.Show("Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         }
       }
+      //}
 
       return false;
     }

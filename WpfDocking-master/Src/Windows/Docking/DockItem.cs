@@ -1189,12 +1189,12 @@ namespace DevZest.Windows.Docking
     /// <returns><see langword="true"/> if <see cref="DockItem"/> is hidden or closed successfully, otherwise, <see langword="false"/>.</returns>
     public bool PerformClose()
     {
-     // TODO: закрытие вкладки 
+      // TODO: закрытие вкладки 
 
       if (HideOnPerformClose)
       {
-        Hide();
         CloseItem?.Invoke(true);
+        Hide();
         return true;
       }
       else
