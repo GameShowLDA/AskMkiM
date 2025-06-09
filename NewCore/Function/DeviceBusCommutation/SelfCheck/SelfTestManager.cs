@@ -475,33 +475,15 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     }
     private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter)
     {
-      Console.ForegroundColor = ConsoleColor.Green;
-      Console.WriteLine("Проверка подключения устройств");
       var result1 = await device.ConnectableManager.InitializeAsync();
       var result2 = await meter.ConnectableManager.InitializeAsync();
-      Console.ForegroundColor = ConsoleColor.White;
 
       if (result1.Connect && result2.Connect)
       {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Оба устройства подключены");
         meterConnect = true;
         dbcConnect = true;
         return true;
       }
-      else if (!result1.Connect)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("УКШ не подключено");
-        Console.ForegroundColor = ConsoleColor.White;
-      }
-      else if (!result2.Connect)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Мультиметр не подключен");
-        Console.ForegroundColor = ConsoleColor.White;
-      }
-      Console.ForegroundColor = ConsoleColor.White;
       return false;
     }
 

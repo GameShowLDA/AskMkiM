@@ -72,31 +72,11 @@ namespace ControlCommandAnalyser.Parsing.Command.Si
       if (block.Lines.Count > 1)
         newBlock.Lines.AddRange(block.Lines.GetRange(1, block.Lines.Count - 1));
 
-      // --- Подсветка ---
-      // Номер команды — синий
-      highlights.Add(new HighlightRange(0, 0, commandNumber.Length, HighlightTarget.CommandNumber)
-      {
-        ColorOverride = Colors.DeepSkyBlue
-      });
-
       // Мнемоника — зелёный если есть напряжение, иначе красный
       highlights.Add(new HighlightRange(0, commandNumber.Length + 1, mnemonic?.Length ?? 0, HighlightTarget.Mnemonic)
       {
         ColorOverride = !string.IsNullOrEmpty(voltage) ? Colors.LightGreen : Colors.Red
       });
-
-      // Напряжение — жёлтый
-      if (!string.IsNullOrEmpty(voltage))
-      {
-        int voltageStart = formattedLine.IndexOf(voltage, StringComparison.OrdinalIgnoreCase);
-        if (voltageStart >= 0)
-        {
-          highlights.Add(new HighlightRange(0, voltageStart, voltage.Length, HighlightTarget.Parameter)
-          {
-            ColorOverride = Colors.Gold
-          });
-        }
-      }
 
       return newBlock;
     }

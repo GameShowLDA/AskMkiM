@@ -18,6 +18,6 @@ namespace ControlCommandAnalyser.Parsing.Model
     public string Mnemonic { get; set; }
 
     /// <summary>Исходный текст (по желанию).</summary>
-    public string SourceLine { get; set; }
+    public string SourceText { get; set; }
   }
 }

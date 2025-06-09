@@ -29,7 +29,7 @@ namespace NewCore.Function.GPT
 
     static private int delayBeforeCall = 100;
 
-    int delay = 300;
+    int delay = 100;
 
     #region Mode
 

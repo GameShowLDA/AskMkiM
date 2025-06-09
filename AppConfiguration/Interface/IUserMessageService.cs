@@ -18,5 +18,7 @@ namespace AppConfiguration.Interface
     Task AppendEmptyLineAsync(int indentLevel = 0);
 
     string Header { get; set; }
+
+    Task<bool> WaitAdminButtonAsync();
   }
 }

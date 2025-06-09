@@ -43,17 +43,8 @@ namespace ControlCommandAnalyser
       foreach (var block in blocks)
       {
         var highlights = new List<HighlightRange>();
-
-        // Подсветка номера команды (всегда DeepSkyBlue)
-        highlights.Add(new HighlightRange(0, 0, block.CommandNumber.Length, HighlightTarget.CommandNumber)
-        {
-          ColorOverride = Colors.DeepSkyBlue
-        });
-
-        // Поиск парсера для этой мнемоники
         var parser = _parserRegistry.FindParser(block.Mnemonic);
 
-        // Подсветка мнемоники: зелёный — есть парсер, серый — нет
         highlights.Add(new HighlightRange(0, block.CommandNumber.Length + 1, block.Mnemonic.Length, HighlightTarget.Mnemonic)
         {
           ColorOverride = parser != null ? Colors.LightGreen : Colors.Gray
@@ -89,7 +80,7 @@ namespace ControlCommandAnalyser
 
       // 2. Парсим и подсвечиваем блоки, получаем новые блоки и подсветку
       var (parsedBlocks, highlightsByBlock) = ParseBlocks(blocks);
-
+        
       // 3. Собираем финальный текст для отображения (используем FormattedLines, если есть)
       var lines = parsedBlocks.SelectMany(b =>
         b.FormattedLines != null && b.FormattedLines.Count > 0

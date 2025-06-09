@@ -1,5 +1,7 @@
-﻿using DataBaseConfiguration.Services;
+﻿using System.Diagnostics;
+using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
+using Mode.Base;
 using NewCore.Base.Interface.Main;
 
 namespace TestConsole.GPT
@@ -14,6 +16,7 @@ namespace TestConsole.GPT
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("1. Проверка подлючения");
         Console.WriteLine("2. Проверка времени нарастания");
+        Console.WriteLine("3. Проверка скорости изменений параметров");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
@@ -31,6 +34,10 @@ namespace TestConsole.GPT
 
           case 2:
             await CheckTimeRamp();
+            break;
+
+          case 3:
+            await CheckTime();
             break;
 
 
@@ -61,6 +68,27 @@ namespace TestConsole.GPT
       }
 
     }
+
+    private static async Task CheckTime()
+    {
+      var breakDown = SelectBreakdownTester();
+      Stopwatch stopwatch = new Stopwatch();
+      stopwatch.Start();
+      await breakDown.ConnectableManager.ConnectAsync();
+      await breakDown.AcwManger.SetModeAsync();
+      await breakDown.AcwManger.SetTestTimeAsync(1);
+      await breakDown.AcwManger.SetRampTimeAsync(1);
+      await breakDown.AcwManger.SetFrequencyAsync(50);
+      await breakDown.AcwManger.SetLowCurrentLimitAsync(0);
+      await breakDown.AcwManger.SetHighCurrentLimitAsync(10);
+      await breakDown.AcwManger.SetVoltageAsync(100);
+      stopwatch.Stop();
+
+      Console.WriteLine($"Ticks: {stopwatch.ElapsedTicks}");
+      Console.WriteLine($"Milliseconds: {stopwatch.ElapsedMilliseconds}");
+      Console.WriteLine($"Seconds: {stopwatch.Elapsed.TotalSeconds:F3}");
+    }
+
 
     private static IBreakdownTester SelectBreakdownTester()
     {

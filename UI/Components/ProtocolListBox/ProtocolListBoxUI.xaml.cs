@@ -124,5 +124,10 @@ namespace UI.Components.ProtocolListBox
     {
       throw new NotImplementedException();
     }
+
+    public Task<bool> WaitAdminButtonAsync()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

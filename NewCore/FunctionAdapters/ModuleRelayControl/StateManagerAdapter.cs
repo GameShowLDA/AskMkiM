@@ -5,6 +5,7 @@ using NewCore.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Base.Device;
 using AppConfiguration.Error.Device;
+using NewCore.Device;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
@@ -51,7 +52,17 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
           1);
 
       if (!result)
-        throw ConnectionExceptionFactory.InitializeFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, answer);
+      {
+        var error = ConnectionExceptionFactory.InitializeFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, answer);
+        if (error != null)
+        {
+          throw error;
+        }
+        else
+        {
+          result = true;
+        }
+      }
 
       return (result, answer);
     }
@@ -69,7 +80,17 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
           1);
 
       if (!result)
-        throw ConnectionExceptionFactory.ResetFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, "Ошибка выполнения команды");
+      {
+        var error = ConnectionExceptionFactory.ResetFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, "Ошибка выполнения команды");
+        if (error != null)
+        {
+          throw error;
+        }
+        else
+        {
+          result = true;
+        }
+      }
 
       return result;
     }
