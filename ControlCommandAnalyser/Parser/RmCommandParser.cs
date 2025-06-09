@@ -31,7 +31,6 @@ namespace ControlCommandAnalyser.Parser
           sb.AppendLine(line);
       }
 
-      // Используем универсальный парсер
       var pairs = RmExpressionParser.ParseAllExpressions(sb.ToString());
 
       foreach (var pair in pairs)

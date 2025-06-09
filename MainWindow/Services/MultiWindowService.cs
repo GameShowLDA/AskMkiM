@@ -102,7 +102,7 @@ namespace MainWindowProgram.Services
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
 
-      var editor = new TextEditorUI
+      var editor = new TextEditorUI(TextEditorUI.FileType.OPKW)
       {
         Text = "// Результат трансляции появится здесь...",
         IsReadOnly = true

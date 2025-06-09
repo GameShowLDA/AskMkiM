@@ -19,6 +19,15 @@ namespace UI.Controls.TextEditor
   /// </summary>
   public partial class TextEditorUI : UserControl, ITextEditorAdapter
   {
+    public enum FileType
+    {
+      None,
+      PK,
+      PKW,
+      OPK,
+      OPKW
+    }
+
     /// <summary>
     /// Экземпляр <see cref="MultiEditorControl"/>, используемый для работы с вкладками редактора.
     /// </summary>
@@ -83,7 +92,7 @@ namespace UI.Controls.TextEditor
     /// <remarks>
     /// Этот конструктор вызывается при создании экземпляра класса. Он инициализирует компоненты UI и подготавливает текстовый редактор для работы.
     /// </remarks>
-    public TextEditorUI()
+    public TextEditorUI(FileType fileType = FileType.None)
     {
       InitializeComponent();
 
@@ -107,14 +116,27 @@ namespace UI.Controls.TextEditor
           Console.WriteLine("⚠ TextMarkerService уже инициализирован.");
         }
 
-        using (var stream = File.OpenRead("MKI.xshd"))
-        using (var reader = new XmlTextReader(stream))
+        string xshdFile = fileType switch
         {
-          textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-        }
+          FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
+          FileType.PK or FileType.PKW => "MKI_PK.xshd",
+          _ => "MKI.xshd"
+        };
 
-        LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
+        if (fileType != FileType.None)
+        {
+          using (var stream = File.OpenRead(xshdFile))
+          using (var reader = new XmlTextReader(stream))
+          {
+            textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+          }
+          LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
+        }
       };
+    }
+    public TextEditorUI() : this(FileType.None)
+    {
+
     }
 
     /// <summary>
@@ -385,9 +407,10 @@ namespace UI.Controls.TextEditor
 
         Color color = range.ColorOverride ?? range.Target switch
         {
-          HighlightTarget.CommandNumber => Colors.DeepSkyBlue,
-          HighlightTarget.Mnemonic => Colors.LightGreen,
-          _ => Colors.Transparent
+          HighlightTarget.Parameter     => Color.FromRgb(255, 193, 7),
+          HighlightTarget.RmPoint       => Color.FromRgb(0, 188, 212), // Бирюзовый
+          HighlightTarget.RmAddress          => Color.FromRgb(255, 111, 0), // Оранжевый
+          _                             => Colors.Transparent
         };
 
         LogDebug($"✅ Добавлена подсветка: StartOffset={startOffset}, Length={safeLength}, Цвет={color}");

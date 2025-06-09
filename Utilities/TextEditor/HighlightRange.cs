@@ -53,6 +53,9 @@ namespace Utilities.TextEditor
   {
     CommandNumber,
     Mnemonic,
-    Parameter
+    Parameter,
+
+    RmPoint,
+    RmAddress, 
   }
 }
