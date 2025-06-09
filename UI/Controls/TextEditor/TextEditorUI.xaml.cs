@@ -1,20 +1,16 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using ControlCommandAnalyser.Parsing;
-using ICSharpCode.AvalonEdit;
+using System.Xml;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
-using NLog;
 using UI.Components;
-using UI.Components.SearchControls;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
-using ICSharpCode.AvalonEdit.Highlighting;
-using System.Xml;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using System.IO;
 
 namespace UI.Controls.TextEditor
 {
@@ -111,12 +107,12 @@ namespace UI.Controls.TextEditor
           Console.WriteLine("⚠ TextMarkerService уже инициализирован.");
         }
 
-       using (var stream = File.OpenRead("MKI.xshd"))
-       using (var reader = new XmlTextReader(stream))
-       {
-         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-       }
-       
+        using (var stream = File.OpenRead("MKI.xshd"))
+        using (var reader = new XmlTextReader(stream))
+        {
+          textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        }
+
         LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
       };
     }
@@ -161,7 +157,7 @@ namespace UI.Controls.TextEditor
       if (string.IsNullOrEmpty(textToHighlight))
       {
         return;
-      }  
+      }
 
       if (_markerService == null)
       {
@@ -283,11 +279,11 @@ namespace UI.Controls.TextEditor
       if (e.Data.GetDataPresent(DataFormats.FileDrop))
       {
         textEditor.Background = (Brush)FindResource("ActiveBorderSolidColorBrush");
-        e.Effects = DragDropEffects.Copy; 
+        e.Effects = DragDropEffects.Copy;
       }
       else
       {
-        e.Effects = DragDropEffects.None; 
+        e.Effects = DragDropEffects.None;
       }
     }
 

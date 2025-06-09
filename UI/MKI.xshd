@@ -12,7 +12,7 @@
 
 	<RuleSet ignoreCase="false">
 
-		<Rule color="CommandNumber">^\s*\d+</Rule>
+		<Rule color="CommandNumber">^\s*\d+\b</Rule>
 
 		<!--Мнемоника-->
 		<Rule color="Mnemonic">\bСИ\b</Rule>
