@@ -1,13 +1,15 @@
-﻿using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Xml;
-using ICSharpCode.AvalonEdit.Document;
+﻿using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Xml;
 using UI.Components;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
@@ -27,6 +29,15 @@ namespace UI.Controls.TextEditor
       OPK,
       OPKW
     }
+
+    private FileType FileTypeDock { get; set; }
+
+    private FoldingManager foldingManager;
+    private OpkwFoldingStrategy foldingStrategy = new OpkwFoldingStrategy();
+
+    private bool _ctrlMPressed = false;
+    private DateTime _lastCtrlMTime = DateTime.MinValue;
+    private const int CtrlMTimeoutMs = 1000; // 1 секунда на повторное нажатие
 
     /// <summary>
     /// Экземпляр <see cref="MultiEditorControl"/>, используемый для работы с вкладками редактора.
@@ -53,7 +64,15 @@ namespace UI.Controls.TextEditor
     public string Text
     {
       get => textEditor.Text;
-      set => textEditor.Text = value;
+      set
+      {
+        textEditor.Text = value;
+
+        if (FileTypeDock == FileType.OPKW)
+        {
+          InitializeFolding();
+        }
+      }
     }
 
     /// <summary>
@@ -86,6 +105,15 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    private void InitializeFolding()
+    {
+      if (foldingManager == null)
+        foldingManager = FoldingManager.Install(textEditor.TextArea);
+
+      foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
+    }
+
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
     /// </summary>
@@ -95,6 +123,8 @@ namespace UI.Controls.TextEditor
     public TextEditorUI(FileType fileType = FileType.None)
     {
       InitializeComponent();
+      FileTypeDock = fileType;
+      textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
 
       Loaded += (s, e) =>
       {
@@ -132,8 +162,52 @@ namespace UI.Controls.TextEditor
           }
           LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
         }
+
       };
     }
+    private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      // Отслеживаем Ctrl+M
+      if (e.Key == Key.M && Keyboard.Modifiers == ModifierKeys.Control)
+      {
+        var now = DateTime.Now;
+        if (_ctrlMPressed && (now - _lastCtrlMTime).TotalMilliseconds < CtrlMTimeoutMs)
+        {
+          // Второе нажатие Ctrl+M — свернуть/развернуть текущий блок
+          ToggleCurrentFolding();
+          _ctrlMPressed = false;
+          e.Handled = true;
+        }
+        else
+        {
+          // Первое нажатие Ctrl+M
+          _ctrlMPressed = true;
+          _lastCtrlMTime = now;
+          e.Handled = true;
+        }
+        return;
+      }
+      // Если нажата любая другая клавиша — сбрасываем
+      if (e.Key != Key.M)
+      {
+        _ctrlMPressed = false;
+      }
+    }
+
+    private void ToggleCurrentFolding()
+    {
+      if (foldingManager == null) return;
+      int caretOffset = textEditor.CaretOffset;
+      foreach (var folding in foldingManager.AllFoldings)
+      {
+        if (folding.StartOffset <= caretOffset && caretOffset < folding.EndOffset)
+        {
+          folding.IsFolded = !folding.IsFolded;
+          break;
+        }
+      }
+    }
+
     public TextEditorUI() : this(FileType.None)
     {
 
@@ -407,10 +481,10 @@ namespace UI.Controls.TextEditor
 
         Color color = range.ColorOverride ?? range.Target switch
         {
-          HighlightTarget.Parameter     => Color.FromRgb(255, 193, 7),
-          HighlightTarget.RmPoint       => Color.FromRgb(0, 188, 212), // Бирюзовый
-          HighlightTarget.RmAddress          => Color.FromRgb(255, 111, 0), // Оранжевый
-          _                             => Colors.Transparent
+          HighlightTarget.Parameter => Color.FromRgb(255, 193, 7),
+          HighlightTarget.RmPoint => Color.FromRgb(0, 188, 212), // Бирюзовый
+          HighlightTarget.RmAddress => Color.FromRgb(255, 111, 0), // Оранжевый
+          _ => Colors.Transparent
         };
 
         LogDebug($"✅ Добавлена подсветка: StartOffset={startOffset}, Length={safeLength}, Цвет={color}");
