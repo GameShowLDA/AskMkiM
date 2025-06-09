@@ -37,9 +37,6 @@ namespace ControlCommandAnalyser.Parser
       foreach (var pair in pairs)
         model.PointsMap[pair.OkPoint] = pair.AskInput;
 
-      // Если нужно — можешь также добавить синонимы в отдельную структуру
-      // или заполнять расширенный список сопоставлений
-
       return model;
     }
   }

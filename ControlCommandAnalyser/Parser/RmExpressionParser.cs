@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ControlCommandAnalyser.Model;
+using static Utilities.LoggerUtility;
 
 namespace ControlCommandAnalyser.Parser
 {
-  public class RmPairModel
-  {
-    public string OkPoint { get; set; }
-    public string? Synonym { get; set; }
-    public string AskInput { get; set; }
-  }
-
+  /// <summary>
+  /// Класс для парсинга выражений RM (Remote Monitoring) и преобразования их в модели <see cref="RmPairModel"/>.
+  /// Поддерживает обработку диапазонов, синонимов, составных выражений и других сложных форматов.
+  /// </summary>
   public static class RmExpressionParser
   {
+    /// <summary>
+    /// Парсит все выражения из блока RM и возвращает список моделей <see cref="RmPairModel"/>.
+    /// </summary>
+    /// <param name="rmBlock">Текстовый блок с выражениями RM.</param>
+    /// <returns>Список моделей <see cref="RmPairModel"/>.</returns>
     public static List<RmPairModel> ParseAllExpressions(string rmBlock)
     {
       var expressions = SplitExpressions(rmBlock);
@@ -22,91 +25,137 @@ namespace ControlCommandAnalyser.Parser
 
       foreach (var expr in expressions)
       {
-        // Парсим: левые == синонимы = правые    или   левые = правые
-        string left, right, middle = null;
-        var synMatch = Regex.Match(expr, @"^(.*?)==\s*(.*?)=(.*)$");
-        if (synMatch.Success)
-        {
-          left = synMatch.Groups[1].Value.Trim();
-          middle = synMatch.Groups[2].Value.Trim();
-          right = synMatch.Groups[3].Value.Trim();
-        }
-        else
-        {
-          var basicMatch = Regex.Match(expr, @"^(.*?)=(.*)$");
-          if (!basicMatch.Success) continue;
-          left = basicMatch.Groups[1].Value.Trim();
-          right = basicMatch.Groups[2].Value.Trim();
-        }
-
-        // Бракуем если левая или правая часть пуста
-        if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
-          continue;
-
-        // ==== СПЕЦОБРАБОТКА ГРУППОВЫХ ДИАПАЗОНОВ ====
-        // Левый диапазон: a-b (например, 101-300)
-        var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
-        // Правый составной: X.[a,b].Y-Z (например, 1.[3,5].1-100)
-        var rightMatch = Regex.Match(right, @"^(\d+)\.\[([^\]]+)\]\.(\d+)-(\d+)$");
-        if (leftMatch.Success && rightMatch.Success)
-        {
-          int leftFrom = int.Parse(leftMatch.Groups[1].Value);
-          int leftTo = int.Parse(leftMatch.Groups[2].Value);
-          int leftTotal = leftTo - leftFrom + 1;
-
-          int rightPrefix = int.Parse(rightMatch.Groups[1].Value);
-          var midList = rightMatch.Groups[2].Value.Split(',').Select(x => int.Parse(x.Trim())).ToList();
-          int rightStart = int.Parse(rightMatch.Groups[3].Value);
-          int rightEnd = int.Parse(rightMatch.Groups[4].Value);
-
-          int groupCount = midList.Count;
-          int groupSize = leftTotal / groupCount;
-          if (groupSize * groupCount != leftTotal)
-            throw new Exception("Нельзя разбить диапазон слева на равные группы под массив справа!");
-
-          int leftPtr = leftFrom;
-          foreach (var mid in midList)
-          {
-            for (int i = 0; i < groupSize; i++)
-            {
-              int rightNum = rightStart + i;
-              if (rightNum > rightEnd)
-                throw new Exception("Правая группа короче, чем левая!");
-
-              result.Add(new RmPairModel
-              {
-                OkPoint = (leftPtr++).ToString(),
-                Synonym = middle, // Не поддерживаем синонимы в таких записях (можно расширить при необходимости)
-                AskInput = $"{rightPrefix}.{mid}.{rightNum}"
-              });
-            }
-          }
-          continue; // Всё, обработано!
-        }
-        // ==== / СПЕЦОБРАБОТКА ====
-
-        // Обычная логика:
-        var leftList = ExpandAll(left);
-        var rightList = ExpandAll(right);
-        var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle) : null;
-
-        if ((middleList != null && (leftList.Count != rightList.Count || leftList.Count != middleList.Count))
-            || (middleList == null && leftList.Count != rightList.Count))
-          throw new Exception($"Количество точек ОК, синонимов и входов должно совпадать!\n{expr}");
-
-        for (int i = 0; i < leftList.Count; i++)
-        {
-          result.Add(new RmPairModel
-          {
-            OkPoint = leftList[i],
-            Synonym = middleList != null ? middleList[i] : null,
-            AskInput = rightList[i]
-          });
-        }
+        ParseExpression(expr, result);
       }
+
       return result;
     }
 
+    /// <summary>
+    /// Парсит одно выражение и добавляет результаты в список моделей.
+    /// </summary>
+    /// <param name="expr">Выражение для парсинга.</param>
+    /// <param name="result">Список для добавления результатов.</param>
+    private static void ParseExpression(string expr, List<RmPairModel> result)
+    {
+      string left, right, middle = null;
+
+      if (TryParseSynonymExpression(expr, out left, out middle, out right))
+      {
+        ProcessExpression(left, middle, right, result);
+      }
+      else if (TryParseBasicExpression(expr, out left, out right))
+      {
+        ProcessExpression(left, null, right, result);
+      }
+      else
+      {
+        throw new Exception($"Не удалось распознать выражение: {expr}");
+      }
+    }
+
+    /// <summary>
+    /// Пытается распознать выражение с синонимами (формат: "левое == синоним = правое").
+    /// </summary>
+    /// <param name="expr">Выражение для парсинга.</param>
+    /// <param name="left">Левая часть выражения.</param>
+    /// <param name="middle">Синоним (средняя часть выражения).</param>
+    /// <param name="right">Правая часть выражения.</param>
+    /// <returns>True, если выражение успешно распознано; иначе False.</returns>
+    private static bool TryParseSynonymExpression(string expr, out string left, out string middle, out string right)
+    {
+      var synMatch = Regex.Match(expr, @"^(.*?)==\s*(.*?)=(.*)$");
+      if (synMatch.Success)
+      {
+        left = synMatch.Groups[1].Value.Trim();
+        middle = synMatch.Groups[2].Value.Trim();
+        right = synMatch.Groups[3].Value.Trim();
+
+        // Если средняя часть (middle) пуста, это не синонимное выражение
+        if (string.IsNullOrWhiteSpace(middle))
+        {
+          left = right = middle = null;
+          return false;
+        }
+
+        return true;
+      }
+
+      left = middle = right = null;
+      return false;
+    }
+
+    /// <summary>
+    /// Пытается распознать базовое выражение (формат: "левое = правое").
+    /// </summary>
+    /// <param name="expr">Выражение для парсинга.</param>
+    /// <param name="left">Левая часть выражения.</param>
+    /// <param name="right">Правая часть выражения.</param>
+    /// <returns>True, если выражение успешно распознано; иначе False.</returns>
+    private static bool TryParseBasicExpression(string expr, out string left, out string right)
+    {
+      var basicMatch = Regex.Match(expr, @"^(.*?)=(.*)$");
+      if (basicMatch.Success)
+      {
+        left = basicMatch.Groups[1].Value.Trim();
+        right = basicMatch.Groups[2].Value.Trim();
+        return true;
+      }
+
+      left = right = null;
+      return false;
+    }
+
+    /// <summary>
+    /// Обрабатывает выражение, расширяет диапазоны и добавляет результаты в список моделей.
+    /// </summary>
+    /// <param name="left">Левая часть выражения.</param>
+    /// <param name="middle">Синоним (средняя часть выражения).</param>
+    /// <param name="right">Правая часть выражения.</param>
+    /// <param name="result">Список для добавления результатов.</param>
+    private static void ProcessExpression(string left, string middle, string right, List<RmPairModel> result)
+    {
+      if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
+        throw new Exception($"Левая или правая часть выражения пуста: {left} == {middle} = {right}");
+
+      LogDebug($"[ProcessExpression] Left: {left}, Middle: {middle}, Right: {right}");
+
+      if (TryProcessGroupedRanges(left, right, middle, result))
+        return;
+
+      var leftList = ExpandAll(left);
+      var rightList = ExpandAll(right);
+      var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle) : Enumerable.Repeat<string?>(null, leftList.Count).ToList();
+
+      // Диагностика: выводим размеры списков
+      LogDebug($"[ProcessExpression] Expanded Left: {string.Join(", ", leftList)} (Count: {leftList.Count})");
+      LogDebug($"[ProcessExpression] Expanded Right: {string.Join(", ", rightList)} (Count: {rightList.Count})");
+
+      // Проверяем соответствие размеров списков
+      if (leftList.Count != rightList.Count)
+      {
+        throw new Exception($"Количество точек ОК и входов должно совпадать!\n" +
+                            $"Левая часть: {string.Join(", ", leftList)} (количество: {leftList.Count})\n" +
+                            $"Правая часть: {string.Join(", ", rightList)} (количество: {rightList.Count})");
+      }
+
+      for (int i = 0; i < leftList.Count; i++)
+      {
+        result.Add(new RmPairModel
+        {
+          OkPoint = leftList[i],
+          Synonym = middleList[i],
+          AskInput = rightList[i]
+        });
+      }
+    }
+
+
+    /// <summary>
+    /// Разделяет текстовый блок на отдельные выражения.
+    /// </summary>
+    /// <param name="input">Текстовый блок.</param>
+    /// <returns>Список выражений.</returns>
     public static List<string> SplitExpressions(string input)
     {
       var rawLines = input.Replace("\r", "").Split('\n');
@@ -124,50 +173,91 @@ namespace ControlCommandAnalyser.Parser
       return result;
     }
 
-    // Все остальные вспомогательные методы (ExpandAll, ExpandRange, ExpandComponent, CartesianProduct) — точно такие же, как выше!
-    // ...
+    /// <summary>
+    /// Расширяет выражение, обрабатывая диапазоны, массивы и составные части.
+    /// </summary>
+    /// <param name="expr">Выражение для расширения.</param>
+    /// <returns>Список расширенных значений.</returns>
     public static List<string> ExpandAll(string expr)
     {
       var result = new List<string>();
       expr = expr.Trim();
 
-      // Если точка внутри диапазона (например, 1.6.2-20(2)), парсим составные!
+      LogDebug($"[ExpandAll] Processing expression: {expr}");
+
+      // Если выражение содержит квадратные скобки, пытаемся их обработать
+      if (TryExpandBracketedRanges(expr, result))
+      {
+        LogDebug($"[ExpandAll] Bracketed range expanded: {expr} -> {string.Join(", ", result)}");
+        return result;
+      }
+
+      // Если выражение содержит запятые, разделяем его на части
+      if (expr.Contains(","))
+      {
+        var parts = expr.Split(',').Select(part => part.Trim()).ToList();
+        foreach (var part in parts)
+        {
+          result.AddRange(ExpandAll(part)); // Рекурсивно обрабатываем каждую часть
+        }
+        LogDebug($"[ExpandAll] Comma-separated values expanded: {expr} -> {string.Join(", ", result)}");
+        return result;
+      }
+
+      if (TryExpandCompositeRanges(expr, result))
+      {
+        LogDebug($"[ExpandAll] Composite range expanded: {expr} -> {string.Join(", ", result)}");
+        return result;
+      }
+
+      if (TryExpandDelimitedRanges(expr, result))
+      {
+        LogDebug($"[ExpandAll] Delimited range expanded: {expr} -> {string.Join(", ", result)}");
+        return result;
+      }
+
+      result.Add(expr);
+      LogDebug($"[ExpandAll] Single value: {expr}");
+      return result;
+    }
+
+
+
+    /// <summary>
+    /// Пытается расширить составные диапазоны (например, "1.1-3.5").
+    /// </summary>
+    private static bool TryExpandCompositeRanges(string expr, List<string> result)
+    {
       var compParts = expr.Split('.');
       if (compParts.Length > 1 && compParts.Any(p => p.Contains('-')))
       {
         var ranges = compParts.Select(ExpandComponent).ToList();
         foreach (var tuple in CartesianProduct(ranges))
           result.Add(string.Join(".", tuple));
-        return result;
+        return true;
       }
-
-      // Обработка диапазона формата 1.1.60-78
-      var dotRange = Regex.Match(expr, @"^([\d\.]+)\-(\d+)$");
-      if (dotRange.Success && expr.Contains('.'))
-      {
-        var prefix = dotRange.Groups[1].Value;
-        var prefixParts = prefix.Split('.').ToList();
-        int from = int.Parse(prefixParts.Last());
-        int to = int.Parse(dotRange.Groups[2].Value);
-        prefixParts.RemoveAt(prefixParts.Count - 1);
-        var prefixStr = string.Join(".", prefixParts);
-
-        int sign = to >= from ? 1 : -1;
-        for (int n = from; sign > 0 ? n <= to : n >= to; n += sign)
-          result.Add($"{prefixStr}.{n}");
-        return result;
-      }
-
-      // Массив в скобках: [a,b,c] или [3-5]
+      return false;
+    }
+    /// <summary>
+    /// Пытается расширить диапазоны в квадратных скобках (например, "[1-3,5]" или "X[20,30]/1").
+    /// </summary>
+    private static bool TryExpandBracketedRanges(string expr, List<string> result)
+    {
       var bracketRegex = new Regex(@"\[([^\[\]]+)\]");
       var match = bracketRegex.Match(expr);
       if (match.Success)
       {
-        string suffix = expr.Substring(match.Index + match.Length);
+        // Разделяем выражение на части: до скобок, содержимое скобок и после скобок
+        string prefix = expr.Substring(0, match.Index).Trim();
+        string suffix = expr.Substring(match.Index + match.Length).Trim();
         var itemsRaw = match.Groups[1].Value.Split(',').Select(s => s.Trim());
+
+        // Создаем список для хранения промежуточных результатов
+        var expandedItems = new List<string>();
+
         foreach (var item in itemsRaw)
         {
-          // Диапазон внутри скобок (например, [3-5])
+          // Если элемент внутри скобок является диапазоном, разворачиваем его
           var diap = Regex.Match(item, @"^(\d+)-(\d+)$");
           if (diap.Success)
           {
@@ -175,26 +265,29 @@ namespace ControlCommandAnalyser.Parser
             int to = int.Parse(diap.Groups[2].Value);
             int sign = to >= from ? 1 : -1;
             for (int n = from; sign > 0 ? n <= to : n >= to; n += sign)
-              result.Add(n.ToString() + suffix);
+            {
+              expandedItems.Add($"{prefix}{n}{suffix}");
+            }
           }
           else
           {
-            result.Add(item + suffix);
+            // Если элемент не является диапазоном, добавляем его с префиксом и суффиксом
+            expandedItems.Add($"{prefix}{item}{suffix}");
           }
         }
-        return result;
-      }
 
-      // Парсим запятые на верхнем уровне
-      var parts = expr.Split(',').Select(s => s.Trim()).ToList();
-      if (parts.Count > 1)
-      {
-        foreach (var part in parts)
-          result.AddRange(ExpandAll(part));
-        return result;
+        // Добавляем все результаты в итоговый список
+        result.AddRange(expandedItems);
+        return true;
       }
+      return false;
+    }
 
-      // Диапазоны с "буква/от-до" (например, Х1/А1-А30)
+    /// <summary>
+    /// Пытается расширить диапазоны с разделителями (например, "X1/1-3").
+    /// </summary>
+    private static bool TryExpandDelimitedRanges(string expr, List<string> result)
+    {
       var diap2 = Regex.Match(expr, @"^([^\s/=]+/)?([^\s/=]+)-([^\s/=]+)$");
       if (diap2.Success)
       {
@@ -202,79 +295,62 @@ namespace ControlCommandAnalyser.Parser
         string from = diap2.Groups[2].Value;
         string to = diap2.Groups[3].Value;
         result.AddRange(ExpandRange(prefix, from, to));
-        return result;
+        return true;
       }
-
-      // Просто число или просто слово
-      result.Add(expr);
-      return result;
+      return false;
     }
 
-    public static List<string> ExpandRange(string prefix, string from, string to)
+    /// <summary>
+    /// Расширяет числовые и буквенные диапазоны.
+    /// </summary>
+    public static List<string> ExpandRange(string prefix, string from, string to, int step = 1)
     {
       var result = new List<string>();
-      // Проверка на шаг: формат "N-M(Step)"
-      var mStep = Regex.Match(to, @"^(\d+)\((\d+)\)$");
-      int step = 1;
-      string toValue = to;
-      if (mStep.Success)
-      {
-        toValue = mStep.Groups[1].Value;
-        step = int.Parse(mStep.Groups[2].Value);
-      }
 
-      // Новый блок: поддержка префикса с двоеточием!
-      // from: XS1:1, to: 10
-      var preDiap = Regex.Match(from, @"^(.*:)?(\d+)$");
-      if (preDiap.Success)
-      {
-        string pre = preDiap.Groups[1].Success ? preDiap.Groups[1].Value : "";
-        string fromNum = preDiap.Groups[2].Value;
-        if (int.TryParse(fromNum, out int nFrom) && int.TryParse(toValue, out int nTo))
-        {
-          int sign = nTo >= nFrom ? 1 : -1;
-          for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
-            result.Add($"{pre}{n}");
-          return result;
-        }
-      }
+      if (TryExpandLetterRanges(prefix, from, to, step, result))
+        return result;
 
-      // ...дальше твоя стандартная логика...
-      if (int.TryParse(from, out int nFrom2) && int.TryParse(toValue, out int nTo2))
+      if (int.TryParse(from, out int nFrom) && int.TryParse(to, out int nTo))
       {
-        int sign = nTo2 >= nFrom2 ? 1 : -1;
-        for (int n = nFrom2; sign > 0 ? n <= nTo2 : n >= nTo2; n += sign * step)
+        int sign = nTo >= nFrom ? 1 : -1;
+        for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
           result.Add($"{prefix}{n}");
       }
       else
       {
-        // Буквенные диапазоны (оставь как было)
-        var rg = new Regex(@"^([А-ЯA-Z]+)(\d+)$");
-        var mFrom2 = rg.Match(from);
-        var mTo2 = rg.Match(toValue);
-        if (mFrom2.Success && mTo2.Success)
-        {
-          var letter = mFrom2.Groups[1].Value;
-          int nFrom3 = int.Parse(mFrom2.Groups[2].Value);
-          int nTo3 = int.Parse(mTo2.Groups[2].Value);
-          int sign = nTo3 >= nFrom3 ? 1 : -1;
-          for (int n = nFrom3; sign > 0 ? n <= nTo3 : n >= nTo3; n += sign * step)
-            result.Add($"{prefix}{letter}{n}");
-        }
-        else
-        {
-          result.Add($"{prefix}{from}-{to}");
-        }
+        result.Add($"{prefix}{from}-{to}");
       }
+
       return result;
     }
 
+    /// <summary>
+    /// Пытается расширить буквенные диапазоны (например, "A1-A3").
+    /// </summary>
+    private static bool TryExpandLetterRanges(string prefix, string from, string to, int step, List<string> result)
+    {
+      var rg = new Regex(@"^([А-ЯA-Z]+)(\d+)$");
+      var mFrom = rg.Match(from);
+      var mTo = rg.Match(to);
+      if (mFrom.Success && mTo.Success)
+      {
+        var letter = mFrom.Groups[1].Value;
+        int nFrom = int.Parse(mFrom.Groups[2].Value);
+        int nTo = int.Parse(mTo.Groups[2].Value);
+        int sign = nTo >= nFrom ? 1 : -1;
+        for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
+          result.Add($"{prefix}{letter}{n}");
+        return true;
+      }
+      return false;
+    }
 
-
+    /// <summary>
+    /// Расширяет компонент диапазона (например, "1-3").
+    /// </summary>
     public static List<string> ExpandComponent(string part)
     {
       part = part.Trim();
-      // Поддержка шага (N-M(Step)) внутри компонента!
       var diap = Regex.Match(part, @"^([^\s/=]+)-([^\s/=]+)(?:\((\d+)\))?$");
       if (diap.Success)
       {
@@ -287,59 +363,9 @@ namespace ControlCommandAnalyser.Parser
         return new List<string> { part };
     }
 
-    public static List<string> ExpandRange(string prefix, string from, string to, int step = 1)
-    {
-      var result = new List<string>();
-
-      // Поддержка префикса с двоеточием!
-      var preDiap = Regex.Match(from, @"^(.*:)?(\d+)$");
-      if (preDiap.Success)
-      {
-        string pre = preDiap.Groups[1].Success ? preDiap.Groups[1].Value : "";
-        string fromNum = preDiap.Groups[2].Value;
-        // Парсим to — если вдруг to содержит скобки (шаг), отделяем число
-        var mTo = Regex.Match(to, @"^(\d+)(?:\((\d+)\))?$");
-        string toNum = mTo.Success ? mTo.Groups[1].Value : to;
-        int mStep = mTo.Success && mTo.Groups[2].Success ? int.Parse(mTo.Groups[2].Value) : step;
-        if (int.TryParse(fromNum, out int nFrom) && int.TryParse(toNum, out int nTo))
-        {
-          int sign = nTo >= nFrom ? 1 : -1;
-          for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * mStep)
-            result.Add($"{pre}{n}");
-          return result;
-        }
-      }
-
-      // Просто числовой диапазон
-      if (int.TryParse(from, out int nFrom2) && int.TryParse(to, out int nTo2))
-      {
-        int sign = nTo2 >= nFrom2 ? 1 : -1;
-        for (int n = nFrom2; sign > 0 ? n <= nTo2 : n >= nTo2; n += sign * step)
-          result.Add($"{prefix}{n}");
-      }
-      else
-      {
-        // Буквенные диапазоны
-        var rg = new Regex(@"^([А-ЯA-Z]+)(\d+)$");
-        var mFrom2 = rg.Match(from);
-        var mTo2 = rg.Match(to);
-        if (mFrom2.Success && mTo2.Success)
-        {
-          var letter = mFrom2.Groups[1].Value;
-          int nFrom3 = int.Parse(mFrom2.Groups[2].Value);
-          int nTo3 = int.Parse(mTo2.Groups[2].Value);
-          int sign = nTo3 >= nFrom3 ? 1 : -1;
-          for (int n = nFrom3; sign > 0 ? n <= nTo3 : n >= nTo3; n += sign * step)
-            result.Add($"{prefix}{letter}{n}");
-        }
-        else
-        {
-          result.Add($"{prefix}{from}-{to}");
-        }
-      }
-      return result;
-    }
-
+    /// <summary>
+    /// Генерирует декартово произведение списков.
+    /// </summary>
     public static IEnumerable<List<string>> CartesianProduct(List<List<string>> sequences)
     {
       IEnumerable<List<string>> result = new List<List<string>> { new List<string>() };
@@ -350,6 +376,63 @@ namespace ControlCommandAnalyser.Parser
                  select new List<string>(seq) { item };
       }
       return result;
+    }
+
+    /// <summary>
+    /// Пытается обработать выражение с групповыми диапазонами (например, "101-300=1.[3,5].1-100").
+    /// </summary>
+    /// <param name="left">Левая часть выражения.</param>
+    /// <param name="right">Правая часть выражения.</param>
+    /// <param name="middle">Синоним (средняя часть выражения).</param>
+    /// <param name="result">Список для добавления результатов.</param>
+    /// <returns>True, если выражение успешно обработано; иначе False.</returns>
+    private static bool TryProcessGroupedRanges(string left, string right, string middle, List<RmPairModel> result)
+    {
+      // Регулярное выражение для левой части (диапазон чисел, например, "101-300")
+      var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
+      // Регулярное выражение для правой части (составной диапазон, например, "1.[3,5].1-100")
+      var rightMatch = Regex.Match(right, @"^(\d+)\.\[([^\]]+)\]\.(\d+)-(\d+)$");
+
+      if (leftMatch.Success && rightMatch.Success)
+      {
+        // Парсим левую часть
+        int leftFrom = int.Parse(leftMatch.Groups[1].Value);
+        int leftTo = int.Parse(leftMatch.Groups[2].Value);
+        int leftTotal = leftTo - leftFrom + 1;
+
+        // Парсим правую часть
+        int rightPrefix = int.Parse(rightMatch.Groups[1].Value);
+        var midList = rightMatch.Groups[2].Value.Split(',').Select(x => int.Parse(x.Trim())).ToList();
+        int rightStart = int.Parse(rightMatch.Groups[3].Value);
+        int rightEnd = int.Parse(rightMatch.Groups[4].Value);
+
+        // Проверяем, можно ли разбить левую часть на группы
+        int groupCount = midList.Count;
+        int groupSize = leftTotal / groupCount;
+        if (groupSize * groupCount != leftTotal)
+          throw new Exception("Нельзя разбить диапазон слева на равные группы под массив справа!");
+
+        int leftPtr = leftFrom;
+        foreach (var mid in midList)
+        {
+          for (int i = 0; i < groupSize; i++)
+          {
+            int rightNum = rightStart + i;
+            if (rightNum > rightEnd)
+              throw new Exception("Правая группа короче, чем левая!");
+
+            result.Add(new RmPairModel
+            {
+              OkPoint = (leftPtr++).ToString(),
+              Synonym = middle, // Не поддерживаем синонимы в таких записях (можно расширить при необходимости)
+              AskInput = $"{rightPrefix}.{mid}.{rightNum}"
+            });
+          }
+        }
+        return true;
+      }
+
+      return false;
     }
   }
 }

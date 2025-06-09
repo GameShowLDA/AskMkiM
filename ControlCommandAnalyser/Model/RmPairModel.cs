@@ -11,6 +11,13 @@ namespace ControlCommandAnalyser.Model
     public string OkPoint { get; set; }
     public string? Synonym { get; set; }
     public string AskInput { get; set; }
+
+    public override string ToString()
+    {
+      return Synonym != null
+          ? $"{OkPoint}({Synonym}) => {AskInput}"
+          : $"{OkPoint} => {AskInput}";
+    }
   }
 
 }
