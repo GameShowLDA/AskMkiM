@@ -83,7 +83,7 @@ namespace UI.Components.MultiEditorMethods
       controlManager.ShowControl(textEditorContainer, tabButton);
     }
 
-    private TextEditorContainer GetTextEditorContainer()
+    public TextEditorContainer GetTextEditorContainer()
     {
       TextEditorContainer textEditorContainer = TextEditorContainerExists();
       if (textEditorContainer == null)
@@ -174,7 +174,7 @@ namespace UI.Components.MultiEditorMethods
       controlManager.RemoveControl(foundPage, textEditorContainer);
     }
 
-    private static void ShowDockItem(TextEditorContainer textEditorContainer, DockItem dockItem)
+    public void ShowDockItem(TextEditorContainer textEditorContainer, DockItem dockItem)
     {
       try
       {
@@ -200,14 +200,8 @@ namespace UI.Components.MultiEditorMethods
 
     private TextEditorContainer TextEditorContainerExists()
     {
-      foreach (var userControl in UserControls)
-      {
-        if (userControl is TextEditorContainer textEditorContainer)
-        {
-          return textEditorContainer;
-        }
-      }
-      return null;
+      var container = UserControls.FirstOrDefault(textEditorContainer => textEditorContainer.GetType() == typeof(TextEditorContainer));
+      return container as TextEditorContainer;
     }
 
     private string GetFileContent(string path, string nameFile, string fileContent)
@@ -382,7 +376,6 @@ namespace UI.Components.MultiEditorMethods
           MessageBox.Show("Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         }
       }
-      //}
 
       return false;
     }

@@ -72,6 +72,7 @@ namespace MainWindowProgram.Events
       var firstFileName = Path.GetFileName(firstFilePath);
       var secondFileName = Path.GetFileName(secondFilePath);
       var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
+      // TODO: сравнение файлов
       _multiWindow.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
     }
 

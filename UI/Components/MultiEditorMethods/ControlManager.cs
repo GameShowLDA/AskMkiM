@@ -1,12 +1,14 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using DevZest.Windows.Docking;
+using ICSharpCode.AvalonEdit;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
-using UserControl = System.Windows.Controls.UserControl;
-using System.Windows.Media;
-using System.Windows.Input;
-using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
-using DevZest.Windows.Docking;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -71,8 +73,8 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="control">Элемент управления для проверки.</param>
     /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
-    private bool 
-      
+    private bool
+
       ShowSaveDialogForControl(DockItem control)
     {
       var result = MessageBoxResult.No;
@@ -171,6 +173,12 @@ namespace UI.Components.MultiEditorMethods
 
       OpenFileButton tabButton = CreateTabButton(header, description, tabType);
 
+      if (control is FileCompareControl)
+      {
+        AddFileCompareControl(header, control);
+        return;
+      }
+
       if (CheckExistingPage(tabButton, description))
       {
         return;
@@ -179,6 +187,19 @@ namespace UI.Components.MultiEditorMethods
       ConfigureTabEvents(tabButton, control);
       AddTabAndControl(tabButton, control);
       ShowControl(control, tabButton);
+    }
+
+    private void AddFileCompareControl(string header, UserControl control)
+    {
+      var fileManager = new FileManager(multiEditorControl);
+      var textEditorContainer = fileManager.GetTextEditorContainer();
+      var dockItem = new DockItem
+      {
+        Title = header,
+        TabText = header,
+        Content = control
+      };
+      fileManager.ShowDockItem(textEditorContainer, dockItem);
     }
 
     /// <summary>
