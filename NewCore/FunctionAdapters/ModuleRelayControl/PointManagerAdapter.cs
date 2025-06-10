@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device.ModuleRelayControl;
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
-using Utilities.Error.Device.ModuleRelayControl;
 using static NewCore.Enum.DeviceEnum;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
@@ -33,6 +33,9 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await _pointManager.ConnectRelayAsync(bus, number);
       var description = $"{number} к шине [{bus}]";
 
+      if (!result)
+        result = await _pointManager.ConnectRelayAsync(bus, number);
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
           $"Подключение точки {description}",
@@ -51,6 +54,11 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await _pointManager.DisconnectRelayAsync(bus, number);
       var description = $"{number} от шины [{bus}]";
 
+      if (!result)
+        result = await _pointManager.DisconnectRelayAsync(bus, number);
+
+
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
           $"Отключение точки {description}",
@@ -60,6 +68,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       if (!result)
         throw RelayExceptionFactory.DisconnectPointFailed(description);
 
+
       return result;
     }
 
@@ -68,6 +77,9 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     {
       var result = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
       var description = $"{firstPoint}-{lastPoint} к шине [{bus}]";
+
+      if (!result)
+        result = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
@@ -87,11 +99,14 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint);
       var description = $"{firstPoint}-{lastPoint} от шины [{bus}]";
 
+      if (!result)
+        result = await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint);
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _moduleRelayControl,
-          $"Отключение диапазона точек {description}",
-          result,
-          1);
+        _moduleRelayControl,
+        $"Отключение диапазона точек {description}",
+        result,
+        1);
 
       if (!result)
         throw RelayExceptionFactory.DisconnectRangeFailed(description);

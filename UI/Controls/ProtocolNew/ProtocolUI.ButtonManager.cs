@@ -7,6 +7,8 @@ namespace UI.Controls.ProtocolNew
 {
   partial class ProtocolUI
   {
+    private TaskCompletionSource<bool>? _adminButtonTcs;
+
     #region Кнопки.
 
     /// <summary>
@@ -321,6 +323,9 @@ namespace UI.Controls.ProtocolNew
 
         stepOverButton.Visibility = Visibility.Collapsed;
         stepIntoButton.Visibility = Visibility.Collapsed;
+
+        adminContinue.Visibility = Visibility.Collapsed;
+        adminExit.Visibility = Visibility.Collapsed;
       });
     }
 
@@ -415,6 +420,19 @@ namespace UI.Controls.ProtocolNew
       });
     }
 
+    public void SetupAdminButton()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        SetNonVisibleAllButton();
+
+        adminExit.Visibility = Visibility.Visible;
+        adminContinue.Visibility = Visibility.Visible;
+      });
+    }
+
     #endregion
+
+   
   }
 }

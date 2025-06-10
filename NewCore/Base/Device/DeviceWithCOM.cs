@@ -14,7 +14,7 @@ namespace NewCore.Base.Device
   /// Этот класс реализует интерфейс <see cref="IDevice"/> и предоставляет базовые методы для подключения 
   /// и отключения устройств через последовательный порт (COM).
   /// </remarks>
-  public abstract class DeviceWithCOM : IDevice
+  public abstract class DeviceWithCOM : IDevice, IDisposable
   {
     /// <inheritdoc />
     public string Name { get; set; }
@@ -152,6 +152,33 @@ namespace NewCore.Base.Device
       }
 
       return null;
+    }
+
+    public void Dispose()
+    {
+      try
+      {
+        if (COMPort != null)
+        {
+          if (COMPort.IsOpen)
+          {
+            LogInformation($"[{Name}] Закрываю порт {COMPort.PortName} в Dispose()");
+            COMPort.Close();
+          }
+
+          COMPort.Dispose();
+          COMPort = null;
+        }
+
+        DeviceProtocol = null;
+        ConnectableManager = null;
+
+        LogInformation($"[{Name}] Ресурсы устройства освобождены.");
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, $"[{Name}] Ошибка при освобождении ресурсов устройства");
+      }
     }
   }
 }

@@ -19,6 +19,8 @@ namespace NewCore.Function.GPT
     private GPT79904 _gptModel { get; set; }
     static private int delayBeforeCall = 100;
 
+    int delay = 50;
+
     public DcwMode(GPT79904 gpt79904) => _gptModel = gpt79904;
 
     #region Mode
@@ -34,6 +36,8 @@ namespace NewCore.Function.GPT
       var command = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} DCW";
 
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
+
       string response = await GetModeAsync();
       if (response.Trim().Equals("DCW", StringComparison.OrdinalIgnoreCase))
       {
@@ -76,6 +80,8 @@ namespace NewCore.Function.GPT
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {kvValue:F3}".Replace(',', '.');
 
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
+
       var actualKv = await GetVoltageAsync();
       if (actualKv.HasValue && Math.Abs(actualKv.Value - kvValue) < 0.01)
       {
@@ -122,6 +128,8 @@ namespace NewCore.Function.GPT
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CHISET)} {value:F3}".Replace(',', '.');
 
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
+
       double actual = await GetHighCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
       {
@@ -157,6 +165,8 @@ namespace NewCore.Function.GPT
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
 
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
+
       double actual = await GetLowCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
       {
@@ -191,6 +201,7 @@ namespace NewCore.Function.GPT
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
 
       double actual = await GetTestTimeAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -231,6 +242,7 @@ namespace NewCore.Function.GPT
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
 
       double actual = await GetRampTimeAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -267,6 +279,7 @@ namespace NewCore.Function.GPT
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_REF)} {value:F3}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
 
       double actual = await GetOffsetAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -296,6 +309,7 @@ namespace NewCore.Function.GPT
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_DCW_ARCCURRENT)} {value:F3}".Replace(',', '.');
       await _gptModel.DeviceProtocol.QueryAsync(command);
+      await Task.Delay(delay);
 
       double actual = await GetArcCurrentAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -342,6 +356,8 @@ namespace NewCore.Function.GPT
       int delay = (int)(await GetRampTimeAsync() + await GetTestTimeAsync()) * 1000;
 
       await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: delay, delayBeforeCall: delayBeforeCall);
+      await Task.Delay(delay);
+
       query = $"{GetCommandSyntax(FunctionCommand.MEASURE)} ?";
 
       string[] result;

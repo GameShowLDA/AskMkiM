@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
-using Utilities.Error.Device;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -51,7 +51,15 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
 
       if (!connect)
       {
-        throw ConnectionExceptionFactory.InitializeFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, answer);
+        var error = ConnectionExceptionFactory.InitializeFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, answer);
+        if (error != null)
+        {
+          throw error;
+        }
+        else
+        {
+          connect = true;
+        }
       }
 
       return (connect, answer);

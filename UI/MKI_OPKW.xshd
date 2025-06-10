@@ -1,0 +1,43 @@
+﻿<?xml version="1.0"?>
+
+<SyntaxDefinition name="MKI" extensions=".pk;.pkw;" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+	<Color name="Comment" foreground="#4CAF50" />
+	<Color name="Mnemonic" foreground="#90EE90" />
+	<Color name="CommandNumber" foreground="#00BFFF" />
+	<Color name="Resistance" foreground="#FFD700" />
+	<Color name="Voltage" foreground="#FFD700" />
+	<Color name="Time" foreground="#FFD700" />
+	<Color name="Wire" foreground="#F44336"/>
+	<Color name="OkParam" foreground="#FFB300" />
+	<Color name="RmPoint" foreground="#00BCD4" />
+	<Color name="RmAddress" foreground="#FF6F00" />
+
+	<RuleSet ignoreCase="false">
+		
+		<!-- Данные РМ -->
+		<Rule color="RmPoint">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
+		<Rule color="RmAddress">(?&lt;=&gt;\s*)[\d\.]+</Rule>
+
+		<!-- Номер команды -->
+		<Rule color="CommandNumber">^\s*\d+\b</Rule>
+
+		<!--Мнемоника-->
+		<Rule color="Mnemonic">\bСИ\b</Rule>
+		<Rule color="Mnemonic">\bОК\b</Rule>
+		<Rule color="Mnemonic">\bСП\b</Rule>
+		<Rule color="Mnemonic">\bРМ\b</Rule>
+		<Rule color="Mnemonic">\bЦУ\b</Rule>
+		<Rule color="Mnemonic">\bПР\b</Rule>
+		<Rule color="Mnemonic">\bПИ\b</Rule>
+		<Rule color="Mnemonic">\bКЦ\b</Rule>
+		<Rule color="Mnemonic">\bУП\b</Rule>
+
+		<!--Комментарии-->
+		<Span color="Comment" begin="{" end="}" />
+		<Span color="Comment" begin="//" end="\n" />
+
+		
+
+	</RuleSet>
+</SyntaxDefinition>
+

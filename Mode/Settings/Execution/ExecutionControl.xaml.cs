@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Base;
 
 namespace Mode.Settings.Execution
 {
@@ -15,6 +16,8 @@ namespace Mode.Settings.Execution
       InitializeComponent();
       SetConfiguration();
       start = true;
+
+      Loaded += ExecutionControl_Loaded;
     }
   }
 }

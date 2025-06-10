@@ -15,6 +15,10 @@ namespace AppConfiguration.Interface
     /// <returns>True, если пользователь подтвердил действие.</returns>
     Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false);
 
+    Task AppendEmptyLineAsync(int indentLevel = 0);
+
     string Header { get; set; }
+
+    Task<bool> WaitAdminButtonAsync();
   }
 }

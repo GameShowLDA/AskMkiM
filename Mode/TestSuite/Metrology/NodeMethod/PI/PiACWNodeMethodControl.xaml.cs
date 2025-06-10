@@ -3,6 +3,7 @@ using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
+using static NewCore.Enum.MetrologyEnum;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.PI
 {
@@ -11,6 +12,8 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
   /// </summary>
   public partial class PiACWNodeMethodControl : UserControl
   {
+    PiNodeMethod testMeasurement = new PiNodeMethod();
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="PiACWNodeMethodControl"/>.
     /// </summary>
@@ -26,7 +29,14 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
     /// </summary>
     public async Task InitializeSettingsAsync()
     {
-      ProtocolUI.SetSettings(this, StartDelegate: ExecuteMeasurementProcess, true, null);
+      ProtocolUI.SetSettings(
+        this,
+        StartDelegate: ExecuteMeasurementProcess,
+        true,
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeAsync();
+        });
     }
 
     /// <summary>
@@ -39,7 +49,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var (ok, msg, dataModel) = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       if (!ok)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, msg));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: msg, type: ShowMessageModel.MessageType.Error));
         return;
       }
 
@@ -48,18 +58,17 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       var param = dataModel.Param;
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
-      PiNodeMethod testMeasurement = new PiNodeMethod();
+
       var connect = await testMeasurement.ConnectToEquipment(first, second, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message));
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
         return;
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
       await testMeasurement.ConfigureMeter(dataModel);
       await testMeasurement.PerformMeasurement(ProtocolUI, dataModel);
-      await testMeasurement.FinalizeAsync();
     }
 
     private class PiNodeMethod : BaseNodeTest
@@ -72,11 +81,11 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
         await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.AcwManger.SetHighCurrentLimitAsync(dataModel.Param);
         await breakDown.AcwManger.SetFrequencyAsync(50);
+        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
       }
 
       /// <inheritdoc />
@@ -89,31 +98,22 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         {
           token.ThrowIfCancellationRequested();
 
-          protocolUI.GetCancellationToken();
-
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
 
             var answer = await breakDown.AcwManger.MeasureCurrentAsync();
-            var successMessage = ShowMessageModel.ErrorMessage.Title;
-            var colorMessage = ShowMessageModel.SuccessMessage.TitleColor;
+            var type = ShowMessageModel.MessageType.Success;
 
             bool error = false;
             if (answer >= dataModel.Param)
             {
-              successMessage = ShowMessageModel.ErrorMessage.Item1;
-              colorMessage = ShowMessageModel.ErrorMessage.TitleColor;
+              type = ShowMessageModel.MessageType.Error;
               error = true;
             }
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА [{successMessage}]", messageColor: colorMessage));
-            if (error)
-            {
-              await protocolUI.PauseAsync();
-              error = false;
-            }
+            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type));
           }
           else
           {
@@ -127,6 +127,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         await base.FinalizeAsync();
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         await breakDown.ConnectableManager.DisconnectAsync();
+        ResetPoints();
       }
     }
   }

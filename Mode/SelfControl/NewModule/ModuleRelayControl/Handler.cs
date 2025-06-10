@@ -66,7 +66,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
       //  }
       //}
 
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР", SuccessMessage.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР"));
 
       await moduleRelayControl.MeterManager.ConnectMeterAsync();
       await PerformClosureCycle(token);
@@ -76,8 +76,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
       ShowMessageModel showMessageModel = new ShowMessageModel()
       {
         Header = $"\r\nСамоконтроль",
-        Message = $"[{SuccessMessage.Title}]",
-        MessageColor = SuccessMessage.TitleColor,
+        Status = MessageType.Success,
         CanBeDeleted = false,
       };
       await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -123,8 +122,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
           showMessageModel = new ShowMessageModel()
           {
             Header = $"\tТочка {point}",
-            Message = model.SelfControl ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
-            MessageColor = model.SelfControl ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
+            Status = model.SelfControl ? ShowMessageModel.MessageType.Success : MessageType.Error,
             ExecutionError = !model.SelfControl,
           };
           showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
@@ -135,8 +133,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
             showMessageModel = new ShowMessageModel()
             {
               Header = $"\t\tПодключение точки",
-              Message = model.ConnectPoint ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
-              MessageColor = model.ConnectPoint ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
+              Status = model.ConnectPoint ? MessageType.Success : MessageType.Error,
               CanBeDeleted = model.ConnectPoint,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -144,8 +141,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
             showMessageModel = new ShowMessageModel()
             {
               Header = $"\t\tПроверка реле на шине А",
-              Message = model.DisconnectBusA ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
-              MessageColor = model.DisconnectBusA ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
+              Status = model.DisconnectBusA ? MessageType.Success : MessageType.Error,
               CanBeDeleted = model.DisconnectBusA,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -153,8 +149,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
             showMessageModel = new ShowMessageModel()
             {
               Header = $"\t\tПроверка реле на шине B",
-              Message = model.DisconnectBusB ? $"[{SuccessMessage.Title}]" : $"[{ErrorMessage.Title}]",
-              MessageColor = model.DisconnectBusB ? SuccessMessage.TitleColor : ErrorMessage.TitleColor,
+              Status = model.DisconnectBusB ? MessageType.Success : MessageType.Error,
               CanBeDeleted = model.DisconnectBusB,
             };
             await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -165,7 +160,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
           showMessageModel = new ShowMessageModel()
           {
             Header = $"\tОшибка данных!",
-            HeaderColor = ErrorMessage.TitleColor,
+            Status = MessageType.Error,
             Message = answer,
           };
           await ProtocolSelfCheckControl.ShowMessageAsync(showMessageModel);
@@ -196,7 +191,7 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
     {
       LogInformation("Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, type: MessageType.Success));
       LogInformation("Завершён метод завершения самоконтроля");
     }
     #endregion

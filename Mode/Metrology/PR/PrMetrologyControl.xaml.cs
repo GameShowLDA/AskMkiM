@@ -1,14 +1,14 @@
 ﻿using System.Text.Json;
 using System.Windows.Controls;
 using AppConfiguration.Interface;
+using AppConfiguration.Enums;
+using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.DeviceEnum;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
@@ -73,7 +73,7 @@ namespace Mode.Metrology.PR
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: Data.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         return;
       }
 
@@ -86,7 +86,7 @@ namespace Mode.Metrology.PR
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         return;
       }
 
@@ -136,20 +136,19 @@ namespace Mode.Metrology.PR
         var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной"));
 
         var data = SelectOptimalCurrentAndVoltage(param, mint);
         double currentGenerial = (data.DecimalCurrent / 1000.0) + data.IntegerCurrent;
 
-        double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.PR)) + GetNumericError(TypeCommand.PR);
+        var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.PR, param);
 
         var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
         double fakeCurrent = GetInterpolatedCurrent(param, mint);
         var result = voltage / (fakeCurrent / 1000.0);
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.MessageColor = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
+        showMessageModel.Status = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await protocolUI.ShowMessageAsync(showMessageModel);

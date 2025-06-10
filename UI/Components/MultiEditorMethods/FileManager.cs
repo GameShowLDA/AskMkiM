@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
+using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
@@ -58,7 +59,9 @@ namespace UI.Components.MultiEditorMethods
         // TODO: сделать вкладку активной
         fileContent = GetFileContent(path, nameFile, fileContent);
         TextEditorContainer textEditorContainer = GetTextEditorContainer();
-        var textEditor = CreateTextEditor(fileContent);
+        
+		var fileType = GetFileType(nameFile);
+        var textEditor = CreateTextEditor(fileContent, fileType);
 
         if (Path.GetExtension(path).Equals(".pk", StringComparison.OrdinalIgnoreCase))
         {
@@ -295,9 +298,9 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="fileContent">Содержимое файла, которое будет установлено в редактор.</param>
     /// <returns>Новый экземпляр <see cref="TextEditorUI"/>.</returns>
-    private TextEditorUI CreateTextEditor(string fileContent)
+    private TextEditorUI CreateTextEditor(string fileContent, FileType fileType = FileType.None)
     {
-      var textEditor = new TextEditorUI();
+      var textEditor = new TextEditorUI(fileType);
       textEditor.Text = fileContent;
       return textEditor;
     }
@@ -390,6 +393,21 @@ namespace UI.Components.MultiEditorMethods
       this.UserControls = new List<UserControl>();
       this.OpenPages = new List<OpenFileButton>();
       this.multiEditorControl = multiEditorControl;
+    }
+
+    private FileType GetFileType(string fileName)
+    {
+      if (string.IsNullOrEmpty(fileName))
+        return FileType.None;
+      var ext = Path.GetExtension(fileName).ToLowerInvariant();
+      return ext switch
+      {
+        ".pk" => FileType.PK,
+        ".pkw" => FileType.PKW,
+        ".opk" => FileType.OPK,
+        ".opkw" => FileType.OPKW,
+        _ => FileType.None
+      };
     }
   }
 }

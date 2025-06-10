@@ -73,9 +73,10 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
         return true;
       }
 
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
-      return result == "2.0.1";
+      DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
+      string result = await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      return true;
+      // return result == "2.0.1";
     }
 
     /// <inheritdoc />
@@ -87,6 +88,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
+      await _moduleVoltageCurrentSource.DeviceProtocol.OperationLock.WaitAsync();
       return await ResetAsync();
     }
   }

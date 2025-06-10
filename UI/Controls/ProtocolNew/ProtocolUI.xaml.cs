@@ -118,6 +118,44 @@ namespace UI.Controls.ProtocolNew
     public string GetText()
     {
       return protocolTextBox.GetPlainTextAsync().Result;
+	}
+	
+    /// <summary>
+    /// Ожидает нажатия одной из двух административных кнопок.
+    /// Возвращает true, если нажали ПРОПУСТИТЬ, false — если ЗАВЕРШИТЬ.
+    /// </summary>
+    public Task<bool> WaitAdminButtonAsync()
+    {
+      _adminButtonTcs = new TaskCompletionSource<bool>();
+
+      // Навешиваем обработчики (лучше один раз, если не делаете динамически)
+      adminContinue.Click += OnAdminContinueClicked;
+      adminExit.Click += OnAdminExitClicked;
+
+      SetupAdminButton();
+
+      return _adminButtonTcs.Task;
+    }
+
+    private void OnAdminContinueClicked(object sender, RoutedEventArgs e)
+    {
+      CleanupAdminButtonHandlers();
+      _adminButtonTcs?.TrySetResult(true);
+    }
+
+    private void OnAdminExitClicked(object sender, RoutedEventArgs e)
+    {
+      CleanupAdminButtonHandlers();
+      _adminButtonTcs?.TrySetResult(false);
+    }
+
+    /// <summary>
+    /// Снимает обработчики после клика (чтобы не было дублирования).
+    /// </summary>
+    private void CleanupAdminButtonHandlers()
+    {
+      adminContinue.Click -= OnAdminContinueClicked;
+      adminExit.Click -= OnAdminExitClicked;
     }
   }
 }

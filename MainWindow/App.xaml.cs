@@ -3,6 +3,7 @@ using System.Windows;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
 using static Utilities.LoggerUtility;
+using System.Runtime.InteropServices;
 
 namespace MainWindowProgram
 {
@@ -15,6 +16,18 @@ namespace MainWindowProgram
     [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     private const int SW_HIDE = 0;
+
+    [Flags]
+    public enum EXECUTION_STATE : uint
+    {
+      ES_CONTINUOUS = 0x80000000,
+      ES_DISPLAY_REQUIRED = 0x00000002,
+      ES_SYSTEM_REQUIRED = 0x00000001,
+      // ES_AWAYMODE_REQUIRED = 0x00000040 // если хочешь поддержать режим "away"
+    }
+
+    [DllImport("kernel32.dll")]
+    public static extern EXECUTION_STATE SetThreadExecutionState(EXECUTION_STATE esFlags);
 
     // Менеджер консоли (Singleton), отвечающий за переключение режима консоли и обработку событий администратора.
     static internal ConsoleManager _consoleManager { get; private set; }
@@ -59,7 +72,12 @@ namespace MainWindowProgram
         // 5. Только теперь показываем основное окно
         await Dispatcher.InvokeAsync(() =>
         {
+          SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
           mainWindow.Visibility = Visibility.Visible;
+          mainWindow.Closed += (s, _) =>
+          {
+            SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+          };
         });
       }
       catch (Exception ex) 

@@ -46,8 +46,33 @@ namespace Mode.Metrology.PI
     /// <param name="e">Аргументы события ввода текста.</param>
     private void NumberDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-      e.Handled = !Regex.IsMatch(e.Text, "^[0-9]+$");
+      var textBox = sender as TextBox;
+      if (textBox == null)
+      {
+        e.Handled = true;
+        return;
+      }
+
+      // Заменяем точку на запятую при вводе
+      if (e.Text == ".")
+      {
+        int caretIndex = textBox.CaretIndex;
+        textBox.Text = textBox.Text.Insert(caretIndex, ",");
+        textBox.CaretIndex = caretIndex + 1;
+        e.Handled = true; // предотвращаем вставку точки
+        return;
+      }
+
+      // Разрешаем только цифры и запятую
+      e.Handled = !Regex.IsMatch(e.Text, @"^[0-9,]$");
+
+      // Не допускаем вторую запятую
+      if (!e.Handled && e.Text == "," && textBox.Text.Contains(","))
+      {
+        e.Handled = true;
+      }
     }
+
 
     private void VoltageInput_KeyDown(object sender, KeyEventArgs e)
     {
