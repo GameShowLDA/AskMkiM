@@ -55,7 +55,6 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         string fileContent = string.Empty;
-        // TODO: сделать вкладку активной
         fileContent = GetFileContent(path, nameFile, fileContent);
         TextEditorContainer textEditorContainer = GetTextEditorContainer();
         var textEditor = CreateTextEditor(fileContent);

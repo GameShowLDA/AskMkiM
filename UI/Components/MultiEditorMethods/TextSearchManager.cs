@@ -159,15 +159,22 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        var pageIndex = fileManager.OpenPages.IndexOf(activeTab);
-        var pageName = fileManager.OpenPages[pageIndex].Text;
-        var allOccurrences = FindAllOccurrences(fullText[fileManager.UserControls[pageIndex]], searchText, wholeWord, caseWord, searchArea);
-
-        if (allOccurrences != null)
+        var activeTextEditorContainer = fileManager.UserControls.FirstOrDefault(container => container.GetType() == typeof(TextEditorContainer));
+        if (activeTextEditorContainer != null)
         {
-          InitializeCurrentIndex();
-          GoToOccurrence(currentIndex);
+          var dockItems = (activeTextEditorContainer as TextEditorContainer).DockManager.DockItems;
+          var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
+          if (dockItems[index].Content is TextEditorUI)
+          {
+            var textEditor = dockItems[index].Content as TextEditorUI;
+            var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
+
+            if (allOccurrences != null)
+            {
+              InitializeCurrentIndex();
+              GoToOccurrence(currentIndex);
+            }
+          }
         }
       }
     }
@@ -185,21 +192,28 @@ namespace UI.Components.MultiEditorMethods
       {
         int pageIndex = fileManager.OpenPages.IndexOf(activeTab);
 
-        if (fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
+        if (fileManager.UserControls[pageIndex] is TextEditorContainer textEditorContainer)
         {
-          switch (searchParameters)
+          var foundDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+          if (foundDockItem != null)
           {
-            case "FindNext":
-              NextOccurrence(_searchArea, textEditor);
-              break;
+            if (foundDockItem.Content is TextEditorUI textEditor)
+            {
+              switch (searchParameters)
+              {
+                case "FindNext":
+                  NextOccurrence(_searchArea, textEditor);
+                  break;
 
-            case "FindPrevious":
-              PreviousOccurrence(_searchArea, textEditor);
-              break;
+                case "FindPrevious":
+                  PreviousOccurrence(_searchArea, textEditor);
+                  break;
 
-            case "FindAll":
-              await FindAllAsync(_searchText, _wholeWord, _caseWord, _searchArea);
-              break;
+                case "FindAll":
+                  await FindAllAsync(_searchText, _wholeWord, _caseWord, _searchArea);
+                  break;
+              }
+            }
           }
         }
       }
@@ -214,6 +228,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="searchArea">Параметры поиска: текущий документ или все документы.</param>
     public async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea, bool showResults = true)
     {
+      // TODO: переделать функцию "Найти все"
       if (string.IsNullOrEmpty(searchText))
       {
         ShowEmptySearchWarning();
@@ -698,7 +713,13 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Индекс текущей активной вкладки, или -1 если активная вкладка не найдена.</returns>
     private int GetCurrentIndex()
     {
-      return fileManager.OpenPages.FindIndex(p => p.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+      if (textEditroContainer != null)
+      {
+        var dockItems = (textEditroContainer as TextEditorContainer).DockManager.DockItems;
+        return dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
+      }
+      return -1;
     }
 
     /// <summary>
@@ -708,11 +729,17 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Индекс следующей вкладки с текстовым редактором, или -1, если таковой не найден.</returns>
     private int GetNextValidIndex(int startIndex)
     {
-      for (int i = startIndex; i < fileManager.OpenPages.Count; i++)
+      var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+      if (textEditroContainer != null)
       {
-        if (fileManager.UserControls[i] is TextEditorUI)
+        var dockItems = (textEditroContainer as TextEditorContainer).DockManager.DockItems;
+
+        for (int i = startIndex; i < dockItems.Count; i++)
         {
-          return i;
+          if (dockItems[i].Content is TextEditorUI)
+          {
+            return i;
+          }
         }
       }
 
@@ -725,9 +752,16 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="nextIndex">Индекс следующей вкладки, которую нужно отобразить.</param>
     private void ShowNextPage(int nextIndex)
     {
-      _textEditor++;
-      Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
-      ShowControl(fileManager.UserControls[nextIndex], fileManager.OpenPages[nextIndex]);
+      // TODO: показывать следующий dockItem
+      var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+      if (textEditroContainer != null)
+      {
+        var dockItems = (textEditroContainer as TextEditorContainer).DockManager.DockItems;
+        //_textEditor++;
+        //Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+        //ShowControl(fileManager.UserControls[nextIndex], fileManager.OpenPages[nextIndex]);
+        dockItems[nextIndex].Show((textEditroContainer as TextEditorContainer).DockManager);
+      }
     }
 
     /// <summary>
@@ -762,21 +796,27 @@ namespace UI.Components.MultiEditorMethods
     {
       if (index >= 0 && index < foundResults.Count)
       {
-        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        int pageIndex = fileManager.OpenPages.IndexOf(activeTab);
 
-        if (fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
+        var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+        if (textEditroContainer != null)
         {
-          var result = foundResults[index];
-          textEditor.MarkerService.ClearAllMarkers();
-          textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, (Color)ColorConverter.ConvertFromString("#b23a48"));
-          textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-          int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
-          textEditor.ScrollToLine(lineNumber);
-          textEditor.TextArea.Caret.Offset = result.StartOffset + result.Length;
-          textEditor.Focus();
-          textEditor.TextArea.Focus();
-          textEditor.TextArea.Caret.BringCaretToView();
+          var activeDockItem = (textEditroContainer as TextEditorContainer).DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+          if (activeDockItem != null)
+          {
+            if (activeDockItem.Content is TextEditorUI textEditor)
+            {
+              var result = foundResults[index];
+              textEditor.MarkerService.ClearAllMarkers();
+              textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, (Color)ColorConverter.ConvertFromString("#b23a48"));
+              textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+              int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
+              textEditor.ScrollToLine(lineNumber);
+              textEditor.TextArea.Caret.Offset = result.StartOffset + result.Length;
+              textEditor.Focus();
+              textEditor.TextArea.Focus();
+              textEditor.TextArea.Caret.BringCaretToView();
+            }
+          }
         }
       }
     }
