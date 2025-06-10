@@ -161,6 +161,7 @@
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" />
 		<Span color="Comment" begin="//" end="\n" />
+		<Span color="Comment" begin="/\*" end="\*/" multiline="true" />
 
 	</RuleSet>
 </SyntaxDefinition>
