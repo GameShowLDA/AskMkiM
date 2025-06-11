@@ -198,15 +198,16 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Создает новый файл трансляции (.opkw) в редакторе.
     /// </summary>
-    public async Task CreateTranslationFileAsync()
+    public TextEditorUI CreateTranslationFileAsync()
     {
       if (_isLockedProvider())
       {
         MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        return null;
       }
       else
       {
-        await _multiWindow.CreateTranslationFileAsync();
+        return _multiWindow.CreateTranslationFileAsync();
       }
     }
   }

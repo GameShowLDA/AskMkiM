@@ -128,18 +128,18 @@ namespace UI.Components
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
     public TextEditorUI GetActiveTextEditor()
     {
-      var activePage = fileManager.OpenPages.FirstOrDefault(page =>
-                        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (activePage != null)
-      {
-        int index = fileManager.OpenPages.IndexOf(activePage);
-        if (fileManager.UserControls[index] is TextEditorUI activeEditor)
-        {
-          return activeEditor;
-        }
-      }
+      return fileManager.GetActiveTextEditor();
+    }
 
-      return null;
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>
+    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// </returns>
+    public TextEditorUI CreateTranslationFileAsync()
+    {
+      return fileManager.CreateTranslationFileAsync();
     }
 
     /// <summary>

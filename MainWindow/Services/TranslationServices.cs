@@ -45,9 +45,7 @@ namespace MainWindowProgram.Services
       }
       string text = editor.Text;
 
-      await _fileService.CreateTranslationFileAsync();
-      editor = await _multiWindow.GetActiveTextEditor();
-
+      editor =  _fileService.CreateTranslationFileAsync();
 
       var manager = new CommandTranslationManager();
       var models = manager.ParseAllAndDisplay(text, editor);

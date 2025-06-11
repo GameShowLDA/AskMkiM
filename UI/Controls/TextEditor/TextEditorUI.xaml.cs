@@ -1,21 +1,16 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml;
 using AppConfiguration.Interface;
-using ControlCommandAnalyser.Parsing;
-using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Xml;
 using UI.Components;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
@@ -25,7 +20,7 @@ namespace UI.Controls.TextEditor
   /// <summary>
   /// Логика взаимодействия для TextEditorUI.xaml.
   /// </summary>
-  public partial class TextEditorUI : UserControl, ITextAdapter
+  public partial class TextEditorUI : UserControl, ITextEditorAdapter
   {
     public enum FileType
     {
@@ -509,8 +504,8 @@ namespace UI.Controls.TextEditor
     public string GetText()
     {
       return this.Text;
-	}
-	
+    }
+
     public void SetTextAndHighlighting(string text, List<HighlightRange> highlights)
     {
       Text = text;

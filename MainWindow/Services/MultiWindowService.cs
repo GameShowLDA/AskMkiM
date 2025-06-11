@@ -98,18 +98,9 @@ namespace MainWindowProgram.Services
       return Task.FromResult(foundEditor);
     }
 
-    public Task CreateTranslationFileAsync()
+    public TextEditorUI CreateTranslationFileAsync()
     {
-      string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
-
-      var editor = new TextEditorUI(TextEditorUI.FileType.OPKW)
-      {
-        Text = "// Результат трансляции появится здесь...",
-        IsReadOnly = true
-      };
-
-      _multiWindowControl.AddControl(fileName, editor, TypeWindow.Translation);
-      return Task.CompletedTask;
+      return _multiWindowControl.CreateTranslationFileAsync();
     }
   }
 }

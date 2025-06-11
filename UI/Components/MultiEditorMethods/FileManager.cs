@@ -1,13 +1,11 @@
-﻿using ControlCommandAnalyser.Parsing;
-using DevZest.Windows.Docking;
-using DevZest.Windows.Docking.Primitives;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Shapes;
+using DevZest.Windows.Docking;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
+using static UI.Components.Invoke.OpenFileButton;
 using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
@@ -56,17 +54,13 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         string fileContent = string.Empty;
+
         // TODO: сделать вкладку активной
         fileContent = GetFileContent(path, nameFile, fileContent);
         TextEditorContainer textEditorContainer = GetTextEditorContainer();
-        
-		var fileType = GetFileType(nameFile);
-        var textEditor = CreateTextEditor(fileContent, fileType);
 
-        if (Path.GetExtension(path).Equals(".pk", StringComparison.OrdinalIgnoreCase))
-        {
-          PkFileEncoding(fileContent, textEditor);
-        }
+        var fileType = GetFileType(nameFile);
+        var textEditor = CreateTextEditor(fileContent, fileType);
 
         ManageFilename(path, nameFile, textEditorContainer, textEditor);
         ShowControl(textEditorContainer);
@@ -76,6 +70,30 @@ namespace UI.Components.MultiEditorMethods
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
+    }
+
+    public TextEditorUI CreateTranslationFileAsync()
+    {
+      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+
+      string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
+
+      var textEditor = new TextEditorUI(TextEditorUI.FileType.OPKW)
+      {
+        Text = "// Результат трансляции появится здесь...",
+        IsReadOnly = true
+      };
+
+      ManageFilename(fileName, fileName, textEditorContainer, textEditor);
+      ShowControl(textEditorContainer);
+
+      return textEditor;
+    }
+
+    public TextEditorUI GetActiveTextEditor()
+    {
+      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+      return textEditorContainer.GetTextEditor();
     }
 
     private void ShowControl(TextEditorContainer textEditorContainer)
@@ -122,22 +140,14 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private static void PkFileEncoding(string fileContent, TextEditorUI textEditor)
-    {
-      var lines = fileContent.Split('\n');
-
-      var recognizer = new LineRecognizer();
-      var parsed = lines.Select((line, index) => recognizer.Parse(line, index)).ToList();
-
-      var highlighter = new SyntaxHighlightPlanner();
-      var highlights = highlighter.Build(parsed);
-
-      if (textEditor is TextEditorUI editorUI)
-      {
-        editorUI.ApplyHighlighting(highlights);
-      }
-    }
-
+    /// <summary>
+    /// Обрабатывает добавление или открытие файла с учётом уже открытых файлов в редакторе.
+    /// При необходимости добавляет новый DockItem или показывает существующий.
+    /// </summary>
+    /// <param name="path">Полный путь к файлу.</param>
+    /// <param name="nameFile">Имя файла.</param>
+    /// <param name="textEditorContainer">Контейнер редактора, в котором будут размещаться DockItem'ы.</param>
+    /// <param name="textEditor">Экземпляр редактора для отображения содержимого файла.</param>
     private async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor)
     {
       var dockItem = new DockItem
