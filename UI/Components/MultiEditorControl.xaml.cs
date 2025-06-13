@@ -312,10 +312,10 @@ namespace UI.Components
       {
         var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
         var lineStartOffset = searchResult.Value.FirstOrDefault().StartOffset;
-        int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, searchResult.Value.FirstOrDefault().SubstringFromWord, searchText);
-        if (globalStartOffset >= 0)
+        //int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, searchResult.Value.FirstOrDefault().SubstringFromWord, searchText);
+        if (lineStartOffset >= 0)
         {
-          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), globalStartOffset, replaceText, searchText);
+          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), lineStartOffset, replaceText, searchText);
         }
       }
     }

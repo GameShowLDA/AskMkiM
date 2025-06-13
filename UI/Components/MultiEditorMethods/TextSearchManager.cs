@@ -8,6 +8,7 @@ using UI.Components.SearchControls;
 using static Utilities.LoggerUtility;
 using System.Windows.Controls;
 using AppConfiguration.Base;
+using DevZest.Windows.Docking;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -228,7 +229,6 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="searchArea">Параметры поиска: текущий документ или все документы.</param>
     public async Task FindAllAsync(string searchText, bool? wholeWord, bool? caseWord, int searchArea, bool showResults = true)
     {
-      // TODO: переделать функцию "Найти все"
       if (string.IsNullOrEmpty(searchText))
       {
         ShowEmptySearchWarning();
@@ -237,7 +237,7 @@ namespace UI.Components.MultiEditorMethods
 
       EventAggregator.RaiseRequestShowProgress();
 
-      List<OpenFileButton> searchPages = SetSearchAreaPages(searchArea);
+      List<DockItem> searchPages = SetSearchAreaPages(searchArea);
       ClearPreviousSearchResults();
 
       List<Task> searchTasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
@@ -304,46 +304,70 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="wholeWord">Флаг поиска целых слов.</param>
     /// <param name="caseWord">Флаг чувствительности к регистру.</param>
     /// <returns>Список задач поиска.</returns>
-    private List<Task> ExecuteSearchTasks(List<OpenFileButton> searchPages, string searchText, bool? wholeWord, bool? caseWord)
+    private List<Task> ExecuteSearchTasks(List<DockItem> searchPages, string searchText, bool? wholeWord, bool? caseWord)
     {
       object lockObj = new object();
-      return searchPages.Select(page => Task.Run(() =>
-      {
-        string pageName = page.Dispatcher.Invoke(() => page.Text);
 
-        int pageIndex = fileManager.OpenPages.IndexOf(page);
-        if (fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
+      // Сначала получаем нужные данные на UI-потоке
+      var searchData = searchPages.Select(page =>
+      {
+        string pageName = page.Dispatcher.Invoke(() => page.Title);
+        string pageText = null;
+        if (page.Dispatcher.Invoke(() => page.Content) is TextEditorUI textEditor)
         {
-          string pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
-          var foundResultsList = FindOccurrencesByLine(pageText, searchText, wholeWord, caseWord);
-          if (foundResultsList != null && foundResultsList.Count > 0)
+          pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
+        }
+        return new { pageName, pageText };
+      }).Where(x => x.pageText != null).ToList();
+
+      // Потом параллельно ищем
+      return searchData.Select(data => Task.Run(() =>
+      {
+        var foundResultsList = FindOccurrencesByLine(data.pageText, searchText, wholeWord, caseWord);
+        if (foundResultsList != null && foundResultsList.Count > 0)
+        {
+          lock (lockObj)
           {
-            lock (lockObj)
-            {
-              foundInOpenedFiles[pageName] = foundResultsList;
-            }
+            foundInOpenedFiles[data.pageName] = foundResultsList;
           }
         }
       })).ToList();
     }
+
 
     /// <summary>
     /// Задает страницы, в которых необходимо провести поиск по тексту.
     /// </summary>
     /// <param name="searchArea">Область поиска текста.</param>
     /// <returns>Коллекцию вкладок, в которых находятся текстовые редакторы, где необходимо провести поиск по тексту.</returns>
-    private List<OpenFileButton> SetSearchAreaPages(int searchArea)
+    private List<DockItem> SetSearchAreaPages(int searchArea)
     {
-      var searchPages = new List<OpenFileButton>();
+      var activeTextEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
+      var searchPages = new List<DockItem>();
       if (searchArea == 0 || searchArea == 2)
       {
-        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        var pageIndex = fileManager.OpenPages.IndexOf(activeTab);
-        searchPages.Add(fileManager.OpenPages[pageIndex]);
+        //var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        //var pageIndex = fileManager.OpenPages.IndexOf(activeTab);
+        //searchPages.Add(fileManager.OpenPages[pageIndex]);
+        if (activeTextEditorContainer != null)
+        {
+          var dockItems = activeTextEditorContainer.DockManager.DockItems;
+          var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
+          if (dockItems[index].Content is TextEditorUI)
+          {
+            searchPages.Add(dockItems[index]);
+          }
+        }
       }
       else
       {
-        searchPages = fileManager.OpenPages;
+        foreach (var item in activeTextEditorContainer.DockManager.DockItems)
+        {
+          if (item.Content.GetType() == typeof(TextEditorUI))
+          {
+            searchPages.Add(item);
+          }
+        }
       }
 
       return searchPages;
@@ -382,14 +406,21 @@ namespace UI.Components.MultiEditorMethods
 
       if (searchArea == 0 || searchArea == 2)
       {
-        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        if (activeTab != null)
+        //var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        //if (activeTab != null)
+        //{
+        //  int pageIndex = fileManager.OpenPages.IndexOf(activeTab);
+        //  if (pageIndex != -1 && fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
+        //  {
+        //    fullText.Add(textEditor, textEditor.Text);
+        //  }
+        //}
+        var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
+        var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true && item.Content.GetType() == typeof(TextEditorUI));
+        if (activeDockItem != null)
         {
-          int pageIndex = fileManager.OpenPages.IndexOf(activeTab);
-          if (pageIndex != -1 && fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
-          {
-            fullText.Add(textEditor, textEditor.Text);
-          }
+          var textEditor = activeDockItem.Content as TextEditorUI;
+          fullText.Add(textEditor, textEditor.Text);
         }
       }
       else
@@ -406,10 +437,11 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="fullText">Словарь для хранения текста.</param>
     private void AddTextFromAllDocuments(Dictionary<UserControl, string> fullText)
     {
-      foreach (var page in fileManager.OpenPages)
+      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
+      
+      foreach (var item in textEditorContainer.DockManager.DockItems)
       {
-        int pageIndex = fileManager.OpenPages.IndexOf(page);
-        if (fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
+        if (item.Content is TextEditorUI textEditor)
         {
           if (!fullText.ContainsKey(textEditor))
           {
@@ -599,35 +631,53 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="caseWord">Если true, учитывается регистр, если false — не учитывается.</param>
     /// <param name="lineOffset">Смещение в тексте для вычисления позиции в строках.</param>
     /// <returns>Список результатов поиска или null, если текст не найден.</returns>
-    public List<SearchResult> FindOccurrencesByLine(string fullText, string searchText, bool? wholeWord, bool? caseWord, int lineOffset = 0)
+    public List<SearchResult> FindOccurrencesByLine(string fullText, string searchText, bool? wholeWord, bool? caseWord, int startOffset = 0)
     {
-      List<SearchResult> results = new List<SearchResult>();
+      var results = new List<SearchResult>();
       if (string.IsNullOrEmpty(searchText))
-      {
         return results;
-      }
 
       RegexOptions options = caseWord == true ? RegexOptions.None : RegexOptions.IgnoreCase;
       string escapedSearchText = Regex.Escape(searchText);
       string pattern = wholeWord == true ? $@"\b{escapedSearchText}\b" : escapedSearchText;
 
-      string[] lines = fullText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+      // Используем регэксп, чтобы не терять реальные line ending
+      var lineMatches = Regex.Matches(fullText, @"([^\r\n]*)(\r\n|\n|\r)?");
+      int offset = startOffset;
+      int lineNumber = 1;
 
-      for (int i = 0; i < lines.Length; i++)
+      foreach (Match lineMatch in lineMatches)
       {
-        string line = lines[i];
+        string line = lineMatch.Groups[1].Value;
+        string lineEnding = lineMatch.Groups[2].Value;
 
+        // Поиск совпадений в строке
         MatchCollection matches = Regex.Matches(line, pattern, options);
-        if (Regex.IsMatch(lines[i], pattern, options))
+        foreach (Match match in matches)
         {
-          results.Add(new SearchResult(lineOffset, searchText.Length, i + 1, lines[i]));
+          int globalStart = offset + match.Index;
+          LogDebug($"Найдено вхождение: {match.Value} на строке {lineNumber}, позиция {globalStart}");
+          // Для отладки:
+          if (globalStart < fullText.Length)
+          {
+            LogDebug($"Подстрока до позиции {globalStart}: {fullText.Substring(0, globalStart)}");
+            int endPosition = globalStart + searchText.Length;
+            int afterLength = Math.Min(fullText.Length - endPosition, 50); // максимум 50 символов для отладки
+            LogDebug($"Подстрока после слова {match.Value}: {fullText.Substring(endPosition, afterLength)}");
+          }
+
+          results.Add(new SearchResult(globalStart, match.Length, lineNumber, match.Value));
         }
 
-        lineOffset += line.Length + Environment.NewLine.Length;
+        offset += line.Length + lineEnding.Length;
+        lineNumber++;
       }
 
-      return results.Count > 0 ? results : null;
+      return results;
     }
+
+
+
 
     /// <summary>
     /// Переход к следующему вхождению.
