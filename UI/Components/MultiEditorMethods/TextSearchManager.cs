@@ -160,10 +160,10 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        var activeTextEditorContainer = fileManager.UserControls.FirstOrDefault(container => container.GetType() == typeof(TextEditorContainer));
+        var activeTextEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
         if (activeTextEditorContainer != null)
         {
-          var dockItems = (activeTextEditorContainer as TextEditorContainer).DockManager.DockItems;
+          var dockItems = activeTextEditorContainer.DockManager.DockItems;
           var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
           if (dockItems[index].Content is TextEditorUI)
           {
@@ -406,15 +406,6 @@ namespace UI.Components.MultiEditorMethods
 
       if (searchArea == 0 || searchArea == 2)
       {
-        //var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        //if (activeTab != null)
-        //{
-        //  int pageIndex = fileManager.OpenPages.IndexOf(activeTab);
-        //  if (pageIndex != -1 && fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
-        //  {
-        //    fullText.Add(textEditor, textEditor.Text);
-        //  }
-        //}
         var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
         var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true && item.Content.GetType() == typeof(TextEditorUI));
         if (activeDockItem != null)
@@ -803,14 +794,11 @@ namespace UI.Components.MultiEditorMethods
     private void ShowNextPage(int nextIndex)
     {
       // TODO: показывать следующий dockItem
-      var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+      var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
       if (textEditroContainer != null)
       {
-        var dockItems = (textEditroContainer as TextEditorContainer).DockManager.DockItems;
-        //_textEditor++;
-        //Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
-        //ShowControl(fileManager.UserControls[nextIndex], fileManager.OpenPages[nextIndex]);
-        dockItems[nextIndex].Show((textEditroContainer as TextEditorContainer).DockManager);
+        var dockItems = textEditroContainer.DockManager.DockItems;
+        dockItems[nextIndex].Show(textEditroContainer.DockManager);
       }
     }
 
@@ -913,15 +901,14 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="lineText">Текст строки для поиска вхождений.</param>
     public void GetLineOccurrences(string fileName, int lineNumber, int startOffset, string lineText)
     {
-      var foundPage = FindFilePage(fileName);
+      var foundPage = FindFilePage();
       if (foundPage == null)
       {
         return;
       }
 
-      int pageIndex = fileManager.OpenPages.IndexOf(foundPage);
-
-      if (fileManager.UserControls[pageIndex] is TextEditorUI textEditor)
+      var foundDockItem = foundPage.DockManager.DockItems.FirstOrDefault(item => item.Title == fileName);
+      if (foundDockItem.Content is TextEditorUI textEditor)
       {
         if (textEditor.MarkerService == null)
         {
@@ -929,7 +916,8 @@ namespace UI.Components.MultiEditorMethods
           return;
         }
 
-        ShowControl(textEditor, foundPage);
+        foundDockItem.Show(foundPage.DockManager);
+        //ShowControl(textEditor, foundPage);
         textEditor.MarkerService.ClearAllMarkers();
 
         var ranges = FindAllOccurrencesInLine(lineText, startOffset);
@@ -950,9 +938,9 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="fileName">Имя файла для поиска страницы.</param>
     /// <returns>Страница с данным файлом, или null, если не найдена.</returns>
-    private OpenFileButton FindFilePage(string fileName)
+    private TextEditorContainer FindFilePage()
     {
-      return fileManager.OpenPages.FirstOrDefault(page => page.Text == fileName);
+      return fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
     }
 
     /// <summary>

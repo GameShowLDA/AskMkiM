@@ -60,7 +60,6 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     internal Dictionary<UserControl, string> _fullText = new Dictionary<UserControl, string>();
 
-    // TODO: замена текста
     internal void ReplaceWord(string fileName, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
       var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
@@ -71,7 +70,6 @@ namespace UI.Components.MultiEditorMethods
         {
           var foundTextEditor = foundPage.Content as TextEditorUI;
           ReplaceTextInEditor(foundTextEditor, searchResult, startOffset, replaceText, searchText);
-          //controlManager.ShowControl(foundTextEditor, foundPage);
         }
       }
     }
@@ -87,8 +85,6 @@ namespace UI.Components.MultiEditorMethods
         var afterText = text.Substring(startOffset + searchText.Length);
         var newText = beforeText + replaceText + afterText;
         document.Text = newText;
-        //LogDebug("Оригинал строки: '" + text.Substring(startOffset - 10, searchText.Length + 20) + "'");
-        //LogDebug($"startOffset={startOffset}, searchText.Length={searchText.Length}, заменяем на '{replaceText}'");
       }
     }
 
