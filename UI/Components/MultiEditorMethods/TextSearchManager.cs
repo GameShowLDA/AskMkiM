@@ -429,7 +429,7 @@ namespace UI.Components.MultiEditorMethods
     private void AddTextFromAllDocuments(Dictionary<UserControl, string> fullText)
     {
       var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      
+
       foreach (var item in textEditorContainer.DockManager.DockItems)
       {
         if (item.Content is TextEditorUI textEditor)
@@ -724,8 +724,9 @@ namespace UI.Components.MultiEditorMethods
     private int SwitchToNextDocument()
     {
       int currentIndex = GetCurrentIndex();
+      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
 
-      if (currentIndex >= 0 && currentIndex < fileManager.OpenPages.Count - 1)
+      if (currentIndex >= 0 && currentIndex < textEditorContainer.DockManager.DockItems.Count - 1)
       {
         int nextIndex = GetNextValidIndex(currentIndex + 1);
 
@@ -743,6 +744,10 @@ namespace UI.Components.MultiEditorMethods
           ShowNextPage(nextIndex);
           return nextIndex;
         }
+        //else if (nextIndex >= textEditorContainer.DockManager.DockItems.Count)
+        //{
+
+        //}
       }
 
       return -1;
@@ -754,10 +759,10 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Индекс текущей активной вкладки, или -1 если активная вкладка не найдена.</returns>
     private int GetCurrentIndex()
     {
-      var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+      var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
       if (textEditroContainer != null)
       {
-        var dockItems = (textEditroContainer as TextEditorContainer).DockManager.DockItems;
+        var dockItems = textEditroContainer.DockManager.DockItems;
         return dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
       }
       return -1;
@@ -770,11 +775,12 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Индекс следующей вкладки с текстовым редактором, или -1, если таковой не найден.</returns>
     private int GetNextValidIndex(int startIndex)
     {
-      var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
+      // TODO: придумать как обнулять счетчик и потом снова его запускать
+
+      var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
       if (textEditroContainer != null)
       {
-        var dockItems = (textEditroContainer as TextEditorContainer).DockManager.DockItems;
-
+        var dockItems = textEditroContainer.DockManager.DockItems;
         for (int i = startIndex; i < dockItems.Count; i++)
         {
           if (dockItems[i].Content is TextEditorUI)
@@ -793,7 +799,6 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="nextIndex">Индекс следующей вкладки, которую нужно отобразить.</param>
     private void ShowNextPage(int nextIndex)
     {
-      // TODO: показывать следующий dockItem
       var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
       if (textEditroContainer != null)
       {
@@ -965,16 +970,6 @@ namespace UI.Components.MultiEditorMethods
       }
 
       return ranges;
-    }
-
-    /// <summary>
-    /// Отображает указанный элемент управления, скрывая остальные.
-    /// </summary>
-    /// <param name="control">Элемент управления для отображения.</param>
-    private void ShowControl(UserControl control, OpenFileButton openPage)
-    {
-      var controlManager = new ControlManager(this.fileManager, this.multiEditorControl);
-      controlManager.ShowControl(control, openPage);
     }
 
     /// <summary>
