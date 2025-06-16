@@ -45,6 +45,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         ISwitchingDevice relayModule)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel("Начало проверки резисторов по таблице"));
+      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
 
       await powerSource.VoltageManager.SetSourceVoltageAsync(VoltageSources.Supply5V);
       // Подключить шины A1, B1 и питание
@@ -55,7 +56,6 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
       foreach (var (resistorNumber, resistance, integerPart, decimalPart) in TestPoints)
       {
-        await messageService.AppendEmptyLineAsync();
         cancellationToken.ThrowIfCancellationRequested();
 
         await messageService.ShowMessageAsync(new ShowMessageModel(
@@ -78,10 +78,13 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         double firstNorm = resistance - ((resistance / 100.0 * error.Percent) + error.Numeric);
         double lastNorm = resistance + ((resistance / 100.0 * error.Percent) + error.Numeric);
 
-        var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(currentAmps);
-        var result = voltage / currentAmps;
-
-        await DisconnectResistorByNumberAsync(relayModule, resistorNumber);
+        var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync();
+        double result = resistance;
+        
+        if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          result = voltage / currentAmps;
+        }
 
         ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", 
           message: $"{result:F2}",
@@ -91,8 +94,9 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await messageService.ShowMessageAsync(showMessageModel);
+
+        await DisconnectResistorByNumberAsync(relayModule, resistorNumber);
       }
-      await messageService.AppendEmptyLineAsync();
 
     }
 

@@ -32,20 +32,20 @@ namespace NewCore.Communication
             if (existing.IsOpen)
             {
               existing.Close();
-              LogInformation($"Закрыт старый порт {existing.PortName} перед заменой.");
+              LogInformation($"Закрыт старый порт {existing.PortName} перед заменой.", isDeviceLog: true);
             }
           }
           catch (Exception ex)
           {
-            LogException(ex, $"Ошибка при закрытии порта {existing.PortName}");
+            LogException(ex, $"Ошибка при закрытии порта {existing.PortName}", isDeviceLog: true);
           }
 
           _ports.Remove(existing);
-          LogInformation($"Старый порт {existing.PortName} удалён из списка.");
+          LogInformation($"Старый порт {existing.PortName} удалён из списка.", isDeviceLog: true);
         }
 
         _ports.Add(port);
-        LogInformation($"Порт {port.PortName} зарегистрирован.");
+        LogInformation($"Порт {port.PortName} зарегистрирован.", isDeviceLog: true);
       }
     }
 
@@ -62,20 +62,20 @@ namespace NewCore.Communication
           {
             if (port != null && port.IsOpen)
             {
-              LogInformation($"[{port.PortName}] Вызываю Close()");
+              LogInformation($"[{port.PortName}] Вызываю Close()", isDeviceLog: true);
               port.Close();
-              LogInformation($"Порт {port.PortName} закрыт.");
+              LogInformation($"Порт {port.PortName} закрыт.", isDeviceLog: true);
 
             }
           }
           catch (Exception ex)
           {
-            LogException(ex, $"Ошибка при закрытии порта {port.PortName}");
+            LogException(ex, $"Ошибка при закрытии порта {port.PortName}", isDeviceLog: true);
           }
         }
 
         _ports.Clear();
-        LogInformation("Все зарегистрированные порты удалены из списка.");
+        LogInformation("Все зарегистрированные порты удалены из списка.", isDeviceLog: true);
       }
     }
   }

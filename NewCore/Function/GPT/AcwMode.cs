@@ -39,13 +39,13 @@ namespace NewCore.Function.GPT
     /// </summary>
     public async Task<(bool Success, string Message)> SetModeAsync()
     {
-      LogInformation($"Начало выполнения {nameof(SetModeAsync)}");
+      LogInformation($"Начало выполнения {nameof(SetModeAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetModeAsync)}: Устройство в Idle Mode. Пропускаем установку режима.");
+          LogInformation($"{nameof(SetModeAsync)}: Устройство в Idle Mode. Пропускаем установку режима.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -57,21 +57,21 @@ namespace NewCore.Function.GPT
         var actualMode = await GetModeAsync();
         if (actualMode.Equals(expectedMode, StringComparison.OrdinalIgnoreCase))
         {
-          LogInformation($"{nameof(SetModeAsync)}: Режим успешно установлен с первой попытки.");
+          LogInformation($"{nameof(SetModeAsync)}: Режим успешно установлен с первой попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetModeAsync)}: Повторная попытка установки режима ACW.");
+        LogWarning($"{nameof(SetModeAsync)}: Повторная попытка установки режима ACW.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actualMode = await GetModeAsync();
         if (actualMode.Equals(expectedMode, StringComparison.OrdinalIgnoreCase))
         {
-          LogInformation($"{nameof(SetModeAsync)}: Режим успешно установлен со второй попытки.");
+          LogInformation($"{nameof(SetModeAsync)}: Режим успешно установлен со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить режим ACW. Устройство сообщает: {actualMode}";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
@@ -84,28 +84,28 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<string> GetModeAsync()
     {
-      LogInformation($"Начало выполнения {nameof(GetModeAsync)}");
+      LogInformation($"Начало выполнения {nameof(GetModeAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetModeAsync)}: Устройство в Idle Mode. Возвращаем пустую строку.");
+          LogInformation($"{nameof(GetModeAsync)}: Устройство в Idle Mode. Возвращаем пустую строку.", isDeviceLog: true);
           return string.Empty;
         }
 
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetModeAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetModeAsync)}: \"{response}\"", isDeviceLog: true);
 
         var trimmed = response.Trim();
-        LogInformation($"{nameof(GetModeAsync)}: Результат = {trimmed}");
+        LogInformation($"{nameof(GetModeAsync)}: Результат = {trimmed}", isDeviceLog: true);
         return trimmed;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetModeAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetModeAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -117,13 +117,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetVoltageAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetVoltageAsync)}: value={value:F3}");
+      LogInformation($"Начало {nameof(SetVoltageAsync)}: value={value:F3}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetVoltageAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetVoltageAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -136,26 +136,26 @@ namespace NewCore.Function.GPT
         var actualKv = await GetVoltageAsync();
         if (Math.Abs(actualKv - kvValue) < 0.01)
         {
-          LogInformation($"{nameof(SetVoltageAsync)}: Напряжение установлено успешно.");
+          LogInformation($"{nameof(SetVoltageAsync)}: Напряжение установлено успешно.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetVoltageAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetVoltageAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actualKv = await GetVoltageAsync();
         if (Math.Abs(actualKv - kvValue) < 0.01)
         {
-          LogInformation($"{nameof(SetVoltageAsync)}: Напряжение установлено успешно (со второй попытки).");
+          LogInformation($"{nameof(SetVoltageAsync)}: Напряжение установлено успешно (со второй попытки).", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить напряжение {kvValue:F3} кВ. Устройство сообщает: {actualKv:F3} кВ.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetVoltageAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetVoltageAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -167,33 +167,33 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetVoltageAsync()
     {
-      LogInformation($"Начало {nameof(GetVoltageAsync)}");
+      LogInformation($"Начало {nameof(GetVoltageAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetVoltageAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetVoltageAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetVoltageAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetVoltageAsync)}: \"{response}\"", isDeviceLog: true);
 
         if (double.TryParse(response.Replace("kV", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var voltage))
         {
-          LogInformation($"{nameof(GetVoltageAsync)}: Результат = {voltage}");
+          LogInformation($"{nameof(GetVoltageAsync)}: Результат = {voltage}", isDeviceLog: true);
           return voltage;
         }
 
-        LogWarning($"{nameof(GetVoltageAsync)}: Не удалось разобрать напряжение. Возвращаем 0.");
+        LogWarning($"{nameof(GetVoltageAsync)}: Не удалось разобрать напряжение. Возвращаем 0.", isDeviceLog: true);
         return 0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetVoltageAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetVoltageAsync)}", ex, isDeviceLog: true);
         throw;
       }
 
@@ -206,13 +206,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetHighCurrentLimitAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetHighCurrentLimitAsync)}: value={value:F3}");
+      LogInformation($"Начало {nameof(SetHighCurrentLimitAsync)}: value={value:F3}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -223,26 +223,26 @@ namespace NewCore.Function.GPT
         var actual = await GetHighCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Верхний предел тока успешно установлен.");
+          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Верхний предел тока успешно установлен.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetHighCurrentLimitAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetHighCurrentLimitAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetHighCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Верхний предел тока установлен со второй попытки.");
+          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Верхний предел тока установлен со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить верхний предел тока {value:F3} мА. Устройство сообщает: {actual:F3} мА.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetHighCurrentLimitAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetHighCurrentLimitAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -255,33 +255,33 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetHighCurrentLimitAsync()
     {
-      LogInformation($"Начало {nameof(GetHighCurrentLimitAsync)}");
+      LogInformation($"Начало {nameof(GetHighCurrentLimitAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetHighCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetHighCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CHISET)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetHighCurrentLimitAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetHighCurrentLimitAsync)}: \"{response}\"", isDeviceLog: true);
 
         if (double.TryParse(response.Replace("mA", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var current))
         {
-          LogInformation($"{nameof(GetHighCurrentLimitAsync)}: Результат = {current}");
+          LogInformation($"{nameof(GetHighCurrentLimitAsync)}: Результат = {current}", isDeviceLog: true);
           return current;
         }
 
-        LogWarning($"{nameof(GetHighCurrentLimitAsync)}: Не удалось разобрать ток. Возвращаем 0.");
+        LogWarning($"{nameof(GetHighCurrentLimitAsync)}: Не удалось разобрать ток. Возвращаем 0.", isDeviceLog: true);
         return 0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetHighCurrentLimitAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetHighCurrentLimitAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -293,13 +293,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetLowCurrentLimitAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetLowCurrentLimitAsync)}: value={value:F3}");
+      LogInformation($"Начало {nameof(SetLowCurrentLimitAsync)}: value={value:F3}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -310,26 +310,26 @@ namespace NewCore.Function.GPT
         var actual = await GetLowCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Нижний предел тока успешно установлен.");
+          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Нижний предел тока успешно установлен.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetLowCurrentLimitAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetLowCurrentLimitAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetLowCurrentLimitAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Нижний предел тока установлен со второй попытки.");
+          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Нижний предел тока установлен со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить нижний предел тока {value:F3} мА. Устройство сообщает: {actual:F3} мА.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetLowCurrentLimitAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetLowCurrentLimitAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -342,33 +342,33 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetLowCurrentLimitAsync()
     {
-      LogInformation($"Начало {nameof(GetLowCurrentLimitAsync)}");
+      LogInformation($"Начало {nameof(GetLowCurrentLimitAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetLowCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetLowCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_CLOSET)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetLowCurrentLimitAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetLowCurrentLimitAsync)}: \"{response}\"", isDeviceLog: true);
 
         if (double.TryParse(response.Replace("mA", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var current))
         {
-          LogInformation($"{nameof(GetLowCurrentLimitAsync)}: Результат = {current}");
+          LogInformation($"{nameof(GetLowCurrentLimitAsync)}: Результат = {current}", isDeviceLog: true);
           return current;
         }
 
-        LogWarning($"{nameof(GetLowCurrentLimitAsync)}: Не удалось разобрать ток. Возвращаем 0.");
+        LogWarning($"{nameof(GetLowCurrentLimitAsync)}: Не удалось разобрать ток. Возвращаем 0.", isDeviceLog: true);
         return 0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetLowCurrentLimitAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetLowCurrentLimitAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -379,13 +379,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetTestTimeAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetTestTimeAsync)}: value={value:F1}");
+      LogInformation($"Начало {nameof(SetTestTimeAsync)}: value={value:F1}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetTestTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetTestTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -397,26 +397,26 @@ namespace NewCore.Function.GPT
         var actual = await GetTestTimeAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetTestTimeAsync)}: Время теста успешно установлено.");
+          LogInformation($"{nameof(SetTestTimeAsync)}: Время теста успешно установлено.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetTestTimeAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetTestTimeAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetTestTimeAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetTestTimeAsync)}: Время теста установлено со второй попытки.");
+          LogInformation($"{nameof(SetTestTimeAsync)}: Время теста установлено со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить время теста {value:F1} сек. Устройство сообщает: {actual:F1} сек.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetTestTimeAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetTestTimeAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -428,33 +428,33 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetTestTimeAsync()
     {
-      LogInformation($"Начало {nameof(GetTestTimeAsync)}");
+      LogInformation($"Начало {nameof(GetTestTimeAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetTestTimeAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetTestTimeAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         var query = GetCommandSyntax(ManualCommand.MANU_ACW_TTIME) + "?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetTestTimeAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetTestTimeAsync)}: \"{response}\"", isDeviceLog: true);
 
         var match = Regex.Match(response, @"\d+(\.\d+)?");
         if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var testTime))
         {
-          LogInformation($"{nameof(GetTestTimeAsync)}: Результат = {testTime}");
+          LogInformation($"{nameof(GetTestTimeAsync)}: Результат = {testTime}", isDeviceLog: true);
           return testTime;
         }
 
-        LogWarning($"{nameof(GetTestTimeAsync)}: Не удалось разобрать время. Возвращаем -1.");
+        LogWarning($"{nameof(GetTestTimeAsync)}: Не удалось разобрать время. Возвращаем -1.", isDeviceLog: true);
         return -1;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetTestTimeAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetTestTimeAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -466,13 +466,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetRampTimeAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetRampTimeAsync)}: value={value:F1}");
+      LogInformation($"Начало {nameof(SetRampTimeAsync)}: value={value:F1}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetRampTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetRampTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -484,26 +484,26 @@ namespace NewCore.Function.GPT
         var actual = await GetRampTimeAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetRampTimeAsync)}: Ramp Time успешно установлен.");
+          LogInformation($"{nameof(SetRampTimeAsync)}: Ramp Time успешно установлен.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetRampTimeAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetRampTimeAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetRampTimeAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetRampTimeAsync)}: Ramp Time установлен со второй попытки.");
+          LogInformation($"{nameof(SetRampTimeAsync)}: Ramp Time установлен со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить Ramp Time {value:F1} сек. Устройство сообщает: {actual:F1} сек.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetRampTimeAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetRampTimeAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -515,33 +515,33 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetRampTimeAsync()
     {
-      LogInformation($"Начало {nameof(GetRampTimeAsync)}");
+      LogInformation($"Начало {nameof(GetRampTimeAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetRampTimeAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetRampTimeAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         var query = GetCommandSyntax(ManualCommand.MANU_RTIME) + "?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetRampTimeAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetRampTimeAsync)}: \"{response}\"", isDeviceLog: true);
 
         var match = Regex.Match(response, @"\d+(\.\d+)?");
         if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var rampTime))
         {
-          LogInformation($"{nameof(GetRampTimeAsync)}: Результат = {rampTime}");
+          LogInformation($"{nameof(GetRampTimeAsync)}: Результат = {rampTime}", isDeviceLog: true);
           return rampTime;
         }
 
-        LogWarning($"{nameof(GetRampTimeAsync)}: Не удалось разобрать Ramp Time. Возвращаем 0.");
+        LogWarning($"{nameof(GetRampTimeAsync)}: Не удалось разобрать Ramp Time. Возвращаем 0.", isDeviceLog: true);
         return 0.0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetRampTimeAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetRampTimeAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -553,7 +553,7 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetFrequencyAsync(int frequency)
     {
-      LogInformation($"Начало {nameof(SetFrequencyAsync)}: frequency={frequency}");
+      LogInformation($"Начало {nameof(SetFrequencyAsync)}: frequency={frequency}", isDeviceLog: true);
 
       try
       {
@@ -562,7 +562,7 @@ namespace NewCore.Function.GPT
 
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -574,26 +574,26 @@ namespace NewCore.Function.GPT
         var actual = await GetFrequencyAsync();
         if (actual == frequency)
         {
-          LogInformation($"{nameof(SetFrequencyAsync)}: Частота успешно установлена.");
+          LogInformation($"{nameof(SetFrequencyAsync)}: Частота успешно установлена.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetFrequencyAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetFrequencyAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetFrequencyAsync();
         if (actual == frequency)
         {
-          LogInformation($"{nameof(SetFrequencyAsync)}: Частота успешно установлена со второй попытки.");
+          LogInformation($"{nameof(SetFrequencyAsync)}: Частота успешно установлена со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить частоту {frequency} Гц. Устройство сообщает: {actual} Гц.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetFrequencyAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetFrequencyAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -605,33 +605,33 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<int> GetFrequencyAsync()
     {
-      LogInformation($"Начало {nameof(GetFrequencyAsync)}");
+      LogInformation($"Начало {nameof(GetFrequencyAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetFrequencyAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetFrequencyAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
 
-        LogDebug($"Ответ на {nameof(GetFrequencyAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetFrequencyAsync)}: \"{response}\"", isDeviceLog: true);
 
         if (int.TryParse(response.Replace("Hz", "").Trim(), out var freq))
         {
-          LogInformation($"{nameof(GetFrequencyAsync)}: Результат = {freq}");
+          LogInformation($"{nameof(GetFrequencyAsync)}: Результат = {freq}", isDeviceLog: true);
           return freq;
         }
 
-        LogWarning($"{nameof(GetFrequencyAsync)}: Не удалось разобрать частоту. Возвращаем 0.");
+        LogWarning($"{nameof(GetFrequencyAsync)}: Не удалось разобрать частоту. Возвращаем 0.", isDeviceLog: true);
         return 0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetFrequencyAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetFrequencyAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -643,13 +643,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetOffsetAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetOffsetAsync)}: value={value:F3}");
+      LogInformation($"Начало {nameof(SetOffsetAsync)}: value={value:F3}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetOffsetAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetOffsetAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -660,26 +660,26 @@ namespace NewCore.Function.GPT
         var actual = await GetOffsetAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetOffsetAsync)}: Смещение успешно установлено.");
+          LogInformation($"{nameof(SetOffsetAsync)}: Смещение успешно установлено.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetOffsetAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetOffsetAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetOffsetAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetOffsetAsync)}: Смещение установлено со второй попытки.");
+          LogInformation($"{nameof(SetOffsetAsync)}: Смещение установлено со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить смещение {value:F3} мА. Устройство сообщает: {actual:F3} мА.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetOffsetAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetOffsetAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -691,32 +691,32 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetOffsetAsync()
     {
-      LogInformation($"Начало {nameof(GetOffsetAsync)}");
+      LogInformation($"Начало {nameof(GetOffsetAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetOffsetAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetOffsetAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_REF)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetOffsetAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetOffsetAsync)}: \"{response}\"", isDeviceLog: true);
 
         if (double.TryParse(response.Replace("mA", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var offset))
         {
-          LogInformation($"{nameof(GetOffsetAsync)}: Результат = {offset}");
+          LogInformation($"{nameof(GetOffsetAsync)}: Результат = {offset}", isDeviceLog: true);
           return offset;
         }
 
-        LogWarning($"{nameof(GetOffsetAsync)}: Не удалось разобрать смещение. Возвращаем 0.");
+        LogWarning($"{nameof(GetOffsetAsync)}: Не удалось разобрать смещение. Возвращаем 0.", isDeviceLog: true);
         return 0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetOffsetAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetOffsetAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -728,13 +728,13 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetArcCurrentAsync(double value)
     {
-      LogInformation($"Начало {nameof(SetArcCurrentAsync)}: value={value:F3}");
+      LogInformation($"Начало {nameof(SetArcCurrentAsync)}: value={value:F3}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(SetArcCurrentAsync)}: Устройство в Idle Mode. Пропускаем установку.");
+          LogInformation($"{nameof(SetArcCurrentAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
@@ -746,26 +746,26 @@ namespace NewCore.Function.GPT
         var actual = await GetArcCurrentAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetArcCurrentAsync)}: Дуговой ток успешно установлен.");
+          LogInformation($"{nameof(SetArcCurrentAsync)}: Дуговой ток успешно установлен.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
-        LogWarning($"{nameof(SetArcCurrentAsync)}: Повторная попытка.");
+        LogWarning($"{nameof(SetArcCurrentAsync)}: Повторная попытка.", isDeviceLog: true);
         await _gptModel.DeviceProtocol.QueryAsync(command);
         actual = await GetArcCurrentAsync();
         if (Math.Abs(actual - value) < 0.1)
         {
-          LogInformation($"{nameof(SetArcCurrentAsync)}: Дуговой ток установлен со второй попытки.");
+          LogInformation($"{nameof(SetArcCurrentAsync)}: Дуговой ток установлен со второй попытки.", isDeviceLog: true);
           return (true, string.Empty);
         }
 
         string error = $"Не удалось установить ток дуги {value:F3} мА. Устройство сообщает: {actual:F3} мА.";
-        LogWarning(error);
+        LogWarning(error, isDeviceLog: true);
         return (false, error);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(SetArcCurrentAsync)}", ex);
+        LogException($"Ошибка в {nameof(SetArcCurrentAsync)}", ex, isDeviceLog: true);
         throw;
       }
       finally
@@ -777,32 +777,32 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<double> GetArcCurrentAsync()
     {
-      LogInformation($"Начало {nameof(GetArcCurrentAsync)}");
+      LogInformation($"Начало {nameof(GetArcCurrentAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(GetArcCurrentAsync)}: Устройство в Idle Mode. Возвращаем 0.");
+          LogInformation($"{nameof(GetArcCurrentAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
         }
 
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_ARCCURRENT)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-        LogDebug($"Ответ на {nameof(GetArcCurrentAsync)}: \"{response}\"");
+        LogDebug($"Ответ на {nameof(GetArcCurrentAsync)}: \"{response}\"", isDeviceLog: true);
 
         if (double.TryParse(response.Replace("mA", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var arc))
         {
-          LogInformation($"{nameof(GetArcCurrentAsync)}: Результат = {arc}");
+          LogInformation($"{nameof(GetArcCurrentAsync)}: Результат = {arc}", isDeviceLog: true);
           return arc;
         }
 
-        LogWarning($"{nameof(GetArcCurrentAsync)}: Не удалось разобрать ток дуги. Возвращаем 0.");
+        LogWarning($"{nameof(GetArcCurrentAsync)}: Не удалось разобрать ток дуги. Возвращаем 0.", isDeviceLog: true);
         return 0;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(GetArcCurrentAsync)}", ex);
+        LogException($"Ошибка в {nameof(GetArcCurrentAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -814,13 +814,13 @@ namespace NewCore.Function.GPT
     /// </summary>
     public async Task<AcwConfiguration> ReadConfigurationAsync()
     {
-      LogInformation($"Начало {nameof(ReadConfigurationAsync)}");
+      LogInformation($"Начало {nameof(ReadConfigurationAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(ReadConfigurationAsync)}: Устройство в Idle Mode. Возвращаем пустую конфигурацию.");
+          LogInformation($"{nameof(ReadConfigurationAsync)}: Устройство в Idle Mode. Возвращаем пустую конфигурацию.", isDeviceLog: true);
           return new AcwConfiguration();
         }
 
@@ -843,12 +843,12 @@ namespace NewCore.Function.GPT
           ArcCurrent = arcCurrent,
         };
 
-        LogInformation($"{nameof(ReadConfigurationAsync)}: Конфигурация успешно считана.");
+        LogInformation($"{nameof(ReadConfigurationAsync)}: Конфигурация успешно считана.", isDeviceLog: true);
         return config;
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(ReadConfigurationAsync)}", ex);
+        LogException($"Ошибка в {nameof(ReadConfigurationAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }
@@ -859,13 +859,13 @@ namespace NewCore.Function.GPT
     /// </summary>
     public async Task<double> MeasureCurrentAsync(double param = 0)
     {
-      LogInformation($"Начало {nameof(MeasureCurrentAsync)}");
+      LogInformation($"Начало {nameof(MeasureCurrentAsync)}", isDeviceLog: true);
 
       try
       {
         if (await GetIsIdleModeEnabled())
         {
-          LogInformation($"{nameof(MeasureCurrentAsync)}: Устройство в Idle Mode. Возвращаем param.");
+          LogInformation($"{nameof(MeasureCurrentAsync)}: Устройство в Idle Mode. Возвращаем param.", isDeviceLog: true);
           return param;
         }
 
@@ -882,13 +882,13 @@ namespace NewCore.Function.GPT
         var result = answerDevice.Split(',');
         var measureResulte = result[3];
 
-        LogInformation($"Результат измерения режима ACW: {measureResulte}");
+        LogInformation($"Результат измерения режима ACW: {measureResulte}", isDeviceLog: true);
 
         Match match = Regex.Match(measureResulte, @"\d+(\.\d+)?");
         if (match.Success)
         {
           var finalResult = double.Parse(match.Value, CultureInfo.InvariantCulture);
-          LogInformation($"{nameof(MeasureCurrentAsync)}: Возвращаем значение = {finalResult}");
+          LogInformation($"{nameof(MeasureCurrentAsync)}: Возвращаем значение = {finalResult}", isDeviceLog: true);
           return finalResult;
         }
 
@@ -896,7 +896,7 @@ namespace NewCore.Function.GPT
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка в {nameof(MeasureCurrentAsync)}", ex);
+        LogException($"Ошибка в {nameof(MeasureCurrentAsync)}", ex, isDeviceLog: true);
         throw;
       }
     }

@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UI\UI.csproj" />
-    <ProjectReference Include="..\WpfDocking-master\Src\WpfDocking.csproj" />
   </ItemGroup>
 
 </Project>
+

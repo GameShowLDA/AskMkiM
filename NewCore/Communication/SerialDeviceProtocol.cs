@@ -37,7 +37,7 @@ namespace NewCore.Communication
     /// <inheritdoc />
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
     {
-      LogDebug($"[{_device.Name}] Захват _portLock");
+      LogDebug($"[{_device.Name}] Захват _portLock", isDeviceLog: true);
       await OperationLock.WaitAsync();
 
 
@@ -45,7 +45,7 @@ namespace NewCore.Communication
       {
         if (delayBeforeCall > 0)
         {
-          LogDebug($"Задержка перед вызовом: {delayBeforeCall} мс");
+          LogDebug($"Задержка перед вызовом: {delayBeforeCall} мс", isDeviceLog: true);
           await Task.Delay(delayBeforeCall);
         }
 
@@ -53,23 +53,23 @@ namespace NewCore.Communication
         {
           if (!EnsurePortOpen())
           {
-            LogWarning($"COM-порт не удалось открыть: {_serialPort.PortName}");
+            LogWarning($"COM-порт не удалось открыть: {_serialPort.PortName}", isDeviceLog: true);
             return string.Empty;
           }
 
-          LogDebug($"COM-порт открыт: {_serialPort.IsOpen}, Скорость: {_serialPort.BaudRate}, Handshake: {_serialPort.Handshake}");
-          LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}");
+          LogDebug($"COM-порт открыт: {_serialPort.IsOpen}, Скорость: {_serialPort.BaudRate}, Handshake: {_serialPort.Handshake}", isDeviceLog: true);
+          LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}", isDeviceLog: true);
 
           _serialPort.DiscardInBuffer();
           _serialPort.DiscardOutBuffer();
           _serialPort.WriteLine(command);
 
-          LogDebug($"Команда отправлена. BytesToRead до задержки: {_serialPort.BytesToRead}");
+          LogDebug($"Команда отправлена. BytesToRead до задержки: {_serialPort.BytesToRead}", isDeviceLog: true);
 
           if (responseDelay > 0)
           {
             int roundedDelay = (int)Math.Ceiling(responseDelay) + 300;
-            LogDebug($"Задержка перед чтением ответа: {roundedDelay} мс");
+            LogDebug($"Задержка перед чтением ответа: {roundedDelay} мс", isDeviceLog: true);
             await Task.Delay(roundedDelay);
           }
 
@@ -90,7 +90,7 @@ namespace NewCore.Communication
                 {
                   string chunk = _serialPort.ReadExisting();
                   responseBuilder.Append(chunk);
-                  LogDebug($"Принятый фрагмент: {chunk.Trim()}");
+                  LogDebug($"Принятый фрагмент: {chunk.Trim()}", isDeviceLog: true);
                   if (chunk.Contains("\n") || chunk.Contains("\r")) break;  // Можно уточнить по протоколу устройства
                 }
                 else
@@ -100,7 +100,7 @@ namespace NewCore.Communication
               }
               catch (Exception ex)
               {
-                LogException(ex, $"Ошибка при чтении из порта");
+                LogException(ex, $"Ошибка при чтении из порта", isDeviceLog: true);
                 break;
               }
             }
@@ -108,28 +108,28 @@ namespace NewCore.Communication
             string response = responseBuilder.ToString().Trim();
             if (string.IsNullOrWhiteSpace(response))
             {
-              LogWarning($"[{_device.Name}] Таймаут: данных от устройства нет за {timeout} мс");
+              LogWarning($"[{_device.Name}] Таймаут: данных от устройства нет за {timeout} мс", isDeviceLog: true);
             }
             else
             {
-              LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
+              LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
             }
 
             return response;
           }
 
-          LogDebug("Таймаут чтения не задан, возвращается пустой ответ.");
+          LogDebug("Таймаут чтения не задан, возвращается пустой ответ.", isDeviceLog: true);
           return string.Empty;
         }
         catch (Exception ex)
         {
-          LogException(ex, $"[{_device.Name}] Ошибка при работе с COM-портом");
+          LogException(ex, $"[{_device.Name}] Ошибка при работе с COM-портом", isDeviceLog: true);
           return string.Empty;
         }
       }
       finally
       {
-        LogDebug($"[{_device.Name}] Освобождение _portLock");
+        LogDebug($"[{_device.Name}] Освобождение _portLock", isDeviceLog: true);
         OperationLock.Release();
       }
     }
@@ -145,29 +145,29 @@ namespace NewCore.Communication
         if (!_serialPort.IsOpen)
         {
           _serialPort.Open();
-          LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} успешно открыт.");
+          LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} успешно открыт.", isDeviceLog: true);
         }
 
         return true;
       }
       catch (UnauthorizedAccessException ex)
       {
-        LogException($"[{_device.Name}] Доступ к порту запрещен", ex);
+        LogException($"[{_device.Name}] Доступ к порту запрещен", ex, isDeviceLog: true);
         return false;
       }
       catch (IOException ex)
       {
-        LogException($"[{_device.Name}] Ошибка ввода-вывода при открытии порта", ex);
+        LogException($"[{_device.Name}] Ошибка ввода-вывода при открытии порта", ex, isDeviceLog: true);
         return false;
       }
       catch (InvalidOperationException ex)
       {
-        LogException($"[{_device.Name}] Порт уже используется другим процессом", ex);
+        LogException($"[{_device.Name}] Порт уже используется другим процессом", ex, isDeviceLog: true);
         return false;
       }
       catch (Exception ex)
       {
-        LogException($"[{_device.Name}] Неизвестная ошибка при открытии порта", ex);
+        LogException($"[{_device.Name}] Неизвестная ошибка при открытии порта", ex, isDeviceLog: true);
         return false;
       }
     }
