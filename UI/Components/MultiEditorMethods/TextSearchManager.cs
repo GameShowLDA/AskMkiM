@@ -744,10 +744,6 @@ namespace UI.Components.MultiEditorMethods
           ShowNextPage(nextIndex);
           return nextIndex;
         }
-        //else if (nextIndex >= textEditorContainer.DockManager.DockItems.Count)
-        //{
-
-        //}
       }
 
       return -1;
@@ -880,21 +876,26 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     public void OnSearchWindowClosing()
     {
-      foreach (var control in fileManager.UserControls)
+      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
+      if (textEditorContainer != null)
       {
-        if (control is TextEditorUI textEditor)
-        {
-          ClearHighlights(textEditor);
-        }
-      }
 
-      _pendingHighlights.Clear();
-      _fullText = new Dictionary<UserControl, string>();
-      _wholeWord = false;
-      _caseWord = false;
-      _searchArea = 0;
-      _searchParameters = string.Empty;
-      hasChanged = true;
+        foreach (var control in textEditorContainer.DockManager.DockItems)
+        {
+          if (control.Content is TextEditorUI textEditor)
+          {
+            ClearHighlights(textEditor);
+          }
+        }
+
+        _pendingHighlights.Clear();
+        _fullText = new Dictionary<UserControl, string>();
+        _wholeWord = false;
+        _caseWord = false;
+        _searchArea = 0;
+        _searchParameters = string.Empty;
+        hasChanged = true;
+      }
     }
 
     /// <summary>
