@@ -199,6 +199,13 @@
 
                 </MenuItem>
 
+                <MenuItem Header="Сервис" Name="Services" Tag="menuHeader_6">
+                    <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
+                    <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
+                    <MenuItem Header="МКР" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
+                    <MenuItem Header="УКШ" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
+                </MenuItem>
+
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
 
                     <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
@@ -228,6 +235,10 @@
 
                     </MenuItem>
 
+                    <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
+                        <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+                    </MenuItem>
+
                 </MenuItem>
 
                 <MenuItem Header="Трансляция" Name="Translation" Tag="menuHeader_5">
@@ -239,7 +250,6 @@
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
                     <MenuItem Header="Протокол" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
-                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Settings.ErrorCommand}"/>
 
                 </MenuItem>
 
@@ -249,6 +259,7 @@
 
                 <MenuItem Header="Администрирование" Name="Admin">
 
+                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Admin.ErrorCommand}"/>
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
                     <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
                     <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>

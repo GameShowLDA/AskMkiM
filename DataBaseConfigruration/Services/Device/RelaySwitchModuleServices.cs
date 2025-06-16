@@ -17,6 +17,24 @@ namespace DataBaseConfiguration.Services.Device
     { }
 
     /// <summary>
+    /// Получает список всех устройств.
+    /// </summary>
+    /// <returns>Список модулей коммутации реле.</returns>
+    public List<IRelaySwitchModule> GetAllDevices()
+    {
+      var data = _context.Set<RelaySwitchModuleEntity>()
+                         .ToList();
+
+      var result = data
+          .OfType<IRelaySwitchModule>()
+          .Select(GetDeviceInstance)
+          .Where(instance => instance != null)
+          .ToList();
+
+      return result;
+    }
+    
+    /// <summary>
     /// Получает список всех устройств, привязанных к определенному шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>

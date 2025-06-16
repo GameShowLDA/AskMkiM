@@ -47,7 +47,7 @@ namespace MainWindowProgram.Test.Protocol
              await Test.ShowMessageAsync(new ShowMessageModel($"БЛОК {i / 100 + 1}", message: "Вложенный шаг", messageColor: Colors.Yellow), true);
            }
 
-           await Test.ShowMessageAsync(new ShowMessageModel("Тест", message: i.ToString() + $"[{ShowMessageModel.SuccessMessage.Title}]", messageColor: ShowMessageModel.SuccessMessage.TitleColor));
+           await Test.ShowMessageAsync(new ShowMessageModel("Тест", message: i.ToString(), type: ShowMessageModel.MessageType.Success));
            i++;
          }
        });

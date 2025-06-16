@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using NewCore.Communication;
 using Utilities.Models;
 using WindowsInput;
 using static AppConfiguration.Base.EventAggregator;
@@ -87,12 +88,13 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null, bool checkPower = true)
     {
+      isExit = false;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
       {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", ErrorMessage.TitleColor));
-          await ProtocolSelfCheck.FinalizeAsync();
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error));
+          await FinalizeAsync();
           return;
       }
 
@@ -103,14 +105,21 @@ namespace UI.Controls.ProtocolNew
 
       if (startDelegate == null)
       {
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", ErrorMessage.TitleColor));
-        await ProtocolSelfCheck.FinalizeAsync();
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", type: MessageType.Error));
+        await FinalizeAsync();
         LogError("Системная ошибка выполнения, обратитесь к администратору");
         return;
       }
 
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
       StartProcessing?.Invoke(true);
+
+
+      if (await GetIsStepByStepModeEnabled())
+      {
+        StepControlManager.EnableStepMode(true);
+        StepMode = true;
+      }
 
       if (IsProcessRunning(name))
       {
@@ -135,6 +144,7 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
     internal async Task StopAsync(StopDelegate stopDelegate)
     {
+
       await FinalizeAsync(stopDelegate);
     }
 
@@ -151,9 +161,10 @@ namespace UI.Controls.ProtocolNew
 
       isExit = true;
 
-      StartProcessing?.Invoke(false);
 
       LogInformation($"Завершение \"{name}\"");
+
+      SerialPortHelper.CloseAllRegisteredSerialPorts();
 
       await CancelProcessTaskAsync(stopDelegate, name);
 
@@ -166,12 +177,14 @@ namespace UI.Controls.ProtocolNew
       ProtocolSelfCheck.ShowOnlyStartButton();
 
       await DisplayCompletionMessage();
+
+      StartProcessing?.Invoke(false);
     }
 
     /// <summary>
     /// Ставит выполнение метода на паузу.
     /// </summary>
-    internal async Task PauseAsync()
+    internal async Task PauseAsync(CancellationToken cancellationToken)
     {
       if (!IsPaused)
       {
@@ -181,7 +194,7 @@ namespace UI.Controls.ProtocolNew
         ProtocolSelfCheck.ShowButtonsOnPause();
       }
 
-      await WaitWhilePausedAsync();
+      await WaitWhilePausedAsync(cancellationToken);
     }
 
     /// <summary>
@@ -230,7 +243,7 @@ namespace UI.Controls.ProtocolNew
     internal async Task LoopMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
     {
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
-      while (true)
+      while (!CancellationTokenSource?.IsCancellationRequested ?? true)
       {
         try
         {
@@ -287,47 +300,69 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="protocolSelfCheck">Объект интерфейса.</param>
     /// <returns>Задача ожидания паузы.</returns>
-    public async Task WaitWhilePausedAsync(ProtocolUI protocolSelfCheck = null)
+    /// <summary>
+    /// Ожидает, пока выполнение процесса находится в состоянии паузы.
+    /// Поддерживает отмену ожидания через CancellationToken.
+    /// </summary>
+    /// <param name="protocolSelfCheck">Объект интерфейса для вывода сообщений.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Задача ожидания выхода из паузы или отмены.</returns>
+    public async Task WaitWhilePausedAsync(CancellationToken cancellationToken, ProtocolUI protocolSelfCheck = null)
     {
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
       {
         LogInformation("Срабатывание ожидания при самоконтроле");
-        if (protocolSelfCheck != null)
+
+        if (protocolSelfCheck != null && ShouldShowPauseMessage)
         {
-          if (ShouldShowPauseMessage)
+          ShouldShowPauseMessage = false;
+          ShouldShowResumeMessage = true;
+
+          ShowMessageModel showMessage = new ShowMessageModel
           {
-            ShouldShowPauseMessage = false;
-            ShouldShowResumeMessage = true;
-
-            ShowMessageModel showMessage = new ShowMessageModel()
-            {
-              Header = "Выполнение поставлено на паузу!",
-              CanBeDeleted = false,
-            };
-
-            await protocolSelfCheck.ShowMessageAsync(showMessage);
-          }
-        }
-
-        await PauseCompletionSource.Task;
-        ShouldShowPauseMessage = true;
-      }
-
-      if (protocolSelfCheck != null)
-      {
-        if (ShouldShowResumeMessage)
-        {
-          ShouldShowResumeMessage = false;
-
-          ShowMessageModel showMessage = new ShowMessageModel()
-          {
-            Header = "Выполнение снято с паузы!",
+            Header = "Выполнение поставлено на паузу!",
             CanBeDeleted = false,
           };
+
           await protocolSelfCheck.ShowMessageAsync(showMessage);
         }
+
+        using (cancellationToken.Register(() =>
+        {
+          LogInformation("Ожидание паузы прервано по отмене");
+          PauseCompletionSource.TrySetCanceled(cancellationToken);
+        }))
+        {
+          try
+          {
+            await PauseCompletionSource.Task;
+          }
+          catch (TaskCanceledException)
+          {
+            // Отмена ожидания — просто выйти
+            return;
+          }
+          finally
+          {
+            ShouldShowPauseMessage = true;
+          }
+        }
+      }
+
+      if (protocolSelfCheck != null && ShouldShowResumeMessage)
+      {
+        ShouldShowResumeMessage = false;
+
+        ShowMessageModel showMessage = new ShowMessageModel
+        {
+          Header = "Выполнение снято с паузы!",
+          CanBeDeleted = false,
+        };
+
+        await protocolSelfCheck.ShowMessageAsync(showMessage);
       }
     }
+
 
     /// <summary>
     /// Проверка на паузу или завершение программы.
@@ -343,7 +378,7 @@ namespace UI.Controls.ProtocolNew
 
       if (IsPaused)
       {
-        await WaitWhilePausedAsync().ConfigureAwait(true);
+        await WaitWhilePausedAsync(token).ConfigureAwait(true);
       }
 
       return true;
@@ -386,8 +421,7 @@ namespace UI.Controls.ProtocolNew
     {
       ShowMessageModel showMessage = new ShowMessageModel()
       {
-        Header = $"Завершено.",
-        HeaderColor = SuccessMessage.TitleColor,
+        Header = $"Завершено",
         CanBeDeleted = false,
       };
       await ProtocolSelfCheck.ShowMessageAsync(showMessage);
@@ -408,11 +442,6 @@ namespace UI.Controls.ProtocolNew
       // Создаём новый токен
       CancellationTokenSource = new CancellationTokenSource();
       PauseCompletionSource = new TaskCompletionSource<bool>();
-
-      if (await GetIsStepByStepModeEnabled())
-      {
-        StepControlManager.EnableStepMode(true);
-      }
 
       if (startDelegate != null)
       {
@@ -459,11 +488,25 @@ namespace UI.Controls.ProtocolNew
         {
           // Отмена токена
           CancellationTokenSource?.Cancel();
-          LogInformation($"Процесс \"{name}\" успешно завершен.");
+          LogInformation($"Процесс \"{name}\" запрошен на завершение.");
         }
         catch (Exception ex)
         {
           LogException($"Ошибка при завершении \"{name}\"", ex);
+        }
+
+        try
+        {
+          // Ждём завершения задачи
+          await ProcessTask;
+        }
+        catch (OperationCanceledException)
+        {
+          LogInformation($"Процесс \"{name}\" был отменён.");
+        }
+        catch (Exception ex)
+        {
+          LogException($"Ошибка при ожидании завершения задачи \"{name}\"", ex);
         }
       }
       else
@@ -474,6 +517,10 @@ namespace UI.Controls.ProtocolNew
       if (stopDelegate != null)
       {
         var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+
+        StepControlManager.DisableStepMode();
+        KeyboardManager.TriggerStep();
+
         await stopDelegate(token);
       }
 
@@ -481,14 +528,15 @@ namespace UI.Controls.ProtocolNew
       ProcessTask = null;
     }
 
+
     /// <summary>
     /// Сбрасывает состояние выполнения и интерфейса.
     /// </summary>
     private void ResetState()
     {
       ProcessTask = null;
-      //IsPaused = false;
-      //StepMode = false;
+      IsPaused = false;
+      StepMode = false;
       ShouldShowPauseMessage = true;
 
       Application.Current.Dispatcher.Invoke(() =>

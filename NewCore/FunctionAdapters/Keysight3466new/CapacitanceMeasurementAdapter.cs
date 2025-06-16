@@ -35,7 +35,6 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима измерения ёмкости",
-          "CONF:CAP",
           true,
           1);
       }
@@ -57,14 +56,6 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       try
       {
         double result = await _measurement.MeasureCapacitanceAsync(param);
-
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Результат измерения ёмкости",
-          $"{result} нФ",
-          result >= 0,
-          2);
-
         return result;
       }
       catch (Exception ex)

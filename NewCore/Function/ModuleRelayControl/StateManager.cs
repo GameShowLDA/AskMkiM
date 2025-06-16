@@ -78,9 +78,37 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
+
       DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
       string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return result == "2.0.1";
+
+      BaseResponse baseResponse = BaseResponse.FromJson(result);
+      if (baseResponse != null)
+      {
+        if (baseResponse.NumberChassis == _moduleRelayControl.NumberChassis &&
+      baseResponse.NumberDevice == _moduleRelayControl.Number && baseResponse.Answer.Contains("2.0"))
+        {
+          return (true);
+        }
+        else
+        {
+          string errorMessage = string.Empty;
+
+          if (baseResponse.NumberChassis != _moduleRelayControl.NumberChassis)
+          {
+            errorMessage += $"Несовпадение по NumberChassis: ожидается {_moduleRelayControl.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+          }
+
+          if (baseResponse.NumberDevice != _moduleRelayControl.Number)
+          {
+            errorMessage += $"Несовпадение по NumberDevice: ожидается {_moduleRelayControl.Number}, получено {baseResponse.NumberDevice}.";
+          }
+
+          return (false);
+        }
+      }
+
+      return false;
     }
 
     /// <inheritdoc />

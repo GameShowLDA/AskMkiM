@@ -97,5 +97,10 @@ namespace MainWindowProgram.Services
       var foundEditor = _multiWindowControl.GetActiveTextEditor();
       return Task.FromResult(foundEditor);
     }
+
+    public TextEditorUI CreateTranslationFileAsync()
+    {
+      return _multiWindowControl.CreateTranslationFileAsync();
+    }
   }
 }

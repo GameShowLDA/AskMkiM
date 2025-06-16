@@ -27,13 +27,15 @@ namespace MainWindowProgram.Engine
       var metrology = new MetrologyService(multi);
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
+      var service = new ServiceMode(multi);
       var settings = new SettingsService(multi);
       var windowService = new WindowService(window, window.mainMenu, window.ButtonsPanel, () => window.IsLocked);
       var selfTest = new SelfTestServices(multi);
-      var translation = new TranslationServices(window, multi);
+      var translation = new TranslationServices(window, multi, file);
 
       var viewModel = new MainWindowViewModel(
           metrology,
+          service,
           file,
           test,
           settings,

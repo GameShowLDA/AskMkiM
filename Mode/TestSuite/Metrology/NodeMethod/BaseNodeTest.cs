@@ -87,7 +87,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
 
       foreach (var module in relayModules)
       {
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", ShowMessageModel.SuccessMessage.TitleColor, message: $"Подключение к шинам A1B1"));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", message: $"Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info));
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1);
 
@@ -120,7 +120,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
 
         await module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", ShowMessageModel.SuccessMessage.TitleColor, message: $"Подключение точек к шинам"));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", message: $"Подключение точек к шинам", type: ShowMessageModel.MessageType.Info));
         for (int i = startPoint; i <= endPoint; i++)
         {
           _pointsToProcess.Add(new PointModel { DeviceNumber = module.NumberChassis, ModuleNumber = module.Number, PointNumber = i });
@@ -197,7 +197,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// <returns>Задача, представляющая операцию подключения.</returns>
     public virtual async Task<(bool Connect, string Message)> ConnectDevicesAsync()
     {
-      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования", ShowMessageModel.SuccessMessage.TitleColor));
+      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования", type: ShowMessageModel.MessageType.Info));
 
       foreach (var device in Devices)
       {
@@ -219,6 +219,12 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// </summary>
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public abstract Task ConfigureMeter(DataModel dataModel = null);
+
+    public void ResetPoints()
+    {
+      _pointsToProcess.Clear();
+      _currentPointIndex = 0;
+    }
 
     /// <summary>
     /// Подключает все устройства, собранные в коллекции <see cref="Devices"/>.

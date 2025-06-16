@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleVoltageCurrentSource;
-using Utilities.Error.Device;
 
 namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
 {

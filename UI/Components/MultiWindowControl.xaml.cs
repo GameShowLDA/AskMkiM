@@ -163,6 +163,17 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>
+    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// </returns>
+    public TextEditorUI CreateTranslationFileAsync()
+    {
+      return MultiEditor.CreateTranslationFileAsync();
+    }
+
+    /// <summary>
     /// Добавляет новый элемент управления в редактор.
     /// </summary>
     /// <param name="name">

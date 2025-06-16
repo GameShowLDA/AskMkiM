@@ -113,8 +113,6 @@
                             </Button.Style>
                         </Button>
 
-
-
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -184,6 +182,61 @@
                             </Button.Style>
                         </Button>
 
+                        <Button x:Name="adminContinue" Content="ПРОПУСТИТЬ" FontSize="18" Margin="0,10,0,0" Cursor="Hand" >
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="{StaticResource RedColor}" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="#f3f0f9"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#fcaa3f" Offset="1"/>
+                                                        <GradientStop Color="#f47842" Offset="0"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Button x:Name="adminExit" Content="ЗАВЕРШИТЬ" FontSize="18" Margin="0,10,0,0" Cursor="Hand" >
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="{StaticResource RedColor}" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="#f3f0f9"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#fcaa3f" Offset="1"/>
+                                                        <GradientStop Color="#f47842" Offset="0"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>

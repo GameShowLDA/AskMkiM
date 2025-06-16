@@ -43,6 +43,10 @@ namespace Mode.Metrology.PI
         ReturnDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
         });
     }
 
@@ -53,7 +57,7 @@ namespace Mode.Metrology.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(CancellationToken cancellationToken)
     {
-      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
+      Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true, timeRampCheck: true);
       if (!Data.Success)
       {
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
@@ -76,7 +80,6 @@ namespace Mode.Metrology.PI
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
     }
 
     public ITextAdapter GetControl()
@@ -94,11 +97,11 @@ namespace Mode.Metrology.PI
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await breakDown.ConnectableManager.ConnectAsync();
         await breakDown.DcwManger.SetModeAsync();
-        await breakDown.DcwManger.SetVoltageAsync(dataModel.Param);
         await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time);
         await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime);
         await breakDown.DcwManger.SetLowCurrentLimitAsync(0);
         await breakDown.DcwManger.SetHighCurrentLimitAsync(10);
+        await breakDown.DcwManger.SetVoltageAsync(dataModel.Param);
       }
 
       /// <inheritdoc />

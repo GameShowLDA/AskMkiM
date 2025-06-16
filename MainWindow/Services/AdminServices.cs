@@ -5,6 +5,7 @@ using Mode.SelfControl.DeviceCheck;
 using Mode.Settings.LoggerMessage;
 using Mode.Settings.SendCommand;
 using UI.Controls.GPT;
+using UI.Controls.MeasurementError;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -72,6 +73,14 @@ namespace MainWindowProgram.Services
 
       _mainWindow.Effect = null;
     }
+
+
+    /// <summary>
+    /// Открывает пользовательский элемент управления с настройками погрешностей выполнения режимов.
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия интерфейса погрешностей.</returns>
+    public async Task OpenErrorSync() =>
+      await _multiWindow.AddControlAsync("Погрешности измерений", new MeasurementErrorControl(), TypeWindow.Settings);
 
     public async Task ProtocolTest()
     { 

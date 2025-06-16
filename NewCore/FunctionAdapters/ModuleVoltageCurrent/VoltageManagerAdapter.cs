@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device.ModuleVoltageCurrent;
 using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleVoltageCurrentSource;
-using Utilities.Error.Device.ModuleVoltageCurrent;
 using static NewCore.Enum.DeviceEnum;
 
 namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
@@ -53,7 +53,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
 
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
     {
-      string value = $"{integerPart}.{decimalPart:D3}";
+      string value = $"{integerPart}.{decimalPart}";
 
       try
       {

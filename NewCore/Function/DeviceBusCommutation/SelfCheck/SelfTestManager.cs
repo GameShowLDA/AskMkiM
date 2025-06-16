@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using AppConfiguration.Interface;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Additionally;
-using NewCore.Communication;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
 using NewCore.Base.Interface.Main;
-using static NewCore.Enum.DeviceEnum;
+using NewCore.Communication;
 using Utilities.Models;
+using static AppConfiguration.Execution.ExecutionConfig;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 {
@@ -180,8 +174,9 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       if (selectedType is not TypeConnector type)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel(
-          "Ошибка", ShowMessageModel.ErrorMessage.TitleColor,
-          "Неверный тип проверки: требуется TypeConnector"));
+          "Ошибка",
+          message: "Неверный тип проверки: требуется TypeConnector",
+          type: ShowMessageModel.MessageType.Error));
         return;
       }
 
@@ -229,8 +224,9 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
         default:
           await messageService.ShowMessageAsync(new ShowMessageModel(
-            "Ошибка", ShowMessageModel.ErrorMessage.TitleColor,
-            $"Тип проверки {type} не распознан."));
+            "Ошибка",
+            message: $"Тип проверки {type} не распознан.",
+            type: ShowMessageModel.MessageType.Error));
           break;
 
       }
@@ -316,7 +312,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       if (selfTestChecker == null)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, "Устройство не поддерживает самоконтроль."));
+        await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Устройство не поддерживает самоконтроль.", type: ShowMessageModel.MessageType.Error));
         LogError("Ошибка: Устройство не поддерживает самоконтроль.");
         return false;
       }
@@ -339,7 +335,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
         if (!await PerformCircuitTestAsync(messageService, selfTestChecker, meter, testType, circuitName, busContact))
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor) { IndentLevel = 3 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
           LogError($"Проверка {circuitName} завершилась с ошибкой!");
           allTestsPassed = false;
           continue;
@@ -369,11 +365,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
     private static async Task<bool> PerformCircuitTestAsync(IUserMessageService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}", ShowMessageModel.SuccessMessage.TitleColor), true);
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
 
       if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 1))
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при замыкании: {circuitName}.", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при замыкании: {circuitName}.", type: ShowMessageModel.MessageType.Error));
         return false;
       }
 
@@ -388,16 +384,16 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         continuityResult = await meter.ContinuityManager.CheckContinuityAsync();
         if (continuityResult)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName}", message: ShowMessageModel.SuccessMessage.Title, messageColor: ShowMessageModel.SuccessMessage.TitleColor) { IndentLevel = 3 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
 
           if (!await PerformRelayCheck(messageService, selfTestChecker, testType, circuitName, busContact, meter))
           {
-            await messageService.ShowMessageAsync(new ShowMessageModel($"Реле цепи {circuitName}", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+            await messageService.ShowMessageAsync(new ShowMessageModel($"Реле цепи {circuitName}", type: ShowMessageModel.MessageType.Error));
           }
         }
         else
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName}", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor) { IndentLevel = 3 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
         }
       }
       else
@@ -408,11 +404,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       // Размыкаем цепь
       if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 2))
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Размыкание цепи {circuitName}", message: ShowMessageModel.ErrorMessage.Title, messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Размыкание цепи {circuitName}", type: ShowMessageModel.MessageType.Error));
         return false;
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName} успешно разомкнута.", ShowMessageModel.SuccessMessage.TitleColor));
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName} успешно разомкнута.", type: ShowMessageModel.MessageType.Success));
       return continuityResult;
     }
 
@@ -430,7 +426,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка", ShowMessageModel.ErrorMessage.TitleColor, $"Невозможно получить количество реле для {circuitName}."));
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка", message: $"Невозможно получить количество реле для {circuitName}.", type: ShowMessageModel.MessageType.Error));
         return false;
       }
 
@@ -442,7 +438,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         await Task.Delay(1);
         if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 2))
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Включении реле {relay} в цепи {circuitName}", message: $"[{ShowMessageModel.ErrorMessage.Title}]", messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Включении реле {relay} в цепи {circuitName}", type: ShowMessageModel.MessageType.Error));
           return false;
         }
 
@@ -452,11 +448,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         var result = await meter.ContinuityManager.CheckContinuityAsync();
         if (!result)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", message: $"[{ShowMessageModel.SuccessMessage.Title}]", messageColor: ShowMessageModel.SuccessMessage.TitleColor) { IndentLevel = 3 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
         }
         else
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", message: $"[{ShowMessageModel.ErrorMessage.Title}]", messageColor: ShowMessageModel.ErrorMessage.TitleColor) { IndentLevel = 3 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
         }
 
         await Task.Delay(1);
@@ -479,33 +475,15 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     }
     private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter)
     {
-      Console.ForegroundColor = ConsoleColor.Green;
-      Console.WriteLine("Проверка подключения устройств");
       var result1 = await device.ConnectableManager.InitializeAsync();
       var result2 = await meter.ConnectableManager.InitializeAsync();
-      Console.ForegroundColor = ConsoleColor.White;
 
       if (result1.Connect && result2.Connect)
       {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Оба устройства подключены");
         meterConnect = true;
         dbcConnect = true;
         return true;
       }
-      else if (!result1.Connect)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("УКШ не подключено");
-        Console.ForegroundColor = ConsoleColor.White;
-      }
-      else if (!result2.Connect)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Мультиметр не подключен");
-        Console.ForegroundColor = ConsoleColor.White;
-      }
-      Console.ForegroundColor = ConsoleColor.White;
       return false;
     }
 

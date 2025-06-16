@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.Diagnostics;
+using System.Windows.Controls;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 using UI.Components;
 using Utilities.Models;
@@ -50,7 +52,7 @@ namespace Mode.SelfControl.DeviceCheck
           await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
             "Ошибка",
             message: "Не удалось преобразовать объект в измеритель!",
-            messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+            type: ShowMessageModel.MessageType.Error));
           return;
         }
 
@@ -65,6 +67,9 @@ namespace Mode.SelfControl.DeviceCheck
             break;
 
           case RelayDeviceType.PowerSourceModule when device is IPowerSourceModule mint:
+            var numberChassis = mint.NumberChassis;
+            var switcher1 = new SwitchingDeviceServices().GetDevicesByNumberChassis(numberChassis).FirstOrDefault();
+            await mint.SelfTestManager.StartSelfCheck(ProtocolUI.GetCancellationToken(), ProtocolUI, part, switcher1, mint, meter);
             // обработка mint
             break;
         }
@@ -74,14 +79,9 @@ namespace Mode.SelfControl.DeviceCheck
         await ProtocolUI.ShowMessageAsync(new ShowMessageModel(
           "Ошибка",
           message: "Не удалось получить устройство.",
-          messageColor: ShowMessageModel.ErrorMessage.TitleColor));
+          type: ShowMessageModel.MessageType.Error));
         return;
       }
-
-
-
-      // продолжение работы с meter и device
     }
-
   }
 }

@@ -46,6 +46,11 @@ namespace MainWindowProgram.ViewModels
     public ICommand PiDCWMethodExecutorCommand { get; }
 
     /// <summary>
+    /// Команда отображения перекрёстного теста МКР.
+    /// </summary>
+    public ICommand CrossTestMkrExecutorCommand { get; }
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TestViewModel"/>.
     /// </summary>
     /// <param name="testService">Сервис для работы с тестами.</param>
@@ -60,6 +65,8 @@ namespace MainWindowProgram.ViewModels
       CiMethodExecutorCommand = new AsyncRelayCommand(_testService.AddCiMethodExecutorControlAsync);
       PiACWMethodExecutorCommand = new AsyncRelayCommand(_testService.AddPiACWMethodExecutorControlAsync);
       PiDCWMethodExecutorCommand = new AsyncRelayCommand(_testService.AddPiDCWMethodExecutorControlAsync);
+
+      CrossTestMkrExecutorCommand = new AsyncRelayCommand(_testService.AddCrossTestMkrExecutorControlAsync);
     }
   }
 }

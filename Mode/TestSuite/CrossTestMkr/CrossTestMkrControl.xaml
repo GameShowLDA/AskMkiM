@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="Mode.TestSuite.CrossTestMkr.CrossTestMkrControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew;assembly=UI"
+             xmlns:local="Mode.TestSuite.CrossTestMkr"
+             xmlns:Test="clr-namespace:UI.Components;assembly=UI"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid>
+        <!-- 
+          ProtocolUI сам рисует «панель протокола», кнопки Старт/Стоп и управляет видимостью ContentView 
+        -->
+        <Protocol:ProtocolUI x:Name="ProtocolSelfCheckControl"
+                             Header="Перекрёстный тест">
+            <Protocol:ProtocolUI.ContentView>
+                <Test:InputFieldLightweight Margin="0,10"/>
+            </Protocol:ProtocolUI.ContentView>
+        </Protocol:ProtocolUI>
+    </Grid>
+</UserControl>

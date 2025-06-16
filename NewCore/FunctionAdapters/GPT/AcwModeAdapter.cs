@@ -5,7 +5,7 @@ using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.GPT.Data;
 using NewCore.Function.Helpers;
-using Utilities.Error.Device.Breakdown;
+using Utilities;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -32,7 +32,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима ACW", result.Success ? "ACW" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке режима ACW: {result.Message}");
 
       return result;
     }
@@ -51,7 +51,9 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения ACW", result.Success ? $"{value} В" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetVoltageFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+      { 
+        return(false, $"Ошибка при установке напряжения ACW: {result.Message}");
+      }  
 
       return result;
     }
@@ -70,7 +72,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела тока ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке верхнего предела тока ACW: {result.Message}");
 
       return result;
     }
@@ -89,7 +91,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела тока ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке нижнего предела тока ACW: {result.Message}");
 
       return result;
     }
@@ -108,7 +110,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени теста ACW", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке времени теста ACW: {result.Message}");
 
       return result;
     }
@@ -127,7 +129,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка Ramp Time ACW", result.Success ? $"{value} сек" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetRampTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке Ramp Time ACW: {result.Message}");
 
       return result;
     }
@@ -146,7 +148,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка частоты ACW", result.Success ? $"{frequency} Гц" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetFrequencyFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке частоты ACW: {result.Message}");
 
       return result;
     }
@@ -165,11 +167,10 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке смещения ACW: {result.Message}");
 
       return result;
     }
-
 
     /// <inheritdoc />
     public Task<double> GetOffsetAsync() => _acwMode.GetOffsetAsync();
@@ -185,7 +186,7 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка дугового тока ACW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
 
       if (!result.Success)
-        throw AcwExceptionFactory.SetArcCurrentFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        throw new Exception($"Ошибка при установке дугового тока ACW: {result.Message}");
 
       return result;
     }
@@ -217,10 +218,9 @@ namespace NewCore.FunctionAdapters.GPT
       catch (Exception ex)
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка измерения тока ACW", ex.Message, false, 2);
-        return -1;
+        throw new Exception($"Ошибка при измерении тока ACW: {ex.Message}");
       }
     }
-
     #endregion
   }
 }

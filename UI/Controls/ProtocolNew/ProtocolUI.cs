@@ -167,7 +167,7 @@ namespace UI.Controls.ProtocolNew
     /// Приостанавливает метод на паузу.
     /// </summary>
     /// <returns></returns>
-    public async Task PauseAsync() => await ActionExecutor.PauseAsync();
+    public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken());
 
     /// <summary>
     /// Возобновляет метод после паузы.
@@ -207,7 +207,7 @@ namespace UI.Controls.ProtocolNew
     #endregion
 
     #region Методы.
-
+    
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
@@ -215,35 +215,23 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Возвращает режим по шагам.</returns>
     public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false)
     {
+      await CheckBlockStart(IsBlockStart);
 
-      if (IsBlockStart)
-      {
-        await protocolTextBox.AppendEmptyLineAsync();
-        StepControlManager.ExitBlock();
-        StepControlManager.EnterBlock();
-      }
-
-      if (await GetTimeStart())
+      if (await GetTimeStart() && showMessageModel.Status != MessageType.Info)
       {
         showMessageModel.Time = _stopwatch.Elapsed.ToString(@"mm\:ss\.fff", CultureInfo.InvariantCulture);
       }
-
-      if (!await GetShowDetailedProtocol())
-      {
-        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
-        {
-          await protocolTextBox.RemoveLastLinesAsync();
-        }
-
-        LastModelMeassage = showMessageModel;
-      }
-
+      await ShouldShowDetailedProtocol(showMessageModel);
+      CheckStatus(ref showMessageModel);
+      
       await protocolTextBox.AppendLineAsync(showMessageModel);
 
       if (ActionExecutor.IsPaused)
       {
-        await ActionExecutor.WaitWhilePausedAsync(this);
+        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
       }
+
+      await CheckPause(showMessageModel.Status);
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
@@ -253,11 +241,83 @@ namespace UI.Controls.ProtocolNew
         }
         else
         {
-          await KeyboardManager.WaitForNextStepKeyAsync();
+          await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
         }
       }
 
       await Task.Delay(1);
+    }
+
+    /// <summary>
+    /// Асинхронно добавляет пустую строку в протокол с заданным уровнем отступа.
+    /// </summary>
+    /// <param name="indentLevel">Уровень отступа (не используется в текущей реализации).</param>
+    public async Task AppendEmptyLineAsync(int indentLevel = 0)
+    {
+      await protocolTextBox.AppendEmptyLineAsync();
+    }
+
+    /// <summary>
+    /// Проверяет, необходимо ли начать новый блок. Если да — завершает предыдущий и начинает новый.
+    /// </summary>
+    /// <param name="IsBlockStart">Признак начала нового блока.</param>
+    private async Task CheckBlockStart(bool IsBlockStart)
+    {
+      if (IsBlockStart)
+      {
+        StepControlManager.ExitBlock();
+        StepControlManager.EnterBlock();
+      }
+    }
+
+    /// <summary>
+    /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
+    /// </summary>
+    /// <param name="showMessageModel">Модель отображаемого сообщения, передаётся по ссылке.</param>
+    private void CheckStatus(ref ShowMessageModel showMessageModel)
+    {
+      if (showMessageModel.Status != MessageType.Info)
+      {
+        if (string.IsNullOrEmpty(showMessageModel.Message))
+        {
+          showMessageModel.Message += showMessageModel.GetQualityPrefix();
+        }
+        else
+        {
+          showMessageModel.Message += " " + showMessageModel.GetQualityPrefix();
+        }
+        showMessageModel.MessageColor = showMessageModel.GetColorMessage();
+      }
+    }
+
+    /// <summary>
+    /// Если статус сообщения — ошибка и включена остановка при ошибке, выполнение ставится на паузу.
+    /// </summary>
+    /// <param name="Status">Тип сообщения (ошибка, информация, успех).</param>
+    private async Task CheckPause(ShowMessageModel.MessageType? Status)
+    {
+      if (Status == MessageType.Error && await AppConfiguration.Execution.ExecutionConfig.GetIsStopOnErrorEnabled())
+      {
+        await PauseAsync();
+      }
+    }
+
+    /// <summary>
+    /// Проверяет, нужно ли отображать детализированный протокол.
+    /// Если не нужно, удаляет последнее сообщение, если оно допускает удаление и не содержит ошибки выполнения.
+    /// </summary>
+    /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
+    private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
+    {
+      if (!await GetShowDetailedProtocol())
+      {
+        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
+        {
+          await protocolTextBox.RemoveLastLinesAsync();
+        }
+
+        LastModelMeassage = showMessageModel;
+      }
     }
 
     /// <summary>
@@ -271,7 +331,7 @@ namespace UI.Controls.ProtocolNew
 
       if (ActionExecutor.IsPaused)
       {
-        await ActionExecutor.WaitWhilePausedAsync(this);
+        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
       }
 
       return ActionExecutor.StepMode;
@@ -355,5 +415,10 @@ namespace UI.Controls.ProtocolNew
     public CancellationToken GetCancellationToken() =>
       ActionExecutor.CancellationTokenSource?.Token ?? CancellationToken.None;
 
+    public Task<bool> AwaitAdminDecisionAsync(string message)
+    {
+      MessageBox.Show("В будущем добавить сюда реализацию выбора");
+      return Task.FromResult(true);
+    }
   }
 }

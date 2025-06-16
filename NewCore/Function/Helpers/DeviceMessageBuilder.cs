@@ -41,17 +41,6 @@ namespace NewCore.Function.Helpers
         baseMessage = string.Empty;
       }
 
-      if (isError)
-      {
-        message.Message = $"{baseMessage} [{ShowMessageModel.ErrorMessage.Title}]";
-        message.MessageColor = ShowMessageModel.ErrorMessage.TitleColor;
-      }
-      else
-      {
-        message.Message += $"{baseMessage} [{ShowMessageModel.SuccessMessage.Title}]";
-        message.MessageColor = ShowMessageModel.SuccessMessage.TitleColor;
-      }
-
       return message;
     }
 
@@ -90,6 +79,16 @@ namespace NewCore.Function.Helpers
       var showMessageModel = GetDefaultSettings(device);
       showMessageModel.Header += $" - {headerSuffix}";
       showMessageModel.IndentLevel = indentLevel;
+
+      if (result)
+      {
+        showMessageModel.Status = ShowMessageModel.MessageType.Success;
+      }
+      else
+      {
+        showMessageModel.Status = ShowMessageModel.MessageType.Error;
+      }
+
       BuildMessage(ref showMessageModel, isError: !result);
       await ShowDeviceMessage(showMessageModel, result);
     }
@@ -108,6 +107,17 @@ namespace NewCore.Function.Helpers
       var showMessageModel = GetDefaultSettings(device);
       showMessageModel.Header += $" - {headerSuffix}";
       showMessageModel.IndentLevel = indentLevel;
+      showMessageModel.Message = baseMessage;
+
+      if (result)
+      {
+        showMessageModel.Status = ShowMessageModel.MessageType.Success;
+      }
+      else
+      {
+        showMessageModel.Status = ShowMessageModel.MessageType.Error;
+      }
+
       BuildMessage(ref showMessageModel, baseMessage, isError: !result);
       await ShowDeviceMessage(showMessageModel, result);
     }

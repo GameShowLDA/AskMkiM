@@ -25,11 +25,12 @@ namespace TestConsole
         Console.WriteLine("6. Проверка ввода данных");
         Console.WriteLine("7. ППУ");
         Console.WriteLine("8. МИНТ колибровка");
+        Console.WriteLine("9. Тест вентиляторов");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 8)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 9)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -75,6 +76,10 @@ namespace TestConsole
 
           case 8:
             await ResistanceCalibrationEditor.RunAsync();
+            break;
+
+          case 9:
+            await TestAirSpeed.RunAsync();
             break;
 
           case 0:

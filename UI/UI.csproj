@@ -33,4 +33,13 @@
     <ProjectReference Include="..\WpfDocking-master\Src\WpfDocking.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="MKI_OPKW.xshd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MKI_PK.xshd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

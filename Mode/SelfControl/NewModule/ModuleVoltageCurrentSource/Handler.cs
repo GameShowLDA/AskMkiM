@@ -66,7 +66,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     {
       LogInformation($"Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tСамоконтроль", null, type: MessageType.Success));
       LogInformation($"Завершён метод завершения самоконтроля");
     }
 
@@ -96,7 +96,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
       //  }
       //}
 
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль МИНТ", SuccessMessage.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\r\nСамоконтроль МИНТ"));
 
       await GenerateDiscreteVoltageCheck(token);
       ProtocolSelfCheckControl.PauseButtonVisibility = Visibility.Collapsed;
@@ -172,7 +172,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
       int a = (int)voltage;
       int b = (int)((voltage - a) * 10);
       LogInformation($"Установка напряжения {a}.{b} В");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tУстанавливаем напряжение {a}.{b} В", SuccessMessage.TitleColor));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tУстанавливаем напряжение {a}.{b} В"));
     }
 
     /// <summary>
@@ -207,12 +207,6 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
 
       bool error = !(result >= firstNorm - tolerance && result <= lastNorm + tolerance);
       await ShowMeasurementResult(firstNorm, lastNorm, result, error);
-
-      if (error && await GetIsStopOnErrorEnabled())
-      {
-        LogWarning("Обнаружена ошибка при измерении напряжения. Пауза в выполнении.");
-        await ProtocolSelfCheckControl.PauseAsync();
-      }
 
       await Task.Delay(1, token);
     }
@@ -250,10 +244,10 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     /// <param name="error">Флаг ошибки.</param>
     private async Task ShowMeasurementResult(double firstNorm, double lastNorm, double result, bool error)
     {
-      Color messageType = !error ? SuccessMessage.TitleColor : ErrorMessage.TitleColor;
+      var messageType = !error ? MessageType.Success: MessageType.Error;
       var statusText = !error ? "В норме" : "Вне нормы";
       LogInformation($"Результат измерения: {result} В ({firstNorm} - {lastNorm}). Статус: {statusText}");
-      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\t\tРезультат измерений ({Math.Round(firstNorm, 2)} - {Math.Round(lastNorm, 2)})", null, Math.Round(result, 2).ToString(CultureInfo.CurrentCulture) + "\r\n", messageType));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\t\tРезультат измерений ({Math.Round(firstNorm, 2)} - {Math.Round(lastNorm, 2)})", null, Math.Round(result, 2).ToString(CultureInfo.CurrentCulture) + "\r\n", type: messageType));
     }
 
     /// <summary>

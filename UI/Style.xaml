@@ -334,30 +334,40 @@
         <Setter Property="Background" Value="{StaticResource LightPrimarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
 
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                    CornerRadius="15" 
-                    BorderThickness="{TemplateBinding BorderThickness}" 
-                    BorderBrush="{TemplateBinding BorderBrush}">
+                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="15"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        BorderBrush="{TemplateBinding BorderBrush}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource PrimarySolidColorBrush}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                        </Trigger>
+
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource PrimarySolidColorBrush}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
-                <!-- Меняем фон на красный -->
-                <Setter Property="Foreground" Value="{StaticResource PrimarySolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="Cursor" Value="Hand"/>
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="CustomButtonStyle" TargetType="Button">
@@ -911,4 +921,27 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <!-- Стиль для списка кнопок в MkrControl -->
+    <Style x:Key="MkrPointStyle" TargetType="Button">
+        <Setter Property="Content" Value="{Binding PointNumber}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding A}" Value="True">
+                <Setter Property="Background" Value="Aqua"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding B}" Value="True">
+                <Setter Property="Background" Value="Plum"/>
+            </DataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding A}" Value="True"/>
+                    <Condition Binding="{Binding B}" Value="True"/>
+                </MultiDataTrigger.Conditions>
+                <Setter Property="Background" Value="DarkViolet"/>
+            </MultiDataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

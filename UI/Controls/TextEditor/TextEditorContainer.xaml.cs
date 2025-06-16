@@ -40,5 +40,19 @@ namespace UI.Controls.TextEditor
       }
       return string.Empty;
     }
+
+    public TextEditorUI GetTextEditor()
+    {
+      var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (foundDockItem != null)
+      {
+        if (foundDockItem.Content is TextEditorUI)
+        {
+          var textEditor = (TextEditorUI)foundDockItem.Content;
+          return textEditor;
+        }
+      }
+      return null;
+    }
   }
 }

@@ -1,0 +1,190 @@
+﻿<UserControl x:Class="Mode.ServicesTest.MINT.MintControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox;assembly=UI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <Border CornerRadius="0,0,0,0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая часть (StackPanel) -->
+            <StackPanel Margin="20" Grid.Column="0" VerticalAlignment="Top">
+
+                <!-- (1) Блок "Номер" + ComboBox: подключаемся к ViewModel -->
+                <Border Style="{StaticResource ConfigAdditionalBlockStyle}" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Номер:"
+                                   FontSize="20"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0" 
+                                   Padding="10,0,0,0"
+                                   Foreground="{StaticResource ForegroundSolidColorBrush}" />
+
+                        <ComboBox x:Name="CmbMintDevice"
+                                  Grid.Column="1"
+                                  Margin="10"
+                                  Height="30"
+                                  Width="180"
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  ItemsSource="{Binding ComboBoxItems}"
+                                  SelectedItem="{Binding SelectedComboBoxItem, Mode=TwoWay}"
+                                  
+                                  SelectionChanged="CmbMintDevice_SelectionChanged" />
+                    </Grid>
+                </Border>
+
+                <!-- (2) Кнопка "Сброс устройства" -->
+                <Button x:Name="BtnMintReset"
+                        Content="Сброс устройства"
+                        Width="310"
+                        Height="35"
+                        Margin="0,0,0,15"
+                        Style="{StaticResource MetrologyButtonStyle}"
+                        PreviewMouseDown="BtnMintReset_PreviewMouseDown"
+                        IsEnabled="False"/>
+
+                <!-- (3) Регулятор напряжения ПИН -->
+                <StackPanel Orientation="Vertical" Margin="0,0,0,15">
+                    <Label Content="Напряжение ПИН (V):" Foreground="White" />
+                    <Grid Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="SliderMintPinVoltage"
+                            Grid.Column="0"
+                            Minimum="0"
+                            Maximum="100"
+                            TickFrequency="0.01"
+                            SmallChange="0.01"
+                            IsSnapToTickEnabled="True"
+                            Margin="0,0,10,0"
+                            ValueChanged="SliderMintPinVoltage_ValueChanged" 
+                            IsEnabled="False"/>
+
+                        <TextBox x:Name="TextMintPinVoltage"
+                             Grid.Column="1"
+                             PreviewTextInput="TextMintPinVoltage_PreviewTextInput"
+                             LostFocus="TextMintPinVoltage_LostFocus"
+                             KeyDown="TextMintPinVoltage_KeyDown"
+                             IsEnabled="False"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- (4) Регулятор силы тока ПИТ -->
+                <StackPanel Orientation="Vertical" Margin="0,0,0,15">
+                    <Label Content="Сила тока ПИТ (mA):" Foreground="White" />
+                    <Grid Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="SliderMintPitAmperage"
+                            Grid.Column="0"
+                            Minimum="0"
+                            Maximum="100"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            Margin="0,0,10,0"
+                            ValueChanged="SliderMintPitAmperage_ValueChanged" 
+                            IsEnabled="False"/>
+                        <TextBox x:Name="TextMintPitAmperage"
+                             Grid.Column="1"
+                             PreviewTextInput="TextMintPitAmperage_PreviewTextInput"
+                             LostFocus="TextMintPitAmperage_LostFocus"
+                             KeyDown="TextMintPitAmperage_KeyDown"
+                             IsEnabled="False"/>
+                    </Grid>
+                </StackPanel>
+
+
+                <!-- (5) "k"/"k+" и кнопка заземления -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <RadioButton x:Name="RbMintK"
+                                 Content="k"
+                                 Foreground="White"
+                                 GroupName="MintGroundGroup"
+                                 Margin="0,10,10,0"
+                                 PreviewMouseDown="RbMintK_PreviewMouseDown" 
+                                 IsEnabled="False"/>
+                    <RadioButton x:Name="RbMintKplus"
+                                 Content="k+"
+                                 Foreground="White"
+                                 GroupName="MintGroundGroup"
+                                 Margin="0,10,10,0"
+                                 PreviewMouseDown="RbMintKplus_PreviewMouseDown" 
+                                 IsEnabled="False"/>
+                    <Button x:Name="BtnMintGround"
+                            Content="Заземлить шину"
+                            Width="150"
+                            Height="35"
+                            Style="{StaticResource MetrologyButtonStyle}"
+                            PreviewMouseDown="BtnMintGround_PreviewMouseDown" 
+                            IsEnabled="False"/>
+                </StackPanel>
+
+                <!-- (6) Источник питания (12В / 48В) -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <Label Content="Источник питания:"
+                           Foreground="White"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0" />
+                    <RadioButton x:Name="RbMintPower12v"
+                                 Content="12В"
+                                 Foreground="White"
+                                 GroupName="MintPowerSourceGroup"
+                                 Checked="RbMintPower12v_Checked"
+                                 Margin="0,5,10,0" 
+                                 IsEnabled="False"/>
+                    <RadioButton x:Name="RbMintPower48v"
+                                 Content="48В"
+                                 Foreground="White"
+                                 GroupName="MintPowerSourceGroup"
+                                 Checked="RbMintPower48v_Checked"
+                                 Margin="0,5,0,0"
+                                 IsEnabled="False"/>
+                </StackPanel>
+
+                <!-- (7) Кнопки ПИТ и ПИН (вертикально) -->
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <Button x:Name="BtnMintPit"
+                            Content="Подключение ПИТ"
+                            Width="200"
+                            Height="35"
+                            Margin="0,0,0,10"
+                            Style="{StaticResource MetrologyButtonStyle}"
+                            PreviewMouseDown="BtnMintPit_PreviewMouseDown" 
+                            IsEnabled="False"/>
+                    <Button x:Name="BtnMintPin"
+                            Content="Подключение ПИН"
+                            Width="200"
+                            Height="35"
+                            Style="{StaticResource MetrologyButtonStyle}"
+                            PreviewMouseDown="BtnMintPin_PreviewMouseDown"
+                            IsEnabled="False"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Правая часть (лог) -->
+            <Grid Grid.Column="1">
+                <InvokeConrols:InvokeRichTextBoxUI 
+                    x:Name="protocolTextBox"
+                    Margin="10"
+                    IsReadOnly="True" />
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

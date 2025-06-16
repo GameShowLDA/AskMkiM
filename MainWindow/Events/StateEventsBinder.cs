@@ -163,7 +163,7 @@ namespace MainWindowProgram.Events
     /// <param name="newRights">Новое состояние прав администратора.</param>
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
-      SystemStateManager.SetAdminRights(newRights).ConfigureAwait(true);
+      AppConfiguration.Admin.AdminConfig.SetAdminRights(newRights).ConfigureAwait(true);
     }
 
     /// <summary>

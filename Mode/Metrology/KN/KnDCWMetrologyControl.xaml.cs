@@ -7,8 +7,6 @@ using Mode.Metrology.PI;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities.Models;
-using static AppConfiguration.MeasurementError.MeasurementErrorConfig;
-using static AppConfiguration.MeasurementError.MeasurementErrorModel;
 using static NewCore.Enum.MetrologyEnum;
 namespace Mode.Metrology.KN
 {
@@ -45,6 +43,10 @@ namespace Mode.Metrology.KN
         ReturnDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+        },
+        StopDelegate: async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement();
         });
     }
 
@@ -58,7 +60,7 @@ namespace Mode.Metrology.KN
       Data = UIValidationHelper.TryValidateAndParseInputWithEquipment(ProtocolUI, timeCheck: true, voltageCheck: true);
       if (!Data.Success)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, Data.Message), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: Data.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         return;
       }
 
@@ -69,14 +71,13 @@ namespace Mode.Metrology.KN
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, connect.Message), SkipStepModeCheck: true);
+        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         return;
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole);
       await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
     }
 
     public ITextAdapter GetControl()
@@ -102,10 +103,10 @@ namespace Mode.Metrology.KN
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения напряжения(DCW)", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения напряжения(DCW)"));
 
-        double firstNorm = param - ((param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC));
-        double lastNorm = param + (param / 100.0 * GetPercentageError(TypeCommand.KC)) + GetNumericError(TypeCommand.KC);
+        double firstNorm = param - ((param / 100.0 * 1) + 0.01);
+        double lastNorm = param + ((param / 100.0 * 1) + 0.01);
 
         await fastMeter.DcVoltageManager.MeasureDCVoltageAsync();
 
@@ -127,23 +128,23 @@ namespace Mode.Metrology.KN
           }
         });
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}", ShowMessageModel.SuccessMessage.TitleColor));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}"));
         if (!string.IsNullOrEmpty(result) && double.TryParse(result, out var value))
         {
           double pog = value - param;
 
           var answer = (value >= firstNorm && value <= lastNorm) ? false : true; ;
 
-          ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения напряжения", null, $"{result:F2} [{(!answer ? ShowMessageModel.SuccessMessage.Title : ShowMessageModel.ErrorMessage.Title)}]");
-          showMessageModel.MessageColor = (value >= firstNorm && value <= lastNorm) ? ShowMessageModel.SuccessMessage.TitleColor : ShowMessageModel.ErrorMessage.TitleColor;
+          ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения напряжения", null, $"{result:F2}");
+          showMessageModel.Status = (!answer ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error);
           showMessageModel.ExecutionError = (value >= firstNorm && value <= lastNorm) ? false : true;
           showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
           await protocolUI.ShowMessageAsync(showMessageModel);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В [{(!answer ? ShowMessageModel.SuccessMessage.Title : ShowMessageModel.ErrorMessage.Title)}]", messageColor: showMessageModel.MessageColor));
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В", type: showMessageModel.Status));
         }
         else
         {
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, "Некорректно введённое эталонное значение напряжения."));
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Некорректно введённое эталонное значение напряжения.", type: ShowMessageModel.MessageType.Error));
         }
       }
     }

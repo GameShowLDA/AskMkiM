@@ -91,15 +91,18 @@ namespace NewCore.Function.GPT
         return true;
       }
 
-      if (_gptModel.COMPort == null)
+      if (_gptModel == null)
       {
         return true;
       }
 
       try
       {
-        if (_gptModel.COMPort.IsOpen)
+        await _gptModel.DeviceProtocol.OperationLock.WaitAsync();
+
+        if (_gptModel.COMPort != null && _gptModel.COMPort.IsOpen)
         {
+          LogInformation($"[{_gptModel.Name}] Закрываю порт {_gptModel.COMPort.PortName} в DisconnectAsync()");
           _gptModel.COMPort.Close();
         }
       }
@@ -108,8 +111,22 @@ namespace NewCore.Function.GPT
         LogException($"Ошибка при отключении от устройства {_gptModel.Name}", ex);
       }
 
+      try
+      {
+        _gptModel.Dispose();
+      }
+      catch (Exception ex)
+      {
+        LogException($"Ошибка при вызове Dispose() для устройства {_gptModel.Name}", ex);
+      }
+      finally
+      {
+        _gptModel = null;
+      }
+
       return true;
     }
+
 
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync()

@@ -31,7 +31,10 @@ namespace NewCore.Communication
     public UdpDeviceProtocol(DeviceWithIP device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
+      OperationLock = new SemaphoreSlim(1, 1);
     }
+
+    public SemaphoreSlim OperationLock { get; set; }
 
     /// <inheritdoc />
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
@@ -58,6 +61,7 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
+          await Task.Delay(100);
           using var cts = new CancellationTokenSource(timeout);
 
           try
@@ -69,7 +73,7 @@ namespace NewCore.Communication
 
             if (completedTask == receiveTask)
             {
-              UdpReceiveResult result = await receiveTask; // исключения ловим здесь
+              UdpReceiveResult result = await receiveTask;
               string response = Encoding.UTF8.GetString(result.Buffer);
               LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
               return response;
@@ -92,6 +96,9 @@ namespace NewCore.Communication
       {
         LogException($"[{_device.Name}] Общая ошибка QueryAsync", ex);
         return $"[{_device.Name}] Общая ошибка QueryAsync: {ex.Message}";
+      }
+      finally
+      { 
       }
     }
 

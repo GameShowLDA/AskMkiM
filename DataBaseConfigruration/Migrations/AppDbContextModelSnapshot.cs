@@ -316,6 +316,29 @@ namespace DataBaseConfiguration.Migrations
 
                     b.ToTable("FileHotkeys");
                 });
+
+            modelBuilder.Entity("DataBaseConfiguration.Models.MeasurementErrorEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("NumericError")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("PercentageError")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Type")
+                        .IsUnique();
+
+                    b.ToTable("MeasurementErrors");
+                });
 #pragma warning restore 612, 618
         }
     }

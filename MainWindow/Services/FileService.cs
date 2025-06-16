@@ -171,20 +171,6 @@ namespace MainWindowProgram.Services
       _mainWindow.Effect = null;
     }
 
-    private async Task LoadFilesToDataGridAsync()
-    {
-      try
-      {
-        await Task.Run(async () =>
-        {
-          // TODO: открыть файлы в соответсвующих частях окна и перенести этот метод в отдельный класс
-        });
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show($"Ошибка при загрузке файлов: {ex.Message}");
-      }
-    }
 
     /// <summary>
     /// Открывает диалог выбора архива и загружает его в редактор.
@@ -206,6 +192,22 @@ namespace MainWindowProgram.Services
           var archiveName = selectedArchive.ArchiveName;
           await _multiWindow.AddControlAsync(archiveName, new TableApkArchiveControl(archiveName), TypeWindow.Files);
         }
+      }
+    }
+
+    /// <summary>
+    /// Создает новый файл трансляции (.opkw) в редакторе.
+    /// </summary>
+    public TextEditorUI CreateTranslationFileAsync()
+    {
+      if (_isLockedProvider())
+      {
+        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        return null;
+      }
+      else
+      {
+        return _multiWindow.CreateTranslationFileAsync();
       }
     }
   }

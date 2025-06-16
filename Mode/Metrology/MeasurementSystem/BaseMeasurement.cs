@@ -119,7 +119,7 @@ namespace Mode.Metrology.MeasurementSystem
         return (false, ex.Message);
       }
 
-      await protocolUI.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", ShowMessageModel.SuccessMessage.TitleColor));
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
 
       try
       {
@@ -190,7 +190,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public virtual async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
     {
-      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", ShowMessageModel.SuccessMessage.TitleColor));
+      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
     }
 
     /// <summary>
@@ -347,7 +347,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="modeDevice">Тип метрологического устройства.</param>
     private async Task ConnectBusesAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice, ProtocolUI protocolUI)
     {
-      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин", ShowMessageModel.SuccessMessage.TitleColor));
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин"), IsBlockStart: true);
 
       foreach (var relayModule in relayModules)
       {
@@ -366,6 +366,7 @@ namespace Mode.Metrology.MeasurementSystem
           await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
           await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
         }
+
         await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
       }
     }
@@ -378,7 +379,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="point2">Вторая точка коммутации.</param>
     private async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, ProtocolUI protocolUI)
     {
-      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек", ShowMessageModel.SuccessMessage.TitleColor));
+      await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек"), IsBlockStart: true);
 
       await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
       await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);

@@ -38,17 +38,5 @@ namespace AppConfiguration.Base
       await ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
       await ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
     }
-
-    /// <summary>
-    /// Устанавливает текущую модель погрешности измерений (MeasurementErrorModel).
-    /// </summary>
-    /// <param name="measurementErrorModels">Модели погрешности измерений.</param>
-    public static void SetMeasurementErrorModels(List<MeasurementErrorModel> measurementErrorModels)
-    {
-      foreach (var measurementErrorModel in measurementErrorModels)
-      {
-        MeasurementErrorConfig.SetMeasurementErrorModel(measurementErrorModel);
-      }
-    }
   }
 }

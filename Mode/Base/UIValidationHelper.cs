@@ -26,8 +26,7 @@ namespace Mode.Base
     /// <param name="timeRampCheck">Проверять ли заданное время нарасстания для выполнения режимов (ППУ).</param>
     /// <param name="busCheck">Проверять ли заданную шину.</param>
     /// <returns>Кортеж: успешность, сообщение, первая точка, вторая точка, параметр.</returns>
-    public static (bool Success, string Message, DataModel DataModel)
-        TryValidateAndParseInputWithEquipment(
+    public static (bool Success, string Message, DataModel DataModel) TryValidateAndParseInputWithEquipment(
       ProtocolUI protocolUI,
       bool messageOnSuccess = true,
       bool timeCheck = false,

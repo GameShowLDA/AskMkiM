@@ -2,6 +2,7 @@
 using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
+using NewCore.Function.GPT;
 using NewCore.Function.ModuleRelayControl;
 using NewCore.FunctionAdapters.ModuleRelayControl;
 

@@ -132,6 +132,16 @@ namespace UI.Components.ProtocolListBox
         string header = string.IsNullOrWhiteSpace(m.Header) ? "" : $"{m.Header}: ";
         return $"{indent}{header}{m.Message} | {m.Time}";
       })));
+	}
+	
+    public Task<bool> AwaitAdminDecisionAsync(string message)
+    {
+      throw new NotImplementedException();
+    }
+
+    public Task<bool> WaitAdminButtonAsync()
+    {
+      throw new NotImplementedException();
     }
   }
 }

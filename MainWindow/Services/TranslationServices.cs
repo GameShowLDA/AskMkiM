@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static UI.Components.Invoke.OpenFileButton;
-using UI.Controls.GPT;
-using System.Windows;
-using ControlCommandAnalyser.Translation;
+﻿using System.Windows;
+using ControlCommandAnalyser;
 
 namespace MainWindowProgram.Services
 {
@@ -22,34 +15,41 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly MainWindow _mainWindow;
 
+    private readonly FileService _fileService;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AdminServices"/>.
     /// </summary>
     /// <param name="mainWindow">Главное окно приложения.</param>
     /// <param name="multiWindow">Сервис управления многооконным интерфейсом.</param>
-    public TranslationServices(MainWindow mainWindow, MultiWindowService multiWindow)
+    public TranslationServices(MainWindow mainWindow, MultiWindowService multiWindow, FileService fileService)
     {
       _multiWindow = multiWindow;
       _mainWindow = mainWindow;
+      _fileService = fileService;
     }
 
     /// <summary>
-    /// Открывает элемент управления для работы с программируемой пробойной установкой (ППУ).
+    /// Запускает процесс трансляции текущего открытого текста из редактора.
+    /// Выполняет распознавание команд, логирует результат и применяет подсветку
+    /// в соответствии с успешностью распознавания.
     /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию.</returns>
+    /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task StartTranslationAsync()
     {
       var editor = await _multiWindow.GetActiveTextEditor();
-
       if (editor == null)
       {
+        MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         return;
       }
-
       string text = editor.Text;
 
-      var translator = new TranslationManager();
-      await translator.Translate(text);
+      editor =  _fileService.CreateTranslationFileAsync();
+
+      var manager = new CommandTranslationManager();
+      var models = manager.ParseAllAndDisplay(text, editor);
+
     }
   }
 }

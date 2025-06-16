@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="UI.Components.InputFieldLightweight"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="250">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Проверяемый номер -->
+        <Border x:Name="TestedNumberBorder" Margin="5" Grid.Row="0" 
+                Background="{StaticResource ActiveBorderSolidColorBrush}" 
+                CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="headerTestedNumber"
+                           Text="Номер проверяемого a.b"
+                           FontSize="20"
+                           Foreground="{StaticResource ForegroundSolidColorBrush}"
+                           Margin="0,5"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                           
+                <local:TextBoxPlaceholder x:Name="TestedNumberBox"
+                                         Grid.Row="1"
+                                         Placeholder="Введите номер..."
+                                         Margin="0"/>
+            </Grid>
+        </Border>
+
+        <!-- Проверяющий номер -->
+        <Border x:Name="VerificateNumberBorder" Margin="5" Grid.Row="1" 
+                Background="{StaticResource ActiveBorderSolidColorBrush}" 
+                CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="headerTesterNumber"
+                           Text="Номер проверяющего a.b"
+                           FontSize="20"
+                           Foreground="{StaticResource ForegroundSolidColorBrush}"
+                           Margin="0,5"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                           
+                <local:TextBoxPlaceholder x:Name="TesterNumberBox"
+                                         Grid.Row="1"
+                                         Placeholder="Введите номер..."
+                                         Margin="0"/>
+            </Grid>
+        </Border>
+
+        <!-- Диапазон проверки -->
+        <Border x:Name="TestRangeBorder" Margin="5" Grid.Row="2" 
+                Background="{StaticResource ActiveBorderSolidColorBrush}" 
+                CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="headerTestRange"
+                           Text="Диапазон проверки"
+                           FontSize="20"
+                           Foreground="{StaticResource ForegroundSolidColorBrush}"
+                           Margin="0,5"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                           
+                <local:TextBoxPlaceholder x:Name="TestRangeBox"
+                                         Grid.Row="1"
+                                         Placeholder="Введите диапазон..."
+                                         IsNumberInputEnabled="False"
+                                         Margin="0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

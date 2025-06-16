@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Device.DeviceBusCommutation;
 using AppConfiguration.Services;
 using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
-using Utilities.Error.Device.DeviceBusCommutation;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {

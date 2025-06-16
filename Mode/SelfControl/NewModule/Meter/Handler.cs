@@ -90,7 +90,7 @@ namespace Mode.SelfControl.NewModule.Meter
       LogInformation("Запущен метод завершения самоконтроля");
       await ProtocolSelfCheckControl.FinalizeAsync();
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tСамоконтроль", null, $"[{SuccessMessage.Title}]", SuccessMessage.TitleColor));
+        new ShowMessageModel("\tСамоконтроль", null, type: MessageType.Success));
       LogInformation("Завершён метод завершения самоконтроля");
     }
 
@@ -108,7 +108,7 @@ namespace Mode.SelfControl.NewModule.Meter
       //}
 
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\r\nСамоконтроль мультиметра", SuccessMessage.TitleColor));
+        new ShowMessageModel("\r\nСамоконтроль мультиметра"));
 
       if (!await GetIsIdleModeEnabled())
       {
@@ -132,7 +132,7 @@ namespace Mode.SelfControl.NewModule.Meter
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tКонтроль сопротивления", SuccessMessage.TitleColor));
+        new ShowMessageModel("\tКонтроль сопротивления"));
 
       await meter.ResistanceManager.MeasureResistanceAsync();
 
@@ -159,15 +159,14 @@ namespace Mode.SelfControl.NewModule.Meter
         if (result >= first && result <= last)
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", SuccessMessage.TitleColor));
+            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Success));
         }
         else
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", ErrorMessage.TitleColor));
+            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Error));
           if (await GetIsStopOnErrorEnabled())
           {
-            await ProtocolSelfCheckControl.PauseAsync();
             if (returnMeasure)
             {
               i--;
@@ -189,7 +188,7 @@ namespace Mode.SelfControl.NewModule.Meter
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
       await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tКонтроль ёмкости", SuccessMessage.TitleColor));
+        new ShowMessageModel("\tКонтроль ёмкости"));
       for (int i = 1; i <= 6; i++)
       {
         ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
@@ -212,12 +211,12 @@ namespace Mode.SelfControl.NewModule.Meter
         if (result >= first && result <= last)
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", SuccessMessage.TitleColor));
+            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", type: MessageType.Success));
         }
         else
         {
           await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", ErrorMessage.TitleColor));
+            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", type: MessageType.Error));
         }
 
         await Task.Delay(200, token);
