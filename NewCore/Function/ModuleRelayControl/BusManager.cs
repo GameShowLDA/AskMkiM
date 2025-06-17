@@ -32,7 +32,7 @@ namespace NewCore.Function.ModuleRelayControl
     {
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
-        LogError("Ошибка данных шины!");
+        LogError("Ошибка данных шины!", isDeviceLog: true);
         return false;
       }
 
@@ -45,7 +45,7 @@ namespace NewCore.Function.ModuleRelayControl
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
       string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{commandText}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
+      LogInformation($"Команда: \"{commandText}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.", isDeviceLog: true);
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
@@ -57,11 +57,11 @@ namespace NewCore.Function.ModuleRelayControl
           return true;
         }
 
-        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.");
+        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
         await Task.Delay(100);
       }
 
-      LogError("Не удалось получить корректный ответ от устройства.");
+      LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
       return false;
     }
 
@@ -75,7 +75,7 @@ namespace NewCore.Function.ModuleRelayControl
     {
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
-        LogError("Ошибка данных шины!");
+        LogError("Ошибка данных шины!", isDeviceLog: true);
         return false;
       }
 
@@ -88,7 +88,7 @@ namespace NewCore.Function.ModuleRelayControl
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 2);
       string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{commandText}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
+      LogInformation($"Команда: \"{commandText}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.", isDeviceLog: true);
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
@@ -100,11 +100,11 @@ namespace NewCore.Function.ModuleRelayControl
           return true;
         }
 
-        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.");
+        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
         await Task.Delay(100);
       }
 
-      LogError("Не удалось получить корректный ответ от устройства.");
+      LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
       return false;
     }
 

@@ -83,7 +83,7 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices, App._consoleManager);
+      lifecycle.Initialize(this, _usbServices);
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
 
@@ -110,6 +110,11 @@ namespace MainWindowProgram
         LogException($"Ошибка выполнения программы", ex);
         MessageBox.Show($"Ошибка: {ex.Message}");
       }
+    }
+
+    public WindowState WindowStateStatus
+    {
+      get => this.WindowState;
     }
   }
 }

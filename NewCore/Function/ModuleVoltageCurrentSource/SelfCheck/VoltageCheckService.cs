@@ -94,7 +94,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
     {
       await Task.Delay(delay);
       double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage);
-      LogInformation($"Измеренное напряжение: {result} В");
+      LogInformation($"Измеренное напряжение: {result} В", isDeviceLog: true);
       return result;
     }
   }

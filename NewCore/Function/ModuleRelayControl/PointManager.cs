@@ -48,11 +48,11 @@ namespace NewCore.Function.ModuleRelayControl
         if (parsed?.Answer == $"8.{number}.{(int)bus}.1")
           return true;
 
-        LogWarning($"Ответ на команду подключения точки {number} не получен или некорректный. Попытка {attempt}.");
+        LogWarning($"Ответ на команду подключения точки {number} не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
         await Task.Delay(100);
       }
 
-      LogError($"Не удалось подключить точку {number} к шине {bus}.");
+      LogError($"Не удалось подключить точку {number} к шине {bus}.", isDeviceLog: true);
       return false;
     }
 
@@ -78,11 +78,11 @@ namespace NewCore.Function.ModuleRelayControl
         if (parsed?.Answer == $"8.{number}.{(int)bus}.2")
           return true;
 
-        LogWarning($"Ответ на команду отключения точки {number} не получен или некорректный. Попытка {attempt}.");
+        LogWarning($"Ответ на команду отключения точки {number} не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
         await Task.Delay(100);
       }
 
-      LogError($"Не удалось отключить точку {number} от шины {bus}.");
+      LogError($"Не удалось отключить точку {number} от шины {bus}.", isDeviceLog: true);
       return false;
     }
 
@@ -116,11 +116,11 @@ namespace NewCore.Function.ModuleRelayControl
         if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{(int)bus * 10 + 1}")
           return true;
 
-        LogWarning($"Ответ на команду подключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.");
+        LogWarning($"Ответ на команду подключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.", isDeviceLog: true);
         await Task.Delay(100);
       }
 
-      LogError($"Не удалось подключить диапазон точек {firstPoint}-{lastPoint} к шине {bus}.");
+      LogError($"Не удалось подключить диапазон точек {firstPoint}-{lastPoint} к шине {bus}.", isDeviceLog: true);
       return false;
     }
 
@@ -156,11 +156,11 @@ namespace NewCore.Function.ModuleRelayControl
           return true;
         }
 
-        LogWarning($"Ответ на команду отключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.");
+        LogWarning($"Ответ на команду отключения диапазона точек {firstPoint}-{lastPoint} не получен или некорректен. Попытка {attempt}.", isDeviceLog: true);
         await Task.Delay(100);
       }
 
-      LogError($"Не удалось отключить диапазон точек {firstPoint}-{lastPoint} от шины {bus}.");
+      LogError($"Не удалось отключить диапазон точек {firstPoint}-{lastPoint} от шины {bus}.", isDeviceLog: true);
       return false;
     }
 

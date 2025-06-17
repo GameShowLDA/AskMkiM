@@ -1,10 +1,11 @@
-﻿using DataBaseConfiguration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using DataBaseConfiguration;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram.HotkeyBindings
@@ -28,6 +29,16 @@ namespace MainWindowProgram.HotkeyBindings
       }
 
       MenuHotkeyBinder.Attach(window, dataContext, DataBaseConfig.Context);
+
+      window.PreviewKeyDown += (s, e) =>
+      {
+        if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
+            && e.Key != Key.LeftCtrl && e.Key != Key.RightCtrl)
+        {
+          string combo = $"CTRL + {e.Key}";
+          window.messageHandler?.SetInfoMessage($"Нажата комбинация: {combo}", clearMessage: true);
+        }
+      };
     }
   }
 }

@@ -26,7 +26,7 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetModeAsync()
     {
-      LogInformation("Устанавливаем режим IR на GPT-79904");
+      LogInformation("Устанавливаем режим IR на GPT-79904", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled()) return (true, string.Empty);
 
@@ -42,7 +42,7 @@ namespace NewCore.Function.GPT
           return (true, string.Empty);
         }
 
-        LogWarning($"Попытка {attempt} неудачна. Ответ: {check.Message}");
+        LogWarning($"Попытка {attempt} неудачна. Ответ: {check.Message}", isDeviceLog: true);
       }
 
       return (false, "Не удалось установить режим IR после 2 попыток.");
@@ -65,7 +65,7 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetVoltageAsync(double value)
     {
-      LogInformation($"Устанавливаем напряжение IR: {value} В");
+      LogInformation($"Устанавливаем напряжение IR: {value} В", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
@@ -81,7 +81,7 @@ namespace NewCore.Function.GPT
         if (Math.Abs(actual - value) < 1.0)
           return (true, string.Empty);
 
-        LogWarning($"Попытка {attempt} установки напряжения не удалась. Получено: {actual:F1} В, ожидалось: {value:F1} В.");
+        LogWarning($"Попытка {attempt} установки напряжения не удалась. Получено: {actual:F1} В, ожидалось: {value:F1} В.", isDeviceLog: true);
       }
 
       return (false, $"Не удалось установить напряжение IR. Устройство не приняло значение {value} В.");
@@ -98,7 +98,7 @@ namespace NewCore.Function.GPT
       if (double.TryParse(cleaned, out var kv))
         return kv * 1000;
 
-      LogError($"Ошибка чтения напряжения IR. Ответ: '{response}'");
+      LogError($"Ошибка чтения напряжения IR. Ответ: '{response}'", isDeviceLog: true);
       return -1;
     }
 
@@ -119,7 +119,7 @@ namespace NewCore.Function.GPT
         if (Math.Abs(actual - value) < 0.1)
           return (true, string.Empty);
 
-        LogWarning($"Попытка {attempt} установки высокого предела сопротивления неудачна. Ответ: {actual} ГОм");
+        LogWarning($"Попытка {attempt} установки высокого предела сопротивления неудачна. Ответ: {actual} ГОм", isDeviceLog: true);
       }
 
       return (false, $"Не удалось установить высокий предел IR: {value} ГОм.");
@@ -149,7 +149,7 @@ namespace NewCore.Function.GPT
         if (Math.Abs(actual - value) < 0.5)
           return (true, string.Empty);
 
-        LogWarning($"Попытка {attempt} установки нижнего предела сопротивления неудачна. Ответ: {actual} МОм");
+        LogWarning($"Попытка {attempt} установки нижнего предела сопротивления неудачна. Ответ: {actual} МОм", isDeviceLog: true);
       }
 
       return (false, $"Не удалось установить нижний предел IR: {value} МОм.");
@@ -167,7 +167,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetTestTimeAsync(double value)
     {
-      LogInformation($"Устанавливаем время теста IR: {value} сек");
+      LogInformation($"Устанавливаем время теста IR: {value} сек", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled()) return (true, string.Empty);
 
@@ -183,7 +183,7 @@ namespace NewCore.Function.GPT
           return (true, string.Empty);
         }
 
-        LogWarning($"Попытка {attempt} установки времени теста IR неудачна. Ответ: {actual} сек");
+        LogWarning($"Попытка {attempt} установки времени теста IR неудачна. Ответ: {actual} сек", isDeviceLog: true);
       }
 
       return (false, $"Не удалось установить время теста IR: {value} сек.");
@@ -201,7 +201,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetOffsetAsync(double value)
     {
-      LogInformation($"Устанавливаем смещение IR: {value} ГОм");
+      LogInformation($"Устанавливаем смещение IR: {value} ГОм", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled()) return (true, string.Empty);
 
@@ -214,7 +214,7 @@ namespace NewCore.Function.GPT
         if (Math.Abs(actual - value) < 0.1)
           return (true, string.Empty);
 
-        LogWarning($"Попытка {attempt} установки смещения неудачна. Ответ: {actual} ГОм");
+        LogWarning($"Попытка {attempt} установки смещения неудачна. Ответ: {actual} ГОм", isDeviceLog: true);
       }
 
       return (false, $"Не удалось установить смещение IR: {value} ГОм.");

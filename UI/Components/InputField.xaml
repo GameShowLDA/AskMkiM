@@ -27,8 +27,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerFirstData" TextWrapping="Wrap" TextTrimming="None" Text="Начальная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"  Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder Grid.Row="1" x:Name="FirstTextBox" Placeholder="Введите значение..." Text="1.1.1" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
+                <TextBlock Name="headerFirstData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Начальная точка a.b.c" FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}"  Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder Grid.Row="1" FontFamily="{DynamicResource WinstonLight}" x:Name="FirstTextBox" Placeholder="Введите значение..." Text="1.1.1" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 
@@ -38,8 +38,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerSecondData" TextWrapping="Wrap" TextTrimming="None" Text="Конечная точка a.b.c" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="SecondTextBox" Grid.Row="1" Placeholder="Введите значение..." Text="1.1.100" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
+                <TextBlock Name="headerSecondData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Конечная точка a.b.c" FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="SecondTextBox" FontFamily="{DynamicResource WinstonLight}" Grid.Row="1" Placeholder="Введите значение..." Text="1.1.100" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 
@@ -50,8 +50,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerElectricalData" TextWrapping="Wrap" TextTrimming="None" Text="Электрический параметр" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" Placeholder="Введите значение..." Height="40"
+                <TextBlock Name="headerElectricalData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Электрический параметр" FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" Placeholder="Введите значение..." Height="40" FontFamily="{DynamicResource WinstonLight}"
                                            Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
@@ -64,8 +64,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock x:Name="headerTimeData" TextWrapping="Wrap" TextTrimming="None" Text="Время выполнения в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" Placeholder="от 1 до 999 сек."  Height="40"
+                <TextBlock x:Name="headerTimeData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Время выполнения в сек." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" Placeholder="от 1 до 999 сек."  Height="40" FontFamily="{DynamicResource WinstonLight}"
                                           Unit=",сек."/>
             </Grid>
         </Border>
@@ -79,8 +79,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock x:Name="headerTimeRampData" TextWrapping="Wrap" TextTrimming="None" Text="Время нарастания в сек." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" Placeholder="от 0.1 до 999.9 сек." Unit=",сек." Height="40" />
+                <TextBlock x:Name="headerTimeRampData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Время нарастания в сек." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" Placeholder="от 0.1 до 999.9 сек." Unit=",сек." Height="40" FontFamily="{DynamicResource WinstonLight}"/>
             </Grid>
         </Border>
 
@@ -93,8 +93,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock x:Name="headerVoltageData" TextWrapping="Wrap" TextTrimming="None" Text="Напряжение в В." FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <local:TextBoxPlaceholder x:Name="VoltageTextBox" Grid.Row="5" Placeholder="Введите значение..." Unit=",В." Height="40"/>
+                <TextBlock x:Name="headerVoltageData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Напряжение в В." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <local:TextBoxPlaceholder x:Name="VoltageTextBox" Grid.Row="5" Placeholder="Введите значение..." Unit=",В." Height="40" FontFamily="{DynamicResource WinstonLight}"/>
             </Grid>
         </Border>
 
@@ -105,7 +105,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Name="headerBusData" TextWrapping="Wrap" TextTrimming="None"  Text="Шина для проверки" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Name="headerBusData" FontFamily="{DynamicResource WinstonMedium}"  TextWrapping="Wrap" TextTrimming="None"  Text="Шина для проверки" FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <Border Name="BusBorder" Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="10" Margin="0,5,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -118,10 +118,10 @@
                         </Grid.RowDefinitions>
 
                         <CheckBox x:Name="ShinaACheckBox" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
-                        <TextBlock Text="Шина A" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}" VerticalAlignment="Center" FontSize="18" />
+                        <TextBlock Text="Шина A" FontFamily="{DynamicResource WinstonMedium}" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}" VerticalAlignment="Center" FontSize="18" />
 
                         <CheckBox x:Name="ShinaBCheckBox" Grid.Row="1" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
-                        <TextBlock Grid.Row="1" Text="Шина B" Grid.Column="1" VerticalAlignment="Center" Foreground="{StaticResource ForegroundSolidColorBrush}" FontSize="18" />
+                        <TextBlock Grid.Row="1" FontFamily="{DynamicResource WinstonMedium}" Text="Шина B" Grid.Column="1" VerticalAlignment="Center" Foreground="{StaticResource ForegroundSolidColorBrush}" FontSize="18" />
                     </Grid>
                 </Border>
             </Grid>

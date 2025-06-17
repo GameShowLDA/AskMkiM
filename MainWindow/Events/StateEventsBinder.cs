@@ -40,18 +40,15 @@ namespace MainWindowProgram.Events
     /// </summary>
     private static bool isLocked = false;
 
-    private readonly ConsoleManager _consoleManager;
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateEventsBinder"/>.
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
     /// <param name="usbMonitorService">Сервис мониторинга USB-подключений.</param>
-    public StateEventsBinder(MainWindow mainWindow, UsbServices usbMonitorService, ConsoleManager consoleManager)
+    public StateEventsBinder(MainWindow mainWindow, UsbServices usbMonitorService)
     {
       _usbMonitorService = usbMonitorService;
       _mainWindow = mainWindow;
-      _consoleManager = consoleManager;
     }
 
     /// <summary>
@@ -174,7 +171,6 @@ namespace MainWindowProgram.Events
     /// <param name="e">Аргументы события нажатия клавиши.</param>
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
-
       if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
       {
         ConsoleVisibilityController.ToggleConsole();

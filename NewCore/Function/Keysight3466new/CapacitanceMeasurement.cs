@@ -64,7 +64,7 @@ namespace NewCore.Function.Keysight3466new
         return capacitance * 1e9;
       }
 
-      throw new InvalidOperationException(LogError($"Не удалось обработать значение ёмкости: {response}"));
+      throw new InvalidOperationException(LogError($"Не удалось обработать значение ёмкости: {response}", isDeviceLog: true));
     }
   }
 }

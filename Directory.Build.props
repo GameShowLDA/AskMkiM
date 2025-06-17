@@ -1,7 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-		<OutputPath>$(SolutionDir)Bin\</OutputPath>
+		<OutputPath>$(SolutionDir)Bin\$(MSBuildProjectName)\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 </Project>

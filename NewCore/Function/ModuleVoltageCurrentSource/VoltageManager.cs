@@ -28,7 +28,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <returns>Асинхронная задача, представляющая операцию установки источника напряжения.</returns>
     public async Task SetSourceVoltageAsync(VoltageSources voltageSources)
     {
-      LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}");
+      LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -47,7 +47,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <returns>Асинхронная задача, представляющая операцию установки напряжения.</returns>
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
     {
-      LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})");
+      LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {

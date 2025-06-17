@@ -32,7 +32,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <returns>Асинхронная задача.</returns>
     public async Task SetCurrentLevelAsync(int integerPart, int decimalPart)
     {
-      LogInformation($"МИНТ: Установка тока {integerPart}.{decimalPart} мА ({new DeviceCommand(4, integerPart, decimalPart)})");
+      LogInformation($"МИНТ: Установка тока {integerPart}.{decimalPart} мА ({new DeviceCommand(4, integerPart, decimalPart)})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -49,7 +49,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <returns>Булево значение, указывающее успешность операции.</returns>
     public async Task<bool> LimitationOfTheOutputCurrent(int current)
     {
-      LogInformation($"МИНТ: Установка ограничения тока в {current} мА ({new DeviceCommand(10, current)})");
+      LogInformation($"МИНТ: Установка ограничения тока в {current} мА ({new DeviceCommand(10, current)})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
