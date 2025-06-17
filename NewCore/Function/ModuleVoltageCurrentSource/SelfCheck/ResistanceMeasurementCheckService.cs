@@ -35,8 +35,14 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         };
 
     /// <summary>
-    /// Основной метод проверки.
+    /// Основной метод проверки резисторов по таблице TestPoints.
+    /// Настраивает оборудование, подключает необходимые шины и реле, выполняет измерения и сравнивает результат с нормой.
     /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
+    /// <param name="fastMeter">Быстрый измеритель для снятия показаний.</param>
+    /// <param name="powerSource">Модуль источника питания и тока.</param>
+    /// <param name="relayModule">Модуль коммутации (реле, резисторы и т.д.).</param>
     static internal async Task PerformResistanceCheckAsync(
         CancellationToken cancellationToken,
         IUserMessageService messageService,
@@ -72,7 +78,6 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         await SetCurrentAsync(powerSource, integerPart, decimalPart);
         await ConnectResistorByNumberAsync(relayModule, resistorNumber);
 
-
         var error = ErrorProviderLocator.Provider.GetErrorParameters(TypeCommand.PR);
 
         double firstNorm = resistance - ((resistance / 100.0 * error.Percent) + error.Numeric);
@@ -100,12 +105,21 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
     }
 
+    /// <summary>
+    /// Подключает шунтирующие шины A1 и B1 к положительной и отрицательной полярности соответственно.
+    /// </summary>
+    /// <param name="powerSourceModule">Модуль источника питания и тока.</param>
     static private async Task ConnectShuntAndPowerAsync(IPowerSourceModule powerSourceModule)
     {
       await powerSourceModule.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A1);
       await powerSourceModule.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B1);
     }
 
+    /// <summary>
+    /// Подключает блокировочные реле на УКШ.
+    /// </summary>
+    /// <param name="relayModule">Модуль коммутации (реле, резисторы и т.д.).</param>
+    /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
     static private async Task ConnectBlockingRelaysAsync(ISwitchingDevice relayModule, IUserMessageService messageService)
     {
       await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel("Подключение блокировочных реле на УКШ."));
@@ -116,24 +130,43 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       }
     }
 
+    /// <summary>
+    /// Устанавливает дискретное значение тока на модуле источника питания и тока.
+    /// </summary>
+    /// <param name="powerSource">Модуль источника питания и тока.</param>
+    /// <param name="integerPart">Целая часть значения тока (мА).</param>
+    /// <param name="decimalPart">Дробная часть значения тока (мА).</param>
     static private async Task SetCurrentAsync(IPowerSourceModule powerSource, int integerPart, int decimalPart)
     {
       await powerSource.CurrentManager.SetCurrentLevelAsync(integerPart, decimalPart);
     }
 
+    /// <summary>
+    /// Подключает резистор по его номеру через модуль коммутации.
+    /// </summary>
+    /// <param name="relayModule">Модуль коммутации (реле, резисторы и т.д.).</param>
+    /// <param name="resistorNumber">Номер резистора для подключения.</param>
     static private async Task ConnectResistorByNumberAsync(ISwitchingDevice relayModule, int resistorNumber)
     {
       await relayModule.ResistorManager.ConnectResistor(resistorNumber.ToString());
     }
 
+    /// <summary>
+    /// Отключает резистор по его номеру через модуль коммутации.
+    /// </summary>
+    /// <param name="relayModule">Модуль коммутации (реле, резисторы и т.д.).</param>
+    /// <param name="resistorNumber">Номер резистора для отключения.</param>
     static private async Task DisconnectResistorByNumberAsync(ISwitchingDevice relayModule, int resistorNumber)
     {
       await relayModule.ResistorManager.DisconnectResistor(resistorNumber.ToString());
     }
 
     /// <summary>
-    /// Переводит целую и дробную части в амперы.
+    /// Переводит целую и дробную части значения тока в амперы.
     /// </summary>
+    /// <param name="integerPart">Целая часть значения тока (мА).</param>
+    /// <param name="decimalPart">Дробная часть значения тока (мА).</param>
+    /// <returns>Значение тока в амперах.</returns>
     static private double ConvertToAmperes(int integerPart, int decimalPart)
     {
       double milliamps = integerPart + decimalPart / 100.0;

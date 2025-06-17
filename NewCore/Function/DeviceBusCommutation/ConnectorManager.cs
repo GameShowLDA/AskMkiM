@@ -52,7 +52,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Ошибка номера шины УКШ!");
+      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
       return false;
     }
 
@@ -94,7 +94,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Ошибка номера шины УКШ!");
+      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
       return false;
     }
 
@@ -130,7 +130,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Ошибка номера шины УКШ!");
+      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
       return false;
     }
 

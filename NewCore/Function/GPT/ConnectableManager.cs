@@ -66,16 +66,16 @@ namespace NewCore.Function.GPT
           _gptModel.COMPort.Open();
         }
 
-        LogInformation($"Успешно подключено к устройству {_gptModel.Name} через COM-порт {_gptModel.COMPort.PortName}");
+        LogInformation($"Успешно подключено к устройству {_gptModel.Name} через COM-порт {_gptModel.COMPort.PortName}", isDeviceLog: true);
       }
       catch (UnauthorizedAccessException ex)
       {
-        LogException($"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}", ex);
+        LogException($"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}", ex, isDeviceLog: true);
         return (false, $"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}: {ex.Message}");
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при подключении к устройству {_gptModel.Name}", ex);
+        LogException($"Ошибка при подключении к устройству {_gptModel.Name}", ex, isDeviceLog: true);
         return (false, $"Ошибка при подключении к устройству {_gptModel.Name}: {ex.Message}");
         throw;
       }
@@ -102,13 +102,13 @@ namespace NewCore.Function.GPT
 
         if (_gptModel.COMPort != null && _gptModel.COMPort.IsOpen)
         {
-          LogInformation($"[{_gptModel.Name}] Закрываю порт {_gptModel.COMPort.PortName} в DisconnectAsync()");
+          LogInformation($"[{_gptModel.Name}] Закрываю порт {_gptModel.COMPort.PortName} в DisconnectAsync()", isDeviceLog: true);
           _gptModel.COMPort.Close();
         }
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при отключении от устройства {_gptModel.Name}", ex);
+        LogException($"Ошибка при отключении от устройства {_gptModel.Name}", ex, isDeviceLog: true);
       }
 
       try
@@ -117,7 +117,7 @@ namespace NewCore.Function.GPT
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при вызове Dispose() для устройства {_gptModel.Name}", ex);
+        LogException($"Ошибка при вызове Dispose() для устройства {_gptModel.Name}", ex, isDeviceLog: true);
       }
       finally
       {
@@ -138,13 +138,13 @@ namespace NewCore.Function.GPT
 
       try
       {
-        LogInformation("Открываем порт...");
+        LogInformation("Открываем порт...", isDeviceLog: true);
         if (_gptModel.COMPort != null)
         {
           using (var port = _gptModel.COMPort)
           {
             await Task.Run(() => port.Open());
-            LogInformation("Порт открыт");
+            LogInformation("Порт открыт", isDeviceLog: true);
 
             string query = $"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%({_gptModel.COMPort})%'";
             using (var searcher = new ManagementObjectSearcher(query))
@@ -156,27 +156,27 @@ namespace NewCore.Function.GPT
                 string deviceID = obj["DeviceID"]?.ToString() ?? string.Empty;
                 if (deviceID.Contains(_gptModel.VID) && deviceID.Contains(_gptModel.PID))
                 {
-                  LogInformation($"Устройство найдено по VID/PID: {_gptModel.VID}, {_gptModel.PID}");
+                  LogInformation($"Устройство найдено по VID/PID: {_gptModel.VID}, {_gptModel.PID}", isDeviceLog: true);
                   return (true, string.Empty);
                 }
               }
             }
 
-            LogError("Устройство не найдено по VID/PID");
+            LogError("Устройство не найдено по VID/PID", isDeviceLog: true);
             return (false, "Устройство не найдено по VID/PID");
           }
         }
 
-        return (false, "COM порт не иинициализирован");
+        return (false, "COM порт не инициализирован");
       }
       catch (UnauthorizedAccessException ex)
       {
-        LogException($"Ошибка доступа к порту", ex);
+        LogException($"Ошибка доступа к порту", ex, isDeviceLog: true);
         return (false, $"Ошибка доступа к порту: {ex.Message}");
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при проверке соединения", ex);
+        LogException($"Ошибка при проверке соединения", ex, isDeviceLog: true);
         return (false, $"Ошибка при проверке соединения: {ex.Message}");
       }
     }

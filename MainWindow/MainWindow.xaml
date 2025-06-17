@@ -43,7 +43,7 @@
 
                                 <!-- Добавляем TextBlock для отображения горячей клавиши -->
                                 <TextBlock x:Name="HotkeyText" Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
-                                
+
                             </DockPanel>
                             <Popup x:Name="PART_Popup" AllowsTransparency="true" Focusable="false" HorizontalOffset="1" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom" VerticalOffset="-1">
                                 <Border Background="{TemplateBinding Background}">
@@ -156,7 +156,7 @@
                     <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="50"/>
@@ -197,13 +197,6 @@
                     <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
                     <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
 
-                </MenuItem>
-
-                <MenuItem Header="Сервис" Name="Services" Tag="menuHeader_6">
-                    <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
-                    <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
-                    <MenuItem Header="МКР" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
-                    <MenuItem Header="УКШ" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
                 </MenuItem>
 
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
@@ -254,7 +247,7 @@
                 </MenuItem>
 
                 <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
-                    
+
                 </MenuItem>
 
                 <MenuItem Header="Администрирование" Name="Admin">
@@ -266,6 +259,10 @@
 
                     <MenuItem Header="Управление" Name="DeviceManagment">
                         <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
+                        <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
+                        <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
+                        <MenuItem Header="МКР" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
+                        <MenuItem Header="УКШ" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
                     </MenuItem>
 
                     <MenuItem Header="Тесты ПО">
@@ -297,27 +294,27 @@
                     Background="Transparent"
                     >
 
-                    <DefaultGUI:WindowButtons 
+                <DefaultGUI:WindowButtons 
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}" 
                         x:Name="minimizeButton" ChoiceElement="Minimize" 
                         Command="{Binding Window.MinimizeCommand}"
                         />
 
-                    <DefaultGUI:WindowButtons 
+                <DefaultGUI:WindowButtons 
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
                         x:Name="maximizeButton" ChoiceElement="Maximize" 
                         Command="{Binding Window.MaximizeCommand}"
                         />
 
-                    <DefaultGUI:WindowButtons 
+                <DefaultGUI:WindowButtons 
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
                         x:Name="exitButton" ChoiceElement="Exit" 
                         Command="{Binding Window.CloseCommand}"
                         />
-                </StackPanel>
+            </StackPanel>
         </Grid>
 
         <Components:MultiWindowControl 
