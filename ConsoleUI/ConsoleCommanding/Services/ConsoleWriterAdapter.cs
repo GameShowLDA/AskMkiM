@@ -14,11 +14,6 @@ namespace ConsoleUI.ConsoleCommanding.Services
   {
     public void WriteLine(string message) => ConsoleTextManager.Instance.Append(message);
     public void Clear() => ConsoleTextManager.Instance.Clear();
-
-    public Task<string> ReadLineAsync()
-    {
-      var overlay = Application.Current.Windows.OfType<ConsoleOverlay>().FirstOrDefault();
-      return overlay?.ReadLineAsync() ?? Task.FromResult(string.Empty);
-    }
+    public Task<string> ReadLineAsync() => ConsoleVisibilityController.ReadLineAsync();
   }
 }
