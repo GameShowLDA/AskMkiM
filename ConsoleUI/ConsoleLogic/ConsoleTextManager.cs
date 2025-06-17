@@ -46,22 +46,18 @@ namespace ConsoleUI.ConsoleLogic
       }
     }
 
+    public void Unsubscribe(Action<LogEntry> callback)
+    {
+      lock (_lock)
+        _subscribers.Remove(callback);
+    }
+
     public void Clear()
     {
       lock (_lock)
-      {
         _buffer.Clear();
-      }
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        if (Application.Current.Windows.OfType<ConsoleOverlay>().FirstOrDefault() is ConsoleOverlay overlay)
-        {
-          overlay.ClearConsoleUI();
-        }
 
-        _buffer.Clear(); // также очищаем буфер, если ты его используешь
-      });
-
+      ConsoleVisibilityController.ClearConsole();
     }
 
     private Brush ParseColor(string text)

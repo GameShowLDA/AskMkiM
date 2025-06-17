@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -40,23 +37,45 @@ namespace ConsoleUI.ConsoleUI
       // Подписка на вывод
       ConsoleTextManager.Instance.Subscribe(AppendLogEntry);
       Loaded += (_, _) => CommandInput.Focus();
+
+      Closed += (_, _) =>
+        ConsoleTextManager.Instance.Unsubscribe(AppendLogEntry);
+
+
+      // Перехватываем Alt+F4, чтобы окно закрывалось,
+      // а не пробовало скрыться через Toggle
+      this.PreviewKeyDown += (_, e) =>
+      {
+        if (e.Key == Key.F4 && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+        {
+          e.Handled = true;
+          Close();   // нормальное закрытие → поток завершится
+        }
+      };
     }
 
     private void AppendLogEntry(LogEntry entry)
     {
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(() => AppendLogEntry(entry));
+        return;
+      }
+
       var block = new TextBlock
       {
-        Text = entry.Text,
-        Foreground = entry.Color,
-        FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-        FontSize = 14,
+        Text         = entry.Text,
+        Foreground   = entry.Color,
+        FontFamily   = new System.Windows.Media.FontFamily("Consolas"),
+        FontSize     = 14,
         TextWrapping = TextWrapping.Wrap,
-        Margin = new Thickness(0, 2, 0, 2)
+        Margin       = new Thickness(0, 2, 0, 2)
       };
 
       ConsolePanel.Children.Add(block);
       ConsoleScroll.ScrollToEnd();
     }
+
 
     private async void CommandInput_KeyDown(object sender, KeyEventArgs e)
     {
