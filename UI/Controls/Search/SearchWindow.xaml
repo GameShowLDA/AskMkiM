@@ -155,7 +155,8 @@
                            Foreground="{StaticResource ForegroundSolidColorBrush}" 
                            PreviewMouseLeftButtonDown="SearchSlider_MouseLeftButtonDown"
                            PreviewMouseLeftButtonUp="SearchSlider_MouseLeftButtonUp"
-                           MouseMove="SearchSlider_MouseMove"/>
+                           MouseMove="SearchSlider_MouseMove"
+                           ToolTip="Передвинуть окно поиска"/>
 
                 <!-- Строка 3 -->
             <Grid Grid.Row="2" Grid.Column="1">
