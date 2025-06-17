@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using ControlCommandAnalyser;
+using UI.Components.MultiEditorMethods;
 
 namespace MainWindowProgram.Services
 {
@@ -45,11 +46,24 @@ namespace MainWindowProgram.Services
       }
       string text = editor.Text;
 
-      editor =  _fileService.CreateTranslationFileAsync();
+      if (_multiWindow.RemoveActiveTextEditor())
+      {
+        var translateEditor = _fileService.CreateTranslationFileAsync();
 
-      var manager = new CommandTranslationManager();
-      var models = manager.ParseAllAndDisplay(text, editor);
+        var manager = new CommandTranslationManager();
+        var models = manager.ParseAllAndDisplay(text, translateEditor);
 
+        var translationContainer = await _multiWindow.GetActiveTranslateContainer();
+        if (translationContainer != null)
+        {
+          translationContainer.SetLeftEditor(editor);
+          translationContainer.SetRighttEditor(translateEditor);
+        }
+      }
+      else
+      {
+        throw new Exception("Не найдено активное окно при трансляции");
+      }
     }
   }
 }
