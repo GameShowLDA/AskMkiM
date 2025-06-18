@@ -51,5 +51,25 @@ namespace UI.Controls
       RightBox.Children.Clear();
       RightBox.Children.Add(textEditorUI);
     }
+
+    public TextEditorUI GetRightEditor()
+    {
+      if (RightBox == null)
+      {
+        return null;
+      }
+
+      return RightBox.Children[0] as TextEditorUI;
+    }
+
+    public TextEditorUI GetLeftEditor()
+    {
+      if (LeftBox == null)
+      {
+        return null;
+      }
+
+      return LeftBox.Children[0] as TextEditorUI;
+    }
   }
 }
