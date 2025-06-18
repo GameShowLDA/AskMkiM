@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;
+using static Utilities.LoggerUtility;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -61,30 +62,29 @@ namespace UI.Components.MultiEditorMethods
 
     internal void ReplaceWord(string fileName, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      var foundPage = fileManager.OpenPages.FirstOrDefault(page => page.Text == fileName);
-      if (foundPage != null)
+      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
+      if (textEditorContainer != null)
       {
-        var pageIndex = fileManager.OpenPages.IndexOf(foundPage);
-        var foundTextEditor = fileManager.UserControls[pageIndex];
-        ReplaceTextInEditor(foundTextEditor, searchResult, startOffset, replaceText, searchText);
-        //controlManager.ShowControl(foundTextEditor, foundPage);
+        var foundPage = textEditorContainer.DockManager.DockItems.FirstOrDefault(page => page.Title == fileName);
+        if (foundPage != null && foundPage.Content.GetType() == typeof(TextEditorUI))
+        {
+          var foundTextEditor = foundPage.Content as TextEditorUI;
+          ReplaceTextInEditor(foundTextEditor, searchResult, startOffset, replaceText, searchText);
+        }
       }
     }
 
     private void ReplaceTextInEditor(UserControl editor, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      if (editor is TextEditorUI textEditor)
+      if (editor is TextEditorUI textEditor && searchResult != null)
       {
-        if (searchResult != null)
-        {
-          var document = textEditor.Document;
-          var text = document.Text;
-          var endOffset = startOffset + searchResult.Length;
-          var beforeText = text.Substring(0, startOffset);
-          var afterText = text.Substring(endOffset);
-          var newText = beforeText + replaceText + afterText;
-          document.Text = newText;
-        }
+        var document = textEditor.Document;
+        var text = document.Text;
+        var endOffset = startOffset + searchResult.Length;
+        var beforeText = text.Substring(0, startOffset);
+        var afterText = text.Substring(startOffset + searchText.Length);
+        var newText = beforeText + replaceText + afterText;
+        document.Text = newText;
       }
     }
 

@@ -193,6 +193,10 @@ namespace UI.Components.MultiEditorMethods
     {
       var fileManager = new FileManager(multiEditorControl);
       var textEditorContainer = fileManager.GetTextEditorContainer();
+      if (textEditorContainer == null)
+      {
+        textEditorContainer = fileManager.CreateTextEditorContainer();
+      }
       var dockItem = new DockItem
       {
         Title = header,
@@ -231,26 +235,6 @@ namespace UI.Components.MultiEditorMethods
       {
         TabType = tabType,
       };
-      tabButton.Header.Text = header;
-      if (description != null)
-      {
-        tabButton.Description = description;
-      }
-
-      return tabButton;
-    }
-
-
-    /// <summary>
-    /// Создает кнопку вкладки для нового контрола.
-    /// </summary>
-    /// <param name="header">Заголовок для вкладки.</param>
-    /// <param name="description">Описание вкладки.</param>
-    /// <returns>Созданная кнопка вкладки.</returns>
-
-    private OpenFileButton CreateTabButton(string header, string description)
-    {
-      OpenFileButton tabButton = new OpenFileButton();
       tabButton.Header.Text = header;
       if (description != null)
       {

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
 using UI.Components;
+using UI.Controls;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
 
@@ -98,9 +99,26 @@ namespace MainWindowProgram.Services
       return Task.FromResult(foundEditor);
     }
 
+    public bool RemoveActiveTextEditor()
+    {
+      return _multiWindowControl.RemoveActiveTextEditor();
+    }
+
     public TextEditorUI CreateTranslationFileAsync()
     {
       return _multiWindowControl.CreateTranslationFileAsync();
+    }
+
+    internal Task<TranslatorItem> GetActiveTranslateContainer()
+    {
+      var foundContainer = _multiWindowControl.GetActiveTranslateContainer();
+      return Task.FromResult(foundContainer);
+    }
+
+    internal Task<TextEditorContainer> GetActiveTextEditorContainer()
+    {
+      var foundContainer = _multiWindowControl.GetActiveTextEditorContainer();
+      return Task.FromResult(foundContainer);
     }
   }
 }

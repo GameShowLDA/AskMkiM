@@ -1,10 +1,12 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfiguration.Base;
 using UI.Components.Invoke;
+using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
+using UI.Controls;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
 using static Utilities.LoggerUtility;
@@ -160,6 +162,12 @@ namespace UI.Components
     public TextEditorUI GetActiveTextEditor()
     {
       return MultiEditor.GetActiveTextEditor();
+    }
+
+
+    public bool RemoveActiveTextEditor()
+    {
+      return MultiEditor.RemoveActiveTextEditor();
     }
 
     /// <summary>
@@ -613,6 +621,16 @@ namespace UI.Components
 
         CloseSearchResultsActions();
       }
+    }
+
+    public TranslatorItem GetActiveTranslateContainer()
+    {
+      return MultiEditor.GetActiveTranslatorContainer();
+    }
+
+    public TextEditorContainer GetActiveTextEditorContainer()
+    {
+      return MultiEditor.GetActiveTextEditorContainer();
     }
   }
 }

@@ -2,42 +2,79 @@
 using Microsoft.Win32;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using UI.Controls.TextEditor;
 
 namespace TestDocking
 {
   public partial class MainWindow : Window
   {
-    private int _documentCounter = 1;
+    private bool isLeftPanelVisible = true;
+
+    public string FirstFilePath { get; set; }
+    public string SecondFilePath { get; set; }
 
     public MainWindow()
     {
       InitializeComponent();
     }
 
-    private void OpenFile_Click(object sender, RoutedEventArgs e)
+    private async void MenuButton_PreviewMouseDownAsync(object sender, MouseButtonEventArgs e)
     {
-      var dialog = new OpenFileDialog
+      isLeftPanelVisible = !isLeftPanelVisible;
+
+      if (!isLeftPanelVisible)
       {
-        Filter = "Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*"
-      };
-
-      if (dialog.ShowDialog() == true)
-      {
-        string filePath = dialog.FileName;
-        string fileContent = File.ReadAllText(filePath);
-
-        var textEditor = new TextEditorUI();
-        textEditor.Text = File.ReadAllText(filePath);
-
-        var dockItem = new DevZest.Windows.Docking.DockItem
+        int newWidth = 50;
+        while (PanelManagment.Width.Value > newWidth)
         {
-          Title = Path.GetFileName(filePath),
-          TabText = Path.GetFileName(filePath),
-          Content = textEditor
-        };
+          PanelManagment.Width = new GridLength(PanelManagment.Width.Value - 25);
+          if (ButtonsGrid.Opacity > 0)
+          {
+            ButtonsGrid.Opacity -= 0.1;
+          }
+          await Task.Delay(1);
+        }
+        ButtonsGrid.Opacity = 0;
+      }
+      else
+      {
+        int newWidth = 250;
+        while (PanelManagment.Width.Value < newWidth)
+        {
+          PanelManagment.Width = new System.Windows.GridLength(PanelManagment.Width.Value + 25);
+          if (ButtonsGrid.Opacity < 1)
+          {
+            ButtonsGrid.Opacity += 0.1;
+          }
+          await Task.Delay(1);
+        }
 
-        dockItem.Show(DockManager, DevZest.Windows.Docking.DockPosition.Document);
+        PanelManagment.Width = new GridLength(250);
+        ButtonsGrid.Opacity = 1;
+      }
+    }
+
+    private void ToggleOrientation(object sender, MouseButtonEventArgs e)
+    {
+      bool toVertical = sender == LeftRight;
+
+      HorizontalPanel.Visibility = toVertical ? Visibility.Collapsed : Visibility.Visible;
+      VerticalPanel.Visibility = toVertical ? Visibility.Visible : Visibility.Collapsed;
+
+      UpDown.Visibility = toVertical ? Visibility.Visible : Visibility.Collapsed;
+      LeftRight.Visibility = toVertical ? Visibility.Collapsed : Visibility.Visible;
+
+      if (HorizontalPanel.Visibility == Visibility.Visible)
+      {
+        (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text) =
+          (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text);
+      }
+      else
+      {
+        (LeftBox.Text, RightBox.Text, FirstVerticalFileName.Text, SecondVerticalFileName.Text) =
+          (TopBox.Text, BottomBox.Text, FirstFileName.Text, SecondFileName.Text);
       }
     }
 

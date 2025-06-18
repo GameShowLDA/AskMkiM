@@ -41,6 +41,11 @@ namespace UI.Controls.Search
     public event Func<Task> SelectFileForSearch;
     public string SearchTextData { get; set; }
 
+    private bool _isDraggingSlider = false;
+    private Point _dragStartScreenPoint;
+    private double _windowStartLeft;
+
+
     /// <summary>
     /// Высота окна при развернутой строке замены.
     /// </summary>
@@ -461,5 +466,73 @@ namespace UI.Controls.Search
         SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
       }
     }
+
+    private void SearchSlider_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      StopAnimations();
+
+      _isDraggingSlider = true;
+
+      // Получаем координаты мыши в пределах экрана
+      _dragStartScreenPoint = PointToScreen(e.GetPosition(this));
+      _windowStartLeft = this.Left;
+
+      SearchSlider.CaptureMouse();
+    }
+
+    private void SearchSlider_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+      _isDraggingSlider = false;
+      SearchSlider.ReleaseMouseCapture();
+    }
+
+    private void SearchSlider_MouseMove(object sender, MouseEventArgs e)
+    {
+      if (_isDraggingSlider && e.LeftButton == MouseButtonState.Pressed && _parentWindow != null)
+      {
+        Point currentScreenPoint = PointToScreen(e.GetPosition(this));
+        double deltaX = currentScreenPoint.X - _dragStartScreenPoint.X;
+
+        double newLeft = _windowStartLeft + deltaX;
+
+        // Получаем границы окна-родителя
+        var ownerTopLeft = _parentWindow.PointToScreen(new Point(0, 0));
+        double ownerLeft = ownerTopLeft.X;
+        double ownerRight = ownerLeft + _parentWindow.ActualWidth;
+
+        double windowWidth = this.ActualWidth;
+
+        // Ограничение по левому краю
+        if (newLeft < ownerLeft)
+        {
+          newLeft = ownerLeft;
+        }
+
+        // Ограничение по правому краю
+        if (newLeft + windowWidth > ownerRight)
+        {
+          newLeft = ownerRight - windowWidth - 15;
+        }
+
+        this.Left = newLeft;
+      }
+    }
+
+
+
+    private void StopAnimations()
+    {
+      if (Resources["ShowAnimation"] is Storyboard showAnimation)
+        showAnimation.Stop();
+
+      if (Resources["HideAnimation"] is Storyboard hideAnimation)
+        hideAnimation.Stop();
+
+      WindowContainer.RenderTransform = new TranslateTransform(0, 0); // Сброс
+      WindowContainer.Opacity = 1;
+    }
+
+
+
   }
 }

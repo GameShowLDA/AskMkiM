@@ -12,6 +12,7 @@ using UI.Components.SearchControls;
 using UI.Components.MultiEditorMethods;
 using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
+using UI.Controls;
 
 namespace UI.Components
 {
@@ -129,6 +130,20 @@ namespace UI.Components
     public TextEditorUI GetActiveTextEditor()
     {
       return fileManager.GetActiveTextEditor();
+    }
+
+    public bool RemoveActiveTextEditor()
+    {
+      return fileManager.RemoveActiveTextEditor();
+    }
+
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
+    public TextEditorContainer GetActiveTextEditorContainer()
+    {
+      return fileManager.GetTextEditorContainer();
     }
 
     /// <summary>
@@ -312,10 +327,9 @@ namespace UI.Components
       {
         var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
         var lineStartOffset = searchResult.Value.FirstOrDefault().StartOffset;
-        int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, searchResult.Value.FirstOrDefault().SubstringFromWord, searchText);
-        if (globalStartOffset >= 0)
+        if (lineStartOffset >= 0)
         {
-          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), globalStartOffset, replaceText, searchText);
+          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), lineStartOffset, replaceText, searchText);
         }
       }
     }
@@ -337,6 +351,11 @@ namespace UI.Components
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
     {
       SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
+    }
+
+    internal TranslatorItem GetActiveTranslatorContainer()
+    {
+      return fileManager.GetActiveTranslatorContainer();
     }
   }
 }

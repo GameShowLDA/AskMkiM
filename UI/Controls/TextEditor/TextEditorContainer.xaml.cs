@@ -32,7 +32,7 @@ namespace UI.Controls.TextEditor
       var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
       if (foundDockItem != null)
       {
-        if(foundDockItem.Content is TextEditorUI)
+        if (foundDockItem.Content is TextEditorUI)
         {
           var textEditor = (TextEditorUI)foundDockItem.Content;
           return textEditor.Text;
@@ -53,6 +53,19 @@ namespace UI.Controls.TextEditor
         }
       }
       return null;
+    }
+
+    public bool RemoveActiveTextEditor(TextEditorContainer textEditorContainer)
+    {
+      var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (foundDockItem != null)
+      {
+        if (foundDockItem.Content is TextEditorUI)
+        {
+          return foundDockItem.Close();
+        }
+      }
+      return false;
     }
   }
 }

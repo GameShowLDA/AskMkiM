@@ -1,5 +1,9 @@
-﻿using System.Windows;
-using ControlCommandAnalyser;
+﻿using ControlCommandAnalyser;
+using System.Windows;
+using UI.Components.MultiEditorMethods;
+using UI.Controls;
+using UI.Controls.TextEditor;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MainWindowProgram.Services
 {
@@ -37,19 +41,51 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task StartTranslationAsync()
     {
-      var editor = await _multiWindow.GetActiveTextEditor();
+      TextEditorUI editor = await _multiWindow.GetActiveTextEditor();
+      var translationContainer = await _multiWindow.GetActiveTranslateContainer();
       if (editor == null)
       {
-        MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        return;
+        editor = translationContainer.GetLeftEditor();
+        if (editor == null)
+        {
+          MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          return;
+        }
+        else
+        {
+          string text = editor.Text;
+          var translateEditor = _fileService.CreateTranslationFileAsync();
+
+          var manager = new CommandTranslationManager();
+          var models = manager.ParseAllAndDisplay(text, translateEditor);
+
+          if (translationContainer != null)
+          {
+            translationContainer.SetRighttEditor(translateEditor);
+          }
+        }
       }
-      string text = editor.Text;
+      else
+      {
+        string text = editor.Text;
+        if (_multiWindow.RemoveActiveTextEditor())
+        {
+          var translateEditor = _fileService.CreateTranslationFileAsync();
 
-      editor =  _fileService.CreateTranslationFileAsync();
+          var manager = new CommandTranslationManager();
+          var models = manager.ParseAllAndDisplay(text, translateEditor);
 
-      var manager = new CommandTranslationManager();
-      var models = manager.ParseAllAndDisplay(text, editor);
-
+          if (translationContainer != null)
+          {
+            translationContainer.SetLeftEditor(editor);
+            translationContainer.SetRighttEditor(translateEditor);
+          }
+        }
+        else
+        {
+          throw new Exception("Не найдено активное окно при трансляции");
+        }
+      }
     }
   }
 }
