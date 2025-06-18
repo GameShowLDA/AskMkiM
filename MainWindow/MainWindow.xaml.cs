@@ -1,15 +1,11 @@
- using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Threading;
-using AppConfiguration.SystemState;
 using MainWindowProgram.Engine;
-using MainWindowProgram.Events;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using UI.Controls.Search;
-using Utilities.USB;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
