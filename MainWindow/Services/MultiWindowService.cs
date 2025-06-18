@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using DevZest.Windows.Docking;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
@@ -104,21 +105,25 @@ namespace MainWindowProgram.Services
       return _multiWindowControl.RemoveActiveTextEditor();
     }
 
+    public void RemoveControl(string pageText)
+    {
+      _multiWindowControl.RemoveControl(pageText);
+    }
+
     public TextEditorUI CreateTranslationFileAsync()
     {
       return _multiWindowControl.CreateTranslationFileAsync();
     }
 
-    internal Task<TranslatorItem> GetActiveTranslateContainer()
+    internal Task<TextEditorContainer> GetActiveTextEditorContainer(string pageText)
     {
-      var foundContainer = _multiWindowControl.GetActiveTranslateContainer();
+      var foundContainer = _multiWindowControl.GetActiveTextEditorContainer(pageText);
       return Task.FromResult(foundContainer);
     }
 
-    internal Task<TextEditorContainer> GetActiveTextEditorContainer()
+    internal async Task AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
     {
-      var foundContainer = _multiWindowControl.GetActiveTextEditorContainer();
-      return Task.FromResult(foundContainer);
+      _multiWindowControl.AddTranslatorItem(editor, translateEditor, pageName);
     }
   }
 }

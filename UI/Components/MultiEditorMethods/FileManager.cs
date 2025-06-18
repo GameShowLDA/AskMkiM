@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using DevZest.Windows.Docking;
+using System;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Shapes;
-using DevZest.Windows.Docking;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.TextEditor;
@@ -56,10 +57,11 @@ namespace UI.Components.MultiEditorMethods
       {
         string fileContent = string.Empty;
         fileContent = GetFileContent(path, nameFile, fileContent);
-        TextEditorContainer textEditorContainer = GetTextEditorContainer();
+        var pageName = "Текстовый редактор";
+        TextEditorContainer textEditorContainer = GetContainer(pageName);
         if (textEditorContainer == null)
         {
-          textEditorContainer = CreateTextEditorContainer();
+          textEditorContainer = CreateContainer(pageName);
         }
 
         var fileType = GetFileType(nameFile);
@@ -77,19 +79,20 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    public TextEditorContainer CreateTextEditorContainer()
+    public TextEditorContainer CreateContainer(string pageName)
     {
       var textEditorContainer = new TextEditorContainer();
-      AddFileToControlManager("Текстовый редактор", textEditorContainer);
+      AddFileToControlManager(pageName, textEditorContainer);
       return textEditorContainer;
     }
 
     public TextEditorUI CreateTranslationFileAsync()
     {
-      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+      var pageName = "Текстовый редактор";
+      TextEditorContainer textEditorContainer = GetContainer(pageName);
       if (textEditorContainer == null)
       {
-        textEditorContainer = CreateTextEditorContainer();
+        textEditorContainer = CreateContainer(pageName);
       }
 
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
@@ -107,17 +110,18 @@ namespace UI.Components.MultiEditorMethods
 
     public TextEditorUI GetActiveTextEditor()
     {
-      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+      var pageName = "Текстовый редактор";
+      TextEditorContainer textEditorContainer = GetContainer(pageName);
       if (textEditorContainer == null)
       {
-        textEditorContainer = CreateTextEditorContainer();
+        textEditorContainer = CreateContainer(pageName);
       }
       return textEditorContainer.GetTextEditor();
     }
 
     public bool RemoveActiveTextEditor()
     {
-      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+      TextEditorContainer textEditorContainer = GetContainer("Текстовый редактор");
       return textEditorContainer.RemoveActiveTextEditor(textEditorContainer);
     }
 
@@ -129,16 +133,26 @@ namespace UI.Components.MultiEditorMethods
       controlManager.ShowControl(textEditorContainer, tabButton);
     }
 
-    public TextEditorContainer GetTextEditorContainer()
+    public TextEditorContainer GetContainer(string pageText)
     {
-      TextEditorContainer textEditorContainer = UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      //if (textEditorContainer == null)
-      //{
-      //  textEditorContainer = new TextEditorContainer();
-      //  AddFileToControlManager("Текстовый редактор", textEditorContainer);
-      //}
-
-      return textEditorContainer;
+      var containerPage = OpenPages.FirstOrDefault(page => page.Text == pageText);
+      if (containerPage == null)
+      {
+        return null;
+      }
+      else
+      {
+        var foundElement = UserControls[OpenPages.IndexOf(containerPage)];
+        if (foundElement != null && foundElement is TextEditorContainer)
+        {
+          TextEditorContainer textEditorContainer = foundElement as TextEditorContainer;
+          return textEditorContainer;
+        }
+        else
+        {
+          return null;
+        }
+      }
     }
 
     private string ManageFilename(string path, string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor)
@@ -178,6 +192,41 @@ namespace UI.Components.MultiEditorMethods
         Title = nameFile,
         TabText = nameFile,
         Content = textEditor
+      };
+
+      dockItem.CloseItem += (sender) =>
+      {
+        if (dockItem.Content is TextEditorUI textEditor)
+        {
+          if (textEditorContainer != null)
+          {
+            var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
+            var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+            controlManager.RemoveControl(foundPage, textEditor);
+            FilePaths.Remove(dockItem.TabText);
+            if (FilePaths.Count == 0)
+            {
+              RemoveTextEditorContainer(textEditorContainer);
+            }
+          }
+        }
+      };
+
+      await Task.Delay(1).ConfigureAwait(true);
+
+      ShowDockItem(textEditorContainer, dockItem);
+    }
+
+    private async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor, TextEditorUI translatorEditor)
+    {
+      var translatorItem = new TranslatorItem();
+      translatorItem.SetLeftEditor(textEditor);
+      translatorItem.SetRightEditor(translatorEditor);
+      var dockItem = new DockItem
+      {
+        Title = nameFile,
+        TabText = nameFile,
+        Content = translatorItem
       };
 
       dockItem.CloseItem += (sender) =>
@@ -336,11 +385,12 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     public void CreateNewFile()
     {
-      TextEditorContainer textEditorContainer = GetTextEditorContainer();
+      var pageName = "Текстовый редактор";
+      TextEditorContainer textEditorContainer = GetContainer(pageName);
 
       if (textEditorContainer == null)
       {
-        textEditorContainer = CreateTextEditorContainer();
+        textEditorContainer = CreateContainer(pageName);
       }
 
       var controlName = "Новый";
@@ -435,16 +485,24 @@ namespace UI.Components.MultiEditorMethods
       };
     }
 
-    internal TranslatorItem GetActiveTranslatorContainer()
+    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
     {
-      TranslatorItem translatorContainer = UserControls.OfType<TranslatorItem>().FirstOrDefault();
-      if (translatorContainer == null)
+      try
       {
-        translatorContainer = new TranslatorItem();
-        AddFileToControlManager("Трансляторы", translatorContainer);
-      }
+        TextEditorContainer textEditorContainer = GetContainer(pageName);
+        if (textEditorContainer == null)
+        {
+          textEditorContainer = CreateContainer(pageName);
+        }
+        ShowNewDockItem("Заглушка", textEditorContainer, editor, translateEditor);
 
-      return translatorContainer;
+        ShowControl(textEditorContainer);
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        LogException($"Ошибка при чтении файла", ex);
+      }
     }
   }
 }

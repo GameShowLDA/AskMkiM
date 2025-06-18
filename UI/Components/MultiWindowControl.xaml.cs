@@ -1,4 +1,5 @@
 ﻿using AppConfiguration.Base;
+using DevZest.Windows.Docking;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -168,6 +169,11 @@ namespace UI.Components
     public bool RemoveActiveTextEditor()
     {
       return MultiEditor.RemoveActiveTextEditor();
+    }
+
+    public void RemoveControl(string pageText)
+    {
+      MultiEditor.RemoveControl(pageText);
     }
 
     /// <summary>
@@ -623,14 +629,14 @@ namespace UI.Components
       }
     }
 
-    public TranslatorItem GetActiveTranslateContainer()
+    public TextEditorContainer GetActiveTextEditorContainer(string pageText)
     {
-      return MultiEditor.GetActiveTranslatorContainer();
+      return MultiEditor.GetActiveTextEditorContainer(pageText);
     }
 
-    public TextEditorContainer GetActiveTextEditorContainer()
+    public void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
     {
-      return MultiEditor.GetActiveTextEditorContainer();
+      MultiEditor.AddTranslatorItem(editor, translateEditor, pageName);
     }
   }
 }

@@ -6,7 +6,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
+using UI.Controls;
 using UI.Controls.TextEditor;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static UI.Components.Invoke.OpenFileButton;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -192,10 +194,11 @@ namespace UI.Components.MultiEditorMethods
     private void AddFileCompareControl(string header, UserControl control)
     {
       var fileManager = new FileManager(multiEditorControl);
-      var textEditorContainer = fileManager.GetTextEditorContainer();
+      var pageName = "Текстовый редактор";
+      var textEditorContainer = fileManager.GetContainer(pageName);
       if (textEditorContainer == null)
       {
-        textEditorContainer = fileManager.CreateTextEditorContainer();
+        textEditorContainer = fileManager.CreateContainer(pageName);
       }
       var dockItem = new DockItem
       {
@@ -204,6 +207,26 @@ namespace UI.Components.MultiEditorMethods
         Content = control
       };
       fileManager.ShowDockItem(textEditorContainer, dockItem);
+    }
+
+    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
+    {
+      var fileManager = new FileManager(multiEditorControl);
+      var translationContainer = fileManager.GetContainer(pageName);
+      if (translationContainer == null)
+      {
+        translationContainer = fileManager.CreateContainer(pageName);
+      }
+      var translatorItem = new TranslatorItem();
+      translatorItem.SetLeftEditor(editor);
+      translatorItem.SetRightEditor(translateEditor);
+      var dockItem = new DockItem
+      {
+        Title = "Заглушка",
+        TabText = "Заглушка",
+        Content = translatorItem
+      };
+      fileManager.ShowDockItem(translationContainer, dockItem);
     }
 
     /// <summary>
@@ -325,7 +348,7 @@ namespace UI.Components.MultiEditorMethods
     /// Отображает указанный элемент управления, скрывая остальные.
     /// </summary>
     /// <param name="control">Элемент управления для отображения.</param>
-    private void ActivePage(OpenFileButton control, MultiEditorControl multiEditorControl)
+    public void ActivePage(OpenFileButton control, MultiEditorControl multiEditorControl)
     {
       foreach (OpenFileButton child in multiEditorControl.TopPanel.Children)
       {

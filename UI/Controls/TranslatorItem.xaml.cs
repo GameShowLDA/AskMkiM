@@ -41,7 +41,7 @@ namespace UI.Controls
     }
 
 
-    public void SetRighttEditor(TextEditorUI textEditorUI)
+    public void SetRightEditor(TextEditorUI textEditorUI)
     {
       if (RightBox == null || textEditorUI == null)
       {

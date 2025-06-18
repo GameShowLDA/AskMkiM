@@ -67,5 +67,10 @@ namespace UI.Controls.TextEditor
       }
       return false;
     }
+
+    public DockControl GetDockControl()
+    {
+      return this.DockManager as DockControl;
+    }
   }
 }
