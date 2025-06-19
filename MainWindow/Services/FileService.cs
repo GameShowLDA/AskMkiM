@@ -135,7 +135,8 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      if (_isSearchWindowOpen == false)
+      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+      if (_isSearchWindowOpen == false && activeEditor != null)
       {
         _mainWindow.SearchWindow.Owner = _mainWindow;
         _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
@@ -143,7 +144,6 @@ namespace MainWindowProgram.Services
         _isSearchWindowOpen = true;
       }
 
-      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
       if (activeEditor != null)
       {
         string selectedText = activeEditor?.TextArea.Selection.GetText();

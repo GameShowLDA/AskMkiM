@@ -105,7 +105,7 @@ namespace UI.Components.MultiEditorMethods
       TextEditorContainer textEditorContainer = GetContainer(pageName);
       if (textEditorContainer == null)
       {
-        return null; //textEditorContainer = CreateContainer(pageName);
+        return null;
       }
       else
       {
