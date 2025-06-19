@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utilities.Models;
 
 namespace ControlCommandAnalyser.Model
 {
@@ -22,5 +23,12 @@ namespace ControlCommandAnalyser.Model
     public string Mnemonic { get; set; }
 
     public List<string> SourceLines { get; set; } = new List<string>();
+
+    public List<ErrorItem> Errors { get; set; } = new List<ErrorItem>();
+
+    /// <summary>
+    /// Номер строки, с которой начинается команда (в исходном тексте).
+    /// </summary>
+    public int StartLineNumber { get; set; }
   }
 }

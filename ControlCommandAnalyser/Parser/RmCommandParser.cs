@@ -7,13 +7,14 @@ namespace ControlCommandAnalyser.Parser
   {
     public bool CanParse(string mnemonic) => mnemonic == "РМ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       var model = new RmCommandModel
       {
         CommandNumber = commandNumber,
         Mnemonic = mnemonic,
-        SourceLines = new List<string>(lines)
+        SourceLines = new List<string>(lines),
+        StartLineNumber = numberLine,
       };
 
       // Собрать весь текст команды (все строки после номера и мнемоники)
@@ -31,7 +32,7 @@ namespace ControlCommandAnalyser.Parser
           sb.AppendLine(line);
       }
 
-      var pairs = RmExpressionParser.ParseAllExpressions(sb.ToString());
+      var pairs = RmExpressionParser.ParseAllExpressions(sb.ToString(), ref model);
 
       foreach (var pair in pairs)
         model.PointsMap[pair.OkPoint] = pair.AskInput;

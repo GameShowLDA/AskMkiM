@@ -1,7 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml.Serialization;
+using UI.Controls.ErrorList;
 using UI.Controls.TextEditor;
+using Utilities.Models;
 
 namespace UI.Controls
 {
@@ -16,6 +19,16 @@ namespace UI.Controls
     public TranslatorItem()
     {
       InitializeComponent();
+    }
+
+    public void AddError(ErrorItem errorItem)
+    {
+      ErrorListBoxVertical.Errors.Add(errorItem);
+    }
+
+    public void ErrorClear()
+    {
+      ErrorListBoxVertical.Errors.Clear();
     }
 
     public void SetLeftEditor(TextEditorUI textEditorUI)
@@ -50,6 +63,15 @@ namespace UI.Controls
 
       RightBox.Children.Clear();
       RightBox.Children.Add(textEditorUI);
+    }
+
+    public void SetError(List<ErrorItem> errorItems)
+    {
+      ErrorListBoxVertical.Errors.Clear();
+      foreach (ErrorItem errorItem in errorItems)
+      {
+        ErrorListBoxVertical.Errors.Add(errorItem);
+      }
     }
 
     public TextEditorUI GetRightEditor()

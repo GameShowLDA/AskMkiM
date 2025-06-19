@@ -55,7 +55,6 @@ namespace ControlCommandAnalyser
 
       foreach (var model in models)
       {
-        // Найти подходящий форматтер (по типу модели)
         var formatter = _formatters.FirstOrDefault(f => f.CanFormat(model));
         IEnumerable<string> lines;
         if (formatter != null)
@@ -64,7 +63,6 @@ namespace ControlCommandAnalyser
         }
         else
         {
-          // Если нет форматтера — пытаемся взять исходные строки
           var sourceLinesProp = model.GetType().GetProperty("SourceLines");
           lines = sourceLinesProp != null
             ? sourceLinesProp.GetValue(model) as IEnumerable<string> ?? new List<string>()
@@ -116,37 +114,52 @@ namespace ControlCommandAnalyser
       string commandNumber = null;
       string mnemonic = null;
       var commandLines = new List<string>();
+      int currentStartLine = -1;
+      int lineNumer = -1;
 
       var cmdRegex = new Regex(@"^\s*(\d+)\s+([А-ЯA-Z]{2,})\b", RegexOptions.Compiled);
 
-      foreach (var line in lines)
+      for (int i = 0; i < lines.Length; i++)
       {
+        var line = lines[i];
         var match = cmdRegex.Match(line);
         if (match.Success)
         {
           if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
-            commands.Add(ParseSingle(commandNumber, mnemonic, commandLines));
+          {
+            var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines);
+            model.StartLineNumber = currentStartLine + 1; // +1 если строки 1-based
+            commands.Add(model);
+          }
 
+          lineNumer = currentStartLine + 1;
           commandNumber = match.Groups[1].Value;
           mnemonic = match.Groups[2].Value;
           commandLines = new List<string> { line };
+          currentStartLine = i;
         }
         else if (commandLines.Count > 0)
         {
           commandLines.Add(line);
         }
       }
+
       if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
-        commands.Add(ParseSingle(commandNumber, mnemonic, commandLines));
+      {
+        var model = ParseSingle(commandNumber, mnemonic, lineNumer, commandLines);
+        model.StartLineNumber = currentStartLine + 1;
+        commands.Add(model);
+      }
 
       return commands;
     }
 
-    private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, List<string> lines)
+
+    private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, int lineNumber, List<string> lines)
     {
       foreach (var parser in _parsers)
         if (parser.CanParse(mnemonic))
-          return parser.Parse(commandNumber, mnemonic, lines);
+          return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
 
       return new UnknownCommandModel
       {

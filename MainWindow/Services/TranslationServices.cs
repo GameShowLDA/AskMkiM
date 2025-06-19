@@ -62,6 +62,14 @@ namespace MainWindowProgram.Services
           if (translationContainer != null)
           {
             translationContainer.SetRighttEditor(translateEditor);
+
+            foreach (var model in models)
+            {
+              if (model.Errors.Count > 0)
+              {
+                translationContainer.SetError(model.Errors);
+              }
+            }
           }
         }
       }
@@ -75,10 +83,19 @@ namespace MainWindowProgram.Services
           var manager = new CommandTranslationManager();
           var models = manager.ParseAllAndDisplay(text, translateEditor);
 
+
           if (translationContainer != null)
           {
             translationContainer.SetLeftEditor(editor);
             translationContainer.SetRighttEditor(translateEditor);
+
+            foreach (var model in models)
+            {
+              if (model.Errors.Count > 0)
+              { 
+                translationContainer.SetError(model.Errors);
+              }
+            }
           }
         }
         else

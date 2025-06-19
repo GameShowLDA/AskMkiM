@@ -1,0 +1,74 @@
+﻿<UserControl x:Class="UI.Controls.ErrorList.ErrorListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:UI.Controls.ErrorList"
+             xmlns:components="clr-namespace:UI.Components"
+             x:Name="root">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="ErrorListBackground" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="ErrorListForeground" Color="#D4D4D4"/>
+        <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#2D2D2D"/>
+        <SolidColorBrush x:Key="ErrorListSelection" Color="#264F78"/>
+    </UserControl.Resources>
+    <Grid Background="{StaticResource ErrorListBackground}">
+        <DataGrid ItemsSource="{Binding Errors, ElementName=root}"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  Background="{StaticResource ErrorListBackground}"
+                  Foreground="{StaticResource ErrorListForeground}"
+                  RowBackground="{StaticResource ErrorListBackground}"
+                  AlternatingRowBackground="{StaticResource ErrorListBackground}"
+                  GridLinesVisibility="None"
+                  BorderThickness="0"
+                  ColumnHeaderHeight="28"
+                  >
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{StaticResource ErrorListHeaderBackground}"/>
+                    <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
+                    <Setter Property="Background" Value="{StaticResource ErrorListBackground}"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="{StaticResource ErrorListBackground}"/>
+                    <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FontWeight" Value="Normal"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#264F78"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <!-- Крестик -->
+                <DataGridTemplateColumn Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <components:CrossIcon Size="16" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!-- Номер строки -->
+                <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <!-- Номер команды -->
+                <DataGridTextColumn Header="Команда" Width="80" Binding="{Binding Command}" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <!-- Описание ошибки -->
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
