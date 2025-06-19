@@ -144,11 +144,18 @@ namespace MainWindowProgram.Services
       }
 
       TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
-      string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-      if (!string.IsNullOrEmpty(selectedText))
+      if (activeEditor != null)
       {
-        EventAggregator.RaiseSearchTextRequested(selectedText);
+        string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          EventAggregator.RaiseSearchTextRequested(selectedText);
+        }
+      }
+      else
+      {
+        return;
       }
     }
 

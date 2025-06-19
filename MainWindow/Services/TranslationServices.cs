@@ -74,16 +74,6 @@ namespace MainWindowProgram.Services
 
         if (_multiWindow.RemoveActiveTextEditor())
         {
-          var pageText = "Текстовый редактор";
-          var textEditor = await _multiWindow.GetActiveTextEditorContainer(pageText);
-          if (textEditor != null)
-          {
-            var dockControl = textEditor.GetDockControl();
-            if(dockControl != null && dockControl.DockItems.Count == 0)
-            {
-              _multiWindow.RemoveControl(pageText); //TODO: закрытие текстового редактора
-            }
-          }
           await CreateNewTranslator(editor, text);
         }
       }

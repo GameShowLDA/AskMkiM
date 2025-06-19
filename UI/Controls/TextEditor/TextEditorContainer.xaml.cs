@@ -55,19 +55,6 @@ namespace UI.Controls.TextEditor
       return null;
     }
 
-    public bool RemoveActiveTextEditor(TextEditorContainer textEditorContainer)
-    {
-      var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
-      if (foundDockItem != null)
-      {
-        if (foundDockItem.Content is TextEditorUI)
-        {
-          return foundDockItem.Close();
-        }
-      }
-      return false;
-    }
-
     public DockControl GetDockControl()
     {
       return this.DockManager as DockControl;

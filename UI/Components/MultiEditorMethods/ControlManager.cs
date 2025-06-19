@@ -61,7 +61,6 @@ namespace UI.Components.MultiEditorMethods
         }
         if (control is TextEditorContainer)
         {
-          // ShowSaveDialogForControl(control);
           HandleClosingEvents(control, tabButton);
         }
 
