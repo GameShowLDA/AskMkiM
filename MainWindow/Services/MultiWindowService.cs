@@ -105,9 +105,9 @@ namespace MainWindowProgram.Services
       return _multiWindowControl.RemoveActiveTextEditor();
     }
 
-    public void RemoveControl(string pageText)
+    public void RemoveControl(EditorType editorType)
     {
-      _multiWindowControl.RemoveControl(pageText);
+      _multiWindowControl.RemoveControl(editorType);
     }
 
     public TextEditorUI CreateTranslationFileAsync()
@@ -115,15 +115,15 @@ namespace MainWindowProgram.Services
       return _multiWindowControl.CreateTranslationFileAsync();
     }
 
-    internal Task<TextEditorContainer> GetActiveTextEditorContainer(string pageText)
+    internal Task<TextEditorContainer> GetActiveTextEditorContainer(EditorType editorType)
     {
-      var foundContainer = _multiWindowControl.GetActiveTextEditorContainer(pageText);
+      var foundContainer = _multiWindowControl.GetActiveTextEditorContainer(editorType);
       return Task.FromResult(foundContainer);
     }
 
-    internal async Task AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
+    internal async Task AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      _multiWindowControl.AddTranslatorItem(editor, translateEditor, pageName);
+      _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }
   }
 }

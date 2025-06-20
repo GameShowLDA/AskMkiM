@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Shapes;
+using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.TextEditor;
@@ -57,20 +58,25 @@ namespace UI.Components.MultiEditorMethods
       {
         string fileContent = string.Empty;
         fileContent = GetFileContent(path, nameFile, fileContent);
-        var pageName = "Текстовый редактор";
-        TextEditorContainer textEditorContainer = GetContainer(pageName);
+        TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
         if (textEditorContainer == null)
         {
-          textEditorContainer = CreateContainer(pageName);
+          textEditorContainer = CreateContainer(EditorType.TextEditor);
         }
 
         var fileType = GetFileType(nameFile);
-        var textEditor = CreateTextEditor(fileContent, fileType);
+        var newFileName = ManageFilename(path, nameFile);
 
-        var newFileName = ManageFilename(path, nameFile, textEditorContainer, textEditor);
+        var textEditorModel = new TextEditorModel
+        {
+          FilePath = path,
+          FileName = newFileName
+        };
+        var textEditor = CreateTextEditor(textEditorModel, fileContent, fileType);
+
         ShowNewDockItem(newFileName, textEditorContainer, textEditor);
 
-        ShowControl(textEditorContainer, pageName);
+        ShowControl(textEditorContainer, EditorType.TextEditor);
       }
       catch (Exception ex)
       {
@@ -79,18 +85,22 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    public TextEditorContainer CreateContainer(string pageName)
+    public TextEditorContainer CreateContainer(EditorType editorType)
     {
       var textEditorContainer = new TextEditorContainer();
-      AddFileToControlManager(pageName, textEditorContainer);
+      AddFileToControlManager(editorType.ToString(), textEditorContainer);
       return textEditorContainer;
     }
 
     public TextEditorUI CreateTranslationFileAsync()
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
+      var textEditorModel = new TextEditorModel
+      {
+        FileName = fileName
+      };
 
-      var textEditor = new TextEditorUI(TextEditorUI.FileType.OPKW)
+      var textEditor = new TextEditorUI(TextEditorUI.FileType.OPKW, textEditorModel)
       {
         Text = "// Результат трансляции появится здесь...",
         IsReadOnly = true
@@ -101,8 +111,7 @@ namespace UI.Components.MultiEditorMethods
 
     public TextEditorUI GetActiveTextEditor()
     {
-      var pageName = "Текстовый редактор";
-      TextEditorContainer textEditorContainer = GetContainer(pageName);
+      TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
       if (textEditorContainer == null)
       {
         return null;
@@ -115,12 +124,12 @@ namespace UI.Components.MultiEditorMethods
 
     public bool RemoveActiveTextEditor()
     {
-      TextEditorContainer textEditorContainer = GetContainer("Текстовый редактор");
+      TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
       var foundDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
       if (foundDockItem != null && foundDockItem.Content is TextEditorUI textEditor)
       {
         var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-        var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+        var foundPage = OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
         controlManager.RemoveControl(foundPage, textEditor);
         FilePaths.Remove(foundDockItem.TabText);
 
@@ -137,17 +146,17 @@ namespace UI.Components.MultiEditorMethods
     }
 
 
-    private void ShowControl(TextEditorContainer textEditorContainer, string pageName)
+    private void ShowControl(TextEditorContainer textEditorContainer, EditorType editorType)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
       var tabButton = new OpenFileButton();
-      tabButton.Header.Text = pageName;
+      tabButton.Header.Text = editorType.ToString();
       controlManager.ShowControl(textEditorContainer, tabButton);
     }
 
-    public TextEditorContainer GetContainer(string pageText)
+    public TextEditorContainer GetContainer(EditorType editorType)
     {
-      var containerPage = OpenPages.FirstOrDefault(page => page.Text == pageText);
+      var containerPage = OpenPages.FirstOrDefault(page => page.Text == editorType.DisplayName);
       if (containerPage == null)
       {
         return null;
@@ -167,7 +176,7 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private string ManageFilename(string path, string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor)
+    private string ManageFilename(string path, string nameFile)
     {
       if (!FilePaths.ContainsKey(nameFile))
       {
@@ -193,7 +202,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="nameFile">Имя файла.</param>
     /// <param name="textEditorContainer">Контейнер редактора, в котором будут размещаться DockItem'ы.</param>
     /// <param name="textEditor">Экземпляр редактора для отображения содержимого файла.</param>
-    private async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor)
+    internal async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, UserControl textEditor)
     {
       var dockItem = new DockItem
       {
@@ -204,12 +213,12 @@ namespace UI.Components.MultiEditorMethods
 
       dockItem.CloseItem += (sender) =>
       {
-        if (dockItem.Content is TextEditorUI textEditor)
+        if (dockItem.Content is TextEditorUI || dockItem.Content is FileCompareControl)
         {
           if (textEditorContainer != null)
           {
             var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-            var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+            var foundPage = OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
             controlManager.RemoveControl(foundPage, textEditor);
             FilePaths.Remove(dockItem.TabText);
             if (FilePaths.Count == 0)
@@ -227,43 +236,54 @@ namespace UI.Components.MultiEditorMethods
 
     private async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor, TextEditorUI translatorEditor)
     {
-      var translatorItem = new TranslatorItem();
-      translatorItem.SetLeftEditor(textEditor);
-      translatorItem.SetRightEditor(translatorEditor);
-      var dockItem = new DockItem
+      try
       {
-        Title = nameFile,
-        TabText = nameFile,
-        Content = translatorItem
-      };
 
-      dockItem.CloseItem += (sender) =>
-      {
-        if (dockItem.Content is TextEditorUI textEditor)
+        var translatorItem = new TranslatorItem();
+        translatorItem.SetLeftEditor(textEditor);
+        translatorItem.SetRightEditor(translatorEditor);
+        translatorItem.SetRightEditorName(translatorEditor.TextEditorModel.FileName);
+        translatorItem.SetLeftEditorName(textEditor.TextEditorModel.FileName);
+        var dockItem = new DockItem
         {
-          if (textEditorContainer != null)
+          Title = nameFile,
+          TabText = nameFile,
+          Content = translatorItem
+        };
+
+        dockItem.CloseItem += (sender) =>
+        {
+          if (dockItem.Content is TextEditorUI textEditor)
           {
-            var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-            var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
-            controlManager.RemoveControl(foundPage, textEditor);
-            FilePaths.Remove(dockItem.TabText);
-            if (FilePaths.Count == 0)
+            if (textEditorContainer != null)
             {
-              RemoveTextEditorContainer(textEditorContainer);
+              var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
+              var foundPage = OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
+              controlManager.RemoveControl(foundPage, textEditor);
+              FilePaths.Remove(dockItem.TabText);
+              if (FilePaths.Count == 0)
+              {
+                RemoveTextEditorContainer(textEditorContainer);
+              }
             }
           }
-        }
-      };
+        };
 
-      await Task.Delay(1).ConfigureAwait(true);
+        await Task.Delay(1).ConfigureAwait(true);
 
-      ShowDockItem(textEditorContainer, dockItem);
+        ShowDockItem(textEditorContainer, dockItem);
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Системная ошибка: {ex}", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError($"Системная ошибка: {ex}");
+      }
     }
 
     private void RemoveTextEditorContainer(TextEditorContainer textEditorContainer)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-      var foundPage = OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+      var foundPage = OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
       controlManager.RemoveControl(foundPage, textEditorContainer);
     }
 
@@ -381,9 +401,9 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="fileContent">Содержимое файла, которое будет установлено в редактор.</param>
     /// <returns>Новый экземпляр <see cref="TextEditorUI"/>.</returns>
-    private TextEditorUI CreateTextEditor(string fileContent, FileType fileType = FileType.None)
+    private TextEditorUI CreateTextEditor(TextEditorModel textEditorModel, string fileContent, FileType fileType = FileType.None)
     {
-      var textEditor = new TextEditorUI(fileType);
+      var textEditor = new TextEditorUI(fileType, textEditorModel);
       textEditor.Text = fileContent;
       return textEditor;
     }
@@ -393,12 +413,11 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     public void CreateNewFile()
     {
-      var pageName = "Текстовый редактор";
-      TextEditorContainer textEditorContainer = GetContainer(pageName);
+      TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
 
       if (textEditorContainer == null)
       {
-        textEditorContainer = CreateContainer(pageName);
+        textEditorContainer = CreateContainer(EditorType.TextEditor);
       }
 
       var controlName = "Новый";
@@ -493,18 +512,18 @@ namespace UI.Components.MultiEditorMethods
       };
     }
 
-    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
+    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       try
       {
-        TextEditorContainer textEditorContainer = GetContainer(pageName);
+        TextEditorContainer textEditorContainer = GetContainer(editorType);
         if (textEditorContainer == null)
         {
-          textEditorContainer = CreateContainer(pageName);
+          textEditorContainer = CreateContainer(editorType);
         }
-        ShowNewDockItem("Заглушка", textEditorContainer, editor, translateEditor);
+        ShowNewDockItem($"Трансляция {editor.TextEditorModel.FileName}", textEditorContainer, editor, translateEditor);
 
-        ShowControl(textEditorContainer, "Трансляторы");
+        ShowControl(textEditorContainer, EditorType.Translator);
       }
       catch (Exception ex)
       {

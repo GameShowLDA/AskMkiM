@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Controls.TextEditor;
+using System;
 
 namespace UI.Controls
 {
@@ -10,9 +11,6 @@ namespace UI.Controls
   /// </summary>
   public partial class TranslatorItem : UserControl
   {
-    public string FirstFilePath { get; set; }
-    public string SecondFilePath { get; set; }
-
     public TranslatorItem()
     {
       InitializeComponent();
@@ -70,6 +68,26 @@ namespace UI.Controls
       }
 
       return LeftBox.Children[0] as TextEditorUI;
+    }
+
+    public string GetLeftEditorName()
+    {
+      return FirstFileName.Text;
+    }
+
+    public string GetRightEditorName()
+    {
+      return SecondFileName.Text;
+    }
+
+    public void SetRightEditorName(string newText)
+    {
+      SecondFileName.Text = newText;
+    }
+
+    public void SetLeftEditorName(string newText)
+    {
+      FirstFileName.Text = newText;
     }
   }
 }

@@ -170,9 +170,9 @@ namespace UI.Components
       return MultiEditor.RemoveActiveTextEditor();
     }
 
-    public void RemoveControl(string pageText)
+    public void RemoveControl(EditorType editorType)
     {
-      MultiEditor.RemoveControl(pageText);
+      MultiEditor.RemoveControl(editorType);
     }
 
     /// <summary>
@@ -628,14 +628,14 @@ namespace UI.Components
       }
     }
 
-    public TextEditorContainer GetActiveTextEditorContainer(string pageText)
+    public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
     {
-      return MultiEditor.GetActiveTextEditorContainer(pageText);
+      return MultiEditor.GetActiveTextEditorContainer(editorType);
     }
 
-    public void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
+    public void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      MultiEditor.AddTranslatorItem(editor, translateEditor, pageName);
+      MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
   }
 }

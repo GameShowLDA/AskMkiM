@@ -138,10 +138,10 @@ namespace UI.Components
       return fileManager.RemoveActiveTextEditor();
     }
 
-    public void RemoveControl(string pageText)
+    public void RemoveControl(EditorType editorType)
     {
-      var control = fileManager.GetContainer(pageText);
-      var page = fileManager.OpenPages.FirstOrDefault(item => item.Text == pageText);
+      var control = fileManager.GetContainer(editorType);
+      var page = fileManager.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
       if (control != null && page != null)
       {
         controlManager.RemoveControl(page, control);
@@ -152,9 +152,9 @@ namespace UI.Components
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
-    public TextEditorContainer GetActiveTextEditorContainer(string pageText)
+    public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
     {
-      return fileManager.GetContainer(pageText);
+      return fileManager.GetContainer(editorType);
     }
 
 
@@ -365,9 +365,9 @@ namespace UI.Components
       SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
     }
 
-    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
+    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      fileManager.AddTranslatorItem(editor, translateEditor, pageName);
+      fileManager.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
   }

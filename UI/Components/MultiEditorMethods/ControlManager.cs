@@ -193,39 +193,13 @@ namespace UI.Components.MultiEditorMethods
     private void AddFileCompareControl(string header, UserControl control)
     {
       var fileManager = new FileManager(multiEditorControl);
-      var pageName = "Текстовый редактор";
-      var textEditorContainer = fileManager.GetContainer(pageName);
+      var textEditorContainer = fileManager.GetContainer(EditorType.TextEditor);
       if (textEditorContainer == null)
       {
-        textEditorContainer = fileManager.CreateContainer(pageName);
+        textEditorContainer = fileManager.CreateContainer(EditorType.TextEditor);
       }
-      var dockItem = new DockItem
-      {
-        Title = header,
-        TabText = header,
-        Content = control
-      };
-      fileManager.ShowDockItem(textEditorContainer, dockItem);
-    }
 
-    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, string pageName)
-    {
-      var fileManager = new FileManager(multiEditorControl);
-      var translationContainer = fileManager.GetContainer(pageName);
-      if (translationContainer == null)
-      {
-        translationContainer = fileManager.CreateContainer(pageName);
-      }
-      var translatorItem = new TranslatorItem();
-      translatorItem.SetLeftEditor(editor);
-      translatorItem.SetRightEditor(translateEditor);
-      var dockItem = new DockItem
-      {
-        Title = "Заглушка",
-        TabText = "Заглушка",
-        Content = translatorItem
-      };
-      fileManager.ShowDockItem(translationContainer, dockItem);
+      fileManager.ShowNewDockItem(header, textEditorContainer, control);
     }
 
     /// <summary>

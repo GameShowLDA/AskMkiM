@@ -32,6 +32,7 @@ namespace UI.Controls.TextEditor
     }
 
     private FileType FileTypeDock { get; set; }
+    public TextEditorModel TextEditorModel { get; set; }
 
     private FoldingManager foldingManager;
     private OpkwFoldingStrategy foldingStrategy = new OpkwFoldingStrategy();
@@ -121,10 +122,12 @@ namespace UI.Controls.TextEditor
     /// <remarks>
     /// Этот конструктор вызывается при создании экземпляра класса. Он инициализирует компоненты UI и подготавливает текстовый редактор для работы.
     /// </remarks>
-    public TextEditorUI(FileType fileType = FileType.None)
+    public TextEditorUI(FileType fileType = FileType.None, TextEditorModel textEditorModel = null)
     {
       InitializeComponent();
       FileTypeDock = fileType;
+      TextEditorModel = textEditorModel;
+
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
 
       Loaded += (s, e) =>

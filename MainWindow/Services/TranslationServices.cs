@@ -45,7 +45,7 @@ namespace MainWindowProgram.Services
     public async Task StartTranslationAsync()
     {
       TextEditorUI editor = await _multiWindow.GetActiveTextEditor();
-      var translationContainer = await _multiWindow.GetActiveTextEditorContainer("Трансляторы");
+      var translationContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
       if (editor == null && translationContainer != null)
       {
@@ -98,7 +98,7 @@ namespace MainWindowProgram.Services
         var manager = new CommandTranslationManager();
         var models = manager.ParseAllAndDisplay(text, translateEditor);
 
-        await _multiWindow.AddTranslatorItem(editor, translateEditor, "Трансляторы");
+        await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
       }
     }
   }
