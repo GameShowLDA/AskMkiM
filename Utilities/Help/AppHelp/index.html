@@ -19,6 +19,7 @@
                         <ul>
                             <li><a href="?section=hotkeys">✦ Горячие клавиши</a></li>
                             <li><a href="?section=description">✦ Описание работы</a></li>
+                            <li><a href="?section=commands">✦ Список команд</a></li>
                         </ul>
                     </details>
                 </li>
@@ -35,10 +36,13 @@
     </footer>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
+        const params  = new URLSearchParams(window.location.search);
         const section = params.get('section') || 'hotkeys';
-        const frame = document.getElementById("content-frame");
-        frame.src = `TextEditor/${section}.html`;
+        const cmd     = params.get('cmd');          // ← новое
+        let   src     = `TextEditor/${section}.html`;
+        if (cmd) src += `?cmd=${cmd}`;              // ← новое
+        document.getElementById("content-frame").src = src;
     </script>
+
 </body>
 </html>
