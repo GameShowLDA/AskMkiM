@@ -46,7 +46,6 @@
             <Border  Padding="0,10" Margin="5" CornerRadius="20">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="{StaticResource SecondaryColor}" Offset="0"/>
                         <GradientStop Color="{StaticResource IsCheckedColor}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
@@ -62,9 +61,9 @@
                                Text="Ваша надпись" 
                                Foreground="{StaticResource ForegroundSolidColorBrush}" 
                                VerticalAlignment="Center" 
-                               HorizontalAlignment="Center"
+                               HorizontalAlignment="Left"
                                TextAlignment="Center"
-                               Padding="20,10,10,10" 
+                               Padding="30,10,10,10" 
                                FontSize="25"
                                TextWrapping="Wrap" TextTrimming="None"
                                FontFamily="{DynamicResource WinstonBold}"

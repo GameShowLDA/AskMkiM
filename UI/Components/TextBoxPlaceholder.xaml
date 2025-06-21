@@ -11,7 +11,7 @@
         <local:MarginConverter x:Key="MarginConverter"/>
     </UserControl.Resources>
 
-    <Border Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="10" Name="BorderData">
+    <Border Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="0,0,10,10" Name="BorderData">
         <Grid>
             <!-- Определяем колонки -->
             <Grid.ColumnDefinitions>
@@ -22,7 +22,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- TextBox в первой колонке -->
-            <TextBox x:Name="InputBox" MinWidth="100"
+            <TextBox x:Name="InputBox" MinWidth="100" Margin="5"
                  Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Background="Transparent" 
                  BorderThickness="0" 

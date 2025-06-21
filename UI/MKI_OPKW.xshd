@@ -14,6 +14,25 @@
 	<Color name="OkValue" foreground="#00FFFF" />
 
 	<RuleSet ignoreCase="false">
+
+		<!--Время-->
+		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
+
+		<!--Напряжение-->
+		<Rule color="Voltage">\s\d+\s*[ВVv]\b</Rule>
+
+		<!--Сопротивление-->
+		<Rule color="Resistance">\s\d+&lt;МОМ(\&lt;\d+)?</Rule>
+		<Rule color="Resistance">\s\d+&gt;МОМ</Rule>
+		<Rule color="Resistance">\sR&gt;\d+МОМ</Rule>
+		<Rule color="Resistance">\sМОМ&lt;\d+</Rule>
+		<Rule color="Resistance">\sМОМ&gt;\d+</Rule>
+
+		<Rule color="Resistance">\s\d+&lt;ОМ(\&lt;\d+)?</Rule>
+		<Rule color="Resistance">\s\d+&gt;ОМ</Rule>
+		<Rule color="Resistance">\sR&gt;\d+ОМ</Rule>
+		<Rule color="Resistance">\sОМ&lt;\d+</Rule>
+		<Rule color="Resistance">\sОМ&gt;\d+</Rule>
 		
 		<!-- Данные РМ -->
 		<Rule color="OkParam">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
@@ -40,7 +59,7 @@
 		<!--Обозначения-->
 		<Rule color="OkParam">^[ \t]*[А-Яа-яA-Za-z_0-9]+(?=\s*=)</Rule>
 		<Rule color="OkValue">(?&lt;=\=)[^\r\n]+</Rule>
-		
+
 
 	</RuleSet>
 </SyntaxDefinition>
