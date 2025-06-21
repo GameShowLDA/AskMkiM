@@ -160,6 +160,7 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
+
         var activeTextEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
         if (activeTextEditorContainer != null)
         {

@@ -16,11 +16,6 @@ namespace ControlCommandAnalyser.Model
     /// </summary>
     public Dictionary<string, string> PointsMap { get; set; } = new();
 
-    /// <summary>
-    /// Список всех исходных строк команды.
-    /// </summary>
-    public List<string> SourceLines { get; set; } = new();
-
     public IEnumerable<string> ToExpandedLines()
     {
       foreach (var kv in PointsMap)

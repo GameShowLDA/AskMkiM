@@ -203,7 +203,7 @@ namespace AppConfiguration.Base
     /// <param name="clearMessage">Удалить сообщение?</param>
     static public void RaiseErrorMessage(string message, bool clearMessage = false)
     {
-      ErrorMessageEvent?.Invoke(message, clearMessage);
+      Application.Current.Dispatcher.Invoke(() => ErrorMessageEvent?.Invoke(message, clearMessage));
     }
 
     /// <summary>
@@ -213,7 +213,7 @@ namespace AppConfiguration.Base
     /// <param name="clearMessage">Удалить сообщение?</param>
     static public void RaiseWarningMessage(string message, bool clearMessage = false)
     {
-      WarningMessageEvent?.Invoke(message, clearMessage);
+      Application.Current.Dispatcher.Invoke(() => WarningMessageEvent?.Invoke(message, clearMessage)); 
     }
 
     /// <summary>
@@ -223,7 +223,7 @@ namespace AppConfiguration.Base
     /// <param name="clearMessage">Удалить сообщение?</param>
     static public void RaiseInfoMessage(string message, bool clearMessage = false)
     {
-      InfoMessageEvent?.Invoke(message, clearMessage);
+      Application.Current.Dispatcher.Invoke(() => InfoMessageEvent?.Invoke(message, clearMessage));
     }
 
     /// <summary>
@@ -232,7 +232,7 @@ namespace AppConfiguration.Base
     /// <param name="elementName">Имя нового элемента.</param>
     static public void RaiseTextEditorActive(bool isTextEditorContainer)
     {
-      TextEditorActive?.Invoke(isTextEditorContainer);
+      Application.Current.Dispatcher.Invoke(() => TextEditorActive?.Invoke(isTextEditorContainer));
     }
 
     /// <summary>

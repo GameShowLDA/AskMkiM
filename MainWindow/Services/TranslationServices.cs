@@ -62,7 +62,7 @@ namespace MainWindowProgram.Services
           if (translationContainer != null)
           {
             translationContainer.SetRighttEditor(translateEditor);
-
+            translationContainer.ErrorClear();
             foreach (var model in models)
             {
               if (model.Errors.Count > 0)

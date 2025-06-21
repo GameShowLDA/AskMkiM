@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ControlCommandAnalyser.Model;
 
-namespace ControlCommandAnalyser.Parser
+namespace ControlCommandAnalyser.Parser.Rm
 {
   public class RmCommandParser : ICommandParser
   {

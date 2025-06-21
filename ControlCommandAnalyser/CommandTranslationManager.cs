@@ -47,12 +47,14 @@ namespace ControlCommandAnalyser
     /// </summary>
     public List<BaseCommandModel> ParseAllAndDisplay(string text, ITextEditorAdapter adapter)
     {
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Начало трансляции");
       var models = ParseAll(text);
 
       var formattedLines = new List<string>();
       var highlights = new List<HighlightRange>();
       int globalLine = 0;
 
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Формирование данных");
       foreach (var model in models)
       {
         var formatter = _formatters.FirstOrDefault(f => f.CanFormat(model));
@@ -72,33 +74,25 @@ namespace ControlCommandAnalyser
         foreach (var line in lines)
         {
           formattedLines.Add(line);
-
-          // Подсветка для первой строки (номер/мнемоника), если это исходные строки
-          if (globalLine == 0 && !string.IsNullOrWhiteSpace(model.CommandNumber))
-          {
-            int cmdIdx = line.IndexOf(model.CommandNumber, StringComparison.Ordinal);
-            if (cmdIdx >= 0)
-              highlights.Add(new HighlightRange(globalLine, cmdIdx, model.CommandNumber.Length, HighlightTarget.CommandNumber));
-          }
-          if (globalLine == 0 && !string.IsNullOrWhiteSpace(model.Mnemonic))
-          {
-            int mnemIdx = line.IndexOf(model.Mnemonic, StringComparison.Ordinal);
-            if (mnemIdx >= 0)
-            {
-              var isUnknown = model.GetType().Name == "UnknownCommandModel";
-              highlights.Add(new HighlightRange(globalLine, mnemIdx, model.Mnemonic.Length, HighlightTarget.Mnemonic)
-              {
-                ColorOverride = isUnknown ? Colors.Gray : (Color?)null
-              });
-            }
-          }
-
           globalLine++;
         }
       }
 
       string outText = string.Join("\n", formattedLines);
       adapter.SetTextAndHighlighting(outText, highlights);
+
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Проверка взаимосвязей");
+      CommandPostAnalyzer.Analyze(models);
+
+      var totalErrorCount = models.Sum(m => m?.Errors?.Count() ?? 0);
+      if (totalErrorCount > 0)
+      {
+        AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Ошибка трансляции");
+      }
+      else
+      {
+        AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Готово");
+      }
 
       return models;
     }
@@ -108,6 +102,7 @@ namespace ControlCommandAnalyser
     /// </summary>
     public List<BaseCommandModel> ParseAll(string text)
     {
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Сбор данных...");
       var lines = text.Replace("\r\n", "\n").Split('\n');
       var commands = new List<BaseCommandModel>();
 
@@ -165,11 +160,11 @@ namespace ControlCommandAnalyser
       {
         CommandNumber = commandNumber,
         Mnemonic = mnemonic,
-        SourceLines = new List<string>(lines)
+        SourceLines = new List<string>(lines),
+        Errors = new List<Utilities.Models.ErrorItem>() { new Utilities.Models.ErrorItem() { Command = $"{commandNumber} {mnemonic}", LineNumber = lineNumber, Description = $"Неизвестная команда {mnemonic}" } }
       };
     }
   }
 
-  // Для совместимости — вынеси в отдельный файл в реальном проекте!
-  public class UnknownCommandModel : BaseCommandModel{}
+  public class UnknownCommandModel : BaseCommandModel { }
 }

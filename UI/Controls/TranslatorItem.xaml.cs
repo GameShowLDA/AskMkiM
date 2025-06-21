@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml.Serialization;
+using ICSharpCode.AvalonEdit;
 using UI.Controls.ErrorList;
 using UI.Controls.TextEditor;
 using Utilities.Models;
@@ -16,9 +17,26 @@ namespace UI.Controls
     public string FirstFilePath { get; set; }
     public string SecondFilePath { get; set; }
 
+    public int errorCount = 0;
+
     public TranslatorItem()
     {
       InitializeComponent();
+      ErrorListBoxVertical.ErrorItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
+    }
+
+    private void ErrorListBoxVertical_ErrorItemDoubleClicked(ErrorItem error)
+    {
+      var lineNumber = error.LineNumber;
+      var textEditor = GetLeftEditor();
+
+      if (lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
+        return;
+
+      var line = textEditor.Document.GetLineByNumber(lineNumber);
+      textEditor.ScrollToLine(lineNumber);
+      textEditor.Select(line.Offset, line.Length); // можно убрать, если не нужно выделение
+      textEditor.Focus();
     }
 
     public void AddError(ErrorItem errorItem)
@@ -29,6 +47,7 @@ namespace UI.Controls
     public void ErrorClear()
     {
       ErrorListBoxVertical.Errors.Clear();
+      errorCount = 0;
     }
 
     public void SetLeftEditor(TextEditorUI textEditorUI)
@@ -67,11 +86,17 @@ namespace UI.Controls
 
     public void SetError(List<ErrorItem> errorItems)
     {
-      ErrorListBoxVertical.Errors.Clear();
       foreach (ErrorItem errorItem in errorItems)
       {
         ErrorListBoxVertical.Errors.Add(errorItem);
+        errorCount++;
       }
+
+      if (errorCount > 0)
+      {
+        AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Общее кол-во ошибок: {errorCount}");
+      }
+
     }
 
     public TextEditorUI GetRightEditor()
@@ -93,5 +118,7 @@ namespace UI.Controls
 
       return LeftBox.Children[0] as TextEditorUI;
     }
+
+
   }
 }

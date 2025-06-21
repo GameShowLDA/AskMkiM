@@ -28,5 +28,18 @@ namespace UI.Controls.ErrorList
       InitializeComponent();
       DataContext = this;
     }
+
+    /// <summary>
+    /// Событие вызывается при двойном клике по строке с ошибкой.
+    /// </summary>
+    public event Action<ErrorItem>? ErrorItemDoubleClicked;
+
+    private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      if (sender is DataGrid grid && grid.SelectedItem is ErrorItem selectedError)
+      {
+        ErrorItemDoubleClicked?.Invoke(selectedError);
+      }
+    }
   }
 }

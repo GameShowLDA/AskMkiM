@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
 using static Utilities.LoggerUtility;
 
-namespace ControlCommandAnalyser.Parser
+namespace ControlCommandAnalyser.Parser.Rm
 {
   /// <summary>
   /// Класс для парсинга выражений RM (Remote Monitoring) и преобразования их в модели <see cref="RmPairModel"/>.
@@ -20,6 +21,11 @@ namespace ControlCommandAnalyser.Parser
     /// <returns>Список моделей <see cref="RmPairModel"/>.</returns>
     public static List<RmPairModel> ParseAllExpressions(string rmBlock, ref RmCommandModel baseCommandModel)
     {
+      if (string.IsNullOrEmpty(rmBlock))
+      {
+        baseCommandModel.Errors.Add(RmErrors.EmptyCommandBody(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+      }
+
       var expressions = SplitExpressions(rmBlock);
       var result = new List<RmPairModel>();
 
@@ -50,12 +56,7 @@ namespace ControlCommandAnalyser.Parser
       }
       else
       {
-        baseCommandModel.Errors.Add(new Utilities.Models.ErrorItem()
-        {
-          LineNumber = baseCommandModel.StartLineNumber,
-          Command = $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-          Description = $"Не удалось распознать выражение: {expr}"
-        });
+        baseCommandModel.Errors.Add(RmErrors.CannotParseExpression(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
       }
     }
 
@@ -122,12 +123,7 @@ namespace ControlCommandAnalyser.Parser
     {
       if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
       {
-        baseCommandModel.Errors.Add(new Utilities.Models.ErrorItem()
-        {
-          LineNumber = baseCommandModel.StartLineNumber,
-          Command = $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-          Description = $"Левая или правая часть выражения пуста: {left} == {middle} = {right}"
-        });
+        baseCommandModel.Errors.Add(RmErrors.EmptyLeftOrRight(left, middle, right, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return;
       }
 
@@ -151,15 +147,7 @@ namespace ControlCommandAnalyser.Parser
       // Проверяем соответствие размеров списков
       if (leftList.Count != rightList.Count)
       {
-        baseCommandModel.Errors.Add(new Utilities.Models.ErrorItem()
-        {
-          LineNumber = baseCommandModel.StartLineNumber,
-          Command = $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-          Description = $"Количество точек ОК и входов должно совпадать! " +
-                            $"Левая часть: (количество: {leftList.Count}) " +
-                            $"Правая часть: (количество: {rightList.Count})"
-        });
-
+        baseCommandModel.Errors.Add(RmErrors.MismatchedCounts(leftList.Count, rightList.Count, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return;
       }
 
@@ -444,11 +432,7 @@ namespace ControlCommandAnalyser.Parser
         int groupSize = leftTotal / groupCount;
         if (groupSize * groupCount != leftTotal)
         {
-          baseCommandModel.Errors.Add(new Utilities.Models.ErrorItem()
-          {
-            Command = $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-            Description = "Нельзя разбить диапазон слева на равные группы под массив справа!"
-          });
+          baseCommandModel.Errors.Add(RmErrors.GroupMismatch(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
           return false;
         }
 
@@ -460,18 +444,13 @@ namespace ControlCommandAnalyser.Parser
             int rightNum = rightStart + i;
             if (rightNum > rightEnd)
             {
-              baseCommandModel.Errors.Add(new Utilities.Models.ErrorItem()
-              {
-                LineNumber = baseCommandModel.StartLineNumber,
-                Command = $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-                Description = "Правая группа короче, чем левая!"
-              });
+              baseCommandModel.Errors.Add(RmErrors.GroupTooShort(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
               return false;
             }
 
             result.Add(new RmPairModel
             {
-              OkPoint = (leftPtr++).ToString(),
+              OkPoint = leftPtr++.ToString(),
               Synonym = middle, // Не поддерживаем синонимы в таких записях (можно расширить при необходимости)
               AskInput = $"{rightPrefix}.{mid}.{rightNum}"
             });
@@ -516,14 +495,9 @@ namespace ControlCommandAnalyser.Parser
         int rightStep = int.Parse(rightMatch.Groups[4].Value);
 
         int count = leftTo - leftFrom + 1;
-        if (count != (synRangeTo - synRangeFrom + 1) || count != ((rightTo - rightFrom) / rightStep + 1))
+        if (count != synRangeTo - synRangeFrom + 1 || count != (rightTo - rightFrom) / rightStep + 1)
         {
-          baseCommandModel.Errors.Add(new Utilities.Models.ErrorItem()
-          {
-            LineNumber = baseCommandModel.StartLineNumber,
-            Command = $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-            Description = "Диапазоны не совпадают по количеству элементов."
-          });
+          baseCommandModel.Errors.Add(RmErrors.StepRangeMismatch(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
           return false;
         }
 

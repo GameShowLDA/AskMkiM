@@ -11,11 +11,12 @@
 	<Color name="OkParam" foreground="#FFB300" />
 	<Color name="RmPoint" foreground="#00BCD4" />
 	<Color name="RmAddress" foreground="#FF6F00" />
+	<Color name="OkValue" foreground="#00FFFF" />
 
 	<RuleSet ignoreCase="false">
 		
 		<!-- Данные РМ -->
-		<Rule color="RmPoint">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
+		<Rule color="OkParam">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
 		<Rule color="RmAddress">(?&lt;=&gt;\s*)[\d\.]+</Rule>
 
 		<!-- Номер команды -->
@@ -36,6 +37,9 @@
 		<Span color="Comment" begin="{" end="}" />
 		<Span color="Comment" begin="//" end="\n" />
 
+		<!--Обозначения-->
+		<Rule color="OkParam">^[ \t]*[А-Яа-яA-Za-z_0-9]+(?=\s*=)</Rule>
+		<Rule color="OkValue">(?&lt;=\=)[^\r\n]+</Rule>
 		
 
 	</RuleSet>

@@ -24,7 +24,7 @@
                   GridLinesVisibility="None"
                   BorderThickness="0"
                   ColumnHeaderHeight="28"
-                  >
+                  MouseDoubleClick="DataGrid_MouseDoubleClick">
             <DataGrid.Resources>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Background" Value="{StaticResource ErrorListHeaderBackground}"/>
