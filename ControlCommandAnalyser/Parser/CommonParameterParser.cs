@@ -44,7 +44,6 @@ namespace ControlCommandAnalyser.Parser.Common
       return (null, input);
     }
 
-
     /// <summary>
     /// Извлекает значение времени из строки.
     /// Пример: "1c", "2 c".
@@ -53,7 +52,7 @@ namespace ControlCommandAnalyser.Parser.Common
     /// <returns>Кортеж: найденное время (или null) и остаток строки без времени.</returns>
     public static (string? Time, string Remainder) ParseTime(string input)
     {
-      var match = Regex.Match(input, @"(?<value>\d+\s*c)", RegexOptions.IgnoreCase);
+      var match = Regex.Match(input, @"(?<value>\d+\s*[сc])", RegexOptions.IgnoreCase);
       if (match.Success)
       {
         var time = match.Groups["value"].Value.Trim();

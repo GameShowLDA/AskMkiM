@@ -12,9 +12,13 @@
 	<Color name="RmPoint" foreground="#00BCD4" />
 	<Color name="RmAddress" foreground="#FF6F00" />
 	<Color name="OkValue" foreground="#00FFFF" />
+	<Color name="ErrorLine" foreground="#FF2D2D" />
 
 	<RuleSet ignoreCase="false">
 
+		<!-- Вся строка с ! красная -->
+		<Rule color="ErrorLine">^.*!.*$</Rule>
+		
 		<!--Время-->
 		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
 

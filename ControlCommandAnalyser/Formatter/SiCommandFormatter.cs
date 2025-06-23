@@ -23,19 +23,46 @@ namespace ControlCommandAnalyser.Formatter
 
       // Напряжение
       if (!string.IsNullOrWhiteSpace(si.Voltage))
-        yield return $"\t{si.Voltage}";
+      {
+        yield return $"\tНапряжение: {si.Voltage}";
+      }
+      else
+      {
+        yield return $"\tНапряжение не задано!";
+      }
 
       // Время
       if (!string.IsNullOrWhiteSpace(si.Time))
-        yield return $"\t{si.Time}";
+      {
+        yield return $"\tВремя выполнения: {si.Time}";
+      }
+      else
+      {
+        yield return $"\tВремя выполнения не задано!";
+      }
 
       // Сопротивление
       if (!string.IsNullOrWhiteSpace(si.Resistance))
-        yield return $"\t{si.Resistance}";
+      {
+        yield return $"\tСопротивление: {si.Resistance}";
+      }
+      else
+      {
+        yield return $"\tСопротивление не задано!";
+      }
 
-      // Точки
-      foreach (var point in si.Points)
-        yield return $"\t{point}";
+      if (si.Points.Count > 0)
+      {
+        // Точки
+        yield return $"\tЗаданные точки:";
+
+        foreach (var point in si.Points)
+          yield return $"\t\t{point}";
+      }
+      else
+      {
+        yield return $"\tТочки не заданы!";
+      }
 
       yield return string.Empty;
     }
