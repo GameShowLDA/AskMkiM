@@ -52,6 +52,8 @@ namespace AppConfiguration.Base
     /// </summary>
     static public event Action<bool> TextEditorActive;
 
+    public static event Action<UserControl>? TextEditorActivated;
+
     /// <summary>
     /// Событие, которое вызывается, когда закрывается окно типа TextEditor.
     /// </summary>
@@ -233,6 +235,15 @@ namespace AppConfiguration.Base
     static public void RaiseTextEditorActive(bool isTextEditorContainer)
     {
       TextEditorActive?.Invoke(isTextEditorContainer);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTextEditorActivated(UserControl aciveTextEditorUI)
+    {
+      TextEditorActivated?.Invoke(aciveTextEditorUI);
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using DevZest.Windows.Docking;
+﻿using AppConfiguration.Base;
+using DevZest.Windows.Docking;
 using ICSharpCode.AvalonEdit;
 using Microsoft.Win32;
 using System;
@@ -70,12 +71,9 @@ namespace UI.Components.MultiEditorMethods
         var fileType = GetFileType(nameFile);
         var newFileName = ManageFilename(path, nameFile);
 
-        var textEditorModel = new TextEditorModel
-        {
-          FilePath = path,
-          FileName = newFileName
-        };
+        var textEditorModel = new TextEditorModel(path, newFileName);
         var textEditor = CreateTextEditor(textEditorModel, fileContent, fileType);
+        EventAggregator.RaiseTextEditorActivated(textEditor);
 
         ShowNewDockItem(newFileName, textEditorContainer, textEditor);
 
@@ -98,10 +96,7 @@ namespace UI.Components.MultiEditorMethods
     public TextEditorUI CreateTranslationFileAsync()
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
-      var textEditorModel = new TextEditorModel
-      {
-        FileName = fileName
-      };
+      var textEditorModel = new TextEditorModel(fileName);
 
       var textEditor = new TextEditorUI(TextEditorUI.FileType.OPKW, textEditorModel)
       {
@@ -408,6 +403,7 @@ namespace UI.Components.MultiEditorMethods
     {
       var textEditor = new TextEditorUI(fileType, textEditorModel);
       textEditor.Text = fileContent;
+      //EventAggregator.RaiseTextEditorActivated(control);
       return textEditor;
     }
 

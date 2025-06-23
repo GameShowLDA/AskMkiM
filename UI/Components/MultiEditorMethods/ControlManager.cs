@@ -151,6 +151,7 @@ namespace UI.Components.MultiEditorMethods
 
           _pendingHighlights.Remove(fileName);
         }
+        EventAggregator.RaiseTextEditorActivated(control);
       }
 
       bool isTextEditorContainer = control is TextEditorContainer;

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ConsoleUI.ConsoleCommanding.Services;
+using MainWindowProgram.Events;
+using MainWindowProgram.Services;
+using MainWindowProgram.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ConsoleUI.ConsoleCommanding.Services;
-using MainWindowProgram.Events;
-using MainWindowProgram.Services;
 
 namespace MainWindowProgram.Engine
 {
@@ -22,11 +23,11 @@ namespace MainWindowProgram.Engine
     /// <param name="window">Главное окно приложения.</param>
     /// <param name="usb">Сервис USB.</param>
     /// <param name="console">Консольный менеджер.</param>
-    public void Initialize(MainWindow window, UsbServices usb, ConsoleManager console)
+    public void Initialize(MainWindow window, UsbServices usb, ConsoleManager console, TextEditorStatusViewModel statusBarViewModel)
     {
       ApplicationEvents = new ApplicationEventsBinder(
           new SystemEventsBinder(),
-          new UiEventsBinder(window, window.MultiWindow),
+          new UiEventsBinder(window, window.MultiWindow, statusBarViewModel),
           new StateEventsBinder(window, usb, console)
       );
 

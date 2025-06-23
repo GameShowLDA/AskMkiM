@@ -7,6 +7,7 @@
         
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
+        xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 
@@ -348,6 +349,14 @@
                 >
                 Тут будет информационый текст
             </TextBlock>
+
+            <Controls:StatusBarControl
+                Grid.Column="1" 
+                x:Name="StatusBar"
+                HorizontalAlignment="Right"
+                Visibility="Hidden"
+                />
+
             <DefaultGUI:PowerButton
                 Grid.Column="2" 
                 Width="200"

@@ -1,5 +1,7 @@
-﻿using ControlCommandAnalyser;
+﻿using AppConfiguration.Base;
+using ControlCommandAnalyser;
 using DevZest.Windows.Docking;
+using ICSharpCode.AvalonEdit;
 using System.Windows;
 using UI.Components;
 using UI.Components.MultiEditorMethods;
@@ -98,6 +100,7 @@ namespace MainWindowProgram.Services
       {
         var manager = new CommandTranslationManager();
         var models = manager.ParseAllAndDisplay(text, translateEditor);
+        EventAggregator.RaiseTextEditorActivated(editor);
 
         await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
       }
