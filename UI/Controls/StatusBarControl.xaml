@@ -24,6 +24,7 @@
                    TextDecorations="Underline"
                    Cursor="Hand"
                    MouseRightButtonUp="EncodingTextBlock_MouseRightButtonUp"
+                   MouseLeftButtonUp="EncodingTextBlock_MouseLeftButtonUp"
                    Margin="10,0"/>
     </Grid>
 </UserControl>

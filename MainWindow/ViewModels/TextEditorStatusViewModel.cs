@@ -52,10 +52,12 @@ namespace MainWindowProgram.ViewModels
     public Encoding CurrentEncoding { get; private set; } = Encoding.UTF8;
 
     public ICommand ChangeEncodingCommand { get; }
+    public ICommand ToggleEncodingCommand { get; }
 
     public TextEditorStatusViewModel()
     {
       ChangeEncodingCommand = new ChangeEncodingMouseCommand(this);
+      ToggleEncodingCommand = new ToggleEncodingCommandImpl(this);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -143,6 +145,57 @@ namespace MainWindowProgram.ViewModels
         menu.IsOpen = true;
       }
 
+    }
+
+    private class ToggleEncodingCommandImpl : ICommand
+    {
+      private readonly TextEditorStatusViewModel _viewModel;
+      private static readonly Encoding Utf8 = Encoding.UTF8;
+      private static readonly Encoding Dos866 = Encoding.GetEncoding("IBM866");
+
+      public ToggleEncodingCommandImpl(TextEditorStatusViewModel viewModel)
+      {
+        _viewModel = viewModel;
+      }
+
+      public event EventHandler? CanExecuteChanged;
+      public bool CanExecute(object? parameter) => true;
+
+      public void Execute(object? parameter)
+      {
+        var editor = _viewModel.GetActiveEditor?.Invoke();
+        if (editor == null)
+        {
+          MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          return;
+        }
+
+        var current = _viewModel.CurrentEncoding.WebName.ToUpperInvariant();
+        var utfEncoding = Utf8.WebName.ToUpperInvariant();
+        var newEncoding = current == utfEncoding ? Dos866 : Utf8;
+
+        var path = editor.TextEditorModel.FilePath;
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+          MessageBox.Show("Файл не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          return;
+        }
+
+        try
+        {
+          string content = File.ReadAllText(path, newEncoding);
+          editor.TextEditorModel.Encoding = newEncoding;
+          editor.TextEditor.Text = content;
+
+          _viewModel.CurrentEncoding = newEncoding;
+          _viewModel.EncodingName = newEncoding.WebName.ToUpperInvariant();
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show("Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
+                          "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+      }
     }
   }
 }

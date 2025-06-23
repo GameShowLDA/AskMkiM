@@ -133,9 +133,9 @@ namespace UI.Components
       return fileManager.GetActiveTextEditor();
     }
 
-    public bool RemoveActiveTextEditor()
+    public bool RemoveActiveTextEditor(bool isTranslation)
     {
-      return fileManager.RemoveActiveTextEditor();
+      return fileManager.RemoveActiveTextEditor(isTranslation);
     }
 
     public void RemoveControl(EditorType editorType)

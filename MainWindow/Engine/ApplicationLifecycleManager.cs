@@ -23,12 +23,12 @@ namespace MainWindowProgram.Engine
     /// <param name="window">Главное окно приложения.</param>
     /// <param name="usb">Сервис USB.</param>
     /// <param name="console">Консольный менеджер.</param>
-    public void Initialize(MainWindow window, UsbServices usb, ConsoleManager console, TextEditorStatusViewModel statusBarViewModel)
+    public void Initialize(MainWindow window, UsbServices usb, TextEditorStatusViewModel statusBarViewModel)
     {
       ApplicationEvents = new ApplicationEventsBinder(
           new SystemEventsBinder(),
           new UiEventsBinder(window, window.MultiWindow, statusBarViewModel),
-          new StateEventsBinder(window, usb, console)
+          new StateEventsBinder(window, usb)
       );
 
       ApplicationEvents.BindAll();

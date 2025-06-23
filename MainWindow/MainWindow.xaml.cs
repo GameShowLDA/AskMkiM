@@ -89,7 +89,7 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices, App._consoleManager, _statusBarViewModel);
+      lifecycle.Initialize(this, _usbServices, _statusBarViewModel);
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
 

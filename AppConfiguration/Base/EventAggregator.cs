@@ -54,6 +54,8 @@ namespace AppConfiguration.Base
 
     public static event Action<UserControl>? TextEditorActivated;
 
+    public static event Action<bool> TranslatorActive;
+
     /// <summary>
     /// Событие, которое вызывается, когда закрывается окно типа TextEditor.
     /// </summary>
@@ -244,6 +246,15 @@ namespace AppConfiguration.Base
     static public void RaiseTextEditorActivated(UserControl aciveTextEditorUI)
     {
       TextEditorActivated?.Invoke(aciveTextEditorUI);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTranslatorActivated(bool aciveTextEditorUI)
+    {
+      TranslatorActive?.Invoke(aciveTextEditorUI);
     }
 
     /// <summary>

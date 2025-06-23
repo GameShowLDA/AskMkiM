@@ -73,6 +73,12 @@ namespace MainWindowProgram.Events
       EventAggregator.OpenOpk += OnOpenOpk;
 
       EventAggregator.CompareFiles += OnCompareFiles;
+      EventAggregator.TranslatorActive += EventAggregator_TranslatorActive;
+    }
+
+    private void EventAggregator_TranslatorActive(bool obj)
+    {
+      _mainWindow.StatusBar.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnCompareFiles(string firstFilePath, string secondFilePath)
@@ -80,7 +86,6 @@ namespace MainWindowProgram.Events
       var firstFileName = Path.GetFileName(firstFilePath);
       var secondFileName = Path.GetFileName(secondFilePath);
       var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
-      // TODO: сравнение файлов
       _multiWindow.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
     }
 
@@ -99,7 +104,6 @@ namespace MainWindowProgram.Events
       _mainWindow.openFolderMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
-      _mainWindow.StatusBar.Visibility = visibility;
     }
 
 

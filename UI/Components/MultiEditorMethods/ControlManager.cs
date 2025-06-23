@@ -30,9 +30,9 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="tabButton">Вкладка для удаления.</param>
     /// <param name="control">Элемент управления для удаления.</param>
-    public void RemoveControl(OpenFileButton tabButton, UserControl control)
+    public void RemoveControl(OpenFileButton tabButton, UserControl control, bool isTranslation = false)
     {
-      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control) || control is TextEditorUI)
+      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control) || control is TextEditorUI && isTranslation == false)
       {
         int index = -1;
         if (control is TextEditorUI)
@@ -40,17 +40,13 @@ namespace UI.Components.MultiEditorMethods
           if (tabButton.Text == "Текстовый редактор")
           {
             var container = fileManager.UserControls.FirstOrDefault(textEditorContainer => textEditorContainer.GetType() == typeof(TextEditorContainer));
-            if (container is TextEditorContainer)
+            if (container is TextEditorContainer foundContainer)
             {
-              var foundContainer = container as TextEditorContainer;
               var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
               if (foundDockItem != null)
               {
-                if (control is TextEditorUI)
-                {
-                  ShowSaveDialogForControl(foundDockItem);
-                  return;
-                }
+                ShowSaveDialogForControl(foundDockItem);
+                return;
               }
             }
           }
@@ -74,9 +70,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="control">Элемент управления для проверки.</param>
     /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
-    private bool
-
-      ShowSaveDialogForControl(DockItem control)
+    private bool ShowSaveDialogForControl(DockItem control)
     {
       var result = MessageBoxResult.No;
       var saveFileResult = false;
@@ -152,6 +146,7 @@ namespace UI.Components.MultiEditorMethods
           _pendingHighlights.Remove(fileName);
         }
         EventAggregator.RaiseTextEditorActivated(control);
+
       }
 
       bool isTextEditorContainer = control is TextEditorContainer;
@@ -329,6 +324,14 @@ namespace UI.Components.MultiEditorMethods
         if (control.Text == child.Text)
         {
           child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
+          if (control.Text == "Текстовый редактор")
+          {
+            EventAggregator.RaiseTranslatorActivated(true);
+          }
+          else
+          {
+            EventAggregator.RaiseTranslatorActivated(false);
+          }
         }
         else
         {

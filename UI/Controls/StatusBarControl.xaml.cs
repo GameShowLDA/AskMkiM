@@ -28,42 +28,23 @@ namespace UI.Controls
     public interface ICommandProvider
     {
       ICommand ChangeEncodingCommand { get; }
+      ICommand ToggleEncodingCommand { get; }
     }
 
-    //private void EncodingTextBlock_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-    //{
-    //  if (DataContext is ICommandProvider provider && provider.ChangeEncodingCommand.CanExecute(e))
-    //  {
-    //    provider.ChangeEncodingCommand.Execute(e);
-    //  }
-    //}
     private void EncodingTextBlock_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
     {
-      if (DataContext == null)
+      if (DataContext is ICommandProvider provider && provider.ChangeEncodingCommand.CanExecute(e))
       {
-        MessageBox.Show("DataContext is null");
-        return;
+        provider.ChangeEncodingCommand.Execute(e);
       }
+    }
 
-      if (DataContext is not ICommandProvider provider)
+    private void EncodingTextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+      if (DataContext is ICommandProvider provider && provider.ChangeEncodingCommand.CanExecute(e))
       {
-        MessageBox.Show("DataContext is not ICommandProvider");
-        return;
+        provider.ToggleEncodingCommand.Execute(e);
       }
-
-      if (provider.ChangeEncodingCommand == null)
-      {
-        MessageBox.Show("ChangeEncodingCommand is null");
-        return;
-      }
-
-      if (!provider.ChangeEncodingCommand.CanExecute(e))
-      {
-        MessageBox.Show("Command can't execute");
-        return;
-      }
-
-      provider.ChangeEncodingCommand.Execute(e);
     }
 
   }

@@ -75,7 +75,7 @@ namespace MainWindowProgram.Services
       {
         string text = editor.Text;
 
-        if (_multiWindow.RemoveActiveTextEditor())
+        if (_multiWindow.RemoveActiveTextEditor(true))
         {
           await CreateNewTranslator(editor, text);
         }
