@@ -1,9 +1,12 @@
 ﻿using ControlCommandAnalyser;
+using DevZest.Windows.Docking;
 using System.Windows;
+using UI.Components;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.TextEditor;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace MainWindowProgram.Services
 {
@@ -42,33 +45,26 @@ namespace MainWindowProgram.Services
     public async Task StartTranslationAsync()
     {
       TextEditorUI editor = await _multiWindow.GetActiveTextEditor();
-      var translationContainer = await _multiWindow.GetActiveTranslateContainer();
-      if (editor == null)
+      var translationContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+
+      if (editor == null && translationContainer != null)
       {
-        editor = translationContainer.GetLeftEditor();
-        if (editor == null)
+        var dockManager = translationContainer.GetDockControl();
+        if (dockManager != null)
         {
-          MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-          return;
-        }
-        else
-        {
-          string text = editor.Text;
-          var translateEditor = _fileService.CreateTranslationFileAsync();
-
-          var manager = new CommandTranslationManager();
-          var models = manager.ParseAllAndDisplay(text, translateEditor);
-
-          if (translationContainer != null)
+          var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+          if (foundDockItem != null && foundDockItem.Content is TranslatorItem)
           {
-            translationContainer.SetRighttEditor(translateEditor);
-            translationContainer.ErrorClear();
-            foreach (var model in models)
+            editor = (foundDockItem.Content as TranslatorItem).GetLeftEditor();
+            if (editor == null)
             {
-              if (model.Errors.Count > 0)
-              {
-                translationContainer.SetError(model.Errors);
-              }
+              MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              return;
+            }
+            else
+            {
+              EditExistingTranslator(editor, foundDockItem);
+
             }
           }
         }
@@ -76,31 +72,52 @@ namespace MainWindowProgram.Services
       else
       {
         string text = editor.Text;
+
         if (_multiWindow.RemoveActiveTextEditor())
         {
-          var translateEditor = _fileService.CreateTranslationFileAsync();
-
-          var manager = new CommandTranslationManager();
-          var models = manager.ParseAllAndDisplay(text, translateEditor);
-
-
-          if (translationContainer != null)
-          {
-            translationContainer.SetLeftEditor(editor);
-            translationContainer.SetRighttEditor(translateEditor);
-
-            foreach (var model in models)
-            {
-              if (model.Errors.Count > 0)
-              { 
-                translationContainer.SetError(model.Errors);
-              }
-            }
-          }
+          await CreateNewTranslator(editor, text);
         }
-        else
+      }
+    }
+
+
+
+    private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
+    {
+      string text = editor.Text;
+      var translateEditor = _fileService.CreateTranslationFileAsync();
+
+      var manager = new CommandTranslationManager();
+      var models = manager.ParseAllAndDisplay(text, translateEditor);
+      var item = (foundDockItem.Content as TranslatorItem);
+      item.SetRightEditor(translateEditor);
+      item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
+      item.ErrorClear();
+      foreach (var model in models)
+      {
+        if (model.Errors.Count > 0)
         {
-          throw new Exception("Не найдено активное окно при трансляции");
+          item.SetError(model.Errors);
+        }
+      }
+    }
+
+    private async Task CreateNewTranslator(TextEditorUI editor, string text)
+    {
+      var translateEditor = _fileService.CreateTranslationFileAsync();
+      if (translateEditor != null)
+      {
+        var manager = new CommandTranslationManager();
+        var models = manager.ParseAllAndDisplay(text, translateEditor);
+
+        var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
+        item.ErrorClear();
+        foreach (var model in models)
+        {
+          if (model.Errors.Count > 0)
+          {
+            item.SetError(model.Errors);
+          }
         }
       }
     }

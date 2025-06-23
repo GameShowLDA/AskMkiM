@@ -6,7 +6,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
+using UI.Controls;
 using UI.Controls.TextEditor;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static UI.Components.Invoke.OpenFileButton;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -59,7 +61,6 @@ namespace UI.Components.MultiEditorMethods
         }
         if (control is TextEditorContainer)
         {
-          // ShowSaveDialogForControl(control);
           HandleClosingEvents(control, tabButton);
         }
 
@@ -192,18 +193,13 @@ namespace UI.Components.MultiEditorMethods
     private void AddFileCompareControl(string header, UserControl control)
     {
       var fileManager = new FileManager(multiEditorControl);
-      var textEditorContainer = fileManager.GetTextEditorContainer();
+      var textEditorContainer = fileManager.GetContainer(EditorType.TextEditor);
       if (textEditorContainer == null)
       {
-        textEditorContainer = fileManager.CreateTextEditorContainer();
+        textEditorContainer = fileManager.CreateContainer(EditorType.TextEditor);
       }
-      var dockItem = new DockItem
-      {
-        Title = header,
-        TabText = header,
-        Content = control
-      };
-      fileManager.ShowDockItem(textEditorContainer, dockItem);
+
+      fileManager.ShowNewDockItem(header, textEditorContainer, control);
     }
 
     /// <summary>
@@ -325,7 +321,7 @@ namespace UI.Components.MultiEditorMethods
     /// Отображает указанный элемент управления, скрывая остальные.
     /// </summary>
     /// <param name="control">Элемент управления для отображения.</param>
-    private void ActivePage(OpenFileButton control, MultiEditorControl multiEditorControl)
+    public void ActivePage(OpenFileButton control, MultiEditorControl multiEditorControl)
     {
       foreach (OpenFileButton child in multiEditorControl.TopPanel.Children)
       {

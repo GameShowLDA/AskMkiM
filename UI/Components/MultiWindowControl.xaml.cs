@@ -1,4 +1,5 @@
 ﻿using AppConfiguration.Base;
+using DevZest.Windows.Docking;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -164,10 +165,14 @@ namespace UI.Components
       return MultiEditor.GetActiveTextEditor();
     }
 
-
     public bool RemoveActiveTextEditor()
     {
       return MultiEditor.RemoveActiveTextEditor();
+    }
+
+    public void RemoveControl(EditorType editorType)
+    {
+      MultiEditor.RemoveControl(editorType);
     }
 
     /// <summary>
@@ -623,14 +628,26 @@ namespace UI.Components
       }
     }
 
-    public TranslatorItem GetActiveTranslateContainer()
+    public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
     {
-      return MultiEditor.GetActiveTranslatorContainer();
+      return MultiEditor.GetActiveTextEditorContainer(editorType);
     }
 
-    public TextEditorContainer GetActiveTextEditorContainer()
+    public Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      return MultiEditor.GetActiveTextEditorContainer();
+      return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
+    }
+
+    public void OpenFolder()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+        return;
+      }
+
+      MultiEditor.OpenFolder();
     }
   }
 }

@@ -13,6 +13,7 @@ using UI.Components.MultiEditorMethods;
 using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
 using UI.Controls;
+using DevZest.Windows.Docking;
 
 namespace UI.Components
 {
@@ -137,14 +138,25 @@ namespace UI.Components
       return fileManager.RemoveActiveTextEditor();
     }
 
+    public void RemoveControl(EditorType editorType)
+    {
+      var control = fileManager.GetContainer(editorType);
+      var page = fileManager.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
+      if (control != null && page != null)
+      {
+        controlManager.RemoveControl(page, control);
+      }
+    }
+
     /// <summary>
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
-    public TextEditorContainer GetActiveTextEditorContainer()
+    public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
     {
-      return fileManager.GetTextEditorContainer();
+      return fileManager.GetContainer(editorType);
     }
+
 
     /// <summary>
     /// Получает активный текстовый редактор.
@@ -248,7 +260,7 @@ namespace UI.Components
         if (activeTextEditorContainer != null)
         {
           var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab =>
-            tab.IsActiveItem==true);
+            tab.IsActiveItem == true);
           return saveFileManager.SaveFile(activeDockItem);
         }
       }
@@ -353,9 +365,14 @@ namespace UI.Components
       SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
     }
 
-    internal TranslatorItem GetActiveTranslatorContainer()
+    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      return fileManager.GetActiveTranslatorContainer();
+      return fileManager.AddTranslatorItem(editor, translateEditor, editorType);
+    }
+
+    internal void OpenFolder()
+    {
+      fileManager.OpenFolder();
     }
   }
 }

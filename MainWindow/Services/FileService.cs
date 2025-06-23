@@ -29,7 +29,7 @@ namespace MainWindowProgram.Services
     private readonly MainWindow _mainWindow;
 
     /// <summary>
-    /// Делегат, предоставляющий актуальное знанчение состояния блокировки приложения.
+    /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
 
@@ -135,7 +135,8 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      if (_isSearchWindowOpen == false)
+      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+      if (_isSearchWindowOpen == false && activeEditor != null)
       {
         _mainWindow.SearchWindow.Owner = _mainWindow;
         _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
@@ -143,12 +144,18 @@ namespace MainWindowProgram.Services
         _isSearchWindowOpen = true;
       }
 
-      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
-      string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-      if (!string.IsNullOrEmpty(selectedText))
+      if (activeEditor != null)
       {
-        EventAggregator.RaiseSearchTextRequested(selectedText);
+        string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          EventAggregator.RaiseSearchTextRequested(selectedText);
+        }
+      }
+      else
+      {
+        return;
       }
     }
 
@@ -209,6 +216,12 @@ namespace MainWindowProgram.Services
       {
         return _multiWindow.CreateTranslationFileAsync();
       }
+    }
+
+    internal async Task OpenFolder()
+    {
+      await _multiWindow.OpenFolder();
+
     }
   }
 }

@@ -88,6 +88,7 @@ namespace MainWindowProgram.Events
       _mainWindow.fileActionsSeparator.Visibility = visibility;
       _mainWindow.saveMenuItem.Visibility = visibility;
       _mainWindow.saveAsMenuItem.Visibility = visibility;
+      _mainWindow.openFolderMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
     }

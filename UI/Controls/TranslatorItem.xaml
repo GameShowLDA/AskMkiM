@@ -37,7 +37,7 @@
                     BorderThickness="0,0,0,1"
                     Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
                 <TextBlock 
-         x:Name="FirstVerticalFileName"
+         x:Name="FirstFileName"
          Text="Сравнение файлов"
          Margin="10,5"
          FontWeight="SemiBold"
@@ -61,7 +61,7 @@
                  Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
 
                 <TextBlock 
-                     x:Name="SecondVerticalFileName"
+                     x:Name="SecondFileName"
                      Text="Сравнение файлов"
                      Margin="10,5"
                      FontWeight="SemiBold"

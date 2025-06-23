@@ -6,6 +6,7 @@ using ICSharpCode.AvalonEdit;
 using UI.Controls.ErrorList;
 using UI.Controls.TextEditor;
 using Utilities.Models;
+using System;
 
 namespace UI.Controls
 {
@@ -73,7 +74,7 @@ namespace UI.Controls
     }
 
 
-    public void SetRighttEditor(TextEditorUI textEditorUI)
+    public void SetRightEditor(TextEditorUI textEditorUI)
     {
       if (RightBox == null || textEditorUI == null)
       {
@@ -119,6 +120,24 @@ namespace UI.Controls
       return LeftBox.Children[0] as TextEditorUI;
     }
 
+    public string GetLeftEditorName()
+    {
+      return FirstFileName.Text;
+    }
 
+    public string GetRightEditorName()
+    {
+      return SecondFileName.Text;
+    }
+
+    public void SetRightEditorName(string newText)
+    {
+      SecondFileName.Text = newText;
+    }
+
+    public void SetLeftEditorName(string newText)
+    {
+      FirstFileName.Text = newText;
+    }
   }
 }
