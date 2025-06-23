@@ -1,3 +1,4 @@
+using AppConfiguration.SystemState;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -5,6 +6,10 @@ using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
+using UI.Controls;
 using UI.Controls.Search;
 using static Utilities.LoggerUtility;
 
@@ -55,6 +60,8 @@ namespace MainWindowProgram
     /// </summary>
     public SearchWindow SearchWindow;
 
+    private readonly TextEditorStatusViewModel _statusBarViewModel = new();
+
     #endregion
 
     /// <summary>
@@ -69,6 +76,9 @@ namespace MainWindowProgram
       _viewModel = vm;
       _usbServices = usb;
 
+      StatusBar.DataContext = _statusBarViewModel;
+      _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
+
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
     }
@@ -79,7 +89,7 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices);
+      lifecycle.Initialize(this, _usbServices, _statusBarViewModel);
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
 

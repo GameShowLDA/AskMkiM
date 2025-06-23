@@ -1,4 +1,5 @@
-﻿using DevZest.Windows.Docking;
+﻿using AppConfiguration.Base;
+using DevZest.Windows.Docking;
 using ICSharpCode.AvalonEdit;
 using Microsoft.Win32;
 using System;
@@ -16,6 +17,7 @@ using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
+using Ude;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -60,7 +62,9 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         string fileContent = string.Empty;
-        fileContent = GetFileContent(path, nameFile, fileContent);
+        var fileData = GetFileContent(path, nameFile, fileContent).ToTuple();
+        fileContent = fileData.Item1;
+        var encoding = fileData.Item2;
         TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
         if (textEditorContainer == null)
         {
@@ -70,12 +74,9 @@ namespace UI.Components.MultiEditorMethods
         var fileType = GetFileType(nameFile);
         var newFileName = ManageFilename(path, nameFile);
 
-        var textEditorModel = new TextEditorModel
-        {
-          FilePath = path,
-          FileName = newFileName
-        };
+        var textEditorModel = new TextEditorModel(path, newFileName, encoding);
         var textEditor = CreateTextEditor(textEditorModel, fileContent, fileType);
+        EventAggregator.RaiseTextEditorActivated(textEditor);
 
         ShowNewDockItem(newFileName, textEditorContainer, textEditor);
 
@@ -92,16 +93,18 @@ namespace UI.Components.MultiEditorMethods
     {
       var textEditorContainer = new TextEditorContainer();
       AddFileToControlManager(editorType.ToString(), textEditorContainer);
+      if (editorType == EditorType.TextEditor)
+      {
+        
+      }
+
       return textEditorContainer;
     }
 
     public TextEditorUI CreateTranslationFileAsync()
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
-      var textEditorModel = new TextEditorModel
-      {
-        FileName = fileName
-      };
+      var textEditorModel = new TextEditorModel(fileName);
 
       var textEditor = new TextEditorUI(TextEditorUI.FileType.OPKW, textEditorModel)
       {
@@ -125,7 +128,7 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    public bool RemoveActiveTextEditor()
+    public bool RemoveActiveTextEditor(bool isTranslation)
     {
       TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
       var foundDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
@@ -133,7 +136,7 @@ namespace UI.Components.MultiEditorMethods
       {
         var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
         var foundPage = OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
-        controlManager.RemoveControl(foundPage, textEditor);
+        controlManager.RemoveControl(foundPage, textEditor, isTranslation);
         FilePaths.Remove(foundDockItem.TabText);
 
         bool closed = foundDockItem.Close();
@@ -316,31 +319,50 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private string GetFileContent(string path, string nameFile, string fileContent)
+    private Encoding DetectEncoding(string filePath)
     {
-      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-      if (nameFile.ToLower().Contains(".pk") && !nameFile.ToLower().Contains(".pkw"))
+      using var fileStream = File.OpenRead(filePath);
+      var detector = new CharsetDetector();
+      detector.Feed(fileStream);
+      detector.DataEnd();
+
+      if (detector.Charset != null)
       {
-        var content = new List<string>();
-        foreach (string line in File.ReadLines(path, Encoding.GetEncoding(866)))
+        try
         {
-          if (!string.IsNullOrEmpty(line))
-          {
-            content.Add(line);
-          }
+          return Encoding.GetEncoding(detector.Charset);
         }
-        if (content.Count > 0)
+        catch
         {
-          fileContent = string.Join("\n", content);
+          // Fallback в случае недоподдерживаемой кодировки
+          return Encoding.UTF8;
         }
-      }
-      else
-      {
-        fileContent = ReadFileContent(path);
       }
 
-      return fileContent;
+      // Если определить не удалось — используем по умолчанию
+      return Encoding.UTF8;
     }
+
+    private (string, Encoding) GetFileContent(string path, string nameFile, string fileContent)
+    {
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+      Encoding encoding = DetectEncoding(path);
+
+      var content = new List<string>();
+      foreach (string line in File.ReadLines(path, encoding))
+      {
+        if (!string.IsNullOrEmpty(line))
+        {
+          content.Add(line);
+        }
+      }
+
+      fileContent = content.Count > 0 ? string.Join("\n", content) : string.Empty;
+
+      return (fileContent, encoding);
+    }
+
 
     public string GetDifferenceBetweenPaths(string existingPath, string newPath)
     {
@@ -411,6 +433,7 @@ namespace UI.Components.MultiEditorMethods
     {
       var textEditor = new TextEditorUI(fileType, textEditorModel);
       textEditor.Text = fileContent;
+      //EventAggregator.RaiseTextEditorActivated(control);
       return textEditor;
     }
 

@@ -100,9 +100,9 @@ namespace MainWindowProgram.Services
       return Task.FromResult(foundEditor);
     }
 
-    public bool RemoveActiveTextEditor()
+    public bool RemoveActiveTextEditor(bool isTranslation)
     {
-      return _multiWindowControl.RemoveActiveTextEditor();
+      return _multiWindowControl.RemoveActiveTextEditor(isTranslation);
     }
 
     public void RemoveControl(EditorType editorType)

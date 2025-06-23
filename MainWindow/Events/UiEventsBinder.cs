@@ -1,16 +1,18 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media.Effects;
-using AppConfiguration.Base;
+﻿using AppConfiguration.Base;
 using ICSharpCode.AvalonEdit;
-using UI.Components;
-using UI.Controls.Search;
-using static UI.Components.Invoke.OpenFileButton;
-using UI.Controls.TextEditor;
-using System.Windows.Controls;
 using MainWindowProgram.Services;
+using MainWindowProgram.ViewModels;
+using System;
 using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media.Effects;
+using UI.Components;
 using UI.Components.FileComparerControls;
+using UI.Controls.Search;
+using UI.Controls.TextEditor;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Events
 {
@@ -30,6 +32,10 @@ namespace MainWindowProgram.Events
     /// </summary>
     private readonly MultiWindowControl _multiWindow;
 
+    private readonly TextEditorStatusViewModel _statusBarViewModel;
+
+    private TextEditor? _lastEditorControl;
+
     /// <summary>
     /// Свойство, указывающее, открыто ли окно поиска.
     /// </summary>
@@ -39,10 +45,11 @@ namespace MainWindowProgram.Events
     /// Инициализирует новый экземпляр класса <see cref="UiEventsBinder"/>.
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
-    public UiEventsBinder(MainWindow mainWindow, MultiWindowControl multiWindow)
+    public UiEventsBinder(MainWindow mainWindow, MultiWindowControl multiWindow, TextEditorStatusViewModel statusBarViewModel)
     {
       _mainWindow = mainWindow;
       _multiWindow = multiWindow;
+      _statusBarViewModel = statusBarViewModel;
     }
 
     /// <summary>
@@ -51,6 +58,7 @@ namespace MainWindowProgram.Events
     public void Bind()
     {
       EventAggregator.TextEditorActive += OnTextEditorActive;
+      EventAggregator.TextEditorActivated += OnTextEditorActivated;
       EventAggregator.TextEditorContainerClosing += OnTextEditorClosing;
 
       EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
@@ -65,6 +73,12 @@ namespace MainWindowProgram.Events
       EventAggregator.OpenOpk += OnOpenOpk;
 
       EventAggregator.CompareFiles += OnCompareFiles;
+      EventAggregator.TranslatorActive += EventAggregator_TranslatorActive;
+    }
+
+    private void EventAggregator_TranslatorActive(bool obj)
+    {
+      _mainWindow.StatusBar.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnCompareFiles(string firstFilePath, string secondFilePath)
@@ -72,7 +86,6 @@ namespace MainWindowProgram.Events
       var firstFileName = Path.GetFileName(firstFilePath);
       var secondFileName = Path.GetFileName(secondFilePath);
       var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
-      // TODO: сравнение файлов
       _multiWindow.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
     }
 
@@ -91,6 +104,42 @@ namespace MainWindowProgram.Events
       _mainWindow.openFolderMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
+    }
+
+
+    public void OnTextEditorActivated(UserControl editor)
+    {
+      if (editor is not TextEditorUI textEditorUI || textEditorUI.TextEditor == null)
+        return;
+
+      var textEditor = textEditorUI.TextEditor;
+
+      if (_lastEditorControl != null)
+      {
+        _lastEditorControl.TextChanged -= OnTextChanged;
+        _lastEditorControl.TextArea.Caret.PositionChanged -= OnCaretPositionChanged;
+      }
+
+      _lastEditorControl = textEditor;
+
+      textEditor.TextChanged += OnTextChanged;
+      textEditor.TextArea.Caret.PositionChanged += OnCaretPositionChanged;
+
+      _statusBarViewModel.LineCount = textEditor.Document.LineCount;
+      _statusBarViewModel.Line = textEditor.TextArea.Caret.Line;
+      _statusBarViewModel.Column = textEditor.TextArea.Caret.Column;
+      _statusBarViewModel.EncodingName = textEditorUI.TextEditorModel.Encoding?.WebName.ToUpperInvariant() ?? "UTF-8";
+
+      void OnTextChanged(object? sender, EventArgs e)
+      {
+        _statusBarViewModel.LineCount = textEditor.Document.LineCount;
+      }
+
+      void OnCaretPositionChanged(object? sender, EventArgs e)
+      {
+        _statusBarViewModel.Line = textEditor.TextArea.Caret.Line;
+        _statusBarViewModel.Column = textEditor.TextArea.Caret.Column;
+      }
     }
 
     /// <summary>
