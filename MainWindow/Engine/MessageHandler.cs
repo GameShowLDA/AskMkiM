@@ -90,22 +90,25 @@ namespace MainWindowProgram
       await Task.Delay(2000);
       try
       {
-        await Application.Current.Dispatcher.InvokeAsync(async () =>
+        if (Application.Current != null)
         {
-          if (!string.IsNullOrEmpty(_infoBlock.Text))
+          await Application.Current.Dispatcher.InvokeAsync(async () =>
           {
-            timer.Stop();
-            while (_infoBlock.Opacity > 0)
+            if (!string.IsNullOrEmpty(_infoBlock.Text))
             {
-              _infoBlock.Opacity -= 0.1;
-              await Task.Delay(5);
-            }
+              timer.Stop();
+              while (_infoBlock.Opacity > 0)
+              {
+                _infoBlock.Opacity -= 0.1;
+                await Task.Delay(5);
+              }
 
-            _infoBlock.Text = string.Empty;
-            await Task.Delay(10);
-            _infoBlock.Opacity = 1;
-          }
-        });
+              _infoBlock.Text = string.Empty;
+              await Task.Delay(10);
+              _infoBlock.Opacity = 1;
+            }
+          });
+        }
       }
       catch (Exception)
       {
