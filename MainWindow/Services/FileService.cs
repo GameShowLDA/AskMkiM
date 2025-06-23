@@ -29,7 +29,7 @@ namespace MainWindowProgram.Services
     private readonly MainWindow _mainWindow;
 
     /// <summary>
-    /// Делегат, предоставляющий актуальное знанчение состояния блокировки приложения.
+    /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
 
@@ -216,6 +216,12 @@ namespace MainWindowProgram.Services
       {
         return _multiWindow.CreateTranslationFileAsync();
       }
+    }
+
+    internal async Task OpenFolder()
+    {
+      await _multiWindow.OpenFolder();
+
     }
   }
 }

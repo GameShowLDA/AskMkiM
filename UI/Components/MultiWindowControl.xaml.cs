@@ -637,5 +637,17 @@ namespace UI.Components
     {
       MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
+
+    public void OpenFolder()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+        return;
+      }
+
+      MultiEditor.OpenFolder();
+    }
   }
 }

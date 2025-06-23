@@ -370,5 +370,9 @@ namespace UI.Components
       fileManager.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
+    internal void OpenFolder()
+    {
+      fileManager.OpenFolder();
+    }
   }
 }

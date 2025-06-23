@@ -125,5 +125,11 @@ namespace MainWindowProgram.Services
     {
       _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }
+
+    internal Task OpenFolder()
+    {
+      _multiWindowControl.OpenFolder();
+      return Task.CompletedTask;
+    }
   }
 }

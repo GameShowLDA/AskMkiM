@@ -1,5 +1,8 @@
 ﻿using DevZest.Windows.Docking;
+using ICSharpCode.AvalonEdit;
+using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -485,18 +488,6 @@ namespace UI.Components.MultiEditorMethods
       return false;
     }
 
-    /// <summary>
-    /// Конструктор для инициализации файлового менеджера.
-    /// </summary>
-    /// <param name="multiEditorControl">Экземпляр класса MultiEditorControl.</param>
-    public FileManager(MultiEditorControl multiEditorControl)
-    {
-      this.FilePaths = new Dictionary<string, string>();
-      this.UserControls = new List<UserControl>();
-      this.OpenPages = new List<OpenFileButton>();
-      this.multiEditorControl = multiEditorControl;
-    }
-
     private FileType GetFileType(string fileName)
     {
       if (string.IsNullOrEmpty(fileName))
@@ -530,6 +521,62 @@ namespace UI.Components.MultiEditorMethods
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
+    }
+
+    internal void OpenFolder()
+    {
+      TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
+      if (textEditorContainer == null)
+      {
+        textEditorContainer = GetContainer(EditorType.Translator);
+        if (textEditorContainer == null)
+        {
+          return;
+        }
+        else
+        {
+          var translatorEditor = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+          if (translatorEditor != null && translatorEditor.Content is TranslatorItem translator)
+          {
+            var leftEditor = translator.GetLeftEditor();
+            OpenFileFolder(leftEditor.TextEditorModel.FilePath);
+          }
+        }
+      }
+      else
+      {
+        var activeTextEditor = textEditorContainer.GetTextEditor();
+        if (activeTextEditor != null)
+        {
+          OpenFileFolder(activeTextEditor.TextEditorModel.FilePath);
+        }
+      }
+    }
+
+    private static void OpenFileFolder(string path)
+    {
+      string folder = Path.GetDirectoryName(path);
+      if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+      {
+        Process.Start(new ProcessStartInfo
+        {
+          FileName = folder,
+          UseShellExecute = true,
+          Verb = "open"
+        });
+      }
+    }
+
+    /// <summary>
+    /// Конструктор для инициализации файлового менеджера.
+    /// </summary>
+    /// <param name="multiEditorControl">Экземпляр класса MultiEditorControl.</param>
+    public FileManager(MultiEditorControl multiEditorControl)
+    {
+      this.FilePaths = new Dictionary<string, string>();
+      this.UserControls = new List<UserControl>();
+      this.OpenPages = new List<OpenFileButton>();
+      this.multiEditorControl = multiEditorControl;
     }
   }
 }

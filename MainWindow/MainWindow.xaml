@@ -173,6 +173,7 @@
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
                     <MenuItem Header="Сохранить" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
                     <MenuItem Header="Сохранить как" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
+                    <MenuItem Header="Открыть папку в проводнике" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}"/>
                     <MenuItem Header="Печать" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
                     <MenuItem Header="Поиск" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
 

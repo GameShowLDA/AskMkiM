@@ -88,6 +88,7 @@ namespace MainWindowProgram.Services
       var models = manager.ParseAllAndDisplay(text, translateEditor);
 
       (foundDockItem.Content as TranslatorItem).SetRightEditor(translateEditor);
+      (foundDockItem.Content as TranslatorItem).SetRightEditorName(translateEditor.TextEditorModel.FileName);
     }
 
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
