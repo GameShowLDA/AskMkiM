@@ -8,7 +8,7 @@
         <Grid Width="100" Height="100">
             <Ellipse Fill="#F44336" Width="100" Height="100"/>
             <!-- Крестик -->
-            <Path Stroke="White" StrokeThickness="16" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+            <Path Stroke="#1E1E1E" StrokeThickness="16" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                   Data="M 30,30 L 70,70 M 70,30 L 30,70"/>
         </Grid>
     </Viewbox>
