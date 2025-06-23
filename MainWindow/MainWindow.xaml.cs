@@ -1,16 +1,16 @@
 using AppConfiguration.SystemState;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
 using MainWindowProgram.Engine;
-using MainWindowProgram.Events;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
- using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls;
 using UI.Controls.Search;
-using Utilities.USB;
 using static Utilities.LoggerUtility;
 
 namespace MainWindowProgram
@@ -116,6 +116,11 @@ namespace MainWindowProgram
         LogException($"Ошибка выполнения программы", ex);
         MessageBox.Show($"Ошибка: {ex.Message}");
       }
+    }
+
+    public WindowState WindowStateStatus
+    {
+      get => this.WindowState;
     }
   }
 }

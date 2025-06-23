@@ -232,7 +232,7 @@ namespace UI.Components.MultiEditorMethods
       ShowDockItem(textEditorContainer, dockItem);
     }
 
-    private async void ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor, TextEditorUI translatorEditor)
+    private async Task<TranslatorItem> ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor, TextEditorUI translatorEditor)
     {
       try
       {
@@ -270,11 +270,14 @@ namespace UI.Components.MultiEditorMethods
         await Task.Delay(1).ConfigureAwait(true);
 
         ShowDockItem(textEditorContainer, dockItem);
+
+        return translatorItem;
       }
       catch (Exception ex)
       {
         MessageBox.Show($"Системная ошибка: {ex}", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         LogError($"Системная ошибка: {ex}");
+        return null;
       }
     }
 
@@ -499,7 +502,7 @@ namespace UI.Components.MultiEditorMethods
       };
     }
 
-    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    internal async Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       try
       {
@@ -508,14 +511,16 @@ namespace UI.Components.MultiEditorMethods
         {
           textEditorContainer = CreateContainer(editorType);
         }
-        ShowNewDockItem($"Трансляция {editor.TextEditorModel.FileName}", textEditorContainer, editor, translateEditor);
+        var item = await ShowNewDockItem($"Трансляция {editor.TextEditorModel.FileName}", textEditorContainer, editor, translateEditor);
 
         ShowControl(textEditorContainer, EditorType.Translator);
+        return item;
       }
       catch (Exception ex)
       {
         MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
+        return null;
       }
     }
 

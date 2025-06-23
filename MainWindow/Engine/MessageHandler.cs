@@ -88,22 +88,32 @@ namespace MainWindowProgram
     private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
     {
       await Task.Delay(2000);
-      await Application.Current.Dispatcher.InvokeAsync(async () =>
+      try
       {
-        if (!string.IsNullOrEmpty(_infoBlock.Text))
+        if (Application.Current != null)
         {
-          timer.Stop();
-          while (_infoBlock.Opacity > 0)
+          await Application.Current.Dispatcher.InvokeAsync(async () =>
           {
-            _infoBlock.Opacity -= 0.1;
-            await Task.Delay(5);
-          }
+            if (!string.IsNullOrEmpty(_infoBlock.Text))
+            {
+              timer.Stop();
+              while (_infoBlock.Opacity > 0)
+              {
+                _infoBlock.Opacity -= 0.1;
+                await Task.Delay(5);
+              }
 
-          _infoBlock.Text = string.Empty;
-          await Task.Delay(10);
-          _infoBlock.Opacity = 1;
+              _infoBlock.Text = string.Empty;
+              await Task.Delay(10);
+              _infoBlock.Opacity = 1;
+            }
+          });
         }
-      });
+      }
+      catch (Exception)
+      {
+
+      }
     }
   }
 }

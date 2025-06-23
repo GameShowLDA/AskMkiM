@@ -43,7 +43,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Неверный номер конденсатора!");
+      LogError("Неверный номер конденсатора!", isDeviceLog: true);
       return false;
     }
 
@@ -68,7 +68,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Неверный номер конденсатора!");
+      LogError("Неверный номер конденсатора!", isDeviceLog: true);
       return false;
     }
   }

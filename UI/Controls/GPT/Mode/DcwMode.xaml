@@ -27,8 +27,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- MANU_DCW_VOLTAGE -->
-        <TextBlock Grid.Row="0" Text="Напряжение DCW (0.100 - 6.000 кВ):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <Slider x:Name="VoltageSlider" Style="{StaticResource CustomSliderStyle}" Grid.Row="0" Grid.Column="1" Margin="10" Minimum="0.1" Maximum="6" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="VoltageSlider_ValueChanged" />
+        <TextBlock Grid.Row="0" Text="Напряжение DCW (100 - 6000 В):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
+        <Slider x:Name="VoltageSlider" Style="{StaticResource CustomSliderStyle}" Grid.Row="0" Grid.Column="1" Margin="10" Minimum="100" Maximum="6000" TickFrequency="100" IsSnapToTickEnabled="True" ValueChanged="VoltageSlider_ValueChanged" />
         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Value, ElementName=VoltageSlider, StringFormat='Выбранное напряжение: {0:F3} кВ'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
 
         <!-- MANU_DCW_CHISET -->

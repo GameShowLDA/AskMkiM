@@ -66,6 +66,7 @@ namespace MainWindowProgram.Services
             else
             {
               EditExistingTranslator(editor, foundDockItem);
+
             }
           }
         }
@@ -81,6 +82,8 @@ namespace MainWindowProgram.Services
       }
     }
 
+
+
     private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
       string text = editor.Text;
@@ -88,9 +91,17 @@ namespace MainWindowProgram.Services
 
       var manager = new CommandTranslationManager();
       var models = manager.ParseAllAndDisplay(text, translateEditor);
-
-      (foundDockItem.Content as TranslatorItem).SetRightEditor(translateEditor);
-      (foundDockItem.Content as TranslatorItem).SetRightEditorName(translateEditor.TextEditorModel.FileName);
+      var item = (foundDockItem.Content as TranslatorItem);
+      item.SetRightEditor(translateEditor);
+      item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
+      item.ErrorClear();
+      foreach (var model in models)
+      {
+        if (model.Errors.Count > 0)
+        {
+          item.SetError(model.Errors);
+        }
+      }
     }
 
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
@@ -102,7 +113,15 @@ namespace MainWindowProgram.Services
         var models = manager.ParseAllAndDisplay(text, translateEditor);
         EventAggregator.RaiseTextEditorActivated(editor);
 
-        await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
+        var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
+        item.ErrorClear();
+        foreach (var model in models)
+        {
+          if (model.Errors.Count > 0)
+          {
+            item.SetError(model.Errors);
+          }
+        }
       }
     }
   }

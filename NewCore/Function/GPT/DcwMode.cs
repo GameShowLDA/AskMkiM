@@ -27,7 +27,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetModeAsync()
     {
-      LogInformation("Устанавливаем режим DCW на GPT-79904");
+      LogInformation("Устанавливаем режим DCW на GPT-79904", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -44,7 +44,7 @@ namespace NewCore.Function.GPT
         return (true, string.Empty);
       }
 
-      LogWarning("Повторная попытка установки режима DCW.");
+      LogWarning("Повторная попытка установки режима DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       response = await GetModeAsync();
       if (response.Trim().Equals("DCW", StringComparison.OrdinalIgnoreCase))
@@ -69,7 +69,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetVoltageAsync(double value)
     {
-      LogInformation($"Устанавливаем напряжение DCW: {value:F3} В");
+      LogInformation($"Устанавливаем напряжение DCW: {value:F3} В", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -88,7 +88,7 @@ namespace NewCore.Function.GPT
         return (true, string.Empty);
       }
 
-      LogWarning("Повторная попытка установки напряжения DCW.");
+      LogWarning("Повторная попытка установки напряжения DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actualKv = await GetVoltageAsync();
       if (actualKv.HasValue && Math.Abs(actualKv.Value - kvValue) < 0.01)
@@ -108,7 +108,7 @@ namespace NewCore.Function.GPT
       if (double.TryParse(response.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
         return result;
 
-      LogError($"Ошибка при чтении напряжения DCW: '{response}' не удалось распарсить.");
+      LogError($"Ошибка при чтении напряжения DCW: '{response}' не удалось распарсить.", isDeviceLog: true);
       return null;
     }
 
@@ -118,7 +118,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetHighCurrentLimitAsync(double value)
     {
-      LogInformation($"Устанавливаем верхний предел тока DCW: {value:F3} мА");
+      LogInformation($"Устанавливаем верхний предел тока DCW: {value:F3} мА", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -136,7 +136,7 @@ namespace NewCore.Function.GPT
         return (true, string.Empty);
       }
 
-      LogWarning("Повторная попытка установки верхнего предела тока DCW.");
+      LogWarning("Повторная попытка установки верхнего предела тока DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetHighCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -155,7 +155,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetLowCurrentLimitAsync(double value)
     {
-      LogInformation($"Устанавливаем нижний предел тока DCW: {value:F3} мА");
+      LogInformation($"Устанавливаем нижний предел тока DCW: {value:F3} мА", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -173,7 +173,7 @@ namespace NewCore.Function.GPT
         return (true, string.Empty);
       }
 
-      LogWarning("Повторная попытка установки нижнего предела тока DCW.");
+      LogWarning("Повторная попытка установки нижнего предела тока DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetLowCurrentLimitAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -192,7 +192,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetTestTimeAsync(double value)
     {
-      LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
+      LogInformation($"Устанавливаем время теста DCW: {value:F1} сек", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -209,7 +209,7 @@ namespace NewCore.Function.GPT
         return (true, string.Empty);
       }
 
-      LogWarning("Повторная попытка установки времени теста DCW.");
+      LogWarning("Повторная попытка установки времени теста DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetTestTimeAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -235,7 +235,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetRampTimeAsync(double value)
     {
-      LogInformation($"Устанавливаем Ramp Time: {value:F1} сек");
+      LogInformation($"Устанавливаем Ramp Time: {value:F1} сек", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
@@ -248,7 +248,7 @@ namespace NewCore.Function.GPT
       if (Math.Abs(actual - value) < 0.1)
         return (true, string.Empty);
 
-      LogWarning("Повторная попытка установки Ramp Time DCW.");
+      LogWarning("Повторная попытка установки Ramp Time DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetRampTimeAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -272,7 +272,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetOffsetAsync(double value)
     {
-      LogInformation($"Устанавливаем смещение DCW: {value:F3} мА");
+      LogInformation($"Устанавливаем смещение DCW: {value:F3} мА", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
@@ -285,7 +285,7 @@ namespace NewCore.Function.GPT
       if (Math.Abs(actual - value) < 0.1)
         return (true, string.Empty);
 
-      LogWarning("Повторная попытка установки смещения DCW.");
+      LogWarning("Повторная попытка установки смещения DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetOffsetAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -302,7 +302,7 @@ namespace NewCore.Function.GPT
 
     public async Task<(bool Success, string Message)> SetArcCurrentAsync(double value)
     {
-      LogInformation($"Устанавливаем ток дуги DCW: {value:F3} мА");
+      LogInformation($"Устанавливаем ток дуги DCW: {value:F3} мА", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
@@ -315,7 +315,7 @@ namespace NewCore.Function.GPT
       if (Math.Abs(actual - value) < 0.1)
         return (true, string.Empty);
 
-      LogWarning("Повторная попытка установки тока дуги DCW.");
+      LogWarning("Повторная попытка установки тока дуги DCW.", isDeviceLog: true);
       await _gptModel.DeviceProtocol.QueryAsync(command);
       actual = await GetArcCurrentAsync();
       if (Math.Abs(actual - value) < 0.1)
@@ -332,7 +332,7 @@ namespace NewCore.Function.GPT
 
     public async Task<DcwConfiguration> ReadConfigurationAsync()
     {
-      LogInformation("Считываем конфигурацию DCW...");
+      LogInformation("Считываем конфигурацию DCW...", isDeviceLog: true);
 
       return new DcwConfiguration
       {
@@ -347,7 +347,7 @@ namespace NewCore.Function.GPT
 
     public async Task<double> MeasureCurrentAsync()
     {
-      LogInformation("Запуск измерений режима DCW");
+      LogInformation("Запуск измерений режима DCW", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
         return 0;

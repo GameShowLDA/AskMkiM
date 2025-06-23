@@ -20,6 +20,6 @@ namespace ControlCommandAnalyser.Parser
     /// <summary>
     /// Парсит входные строки и возвращает модель команды.
     /// </summary>
-    BaseCommandModel Parse(string commandNumber, string mnemonic, List<string> lines);
+    BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines);
   }
 }

@@ -7,8 +7,14 @@
 
     <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
 
-    <!--<Color x:Key="PrimaryColor">#465060</Color>-->
+    <!-- Подключаем свои шрифты -->
+    <FontFamily x:Key="WinstonBold">pack://application:,,,/UI;component/Resources/#Winston Bold</FontFamily>
+    <FontFamily x:Key="WinstonLight">pack://application:,,,/UI;component/Resources/#Winston Light</FontFamily>
+    <FontFamily x:Key="WinstonMedium">pack://application:,,,/UI;component/Resources/#Winston Medium</FontFamily>
+    <FontFamily x:Key="WinstonRegular">pack://application:,,,/UI;component/Resources/#Winston Regular</FontFamily>
+    
 
+    <!--<Color x:Key="PrimaryColor">#465060</Color>-->
     <Color x:Key="LightPrimaryColor">#6a7689</Color>
     <Color x:Key="PrimaryColor">#465060</Color>
     <Color x:Key="SecondaryColor">#303843</Color>

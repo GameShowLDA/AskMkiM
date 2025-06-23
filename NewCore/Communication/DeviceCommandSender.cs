@@ -77,23 +77,23 @@ namespace NewCore.Communication
         // Отправляем широковещательное сообщение
         await socket.SendToAsync(new ArraySegment<byte>(sendBuf), SocketFlags.None, ep).ConfigureAwait(false);
 
-        LogInformation("Команда отправлена широковещательно.");
+        LogInformation("Команда отправлена широковещательно.", isDeviceLog: true);
       }
       catch (SocketException ex)
       {
-        LogException($"Ошибка соединения", ex);
+        LogException($"Ошибка соединения", ex, isDeviceLog: true);
       }
       catch (TimeoutException ex)
       {
-        LogException($"Превышено время ожидания", ex);
+        LogException($"Превышено время ожидания", ex, isDeviceLog: true);
       }
       catch (ArgumentException ex)
       {
-        LogException($"Неверные аргументы", ex);
+        LogException($"Неверные аргументы", ex, isDeviceLog: true);
       }
       catch (Exception ex)
       {
-        LogException($"Непредвиденная ошибка", ex);
+        LogException($"Непредвиденная ошибка", ex, isDeviceLog: true);
         throw;
       }
     }

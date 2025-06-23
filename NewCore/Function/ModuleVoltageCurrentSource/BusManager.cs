@@ -33,11 +33,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
       {
-        LogError($"Ошибка: Неизвестная шина {bus}");
+        LogError($"Ошибка: Неизвестная шина {bus}", isDeviceLog: true);
         return false;
       }
 
-      LogInformation($"МИНТ: Подключение шины {bus} к + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1)})");
+      LogInformation($"МИНТ: Подключение шины {bus} к + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1)})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -57,11 +57,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
       {
-        LogError($"Ошибка: Неизвестная шина {bus}");
+        LogError($"Ошибка: Неизвестная шина {bus}", isDeviceLog: true);
         return false;
       }
 
-      LogInformation($"МИНТ: Подключение шины {bus} к - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1)})");
+      LogInformation($"МИНТ: Подключение шины {bus} к - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1)})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -81,11 +81,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
       {
-        LogError($"Ошибка: Неизвестная шина {bus}");
+        LogError($"Ошибка: Неизвестная шина {bus}", isDeviceLog: true);
         return false;
       }
 
-      LogInformation($"МИНТ: Отключение шины {bus} от + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2)})");
+      LogInformation($"МИНТ: Отключение шины {bus} от + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2)})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {
@@ -105,11 +105,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       if (!BusParameters.TryGetValue(bus, out Tuple<int, int> partialCommand))
       {
-        LogError($"Ошибка: Неизвестная шина {bus}");
+        LogError($"Ошибка: Неизвестная шина {bus}", isDeviceLog: true);
         return false;
       }
 
-      LogInformation($"МИНТ: Отключение шины {bus} от - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2)})");
+      LogInformation($"МИНТ: Отключение шины {bus} от - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2)})", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
       {

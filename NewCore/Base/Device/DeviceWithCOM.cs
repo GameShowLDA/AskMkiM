@@ -58,11 +58,11 @@ namespace NewCore.Base.Device
         {
           COMPort = port;
           DeviceProtocol = new SerialDeviceProtocol(this, COMPort);
-          LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.");
+          LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.", isDeviceLog: true);
         }
         else
         {
-          LogWarning($"[{Name}] Не удалось сконфигурировать COM-порт из ConnectionDetails.");
+          LogWarning($"[{Name}] Не удалось сконфигурировать COM-порт из ConnectionDetails.", isDeviceLog: true);
           COMPort = null;
           DeviceProtocol = null;
         }
@@ -162,7 +162,7 @@ namespace NewCore.Base.Device
         {
           if (COMPort.IsOpen)
           {
-            LogInformation($"[{Name}] Закрываю порт {COMPort.PortName} в Dispose()");
+            LogInformation($"[{Name}] Закрываю порт {COMPort.PortName} в Dispose()", isDeviceLog: true);
             COMPort.Close();
           }
 
@@ -173,11 +173,11 @@ namespace NewCore.Base.Device
         DeviceProtocol = null;
         ConnectableManager = null;
 
-        LogInformation($"[{Name}] Ресурсы устройства освобождены.");
+        LogInformation($"[{Name}] Ресурсы устройства освобождены.", isDeviceLog: true);
       }
       catch (Exception ex)
       {
-        LogException(ex, $"[{Name}] Ошибка при освобождении ресурсов устройства");
+        LogException(ex, $"[{Name}] Ошибка при освобождении ресурсов устройства", isDeviceLog: true);
       }
     }
   }

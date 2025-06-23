@@ -33,6 +33,7 @@
         </Style>
 
         <Style TargetType="{x:Type MenuItem}">
+            
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
@@ -44,7 +45,7 @@
 
                                 <!-- Добавляем TextBlock для отображения горячей клавиши -->
                                 <TextBlock x:Name="HotkeyText" Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
-                                
+
                             </DockPanel>
                             <Popup x:Name="PART_Popup" AllowsTransparency="true" Focusable="false" HorizontalOffset="1" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom" VerticalOffset="-1">
                                 <Border Background="{TemplateBinding Background}">
@@ -75,6 +76,9 @@
             <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            
         </Style>
 
         <Style x:Key="SideMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -86,8 +90,6 @@
                                 <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="4,0,6,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
                                 <Path x:Name="GlyphPanel" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="7,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="HeaderText" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-
-                                <!-- Добавляем TextBlock для отображения горячей клавиши -->
                                 <TextBlock x:Name="HotkeyText" Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
                             </DockPanel>
                             <Popup x:Name="PART_Popup"
@@ -150,24 +152,24 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}">
+        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}" Cursor="SizeAll">
 
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseLeftButtonDown">
                     <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="50"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" Height="40" FontSize="18" Background="Transparent" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0" Padding="0,0,40,0">
+            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0">
 
-                <MenuItem Header="Файл" Name="File" Cursor="Hand" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
+                <MenuItem Header="Файл" Name="File" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1" >
 
                     <MenuItem Header="Архив" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
@@ -184,7 +186,7 @@
                     <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <MenuItem Header="Выход" Command="{Binding File.ExitApplicationCommand}"/>
+                    <MenuItem Header="Выход"  Tag="ExitApplication" Command="{Binding File.ExitApplicationCommand}"/>
 
                 </MenuItem>
 
@@ -199,13 +201,6 @@
                     <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
                     <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
 
-                </MenuItem>
-
-                <MenuItem Header="Сервис" Name="Services" Tag="menuHeader_6">
-                    <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
-                    <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
-                    <MenuItem Header="МКР" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
-                    <MenuItem Header="УКШ" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
                 </MenuItem>
 
                 <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
@@ -256,7 +251,7 @@
                 </MenuItem>
 
                 <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
-                    
+
                 </MenuItem>
 
                 <MenuItem Header="Администрирование" Name="Admin">
@@ -268,12 +263,17 @@
 
                     <MenuItem Header="Управление" Name="DeviceManagment">
                         <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
+                        <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
+                        <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
+                        <MenuItem Header="МКР" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
+                        <MenuItem Header="УКШ" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
                     </MenuItem>
 
                     <MenuItem Header="Тесты ПО">
                         <MenuItem Header="Протокол" Name="ProtocolTest" Command="{Binding Admin.ProtocolCommand}"/>
                         <MenuItem Header="Выбор устройства" Name="ChoiceTest" Command="{Binding Admin.ChoiceCommand}"/>
-                        <MenuItem Header="Cfvjrjynhjkm" Name="SelfTest" Command="{Binding Admin.SelfCommand}"/>
+                        <MenuItem Header="Самоконтроль" Name="SelfTest" Command="{Binding Admin.SelfCommand}"/>
+                        <MenuItem Header="Тест консоли" Name="ConsoleTest" Command="{Binding Admin.ConsoleTest}"/>
                     </MenuItem>
 
                 </MenuItem>
@@ -299,27 +299,27 @@
                     Background="Transparent"
                     >
 
-                    <DefaultGUI:WindowButtons 
+                <DefaultGUI:WindowButtons 
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}" 
                         x:Name="minimizeButton" ChoiceElement="Minimize" 
                         Command="{Binding Window.MinimizeCommand}"
                         />
 
-                    <DefaultGUI:WindowButtons 
+                <DefaultGUI:WindowButtons 
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
                         x:Name="maximizeButton" ChoiceElement="Maximize" 
                         Command="{Binding Window.MaximizeCommand}"
                         />
 
-                    <DefaultGUI:WindowButtons 
+                <DefaultGUI:WindowButtons 
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
                         x:Name="exitButton" ChoiceElement="Exit" 
                         Command="{Binding Window.CloseCommand}"
                         />
-                </StackPanel>
+            </StackPanel>
         </Grid>
 
         <Components:MultiWindowControl 
@@ -330,7 +330,7 @@
         <Grid 
             Name="BottomPanel"
             Grid.Row="2" 
-            Height="40" 
+            Height="30" 
             Background="{StaticResource SecondarySolidColorBrush}"
             >
 
@@ -345,10 +345,9 @@
                 VerticalAlignment="Center" 
                 Padding="10,0,0,0" 
                 FontSize="14" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}"
-                >
-                Тут будет информационый текст
-            </TextBlock>
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
+				/>
+
 
             <Controls:StatusBarControl
                 Grid.Column="1" 

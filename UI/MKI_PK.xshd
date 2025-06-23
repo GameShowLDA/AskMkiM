@@ -24,6 +24,9 @@
 		<Rule color="Mnemonic">\bПИ\b</Rule>
 		<Rule color="Mnemonic">\bКЦ\b</Rule>
 		<Rule color="Mnemonic">\bУП\b</Rule>
+		<Rule color="Mnemonic">\bКС\b</Rule>
+		<Rule color="Mnemonic">\bЭТ\b</Rule>
+		<Rule color="Mnemonic">\bНЭ\b</Rule>
 
 		<!--Ключи-->
 		

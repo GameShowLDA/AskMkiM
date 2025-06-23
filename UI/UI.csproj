@@ -15,6 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Winston-Bold.ttf" />
+    <None Remove="Resources\Winston-Light.ttf" />
+    <None Remove="Resources\Winston-Medium.ttf" />
+    <None Remove="Resources\Winston-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
     <PackageReference Include="InputSimulator" Version="1.0.4" />
     <PackageReference Include="NLog" Version="5.4.0" />
@@ -31,6 +38,21 @@
     <ProjectReference Include="..\NewCore\NewCore.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
     <ProjectReference Include="..\WpfDocking-master\Src\WpfDocking.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Winston-Bold.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Winston-Light.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Winston-Medium.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Winston-Regular.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

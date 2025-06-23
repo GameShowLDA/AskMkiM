@@ -633,9 +633,9 @@ namespace UI.Components
       return MultiEditor.GetActiveTextEditorContainer(editorType);
     }
 
-    public void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    public Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
+      return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
     public void OpenFolder()

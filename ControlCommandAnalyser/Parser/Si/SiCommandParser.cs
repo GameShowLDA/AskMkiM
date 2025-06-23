@@ -1,0 +1,137 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Parser.Common;
+using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Model.Ok;
+using Utilities; // Для LoggerUtility
+
+namespace ControlCommandAnalyser.Parser.Si
+{
+  /// <summary>
+  /// Парсер для команд СИ (сопротивление изоляции).
+  /// </summary>
+  public class SiCommandParser : ICommandParser
+  {
+    public bool CanParse(string mnemonic) => mnemonic == "СИ";
+
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    {
+      LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
+
+      var model = new SiCommandModel
+      {
+        CommandNumber = commandNumber,
+        Mnemonic = mnemonic,
+        SourceLines = new List<string>(lines),
+        StartLineNumber = numberLine,
+      };
+
+      if (lines == null || lines.Count == 0)
+      {
+        LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+        model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        return model;
+      }
+
+      // Первая строка — параметры (напряжение, сопротивление, время)
+      var firstLine = lines[0];
+      LoggerUtility.LogDebug($"Исходная первая строка: \"{firstLine}\"");
+
+      var match = Regex.Match(firstLine, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+      if (match.Success)
+        firstLine = match.Groups[1].Value.Trim();
+
+      string remainder = firstLine;
+      string? voltage = null, resistance = null, time = null;
+
+      // Парсим параметры
+      (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
+      LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
+
+      (resistance, remainder) = CommonParameterParser.ParseResistance(remainder);
+      LoggerUtility.LogDebug($"После парсинга сопротивления: resistance='{resistance}', remainder='{remainder}'");
+
+      (time, remainder) = CommonParameterParser.ParseTime(remainder);
+      LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
+
+      model.Voltage = voltage;
+      model.Resistance = resistance;
+      model.Time = time;
+
+      if (string.IsNullOrWhiteSpace(voltage))
+      {
+        model.Errors.Add(SiErrors.CannotParseParameters("Не указано напряжение", numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
+      }
+
+      if (string.IsNullOrWhiteSpace(resistance))
+      {
+        model.Errors.Add(SiErrors.CannotParseParameters("Не указано сопротивление", numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
+      }
+
+      if (string.IsNullOrWhiteSpace(time))
+      {
+        model.Errors.Add(SiErrors.CannotParseParameters("Не указано время", numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано время (строка {numberLine}): {commandNumber} {mnemonic}");
+      }
+
+      var allPoints = new List<string>();
+      int starIdx = remainder.IndexOf('*');
+      if (starIdx >= 0)
+      {
+        string pointsPart = remainder.Substring(starIdx);
+        LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
+        allPoints.AddRange(PointParser.ParsePoints(pointsPart));
+        LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
+
+        // Оставляем в remainder только то, что ДО pointsPart
+        remainder = remainder.Substring(0, starIdx).Trim();
+      }
+
+      // Остальные строки — точки
+      for (int i = 1; i < lines.Count; i++)
+      {
+        var pointLine = lines[i].Trim();
+        if (!string.IsNullOrWhiteSpace(pointLine))
+        {
+          LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
+          var pointsBefore = allPoints.Count;
+          allPoints.AddRange(PointParser.ParsePoints(pointLine));
+          LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
+        }
+      }
+      model.Points = allPoints;
+
+      if (!string.IsNullOrEmpty(remainder))
+      {
+        model.UnparsedParameters = "// Не распознанные параметры: ";
+        model.UnparsedParameters += remainder;
+      }
+      
+      // Валидация
+      if (string.IsNullOrWhiteSpace(voltage) && string.IsNullOrWhiteSpace(resistance) && string.IsNullOrWhiteSpace(time))
+      {
+        LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{firstLine}' (строка {numberLine})");
+        model.Errors.Add(SiErrors.CannotParseParameters(firstLine, numberLine, $"{commandNumber} {mnemonic}"));
+      }
+
+      if (model.Points.Count == 0)
+      {
+        LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
+        model.Errors.Add(SiErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
+      }
+      else
+      {
+        LoggerUtility.LogInformation($"Итого найдено точек: {model.Points.Count}");
+      }
+
+      LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
+
+      return model;
+    }
+  }
+}

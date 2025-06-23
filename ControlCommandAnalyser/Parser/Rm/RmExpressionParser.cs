@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
 using static Utilities.LoggerUtility;
 
-namespace ControlCommandAnalyser.Parser
+namespace ControlCommandAnalyser.Parser.Rm
 {
   /// <summary>
   /// Класс для парсинга выражений RM (Remote Monitoring) и преобразования их в модели <see cref="RmPairModel"/>.
@@ -18,14 +19,19 @@ namespace ControlCommandAnalyser.Parser
     /// </summary>
     /// <param name="rmBlock">Текстовый блок с выражениями RM.</param>
     /// <returns>Список моделей <see cref="RmPairModel"/>.</returns>
-    public static List<RmPairModel> ParseAllExpressions(string rmBlock)
+    public static List<RmPairModel> ParseAllExpressions(string rmBlock, ref RmCommandModel baseCommandModel)
     {
+      if (string.IsNullOrEmpty(rmBlock))
+      {
+        baseCommandModel.Errors.Add(RmErrors.EmptyCommandBody(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+      }
+
       var expressions = SplitExpressions(rmBlock);
       var result = new List<RmPairModel>();
 
       foreach (var expr in expressions)
       {
-        ParseExpression(expr, result);
+        ParseExpression(expr, result, ref baseCommandModel);
       }
 
       return result;
@@ -36,21 +42,21 @@ namespace ControlCommandAnalyser.Parser
     /// </summary>
     /// <param name="expr">Выражение для парсинга.</param>
     /// <param name="result">Список для добавления результатов.</param>
-    private static void ParseExpression(string expr, List<RmPairModel> result)
+    private static void ParseExpression(string expr, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
     {
       string left, right, middle = null;
 
       if (TryParseSynonymExpression(expr, out left, out middle, out right))
       {
-        ProcessExpression(left, middle, right, result);
+        ProcessExpression(left, middle, right, result, ref baseCommandModel);
       }
       else if (TryParseBasicExpression(expr, out left, out right))
       {
-        ProcessExpression(left, null, right, result);
+        ProcessExpression(left, null, right, result, ref baseCommandModel);
       }
       else
       {
-        throw new Exception($"Не удалось распознать выражение: {expr}");
+        baseCommandModel.Errors.Add(RmErrors.CannotParseExpression(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
       }
     }
 
@@ -113,18 +119,21 @@ namespace ControlCommandAnalyser.Parser
     /// <param name="middle">Синоним (средняя часть выражения).</param>
     /// <param name="right">Правая часть выражения.</param>
     /// <param name="result">Список для добавления результатов.</param>
-    private static void ProcessExpression(string left, string middle, string right, List<RmPairModel> result)
+    private static void ProcessExpression(string left, string middle, string right, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
     {
       if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
-        throw new Exception($"Левая или правая часть выражения пуста: {left} == {middle} = {right}");
+      {
+        baseCommandModel.Errors.Add(RmErrors.EmptyLeftOrRight(left, middle, right, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        return;
+      }
 
       LogDebug($"[ProcessExpression] Left: {left}, Middle: {middle}, Right: {right}");
 
       // Новый обработчик для особого случая
-      if (TryProcessSynonymRangeWithStep(left, middle, right, result))
+      if (TryProcessSynonymRangeWithStep(left, middle, right, result, ref baseCommandModel))
         return;
 
-      if (TryProcessGroupedRanges(left, right, middle, result))
+      if (TryProcessGroupedRanges(left, right, middle, result, ref baseCommandModel))
         return;
 
       var leftList = ExpandAll(left);
@@ -138,9 +147,8 @@ namespace ControlCommandAnalyser.Parser
       // Проверяем соответствие размеров списков
       if (leftList.Count != rightList.Count)
       {
-        throw new Exception($"Количество точек ОК и входов должно совпадать!\n" +
-                            $"Левая часть: {string.Join(", ", leftList)} (количество: {leftList.Count})\n" +
-                            $"Правая часть: {string.Join(", ", rightList)} (количество: {rightList.Count})");
+        baseCommandModel.Errors.Add(RmErrors.MismatchedCounts(leftList.Count, rightList.Count, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        return;
       }
 
       for (int i = 0; i < leftList.Count; i++)
@@ -399,7 +407,7 @@ namespace ControlCommandAnalyser.Parser
     /// <param name="middle">Синоним (средняя часть выражения).</param>
     /// <param name="result">Список для добавления результатов.</param>
     /// <returns>True, если выражение успешно обработано; иначе False.</returns>
-    private static bool TryProcessGroupedRanges(string left, string right, string middle, List<RmPairModel> result)
+    private static bool TryProcessGroupedRanges(string left, string right, string middle, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
     {
       // Регулярное выражение для левой части (диапазон чисел, например, "101-300")
       var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
@@ -423,7 +431,10 @@ namespace ControlCommandAnalyser.Parser
         int groupCount = midList.Count;
         int groupSize = leftTotal / groupCount;
         if (groupSize * groupCount != leftTotal)
-          throw new Exception("Нельзя разбить диапазон слева на равные группы под массив справа!");
+        {
+          baseCommandModel.Errors.Add(RmErrors.GroupMismatch(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+          return false;
+        }
 
         int leftPtr = leftFrom;
         foreach (var mid in midList)
@@ -432,11 +443,14 @@ namespace ControlCommandAnalyser.Parser
           {
             int rightNum = rightStart + i;
             if (rightNum > rightEnd)
-              throw new Exception("Правая группа короче, чем левая!");
+            {
+              baseCommandModel.Errors.Add(RmErrors.GroupTooShort(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+              return false;
+            }
 
             result.Add(new RmPairModel
             {
-              OkPoint = (leftPtr++).ToString(),
+              OkPoint = leftPtr++.ToString(),
               Synonym = middle, // Не поддерживаем синонимы в таких записях (можно расширить при необходимости)
               AskInput = $"{rightPrefix}.{mid}.{rightNum}"
             });
@@ -456,56 +470,59 @@ namespace ControlCommandAnalyser.Parser
     /// <param name="right">Правая часть выражения.</param>
     /// <param name="result">Список для добавления результатов.</param>
     /// <returns>True, если выражение успешно обработано; иначе False.</returns>
-    private static bool TryProcessSynonymRangeWithStep(string left, string middle, string right, List<RmPairModel> result)
+    private static bool TryProcessSynonymRangeWithStep(string left, string middle, string right, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
     {
-        // Левый диапазон: 301-310
-        var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
-        // Синоним: XS1:1-10
-        var middleMatch = Regex.Match(middle ?? "", @"^([A-Za-z]+)(\d+):(\d+)-(\d+)$");
-        // Правая часть: 1.6.2-20(2)
-        var rightMatch = Regex.Match(right, @"^(\d+\.\d+\.)(\d+)-(\d+)\((\d+)\)$");
+      // Левый диапазон: 301-310
+      var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
+      // Синоним: XS1:1-10
+      var middleMatch = Regex.Match(middle ?? "", @"^([A-Za-z]+)(\d+):(\d+)-(\d+)$");
+      // Правая часть: 1.6.2-20(2)
+      var rightMatch = Regex.Match(right, @"^(\d+\.\d+\.)(\d+)-(\d+)\((\d+)\)$");
 
-        if (leftMatch.Success && middleMatch.Success && rightMatch.Success)
+      if (leftMatch.Success && middleMatch.Success && rightMatch.Success)
+      {
+        int leftFrom = int.Parse(leftMatch.Groups[1].Value);
+        int leftTo = int.Parse(leftMatch.Groups[2].Value);
+
+        string synPrefix = middleMatch.Groups[1].Value;
+        int synBase = int.Parse(middleMatch.Groups[2].Value); // XS1
+        int synRangeFrom = int.Parse(middleMatch.Groups[3].Value); // 1
+        int synRangeTo = int.Parse(middleMatch.Groups[4].Value);   // 10
+
+        string rightPrefix = rightMatch.Groups[1].Value;
+        int rightFrom = int.Parse(rightMatch.Groups[2].Value);
+        int rightTo = int.Parse(rightMatch.Groups[3].Value);
+        int rightStep = int.Parse(rightMatch.Groups[4].Value);
+
+        int count = leftTo - leftFrom + 1;
+        if (count != synRangeTo - synRangeFrom + 1 || count != (rightTo - rightFrom) / rightStep + 1)
         {
-            int leftFrom = int.Parse(leftMatch.Groups[1].Value);
-            int leftTo = int.Parse(leftMatch.Groups[2].Value);
-
-            string synPrefix = middleMatch.Groups[1].Value;
-            int synBase = int.Parse(middleMatch.Groups[2].Value); // XS1
-            int synRangeFrom = int.Parse(middleMatch.Groups[3].Value); // 1
-            int synRangeTo = int.Parse(middleMatch.Groups[4].Value);   // 10
-
-            string rightPrefix = rightMatch.Groups[1].Value;
-            int rightFrom = int.Parse(rightMatch.Groups[2].Value);
-            int rightTo = int.Parse(rightMatch.Groups[3].Value);
-            int rightStep = int.Parse(rightMatch.Groups[4].Value);
-
-            int count = leftTo - leftFrom + 1;
-            if (count != (synRangeTo - synRangeFrom + 1) || count != ((rightTo - rightFrom) / rightStep + 1))
-                throw new Exception("Диапазоны не совпадают по количеству элементов.");
-
-            for (int i = 0; i < count; i++)
-            {
-                int leftVal = leftFrom + i;
-                int synNum = synRangeFrom + i;
-                int rightVal = rightFrom + i * rightStep;
-
-                result.Add(new RmPairModel
-                {
-                    OkPoint = leftVal.ToString(),
-                    Synonym = null,
-                    AskInput = $"{rightPrefix}{rightVal}"
-                });
-                result.Add(new RmPairModel
-                {
-                    OkPoint = $"{synPrefix}{synBase}:{synNum}",
-                    Synonym = null,
-                    AskInput = $"{rightPrefix}{rightVal}"
-                });
-            }
-            return true;
+          baseCommandModel.Errors.Add(RmErrors.StepRangeMismatch(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+          return false;
         }
-        return false;
+
+        for (int i = 0; i < count; i++)
+        {
+          int leftVal = leftFrom + i;
+          int synNum = synRangeFrom + i;
+          int rightVal = rightFrom + i * rightStep;
+
+          result.Add(new RmPairModel
+          {
+            OkPoint = leftVal.ToString(),
+            Synonym = null,
+            AskInput = $"{rightPrefix}{rightVal}"
+          });
+          result.Add(new RmPairModel
+          {
+            OkPoint = $"{synPrefix}{synBase}:{synNum}",
+            Synonym = null,
+            AskInput = $"{rightPrefix}{rightVal}"
+          });
+        }
+        return true;
+      }
+      return false;
     }
   }
 }

@@ -121,9 +121,9 @@ namespace MainWindowProgram.Services
       return Task.FromResult(foundContainer);
     }
 
-    internal async Task AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
+      return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
     internal Task OpenFolder()

@@ -17,6 +17,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
     {
 
       await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel("Начало проверки коммутации"));
+      await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel("Настройка оборудования"));
       await powerSourceModule.VoltageManager.SetSourceVoltageAsync(VoltageSources.Supply12V);
       await powerSourceModule.VoltageManager.SetVoltageLevelAsync(5, 0);
       await Task.Delay(1000);
@@ -47,6 +48,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         await CheckBus(messageService, bus, switchingDevice, powerSourceModule, fastMeter);
       }
 
+      await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel("Настройка оборудования"));
       foreach (var item in busesB)
       {
         cancellationToken.ThrowIfCancellationRequested();
@@ -69,19 +71,18 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       }
 
       await powerSourceModule.ConnectableManager.ResetAsync();
-
-      await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel("Завершение проверки коммутации"));
     }
 
     static private async Task CheckBus(IUserMessageService messageService, SwitchingBus switchingBus, ISwitchingDevice switchingDevice, IPowerSourceModule powerSource, IFastMeter fastMeter)
     {
       var busSwitch = GetAbPair(switchingBus);
-
       if (busSwitch == null)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Не удалось определить шину AB для {switchingBus}"));
         return;
       }
+
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка шины {switchingBus}"));
 
       var connectBus = await switchingDevice.ConnectorManager.ConnectMultimeter(busSwitch);
 
@@ -119,7 +120,6 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       }
 
       await switchingDevice.ConnectorManager.DisconnectMultimeter(busSwitch);
-      await messageService.ShowMessageAsync(new ShowMessageModel($" Отключили {busSwitch} от мультиметра."));
     }
 
 

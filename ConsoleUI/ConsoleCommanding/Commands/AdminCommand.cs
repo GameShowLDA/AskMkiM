@@ -1,8 +1,9 @@
-﻿using System;
+﻿using ConsoleUI.ConsoleCommanding.Core;
+using ConsoleUI.ConsoleLogic;
+using ConsoleUI.ConsoleUI;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
-using ConsoleUI.ConsoleCommanding.Core;
-using ConsoleUI.ConsoleUI;
 
 namespace ConsoleUI.ConsoleCommanding.Commands
 {
@@ -18,8 +19,9 @@ namespace ConsoleUI.ConsoleCommanding.Commands
     {
       context.Console.WriteLine("Введите пароль:");
 
-      ((ConsoleOverlay)Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is ConsoleOverlay))?.SetPasswordMode(true);
-      string password = await context.Console.ReadLineAsync();
+      ConsoleVisibilityController.SetPasswordMode(true);
+      string password = await ConsoleVisibilityController.ReadLineAsync();
+
 
       if (password.ToLower() != "admin")
       {

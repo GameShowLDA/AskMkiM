@@ -1,6 +1,7 @@
 <Project>
-  <PropertyGroup>
-    <OutputPath>D:\AskMkiM\Bin\Libraries\</OutputPath>
-	 <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)Bin\$(MSBuildProjectName)\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
 </Project>

@@ -59,7 +59,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       if (!ValidateParameters(testType, busContact, action))
       {
-        LogError($"Некорректные параметры: Тип проверки - {testType}, Контакт - {busContact}, Действие - {action}.");
+        LogError($"Некорректные параметры: Тип проверки - {testType}, Контакт - {busContact}, Действие - {action}.", isDeviceLog: true);
         return false;
       }
 
@@ -69,11 +69,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       }
 
       DeviceCommand cmd = new DeviceCommand(4, (int)testType, busContact, action);
-      LogInformation($"Отправка команды самоконтроля: {cmd}");
+      LogInformation($"Отправка команды самоконтроля: {cmd}", isDeviceLog: true);
 
       if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
       {
-        LogError("Некорректный IP-адрес устройства коммутации шин.");
+        LogError("Некорректный IP-адрес устройства коммутации шин.", isDeviceLog: true);
         return false;
       }
 
@@ -128,11 +128,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       if (int.TryParse(response, out int relayCount))
       {
-        LogInformation($"Количество реле в цепи {testType}: {relayCount}");
+        LogInformation($"Количество реле в цепи {testType}: {relayCount}", isDeviceLog: true);
         return relayCount;
       }
 
-      LogError($"Ошибка получения количества реле для {testType}");
+      LogError($"Ошибка получения количества реле для {testType}", isDeviceLog: true);
       return -1;
     }
 
@@ -141,16 +141,16 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       if (relayNumber < 0)
       {
-        LogError("Некорректный номер реле.");
+        LogError("Некорректный номер реле.", isDeviceLog: true);
         return false;
       }
 
       DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10 + relayNumber, busContact, action);
-      LogInformation($"Управление реле {relayNumber} в цепи {testType}, контакт {busContact}, действие {action} : команда {cmd.ToString()}");
+      LogInformation($"Управление реле {relayNumber} в цепи {testType}, контакт {busContact}, действие {action} : команда {cmd.ToString()}", isDeviceLog: true);
 
       if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
       {
-        LogError("Некорректный IP-адрес устройства коммутации шин.");
+        LogError("Некорректный IP-адрес устройства коммутации шин.", isDeviceLog: true);
         return false;
       }
 
@@ -313,14 +313,14 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       if (selfTestChecker == null)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Устройство не поддерживает самоконтроль.", type: ShowMessageModel.MessageType.Error));
-        LogError("Ошибка: Устройство не поддерживает самоконтроль.");
+        LogError("Ошибка: Устройство не поддерживает самоконтроль.", isDeviceLog: true);
         return false;
       }
 
       var contacts = selfTestChecker.GetValidBusContacts(testType);
       if (contacts == null || contacts.Count == 0)
       {
-        LogError($"Ошибка: Не удалось получить список контактов для {testType}.");
+        LogError($"Ошибка: Не удалось получить список контактов для {testType}.", isDeviceLog: true);
         return false;
       }
 
@@ -336,7 +336,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         if (!await PerformCircuitTestAsync(messageService, selfTestChecker, meter, testType, circuitName, busContact))
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-          LogError($"Проверка {circuitName} завершилась с ошибкой!");
+          LogError($"Проверка {circuitName} завершилась с ошибкой!", isDeviceLog: true);
           allTestsPassed = false;
           continue;
         }
@@ -344,12 +344,12 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       if (allTestsPassed)
       {
-        LogDebug($"Самоконтроль {testType} завершен успешно.");
+        LogDebug($"Самоконтроль {testType} завершен успешно.", isDeviceLog: true);
         return true;
       }
       else
       {
-        LogError($"Самоконтроль {testType} завершен с ошибками.");
+        LogError($"Самоконтроль {testType} завершен с ошибками.", isDeviceLog: true);
         return false;
       }
     }
@@ -430,7 +430,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      LogInformation($"Обнаружено {relayCount} реле в цепи {circuitName}.");
+      LogInformation($"Обнаружено {relayCount} реле в цепи {circuitName}.", isDeviceLog: true);
       for (int relay = 1; relay <= relayCount; relay++)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка реле {relay} в цепи {circuitName}") { IndentLevel = 1 });
@@ -442,7 +442,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
           return false;
         }
 
-        LogInformation($"Реле {relay} выключено, проверяем целостность цепи...");
+        LogInformation($"Реле {relay} выключено, проверяем целостность цепи...", isDeviceLog: true);
 
         await Task.Delay(25);
         var result = await meter.ContinuityManager.CheckContinuityAsync();
@@ -458,7 +458,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         await Task.Delay(1);
         if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 1))
         {
-          LogError($"Ошибка при выключении реле {relay} в цепи {circuitName}.");
+          LogError($"Ошибка при выключении реле {relay} в цепи {circuitName}.", isDeviceLog: true);
           return false;
         }
 

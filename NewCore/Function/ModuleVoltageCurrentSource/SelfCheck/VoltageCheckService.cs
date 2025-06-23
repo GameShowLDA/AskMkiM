@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Interface.Main;
+using Utilities.Models;
 using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
@@ -22,8 +23,6 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       await CheckVoltageLevelsAsync(cancellationToken, messageService, 0.1, 0.9, 0.1, 20, fastMeter, powerSource);
       await CheckVoltageLevelsAsync(cancellationToken, messageService, 1, 9, 1, 20, fastMeter, powerSource);
       await CheckVoltageLevelsAsync(cancellationToken, messageService, 10, 40, 10, 20, fastMeter, powerSource);
-
-      await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel("Завершение проверки формирования дискрет напряжения"));
     }
 
 
@@ -37,13 +36,13 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="token">Токен для отмены операции.</param>
     static private async Task CheckVoltageLevelsAsync(CancellationToken cancellationToken, IUserMessageService messageService, double startVoltage, double endVoltage, double step, int delay, IFastMeter fastMeter, IPowerSourceModule powerSource)
     {
-      await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Проверка уровней напряжения от {startVoltage} до {endVoltage} с шагом {step}"));
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка уровней напряжения от {startVoltage} до {endVoltage} с шагом {step}"));
       for (double voltage = startVoltage; voltage <= endVoltage; voltage += step)
       {
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка напряжения {Math.Round(voltage, 1)}В"));
         cancellationToken.ThrowIfCancellationRequested();
         double roundedVoltage = Math.Round(voltage, 1);
         await SetVoltageAndShowMessage(messageService, roundedVoltage, powerSource);
-        await Task.Delay(1000);
         await MeasureAndCompareVoltage(messageService, roundedVoltage, delay, fastMeter);
       }
     }
@@ -68,22 +67,18 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
     static private async Task MeasureAndCompareVoltage(IUserMessageService messageService, double voltage, int delay, IFastMeter fastMeter)
     {
       double tolerance = 0.0001;
-      double firstNorm = voltage - (0.01 * voltage + 0.1);
-      double lastNorm = voltage + (0.01 * voltage + 0.1);
+      double firstNorm = Math.Round(voltage - (0.01 * voltage + 0.1), 3);
+      double lastNorm = Math.Round(voltage + (0.01 * voltage + 0.1), 3);
 
-      await Task.Delay(40).ConfigureAwait(true);
+      await Task.Delay(10);
+
       double result = await GetMeasurementResult(messageService, voltage, delay, fastMeter);
+      bool error = !(result >= firstNorm && result <= lastNorm);
 
-      bool error = !(result >= firstNorm - tolerance && result <= lastNorm + tolerance);
-      var statusText = !error ? "В норме" : "Вне нормы";
-      if (!error)
-      {
-        await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Результат измерения: {result} В ({firstNorm} - {lastNorm}). Статус: {statusText}"));
-      }
-      else
-      {
-        await messageService.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Результат измерения: {result} В ({firstNorm} - {lastNorm}). Статус: {statusText}"));
-      }
+      var status = error ? ShowMessageModel.MessageType.Error : ShowMessageModel.MessageType.Success;
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Результат измерения", message: $"{result}В", type: status) { IndentLevel = 2 });
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Диапазон значений", message: $"от {firstNorm} до {lastNorm}В") { IndentLevel = 3 });
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения", message: $"{Math.Abs(result - voltage)}В", type: status) { IndentLevel = 3 });
 
       await Task.Delay(1);
     }
@@ -98,8 +93,8 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
     static private async Task<double> GetMeasurementResult(IUserMessageService messageService, double voltage, int delay, IFastMeter meter)
     {
       await Task.Delay(delay);
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync();
-      LogInformation($"Измеренное напряжение: {result} В");
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage);
+      LogInformation($"Измеренное напряжение: {result} В", isDeviceLog: true);
       return result;
     }
   }

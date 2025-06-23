@@ -59,7 +59,7 @@ namespace NewCore.Function.Helpers
         }
         else
         {
-          LogError($"{showMessageModel.Header}: {showMessageModel.Message}");
+          LogError($"{showMessageModel.Header}: {showMessageModel.Message}", isDeviceLog: true);
         }
       }
     }

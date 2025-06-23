@@ -34,6 +34,7 @@ namespace MainWindowProgram.ViewModels
     public ICommand ProtocolCommand { get; }
     public ICommand ChoiceCommand { get; }
     public ICommand SelfCommand { get; }
+    public ICommand ConsoleTest { get; }
 
     /// <summary>
     /// Команда открытия настроек погрешностей выполнения режимов.
@@ -60,6 +61,7 @@ namespace MainWindowProgram.ViewModels
       ChoiceCommand = new AsyncRelayCommand(_service.ChoiceTest);
       SelfCommand = new AsyncRelayCommand(_service.SelfCheckTest);
       ErrorCommand = new AsyncRelayCommand(_service.OpenErrorSync);
+      ConsoleTest = new AsyncRelayCommand(_service.StartConsoleTest);
     }
   }
 }

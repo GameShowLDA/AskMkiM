@@ -60,7 +60,7 @@ namespace UI.Controls.ProtocolNew
           StepControlManager.IsStepInto = false;
           _tcs.TrySetResult(true);
           args.Handled = true;
-
+          AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Нажата клавиша: F10", true);
           Application.Current.Dispatcher.InvokeAsync(() =>
           {
             var win = Application.Current.MainWindow;
@@ -69,10 +69,10 @@ namespace UI.Controls.ProtocolNew
           });
           break;
 
-
         case Key.F11:
           StepControlManager.IsStepInto = true;
           _tcs.TrySetResult(true);
+          AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Нажата клавиша: F11", true);
           break;
 
         case Key.F5:
@@ -83,6 +83,7 @@ namespace UI.Controls.ProtocolNew
             _tcs.TrySetResult(true);
           }
           args.Handled = true;
+          AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Нажата клавиша: F5", true);
           break;
 
         default:
@@ -97,6 +98,9 @@ namespace UI.Controls.ProtocolNew
     /// <param name="cancellationToken">Токен отмены ожидания.</param>
     public static async Task WaitForNextStepKeyAsync(CancellationToken cancellationToken)
     {
+      // Выводим постоянное сообщение об ожидании
+      AppConfiguration.Base.EventAggregator.RaiseWarningMessage("Ожидание нажатия F5, F10 или F11...");
+
       _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
       using (cancellationToken.Register(() => _tcs.TrySetCanceled(cancellationToken)))

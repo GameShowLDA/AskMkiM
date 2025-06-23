@@ -4,22 +4,18 @@ using NLog;
 
 namespace Utilities
 {
-  /// <summary>
-  /// Утилита для логирования сообщений с использованием NLog.
-  /// Предоставляет методы для логирования информации, предупреждений, ошибок, отладочных сообщений и исключений,
-  /// включая автоматическое определение вызывающего файла и строки.
-  /// </summary>
   static public class LoggerUtility
   {
     /// <summary>
     /// Логирует информационное сообщение.
     /// </summary>
     /// <param name="message">Сообщение для логирования.</param>
+    /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogInformation(string message, [CallerFilePath] string callerFilePath = "")
+    public static string LogInformation(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "")
     {
-      var logger = LogManager.GetLogger(GetCallerClassName(callerFilePath));
+      var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
       logger.Info(message);
       return message;
     }
@@ -28,25 +24,27 @@ namespace Utilities
     /// Логирует предупреждение.
     /// </summary>
     /// <param name="message">Сообщение для логирования.</param>
+    /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogWarning(string message, [CallerFilePath] string callerFilePath = "")
+    public static string LogWarning(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "")
     {
-      var logger = LogManager.GetLogger(GetCallerClassName(callerFilePath));
+      var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
       logger.Warn(message);
       return message;
     }
 
     /// <summary>
-    /// Логирует сообщение об ошибке, включая имя файла и номер строки.
+    /// Логирует сообщение об ошибке.
     /// </summary>
     /// <param name="message">Сообщение об ошибке.</param>
+    /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="lineNumber">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogError(string message, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
+    public static string LogError(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
-      var logger = LogManager.GetLogger(GetCallerClassName(callerFilePath));
+      var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
       logger.Error($"{Path.GetFileName(callerFilePath)}:{lineNumber} — {message}");
       return message;
     }
@@ -55,26 +53,29 @@ namespace Utilities
     /// Логирует отладочное сообщение.
     /// </summary>
     /// <param name="message">Сообщение для логирования.</param>
+    /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogDebug(string message, [CallerFilePath] string callerFilePath = "")
+    public static string LogDebug(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "")
     {
-      var logger = LogManager.GetLogger(GetCallerClassName(callerFilePath));
+      var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
       logger.Debug(message);
       return message;
     }
+
 
     /// <summary>
     /// Логирует исключение с возможностью фильтрации трассировки стека.
     /// </summary>
     /// <param name="ex">Исключение для логирования.</param>
     /// <param name="customMessage">Дополнительное сообщение к исключению.</param>
+    /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="file">Файл, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="line">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="onlyProjectStack">Если true, логируется только часть стека, относящаяся к проекту.</param>
-    public static void LogException(Exception ex, string customMessage = null, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
+    public static void LogException(Exception ex, string customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
     {
-      var logger = LogManager.GetLogger(GetCallerClassName(file));
+      var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
       var fileName = Path.GetFileName(file);
 
       var message = string.IsNullOrEmpty(customMessage)
@@ -104,12 +105,13 @@ namespace Utilities
     /// <param name="userHint">Сообщение для пользователя, поясняющее контекст ошибки.</param>
     /// <param name="ex">Исключение для логирования.</param>
     /// <param name="customMessage">Дополнительное сообщение к исключению.</param>
+    /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="file">Файл, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="line">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="onlyProjectStack">Если true, логируется только часть стека, относящаяся к проекту.</param>
-    public static void LogException(string userHint, Exception ex, string customMessage = null, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
+    public static void LogException(string userHint, Exception ex, string customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
     {
-      var logger = LogManager.GetLogger(GetCallerClassName(file));
+      var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
       var fileName = Path.GetFileName(file);
 
       if (!string.IsNullOrWhiteSpace(userHint))
@@ -117,42 +119,19 @@ namespace Utilities
         logger.Error($"[{fileName}:{line}] {userHint}");
       }
 
-      LogException(ex, customMessage, file, line, onlyProjectStack);
+      LogException(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
     }
 
     /// <summary>
-    /// Получает имя класса, вызвавшего метод, на основе пути к исходному файлу.
+    /// Получает имя логгера на основе пути к файлу и типа логирования.
     /// </summary>
     /// <param name="filePath">Полный путь к файлу, откуда был вызван метод.</param>
-    /// <returns>Имя класса (имя файла без расширения).</returns>
-    private static string GetCallerClassName(string filePath)
+    /// <param name="isDeviceLog">Если true, используется логгер для оборудования.</param>
+    /// <returns>Имя логгера.</returns>
+    private static string GetLoggerName(string filePath, bool isDeviceLog)
     {
-      return Path.GetFileNameWithoutExtension(filePath);
-    }
-
-    /// <summary>
-    /// Статический конструктор класса. Загружает конфигурацию NLog из файла и пишет результат в log_debug.txt.
-    /// </summary>
-    static LoggerUtility()
-    {
-      try
-      {
-        LogManager.Setup().LoadConfigurationFromFile("NLog.config");
-        LogManager.ReconfigExistingLoggers();
-
-        if (LogManager.Configuration == null)
-        {
-          File.AppendAllText("log_debug.txt", "NLog.config не загружен\n");
-        }
-        else
-        {
-          File.AppendAllText("log_debug.txt", "NLog успешно загружен\n");
-        }
-      }
-      catch (Exception ex)
-      {
-        File.AppendAllText("log_debug.txt", "Исключение: " + ex.Message);
-      }
+      var baseName = Path.GetFileNameWithoutExtension(filePath);
+      return isDeviceLog ? $"{baseName}_Device" : $"{baseName}_UI";
     }
   }
 }

@@ -82,6 +82,9 @@ namespace MainWindowProgram.Services
     public async Task OpenErrorSync() =>
       await _multiWindow.AddControlAsync("Погрешности измерений", new MeasurementErrorControl(), TypeWindow.Settings);
 
+    public async Task StartConsoleTest() =>
+     await Test.ConsoleTest.TestData.PrintTestData();
+
     public async Task ProtocolTest()
     { 
       await _multiWindow.AddControlAsync("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);

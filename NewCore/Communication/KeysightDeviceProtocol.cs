@@ -73,21 +73,21 @@ namespace NewCore.Communication
           }
           catch (OperationCanceledException)
           {
-            LogException(new TimeoutException("Read operation timed out."));
+            LogException(new TimeoutException("Read operation timed out."), isDeviceLog: true);
           }
           catch (IOException ioEx)
           {
-            LogException(ioEx); // Проблема с потоком/подключением
+            LogException(ioEx, isDeviceLog: true); // Проблема с потоком/подключением
           }
           catch (Exception innerEx)
           {
-            LogException(innerEx);
+            LogException(innerEx, isDeviceLog: true);
           }
         }
       }
       catch (Exception ex)
       {
-        LogException(ex); // Глобальный отлов
+        LogException(ex, isDeviceLog: true); // Глобальный отлов
       }
 
       return string.Empty;

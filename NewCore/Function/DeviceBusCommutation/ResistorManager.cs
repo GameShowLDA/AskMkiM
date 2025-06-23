@@ -42,7 +42,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Неверный номер резистора!");
+      LogError("Неверный номер резистора!", isDeviceLog: true);
       return false;
     }
 
@@ -66,7 +66,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Неверный номер резистора!");
+      LogError("Неверный номер резистора!", isDeviceLog: true);
       return false;
     }
   }

@@ -365,9 +365,9 @@ namespace UI.Components
       SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
     }
 
-    internal void AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      fileManager.AddTranslatorItem(editor, translateEditor, editorType);
+      return fileManager.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
     internal void OpenFolder()

@@ -51,7 +51,7 @@ namespace NewCore.Communication
         byte[] buffer = Encoding.UTF8.GetBytes(command);
 
         await udpClient.SendAsync(buffer, buffer.Length, deviceEndpoint);
-        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}");
+        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}", isDeviceLog: true);
 
         if (responseDelay > 0)
         {
@@ -75,17 +75,17 @@ namespace NewCore.Communication
             {
               UdpReceiveResult result = await receiveTask;
               string response = Encoding.UTF8.GetString(result.Buffer);
-              LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
+              LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
               return response;
             }
             else
             {
-              return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
+              return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).", isDeviceLog: true);
             }
           }
           catch (Exception ex)
           {
-            LogException($"[{_device.Name}] Исключение при получении ответа", ex);
+            LogException($"[{_device.Name}] Исключение при получении ответа", ex, isDeviceLog: true);
             return $"[{_device.Name}] Ошибка при получении ответа: {ex.Message}";
           }
         }
@@ -94,7 +94,7 @@ namespace NewCore.Communication
       }
       catch (Exception ex)
       {
-        LogException($"[{_device.Name}] Общая ошибка QueryAsync", ex);
+        LogException($"[{_device.Name}] Общая ошибка QueryAsync", ex, isDeviceLog: true);
         return $"[{_device.Name}] Общая ошибка QueryAsync: {ex.Message}";
       }
       finally
