@@ -243,7 +243,7 @@ namespace ControlCommandAnalyser
         if (parser.CanParse(mnemonic))
           return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
 
-      return new UnknownCommandModel
+      var unknownCommandModel = new UnknownCommandModel
       {
         CommandNumber = commandNumber,
         Mnemonic = mnemonic,
@@ -253,6 +253,16 @@ namespace ControlCommandAnalyser
           GeneralErrors.UnknownCommand(mnemonic, lineNumber, $"{commandNumber} {mnemonic}")
         }
       };
+      unknownCommandModel.SourceLines[0] = unknownCommandModel.SourceLines[0] + " (Неизвестная команда!)";
+      for (int i = 1; i < unknownCommandModel.SourceLines.Count; i++)
+      {
+        if (!string.IsNullOrEmpty(unknownCommandModel.SourceLines[i]) && !string.IsNullOrWhiteSpace(unknownCommandModel.SourceLines[i]))
+        {
+          unknownCommandModel.SourceLines[i] += " !";
+        }
+      }
+
+      return unknownCommandModel;
     }
 
     private string PreprocessText(string text)
