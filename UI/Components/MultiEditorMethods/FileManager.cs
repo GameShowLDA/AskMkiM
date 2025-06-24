@@ -242,7 +242,7 @@ namespace UI.Components.MultiEditorMethods
       {
         Title = nameFile,
         TabText = nameFile,
-        Content = textEditor
+        Content = textEditor 
       };
 
       dockItem.CloseItem += (sender) =>

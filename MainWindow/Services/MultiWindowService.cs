@@ -76,56 +76,101 @@ namespace MainWindowProgram.Services
       return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Сохраняет файл.
+    /// </summary>
+    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
     public Task SaveFile()
     {
       _multiWindowControl.SaveFile();
       return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Сохранить файл как.
+    /// </summary>
+    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
     public Task SaveFileAs()
     {
       _multiWindowControl.SaveFileAs();
       return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Выводит файл на печать.
+    /// </summary>
+    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
     public Task PrintFile()
     {
       _multiWindowControl.PrintFile();
       return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>Асинхронную задачу, представляющую результат поиска текстового редактора.</returns>
     public Task<TextEditorUI> GetActiveTextEditor()
     {
       var foundEditor = _multiWindowControl.GetActiveTextEditor();
       return Task.FromResult(foundEditor);
     }
 
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>  
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       return _multiWindowControl.RemoveActiveTextEditor(isTranslation);
     }
 
+    /// <summary>
+    /// Удаляет контрол.
+    /// </summary>
+    /// <param name="editorType">Тип вкладки.</param>
     public void RemoveControl(EditorType editorType)
     {
       _multiWindowControl.RemoveControl(editorType);
     }
 
+    /// <summary>
+    /// Создает файл трансляции.
+    /// </summary>
+    /// <returns>Текстовый редактор с файлом трансляции.</returns>
     public TextEditorUI CreateTranslationFileAsync()
     {
       return _multiWindowControl.CreateTranslationFileAsync();
     }
 
+    /// <summary>
+    /// Получает активный контейнер с вкладками.
+    /// </summary>
+    /// <param name="editorType">Тип вкладок.</param>
+    /// <returns>Асинхронную задачу, представляющую результат поиска контейнера.</returns>
     internal Task<TextEditorContainer> GetActiveTextEditorContainer(EditorType editorType)
     {
       var foundContainer = _multiWindowControl.GetActiveTextEditorContainer(editorType);
       return Task.FromResult(foundContainer);
     }
 
+    /// <summary>
+    /// Добавляет вкладку с транслятором.
+    /// </summary>
+    /// <param name="editor">Текстовый редактор с файлом, который необходимо транслировать.</param>
+    /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
+    /// <param name="editorType">Тип вкладки.</param>
+    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
     internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
+    /// <summary>
+    /// Открывает папку, содержащую файл, в проводнике.
+    /// </summary>
+    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
     internal Task OpenFolder()
     {
       _multiWindowControl.OpenFolder();

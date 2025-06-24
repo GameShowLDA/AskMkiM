@@ -75,7 +75,7 @@ namespace UI.Components.MultiEditorMethods
       var result = MessageBoxResult.No;
       var saveFileResult = false;
       if (control.Content is TextEditorUI)
-      { // TODO: индекс изменить
+      { 
         var saveFileManager = new SaveFileManager(fileManager);
         saveFileManager.SaveFileDialog(ref result, ref saveFileResult, control);
       }
@@ -186,6 +186,11 @@ namespace UI.Components.MultiEditorMethods
       ShowControl(control, tabButton);
     }
 
+    /// <summary>
+    /// Добавляет контрол сравнения файлов в панель и создает соответствующую вкладку.
+    /// </summary>
+    /// <param name="header">Название вкладки.</param>
+    /// <param name="control">Пользовательский элемент сранения файлов.</param>
     private void AddFileCompareControl(string header, UserControl control)
     {
       var fileManager = new FileManager(multiEditorControl);

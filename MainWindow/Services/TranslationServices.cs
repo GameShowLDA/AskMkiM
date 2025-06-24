@@ -83,7 +83,11 @@ namespace MainWindowProgram.Services
     }
 
 
-
+    /// <summary>
+    /// Редактирует содержимое текстового редактора с странслированным файлом.
+    /// </summary>
+    /// <param name="editor">Текстовый редактор с файлом, который необходимо транслировать.</param>
+    /// <param name="foundDockItem">Вкладка с активным транслятором.</param>
     private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
       string text = editor.Text;
@@ -104,6 +108,12 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Создает новый экземпляр транслятора.
+    /// </summary>
+    /// <param name="editor">Текстовый редактор с файлом, который необходимо транслировать.</param>
+    /// <param name="text">Текст, который необходимо транслировать.</param>
+    /// <returns>Асинхронную задачу, представляющую собой результат выполнения.</returns>
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
     {
       var translateEditor = _fileService.CreateTranslationFileAsync();
