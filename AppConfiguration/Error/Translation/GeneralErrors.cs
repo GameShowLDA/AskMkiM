@@ -149,17 +149,18 @@ namespace AppConfiguration.Error.Translation
     /// <summary>
     /// Возвращает ошибку, если в строке команды обнаружены нераспознанные или лишние параметры.
     /// </summary>
+    /// <param name="unparsed">Сами нераспознанные параметры.</param>
     /// <param name="lineNumber">Номер строки, где найдены нераспознанные параметры.</param>
     /// <param name="command">Текст команды, в которой присутствуют лишние или нераспознанные параметры.</param>
     /// <returns>
     /// Объект <see cref="ErrorItem"/>, описывающий ошибку: нераспознанные параметры в строке.
     /// </returns>
-    public static ErrorItem UnrecognizedParameters(string parameters, int lineNumber, string command) => new()
+    public static ErrorItem UnrecognizedParameters(string unparsed, int lineNumber, string command) => new()
     {
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Gen_UnrecognizedParameters,
-      Description = $"Обнаружены нераспознанные параметры: {parameters}"
+      Description = $"Обнаружены нераспознанные параметры: {unparsed}"
     };
 
   }

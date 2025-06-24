@@ -8,12 +8,6 @@ namespace ControlCommandAnalyser.Parser.Common
   /// </summary>
   public static class CommonParameterParser
   {
-    /// <summary>
-    /// Извлекает значение напряжения из строки.
-    /// Примеры: "100В", "2500В", "200кВ", "1 МВ".
-    /// </summary>
-    /// <param name="input">Исходная строка.</param>
-    /// <returns>Кортеж: найденное напряжение (или null) и остаток строки без напряжения.</returns>
     public static (string? Voltage, string Remainder) ParseVoltage(string input)
     {
       var match = Regex.Match(input, @"(?<value>\d+\s*(В|кВ|КВ|мВ|МВ))", RegexOptions.IgnoreCase);
@@ -27,11 +21,24 @@ namespace ControlCommandAnalyser.Parser.Common
     }
 
     /// <summary>
-    /// Извлекает значение сопротивления из строки.
-    /// Примеры: "100<МОМ", "200<ОМ", "1<ГОМ".
+    /// Извлекает пороговое сопротивление в формате R&gt;100МОм.
     /// </summary>
-    /// <param name="input">Исходная строка.</param>
-    /// <returns>Кортеж: найденное сопротивление (или null) и остаток строки без сопротивления.</returns>
+    public static (string? ThresholdResistance, string Remainder) ParseThresholdResistance(string input)
+    {
+      // Совпадает с форматом: R>100МОм или R > 100МОм
+      var match = Regex.Match(input, @"R\s*>\s*\d+\s*(Ом|МОм|ГОм)", RegexOptions.IgnoreCase);
+      if (match.Success)
+      {
+        var resistance = match.Value.Trim();
+        var remainder = input.Remove(match.Index, match.Length).Trim(' ', ',');
+        return (resistance, remainder);
+      }
+      return (null, input);
+    }
+
+    /// <summary>
+    /// Старый метод — парсит сопротивление вида "100<МОм" (для СИ).
+    /// </summary>
     public static (string? Resistance, string Remainder) ParseResistance(string input)
     {
       var match = Regex.Match(input, @"(?<value>\d+\s*<\s*(Ом|МОм|ГОм))", RegexOptions.IgnoreCase);
@@ -44,12 +51,6 @@ namespace ControlCommandAnalyser.Parser.Common
       return (null, input);
     }
 
-    /// <summary>
-    /// Извлекает значение времени из строки.
-    /// Пример: "1c", "2 c".
-    /// </summary>
-    /// <param name="input">Исходная строка.</param>
-    /// <returns>Кортеж: найденное время (или null) и остаток строки без времени.</returns>
     public static (string? Time, string Remainder) ParseTime(string input)
     {
       var match = Regex.Match(input, @"(?<value>\d+\s*[сc])", RegexOptions.IgnoreCase);
