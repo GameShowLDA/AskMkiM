@@ -62,7 +62,7 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         string fileContent = string.Empty;
-        var fileData = GetFileContent(path, nameFile, fileContent).ToTuple();
+        var fileData = GetFileContent(path).ToTuple();
         fileContent = fileData.Item1;
         var encoding = fileData.Item2;
         TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
@@ -89,18 +89,23 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Создает контейнер для вкладок заданного типа.
+    /// </summary>
+    /// <param name="editorType">Тип вкладок.</param>
+    /// <returns>Контейнер для вкладок заданного типа.</returns>
     public TextEditorContainer CreateContainer(EditorType editorType)
     {
       var textEditorContainer = new TextEditorContainer();
       AddFileToControlManager(editorType.ToString(), textEditorContainer);
-      if (editorType == EditorType.TextEditor)
-      {
-        
-      }
 
       return textEditorContainer;
     }
 
+    /// <summary>
+    /// Создает текстовый редактор с результатами трансляции файла.
+    /// </summary>
+    /// <returns>Текстовый редактор с странслированным файлом.</returns>
     public TextEditorUI CreateTranslationFileAsync()
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
@@ -115,6 +120,10 @@ namespace UI.Components.MultiEditorMethods
       return textEditor;
     }
 
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns></returns>
     public TextEditorUI GetActiveTextEditor()
     {
       TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
@@ -128,6 +137,11 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
@@ -151,7 +165,11 @@ namespace UI.Components.MultiEditorMethods
       return false;
     }
 
-
+    /// <summary>
+    /// Отображает контейнер для вкладок заданного типа.
+    /// </summary>
+    /// <param name="textEditorContainer">Контейнер, содержащий вкладки заданного типа.</param>
+    /// <param name="editorType">Тип вкладок контейнера.</param>
     private void ShowControl(TextEditorContainer textEditorContainer, EditorType editorType)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
@@ -160,6 +178,11 @@ namespace UI.Components.MultiEditorMethods
       controlManager.ShowControl(textEditorContainer, tabButton);
     }
 
+    /// <summary>
+    /// Получает контейнер заданного типа.
+    /// </summary>
+    /// <param name="editorType">Тип контейнера.</param>
+    /// <returns>Найденный контейнер или <c>null</c>, если контнейнер не был найден.</returns>
     public TextEditorContainer GetContainer(EditorType editorType)
     {
       var containerPage = OpenPages.FirstOrDefault(page => page.Text == editorType.DisplayName);
@@ -182,6 +205,12 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Проверяет, существует ли уже открытый файл с таким названием, при необходимости присваивает файлу новое имя.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
+    /// <param name="nameFile">Название файла.</param>
+    /// <returns>Новое название файла.</returns>
     private string ManageFilename(string path, string nameFile)
     {
       if (!FilePaths.ContainsKey(nameFile))
@@ -204,7 +233,6 @@ namespace UI.Components.MultiEditorMethods
     /// Обрабатывает добавление или открытие файла с учётом уже открытых файлов в редакторе.
     /// При необходимости добавляет новый DockItem или показывает существующий.
     /// </summary>
-    /// <param name="path">Полный путь к файлу.</param>
     /// <param name="nameFile">Имя файла.</param>
     /// <param name="textEditorContainer">Контейнер редактора, в котором будут размещаться DockItem'ы.</param>
     /// <param name="textEditor">Экземпляр редактора для отображения содержимого файла.</param>
@@ -240,11 +268,18 @@ namespace UI.Components.MultiEditorMethods
       ShowDockItem(textEditorContainer, dockItem);
     }
 
+    /// <summary>
+    /// Отображает новую вкладку с транслятором.
+    /// </summary>
+    /// <param name="nameFile">Название файла.</param>
+    /// <param name="textEditorContainer">Контейнер для транслятора.</param>
+    /// <param name="textEditor">Текстовый редактор с транслируемым документом.</param>
+    /// <param name="translatorEditor">Текстовый редактор с странслированным документом.</param>
+    /// <returns>Асинхронную задачу, представляющую результат создания экземпляра <see cref="TranslatorItem"/>.</returns>
     private async Task<TranslatorItem> ShowNewDockItem(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor, TextEditorUI translatorEditor)
     {
       try
       {
-
         var translatorItem = new TranslatorItem();
         translatorItem.SetLeftEditor(textEditor);
         translatorItem.SetRightEditor(translatorEditor);
@@ -289,6 +324,10 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Удаляет контрол с котейнером для текстовых редакторов.
+    /// </summary>
+    /// <param name="textEditorContainer">Контейнер с текстовыми редакторами.</param>
     private void RemoveTextEditorContainer(TextEditorContainer textEditorContainer)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
@@ -296,6 +335,11 @@ namespace UI.Components.MultiEditorMethods
       controlManager.RemoveControl(foundPage, textEditorContainer);
     }
 
+    /// <summary>
+    /// Отображает новую вкладку в контейнере.
+    /// </summary>
+    /// <param name="textEditorContainer">Контейнер с текстовыми редакторами, в котором необходимо открыть файл.</param>
+    /// <param name="dockItem">Новая вкладка.</param>
     public void ShowDockItem(TextEditorContainer textEditorContainer, DockItem dockItem)
     {
       try
@@ -319,6 +363,11 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Определяет кодировку открываемого файла.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <returns>Кодировка файла.</returns>
     private Encoding DetectEncoding(string filePath)
     {
       using var fileStream = File.OpenRead(filePath);
@@ -343,7 +392,12 @@ namespace UI.Components.MultiEditorMethods
       return Encoding.UTF8;
     }
 
-    private (string, Encoding) GetFileContent(string path, string nameFile, string fileContent)
+    /// <summary>
+    /// Получает содержимое открываемого файла и кодировку, в которой записан файл.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
+    /// <returns>Строку с содержимым файла и кодировку файла.</returns>
+    private (string, Encoding) GetFileContent(string path)
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
@@ -358,12 +412,17 @@ namespace UI.Components.MultiEditorMethods
         }
       }
 
-      fileContent = content.Count > 0 ? string.Join("\n", content) : string.Empty;
+      var fileContent = content.Count > 0 ? string.Join("\n", content) : string.Empty;
 
       return (fileContent, encoding);
     }
 
-
+    /// <summary>
+    /// Получает разницу в путях к файлам с одинаковым названием.
+    /// </summary>
+    /// <param name="existingPath">Уже открытый файл с тем же названием.</param>
+    /// <param name="newPath">Открываемый файл.</param>
+    /// <returns>Уникальное название открываемого файла.</returns>
     public string GetDifferenceBetweenPaths(string existingPath, string newPath)
     {
       var existingParts = existingPath.Split(Path.DirectorySeparatorChar);
@@ -391,13 +450,11 @@ namespace UI.Components.MultiEditorMethods
       return string.Join(Path.DirectorySeparatorChar.ToString(), newParts.Skip(startIndex));
     }
 
-
-
     /// <summary>
     /// Добавляет контрол в мультиэдитор.
     /// </summary>
     /// <param name="nameFile">Имя добавляемого файла.</param>
-    /// <param name="textEditor">Экземпляр класса TextEditorUI.</param>
+    /// <param name="container">Экземпляр класса <see cref="UserControl"/>, представляющий собой контейнер.</param>
     private void AddFileToControlManager(string nameFile, UserControl container)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
@@ -412,16 +469,6 @@ namespace UI.Components.MultiEditorMethods
     private string GetNameFile(string path)
     {
       return string.IsNullOrEmpty(path) ? string.Empty : System.IO.Path.GetFileName(path);
-    }
-
-    /// <summary>
-    /// Читает содержимое файла по указанному пути.
-    /// </summary>
-    /// <param name="path">Путь к файлу.</param>
-    /// <returns>Содержимое файла в виде строки.</returns>
-    private string ReadFileContent(string path)
-    {
-      return System.IO.File.ReadAllText(path);
     }
 
     /// <summary>
@@ -470,7 +517,7 @@ namespace UI.Components.MultiEditorMethods
     /// <summary>
     /// Сравнивает содержимое открытого файла с текстом в текущем редакторе.
     /// </summary>
-    /// <param name="openPage">Объект кнопки, представляющий открытую страницу.</param>
+    /// <param name="control">Экземпляр <see cref="DockItem"/>, представляющий открытую страницу.</param>
     /// <returns>Возвращает <c>true</c>, если файл не сохранен (содержимое изменилось), <c>false</c> в противном случае.</returns>
     public bool CompareFiles(DockItem control)
     {
@@ -514,6 +561,11 @@ namespace UI.Components.MultiEditorMethods
       return false;
     }
 
+    /// <summary>
+    /// Определяет тип файла.
+    /// </summary>
+    /// <param name="fileName">Название файла.</param>
+    /// <returns>Тип файла.</returns>
     private FileType GetFileType(string fileName)
     {
       if (string.IsNullOrEmpty(fileName))
@@ -529,6 +581,13 @@ namespace UI.Components.MultiEditorMethods
       };
     }
 
+    /// <summary>
+    /// Выполняет добавление <see cref="TranslatorItem"/> в качестве новой вкладки в DockControl.
+    /// </summary>
+    /// <param name="editor">Текстовый редактор с транслируемым файлом.</param>
+    /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
+    /// <param name="editorType">Тип контейнера.</param>
+    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
     internal async Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       try
@@ -551,6 +610,9 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Получает контейнер с текстовым редактором/транслятором и выполняет открытие папки в проводнике, содержащей файл.
+    /// </summary>
     internal void OpenFolder()
     {
       TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
@@ -581,6 +643,10 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    /// <summary>
+    /// Открывает папку в проводнике, в которой содержится файл.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
     private static void OpenFileFolder(string path)
     {
       string folder = Path.GetDirectoryName(path);
