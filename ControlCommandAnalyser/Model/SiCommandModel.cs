@@ -5,7 +5,7 @@ namespace ControlCommandAnalyser.Model
   /// <summary>
   /// Модель для команды СИ (сопротивление изоляции).
   /// </summary>
-  public class SiCommandModel : BaseCommandModel
+  public class SiCommandModel : BaseCommandModel, IHasPoints
   {
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").

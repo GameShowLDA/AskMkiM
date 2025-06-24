@@ -1,4 +1,5 @@
 ﻿using System;
+using Utilities.Errors;
 using Utilities.Models;
 
 namespace AppConfiguration.Error.Translation
@@ -16,8 +17,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem CannotParseExpression(string expr, int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_CannotParseExpression,
       Description = $"Не удалось распознать выражение: {expr}"
     };
 
@@ -31,8 +33,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem EmptyLeftOrRight(string left, string middle, string right, int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_EmptyLeftOrRight,
       Description = $"Левая или правая часть выражения пуста: {left} == {middle} = {right}"
     };
 
@@ -45,8 +48,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem MismatchedCounts(int leftCount, int rightCount, int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_MismatchedCounts,
       Description = $"Количество точек ОК и входов должно совпадать! " +
                     $"Левая часть: (количество: {leftCount}) " +
                     $"Правая часть: (количество: {rightCount})"
@@ -59,8 +63,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem GroupMismatch(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_GroupMismatch,
       Description = "Нельзя разбить диапазон слева на равные группы под массив справа!"
     };
 
@@ -71,8 +76,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem GroupTooShort(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_GroupTooShort,
       Description = "Правая группа короче, чем левая!"
     };
 
@@ -83,8 +89,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem StepRangeMismatch(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_StepRangeMismatch,
       Description = "Диапазоны не совпадают по количеству элементов."
     };
 
@@ -95,8 +102,9 @@ namespace AppConfiguration.Error.Translation
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem EmptyCommandBody(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Rm_EmptyCommandBody,
       Description = "Команда РМ должна содержать хотя бы один параметр. Тело команды не может быть пустым."
     };
   }

@@ -16,6 +16,7 @@
 
 	<RuleSet ignoreCase="false">
 
+
 		<!-- Вся строка с ! красная -->
 		<Rule color="ErrorLine">^.*!.*$</Rule>
 		
@@ -41,6 +42,8 @@
 		<!-- Данные РМ -->
 		<Rule color="OkParam">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
 		<Rule color="RmAddress">(?&lt;=&gt;\s*)[\d\.]+</Rule>
+		<Rule color="OkValue">^\s*\d+\.\d+\.\d+\s*$</Rule>
+
 
 		<!-- Номер команды -->
 		<Rule color="CommandNumber">^\s*\d+\b</Rule>

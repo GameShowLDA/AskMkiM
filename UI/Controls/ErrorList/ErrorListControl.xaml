@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:UI.Controls.ErrorList"
              xmlns:components="clr-namespace:UI.Components"
+             xmlns:ErrorConv ="clr-namespace:Utilities.Errors;assembly=Utilities"
              x:Name="root">
     <UserControl.Resources>
         <SolidColorBrush x:Key="ErrorListBackground" Color="#1E1E1E"/>
         <SolidColorBrush x:Key="ErrorListForeground" Color="#D4D4D4"/>
         <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#2D2D2D"/>
         <SolidColorBrush x:Key="ErrorListSelection" Color="#264F78"/>
+        <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
+        <ErrorConv:ErrorCodeToTagConverter x:Key="ErrorCodeToTagConverter"/>
+        <local:ErrorLinePairConverter x:Key="ErrorLinePairConverter"/>
     </UserControl.Resources>
     <Grid Background="{StaticResource ErrorListBackground}">
         <DataGrid ItemsSource="{Binding Errors, ElementName=root}"
@@ -53,17 +57,27 @@
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <!-- Крестик -->
-                <DataGridTemplateColumn Width="40">
+                <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="{Binding Errors.Count, ElementName=root, Converter={StaticResource ErrorCountConverter}}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10"/>
+                    </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <components:CrossIcon Size="16" />
+                                <components:CrossIcon Size="13" />
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <!-- Код ошибки -->
+                <DataGridTextColumn Header="Код"
+                    Width="80"
+                    Binding="{Binding Code, Converter={StaticResource ErrorCodeToTagConverter}}"
+                    FontFamily="{DynamicResource WinstonLight}"
+                    FontSize="14"/>
                 <!-- Номер строки -->
-                <DataGridTextColumn Header="Строка" Binding="{Binding LineNumber}" Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <DataGridTextColumn Header="Строка" Binding="{Binding ., Converter={StaticResource ErrorLinePairConverter}}"  Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
                 <!-- Номер команды -->
                 <DataGridTextColumn Header="Команда" Width="80" Binding="{Binding Command}" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
                 <!-- Описание ошибки -->

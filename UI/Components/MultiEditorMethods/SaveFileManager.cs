@@ -1,15 +1,15 @@
 ﻿using System.IO;
+using System.Text;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
+using DevZest.Windows.Docking;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
+using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
-using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
-using System.Windows;
-using System.Text;
-using DevZest.Windows.Docking;
 
 namespace UI.Components.MultiEditorMethods
 {

@@ -108,8 +108,9 @@ namespace ControlCommandAnalyser.Parser.Si
 
       if (!string.IsNullOrEmpty(remainder))
       {
-        model.UnparsedParameters = "// Не распознанные параметры: ";
+        model.UnparsedParameters = "! Не распознанные параметры: ";
         model.UnparsedParameters += remainder;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
       
       // Валидация

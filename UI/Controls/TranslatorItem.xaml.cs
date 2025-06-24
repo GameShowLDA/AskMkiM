@@ -5,8 +5,9 @@ using System.Xml.Serialization;
 using ICSharpCode.AvalonEdit;
 using UI.Controls.ErrorList;
 using UI.Controls.TextEditor;
-using Utilities.Models;
 using System;
+using Utilities.Errors;
+using Utilities.Models;
 
 namespace UI.Controls
 {
@@ -28,16 +29,29 @@ namespace UI.Controls
 
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(ErrorItem error)
     {
-      var lineNumber = error.LineNumber;
-      var textEditor = GetLeftEditor();
+      // Левый редактор (исходник)
+      var leftLine = error.SourceLineNumber;
+      var leftEditor = GetLeftEditor();
 
-      if (lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
-        return;
+      if (leftLine > 0 && leftLine <= leftEditor.Document.LineCount)
+      {
+        var line = leftEditor.Document.GetLineByNumber(leftLine);
+        leftEditor.ScrollToLine(leftLine);
+        leftEditor.Select(line.Offset, line.Length);
+        leftEditor.Focus();
+      }
 
-      var line = textEditor.Document.GetLineByNumber(lineNumber);
-      textEditor.ScrollToLine(lineNumber);
-      textEditor.Select(line.Offset, line.Length); // можно убрать, если не нужно выделение
-      textEditor.Focus();
+      // Правый редактор (трансляция)
+      var rightLine = error.FormattedLineNumber;
+      var rightEditor = GetRightEditor();
+
+      if (rightLine > 0 && rightLine <= rightEditor.Document.LineCount)
+      {
+        var line = rightEditor.Document.GetLineByNumber(rightLine);
+        rightEditor.ScrollToLine(rightLine);
+        rightEditor.Select(line.Offset, line.Length);
+        rightEditor.Focus();
+      }
     }
 
     public void AddError(ErrorItem errorItem)

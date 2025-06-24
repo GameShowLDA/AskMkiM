@@ -1,4 +1,5 @@
 ﻿using System;
+using Utilities.Errors;
 using Utilities.Models;
 
 namespace AppConfiguration.Error.Translation
@@ -13,8 +14,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem CannotParseFirstLine(int startLineNumber, string command, string line) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Ok_CannotParseFirstLine,
       Description = $"Не удалось разобрать первую строку команды ОК"
     };
 
@@ -23,8 +25,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem MissingObjectCode(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Ok_MissingObjectCode,
       Description = "Не указано обозначение объекта контроля (обязательное поле)."
     };
 
@@ -33,8 +36,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem MissingObjectName(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Ok_MissingObjectName,
       Description = "Не указано наименование объекта контроля (после *)."
     };
 
@@ -43,8 +47,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem EmptyCommandBody(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Ok_EmptyCommandBody,
       Description = "Команда ОК должна содержать хотя бы одну строку. Тело команды не может быть пустым."
     };
 
@@ -53,8 +58,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem CannotParseParameter(int lineNumber, string command, string line) => new()
     {
-      LineNumber = lineNumber,
+      SourceLineNumber = lineNumber,
       Command = command,
+      Code = ErrorCode.Ok_CannotParseParameter,
       Description = $"Не удалось разобрать параметр: {line}"
     };
 
@@ -63,8 +69,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem ParameterKeyTooLong(int lineNumber, string command, string key) => new()
     {
-      LineNumber = lineNumber,
+      SourceLineNumber = lineNumber,
       Command = command,
+      Code = ErrorCode.Ok_ParameterKeyTooLong,
       Description = $"Длина идентификатора параметра '{key}' превышает 39 символов."
     };
 
@@ -73,8 +80,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem ParameterValueTooLong(int lineNumber, string command, string key, int maxLength) => new()
     {
-      LineNumber = lineNumber,
+      SourceLineNumber = lineNumber,
       Command = command,
+      Code = ErrorCode.Ok_ParameterValueTooLong,
       Description = $"Значение параметра '{key}' превышает максимально допустимую длину {maxLength} символов."
     };
 
@@ -83,8 +91,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem DuplicateParameterKey(int lineNumber, string command, string key) => new()
     {
-      LineNumber = lineNumber,
+        SourceLineNumber = lineNumber,
       Command = command,
+      Code = ErrorCode.Ok_DuplicateKey,
       Description = $"Повтор идентификатора параметра '{key}'. Допускается только для КД, ЦЕХ и ПРИМ/ПРИМЕЧ(АНИЕ)."
     };
 
@@ -93,8 +102,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem ObjectCodeTooLong(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Ok_ObjectCodeTooLong,
       Description = "Обозначение объекта контроля превышает 39 символов."
     };
 
@@ -103,8 +113,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem ObjectNameTooLong(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Ok_ObjectNameTooLong,
       Description = "Наименование объекта контроля превышает 39 символов."
     };
   }

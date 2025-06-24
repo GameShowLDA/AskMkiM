@@ -17,9 +17,10 @@ namespace ControlCommandAnalyser.Formatter
 
       // Первая строка: номер, мнемоника, нераспознанные параметры (если есть)
       var firstLine = $"{si.CommandNumber} {si.Mnemonic}";
-      if (!string.IsNullOrWhiteSpace(si.UnparsedParameters))
-        firstLine += $" {si.UnparsedParameters}";
       yield return firstLine;
+
+      if (!string.IsNullOrWhiteSpace(si.UnparsedParameters))
+        yield return $"\t{si.UnparsedParameters}";
 
       // Напряжение
       if (!string.IsNullOrWhiteSpace(si.Voltage))

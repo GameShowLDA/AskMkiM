@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
 using Utilities.Models;
 
@@ -21,7 +22,83 @@ namespace ControlCommandAnalyser.Parser
 
       CheckStartAndEnd(models);
       CheckUniqueMnemonics(models);
+
+      // Извлечение PointsMap из RmCommandModel
+      var rmModel = models.OfType<RmCommandModel>().FirstOrDefault();
+      Dictionary<string, string> pointsMap = null;
+      if (rmModel != null)
+      {
+        pointsMap = rmModel.PointsMap;
+      }
+
+      try
+      {
+        if (rmModel != null)
+        {
+          CheckPointLinks(models, pointsMap);
+        }
+      }
+      catch
+      { }
+
+      CheckPointExistence(models, pointsMap);
     }
+
+    private static void CheckPointLinks(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
+    {
+      var duplicateDestinations = pointsMap
+        .GroupBy(kv => kv.Value)
+        .Where(g => g.Count() > 1)
+        .Select(g => g.Key);
+
+      foreach (var dest in duplicateDestinations)
+      {
+        var rmModel = models.OfType<RmCommandModel>().FirstOrDefault();
+        if (rmModel != null)
+        {
+          rmModel.Errors.Add(GeneralErrors.DuplicateDestinationPoint(dest, rmModel.StartLineNumber, $"{rmModel.CommandNumber} {rmModel.Mnemonic}"));
+        }
+      }
+    }
+
+    private static void CheckPointExistence(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
+    {
+      var pointModels = models.OfType<IHasPoints>();
+
+      foreach (var model in pointModels)
+      {
+        bool errorPoints = false;
+
+        var baseModel = model as BaseCommandModel;
+        for (int i = 0; i < model.Points.Count; i++)
+        {
+          var point = model.Points[i];
+          if (pointsMap == null)
+          {
+            if (!errorPoints)
+            {
+              errorPoints = true; // ошибка уже добавлена, не нужно повторять
+              baseModel?.Errors.Add(GeneralErrors.MissingPointsMap(baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
+            }
+
+            model.Points[i] = $"Нераспознанная точка: {point}!";
+            continue; // пропускаем остальную логику
+          }
+
+          if (!pointsMap.ContainsKey(point) && !pointsMap.ContainsValue(point))
+          {
+            baseModel?.Errors.Add(GeneralErrors.UnknownPoint(point, baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
+            model.Points[i] = $"Нераспознанная точка: {point}!";
+          }
+          else
+          {
+            pointsMap.TryGetValue(point, out var mappedPoint);
+            model.Points[i] = mappedPoint ?? point;
+          }
+        }
+      }
+    }
+
 
     /// <summary>
     /// Проверяет, что первая команда — ОК, а последняя — КЦ. В противном случае добавляет ошибки.
@@ -34,22 +111,12 @@ namespace ControlCommandAnalyser.Parser
 
       if (!string.Equals(first.Mnemonic, "ОК", System.StringComparison.OrdinalIgnoreCase))
       {
-        first.Errors.Add(new ErrorItem
-        {
-          LineNumber = first.StartLineNumber,
-          Command = $"{first.CommandNumber} {first.Mnemonic}",
-          Description = "Первая команда должна быть ОК"
-        });
+        first.Errors.Add(GeneralErrors.FirstCommandMustBeOk(first.StartLineNumber, $"{first.CommandNumber} {first.Mnemonic}"));
       }
 
       if (!string.Equals(last.Mnemonic, "КЦ", System.StringComparison.OrdinalIgnoreCase))
       {
-        last.Errors.Add(new ErrorItem
-        {
-          LineNumber = last.StartLineNumber,
-          Command = $"{last.CommandNumber} {last.Mnemonic}",
-          Description = "Последняя команда должна быть КЦ"
-        });
+        last.Errors.Add(GeneralErrors.LastCommandMustBeKc(last.StartLineNumber, $"{last.CommandNumber} {last.Mnemonic}"));
       }
     }
 
@@ -72,29 +139,17 @@ namespace ControlCommandAnalyser.Parser
           var first = models[0];
           if (mnemonic != "СП")
           {
-            first.Errors.Add(new ErrorItem
-            {
-              LineNumber = first.StartLineNumber,
-              Command = $"{first.CommandNumber} {first.Mnemonic}",
-              Description = $"Команда {mnemonic} должна присутствовать в программе"
-            });
+            first.Errors.Add(GeneralErrors.MissingRequiredCommand(mnemonic, first.StartLineNumber, $"{first.CommandNumber} {first.Mnemonic}"));
           }
         }
         else if (matches.Count > 1)
         {
           foreach (var duplicate in matches.Skip(1))
           {
-            duplicate.Errors.Add(new ErrorItem
-            {
-              LineNumber = duplicate.StartLineNumber,
-              Command = $"{duplicate.CommandNumber} {duplicate.Mnemonic}",
-              Description = $"Команда {mnemonic} должна быть только одна"
-            });
+            duplicate.Errors.Add(GeneralErrors.DuplicateCommand(mnemonic, duplicate.StartLineNumber, $"{duplicate.CommandNumber} {duplicate.Mnemonic}"));
           }
         }
       }
     }
-
-
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Utilities.Errors;
 using Utilities.Models;
 
 namespace AppConfiguration.Error.Translation
@@ -13,8 +14,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem CannotParseExpression(string expr, int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Si_CannotParseExpression,
       Description = $"Не удалось распознать выражение: {expr}"
     };
 
@@ -23,8 +25,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem CannotParseParameters(string parameters, int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Si_CannotParseParameters,
       Description = $"Не удалось распознать параметры: {parameters}"
     };
 
@@ -33,8 +36,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem EmptyPoints(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Si_EmptyPoints,
       Description = "Не указаны точки для измерения."
     };
 
@@ -43,8 +47,9 @@ namespace AppConfiguration.Error.Translation
     /// </summary>
     public static ErrorItem EmptyCommandBody(int startLineNumber, string command) => new()
     {
-      LineNumber = startLineNumber,
+      SourceLineNumber = startLineNumber,
       Command = command,
+      Code = ErrorCode.Si_EmptyCommandBody,
       Description = "Команда СИ должна содержать хотя бы один параметр. Тело команды не может быть пустым."
     };
   }

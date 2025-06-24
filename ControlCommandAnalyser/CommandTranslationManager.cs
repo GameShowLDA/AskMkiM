@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Windows.Media;
+using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Formatter;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Parser;
-using ControlCommandAnalyser.Formatter;
+using Utilities.Errors;
+using Utilities.Models;
 using Utilities.TextEditor;
-using System.Windows.Media;
 
 namespace ControlCommandAnalyser
 {
@@ -47,54 +50,137 @@ namespace ControlCommandAnalyser
     /// </summary>
     public List<BaseCommandModel> ParseAllAndDisplay(string text, ITextEditorAdapter adapter)
     {
-      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Начало трансляции");
-      var models = ParseAll(text);
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Начало трансляции");
+      var models = ParseAndLog(text);
 
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Формирование данных");
+      FormatAndDisplay(models, adapter);
+
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Проверка взаимосвязей");
+      AnalyzeAndLog(models);
+
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Формирование данных");
+      FormatAndDisplay(models, adapter);
+
+      return models;
+    }
+
+    private List<BaseCommandModel> ParseAndLog(string text)
+    {
+      return ParseAll(text);
+    }
+
+    private void FormatAndDisplay(List<BaseCommandModel> models, ITextEditorAdapter adapter)
+    {
       var formattedLines = new List<string>();
       var highlights = new List<HighlightRange>();
-      int globalLine = 0;
 
-      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Формирование данных");
+      // 1. Формируем текст справа и строим mapping
+      var lineMapping = BuildFormattedTextAndMapping(models, formattedLines);
+
+      // 2. Заполняем номера строк для ошибок
+      AssignFormattedLineNumbers(models, lineMapping);
+
+      // 3. Отправляем текст в адаптер
+      string outText = string.Join("\n", formattedLines);
+      adapter.SetTextAndHighlighting(outText, highlights);
+    }
+
+    /// <summary>
+    /// Формирует форматированный текст и строит mapping строк исходник → трансляция.
+    /// </summary>
+    private List<(int SourceLineNumber, int FormattedLineNumber)> BuildFormattedTextAndMapping(
+        List<BaseCommandModel> models, List<string> formattedLines)
+    {
+      var lineMapping = new List<(int SourceLineNumber, int FormattedLineNumber)>();
+      int formattedLineNumber = 1;
+
       foreach (var model in models)
       {
         var formatter = _formatters.FirstOrDefault(f => f.CanFormat(model));
         IEnumerable<string> lines;
-        if (formatter != null)
-        {
-          lines = formatter.Format(model);
-        }
-        else
-        {
-          var sourceLinesProp = model.GetType().GetProperty("SourceLines");
-          lines = sourceLinesProp != null
-            ? sourceLinesProp.GetValue(model) as IEnumerable<string> ?? new List<string>()
-            : new List<string>();
-        }
 
+        // Получаем исходные строки для текущей команды
+        List<string> sourceLines = GetSourceLines(model, out int startSourceLineNumber);
+
+        lines = formatter != null ? formatter.Format(model) : sourceLines;
+
+        int countSourceLines = sourceLines.Count;
+        int localSourceLineIdx = 0;
         foreach (var line in lines)
         {
           formattedLines.Add(line);
-          globalLine++;
+          int sourceLineNumber = (localSourceLineIdx < countSourceLines)
+              ? startSourceLineNumber + localSourceLineIdx
+              : startSourceLineNumber;
+
+          lineMapping.Add((sourceLineNumber, formattedLineNumber));
+          formattedLineNumber++;
+          localSourceLineIdx++;
         }
       }
+      return lineMapping;
+    }
 
-      string outText = string.Join("\n", formattedLines);
-      adapter.SetTextAndHighlighting(outText, highlights);
+    /// <summary>
+    /// Возвращает строки исходника и номер первой строки.
+    /// </summary>
+    private List<string> GetSourceLines(BaseCommandModel model, out int startSourceLineNumber)
+    {
+      var sourceLines = new List<string>();
+      startSourceLineNumber = 1;
 
-      AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Проверка взаимосвязей");
+      var sourceLinesProp = model.GetType().GetProperty("SourceLines");
+      if (sourceLinesProp != null)
+      {
+        var srcLines = sourceLinesProp.GetValue(model) as IEnumerable<string>;
+        if (srcLines != null)
+          sourceLines = srcLines.ToList();
+      }
+      var startLineProp = model.GetType().GetProperty("StartLineNumber");
+      if (startLineProp != null)
+      {
+        var start = startLineProp.GetValue(model);
+        if (start is int i && i > 0)
+          startSourceLineNumber = i;
+      }
+      return sourceLines;
+    }
+
+    /// <summary>
+    /// Проставляет FormattedLineNumber для всех ошибок.
+    /// </summary>
+    private void AssignFormattedLineNumbers(List<BaseCommandModel> models, List<(int SourceLineNumber, int FormattedLineNumber)> lineMapping)
+    {
+      foreach (var model in models)
+      {
+        if (model.Errors == null) continue;
+        foreach (var error in model.Errors)
+        {
+          var match = lineMapping.FirstOrDefault(m => m.SourceLineNumber == error.SourceLineNumber);
+          if (match != default)
+            error.FormattedLineNumber = match.FormattedLineNumber;
+          else
+            error.FormattedLineNumber = -1;
+        }
+      }
+    }
+
+
+
+    private void AnalyzeAndLog(List<BaseCommandModel> models)
+    {
       CommandPostAnalyzer.Analyze(models);
 
       var totalErrorCount = models.Sum(m => m?.Errors?.Count() ?? 0);
       if (totalErrorCount > 0)
       {
-        AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Ошибка трансляции");
+        AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Ошибка трансляции");
       }
       else
       {
-        AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Готово");
+        AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Готово");
       }
-
-      return models;
     }
 
     /// <summary>
@@ -103,6 +189,8 @@ namespace ControlCommandAnalyser
     public List<BaseCommandModel> ParseAll(string text)
     {
       AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Сбор данных...");
+
+      text = PreprocessText(text);
       var lines = text.Replace("\r\n", "\n").Split('\n');
       var commands = new List<BaseCommandModel>();
 
@@ -149,7 +237,6 @@ namespace ControlCommandAnalyser
       return commands;
     }
 
-
     private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, int lineNumber, List<string> lines)
     {
       foreach (var parser in _parsers)
@@ -161,8 +248,20 @@ namespace ControlCommandAnalyser
         CommandNumber = commandNumber,
         Mnemonic = mnemonic,
         SourceLines = new List<string>(lines),
-        Errors = new List<Utilities.Models.ErrorItem>() { new Utilities.Models.ErrorItem() { Command = $"{commandNumber} {mnemonic}", LineNumber = lineNumber, Description = $"Неизвестная команда {mnemonic}" } }
+        Errors = new List<ErrorItem>
+        {
+          GeneralErrors.UnknownCommand(mnemonic, lineNumber, $"{commandNumber} {mnemonic}")
+        }
       };
+    }
+
+    private string PreprocessText(string text)
+    {
+      text = Regex.Replace(text, @"/\*.*?\*/", "", RegexOptions.Singleline);
+      text = Regex.Replace(text, @"//.*?$", "", RegexOptions.Multiline);
+      text = Regex.Replace(text, @"\{[^{}]*\}", "", RegexOptions.Multiline);
+
+      return text;
     }
   }
 
