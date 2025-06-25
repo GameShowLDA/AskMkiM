@@ -48,8 +48,8 @@ namespace MainWindowProgram.Services
     public async Task OpenProtocolAsync() =>
       await _multiWindow.AddControlAsync("Протокол", new Mode.Settings.ProtocolManager.ProtocolManagerControl(), TypeWindow.Settings);
 
-    public async Task HelpTextAsync() =>
-      HelpProvider.ShowHelp("index");
+    //public async Task HelpTextAsync() =>
+    //  HelpProvider.ShowHelp("index");
     
   }
 }

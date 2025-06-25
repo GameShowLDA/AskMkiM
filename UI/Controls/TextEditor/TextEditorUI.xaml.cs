@@ -12,6 +12,7 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
 using UI.Components;
+using Utilities.Help;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
 
@@ -165,6 +166,24 @@ namespace UI.Controls.TextEditor
         }
 
       };
+
+      HelpProvider.SetHelpKeyProvider(textEditor, () =>
+      {
+        var sel = textEditor.SelectedText?.Trim();
+        // если выделили, пытаемся распознать enum по описанию (DescriptionAttribute)
+        if (!string.IsNullOrEmpty(sel)
+            && Enum.TryParse<HelpProvider.EnumHelpCommands>(sel, true, out var directEnum))
+        {
+          return directEnum;
+        }
+        // иначе пробуем по DescriptionAttribute
+        if (HelpProvider.TryGetByDescription(sel ?? "", out var byDesc))
+        {
+          return byDesc;
+        }
+        // если ничего не подошло — общий раздел горячих клавиш
+        return HelpProvider.EnumHelpCommands.OK; // или любой дефолт
+      });
     }
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {

@@ -44,6 +44,33 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandRM.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandTsU.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandPR.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandSI.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandPI.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandKTs.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandUP.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandSP.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandOK.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="NLog.config">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
