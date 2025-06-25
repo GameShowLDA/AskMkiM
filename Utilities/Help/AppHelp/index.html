@@ -4,6 +4,56 @@
     <meta charset="UTF-8">
     <title>Справка</title>
     <link rel="stylesheet" href="style.css">
+
+    <script>
+        console.log("👉 location.href      =", location.href);
+        console.log("👉 location.search    =", location.search);
+        console.log("👉 location.hash      =", location.hash);
+
+        function openCommandTab(command) {
+            if (!command) {
+                alert(
+                    "Входное значение функции 'openCommandTab' была пустая строка или null!\n" +
+                    "Сообщите оь ошибке разработчикам!"
+                );
+                return;
+            }
+            const details = [...document.querySelectorAll('.sidebar details')]
+                .find(d => d.querySelector('summary')?.textContent.includes('Команды'));
+            if (!details) {
+                console.error('Не найден раздел «Команды»');
+                return;
+            }
+            details.open = true;
+            document.getElementById('content-frame')
+                .src = `TextEditor/CommandList/PageCommand${command}.html`;
+        }
+
+        function initHelp() {
+            // 1) сначала пытаемся взять cmd из search (на случай HTTP)
+            let params = new URLSearchParams(window.location.search);
+            let cmd = params.get('cmd');
+            // 2) если нет — берём из hash (для file://)
+            if (!cmd && location.hash.length > 1) {
+                cmd = location.hash.slice(1);
+            }
+
+            if (cmd) {
+                openCommandTab(cmd);
+            } else {
+                // fallback на section=…
+                const section = params.get('section') || 'hotkeys';
+                document.getElementById('content-frame')
+                    .src = `TextEditor/${section}.html`;
+            }
+        }
+
+        if (document.readyState !== 'loading') {
+            initHelp();
+        } else {
+            document.addEventListener('DOMContentLoaded', initHelp);
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -51,10 +101,10 @@
     </footer>
 
     <script>
-        const params  = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
         const section = params.get('section') || 'hotkeys';
-        const cmd     = params.get('cmd');          // ← новое
-        let   src     = `TextEditor/${section}.html`;
+        const cmd = params.get('cmd');          // ← новое
+        let src = `TextEditor/${section}.html`;
         if (cmd) src += `?cmd=${cmd}`;              // ← новое
         document.getElementById("content-frame").src = src;
     </script>

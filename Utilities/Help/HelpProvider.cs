@@ -99,54 +99,32 @@ namespace Utilities.Help
     /// </summary>
     public static void ShowHelp(EnumHelpCommands command)
     {
-      string section;
-      switch (command)
+      // Убеждаемся, что папка есть
+      var helpDir = Path.Combine(
+          AppDomain.CurrentDomain.BaseDirectory,
+          "Help", "AppHelp");
+      if (!Directory.Exists(helpDir))
       {
-        case EnumHelpCommands.KTs:
-          section = "CommandList/PageCommandKTs";
-          break;
-        case EnumHelpCommands.OK:
-          section = "CommandList/PageCommandOK";
-          break;
-        case EnumHelpCommands.PI:
-          section = "CommandList/PageCommandPI";
-          break;
-        case EnumHelpCommands.PR:
-          section = "CommandList/PageCommandPR";
-          break;
-        case EnumHelpCommands.RM:
-          section = "CommandList/PageCommandRM";
-          break;
-        case EnumHelpCommands.SI:
-          section = "CommandList/PageCommandSI";
-          break;
-        case EnumHelpCommands.SP:
-          section = "CommandList/PageCommandSP";
-          break;
-        case EnumHelpCommands.TsU:
-          section = "CommandList/PageCommandTsU";
-          break;
-        case EnumHelpCommands.UP:
-          section = "CommandList/PageCommandUP";
-          break;
-        default:
-          LogError($"Команда {command} не была добавлена в EnumHelpCommands!");
-          MessageBox.Show(
-              $"Неизвестная команда справки: {command}",
-              "Обратитесь к разработчику!"
-          );
-          return;
-      }
-
-      string helpFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Help", "AppHelp", "index.html");
-      if (!File.Exists(helpFile))
-      {
-        MessageBox.Show("Файл справки index.html не найден.", "Справка");
+        MessageBox.Show("Папка с справкой не найдена.", "Справка");
         return;
       }
 
-      string uri = new Uri(helpFile).AbsoluteUri + $"?section={section}";
-      Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
+      // Запускаем HTTP-сервер (если ещё не запущен)
+      try
+      {
+        HelpServer.EnsureStarted();
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Не удалось запустить Help-сервер: {ex.Message}", "Справка");
+        return;
+      }
+
+      // Формируем URL вида http://localhost:8000/index.html?cmd=TsU
+      string url = $"http://localhost:{HelpServer.Port}/index.html?cmd={command}";
+
+      // Открываем в браузере
+      Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
     }
 
     /// <summary>
