@@ -46,6 +46,7 @@ namespace MainWindowProgram.Engine
       );
 
       HelpProvider.RegisterHelp(window);
+
       return (viewModel, usb);
     }
   }

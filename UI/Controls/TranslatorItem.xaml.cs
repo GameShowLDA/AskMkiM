@@ -8,6 +8,7 @@ using UI.Controls.TextEditor;
 using System;
 using Utilities.Errors;
 using Utilities.Models;
+using ControlCommandAnalyser.Model;
 
 namespace UI.Controls
 {
@@ -20,6 +21,27 @@ namespace UI.Controls
     public string SecondFilePath { get; set; }
 
     public int errorCount = 0;
+    
+    private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
+    public List<BaseCommandModel> TranslationModels 
+    {
+      get
+      {
+        return translationModels;
+      }
+      set
+      {
+        translationModels = value;
+        ErrorClear();
+        foreach (var model in value)
+        {
+          if (model.Errors.Count > 0)
+          {
+            SetError(model.Errors);
+          }
+        }
+      }
+    }
 
     public TranslatorItem()
     {
@@ -54,12 +76,7 @@ namespace UI.Controls
       }
     }
 
-    public void AddError(ErrorItem errorItem)
-    {
-      ErrorListBoxVertical.Errors.Add(errorItem);
-    }
-
-    public void ErrorClear()
+    private void ErrorClear()
     {
       ErrorListBoxVertical.Errors.Clear();
       errorCount = 0;
@@ -99,7 +116,7 @@ namespace UI.Controls
       RightBox.Children.Add(textEditorUI);
     }
 
-    public void SetError(List<ErrorItem> errorItems)
+    private void SetError(List<ErrorItem> errorItems)
     {
       foreach (ErrorItem errorItem in errorItems)
       {

@@ -338,6 +338,7 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -348,7 +349,7 @@
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
 				/>
 
-
+            
             <Controls:StatusBarControl
                 Grid.Column="1" 
                 x:Name="StatusBar"
@@ -356,8 +357,19 @@
                 Visibility="Hidden"
                 />
 
-            <DefaultGUI:PowerButton
+
+            <Controls:DateTimeControl Opacity="0.7"
+                x:Name="TimeBlock" 
+                VerticalAlignment="Center" 
+                Margin="10,0,20,0" 
+                FontSize="15" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="2" 
+                HorizontalAlignment="Right"
+				/>
+
+            <DefaultGUI:PowerButton
+                Grid.Column="3" 
                 Width="200"
                 Name="PowerButton"
                 />

@@ -43,6 +43,11 @@ namespace Utilities.Errors
     [ErrorCodeTag("SI002")] Si_CannotParseParameters,
     [ErrorCodeTag("SI003")] Si_EmptyPoints,
     [ErrorCodeTag("SI004")] Si_EmptyCommandBody,
+
+    [ErrorCodeTag("PI001")] Pi_CannotParseExpression,
+    [ErrorCodeTag("PI002")] Pi_CannotParseParameters,
+    [ErrorCodeTag("PI003")] Pi_EmptyPoints,
+    [ErrorCodeTag("PI004")] Pi_EmptyCommandBody,
   }
 
   /// <summary>
