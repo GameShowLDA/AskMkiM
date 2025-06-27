@@ -14,6 +14,9 @@ using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using UserControl = System.Windows.Controls.UserControl;
+using static UI.Controls.Message.MessageBox;
+
+
 
 namespace UI.Components
 {
@@ -87,7 +90,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -211,7 +214,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -230,7 +233,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -249,7 +252,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -268,7 +271,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -298,7 +301,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
 
         return;
@@ -330,7 +333,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
 
         return;
@@ -361,7 +364,7 @@ namespace UI.Components
     public void ShowSearchResults(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
     {
       int totalCount = 0;
-      PrepareSearchResultsArea(); 
+      PrepareSearchResultsArea();
 
       foreach (var file in results)
       {
@@ -477,7 +480,7 @@ namespace UI.Components
       if (TryShowExistingControl(description, header))
       {
         return;
-      }  
+      }
 
       tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
       tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
@@ -642,7 +645,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
         LogError("Редактор не инициализирован");
         return;
       }

@@ -10,6 +10,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Controls.TextEditor;
 using static UI.Controls.StatusBarControl;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace MainWindowProgram.ViewModels
 {
@@ -116,14 +118,14 @@ namespace MainWindowProgram.ViewModels
             var editor = _viewModel.GetActiveEditor?.Invoke();
             if (editor == null)
             {
-              MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              Show(Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
               return;
             }
 
             var path = editor.TextEditorModel.FilePath;
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
-              MessageBox.Show("Файл не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              Show(Status.Error, "Файл не найден", "Ошибка", MessageBoxButton.OK);
               return;
             }
 
@@ -135,8 +137,8 @@ namespace MainWindowProgram.ViewModels
             }
             catch (Exception ex)
             {
-              MessageBox.Show("Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
-                              "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              Show(Status.Error, "Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
+                              "Ошибка", MessageBoxButton.OK);
             }
           };
           menu.Items.Add(item);
@@ -166,7 +168,7 @@ namespace MainWindowProgram.ViewModels
         var editor = _viewModel.GetActiveEditor?.Invoke();
         if (editor == null)
         {
-          MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          Show(Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
           return;
         }
 
@@ -177,7 +179,7 @@ namespace MainWindowProgram.ViewModels
         var path = editor.TextEditorModel.FilePath;
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
         {
-          MessageBox.Show("Файл не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          Show(Status.Error, "Файл не найден", "Ошибка", MessageBoxButton.OK);
           return;
         }
 
@@ -192,8 +194,8 @@ namespace MainWindowProgram.ViewModels
         }
         catch (Exception ex)
         {
-          MessageBox.Show("Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
-                          "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          Show(Status.Error, "Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
+                          "Ошибка", MessageBoxButton.OK);
         }
       }
     }

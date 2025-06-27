@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Windows;
 using System.Windows.Threading;
+using static UI.Controls.Message.MessageBox;
 
 namespace ConsoleUtilities.Services
 {
@@ -33,7 +34,7 @@ namespace ConsoleUtilities.Services
       if (!RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_CONTROL, VK_OEM3))
       {
         var errorCode = Marshal.GetLastWin32Error();
-        MessageBox.Show($"Не удалось зарегистрировать глобальный хоткей Ctrl + ~. Код ошибки: {errorCode}");
+        Show(Status.Error, text: $"Не удалось зарегистрировать глобальный хоткей Ctrl + ~. Код ошибки: {errorCode}");
         // throw new InvalidOperationException($"Не удалось зарегистрировать глобальный хоткей Ctrl + ~. Код ошибки: {errorCode}");
       }
 

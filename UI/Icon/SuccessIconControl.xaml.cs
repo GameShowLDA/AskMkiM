@@ -13,16 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace UI.Components
+namespace UI.Icon
 {
-    /// <summary>
-    /// Логика взаимодействия для SuccessIconControl.xaml
-    /// </summary>
-    public partial class SuccessIconControl : UserControl
+  /// <summary>
+  /// Логика взаимодействия для SuccessIconControl.xaml
+  /// </summary>
+  public partial class SuccessIconControl : UserControl
+  {
+    public SuccessIconControl()
     {
-        public SuccessIconControl()
-        {
-            InitializeComponent();
-        }
+      InitializeComponent();
     }
+  }
 }

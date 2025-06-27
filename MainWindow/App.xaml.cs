@@ -4,6 +4,8 @@ using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
 using static Utilities.LoggerUtility;
 using System.Runtime.InteropServices;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace MainWindowProgram
 {
@@ -69,11 +71,13 @@ namespace MainWindowProgram
         {
             SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
         };
+
+        Application.Current.MainWindow = mainWindow;
       }
       catch (Exception ex)
       {
         LogException(ex, "Произошла ошибка запуска приложения.");
-        MessageBox.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR",  MessageBoxButton.OK);
         Application.Current.Shutdown();
       }
     }

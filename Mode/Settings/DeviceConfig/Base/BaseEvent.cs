@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using NewCore.Base.Device;
 using NewCore.Device;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace Mode.Settings.DeviceConfig.Base
 {
@@ -105,7 +107,7 @@ namespace Mode.Settings.DeviceConfig.Base
         }
         catch (InvalidOperationException ex)
         {
-          MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+          Show(Status.Error, ex.Message, "Ошибка", MessageBoxButton.OK);
         }
       }
     }

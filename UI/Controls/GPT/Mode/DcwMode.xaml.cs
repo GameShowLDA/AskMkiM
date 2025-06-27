@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using NewCore.Base.Interface.Main;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Controls.GPT.Mode
 {
@@ -49,7 +50,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK);
       }
     }
 
@@ -149,7 +150,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK);
       }
     }
 
@@ -168,7 +169,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK);
       }
     }
   }

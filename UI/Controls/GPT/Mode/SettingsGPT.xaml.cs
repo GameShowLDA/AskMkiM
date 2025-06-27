@@ -1,6 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using YamlDotNet.Core.Tokens;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace UI.Controls.GPT.Mode
 {
@@ -38,7 +40,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при загрузке конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Ошибка при загрузке конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK);
       }
     }
 

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:UI.Controls.ErrorList"
              xmlns:components="clr-namespace:UI.Components"
+             xmlns:Icon="clr-namespace:UI.Icon"
              xmlns:ErrorConv ="clr-namespace:Utilities.Errors;assembly=Utilities"
              x:Name="root">
     <UserControl.Resources>
@@ -65,7 +66,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <components:CrossIcon Size="13" />
+                                <Icon:CrossIcon Size="13" />
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

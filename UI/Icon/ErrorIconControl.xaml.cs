@@ -13,16 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace UI.Components
+namespace UI.Icon
 {
-    /// <summary>
-    /// Логика взаимодействия для ErrorIconControl.xaml
-    /// </summary>
-    public partial class ErrorIconControl : UserControl
+  /// <summary>
+  /// Логика взаимодействия для ErrorIconControl.xaml
+  /// </summary>
+  public partial class ErrorIconControl : UserControl
+  {
+    public ErrorIconControl()
     {
-        public ErrorIconControl()
-        {
-            InitializeComponent();
-        }
+      InitializeComponent();
     }
+  }
 }

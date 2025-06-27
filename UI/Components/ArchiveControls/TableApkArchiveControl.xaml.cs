@@ -13,6 +13,8 @@ using UI.Controls.TextEditor;
 using static UI.Controls.ProtocolNew.ProtocolUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace UI.Components.ArchiveControls
 {
@@ -123,7 +125,7 @@ namespace UI.Components.ArchiveControls
       }
       else
       {
-        MessageBox.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+        Show(Status.Error, "Файл не найден.", "Ошибка!", MessageBoxButton.OK);
         LogInformation("Файл не найден");
       }
     }
@@ -148,13 +150,13 @@ namespace UI.Components.ArchiveControls
           }
           catch (Exception ex)
           {
-            MessageBox.Show($"Произошла ошибка: {ex.Message}");
+            Show(Status.Error, $"Произошла ошибка: {ex.Message}");
             LogError($"Произошла ошибка: {ex.Message}");
           }
         }
         else
         {
-          MessageBox.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          Show(Status.Error, "Файл не найден.", "Ошибка!", MessageBoxButton.OK);
           LogInformation("Файл не найден");
         }
       }
@@ -174,12 +176,12 @@ namespace UI.Components.ArchiveControls
       bool result = await fileEditor.UpdateFile(archiveDirectory, opkFile.OpkFilename, newOpkFile);
       if (result)
       {
-        MessageBox.Show("Файл успешно обновлен");
+        Show(Status.Information, "Файл успешно обновлен");
         LogInformation($"Файл {opkFile.OpkFilename} в архиве {archiveDirectory} успешно обновлен.");
       }
       else
       {
-        MessageBox.Show("Не удалось обновить файл. Исходный файл сохранен.");
+        Show(Status.Information, "Не удалось обновить файл. Исходный файл сохранен.");
         LogError($"Файл {opkFile.OpkFilename} в архиве {archiveDirectory} не удалось обновить. Исходный файл сохранен.");
       }
     }
@@ -206,11 +208,11 @@ namespace UI.Components.ArchiveControls
         var archiveDirectory = Path.Combine(ArchiveSettings.ArchivePath, $"{_archiveName}.apkw");
         var fileEditor = new FileEditor();
 
-        MessageBoxResult result = MessageBox.Show(
+        MessageBoxResult result = Show(
+                Status.Warning,
                 "Вы уверены, что хотите удалить этот файл?",
                 "Подтверждение удаления",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+                MessageBoxButton.YesNo);
 
         if (result == MessageBoxResult.Yes)
         {
@@ -223,7 +225,7 @@ namespace UI.Components.ArchiveControls
           else
           {
             var message = $"Файл {opkFile.OpkFilename} не удалось корректно удалить из архива {_archiveName}.apkw.";
-            MessageBox.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Show(Status.Error, message, "Ошибка!", MessageBoxButton.OK);
             LogError(message);
           }
         }
@@ -272,7 +274,7 @@ namespace UI.Components.ArchiveControls
       else
       {
         LogWarning($"Файл {opkFile.OpkFilename} не найден.");
-        MessageBox.Show("Opk файл не найден в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Opk файл не найден в архиве!", "Ошибка!", MessageBoxButton.OK);
       }
     }
 
@@ -298,7 +300,7 @@ namespace UI.Components.ArchiveControls
 
     private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      MessageBox.Show("Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK);
+      Show(Status.Warning, "Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK);
     }
 
     private async void viewOpkFilesDataGrid_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)

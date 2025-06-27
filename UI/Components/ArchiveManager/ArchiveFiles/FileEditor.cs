@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using System.IO;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
+using static UI.Controls.Message.MessageBox;
 
 
 namespace UI.Components.ArchiveManager.ArchiveFiles
@@ -90,7 +91,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
         }
         else
         {
-          MessageBox.Show("Файл с таким именем уже существует в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          Show(Status.Error, "Файл с таким именем уже существует в архиве!", "Ошибка!", MessageBoxButton.OK);
           LogInformation("Файл с таким именем уже существует в архиве");
           return false;
         }
@@ -355,7 +356,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
           string filePath = saveFileDialog.FileName;
           File.WriteAllText(filePath, content);
           LogInformation($"Файл {foundOpkPath} считан и записан.");
-          MessageBox.Show($"Файл {fileName}.pk успешно сохранен!", "Файл сохранен", MessageBoxButton.OK, MessageBoxImage.Information);
+          Show(Status.Information, $"Файл {fileName}.pk успешно сохранен!", "Файл сохранен", MessageBoxButton.OK);
         }
         catch (Exception ex)
         {

@@ -7,6 +7,8 @@ using System.Windows.Shapes;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager;
 using AppConfiguration.Base;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace UI.Components.ArchiveControls
 {
@@ -214,12 +216,12 @@ namespace UI.Components.ArchiveControls
         }
         else
         {
-          MessageBox.Show("Возникла ошибка при создании архива. Повторите попытку позднее.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          UI.Controls.Message.MessageBox.Show(Status.Warning, "Возникла ошибка при создании архива. Повторите попытку позднее.", "Ошибка!", MessageBoxButton.OK);
         }
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при создании архива: {ex.Message}");
+        UI.Controls.Message.MessageBox.Show(Status.Error, $"Ошибка при создании архива: {ex.Message}");
       }
     }
 
@@ -227,14 +229,14 @@ namespace UI.Components.ArchiveControls
     {
       if (string.IsNullOrWhiteSpace(newArchiveName.Text) || newArchiveName.Text.ToString() == newArchiveName.Tag.ToString())
       {
-        MessageBox.Show("Пожалуйста, введите название архива");
+        UI.Controls.Message.MessageBox.Show(Status.Warning, "Пожалуйста, введите название архива");
         newArchiveName.Focus();
         return false;
       }
 
       if (newArchiveName.Text.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0)
       {
-        MessageBox.Show("Название содержит недопустимые символы");
+        UI.Controls.Message.MessageBox.Show(Status.Error, "Название содержит недопустимые символы");
         return false;
       }
 

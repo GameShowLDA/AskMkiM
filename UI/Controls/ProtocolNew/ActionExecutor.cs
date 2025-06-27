@@ -10,6 +10,7 @@ using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -280,13 +281,13 @@ namespace UI.Controls.ProtocolNew
       catch (ObjectDisposedException ex)
       {
         LogException("Token уже утилизирован", ex);
-        MessageBox.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK);
         await FinalizeAsync(stop);
       }
       catch (Exception ex)
       {
         LogException("Системная ошибка", ex);
-        MessageBox.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK);
         await FinalizeAsync(stop);
       }
     }

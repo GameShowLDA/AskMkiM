@@ -12,6 +12,8 @@ using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using static Utilities.LoggerUtility;
 using System.Windows;
 using UI.Components.ArchiveManager.Models;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace UI.Components.ArchiveManager.ArchiveFiles.Index
 {
@@ -428,7 +430,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
             {
               Application.Current.Dispatcher.Invoke(() =>
               {
-                MessageBox.Show($"Ошибка при загрузке файлов: {ex.Message}");
+                Show(Status.Error, $"Ошибка при загрузке файлов: {ex.Message}");
               });
               return false;
             }

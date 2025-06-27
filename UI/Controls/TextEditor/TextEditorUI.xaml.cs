@@ -14,6 +14,7 @@ using ICSharpCode.AvalonEdit.Rendering;
 using UI.Components;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Controls.TextEditor
 {
@@ -422,7 +423,7 @@ namespace UI.Controls.TextEditor
           }
           catch (Exception ex)
           {
-            MessageBox.Show($"Ошибка при открытии файла: {ex.Message}");
+            Show(Status.Error, $"Ошибка при открытии файла: {ex.Message}");
           }
         }
       }

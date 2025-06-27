@@ -1,23 +1,20 @@
-﻿using AppConfiguration.Base;
-using DevZest.Windows.Docking;
-using ICSharpCode.AvalonEdit;
-using Microsoft.Win32;
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
-using System.Windows.Shapes;
+using AppConfiguration.Base;
+using DevZest.Windows.Docking;
+using Ude;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.TextEditor;
-using static UI.Components.Invoke.OpenFileButton;
 using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
-using Ude;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -55,7 +52,7 @@ namespace UI.Components.MultiEditorMethods
       var nameFile = GetNameFile(path);
       if (string.IsNullOrEmpty(nameFile))
       {
-        MessageBox.Show("Ошибка при открытии файла", $"Ошибка при открытии файла {path}");
+        Show(Status.Error, "Ошибка при открытии файла", $"Ошибка при открытии файла {path}");
         return;
       }
 
@@ -84,7 +81,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        Show(Status.Error, $"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
       }
     }
@@ -95,7 +92,7 @@ namespace UI.Components.MultiEditorMethods
       AddFileToControlManager(editorType.ToString(), textEditorContainer);
       if (editorType == EditorType.TextEditor)
       {
-        
+
       }
 
       return textEditorContainer;
@@ -283,7 +280,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Системная ошибка: {ex}", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, $"Системная ошибка: {ex}", "Ошибка!", MessageBoxButton.OK);
         LogError($"Системная ошибка: {ex}");
         return null;
       }
@@ -507,7 +504,7 @@ namespace UI.Components.MultiEditorMethods
         }
         else
         {
-          MessageBox.Show("Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+          Show(Status.Error, "Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK);
         }
       }
 
@@ -545,7 +542,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        Show(Status.Error, $"Ошибка при чтении файла: {ex.Message}", "Ошибка");
         LogException($"Ошибка при чтении файла", ex);
         return null;
       }

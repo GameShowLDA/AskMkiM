@@ -15,6 +15,7 @@ using static AppConfiguration.Protocol.ProtocolConfig;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 using static AppConfiguration.SystemState.SystemStateManager;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -417,7 +418,7 @@ namespace UI.Controls.ProtocolNew
 
     public Task<bool> AwaitAdminDecisionAsync(string message)
     {
-      MessageBox.Show("В будущем добавить сюда реализацию выбора");
+      Show(Status.Error, "В будущем добавить сюда реализацию выбора");
       return Task.FromResult(true);
     }
   }

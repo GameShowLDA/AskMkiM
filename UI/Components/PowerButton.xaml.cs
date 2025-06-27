@@ -3,12 +3,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using DataBaseConfiguration.Services;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
+using static AppConfiguration.Base.EventAggregator;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static AppConfiguration.SystemState.SystemStateManager;
-using static AppConfiguration.Base.EventAggregator;
-using DataBaseConfiguration.Services.Device;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components
 {
@@ -129,13 +129,13 @@ namespace UI.Components
 
       if (model == null)
       {
-        MessageBox.Show("Система не задана в конфигурации! Добавьте менеджер шасси в конфигурацию и повторите попытку.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Система не задана в конфигурации! Добавьте менеджер шасси в конфигурацию и повторите попытку.", "Ошибка!", MessageBoxButton.OK);
         return;
       }
 
       if (await GetIsIdleModeEnabled())
       {
-        MessageBox.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK);
         return;
       }
 

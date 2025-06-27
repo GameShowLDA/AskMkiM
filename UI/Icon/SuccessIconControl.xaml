@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UI.Components.ErrorIconControl"
+﻿<UserControl x:Class="UI.Icon.SuccessIconControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,11 +7,7 @@
              MinWidth="10" MinHeight="10">
     <Viewbox Stretch="Uniform">
         <Canvas Width="50" Height="50">
-            <Path Data="M10,10 L40,40 M40,10 L10,40"
-                  Stroke="Red"
-                  StrokeThickness="5"
-                  StrokeEndLineCap="Round"
-                  StrokeStartLineCap="Round" />
+            <Path Data="M10,25 L20,35 L40,15" Stroke="LimeGreen" StrokeThickness="5" StrokeEndLineCap="Round" StrokeStartLineCap="Round"/>
         </Canvas>
     </Viewbox>
 </UserControl>

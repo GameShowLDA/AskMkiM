@@ -208,18 +208,6 @@ namespace UI.Controls.Search
       hideAnimation.Begin();
     }
 
-    /// <summary>
-    /// Обработчик изменения состояния кнопки регистра (чувствительность к регистру).
-    /// </summary>
-    private void OnCaseChanged(object sender, EventArgs e)
-    {
-      var button = sender as CaseToggleButton;
-      if (button != null)
-      {
-        MessageBox.Show($"Кнопка включена: {button.IsChecked}");
-      }
-    }
-
     private async void ToggleArrow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       _isExpanded = !_isExpanded;

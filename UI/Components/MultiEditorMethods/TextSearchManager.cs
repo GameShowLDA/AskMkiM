@@ -9,6 +9,7 @@ using static Utilities.LoggerUtility;
 using System.Windows.Controls;
 using AppConfiguration.Base;
 using DevZest.Windows.Docking;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -259,7 +260,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private void ShowEmptySearchWarning()
     {
-      MessageBox.Show("Введите текст для поиска.");
+      Show(Status.Warning, "Введите текст для поиска.");
       LogWarning("Поле для поиска не заполнено");
     }
 
@@ -292,7 +293,7 @@ namespace UI.Components.MultiEditorMethods
       else
       {
         EventAggregator.RaiseRequestCloseProgress();
-        MessageBox.Show("Текст не найден в открытых документах.");
+        Show(Status.Warning, "Текст не найден в открытых документах.");
         LogInformation("Текст не найден в открытых документах.");
       }
     }
@@ -384,7 +385,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (results == null || results.Count == 0)
       {
-        MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        Show(Status.Warning, "Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK);
         return;
       }
 
@@ -515,7 +516,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (string.IsNullOrEmpty(searchText))
       {
-        MessageBox.Show("Введите текст для поиска.");
+        Show(Status.Warning, "Введите текст для поиска.");
         LogWarning("Поле для поиска не заполнено");
         return false;
       }
@@ -577,7 +578,7 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Возвращает null и выводит сообщение о том, что текст не найден.</returns>
     private List<SearchResult> HandleNoMatches(string searchText)
     {
-      MessageBox.Show($"Текст {searchText} не найден.");
+      Show(Status.Error, $"Текст {searchText} не найден.");
       LogInformation($"Текст {searchText} не найден.");
       return null;
     }
@@ -701,7 +702,7 @@ namespace UI.Components.MultiEditorMethods
 
             if (index == -1)
             {
-              MessageBox.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен");
+              Show(Status.Warning, "Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен");
               return;
             }
           }
@@ -713,7 +714,7 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        MessageBox.Show($"Текст {_searchText} не найден", "Ошибка");
+        Show(Status.Error, $"Текст {_searchText} не найден", "Ошибка");
         return;
       }
     }

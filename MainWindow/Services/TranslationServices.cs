@@ -9,6 +9,7 @@ using UI.Controls;
 using UI.Controls.TextEditor;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static UI.Controls.Message.MessageBox;
 
 namespace MainWindowProgram.Services
 {
@@ -60,7 +61,7 @@ namespace MainWindowProgram.Services
             editor = (foundDockItem.Content as TranslatorItem).GetLeftEditor();
             if (editor == null)
             {
-              MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+              Show(UI.Controls.Message.MessageBox.Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
               return;
             }
             else
@@ -71,7 +72,7 @@ namespace MainWindowProgram.Services
           }
         }
       }
-      else
+      else if (translationContainer != null)
       {
         string text = editor.Text;
 
@@ -79,6 +80,11 @@ namespace MainWindowProgram.Services
         {
           await CreateNewTranslator(editor, text);
         }
+      }
+      else
+      {
+        Show(UI.Controls.Message.MessageBox.Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
+
       }
     }
 

@@ -51,13 +51,13 @@ namespace ControlCommandAnalyser
     public List<BaseCommandModel> ParseAllAndDisplay(string text, ITextEditorAdapter adapter)
     {
       AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Начало трансляции");
-      var models = ParseAndLog(text);
+      var models = ParseAll(text);
 
       AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Формирование данных");
       FormatAndDisplay(models, adapter);
 
       AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Проверка взаимосвязей");
-      AnalyzeAndLog(models);
+      Analyze(models);
 
       AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Формирование данных");
       FormatAndDisplay(models, adapter);
@@ -65,11 +65,9 @@ namespace ControlCommandAnalyser
       return models;
     }
 
-    private List<BaseCommandModel> ParseAndLog(string text)
-    {
-      return ParseAll(text);
-    }
-
+    /// <summary>
+    /// Форматирует модели команд и выводит их через адаптер.
+    /// </summary>
     private void FormatAndDisplay(List<BaseCommandModel> models, ITextEditorAdapter adapter)
     {
       var formattedLines = new List<string>();
@@ -89,8 +87,7 @@ namespace ControlCommandAnalyser
     /// <summary>
     /// Формирует форматированный текст и строит mapping строк исходник → трансляция.
     /// </summary>
-    private List<(int SourceLineNumber, int FormattedLineNumber)> BuildFormattedTextAndMapping(
-        List<BaseCommandModel> models, List<string> formattedLines)
+    private List<(int SourceLineNumber, int FormattedLineNumber)> BuildFormattedTextAndMapping(List<BaseCommandModel> models, List<string> formattedLines)
     {
       var lineMapping = new List<(int SourceLineNumber, int FormattedLineNumber)>();
       int formattedLineNumber = 1;
@@ -166,9 +163,10 @@ namespace ControlCommandAnalyser
       }
     }
 
-
-
-    private void AnalyzeAndLog(List<BaseCommandModel> models)
+    /// <summary>
+    /// Анализирует собранные модели команд.
+    /// </summary>
+    private void Analyze(List<BaseCommandModel> models)
     {
       CommandPostAnalyzer.Analyze(models);
 
@@ -184,7 +182,7 @@ namespace ControlCommandAnalyser
     }
 
     /// <summary>
-    /// Парсит текст программы в список моделей команд.
+    /// Преобразует текст в список моделей команд.
     /// </summary>
     public List<BaseCommandModel> ParseAll(string text)
     {
@@ -211,7 +209,7 @@ namespace ControlCommandAnalyser
           if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
           {
             var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines);
-            model.StartLineNumber = currentStartLine + 1; // +1 если строки 1-based
+            model.StartLineNumber = currentStartLine + 1; 
             commands.Add(model);
           }
 

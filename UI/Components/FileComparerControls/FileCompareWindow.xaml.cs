@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using static Utilities.LoggerUtility;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.FileComparerControls
 {
@@ -57,7 +58,7 @@ namespace UI.Components.FileComparerControls
         this.Focus();
       };
 
-      this.Loaded += FileCompareWindow_Loaded; 
+      this.Loaded += FileCompareWindow_Loaded;
     }
 
     private void FileCompareWindow_Loaded(object sender, RoutedEventArgs e)
@@ -116,7 +117,7 @@ namespace UI.Components.FileComparerControls
           }
           else
           {
-            MessageBox.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UI.Controls.Message.MessageBox.Show(Status.Warning, "Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK);
             LogWarning("Попытка сравнить один и тот же файл");
           }
         }
@@ -130,7 +131,7 @@ namespace UI.Components.FileComparerControls
 
       if (string.IsNullOrEmpty(firstPath) || string.IsNullOrEmpty(secondPath))
       {
-        MessageBox.Show("Укажите путь к файлу для сравнения", "Не указан путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+        UI.Controls.Message.MessageBox.Show(Status.Warning, "Укажите путь к файлу для сравнения", "Не указан путь к файлу", MessageBoxButton.OK);
         LogWarning("Не указан путь к одному или нескольким файлам для сравнения");
       }
       else
@@ -149,14 +150,14 @@ namespace UI.Components.FileComparerControls
       if (!File.Exists(firstPath))
       {
         var message = "Неверно указан путь к первому файлу для сравнения";
-        MessageBox.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
+        UI.Controls.Message.MessageBox.Show(Status.Error, message, "Файл не найден", MessageBoxButton.OK);
         LogError("Неверно указан путь к первому файлу для сравнения");
         return false;
       }
       if (!File.Exists(secondPath))
       {
         var message = "Неверно указан путь ко второму файлу для сравнения";
-        MessageBox.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
+        UI.Controls.Message.MessageBox.Show(Status.Error, message, "Файл не найден", MessageBoxButton.OK);
         LogError(message);
         return false;
       }

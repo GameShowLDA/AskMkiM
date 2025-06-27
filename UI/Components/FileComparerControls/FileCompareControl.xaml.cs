@@ -8,7 +8,7 @@ using Microsoft.Win32;
 using System.Windows.Media;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
-
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.FileComparerControls
 {
@@ -55,7 +55,7 @@ namespace UI.Components.FileComparerControls
 
       if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
       {
-        MessageBox.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
+        Show(Status.Warning, "Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK);
         LogInformation($"Отличия в файлах {this.FirstFilePath} и {this.SecondFilePath} не найдены");
         return;
       }
@@ -93,7 +93,7 @@ namespace UI.Components.FileComparerControls
         }
       }
     }
-    
+
     private void ToggleOrientation(object sender, MouseButtonEventArgs e)
     {
       bool toVertical = sender == LeftRight;
@@ -139,7 +139,7 @@ namespace UI.Components.FileComparerControls
         }
         else
         {
-          MessageBox.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+          Show(Status.Warning, "Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK);
           LogWarning("Попытка сравнить один и тот же файл");
         }
       }
@@ -176,7 +176,7 @@ namespace UI.Components.FileComparerControls
 
       if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
       {
-        MessageBox.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
+        Show(Status.Information, "Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK);
         LogInformation($"Отличия в открытых файлах не найдены");
         return;
       }

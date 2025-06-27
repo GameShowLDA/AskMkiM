@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Windows;
 using Utilities.USB;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace MainWindowProgram
 {
@@ -66,11 +68,11 @@ namespace MainWindowProgram
         string selectedDrive = usbDrivesComboBox.SelectedItem.ToString();
         var drive = new DriveInfo(selectedDrive);
         usbKeyManager.CreateKeyFile(drive);
-        MessageBox.Show("Ключ успешно создан.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+        UI.Controls.Message.MessageBox.Show(Status.Information, "Ключ успешно создан.", "Успех", MessageBoxButton.OK);
       }
       else
       {
-        MessageBox.Show("Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        UI.Controls.Message.MessageBox.Show(Status.Warning, "Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK);
       }
     }
 
@@ -90,11 +92,11 @@ namespace MainWindowProgram
         string selectedDrive = usbDrivesComboBox.SelectedItem.ToString();
         var drive = new DriveInfo(selectedDrive);
         usbKeyManager.CreateKeyFile(drive); // Перезаписываем ключ
-        MessageBox.Show("Ключ успешно перезаписан.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+        UI.Controls.Message.MessageBox.Show(Status.Information, "Ключ успешно перезаписан.", "Успех", MessageBoxButton.OK);
       }
       else
       {
-        MessageBox.Show("Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        UI.Controls.Message.MessageBox.Show(Status.Warning, "Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK);
       }
     }
 
@@ -118,16 +120,16 @@ namespace MainWindowProgram
         if (File.Exists(filePath))
         {
           File.Delete(filePath);
-          MessageBox.Show("Ключ успешно удален.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+          UI.Controls.Message.MessageBox.Show(Status.Information, "Ключ успешно удален.", "Успех", MessageBoxButton.OK);
         }
         else
         {
-          MessageBox.Show("Ключ не найден на выбранном устройстве.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+          UI.Controls.Message.MessageBox.Show(Status.Error, "Ключ не найден на выбранном устройстве.", "Ошибка", MessageBoxButton.OK);
         }
       }
       else
       {
-        MessageBox.Show("Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        UI.Controls.Message.MessageBox.Show(Status.Warning, "Пожалуйста, выберите USB-накопитель.", "Ошибка", MessageBoxButton.OK);
       }
     }
 

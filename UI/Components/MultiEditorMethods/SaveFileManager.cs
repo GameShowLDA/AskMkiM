@@ -10,6 +10,7 @@ using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using Path = System.IO.Path;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -34,11 +35,10 @@ namespace UI.Components.MultiEditorMethods
       var needToSave = fileManager.CompareFiles(control);
       if (needToSave)
       {
-        result = MessageBox.Show(
+        result = Show(Status.Question,
             $"Сохранить файл {control.Title} перед закрытием?",
             "Подтверждение",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
+            MessageBoxButton.YesNo);
         if (result == MessageBoxResult.Yes)
         {
           saveFileResult = SaveFile(control);
@@ -195,11 +195,8 @@ namespace UI.Components.MultiEditorMethods
         File.WriteAllText(filePath, fileData);
       }
       LogInformation($"Файл {filePath} сохранен");
-      MessageBox.Show($"Файл {filePath} сохранен");
+      Show(Status.Information, $"Файл {filePath} сохранен");
       return true;
-      //}
-
-      //return false;
     }
 
     /// <summary>

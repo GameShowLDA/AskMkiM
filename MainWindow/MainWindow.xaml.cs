@@ -12,6 +12,8 @@ using System.Windows.Threading;
 using UI.Controls;
 using UI.Controls.Search;
 using static Utilities.LoggerUtility;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace MainWindowProgram
 {
@@ -109,12 +111,12 @@ namespace MainWindowProgram
       catch (InvalidOperationException exception)
       {
         LogException($"Ошибка загрузки темы программы", exception);
-        MessageBox.Show($"Ошибка загрузки темы: {exception.Message}");
+        UI.Controls.Message.MessageBox.Show(Status.Error, $"Ошибка загрузки темы: {exception.Message}");
       }
       catch (Exception ex)
       {
         LogException($"Ошибка выполнения программы", ex);
-        MessageBox.Show($"Ошибка: {ex.Message}");
+        UI.Controls.Message.MessageBox.Show(Status.Error, $"Ошибка: {ex.Message}");
       }
     }
 

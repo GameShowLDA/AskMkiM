@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace Mode.Settings.LoggerMessage
 {
@@ -34,7 +36,7 @@ namespace Mode.Settings.LoggerMessage
       }
       else
       {
-        MessageBox.Show("Неверный PIN-код. Попробуйте еще раз.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        UI.Controls.Message.MessageBox.Show(Status.Error, "Неверный PIN-код. Попробуйте еще раз.", "Ошибка", MessageBoxButton.OK);
         PinCodeBox.Clear();
       }
     }

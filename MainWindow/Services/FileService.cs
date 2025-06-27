@@ -12,6 +12,8 @@ using UI.Components.FileComparerControls;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
+using static UI.Controls.Message.MessageBox;
+
 
 namespace MainWindowProgram.Services
 {
@@ -64,7 +66,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
       }
       else
       {
@@ -89,7 +91,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
       }
       else
       {
@@ -209,7 +211,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Show(Status.Error, "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
         return null;
       }
       else
