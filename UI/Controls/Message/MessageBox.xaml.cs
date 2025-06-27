@@ -174,5 +174,26 @@ namespace UI.Controls.Message
       _mainWindow.Effect = null;
       return window.Result;
     }
+
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+      base.OnPreviewKeyDown(e);
+
+      switch (e.Key)
+      {
+        case Key.Enter:
+          if (OkButton.IsVisible) OkButton_PreviewMouseDown(null, null);
+          break;
+        case Key.Escape:
+          if (CancelButton.IsVisible) CancelButton_PreviewMouseDown(null, null);
+          break;
+        case Key.Y:
+          if (YesButton.IsVisible) YesButton_PreviewMouseDown(null, null);
+          break;
+        case Key.N:
+          if (NoButton.IsVisible) NoButton_PreviewMouseDown(null, null);
+          break;
+      }
+    }
   }
 }
