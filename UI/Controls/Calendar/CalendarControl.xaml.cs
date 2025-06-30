@@ -12,31 +12,18 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using YamlDotNet.Core.Tokens;
 
-namespace UI.Components
+namespace UI.Controls.Calendar
 {
   /// <summary>
-  /// Логика взаимодействия для DateControl.xaml
+  /// Логика взаимодействия для CalendarControl.xaml
   /// </summary>
-  public partial class DateControl : UserControl
+  public partial class CalendarControl : UserControl
   {
-    public DateControl()
+    public CalendarControl()
     {
       InitializeComponent();
-      Loaded += DateControl_Loaded;
+      DataContext = new CalendarViewModel();
     }
-
-    private void DateControl_Loaded(object sender, RoutedEventArgs e)
-    {
-      Text = DateTime.Now.ToShortDateString();
-    }
-
-    public string Text
-    {
-      get => Date.Text;
-      set => Date.Text = value;
-    }
-
   }
 }

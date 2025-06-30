@@ -16,16 +16,7 @@
             Foreground="{StaticResource ForegroundSolidColorBrush}"
             VerticalAlignment="Center"
             HorizontalAlignment="Center"
-            Cursor="Hand"
-            MouseLeftButtonUp="Date_MouseLeftButtonDown"
         />
-        <Popup x:Name="CalendarPopup"
-               Placement="Bottom"
-               StaysOpen="False"
-               AllowsTransparency="True">
-            <Border>
-                <Calendar x:Name="CalendarControl"/>
-            </Border>
-        </Popup>
+      
     </Grid>
 </UserControl>

@@ -11,7 +11,7 @@ namespace TestWPF
     public MainWindow()
     {
       InitializeComponent();
-      InitializeSettings();
+      // InitializeSettings();
     }
 
 

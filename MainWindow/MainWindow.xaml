@@ -367,6 +367,7 @@
                 FontSize="13" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="3" 
+                Cursor="Hand"
 				/>
 
             <Components:KeyboardLayoutComponent Opacity="0.7"
