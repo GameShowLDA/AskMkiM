@@ -8,12 +8,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="160">
     <Grid>  
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/> 
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
         <Component:TimeControl x:Name="Time" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0"/>
-        <Component:DateControl x:Name="Date" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <Component:DateControl x:Name="Date" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
     </Grid>
 </UserControl>

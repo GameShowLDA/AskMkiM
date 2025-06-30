@@ -25,6 +25,7 @@ namespace UI.Components
     {
       InitializeComponent();
       Loaded += DateControl_Loaded;
+      Application.Current.Deactivated += App_Deactivated;
     }
 
     private void DateControl_Loaded(object sender, RoutedEventArgs e)
@@ -37,6 +38,16 @@ namespace UI.Components
       get => Date.Text;
       set => Date.Text = value;
     }
- 
+
+    private void Date_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      CalendarPopup.IsOpen = !CalendarPopup.IsOpen;
+    }
+
+    // Закрытие при потере фокуса всего приложения
+    private void App_Deactivated(object? sender, EventArgs e)
+    {
+      CalendarPopup.IsOpen = false;
+    }
   }
 }

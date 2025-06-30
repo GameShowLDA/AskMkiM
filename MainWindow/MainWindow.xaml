@@ -363,10 +363,10 @@
 
             <Controls:DateTimeControl Opacity="0.7"
                 x:Name="TimeBlock" 
-                Margin="10,0,0,0" 
-                FontSize="15" 
+                Margin="0,0,10,0" 
+                FontSize="13" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                Grid.Column="2" 
+                Grid.Column="3" 
 				/>
 
             <Components:KeyboardLayoutComponent Opacity="0.7"
@@ -374,7 +374,7 @@
                 VerticalAlignment="Center" 
                 FontSize="15" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                Grid.Column="3" 
+                Grid.Column="2" 
 				/>
 
             <DefaultGUI:PowerButton
