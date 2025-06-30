@@ -11,6 +11,8 @@ namespace Utilities.Help
 {
   public static class HelpProvider
   {
+    private static HelpViewerWindow _helpWindow;
+
     // Attached property для Func<EnumHelpCommands>
     public static readonly DependencyProperty HelpKeyProviderProperty =
         DependencyProperty.RegisterAttached(
@@ -27,6 +29,8 @@ namespace Utilities.Help
 
     public enum EnumHelpCommands
     {
+      None,       // Для открытия начальной страницы
+      Unknown,    // Для нераспознанных команд
       [Description("КЦ")] KTs,
       [Description("ОК")] OK,
       [Description("ПИ")] PI,
@@ -35,7 +39,7 @@ namespace Utilities.Help
       [Description("СИ")] SI,
       [Description("СП")] SP,
       [Description("ЦУ")] TsU,
-      [Description("УП")] UP
+      [Description("УП")] UP,
     }
 
     /// <summary>
@@ -56,9 +60,13 @@ namespace Utilities.Help
           if (provider != null)
           {
             var cmd = provider();
-            ShowHelp(cmd);
-            e.Handled = true;
-            return;
+            // Проверяем, что команда не None
+            if (cmd != EnumHelpCommands.None)
+            {
+              ShowHelp(cmd);
+              e.Handled = true;
+              return;
+            }
           }
           current = VisualTreeHelper.GetParent(current);
         }
@@ -70,14 +78,16 @@ namespace Utilities.Help
         var fe = FindElementWithTag(focused);
         if (fe != null) tag = fe.Tag as string;
 
-        if (!string.IsNullOrEmpty(tag)
-            && TryGetByDescription(tag, out EnumHelpCommands enumFromTag))
+        // Проверяем что tag не пустой и не состоит из пробелов/непечатаемых символов
+        if (!string.IsNullOrWhiteSpace(tag) &&
+            TryGetByDescription(tag, out EnumHelpCommands enumFromTag) &&
+            enumFromTag != EnumHelpCommands.None)
         {
           ShowHelp(enumFromTag);
         }
         else
         {
-          MessageBox.Show("Элемент справки не найден.", "Справка");
+          ShowHelp(EnumHelpCommands.None);
         }
         e.Handled = true;
       };
@@ -99,6 +109,19 @@ namespace Utilities.Help
     /// </summary>
     public static void ShowHelp(EnumHelpCommands command)
     {
+      // Обработка специальных случаев None и Unknown
+      if (command == EnumHelpCommands.None)
+      {
+        OpenInitialHelp();
+        return;
+      }
+
+      if (command == EnumHelpCommands.Unknown)
+      {
+        MessageBox.Show("Для данной команды, функции или синтаксиса ещё не написана документация!", "Справка");
+        return;
+      }
+
       // Убеждаемся, что папка есть
       var helpDir = Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
@@ -109,7 +132,7 @@ namespace Utilities.Help
         return;
       }
 
-      // Запускаем HTTP-сервер (если ещё не запущен)
+      // Запускаем HTTP-сервер
       try
       {
         HelpServer.EnsureStarted();
@@ -120,11 +143,91 @@ namespace Utilities.Help
         return;
       }
 
-      // Формируем URL вида http://localhost:8000/index.html?cmd=TsU
-      string url = $"http://localhost:{HelpServer.Port}/index.html?cmd={command}";
+      // Проверяем существование файла документации для команды
+      string commandFileName = $"PageCommand{command}.html";
+      string commandFilePath = Path.Combine(helpDir, "TextEditor", "CommandList", commandFileName);
 
-      // Открываем в браузере
-      Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+      if (!File.Exists(commandFilePath))
+      {
+        // Получаем описание команды для сообщения
+        string commandDescription = GetCommandDescription(command);
+        MessageBox.Show($"Для команды '{commandDescription}' документация ещё не написана!", "Справка");
+        return;
+      }
+
+      string url = $"http://localhost:{HelpServer.Port}/index.html?cmd={command}";
+      OpenHelpViewer(url);
+    }
+
+    private static string GetCommandDescription(EnumHelpCommands command)
+    {
+      var field = typeof(EnumHelpCommands).GetField(command.ToString());
+      if (field == null) return command.ToString();
+
+      var attribute = field.GetCustomAttribute<DescriptionAttribute>();
+      return attribute?.Description ?? command.ToString();
+    }
+
+    private static void OpenInitialHelp()
+    {
+      // Убеждаемся, что папка есть
+      var helpDir = Path.Combine(
+          AppDomain.CurrentDomain.BaseDirectory,
+          "Help", "AppHelp");
+      if (!Directory.Exists(helpDir))
+      {
+        MessageBox.Show("Папка с справкой не найдена.", "Справка");
+        return;
+      }
+
+      // Запускаем HTTP-сервер
+      try
+      {
+        HelpServer.EnsureStarted();
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Не удалось запустить Help-сервер: {ex.Message}", "Справка");
+        return;
+      }
+
+      string url = $"http://localhost:{HelpServer.Port}/index.html";
+      OpenHelpViewer(url);
+    }
+
+    private static void OpenHelpViewer(string url)
+    {
+      try
+      {
+        if (Application.Current.Dispatcher.CheckAccess())
+        {
+          ShowHelpWindow(url);
+        }
+        else
+        {
+          Application.Current.Dispatcher.Invoke(() => ShowHelpWindow(url));
+        }
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine($"Ошибка открытия Help Viewer: {ex}");
+        // Fallback: открытие в системном браузере
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+      }
+    }
+
+    private static void ShowHelpWindow(string url)
+    {
+      if (_helpWindow == null || !_helpWindow.IsLoaded)
+      {
+        _helpWindow = new HelpViewerWindow();
+        _helpWindow.Closed += (s, e) => _helpWindow = null;
+      }
+
+      _helpWindow.Navigate(url);
+      _helpWindow.Show();
+      _helpWindow.Activate();
+      _helpWindow.Focus();
     }
 
     /// <summary>

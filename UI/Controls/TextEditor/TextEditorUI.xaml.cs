@@ -170,21 +170,53 @@ namespace UI.Controls.TextEditor
       HelpProvider.SetHelpKeyProvider(textEditor, () =>
       {
         var sel = textEditor.SelectedText?.Trim();
-        // если выделили, пытаемся распознать enum по описанию (DescriptionAttribute)
-        if (!string.IsNullOrEmpty(sel)
-            && Enum.TryParse<HelpProvider.EnumHelpCommands>(sel, true, out var directEnum))
+
+        // Если выделение пустое - возвращаем None для открытия начальной страницы
+        if (string.IsNullOrWhiteSpace(sel))
         {
-          return directEnum;
+          return HelpProvider.EnumHelpCommands.None;
         }
-        // иначе пробуем по DescriptionAttribute
-        if (HelpProvider.TryGetByDescription(sel ?? "", out var byDesc))
+
+        // Проверяем, является ли выделенный текст командой
+        if (IsValidCommand(sel, out HelpProvider.EnumHelpCommands command))
         {
-          return byDesc;
+          return command;
         }
-        // если ничего не подошло — общий раздел горячих клавиш
-        return HelpProvider.EnumHelpCommands.OK; // или любой дефолт
+
+        // Если не команда - возвращаем специальное значение Unknown
+        return HelpProvider.EnumHelpCommands.Unknown;
       });
     }
+
+    private static bool IsValidCommand(string text, out HelpProvider.EnumHelpCommands command)
+    {
+      command = HelpProvider.EnumHelpCommands.Unknown;
+
+      // Проверяем прямое соответствие enum
+      if (Enum.TryParse<HelpProvider.EnumHelpCommands>(text, true, out var directEnum))
+      {
+        // Для одиночных символов делаем дополнительную проверку
+        if (text.Length == 1 &&
+            directEnum != HelpProvider.EnumHelpCommands.OK &&
+            directEnum != HelpProvider.EnumHelpCommands.UP)
+        {
+          return false;
+        }
+
+        command = directEnum;
+        return true;
+      }
+
+      // Проверяем соответствие по Description
+      if (HelpProvider.TryGetByDescription(text, out var byDesc))
+      {
+        command = byDesc;
+        return true;
+      }
+
+      return false;
+    }
+
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       // Отслеживаем Ctrl+M
