@@ -72,7 +72,7 @@ namespace MainWindowProgram.Services
           }
         }
       }
-      else if (translationContainer != null)
+      else if (editor != null)
       {
         string text = editor.Text;
 
