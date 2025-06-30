@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="UI.Components.KeyboardLayoutComponent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+             Height="30" Width="50"
+             >
+    <Border Background="Transparent">
+        <TextBlock x:Name="LayoutText"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   FontWeight="Bold"
+                   Foreground="{StaticResource ForegroundSolidColorBrush}"
+                   FontFamily="{DynamicResource WinstonMedium}"
+                   FontSize="14"
+                   Cursor="Hand"
+                   />
+    </Border>
+</UserControl>

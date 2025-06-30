@@ -30,19 +30,13 @@ namespace UI.Components
     private void DateControl_Loaded(object sender, RoutedEventArgs e)
     {
       Text = DateTime.Now.ToShortDateString();
-
     }
 
-    public string Text 
-    { 
-      get
-      {
-        return Date.Text;
-      }
-      set
-      {
-        Date.Text = value;
-      }
+    public string Text
+    {
+      get => Date.Text;
+      set => Date.Text = value;
     }
+ 
   }
 }

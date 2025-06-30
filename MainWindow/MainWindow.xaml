@@ -35,7 +35,7 @@
         </Style>
 
         <Style TargetType="{x:Type MenuItem}">
-            
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
@@ -80,7 +80,7 @@
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
             <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
             <Setter Property="Cursor" Value="Hand"/>
-            
+
         </Style>
 
         <Style x:Key="SideMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -341,6 +341,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -351,7 +352,7 @@
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
 				/>
 
-            
+
             <Controls:StatusBarControl
                 Grid.Column="1" 
                 x:Name="StatusBar"
@@ -362,16 +363,22 @@
 
             <Controls:DateTimeControl Opacity="0.7"
                 x:Name="TimeBlock" 
-                VerticalAlignment="Center" 
-                Margin="10,0,20,0" 
+                Margin="10,0,0,0" 
                 FontSize="15" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="2" 
-                HorizontalAlignment="Right"
+				/>
+
+            <Components:KeyboardLayoutComponent Opacity="0.7"
+                x:Name="LanguageBlock" 
+                VerticalAlignment="Center" 
+                FontSize="15" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                Grid.Column="3" 
 				/>
 
             <DefaultGUI:PowerButton
-                Grid.Column="3" 
+                Grid.Column="4" 
                 Width="200"
                 Name="PowerButton"
                 />
