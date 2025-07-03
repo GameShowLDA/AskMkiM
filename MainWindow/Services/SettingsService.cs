@@ -48,8 +48,12 @@ namespace MainWindowProgram.Services
     public async Task OpenProtocolAsync() =>
       await _multiWindow.AddControlAsync("Протокол", new Mode.Settings.ProtocolManager.ProtocolManagerControl(), TypeWindow.Settings);
 
-    //public async Task HelpTextAsync() =>
-    //  HelpProvider.ShowHelp("index");
+    /// <summary>
+    /// Открывает WebView2 со справочником к программе.
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия интерфейса протокола.</returns>
+    public async Task HelpTextAsync() =>
+      HelpProvider.ShowHelp(null);
     
   }
 }

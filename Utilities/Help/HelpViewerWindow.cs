@@ -18,6 +18,8 @@ namespace Utilities.Help
     {
       Width = 1024;
       Height = 768;
+      MinHeight = 800;
+      MinWidth = 600;
       Title = "Справочная система";
 
       webView = new WebView2();

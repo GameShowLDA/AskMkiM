@@ -10,48 +10,44 @@
         console.log("👉 location.search    =", location.search);
         console.log("👉 location.hash      =", location.hash);
 
-        function openCommandTab(command) {
-            if (!command) {
-                console.error("Command is empty in openCommandTab");
-                return;
-            }
+        function openCommandTab(cmd) {
+            const tab = document.getElementById(cmd);
 
-            // Открываем раздел "Команды"
-            const cmdSection = document.querySelector('.sidebar details');
-            if (cmdSection) {
-                cmdSection.open = true;
-            }
+            if (tab) {
+                const det = tab.closest('details');
+                if (det) det.open = true;
 
-            // Загружаем нужную страницу команды
-            document.getElementById('content-frame').src =
-                `TextEditor/CommandList/PageCommand${command}.html`;
+                const link = tab.querySelector('a');
+                if (link) {
+                    const url = new URL(link.href, location);
+                    const section = url.searchParams.get('section');
+                    if (section) {
+                        document.getElementById('content-frame').src = `TextEditor/${section}.html`;
+                        history.replaceState({}, '', `?cmd=${encodeURIComponent(cmd)}`);
+                        return;
+                    }
+                }
+            }
+ 
+            const fallbackLi = document.getElementById('HelpF1');
+            if (fallbackLi) {
+                const det = fallbackLi.closest('details');
+                if (det) det.open = true;
+            }
+            document.getElementById('content-frame').src = 'TextEditor/HelpF1.html';
+            history.replaceState({}, '', `?cmd=HelpF1`);
         }
 
         function initHelp() {
-            // Обрабатываем параметры URL
-            const params = new URLSearchParams(window.location.search);
-            const cmd = params.get('cmd');
+            const params = new URLSearchParams(location.search);
+            const raw = (params.get('cmd') || '').trim();
 
-            // Если команда None - показываем главную страницу
-            //if (cmd === 'None') {
-            //    document.getElementById('content-frame').src = 'TextEditor/hotkeys.html';
-            //    return;
-            //}
-
-            const section = params.get('section');
-
-            if (cmd) {
-                openCommandTab(cmd);
-            } else if (section) {
-                document.getElementById('content-frame').src =
-                    `TextEditor/${section}.html`;
+            if (raw) {
+                openCommandTab(raw);
             } else {
-                // Страница по умолчанию
-                document.getElementById('content-frame').src =
-                    'TextEditor/description.html';
+                document.getElementById('content-frame').src = 'TextEditor/description.html';
             }
 
-            // Добавляем обработчики для навигации
             setupNavigation();
         }
 
@@ -76,7 +72,6 @@
             });
         }
 
-        // Инициализация при загрузке
         if (document.readyState !== 'loading') {
             initHelp();
         } else {
@@ -98,6 +93,7 @@
                         <ul>
                             <li><a href="?section=hotkeys">✦ Горячие клавиши</a></li>
                             <li><a href="?section=description">✦ Описание работы</a></li>
+                            <li><a href="?section=HelpF1">✦ Справка об F1 при отсутствии совпадений</a></li>
                         </ul>
                     </details>
                 </li>
@@ -105,15 +101,15 @@
                     <details>
                         <summary>🗒️ Команды</summary>
                         <ul>
-                            <li><a href="?section=CommandList/PageCommandTsU">✦ Команда ЦУ</a></li>
-                            <li><a href="?section=CommandList/PageCommandKTs">✦ Команда КЦ</a></li>
-                            <li><a href="?section=CommandList/PageCommandOK">✦ Команда ОК</a></li>
-                            <li><a href="?section=CommandList/PageCommandPI">✦ Команда ПИ</a></li>
-                            <li><a href="?section=CommandList/PageCommandPR">✦ Команда ПР</a></li>
-                            <li><a href="?section=CommandList/PageCommandRM">✦ Команда РМ</a></li>
-                            <li><a href="?section=CommandList/PageCommandSI">✦ Команда СИ</a></li>
-                            <li><a href="?section=CommandList/PageCommandSP">✦ Команда СП</a></li>
-                            <li><a href="?section=CommandList/PageCommandUP">✦ Команда УП</a></li>
+                            <li id="ЦУ"><a href="?section=CommandList/PageCommandTsU">✦ Команда ЦУ</a></li>
+                            <li id="КЦ"><a href="?section=CommandList/PageCommandKTs">✦ Команда КЦ</a></li>
+                            <li id="ОК"><a href="?section=CommandList/PageCommandOK">✦ Команда ОК</a></li>
+                            <li id="ПИ"><a href="?section=CommandList/PageCommandPI">✦ Команда ПИ</a></li>
+                            <li id="ПР"><a href="?section=CommandList/PageCommandPR">✦ Команда ПР</a></li>
+                            <li id="РМ"><a href="?section=CommandList/PageCommandRM">✦ Команда РМ</a></li>
+                            <li id="СИ"><a href="?section=CommandList/PageCommandSI">✦ Команда СИ</a></li>
+                            <li id="СП"><a href="?section=CommandList/PageCommandSP">✦ Команда СП</a></li>
+                            <li id="УП"><a href="?section=CommandList/PageCommandUP">✦ Команда УП</a></li>
                         </ul>
                     </details>
                 </li>

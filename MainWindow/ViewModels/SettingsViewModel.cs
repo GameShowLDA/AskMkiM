@@ -25,7 +25,10 @@ namespace MainWindowProgram.ViewModels
     /// </summary>
     public ICommand ProtocolCommand { get; }
 
-    //public ICommand HelpCommand { get; }
+    /// <summary>
+    /// Команда открытия справочника.
+    /// </summary>
+    public ICommand HelpCommand { get; }
 
     /// <summary>
     /// Сервис для работы с настройками.
@@ -43,7 +46,7 @@ namespace MainWindowProgram.ViewModels
       ExecutionCommand = new AsyncRelayCommand(_service.OpenExecutionAsync);
       ConfigCommand = new AsyncRelayCommand(_service.OpenConfigurationAsync);
       ProtocolCommand = new AsyncRelayCommand(_service.OpenProtocolAsync);
-      //HelpCommand = new AsyncRelayCommand(_service.HelpTextAsync);
+      HelpCommand = new AsyncRelayCommand(_service.HelpTextAsync);
     }
   }
 }

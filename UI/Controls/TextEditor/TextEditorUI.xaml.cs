@@ -170,52 +170,38 @@ namespace UI.Controls.TextEditor
       HelpProvider.SetHelpKeyProvider(textEditor, () =>
       {
         var sel = textEditor.SelectedText?.Trim();
-
-        // Если выделение пустое - возвращаем None для открытия начальной страницы
-        if (string.IsNullOrWhiteSpace(sel))
-        {
-          return HelpProvider.EnumHelpCommands.None;
-        }
-
-        // Проверяем, является ли выделенный текст командой
-        if (IsValidCommand(sel, out HelpProvider.EnumHelpCommands command))
-        {
-          return command;
-        }
-
-        // Если не команда - возвращаем специальное значение Unknown
-        return HelpProvider.EnumHelpCommands.Unknown;
+        return string.IsNullOrWhiteSpace(sel) ? "" : sel;
       });
     }
 
-    private static bool IsValidCommand(string text, out HelpProvider.EnumHelpCommands command)
-    {
-      command = HelpProvider.EnumHelpCommands.Unknown;
+    //private static bool IsValidCommand(string text, out HelpProvider.EnumHelpCommands command)
+    //{
+    //  command = HelpProvider.EnumHelpCommands.Unknown;
 
-      // Проверяем прямое соответствие enum
-      if (Enum.TryParse<HelpProvider.EnumHelpCommands>(text, true, out var directEnum))
-      {
-        // Для одиночных символов делаем дополнительную проверку
-        if (text.Length == 1 &&
-            directEnum != HelpProvider.EnumHelpCommands.OK &&
-            directEnum != HelpProvider.EnumHelpCommands.UP)
-        {
-          return false;
-        }
+    //  // Проверяем прямое соответствие enum
+    //  if (Enum.TryParse<HelpProvider.EnumHelpCommands>(text, true, out var directEnum))
+    //  {
+    //    // Для одиночных символов делаем дополнительную проверку
+    //    if (text.Length == 1 &&
+    //        directEnum != HelpProvider.EnumHelpCommands.OK &&
+    //        directEnum != HelpProvider.EnumHelpCommands.UP)
+    //    {
+    //      return false;
+    //    }
 
-        command = directEnum;
-        return true;
-      }
+    //    command = directEnum;
+    //    return true;
+    //  }
 
-      // Проверяем соответствие по Description
-      if (HelpProvider.TryGetByDescription(text, out var byDesc))
-      {
-        command = byDesc;
-        return true;
-      }
+    //  // Проверяем соответствие по Description
+    //  if (HelpProvider.TryGetByDescription(text, out var byDesc))
+    //  {
+    //    command = byDesc;
+    //    return true;
+    //  }
 
-      return false;
-    }
+    //  return false;
+    //}
 
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {

@@ -15,83 +15,74 @@ namespace Utilities.Help
 
     // Attached property для Func<EnumHelpCommands>
     public static readonly DependencyProperty HelpKeyProviderProperty =
-        DependencyProperty.RegisterAttached(
-            "HelpKeyProvider",
-            typeof(Func<EnumHelpCommands>),
-            typeof(HelpProvider),
-            new PropertyMetadata(null));
+      DependencyProperty.RegisterAttached(
+        "HelpKeyProvider",
+        typeof(Func<string>),
+        typeof(HelpProvider),
+        new PropertyMetadata(null));
 
-    public static void SetHelpKeyProvider(DependencyObject element, Func<EnumHelpCommands> provider)
+    public static void SetHelpKeyProvider(DependencyObject element, Func<string> provider)
         => element.SetValue(HelpKeyProviderProperty, provider);
 
-    public static Func<EnumHelpCommands>? GetHelpKeyProvider(DependencyObject element)
-        => element.GetValue(HelpKeyProviderProperty) as Func<EnumHelpCommands>;
+    public static Func<string>? GetHelpKeyProvider(DependencyObject element)
+        => element.GetValue(HelpKeyProviderProperty) as Func<string>;
 
-    public enum EnumHelpCommands
-    {
-      None,       // Для открытия начальной страницы
-      Unknown,    // Для нераспознанных команд
-      [Description("КЦ")] KTs,
-      [Description("ОК")] OK,
-      [Description("ПИ")] PI,
-      [Description("ПР")] PR,
-      [Description("РМ")] RM,
-      [Description("СИ")] SI,
-      [Description("СП")] SP,
-      [Description("ЦУ")] TsU,
-      [Description("УП")] UP,
-    }
+    //public enum EnumHelpCommands
+    //{
+    //  None,       // Для открытия начальной страницы
+    //  Unknown,    // Для нераспознанных команд
+    //  [Description("КЦ")] KTs,
+    //  [Description("ОК")] OK,
+    //  [Description("ПИ")] PI,
+    //  [Description("ПР")] PR,
+    //  [Description("РМ")] RM,
+    //  [Description("СИ")] SI,
+    //  [Description("СП")] SP,
+    //  [Description("ЦУ")] TsU,
+    //  [Description("УП")] UP,
+    //}
 
     /// <summary>
     /// Регистрирует глобальный обработчик F1.
     /// </summary>
     public static void RegisterHelp(Window window)
     {
-      window.PreviewKeyDown += (sender, e) =>
+      window.PreviewKeyDown += (s, e) =>
       {
         if (e.Key != Key.F1) return;
 
-        // Пытаемся получить команду из attached provider
-        DependencyObject? current = Keyboard.FocusedElement as DependencyObject
-                                  ?? Mouse.DirectlyOver as DependencyObject;
-        while (current != null)
+        // 1) получаем строку из провайдера
+        DependencyObject? el = Keyboard.FocusedElement as DependencyObject
+                              ?? Mouse.DirectlyOver as DependencyObject;
+        string command = "";
+        while (el != null)
         {
-          var provider = GetHelpKeyProvider(current);
-          if (provider != null)
+          var prov = GetHelpKeyProvider(el);
+          if (prov != null)
           {
-            var cmd = provider();
-            // Проверяем, что команда не None
-            if (cmd != EnumHelpCommands.None)
+            var text = prov().Trim();
+            if (!string.IsNullOrWhiteSpace(text))
             {
-              ShowHelp(cmd);
-              e.Handled = true;
-              return;
+              command = text;
+              break;
             }
           }
-          current = VisualTreeHelper.GetParent(current);
+          el = VisualTreeHelper.GetParent(el);
         }
 
-        // fallback: по Tag или по Description
-        string? tag = null;
-        var focused = Keyboard.FocusedElement as DependencyObject
-                      ?? Mouse.DirectlyOver as DependencyObject;
-        var fe = FindElementWithTag(focused);
-        if (fe != null) tag = fe.Tag as string;
+        // 2) если ничего не нашли, смотрим Tag как fallback
+        if (string.IsNullOrWhiteSpace(command))
+        {
+          var fe = FindElementWithTag(el);
+          var tag = fe?.Tag as string;
+          command = string.IsNullOrWhiteSpace(tag) ? "" : tag.Trim();
+        }
 
-        // Проверяем что tag не пустой и не состоит из пробелов/непечатаемых символов
-        if (!string.IsNullOrWhiteSpace(tag) &&
-            TryGetByDescription(tag, out EnumHelpCommands enumFromTag) &&
-            enumFromTag != EnumHelpCommands.None)
-        {
-          ShowHelp(enumFromTag);
-        }
-        else
-        {
-          ShowHelp(EnumHelpCommands.None);
-        }
+        ShowHelp(command);
         e.Handled = true;
       };
     }
+
 
     private static FrameworkElement? FindElementWithTag(DependencyObject? element)
     {
@@ -105,24 +96,10 @@ namespace Utilities.Help
     }
 
     /// <summary>
-    /// Открывает нужный раздел справки по EnumHelpCommands.
+    /// Открывает нужный раздел справки.
     /// </summary>
-    public static void ShowHelp(EnumHelpCommands command)
+    public static void ShowHelp(string command)
     {
-      // Обработка специальных случаев None и Unknown
-      if (command == EnumHelpCommands.None)
-      {
-        OpenInitialHelp();
-        return;
-      }
-
-      if (command == EnumHelpCommands.Unknown)
-      {
-        MessageBox.Show("Для данной команды, функции или синтаксиса ещё не написана документация!", "Справка");
-        return;
-      }
-
-      // Убеждаемся, что папка есть
       var helpDir = Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
           "Help", "AppHelp");
@@ -132,68 +109,68 @@ namespace Utilities.Help
         return;
       }
 
-      // Запускаем HTTP-сервер
       try
       {
         HelpServer.EnsureStarted();
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Не удалось запустить Help-сервер: {ex.Message}", "Справка");
+        MessageBox.Show($"Не удалось открыть справку!\nОбратитесь к разработчику!", "Справка");
+        LogError($"Не удалось запустить Help-сервер: {ex.Message}");
         return;
       }
 
-      // Проверяем существование файла документации для команды
-      string commandFileName = $"PageCommand{command}.html";
-      string commandFilePath = Path.Combine(helpDir, "TextEditor", "CommandList", commandFileName);
-
-      if (!File.Exists(commandFilePath))
+      string url;
+      if (string.IsNullOrWhiteSpace(command))
       {
-        // Получаем описание команды для сообщения
-        string commandDescription = GetCommandDescription(command);
-        MessageBox.Show($"Для команды '{commandDescription}' документация ещё не написана!", "Справка");
-        return;
+        url = $"http://localhost:{HelpServer.Port}/index.html";
+      }
+      else
+      {
+        // Экранируем спецсимволы в параметре
+        var esc = Uri.EscapeDataString(command);
+        url = $"http://localhost:{HelpServer.Port}/index.html?cmd={esc}";
       }
 
-      string url = $"http://localhost:{HelpServer.Port}/index.html?cmd={command}";
       OpenHelpViewer(url);
     }
 
-    private static string GetCommandDescription(EnumHelpCommands command)
-    {
-      var field = typeof(EnumHelpCommands).GetField(command.ToString());
-      if (field == null) return command.ToString();
 
-      var attribute = field.GetCustomAttribute<DescriptionAttribute>();
-      return attribute?.Description ?? command.ToString();
-    }
+    //private static string GetCommandDescription(EnumHelpCommands command)
+    //{
+    //  var field = typeof(EnumHelpCommands).GetField(command.ToString());
+    //  if (field == null) return command.ToString();
 
-    private static void OpenInitialHelp()
-    {
-      // Убеждаемся, что папка есть
-      var helpDir = Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "Help", "AppHelp");
-      if (!Directory.Exists(helpDir))
-      {
-        MessageBox.Show("Папка с справкой не найдена.", "Справка");
-        return;
-      }
+    //  var attribute = field.GetCustomAttribute<DescriptionAttribute>();
+    //  return attribute?.Description ?? command.ToString();
+    //}
 
-      // Запускаем HTTP-сервер
-      try
-      {
-        HelpServer.EnsureStarted();
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show($"Не удалось запустить Help-сервер: {ex.Message}", "Справка");
-        return;
-      }
+    //private static void OpenInitialHelp()
+    //{
+    //  // Убеждаемся, что папка есть
+    //  var helpDir = Path.Combine(
+    //      AppDomain.CurrentDomain.BaseDirectory,
+    //      "Help", "AppHelp");
+    //  if (!Directory.Exists(helpDir))
+    //  {
+    //    MessageBox.Show("Папка с справкой не найдена.", "Справка");
+    //    return;
+    //  }
 
-      string url = $"http://localhost:{HelpServer.Port}/index.html";
-      OpenHelpViewer(url);
-    }
+    //  // Запускаем HTTP-сервер
+    //  try
+    //  {
+    //    HelpServer.EnsureStarted();
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    MessageBox.Show($"Не удалось запустить Help-сервер: {ex.Message}", "Справка");
+    //    return;
+    //  }
+
+    //  string url = $"http://localhost:{HelpServer.Port}/index.html";
+    //  OpenHelpViewer(url);
+    //}
 
     private static void OpenHelpViewer(string url)
     {
@@ -233,19 +210,19 @@ namespace Utilities.Help
     /// <summary>
     /// Парсит enum по его [Description("...")] атрибуту.
     /// </summary>
-    public static bool TryGetByDescription(string description, out EnumHelpCommands result)
-    {
-      foreach (var field in typeof(EnumHelpCommands).GetFields(BindingFlags.Public | BindingFlags.Static))
-      {
-        var attr = field.GetCustomAttribute<DescriptionAttribute>();
-        if (attr != null && attr.Description.Equals(description, StringComparison.OrdinalIgnoreCase))
-        {
-          result = (EnumHelpCommands)field.GetValue(null)!;
-          return true;
-        }
-      }
-      result = default;
-      return false;
-    }
+    //public static bool TryGetByDescription(string description, out EnumHelpCommands result)
+    //{
+    //  foreach (var field in typeof(EnumHelpCommands).GetFields(BindingFlags.Public | BindingFlags.Static))
+    //  {
+    //    var attr = field.GetCustomAttribute<DescriptionAttribute>();
+    //    if (attr != null && attr.Description.Equals(description, StringComparison.OrdinalIgnoreCase))
+    //    {
+    //      result = (EnumHelpCommands)field.GetValue(null)!;
+    //      return true;
+    //    }
+    //  }
+    //  result = default;
+    //  return false;
+    //}
   }
 }
