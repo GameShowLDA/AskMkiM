@@ -137,7 +137,6 @@ namespace UI.Controls.ProtocolNew
       await ExecuteTaskAsync(startDelegate, stop, name, isRepeatEnabled);
     }
 
-
     /// <summary>
     /// Завершение текущей выполняемой задачи.
     /// </summary>
@@ -145,7 +144,6 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
     internal async Task StopAsync(StopDelegate stopDelegate)
     {
-
       await FinalizeAsync(stopDelegate);
     }
 

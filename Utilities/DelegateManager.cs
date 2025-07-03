@@ -27,5 +27,7 @@ namespace Utilities
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
     public delegate Task ReturnDelegate(CancellationToken cancellationToken);
+
+    public delegate Task<bool> MeasurementReturn();
   }
 }

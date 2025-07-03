@@ -21,10 +21,10 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <c>true</c> — использовать низкий уровень напряжения,
     /// <c>false</c> — использовать стандартный (высокий) уровень напряжения.
     /// </param>
-    private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken, bool lowVoltage = false)
+    private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.BusManager.ConnectBusAsync(bus, lowVoltage);
+      return await module.BusManager.ConnectBusAsync(bus);
     }
 
     /// <summary>
@@ -37,10 +37,10 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <c>true</c> — использовать низкий уровень напряжения,
     /// <c>false</c> — использовать стандартный (высокий) уровень напряжения.
     /// </param>
-    private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken, bool lowVoltage = false)
+    private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.BusManager.DisconnectBusAsync(bus, lowVoltage);
+      return await module.BusManager.DisconnectBusAsync(bus);
     }
 
     /// <summary>

@@ -10,8 +10,8 @@
         mc:Ignorable="d"
         MinWidth="800"
         MinHeight="600"
-        Title="MainWindow" Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}"
+        Title="MainWindow" Height="450" Width="800"
         xmlns:Error ="clr-namespace:TestWPF"
         >
-    <Calendar:CalendarControl/>
+    <local:TestControl x:Name="TestControl" />
 </Window>

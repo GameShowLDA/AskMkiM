@@ -192,59 +192,65 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Метрология" Name="Metrology" Tag="menuHeader_2">
+                <MenuItem Header="Испытания" Tag="menuHeader_2" >
 
-                    <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
-                    <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
-                    <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
-                    <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
-                    <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
-                    <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
-                    <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
-                    <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
+                    <MenuItem Header="Метрология" Name="Metrology" Style="{StaticResource SideMenuItemStyle}">
 
+                        <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
+                        <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
+                        <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
+                        <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
+                        <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
+                        <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
+                        <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
+                        <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
+
+                    </MenuItem>
+
+                    <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3" Style="{StaticResource SideMenuItemStyle}">
+
+                        <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
+
+                    </MenuItem>
+
+                    <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
+
+                        <MenuItem Header="Тест СИ" >
+
+                            <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
+                            <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="Тест ПИ на постоянном токе" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
+                            <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="Тест ПИ на переменном токе" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
+                            <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
+                            <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+                        </MenuItem>
+
+                    </MenuItem>
+                    
                 </MenuItem>
 
-                <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
-
-                    <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
-
-                </MenuItem>
-
-                <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4">
-
-                    <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
-
-                    </MenuItem>
-
-                    <MenuItem Header="Тест ПИ на постоянном токе" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
-
-                    </MenuItem>
-
-                    <MenuItem Header="Тест ПИ на переменном токе" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
-
-                    </MenuItem>
-
-                    <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
-                        <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
-                    </MenuItem>
-
-                </MenuItem>
-
-                <MenuItem Header="Трансляция" Name="Translation" Tag="menuHeader_5">
+                <MenuItem Header="Сборка" Tag="menuHeader_3" Name="Translation">
+                    
                     <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
+
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_6">
+                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_4">
 
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>

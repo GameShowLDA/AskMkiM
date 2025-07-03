@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media;
 using Utilities.Models;
 
 namespace TestWPF
@@ -11,9 +12,13 @@ namespace TestWPF
     public MainWindow()
     {
       InitializeComponent();
-      // InitializeSettings();
+      Loaded += MainWindow_Loaded;
     }
 
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+      TestControl.Background = new SolidColorBrush(Colors.Black);
+    }
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.

@@ -21,9 +21,17 @@ namespace UI.Components
   /// </summary>
   public partial class TimeControl : UserControl
   {
+    /// <summary>
+    /// Свойство зависимости, определяющее, отображается ли поле времени.
+    /// </summary>
+    public static readonly DependencyProperty IsFullTimeProperty =
+        DependencyProperty.Register(nameof(FullTime), typeof(bool), typeof(InputField), new PropertyMetadata(false));
+
     public event Action ChangeDate;
 
     readonly DispatcherTimer DispatcherTimer = new DispatcherTimer();
+
+    public bool FullTime { get; set; }
     public TimeControl()
     {
       InitializeComponent();
@@ -40,7 +48,15 @@ namespace UI.Components
 
     private void DispatcherTimer_Tick(object? sender, EventArgs e)
     {
-      Clock.Text = DateTime.Now.ToShortTimeString();
+      if (!FullTime)
+      {
+        Clock.Text = DateTime.Now.ToShortTimeString();
+      }
+      else
+      {
+        Clock.Text = DateTime.Now.ToLongTimeString();
+      }
+
       if (Clock.Text == "00:00")
       {
         ChangeDate?.Invoke();
