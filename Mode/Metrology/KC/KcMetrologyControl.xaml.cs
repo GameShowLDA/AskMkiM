@@ -47,7 +47,7 @@ namespace Mode.Metrology.KC
         true,
         ReturnDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+          return await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
         },
         StopDelegate: async (CancellationToken token) =>
         {
@@ -103,7 +103,7 @@ namespace Mode.Metrology.KC
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
@@ -115,6 +115,7 @@ namespace Mode.Metrology.KC
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления",  message: $"{result} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 });
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений",  message: $"от {firstNorm} до {lastNorm} Ом") { IndentLevel = 2});
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения",  message: $"{(Math.Abs(result - param))} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 });
+        return true;
       }
     }
   }

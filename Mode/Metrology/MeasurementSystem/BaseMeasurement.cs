@@ -199,7 +199,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
     /// <param name="param">Электрическое значение.</param>
     /// <param name="protocolUI">Пользовательский элемент для вывода в протокол.</param>
-    public abstract Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI);
+    public abstract Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI);
 
     /// <summary>
     /// Завершает измерение, размыкает реле и отключает прибор.

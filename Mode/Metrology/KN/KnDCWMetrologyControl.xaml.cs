@@ -42,7 +42,7 @@ namespace Mode.Metrology.KN
         true,
         ReturnDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+          return await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
         },
         StopDelegate: async (CancellationToken token) =>
         {
@@ -98,7 +98,7 @@ namespace Mode.Metrology.KN
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
 
@@ -146,6 +146,8 @@ namespace Mode.Metrology.KN
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Некорректно введённое эталонное значение напряжения.", type: ShowMessageModel.MessageType.Error));
         }
+
+        return true;
       }
     }
   }

@@ -49,7 +49,7 @@ namespace Mode.Metrology.PR
           true,
           ReturnDelegate: async (CancellationToken token) =>
           {
-            await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+           return await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
           },
           StopDelegate: async (CancellationToken token) =>
           {
@@ -130,7 +130,7 @@ namespace Mode.Metrology.PR
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
         var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
@@ -152,6 +152,7 @@ namespace Mode.Metrology.PR
         showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await protocolUI.ShowMessageAsync(showMessageModel);
+        return true;
       }
 
       /// <summary>

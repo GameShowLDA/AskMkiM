@@ -129,6 +129,10 @@ namespace UI.Controls.ProtocolNew
       ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
     }
 
+    public void SetReturn(ReturnDelegate returnDelegate)
+    {
+      _returnDelegate = returnDelegate;
+    }
     #endregion
 
     #region Основные методы кнопок.

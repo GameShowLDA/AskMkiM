@@ -42,7 +42,7 @@ namespace Mode.Metrology.PI
         true,
         ReturnDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
+         return await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
         },
         StopDelegate: async (CancellationToken token) =>
         {
@@ -106,7 +106,7 @@ namespace Mode.Metrology.PI
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         var meterDevice = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
@@ -156,6 +156,8 @@ namespace Mode.Metrology.PI
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, "Некорректно введённое эталонное значение напряжения."));
         }
+
+        return true;
       }
 
       public override async Task FinalizeMeasurement()

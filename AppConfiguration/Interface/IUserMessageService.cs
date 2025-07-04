@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Utilities.Models;
+using static Utilities.DelegateManager;
 
 namespace AppConfiguration.Interface
 {
