@@ -1,16 +1,18 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using AppConfiguration.Interface;
 using NewCore.Communication;
+using System.Windows;
+using System.Windows.Input;
+using Utilities;
 using Utilities.Models;
 using WindowsInput;
 using static AppConfiguration.Base.EventAggregator;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static AppConfiguration.Protocol.ProtocolConfig;
 using static AppConfiguration.SystemState.SystemStateManager;
+using static UI.Controls.Message.MessageBox;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
-using static UI.Controls.Message.MessageBox;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -183,7 +185,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Ставит выполнение метода на паузу.
     /// </summary>
-    internal async Task PauseAsync(CancellationToken cancellationToken)
+    internal async Task PauseAsync(CancellationToken cancellationToken, IUserMessageService userMessageService)
     {
       if (!IsPaused)
       {
@@ -200,7 +202,7 @@ namespace UI.Controls.ProtocolNew
     /// Возобновляет выполнение метода после паузы.
     /// </summary>
     /// <param name="stepMode">Флаг, указывающий, нужно ли возобновить в пошаговом режиме.</param>
-    internal void Resume(bool stepMode)
+    internal void Resume(bool stepMode, IUserMessageService userMessageService)
     {
       LogInformation("Срабатывание возобновления при самоконтроле");
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
@@ -209,6 +211,7 @@ namespace UI.Controls.ProtocolNew
       }
 
       IsPaused = false;
+      userMessageService.ClearRetryAction();
     }
 
     /// <summary>
@@ -289,6 +292,32 @@ namespace UI.Controls.ProtocolNew
         await FinalizeAsync(stop);
       }
     }
+
+    /// <summary>
+    /// Выполняет повтор действия, зарегистрированного в <see cref="IUserMessageService"/>, при нажатии на кнопку "Повторить".
+    /// Если повторное действие не задано, ничего не происходит.
+    /// </summary>
+    /// <returns>Задача, представляющая выполнение действия повтора.</returns>
+    internal async Task ReturnMeasureEvent(IUserMessageService _userMessageService)
+    {
+      try
+      {
+        if (_userMessageService.HasRetryAction)
+        {
+          await _userMessageService.TryInvokeRetryAsync();
+        }
+      }
+      catch (Exception ex)
+      {
+        LoggerUtility.LogException("Ошибка при выполнении действия повтора", ex);
+
+        await _userMessageService.ShowMessageAsync(new ShowMessageModel(
+          "Не удалось повторить действие.", type: ShowMessageModel.MessageType.Error));
+      }
+
+      _userMessageService.ClearRetryAction();
+    }
+
 
     #endregion
 
@@ -589,6 +618,10 @@ namespace UI.Controls.ProtocolNew
 
       await SetIsLocked(false);
     }
+    #endregion
+
+    #region Повтор действий.
+
     #endregion
 
     #region Настройки подключения к классу.

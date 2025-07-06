@@ -34,6 +34,15 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
+    /// <inheritdoc />
+    public bool HasRetryAction => _retryAction != null;
+
+    /// <summary>
+    /// Действие, которое будет вызвано при нажатии на кнопку "Повторить".
+    /// </summary>
+    private Func<Task> _retryAction;
+
+
     /// <summary>
     /// Главное окно приложения, используемое для отображения интерфейса.
     /// </summary>
@@ -172,12 +181,12 @@ namespace UI.Controls.ProtocolNew
     /// Приостанавливает метод на паузу.
     /// </summary>
     /// <returns></returns>
-    public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken());
+    public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken(), this);
 
     /// <summary>
     /// Возобновляет метод после паузы.
     /// </summary>
-    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode);
+    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this);
 
     #endregion
 
@@ -191,7 +200,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
     /// </summary>
-    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(_returnDelegate, _stopDelegate);
+    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(this);
 
     #endregion
 
@@ -212,7 +221,7 @@ namespace UI.Controls.ProtocolNew
     #endregion
 
     #region Методы.
-    
+
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
@@ -228,15 +237,30 @@ namespace UI.Controls.ProtocolNew
       }
       await ShouldShowDetailedProtocol(showMessageModel);
       CheckStatus(ref showMessageModel);
-      
+
       await protocolTextBox.AppendLineAsync(showMessageModel);
+
+      bool isHasRetry = false;
 
       if (ActionExecutor.IsPaused)
       {
-        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
+        if (!HasRetryAction)
+        {
+          await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
+        }
+        else
+        {
+          await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken());
+          isHasRetry = true;
+        }
       }
 
-      await CheckPause(showMessageModel.Status);
+      if (!isHasRetry)
+      {
+        await CheckPause(showMessageModel.Status);
+      }
+
+      isHasRetry = false;
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
@@ -424,6 +448,28 @@ namespace UI.Controls.ProtocolNew
     {
       Show(Status.Error, "В будущем добавить сюда реализацию выбора");
       return Task.FromResult(true);
+    }
+
+    /// <inheritdoc />
+    public void RegisterRetryAction(Func<Task> retryAction)
+    {
+      _retryAction = retryAction;
+    }
+
+    /// <inheritdoc />
+    public async Task TryInvokeRetryAsync()
+    {
+      if (_retryAction != null)
+      {
+        await _retryAction();
+      }
+    }
+
+    /// <inheritdoc />
+
+    public void ClearRetryAction()
+    {
+      _retryAction = null;
     }
   }
 }

@@ -27,6 +27,10 @@ namespace UI.Components.ProtocolListBox
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
     public string Header { get; set ; }
 
+    public bool HasRetryAction => throw new NotImplementedException();
+
+    public bool ClickRetry { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
     public ProtocolListBoxUI()
     {
       InitializeComponent();
@@ -140,6 +144,21 @@ namespace UI.Components.ProtocolListBox
     }
 
     public Task<bool> WaitAdminButtonAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    public void RegisterRetryAction(Func<Task> retryAction)
+    {
+      throw new NotImplementedException();
+    }
+
+    public Task TryInvokeRetryAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    public void ClearRetryAction()
     {
       throw new NotImplementedException();
     }

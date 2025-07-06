@@ -401,6 +401,10 @@ namespace UI.Controls.ProtocolNew
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetNonVisibleAllButton();
+        if (HasRetryAction)
+        {
+          ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
+        }
         NextButtonVisibility = Visibility.Visible;
         ExitButtonVisibility = Visibility.Visible;
       });
@@ -433,6 +437,6 @@ namespace UI.Controls.ProtocolNew
 
     #endregion
 
-   
+
   }
 }

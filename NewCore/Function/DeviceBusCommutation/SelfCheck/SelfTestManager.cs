@@ -65,7 +65,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       if (await GetIsIdleModeEnabled())
       {
-        return true;
+        return false;
       }
 
       DeviceCommand cmd = new DeviceCommand(4, (int)testType, busContact, action);
@@ -366,12 +366,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     private static async Task<bool> PerformCircuitTestAsync(IUserMessageService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
-
-      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 1))
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при замыкании: {circuitName}.", type: ShowMessageModel.MessageType.Error));
+      
+      if (!await TryCloseCircuitWithRetryAsync(messageService, selfTestChecker, testType, busContact, circuitName))
+      { 
         return false;
-      }
+      }  
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка целостности цепи {circuitName}...") { IndentLevel = 1 });
 
@@ -496,5 +495,42 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       return typeof(TypeConnector);
     }
+
+    /// <summary>
+    /// Выполняет попытку замкнуть указанную цепь с возможностью повтора при ошибке.
+    /// Если замыкание не удалось, отображается сообщение об ошибке и сохраняется действие для кнопки "Повторить".
+    /// </summary>
+    /// <param name="messageService">Сервис отображения сообщений и управления действиями повтора.</param>
+    /// <param name="selfTestChecker">Объект, выполняющий замыкание цепи.</param>
+    /// <param name="testType">Тип соединения (например, BlockingRelay, Multimeter и т. д.).</param>
+    /// <param name="busContact">Номер контакта шины, подлежащий замыканию.</param>
+    /// <param name="circuitName">Название цепи для отображения в сообщениях.</param>
+    /// <returns>True, если замыкание выполнено успешно; иначе false.</returns>
+    private static async Task<bool> TryCloseCircuitWithRetryAsync(
+      IUserMessageService messageService,
+      ISelfTestCheckerDeviceBusCommutation selfTestChecker,
+      TypeConnector testType,
+      int busContact,
+      string circuitName)
+    {
+      async Task retryAction()
+      {
+        await TryCloseCircuitWithRetryAsync(messageService, selfTestChecker, testType, busContact, circuitName);
+      }
+
+      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 1))
+      {
+        messageService.RegisterRetryAction(retryAction);
+
+        await messageService.ShowMessageAsync(new ShowMessageModel(
+          $"Ошибка при замыкании: {circuitName}.",
+          type: ShowMessageModel.MessageType.Error));
+
+        return false;
+      }
+
+      return true;
+    }
+
   }
 }
