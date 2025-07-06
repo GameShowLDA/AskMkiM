@@ -1,19 +1,20 @@
-﻿using System.Diagnostics;
+﻿using AppConfiguration.Base;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
-using AppConfiguration.Base;
-using DevZest.Windows.Docking;
 using Ude;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.TextEditor;
+using UI.Windows.WpfDocking.Windows.Docking;
+using Utilities;
+using static UI.Controls.Message.MessageBox;
 using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace UI.Components.MultiEditorMethods
@@ -293,28 +294,56 @@ namespace UI.Components.MultiEditorMethods
       controlManager.RemoveControl(foundPage, textEditorContainer);
     }
 
+    /// <summary>
+    /// Отображает DockItem внутри переданного TextEditorContainer.
+    /// </summary>
+    /// <param name="textEditorContainer">Контейнер с DockControl.</param>
+    /// <param name="dockItem">DockItem, который нужно показать.</param>
     public void ShowDockItem(TextEditorContainer textEditorContainer, DockItem dockItem)
     {
       try
       {
-        if (!textEditorContainer.DockManager.IsLoaded)
+        var dockControl = textEditorContainer?.DockManager;
+
+        if (dockControl == null)
         {
+          LogError("DockControl не найден (null). Невозможно отобразить вкладку.");
+          return;
+        }
+
+        LoggerUtility.LogInformation($"Попытка показать DockItem. Title: {dockItem.Title}, IsLoaded: {dockControl.IsLoaded}, DockItems.Count: {dockControl.DockItems.Count}");
+
+        if (!dockControl.IsLoaded)
+        {
+          LoggerUtility.LogWarning("DockControl ещё не загружен. Подписка на Loaded...");
+
           var capturedDockItem = dockItem;
-          textEditorContainer.DockManager.Loaded += (s, e) =>
+          dockControl.Loaded += (s, e) =>
           {
-            capturedDockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
+            try
+            {
+              LoggerUtility.LogInformation("DockControl загрузился. Показываем вкладку.");
+              capturedDockItem.Show(dockControl, DockPosition.Document);
+              LoggerUtility.LogInformation("DockItem отображён после загрузки.");
+            }
+            catch (Exception ex)
+            {
+              LoggerUtility.LogException("Ошибка при отображении DockItem после загрузки:", ex);
+            }
           };
         }
         else
         {
-          dockItem.Show(textEditorContainer.DockManager, DockPosition.Document);
+          dockItem.Show(dockControl, DockPosition.Document);
+          LoggerUtility.LogInformation("DockItem отображён немедленно.");
         }
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при открытии документа: {ex}");
+        LoggerUtility.LogException("Ошибка при отображении DockItem:", ex);
       }
     }
+
 
     private Encoding DetectEncoding(string filePath)
     {

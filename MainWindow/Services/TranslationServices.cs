@@ -1,14 +1,9 @@
 ﻿using AppConfiguration.Base;
 using ControlCommandAnalyser;
-using DevZest.Windows.Docking;
-using ICSharpCode.AvalonEdit;
 using System.Windows;
-using UI.Components;
-using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.TextEditor;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using UI.Windows.WpfDocking.Windows.Docking;
 using static UI.Controls.Message.MessageBox;
 
 namespace MainWindowProgram.Services

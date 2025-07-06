@@ -8,7 +8,7 @@ using UI.Components.SearchControls;
 using static Utilities.LoggerUtility;
 using System.Windows.Controls;
 using AppConfiguration.Base;
-using DevZest.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking;
 using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.MultiEditorMethods

@@ -1,5 +1,5 @@
 ﻿using AppConfiguration.Interface;
-using DevZest.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking;
 using System;
 using System.Collections.Generic;
 using System.Linq;

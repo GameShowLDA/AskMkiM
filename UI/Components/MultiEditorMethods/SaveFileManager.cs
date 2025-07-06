@@ -3,7 +3,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
-using DevZest.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
