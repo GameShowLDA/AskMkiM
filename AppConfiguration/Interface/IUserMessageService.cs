@@ -35,8 +35,6 @@ namespace AppConfiguration.Interface
     /// <returns>True, если пользователь подтвердил действие; иначе — false.</returns>
     Task<bool> WaitAdminButtonAsync();
 
-    // ----------- Поддержка повтора действия -----------
-
     /// <summary>
     /// Регистрирует асинхронное действие, которое может быть повторено пользователем в случае ошибки.
     /// </summary>
