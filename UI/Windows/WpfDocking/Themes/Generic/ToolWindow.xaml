@@ -8,7 +8,7 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Brushes.xaml" />
     </ResourceDictionary.MergedDictionaries>
-    
+
     <Style TargetType="{x:Type primitives:ToolWindow}">
         <Style.Resources>
             <DataTemplate x:Key="CaptionTemplate">
@@ -18,16 +18,19 @@
             <DataTemplate x:Key="OverlayTemplate">
                 <primitives:PreviewOverlay Margin="0,0,0,-4" />
             </DataTemplate>
-            
+
             <primitives:Overlay x:Key="Overlay" ContentTemplate="{StaticResource OverlayTemplate}" />
-                
+
             <ControlTemplate x:Key="ControlTemplate" TargetType="{x:Type primitives:ToolWindow}">
                 <Grid ContextMenu="{Binding SelectedItem.TabContextMenu}">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0" SnapsToDevicePixels="True" BorderThickness="1" BorderBrush="{StaticResource ToolWindowBorderBrush}">
+                    <Border x:Name="tabStrip" Grid.Row="0" Margin="0,2,0,4" SnapsToDevicePixels="True" BorderThickness="0">
+                        <primitives:ToolWindowTabStrip Margin="0" ItemsSource="{Binding VisibleItems}" />
+                    </Border>
+                    <Border Grid.Row="1" SnapsToDevicePixels="True" BorderThickness="1" BorderBrush="{StaticResource ToolWindowBorderBrush}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -37,21 +40,15 @@
                             <ContentPresenter SnapsToDevicePixels="True" x:Name="contentPresenter" Grid.Row="1" Content="{Binding SelectedItem}" />
                         </Grid>
                     </Border>
-                    <Border x:Name="tabStrip" Grid.Row="1" Margin="0,2,0,4" SnapsToDevicePixels="True" BorderThickness="0,1,0,0" BorderBrush="{StaticResource ToolWindowBorderBrush}">
-                        <primitives:ToolWindowTabStrip Margin="1,0,0,0" ItemsSource="{Binding VisibleItems}" />
-                    </Border>
                 </Grid>
                 <ControlTemplate.Triggers>
-                    <DataTrigger Binding="{Binding CountOfVisibleItems}" Value="1">
-                        <Setter TargetName="tabStrip" Property="Visibility" Value="Collapsed" />
-                    </DataTrigger>
                     <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Tab">
                         <Setter TargetName="contentPresenter" Property="primitives:DockManager.Overlay" Value="{StaticResource Overlay}" />
                     </DataTrigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
         </Style.Resources>
-        
+
         <Setter Property="DoubleClickCommand" Value="{x:Static docking:DockCommands.ToggleFloating}" />
         <Setter Property="Template" Value="{StaticResource ControlTemplate}" />
     </Style>

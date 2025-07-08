@@ -5,55 +5,17 @@
     xmlns:common="clr-namespace:UI.Windows.WpfDocking.Windows"
     xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
     xmlns:DefaultGUI="clr-namespace:UI.Components" 
-    xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
+    xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors">
 
-    <Style TargetType="{x:Type MenuItem}">
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Grid SnapsToDevicePixels="true">
-                        <DockPanel x:Name="ItemDockPanel" Background="Transparent">
-                            <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="4,0,6,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
-                            <Path x:Name="GlyphPanel" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="7,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="HeaderText" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-
-                            <!-- Добавляем TextBlock для отображения горячей клавиши -->
-                            <TextBlock x:Name="HotkeyText" Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
-
-                        </DockPanel>
-                        <Popup x:Name="PART_Popup" AllowsTransparency="true" Focusable="false" HorizontalOffset="1" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom" VerticalOffset="-1">
-                            <Border Background="{TemplateBinding Background}">
-                                <ScrollViewer x:Name="SubMenuScrollViewer" CanContentScroll="true" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
-                                    <Grid RenderOptions.ClearTypeHint="Enabled">
-                                        <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="true" Margin="2" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle"/>
-                                    </Grid>
-                                </ScrollViewer>
-                            </Border>
-                        </Popup>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush}" TargetName="ItemDockPanel"/>
-                            <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}" TargetName="HeaderText"/>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush}" TargetName="ItemDockPanel"/>
-                            <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}" TargetName="HeaderText"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Padding" Value="5,10,10,10"/>
-        <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
-        <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
-        <Setter Property="Cursor" Value="Hand"/>
-
+    <Style TargetType="DefaultGUI:WindowButtons">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Стиль для NativeFloatingWindow -->
@@ -64,6 +26,7 @@
         <Setter Property="Height" Value="{Binding Path=Height, Mode=TwoWay}" />
         <Setter Property="MinWidth" Value="800" />
         <Setter Property="MinHeight" Value="600" />
+        <Setter Property="ResizeMode" Value="CanResize" />
         <Setter Property="DoubleClickCommand" Value="{x:Static docking:DockCommands.ToggleFloating}" />
 
         <!-- Шаблон окна -->
@@ -71,91 +34,61 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type primitives:NativeFloatingWindow}">
                     <AdornerDecorator>
-                        <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+                        <Grid Background="Transparent">
 
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                                
                             <!-- Верхнее меню -->
-                            <!--Menu x:Name="TopMenu"
-                                  VerticalAlignment="Top"
-                                  Background="{StaticResource SecondarySolidColorBrush}"
-                                  Foreground="{StaticResource ForegroundSolidColorBrush}"
-                                  FontFamily="{DynamicResource WinstonLight}"
-                                  BorderThickness="0"
-                                  Height="30">
-                                <MenuItem Header="Файл" />
-                                <MenuItem Header="Правка" />
-                                <MenuItem Header="Помощь" />
-                            </Menu-->
                             <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}">
 
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                                        <i:InvokeCommandAction 
+                                              Command="{x:Static docking:DockCommands.DragMoveWindow}" 
+                                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type primitives:NativeFloatingWindow}}}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" MinWidth="50"/>
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
-        Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0">
+                                <Thumb Grid.Column="0"
+                                       Height="30"
+                                       Background="Transparent"/>
 
-                                    <MenuItem Header="Файл" Name="File" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1" >
+                                <DefaultGUI:WindowButtons 
+                                                x:Name="minimizeButton" 
+                                                ChoiceElement="Minimize" 
+                                                Grid.Column="1"
+                                                Size="40"
+                                                Command="{x:Static SystemCommands.MinimizeWindowCommand}" />
 
-                                        <Separator Background="{StaticResource ActiveBorderSolidColorBrush}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
-                                        <MenuItem Header="Сохранить" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
-                                        <MenuItem Header="Сохранить как" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
-                                        <MenuItem Header="Открыть папку в проводнике" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}"/>
-                                        <MenuItem Header="Печать" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
-                                        <MenuItem Header="Поиск" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
-
-                                        <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                                        <MenuItem Header="Открыть" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
-                                        <MenuItem Header="Создать" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
-                                        <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
-
-                                        <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                                        <MenuItem Header="Выход"  Tag="ExitApplication" Command="{Binding File.ExitApplicationCommand}"/>
-
-                                    </MenuItem>
-
-                                    <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
-
-                                    </MenuItem>
-
-                                </Menu>
-
-
-                                <StackPanel Name="ButtonsPanel"
-                                    Orientation="Horizontal" 
-                                    HorizontalAlignment="Right" 
-                                    VerticalAlignment="Top" 
-                                    Grid.Column="2" 
-                                    Background="Transparent"
-                                    >
 
                                     <DefaultGUI:WindowButtons 
-                                                Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                                                Height="{Binding ActualHeight, ElementName=mainMenu}" 
-                                                x:Name="minimizeButton" ChoiceElement="Minimize" 
-                                                Command="{Binding Window.MinimizeCommand}"
-                                                />
+                                        Grid.Column="2"
+                                                Size="40"
+                                        
+                                                x:Name="maximizeButton"  
+                                                ChoiceElement="Maximize" 
+                                                Command="{x:Static SystemCommands.MaximizeWindowCommand}" />
 
                                     <DefaultGUI:WindowButtons 
-                                                Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                                                Height="{Binding ActualHeight, ElementName=mainMenu}"
-                                                x:Name="maximizeButton" ChoiceElement="Maximize" 
-                                                Command="{Binding Window.MaximizeCommand}"
-                                                />
-
-                                    <DefaultGUI:WindowButtons 
-                                                Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                                                Height="{Binding ActualHeight, ElementName=mainMenu}"
-                                                x:Name="exitButton" ChoiceElement="Exit" 
-                                                Command="{Binding Window.CloseCommand}"
-                />
-                                </StackPanel>
+                                        Grid.Column="3"
+                                                Size="40"
+                                        
+                                        x:Name="exitButton" ChoiceElement="Exit" 
+                                        Command="{x:Static SystemCommands.CloseWindowCommand}" />
                             </Grid>
 
                             <!-- Основной контент -->
-                            <ContentPresenter Content="{Binding DockTree}"
-                                              Margin="0,30,0,0"/>
+                            <ContentPresenter Content="{Binding DockTree}" Grid.Row="1"/>
                         </Grid>
                     </AdornerDecorator>
 

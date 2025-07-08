@@ -4,76 +4,75 @@
     xmlns:common="clr-namespace:UI.Windows.WpfDocking.Windows"
     xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
     xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
-    
+
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Brushes.xaml" />
+        <ResourceDictionary Source="/UI;component/Style.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <Style TargetType="primitives:ToolWindowTab">
         <Style.Resources>
-            <SolidColorBrush x:Key="BrushSelectedBackground" Color="#FFFFFFFF" />
-
-            <SolidColorBrush x:Key="BrushActiveText" Color="#FF000000" />
-
-            <LinearGradientBrush x:Key="BrushBackground" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#FFC8C8C8" Offset="0" />
-                <GradientStop Color="#FFFFFFFF" Offset="1" />
-            </LinearGradientBrush>
-
-            <LinearGradientBrush x:Key="BrushHighlightedBackground" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#FFA7D9F5" Offset="0" />
-                <GradientStop Color="#FFFFFFFF" Offset="1" />
-            </LinearGradientBrush>
 
             <Style TargetType="primitives:TabBorder">
                 <Setter Property="IsBottom" Value="True" />
-                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderThickness" Value="0" />
             </Style>
 
-            <DataTemplate x:Key="OverlayTemplate">
-                <primitives:TabBorder ClipToBounds="True" Style="{StaticResource {x:Type primitives:TabBorder}}">
-                    <primitives:PreviewOverlay />
-                </primitives:TabBorder>
-            </DataTemplate>
-
-            <primitives:Overlay x:Key="Overlay" ContentTemplate="{StaticResource OverlayTemplate}" />
-
             <ControlTemplate x:Key="ControlTemplate" TargetType="primitives:ToolWindowTab" >
-                <primitives:TabBorder Background="{StaticResource BrushBackground}"
+                <primitives:TabBorder 
                         x:Name="border"
-                        BorderThickness="1"
-                        BorderBrush="{StaticResource ToolWindowBorderBrush}">
-                    <Grid Margin="4,2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Image Margin="0,0,3,0" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Source="{Binding Path=Icon}" Stretch="None" />
-                        <TextBlock
+                        CornerRadius="10,10,0,0"
+                    >
+                    <Border x:Name="insideBorder"
+                            BorderBrush="{StaticResource SecondarySolidColorBrush}"
+                            BorderThickness="0"
+                            Background="{StaticResource SecondarySolidColorBrush}"
+                            CornerRadius="10,10,0,0"
+                            Padding="5,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
                                 x:Name="tabTextBlock"
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Text="{Binding TabText}"
                                 FontFamily="{DynamicResource {x:Static SystemFonts.MenuFontFamilyKey}}"
-                                FontSize="{DynamicResource {x:Static SystemFonts.MenuFontSizeKey}}"
+                                FontSize="14"
                                 FontStyle="{DynamicResource {x:Static SystemFonts.MenuFontStyleKey}}"
                                 FontWeight="{DynamicResource {x:Static SystemFonts.MenuFontWeightKey}}"
-                                Foreground="{StaticResource ToolWindowInactiveTabTextBrush}"
+                                Foreground="{StaticResource ForegroundSolidColorBrush}"
                                 TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis" />
-                    </Grid>
+                            <Button Grid.Column="2"
+                                    Width="16"
+                                    Height="16"
+                                    Margin="5,0,0,0"
+                                    Padding="0"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    Cursor="Hand"
+                                    Command="{x:Static docking:DockCommands.PerformClose}">
+                                <Path Data="M 0 0 L 8 8 M 8 0 L 0 8"
+                                      Stroke="{StaticResource ForegroundSolidColorBrush}"
+                                      StrokeThickness="2"
+                                      Stretch="Uniform" />
+                            </Button>
+                        </Grid>
+                    </Border>
                 </primitives:TabBorder>
                 <ControlTemplate.Triggers>
                     <Trigger Property="UIElement.IsMouseOver" Value="True">
-                        <Setter Property="Background" TargetName="border" Value="{StaticResource BrushHighlightedBackground}" />
+                        <Setter Property="Background" TargetName="insideBorder" Value="{StaticResource IsCheckedColorSolidColorBrush}" />
                     </Trigger>
                     <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
-                        <Setter Property="Foreground" TargetName="tabTextBlock" Value="{StaticResource BrushActiveText}" />
-                        <Setter Property="Background" TargetName="border" Value="{StaticResource BrushSelectedBackground}" />
+                        <Setter Property="Background" TargetName="insideBorder" Value="{StaticResource GreenColorSolidColorBrush}" />
                     </DataTrigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
         </Style.Resources>
-        <Setter Property="Margin" Value="-1,0,0,0" />
+        <Setter Property="Margin" Value="0,0,0,-5" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="DataContext" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Content}" />
         <Setter Property="primitives:DockManager.TargetItem" Value="{Binding}" />
@@ -86,10 +85,7 @@
             </Trigger>
             <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
                 <Setter Property="Panel.ZIndex" Value="1" />
-                <Setter Property="Margin" Value="-1,-1,0,-2" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Tab">
-                <Setter Property="primitives:DockManager.Overlay" Value="{StaticResource Overlay}" />
+                <Setter Property="Margin" Value="-1,-1,0,-5" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
