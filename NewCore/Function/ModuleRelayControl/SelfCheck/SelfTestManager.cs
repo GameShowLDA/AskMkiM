@@ -12,13 +12,12 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Device;
 using Newtonsoft.Json.Linq;
+using Utilities;
 using Utilities.Models;
 using YamlDotNet.Core.Tokens;
 using static AppConfiguration.Execution.ExecutionConfig;
-using static AppConfiguration.Interface.IUserMessageService;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
-using static Utilities.Models.ShowMessageModel;
 using static Utilities.Models.ShowMessageModel;
 
 namespace NewCore.Function.ModuleRelayControl.SelfCheck

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Utilities.Models;
-using static AppConfiguration.Interface.IUserMessageService;
 
-namespace AppConfiguration.Interface
+namespace Utilities
 {
   /// <summary>
   /// Интерфейс для отображения сообщений пользователю и управления действиями, доступными при ошибках.
@@ -54,38 +56,5 @@ namespace AppConfiguration.Interface
     /// <param name="canAbort">Показывать кнопку "Завершить".</param>
     /// <returns>Выбранное пользователем действие.</returns>
     Task<UserAction> WaitUserActionAsync();
-  }
-
-  public static class UserActionHelper
-  {
-    /// <summary>
-    /// Универсальный цикл для выполнения операции с поддержкой повтора, пропуска и завершения.
-    /// </summary>
-    /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
-    /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
-    public static async Task RunWithUserRepeatAsync(
-        Func<Task<bool>> operation,
-        IUserMessageService messageService)
-    {
-      while (true)
-      {
-        bool success = await operation();
-
-        if (success)
-        {
-          return;
-        }
-
-        var action = await messageService.WaitUserActionAsync();
-        if (action == UserAction.Retry)
-        {
-          continue;
-        }
-        else
-        {
-          return;
-        }
-      }
-    }
   }
 }

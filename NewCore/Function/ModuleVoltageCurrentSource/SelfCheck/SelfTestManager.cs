@@ -10,6 +10,7 @@ using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using Utilities;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 

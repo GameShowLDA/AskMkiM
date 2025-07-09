@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Interface.Main;
+using Utilities;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Main;
+using Utilities;
 
 namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 {

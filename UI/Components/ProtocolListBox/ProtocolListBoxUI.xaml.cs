@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AppConfiguration.Interface;
+using Utilities;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 

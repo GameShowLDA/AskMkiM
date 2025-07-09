@@ -5,6 +5,7 @@ using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Device;
+using Utilities;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.LoggerUtility;

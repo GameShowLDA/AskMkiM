@@ -4,6 +4,7 @@ using NewCore.Base.Function.DBC;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using Utilities;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.LoggerUtility;
