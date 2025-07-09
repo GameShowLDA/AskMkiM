@@ -187,18 +187,5 @@ namespace UI.Windows.WpfDocking.Windows.Docking
 
       return false;
     }
-
-    public static readonly ICommand DragMoveWindow = new RelayCommand<Window>(window =>
-    {
-      try
-      {
-        window?.DragMove();
-      }
-      catch
-      {
-        // например, если окно свернуто
-      }
-    });
-
   }
 }

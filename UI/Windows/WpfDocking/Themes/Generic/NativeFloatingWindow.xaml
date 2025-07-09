@@ -6,7 +6,8 @@
     xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
     xmlns:DefaultGUI="clr-namespace:UI.Components" 
     xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors">
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
 
     <Style TargetType="DefaultGUI:WindowButtons">
         <Setter Property="Background" Value="Transparent"/>
@@ -44,13 +45,9 @@
                             <!-- Верхнее меню -->
                             <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}">
 
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="MouseLeftButtonDown">
-                                        <i:InvokeCommandAction 
-                                              Command="{x:Static docking:DockCommands.DragMoveWindow}" 
-                                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type primitives:NativeFloatingWindow}}}" />
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
+                                <i:Interaction.Behaviors>
+                                    <local:DragMoveBehavior />
+                                </i:Interaction.Behaviors>
 
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -59,10 +56,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Thumb Grid.Column="0"
-                                       Height="30"
-                                       Background="Transparent"/>
-
+                                
                                 <DefaultGUI:WindowButtons 
                                                 x:Name="minimizeButton" 
                                                 ChoiceElement="Minimize" 
@@ -85,6 +79,14 @@
                                         
                                         x:Name="exitButton" ChoiceElement="Exit" 
                                         Command="{x:Static SystemCommands.CloseWindowCommand}" />
+
+                                <Thumb x:Name="PART_DragThumb"
+                                       Grid.Column="0"
+                                       Background="{StaticResource SecondarySolidColorBrush}"
+                                       Height="30"
+                                       VerticalAlignment="Stretch"
+                                       HorizontalAlignment="Stretch"
+                                       IsHitTestVisible="True" />
                             </Grid>
 
                             <!-- Основной контент -->
