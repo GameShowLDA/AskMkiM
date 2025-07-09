@@ -4,6 +4,7 @@ using AppConfiguration.Error.Device;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities.Models;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -73,7 +74,6 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _deviceBusCommutation,
           "Сброс устройства",
-          result ? "Операция выполнена успешно" : "Операция завершилась с ошибкой",
           result,
           1);
 

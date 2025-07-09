@@ -61,7 +61,6 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
-          await Task.Delay(100);
           using var cts = new CancellationTokenSource(timeout);
 
           try

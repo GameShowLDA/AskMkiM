@@ -44,4 +44,16 @@ public interface IConnectorDeviceBusCommutation
   /// </summary>
   /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
   Task<bool> DisconnectBreakdownTester();
+
+  /// <summary>
+  /// Подлючает все шины устрйоства.
+  /// </summary>
+  /// <returns></returns>
+  Task<bool> ConnectAllBuses();
+
+  /// <summary>
+  /// Отключает все шины устройства.
+  /// </summary>
+  /// <returns></returns>
+  Task<bool> DisconnectAllBuses();
 }

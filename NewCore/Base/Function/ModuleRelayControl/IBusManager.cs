@@ -38,5 +38,7 @@ namespace NewCore.Base.Function.ModuleRelayControl
     /// <param name="busType">Выходной параметр, содержащий тип шины (1 - A, 2 - B, 3 - AB).</param>
     /// <returns>True, если тип успешно получен; иначе false.</returns>
     bool TryGetBusType(SwitchingBus bus, out int busType);
+
+
   }
 }

@@ -27,7 +27,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     public SelfTestManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
     /// <inheritdoc />
-    public async Task<bool> ExecuteSelfTestAsync(TypeConnector testType, int busContact, int action) => await SelfTestProcessManager.ExecuteSelfTestAsync(_deviceBusCommutation, testType, busContact, action);
+    public async Task<bool> ExecuteSelfTestAsync(CancellationToken cancellationToken, TypeConnector testType, int busContact, int action) => await SelfTestProcessManager.ExecuteSelfTestAsync(cancellationToken, _deviceBusCommutation, testType, busContact, action);
     /// <summary>
     /// Проверяет корректность переданных параметров.
     /// </summary>
@@ -65,10 +65,10 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     #endregion
 
     /// <inheritdoc />
-    public Task StartSelfCheck(IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null) => SelfTestProcessManager.StartSelfCheck(messageService, selectedType, device, meter);
+    public Task StartSelfCheck(CancellationToken cancellationToken, IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null) => SelfTestProcessManager.StartSelfCheck(cancellationToken, messageService, selectedType, device, meter);
 
     /// <inheritdoc />
-    public async Task<bool> ControlRelayAsync(TypeConnector testType, int relayNumber, int busContact, int action) => await SelfTestProcessManager.ControlRelayAsync(_deviceBusCommutation, testType, relayNumber, busContact, action);
+    public async Task<bool> ControlRelayAsync(CancellationToken cancellationToken, TypeConnector testType, int relayNumber, int busContact, int action) => await SelfTestProcessManager.ControlRelayAsync(cancellationToken, _deviceBusCommutation, testType, relayNumber, busContact, action);
 
   
   }

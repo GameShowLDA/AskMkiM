@@ -55,7 +55,7 @@ namespace NewCore.Function.Helpers
       {
         if (UserMessageServiceProvider.Instance != null)
         {
-          await UserMessageServiceProvider.Instance.ShowMessageAsync(showMessageModel);
+          await UserMessageServiceProvider.Instance.ShowMessageAsync(showMessageModel, skipPause: true);
         }
         else
         {

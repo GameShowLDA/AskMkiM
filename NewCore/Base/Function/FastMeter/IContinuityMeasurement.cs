@@ -13,6 +13,6 @@
     /// <summary>
     /// Проверяет наличие проводимости.
     /// </summary>
-    Task<bool> CheckContinuityAsync();
+    Task<bool> CheckContinuityAsync(bool expectedOutcome);
   }
 }

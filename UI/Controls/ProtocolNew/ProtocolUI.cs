@@ -227,7 +227,7 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
-    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false)
+    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false)
     {
       await CheckBlockStart(IsBlockStart);
 
@@ -242,22 +242,31 @@ namespace UI.Controls.ProtocolNew
 
       bool isHasRetry = false;
 
-      if (ActionExecutor.IsPaused)
+      if (!skipPause)
       {
-        if (!HasRetryAction)
+        if (ActionExecutor.IsPaused)
         {
-          await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
-        }
-        else
-        {
-          await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken());
-          isHasRetry = true;
-        }
-      }
+          if (!HasRetryAction)
+          {
+            await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
+          }
+          else if (showMessageModel.Status == MessageType.Error)
+          {
+            await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken());
+            isHasRetry = true;
+          }
 
-      if (!isHasRetry)
-      {
-        await CheckPause(showMessageModel.Status);
+          if (showMessageModel.Status != MessageType.Error)
+          {
+            ActionExecutor.Resume(await AppConfiguration.Execution.ExecutionConfig.GetIsStepByStepModeEnabled(), this);
+            ShowOnlyStopAndFinishButtons(await AppConfiguration.Execution.ExecutionConfig.GetIsStepByStepModeEnabled());
+          }
+        }
+
+        if (!isHasRetry)
+        {
+          await CheckPause(showMessageModel.Status);
+        }
       }
 
       isHasRetry = false;

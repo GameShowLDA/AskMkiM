@@ -18,7 +18,25 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Объект для управления задачей ожидания пользовательского действия.
     /// </summary>
-    private static TaskCompletionSource<bool> _tcs;
+    private static TaskCompletionSource<bool>? _tcs;
+
+    /// <summary>
+    /// Делегат, вызываемый при нажатии клавиши Enter (запуск).
+    /// </summary>
+    public static Action? OnStartPressed;
+
+    /// <summary>
+    /// Делегат, вызываемый при нажатии клавиши P (остановка или продолжение).
+    /// </summary>
+    public static Action? OnPausePressed;
+    public static Action? OnContinuePressed;
+
+    /// <summary>
+    /// Делегат, вызываемый при нажатии клавиши Escape (завершить).
+    /// </summary>
+    public static Action? OnExitPressed;
+    public static Action? OnRepeatPressed;
+
 
     /// <summary>
     /// Регистрирует глобальный обработчик нажатий клавиш.
@@ -51,7 +69,7 @@ namespace UI.Controls.ProtocolNew
       if (args == null || args.RoutedEvent != Keyboard.KeyDownEvent) return;
 
       var key = args.Key == Key.System ? args.SystemKey : args.Key;
-
+      
       LogInformation($"[KEYBOARD] Detected key: {key}");
 
       switch (key)

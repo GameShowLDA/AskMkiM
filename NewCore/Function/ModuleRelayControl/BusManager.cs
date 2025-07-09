@@ -155,5 +155,6 @@ namespace NewCore.Function.ModuleRelayControl
 
       return busType != -1;
     }
+
   }
 }

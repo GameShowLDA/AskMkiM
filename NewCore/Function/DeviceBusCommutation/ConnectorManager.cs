@@ -139,17 +139,17 @@ namespace NewCore.Function.DeviceBusCommutation
     #region Пробойка.
 
     /// <inheritdoc />
-    public async Task<bool> ConnectBreakdownTester() => await SeBreakdownTesterState(true);
+    public async Task<bool> ConnectBreakdownTester() => await SetBreakdownTesterState(true);
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectBreakdownTester() => await SeBreakdownTesterState(false);
+    public async Task<bool> DisconnectBreakdownTester() => await SetBreakdownTesterState(false);
 
     /// <summary>
     /// Устанавливает состояние мультиметра (подключение или отключение).
     /// </summary>
     /// <param name="connect">Флаг состояния: <c>true</c> – подключить, <c>false</c> – отключить.</param>
     /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
-    private async Task<bool> SeBreakdownTesterState(bool connect)
+    private async Task<bool> SetBreakdownTesterState(bool connect)
     {
       int numberConnector = (int)TypeConnector.BreakdownTester;
 
@@ -162,6 +162,39 @@ namespace NewCore.Function.DeviceBusCommutation
       await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
       await Task.Delay(10);
       return true;
+    }
+
+    #endregion
+
+    #region Шины.
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectAllBuses()
+    {
+     return  await SetAllBusesStatus(true);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectAllBuses()
+    {
+      return await SetAllBusesStatus(false);
+    }
+
+    /// <summary>
+    /// Устанавливает состояние всех шин на устройстве.
+    /// </summary>
+    /// <param name="connect"></param>
+    /// <returns></returns>
+    private async Task<bool> SetAllBusesStatus(bool connect)
+    {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      var command = new DeviceCommand(7, connect ? 1 : 2);
+      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      return connect ? answer.Contains("7.1") : answer.Contains("7.2");
     }
 
     #endregion
@@ -186,5 +219,7 @@ namespace NewCore.Function.DeviceBusCommutation
 
       return false;
     }
+
+
   }
 }

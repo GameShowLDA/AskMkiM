@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Device;
 using NewCore.Base.Function.ModuleRelayControl;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Enum;
 using NewCore.Function.GPT;
@@ -22,6 +23,7 @@ namespace NewCore.Device
       MeterManager = new MeterManagerAdapter(this);
       PointManager = new PointManagerAdapter(this);
       ConnectableManager = new StateManagerAdapter(this);
+      SelfTestManager = new Function.ModuleRelayControl.SelfCheck.SelfTestManager(this);
 
       DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";
@@ -47,5 +49,6 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IPointManager PointManager { get; set; }
+    public ISelfTestCheckerModuleRelayControl SelfTestManager { get ; set; }
   }
 }

@@ -22,10 +22,13 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     /// Запуск самоконтроля устройства.
     /// </summary>
     /// <param name="userMessageService">Элемент управления для вывода информации.</param>
-    /// <returns></returns>l
+    /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    static public async Task StartSelfCheck(IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null)
+    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null)
     {
+      SelfTestManager.MeterConnect = false;
+      SelfTestManager.DbcConnect = false;
+
       if (selectedType is not TypeConnector type)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel(
@@ -40,41 +43,41 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       switch (type)
       {
         case TypeConnector.FullCheck:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckAdcAsync(messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckAdcReversedAsync(messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckPintAsync(messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckShuntAsync(messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckAdcAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckAdcReversedAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckPintAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckShuntAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.BlockingRelay:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.Multimeter:
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.ADC:
-          await SelfTestRunner.RunSelfCheckAdcAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckAdcAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.ADCReversed:
-          await SelfTestRunner.RunSelfCheckAdcReversedAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckAdcReversedAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.PINT:
-          await SelfTestRunner.RunSelfCheckPintAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckPintAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.Shunt:
-          await SelfTestRunner.RunSelfCheckShuntAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckShuntAsync(cancellationToken, messageService, device, meter);
           break;
 
         case TypeConnector.BreakdownTester:
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, device, meter);
           break;
 
         default:
@@ -95,7 +98,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     /// </summary>
     /// <param name="testType">Тип цепи для проверки.</param>
     /// <returns>True, если проверка успешна, иначе false.</returns>
-    internal static async Task<bool> SelfCheckCircuitAsync(TypeConnector testType, IUserMessageService messageService, ISwitchingDevice device = null, IFastMeter meter = null)
+    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, TypeConnector testType, IUserMessageService messageService, ISwitchingDevice device = null, IFastMeter meter = null)
     {
       if (!SelfTestManager.MeterConnect && !SelfTestManager.DbcConnect)
       {
@@ -128,11 +131,11 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       foreach (int busContact in contacts)
       {
 
-        Console.WriteLine();
+        cancellationToken.ThrowIfCancellationRequested();
 
         string circuitName = selfTestChecker.GetCircuitName(testType, busContact);
 
-        if (!await PerformCircuitTestAsync(messageService, selfTestChecker, meter, testType, circuitName, busContact))
+        if (!await PerformCircuitTestAsync(cancellationToken, messageService, selfTestChecker, meter, testType, circuitName, busContact))
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
           LogError($"Проверка {circuitName} завершилась с ошибкой!", isDeviceLog: true);
@@ -162,35 +165,30 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
-    private static async Task<bool> PerformCircuitTestAsync(IUserMessageService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserMessageService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
 
-      if (!await SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(messageService, selfTestChecker, testType, busContact, circuitName))
+      if (!await SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(cancellationToken, messageService, selfTestChecker, testType, busContact, circuitName))
       {
         return false;
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка целостности цепи {circuitName}...") { IndentLevel = 1 });
 
-      await Task.Delay(25);
       bool continuityResult = false;
 
       if (meter.ContinuityManager != null)
       {
-        continuityResult = await meter.ContinuityManager.CheckContinuityAsync();
+        continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true);
         if (continuityResult)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
-
-          if (!await PerformRelayCheck(messageService, selfTestChecker, testType, circuitName, busContact, meter))
-          {
-            await messageService.ShowMessageAsync(new ShowMessageModel($"Реле цепи {circuitName}", type: ShowMessageModel.MessageType.Error));
-          }
+          await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
+          await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
         }
         else
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+          await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
         }
       }
       else
@@ -198,14 +196,13 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         await messageService.ShowMessageAsync(new ShowMessageModel($"Прибор не поддерживает самоконтроль для {circuitName}. Пропуск теста."));
       }
 
-      // Размыкаем цепь
-      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 2))
+      if (!await selfTestChecker.ExecuteSelfTestAsync(cancellationToken, testType, busContact, 2))
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Размыкание цепи {circuitName}", type: ShowMessageModel.MessageType.Error));
         return false;
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Цепь {circuitName} успешно разомкнута.", type: ShowMessageModel.MessageType.Success));
+      await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\" отключен.", type: ShowMessageModel.MessageType.Success) { IndentLevel = 2 });
       return continuityResult;
     }
 
@@ -217,7 +214,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если все реле прошли проверку, иначе false.</returns>
-    private static async Task<bool> PerformRelayCheck(IUserMessageService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, TypeConnector testType, string circuitName, int busContact, IFastMeter meter)
+    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserMessageService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, TypeConnector testType, string circuitName, int busContact, IFastMeter meter)
     {
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)
@@ -229,10 +226,10 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
       LogInformation($"Обнаружено {relayCount} реле в цепи {circuitName}.", isDeviceLog: true);
       for (int relay = 1; relay <= relayCount; relay++)
       {
+        cancellationToken.ThrowIfCancellationRequested();
         await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка реле {relay} в цепи {circuitName}") { IndentLevel = 1 });
 
-        await Task.Delay(1);
-        if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 2))
+        if (!await selfTestChecker.ControlRelayAsync(cancellationToken, testType, relay, busContact, 2))
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"Включении реле {relay} в цепи {circuitName}", type: ShowMessageModel.MessageType.Error));
           return false;
@@ -240,19 +237,12 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
         LogInformation($"Реле {relay} выключено, проверяем целостность цепи...", isDeviceLog: true);
 
-        await Task.Delay(25);
-        var result = await meter.ContinuityManager.CheckContinuityAsync();
-        if (!result)
+        if (!await SelfTestRetryHelper.CheckRelayStateAsync(cancellationToken, messageService, meter, relay))
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
-        }
-        else
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+          return false;
         }
 
-        await Task.Delay(1);
-        if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 1))
+        if (!await selfTestChecker.ControlRelayAsync(cancellationToken,testType, relay, busContact, 1))
         {
           LogError($"Ошибка при выключении реле {relay} в цепи {circuitName}.", isDeviceLog: true);
           return false;
@@ -264,7 +254,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     }
 
     /// <inheritdoc />
-    static public async Task<bool> ControlRelayAsync(Device.DeviceBusCommutation _deviceBusCommutation, TypeConnector testType, int relayNumber, int busContact, int action)
+    static public async Task<bool> ControlRelayAsync(CancellationToken cancellationToken, Device.DeviceBusCommutation _deviceBusCommutation, TypeConnector testType, int relayNumber, int busContact, int action)
     {
       if (relayNumber < 0)
       {
@@ -286,11 +276,12 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return true;
       }
 
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      // TODO : Получить и обработать ответ
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return true;
     }
 
-    static public async Task<bool> ExecuteSelfTestAsync(Device.DeviceBusCommutation _deviceBusCommutation,  TypeConnector testType, int busContact, int action)
+    static public async Task<bool> ExecuteSelfTestAsync(CancellationToken cancellationToken, Device.DeviceBusCommutation _deviceBusCommutation, TypeConnector testType, int busContact, int action)
     {
       if (!SelfTestManager.ValidateParameters(testType, busContact, action))
       {
@@ -312,7 +303,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout:1000);
       return true;
     }
   }

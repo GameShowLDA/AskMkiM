@@ -236,6 +236,42 @@ namespace UI.Controls.ProtocolNew
 
       ExitButtonPreviewMouseDown?.Invoke(this, e);
     }
+    private void RegisterHotkeys()
+    {
+      KeyboardManager.OnStartPressed = () =>
+        Application.Current.Dispatcher.Invoke(() =>
+          StartMeasureResistanceButton_PreviewMouseDown(startButton, CreateMouseArgs()));
+
+      KeyboardManager.OnExitPressed = () =>
+        Application.Current.Dispatcher.Invoke(() =>
+          ExitButton_PreviewMouseDown(exitButton, CreateMouseArgs()));
+
+      KeyboardManager.OnPausePressed = () =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          StopButton_PreviewMouseDown(pauseButton, CreateMouseArgs()));
+      };
+
+      KeyboardManager.OnContinuePressed = () =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          NextButton_PreviewMouseDown(continueButton, CreateMouseArgs()));
+      };
+
+      KeyboardManager.OnRepeatPressed = () =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          ReturnMeasureResistanceButton_PreviewMouseDown(returnButton, CreateMouseArgs()));
+      };
+    }
+
+    private MouseButtonEventArgs CreateMouseArgs()
+    {
+      return new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.MouseLeftButtonDownEvent
+      };
+    }
     #endregion
 
     #region События дополнительных кнопок.

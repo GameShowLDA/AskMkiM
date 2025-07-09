@@ -52,7 +52,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<bool> CheckContinuityAsync()
+    public async Task<bool> CheckContinuityAsync(bool expectedOutcome)
     {
       if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -61,7 +61,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
       try
       {
-        var result = await _measurement.CheckContinuityAsync();
+        var result = await _measurement.CheckContinuityAsync(expectedOutcome);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,

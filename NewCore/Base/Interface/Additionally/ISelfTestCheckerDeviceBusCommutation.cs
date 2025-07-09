@@ -22,7 +22,7 @@ namespace NewCore.Base.Interface.Additionally
     /// <param name="selectedType">Выбранное значение перечисления.</param>
     /// <param name="device">Устройство коммутации шин (необязательно).</param>
     /// <param name="meter">Измеритель (необязательно).</param>
-    Task StartSelfCheck(IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null);
+    Task StartSelfCheck(CancellationToken cancellationToken, IUserMessageService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null);
 
     /// <summary>
     /// Выполняет проверку цепи самоконтроля.
@@ -31,7 +31,7 @@ namespace NewCore.Base.Interface.Additionally
     /// <param name="busContact">Выбор шины и контакта.</param>
     /// <param name="action">Действие (1 - замкнуть, 2 - разомкнуть).</param>
     /// <returns><c>true</c>, если команда успешно отправлена, иначе <c>false</c>.</returns>
-    Task<bool> ExecuteSelfTestAsync(TypeConnector testType, int busContact, int action);
+    Task<bool> ExecuteSelfTestAsync(CancellationToken cancellationToken, TypeConnector testType, int busContact, int action);
 
     /// <summary>
     /// Получает список допустимых контактов для указанного типа теста.
@@ -64,7 +64,7 @@ namespace NewCore.Base.Interface.Additionally
     /// <param name="busContact">Выбор шины и контакта.</param>
     /// <param name="action">Действие (1 - замкнуть, 2 - разомкнуть).</param>
     /// <returns><c>true</c>, если команда успешно отправлена, иначе <c>false</c>.</returns>
-    Task<bool> ControlRelayAsync(TypeConnector testType, int relayNumber, int busContact, int action);
+    Task<bool> ControlRelayAsync(CancellationToken cancellationToken, TypeConnector testType, int relayNumber, int busContact, int action);
 
     /// <summary>
     /// Возвращает список поддерживаемых значений перечисления.

@@ -95,14 +95,73 @@ namespace UI.Controls.ProtocolNew
       this.Loaded += (s, e) =>
       {
         KeyboardManager.RegisterGlobalStepHooks();
+        AttachKeyboardHandlers();
+        RegisterHotkeys();
       };
 
       this.Unloaded += (s, e) =>
       {
         KeyboardManager.UnregisterGlobalStepHooks();
+        DetachKeyboardHandlers();
       };
     }
+    private void AttachKeyboardHandlers()
+    {
+      Keyboard.AddKeyDownHandler(Application.Current.MainWindow, OnGlobalKeyDown);
+    }
 
+    private void DetachKeyboardHandlers()
+    {
+      Keyboard.RemoveKeyDownHandler(Application.Current.MainWindow, OnGlobalKeyDown);
+    }
+
+    private void OnGlobalKeyDown(object sender, KeyEventArgs e)
+    {
+      var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      LogInformation($"[KEYBOARD] (Keyboard.AddKeyDownHandler) Обнаружена клавиша: {key}");
+
+      if (Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox)
+        return;
+
+      switch (key)
+      {
+        case Key.Enter:
+          if (StartButton.Visibility == Visibility.Visible)
+          {
+            KeyboardManager.OnStartPressed?.Invoke();
+          }
+          e.Handled = true;
+          break;
+
+        case Key.P:
+          if (NextButtonVisibility == Visibility.Visible)
+          {
+            KeyboardManager.OnContinuePressed?.Invoke();
+          }
+          else if (PauseButton.Visibility == Visibility.Visible)
+          {
+            KeyboardManager.OnPausePressed?.Invoke();
+          }
+          e.Handled = true;
+          break;
+
+        case Key.Escape:
+          if (ExitButton.Visibility == Visibility.Visible)
+          {
+            KeyboardManager.OnExitPressed?.Invoke();
+          }
+          e.Handled = true;
+          break;
+
+        case Key.R:
+          if (ReturnMeasureResistanceButtonVisibility == Visibility.Visible)
+          {
+            KeyboardManager.OnRepeatPressed?.Invoke();
+          }
+          e.Handled = true;
+          break;
+      }
+    }
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       StepControlManager.IsStepInto = false;
@@ -118,8 +177,8 @@ namespace UI.Controls.ProtocolNew
     public string GetText()
     {
       return protocolTextBox.GetPlainTextAsync().Result;
-	}
-	
+    }
+
     /// <summary>
     /// Ожидает нажатия одной из двух административных кнопок.
     /// Возвращает true, если нажали ПРОПУСТИТЬ, false — если ЗАВЕРШИТЬ.
@@ -127,8 +186,7 @@ namespace UI.Controls.ProtocolNew
     public Task<bool> WaitAdminButtonAsync()
     {
       _adminButtonTcs = new TaskCompletionSource<bool>();
-
-      // Навешиваем обработчики (лучше один раз, если не делаете динамически)
+      
       adminContinue.Click += OnAdminContinueClicked;
       adminExit.Click += OnAdminExitClicked;
 

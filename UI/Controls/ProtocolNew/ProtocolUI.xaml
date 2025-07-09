@@ -73,11 +73,11 @@
 
                     <StackPanel Grid.Row="2" Margin="20,0,20,20">
 
-                        <Button x:Name="startButton" Content="ЗАПУСТИТЬ" Cursor="Hand" 
+                        <Button x:Name="startButton" Content="ЗАПУСТИТЬ(Enter)" Cursor="Hand" 
                                 Style="{StaticResource ShadowButtonStyle}" 
                         />
                         
-                        <Button x:Name="returnButton" Content="ПОВТОРИТЬ" Margin="0,10,0,0" Cursor="Hand" 
+                        <Button x:Name="returnButton" Content="ПОВТОРИТЬ(R)" Margin="0,10,0,0" Cursor="Hand" 
                         Style="{StaticResource ShadowButtonStyle}" 
                         />
 
@@ -85,7 +85,7 @@
                         Style="{StaticResource ShadowButtonStyle}" 
                         />
 
-                        <Button x:Name="pauseButton" Content="ОСТАНОВИТЬ" Cursor="Hand" Margin="0,10,0,0">
+                        <Button x:Name="pauseButton" Content="ОСТАНОВИТЬ(P)" Cursor="Hand" Margin="0,10,0,0">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
                                     <Setter Property="Background">
@@ -125,7 +125,7 @@
 
                         </Grid>
 
-                        <Button  x:Name="continueButton" Content="ПРОДОЛЖИТЬ" FontSize="18" Grid.Column="0" Margin="0,10,0,0" Cursor="Hand" >
+                        <Button  x:Name="continueButton" Content="ПРОДОЛЖИТЬ(P)" FontSize="18" Grid.Column="0" Margin="0,10,0,0" Cursor="Hand" >
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
                                     <Setter Property="Background">
@@ -154,7 +154,7 @@
                             </Button.Style>
                         </Button>
 
-                        <Button  x:Name="exitButton" Content="ЗАВЕРШИТЬ" FontSize="18" Grid.Column="1" Margin="0,10,0,0" Cursor="Hand" >
+                        <Button  x:Name="exitButton" Content="ЗАВЕРШИТЬ(Esc)" FontSize="18" Grid.Column="1" Margin="0,10,0,0" Cursor="Hand" >
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
                                     <Setter Property="Background">

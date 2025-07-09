@@ -95,17 +95,24 @@ namespace NewCore.Function.Keysight3466new
       {
         return true;
       }
+
       await _device.DeviceProtocol.OperationLock.WaitAsync();
+      try
+      {
+        _device.Stream?.Close();
+        _device.Stream = null;
 
-      _device.Stream?.Close();
-      _device.Stream = null;
+        _device.Client?.Close();
+        _device.Client = null;
 
-      _device.Client?.Close();
-      _device.Client = null;
+        _device.IsConnected = false;
 
-      _device.IsConnected = false;
-
-      return true;
+        return true;
+      }
+      finally
+      {
+        _device.DeviceProtocol.OperationLock.Release();
+      }
     }
 
     /// <inheritdoc />

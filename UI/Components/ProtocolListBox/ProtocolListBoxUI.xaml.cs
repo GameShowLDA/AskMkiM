@@ -119,7 +119,7 @@ namespace UI.Components.ProtocolListBox
       return AppendLineAsync(emptyLine);
     }
 
-    public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false)
+    public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false)
     {
       await AppendLineAsync(model);
     }

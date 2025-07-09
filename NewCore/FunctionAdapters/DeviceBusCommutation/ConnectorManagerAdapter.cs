@@ -113,5 +113,33 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
 
       return result;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectAllBuses()
+    {
+      var description = $"(AB1, AB2, AB3, AB4)";
+      var result = await _connectorManager.ConnectAllBuses();
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed(description);
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectAllBuses()
+    {
+      var description = $"(AB1, AB2, AB3, AB4)";
+      var result = await _connectorManager.DisconnectAllBuses();
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed(description);
+
+      return result;
+    }
   }
 }

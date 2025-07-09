@@ -31,7 +31,6 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync()
     {
-      await Task.Delay(100);
       return await ResetAsync();
     }
 
@@ -83,9 +82,9 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
+      DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
       string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout:1000);
-      return result == "2.0.1";
+      return result.Contains("2.0.1");
     }
   }
 }
