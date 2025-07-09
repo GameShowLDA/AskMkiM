@@ -33,14 +33,8 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       cancellation.ThrowIfCancellationRequested();
 
-      async Task retryAction()
-      {
-        await TryCloseCircuitWithRetryAsync(cancellation, messageService, selfTestChecker, testType, busContact, circuitName);
-      }
-
       if (!await selfTestChecker.ExecuteSelfTestAsync(cancellation, testType, busContact, 1))
       {
-        messageService.RegisterRetryAction(retryAction);
         await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при подключении: {circuitName}.", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 });
         return false;
       }
@@ -66,21 +60,14 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       cancellation.ThrowIfCancellationRequested();
 
-      async Task retryAction()
-      {
-        await CheckRelayStateAsync(cancellation, messageService, meter, relay);
-      }
-
       var result = await meter.ContinuityManager.CheckContinuityAsync(false);
       if (result)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
-        messageService.ClearRetryAction();
         return true;
       }
       else
       {
-        messageService.RegisterRetryAction(retryAction);
         await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
         return false;
       }

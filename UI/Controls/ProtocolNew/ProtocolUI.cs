@@ -34,9 +34,6 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
-    /// <inheritdoc />
-    public bool HasRetryAction => _retryAction != null;
-
     /// <summary>
     /// Действие, которое будет вызвано при нажатии на кнопку "Повторить".
     /// </summary>
@@ -54,6 +51,8 @@ namespace UI.Controls.ProtocolNew
     readonly ActionExecutor ActionExecutor;
 
     bool _checkPower = true;
+
+    private TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs;
 
     #region Делегаты выполнения.
 
@@ -152,7 +151,7 @@ namespace UI.Controls.ProtocolNew
     /// Прерывает выполнение текущего процесса.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
-    public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate);
+    public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate, _userActionTcs);
 
     /// <summary>
     /// Начинает запуск измерения.
@@ -164,7 +163,7 @@ namespace UI.Controls.ProtocolNew
     /// Завершение текущей выполняемой задачи.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate);
+    private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate, _userActionTcs);
 
     /// <summary>
     /// Выполняет завершающие действия после завершения процесса.
@@ -186,7 +185,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Возобновляет метод после паузы.
     /// </summary>
-    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this);
+    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this, _userActionTcs);
 
     #endregion
 
@@ -200,7 +199,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
     /// </summary>
-    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(this);
+    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(this, _userActionTcs);
 
     #endregion
 
@@ -240,36 +239,15 @@ namespace UI.Controls.ProtocolNew
 
       await protocolTextBox.AppendLineAsync(showMessageModel);
 
-      bool isHasRetry = false;
+      if (ActionExecutor.IsPaused)
+      {
+        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
+      }
 
       if (!skipPause)
       {
-        if (ActionExecutor.IsPaused)
-        {
-          if (!HasRetryAction)
-          {
-            await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
-          }
-          else if (showMessageModel.Status == MessageType.Error)
-          {
-            await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken());
-            isHasRetry = true;
-          }
-
-          if (showMessageModel.Status != MessageType.Error)
-          {
-            ActionExecutor.Resume(await AppConfiguration.Execution.ExecutionConfig.GetIsStepByStepModeEnabled(), this);
-            ShowOnlyStopAndFinishButtons(await AppConfiguration.Execution.ExecutionConfig.GetIsStepByStepModeEnabled());
-          }
-        }
-
-        if (!isHasRetry)
-        {
-          await CheckPause(showMessageModel.Status);
-        }
+        await CheckPause(showMessageModel.Status);
       }
-
-      isHasRetry = false;
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
@@ -458,27 +436,14 @@ namespace UI.Controls.ProtocolNew
       Show(Status.Error, "В будущем добавить сюда реализацию выбора");
       return Task.FromResult(true);
     }
-
-    /// <inheritdoc />
-    public void RegisterRetryAction(Func<Task> retryAction)
+    public Task<IUserMessageService.UserAction> WaitUserActionAsync()
     {
-      _retryAction = retryAction;
-    }
+      _userActionTcs = new TaskCompletionSource<IUserMessageService.UserAction>();
 
-    /// <inheritdoc />
-    public async Task TryInvokeRetryAsync()
-    {
-      if (_retryAction != null)
-      {
-        await _retryAction();
-      }
-    }
+      SetNonVisibleAllButton();
+      ShowButtonsOnPause(true);
 
-    /// <inheritdoc />
-
-    public void ClearRetryAction()
-    {
-      _retryAction = null;
+      return _userActionTcs.Task;
     }
   }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Utilities.Models;
+using static AppConfiguration.Interface.IUserMessageService;
 
 namespace AppConfiguration.Interface
 {
@@ -9,6 +10,16 @@ namespace AppConfiguration.Interface
   /// </summary>
   public interface IUserMessageService
   {
+    /// <summary>
+    /// Перечисление возможных действий пользователя при ошибке.
+    /// </summary>
+    public enum UserAction
+    {
+      Retry,
+      Continue,
+      Abort
+    }
+
     /// <summary>
     /// Асинхронно отображает сообщение пользователю.
     /// </summary>
@@ -36,27 +47,45 @@ namespace AppConfiguration.Interface
     Task<bool> WaitAdminButtonAsync();
 
     /// <summary>
-    /// Регистрирует асинхронное действие, которое может быть повторено пользователем в случае ошибки.
+    /// Асинхронно ожидает выбора пользователя (повторить, продолжить, завершить) после сообщения.
     /// </summary>
-    /// <param name="retryAction">Делегат действия, которое можно повторить (например, шаг замыкания цепи).</param>
-    void RegisterRetryAction(Func<Task> retryAction);
+    /// <param name="canRetry">Показывать кнопку "Повторить".</param>
+    /// <param name="canContinue">Показывать кнопку "Продолжить".</param>
+    /// <param name="canAbort">Показывать кнопку "Завершить".</param>
+    /// <returns>Выбранное пользователем действие.</returns>
+    Task<UserAction> WaitUserActionAsync();
+  }
 
+  public static class UserActionHelper
+  {
     /// <summary>
-    /// Выполняет зарегистрированное действие повтора, если оно задано.
+    /// Универсальный цикл для выполнения операции с поддержкой повтора, пропуска и завершения.
     /// </summary>
-    /// <returns>Задача, представляющая выполнение повтора. Если повтора нет — ничего не происходит.</returns>
-    Task TryInvokeRetryAsync();
+    /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
+    /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
+    public static async Task RunWithUserRepeatAsync(
+        Func<Task<bool>> operation,
+        IUserMessageService messageService)
+    {
+      while (true)
+      {
+        bool success = await operation();
 
-    /// <summary>
-    /// Очищает сохранённое действие повтора.
-    /// </summary>
-    void ClearRetryAction();
+        if (success)
+        {
+          return;
+        }
 
-    /// <summary>
-    /// Возвращает признак того, что зарегистрировано действие, доступное для повтора.
-    /// </summary>
-    bool HasRetryAction { get; }
-
-
+        var action = await messageService.WaitUserActionAsync();
+        if (action == UserAction.Retry)
+        {
+          continue;
+        }
+        else
+        {
+          return;
+        }
+      }
+    }
   }
 }

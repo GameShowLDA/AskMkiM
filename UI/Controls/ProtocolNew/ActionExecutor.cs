@@ -144,8 +144,9 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="stopDelegate">Делегат для завершения задачи.</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
-    internal async Task StopAsync(StopDelegate stopDelegate)
+    internal async Task StopAsync(StopDelegate stopDelegate, TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs)
     {
+      _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Abort);
       await FinalizeAsync(stopDelegate);
     }
 
@@ -202,7 +203,7 @@ namespace UI.Controls.ProtocolNew
     /// Возобновляет выполнение метода после паузы.
     /// </summary>
     /// <param name="stepMode">Флаг, указывающий, нужно ли возобновить в пошаговом режиме.</param>
-    internal void Resume(bool stepMode, IUserMessageService userMessageService)
+    internal void Resume(bool stepMode, IUserMessageService userMessageService, TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs)
     {
       LogInformation("Срабатывание возобновления при самоконтроле");
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
@@ -211,7 +212,7 @@ namespace UI.Controls.ProtocolNew
       }
 
       IsPaused = false;
-      userMessageService.ClearRetryAction();
+      _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Continue);
     }
 
     /// <summary>
@@ -298,24 +299,9 @@ namespace UI.Controls.ProtocolNew
     /// Если повторное действие не задано, ничего не происходит.
     /// </summary>
     /// <returns>Задача, представляющая выполнение действия повтора.</returns>
-    internal async Task ReturnMeasureEvent(IUserMessageService _userMessageService)
+    internal async Task ReturnMeasureEvent(IUserMessageService _userMessageService, TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs)
     {
-      try
-      {
-        if (_userMessageService.HasRetryAction)
-        {
-          await _userMessageService.TryInvokeRetryAsync();
-        }
-      }
-      catch (Exception ex)
-      {
-        LoggerUtility.LogException("Ошибка при выполнении действия повтора", ex);
-
-        await _userMessageService.ShowMessageAsync(new ShowMessageModel(
-          "Не удалось повторить действие.", type: ShowMessageModel.MessageType.Error));
-      }
-
-      _userMessageService.ClearRetryAction();
+      _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Retry);
     }
 
 

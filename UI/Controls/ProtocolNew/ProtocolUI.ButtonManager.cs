@@ -432,17 +432,17 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Отображает кнопки при паузе.
     /// </summary>
-    public void ShowButtonsOnPause()
+    public void ShowButtonsOnPause(bool repeatVisible = false)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetNonVisibleAllButton();
-        if (HasRetryAction)
+        NextButtonVisibility = Visibility.Visible;
+        ExitButtonVisibility = Visibility.Visible;
+        if (repeatVisible)
         {
           ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
         }
-        NextButtonVisibility = Visibility.Visible;
-        ExitButtonVisibility = Visibility.Visible;
       });
     }
 

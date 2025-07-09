@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using Utilities.Models;
 using YamlDotNet.Core.Tokens;
 using static AppConfiguration.Execution.ExecutionConfig;
+using static AppConfiguration.Interface.IUserMessageService;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
@@ -79,7 +80,9 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
       await messageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
       for (int point = 1; point <= 350; point++)
       {
-        await CheckPoint(token, messageService, relaySwitchModule, point);
+        await UserActionHelper.RunWithUserRepeatAsync(
+        () => CheckPoint(token, messageService, relaySwitchModule, point),
+        messageService);
       }
     }
 
@@ -98,43 +101,9 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel("Проверка коммутации шин"));
-      for (int i = 1; i <= 4; i++)
+      for (int busNumber = 1; busNumber <= 4; busNumber++)
       {
-        (bool, string) answer = !await GetIsIdleModeEnabled()
-         ? await TryGetCheckBusConntcrion(i) : (true, string.Empty);
-
-        ShowMessageModel showMessageModel;
-        showMessageModel = new ShowMessageModel()
-        {
-          Header = $"Шины AB{i}",
-          Status = answer.Item1 ? ShowMessageModel.MessageType.Success : MessageType.Error,
-          ExecutionError = !answer.Item1,
-          IndentLevel = 2,
-        };
-        showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
-        await messageService.ShowMessageAsync(showMessageModel);
-
-        if (!answer.Item1)
-        {
-          SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
-            Status = selfBusModel.ConnectProtect ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = selfBusModel.ConnectProtect,
-            IndentLevel = 3,
-          };
-          await messageService.ShowMessageAsync(showMessageModel);
-
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
-            Status = selfBusModel.ConnectMain ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = selfBusModel.ConnectMain,
-            IndentLevel = 3,
-          };
-          await messageService.ShowMessageAsync(showMessageModel);
-        }
+        await CheckBus(token, messageService, relaySwitchModule, busNumber);
       }
     }
 
@@ -165,12 +134,8 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
 
     private async Task<bool> CheckPoint(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule, int point)
     {
+      bool error = false;
       token.ThrowIfCancellationRequested();
-
-      async Task retryAction()
-      {
-        await CheckPoint(token, messageService, relaySwitchModule, point);
-      }
 
       string answer = !await GetIsIdleModeEnabled()
         ? await relaySwitchModule.PointManager.CheckPoint(point)
@@ -238,8 +203,7 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
             IndentLevel = 2,
 
           };
-          messageService.RegisterRetryAction(retryAction);
-          await messageService.ShowMessageAsync(showMessageModel);
+          await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
 
           return false;
         }
@@ -252,13 +216,57 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
           Status = MessageType.Error,
           Message = answer,
         };
-
-        messageService.RegisterRetryAction(retryAction);
-        await messageService.ShowMessageAsync(showMessageModel);
+        await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
         return false;
       }
-
       return true;
+    }
+
+    private async Task CheckBus(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule, int busNumber)
+    {
+      bool next = true;
+      do
+      {
+        next = true;
+        bool error = false;
+
+        (bool, string) answer = !await GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
+
+        ShowMessageModel showMessageModel;
+        showMessageModel = new ShowMessageModel()
+        {
+          Header = $"Шины AB{busNumber}",
+          Status = answer.Item1 ? ShowMessageModel.MessageType.Success : MessageType.Error,
+          ExecutionError = !answer.Item1,
+          IndentLevel = 2,
+        };
+        showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
+        await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
+
+        if (!answer.Item1)
+        {
+          SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
+          showMessageModel = new ShowMessageModel()
+          {
+            Header = $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
+            Status = selfBusModel.ConnectProtect ? MessageType.Success : MessageType.Error,
+            CanBeDeleted = selfBusModel.ConnectProtect,
+            IndentLevel = 3,
+          };
+          await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
+
+          showMessageModel = new ShowMessageModel()
+          {
+            Header = $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
+            Status = selfBusModel.ConnectMain ? MessageType.Success : MessageType.Error,
+            CanBeDeleted = selfBusModel.ConnectMain,
+            IndentLevel = 3,
+          };
+          await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
+
+          error = true;
+        }
+      } while (next);
     }
   }
 }

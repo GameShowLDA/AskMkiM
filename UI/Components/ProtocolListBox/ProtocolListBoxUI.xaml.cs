@@ -162,5 +162,10 @@ namespace UI.Components.ProtocolListBox
     {
       throw new NotImplementedException();
     }
+
+    public Task<IUserMessageService.UserAction> WaitUserActionAsync()
+    {
+      throw new NotImplementedException();
+    }
   }
 }
