@@ -20,6 +20,7 @@ namespace UI.Components
   public partial class PowerButton : UserControl
   {
     #region Поля.
+
     /// <summary>
     /// Модель конфигурации устройства, к которому осуществляется подключение.
     /// </summary>
@@ -39,11 +40,6 @@ namespace UI.Components
     /// Статический флаг, указывающий на наличие ошибки подключения.
     /// </summary>
     private static bool hasError = false;
-
-    /// <summary>
-    /// Ссылка на верхнюю панель для отображения информационных сообщений.
-    /// </summary>
-    private TopPanelControl topPanel;
 
     /// <summary>
     /// Токен для отмены асинхронных задач при необходимости.
@@ -169,11 +165,6 @@ namespace UI.Components
     /// </summary>
     private async Task StartPowerSequenceAsync()
     {
-      if (topPanel == null)
-      {
-        topPanel = new TopPanelControl();
-      }
-
       await model.PowerManager.StartPowerAsync();
       await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
 
@@ -330,22 +321,6 @@ namespace UI.Components
         nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
         GridBlock.Opacity = 0.5;
         active = false;
-      });
-    }
-
-    /// <summary>
-    /// Устанавливает ссылку на верхнюю панель для вывода сообщений.
-    /// </summary>
-    /// <param name="topPanel">Ссылка на объект верхней панели, которая будет использоваться для вывода сообщений.</param>
-    /// <remarks>
-    /// Этот метод позволяет связать верхнюю панель с текущим компонентом, чтобы позднее использовать её для
-    /// вывода сообщений или других операций, связанных с интерфейсом.
-    /// </remarks>
-    public void SetTopPanel(TopPanelControl topPanel)
-    {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        this.topPanel = topPanel;
       });
     }
   }

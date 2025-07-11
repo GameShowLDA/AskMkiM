@@ -79,9 +79,7 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
       await messageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
       for (int point = 1; point <= 350; point++)
       {
-        await UserActionHelper.RunWithUserRepeatAsync(
-        () => CheckPoint(token, messageService, relaySwitchModule, point),
-        messageService);
+        await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, messageService, relaySwitchModule, point), messageService);
       }
     }
 
@@ -100,9 +98,10 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel("Проверка коммутации шин"));
+
       for (int busNumber = 1; busNumber <= 4; busNumber++)
       {
-        await CheckBus(token, messageService, relaySwitchModule, busNumber);
+        await UserActionHelper.RunWithUserRepeatAsync(() => CheckBus(token, messageService, relaySwitchModule, busNumber), messageService);
       }
     }
 
@@ -221,51 +220,45 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
       return true;
     }
 
-    private async Task CheckBus(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule, int busNumber)
+    private async Task<bool> CheckBus(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule, int busNumber)
     {
-      bool next = true;
-      do
+      (bool, string) answer = !await GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
+
+      ShowMessageModel showMessageModel;
+      showMessageModel = new ShowMessageModel()
       {
-        next = true;
-        bool error = false;
+        Header = $"Шины AB{busNumber}",
+        Status = answer.Item1 ? ShowMessageModel.MessageType.Success : MessageType.Error,
+        ExecutionError = !answer.Item1,
+        IndentLevel = 2,
+      };
+      showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
+      await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
 
-        (bool, string) answer = !await GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
-
-        ShowMessageModel showMessageModel;
+      if (!answer.Item1)
+      {
+        SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
         showMessageModel = new ShowMessageModel()
         {
-          Header = $"Шины AB{busNumber}",
-          Status = answer.Item1 ? ShowMessageModel.MessageType.Success : MessageType.Error,
-          ExecutionError = !answer.Item1,
-          IndentLevel = 2,
+          Header = $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
+          Status = selfBusModel.ConnectProtect ? MessageType.Success : MessageType.Error,
+          CanBeDeleted = selfBusModel.ConnectProtect,
+          IndentLevel = 3,
         };
-        showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
         await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
 
-        if (!answer.Item1)
+        showMessageModel = new ShowMessageModel()
         {
-          SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
-            Status = selfBusModel.ConnectProtect ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = selfBusModel.ConnectProtect,
-            IndentLevel = 3,
-          };
-          await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
+          Header = $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
+          Status = selfBusModel.ConnectMain ? MessageType.Success : MessageType.Error,
+          CanBeDeleted = selfBusModel.ConnectMain,
+          IndentLevel = 3,
+        };
+        await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
 
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
-            Status = selfBusModel.ConnectMain ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = selfBusModel.ConnectMain,
-            IndentLevel = 3,
-          };
-          await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
-
-          error = true;
-        }
-      } while (next);
+        return false;
+      }
+      return true;
     }
   }
 }

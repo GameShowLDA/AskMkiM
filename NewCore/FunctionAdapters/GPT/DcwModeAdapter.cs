@@ -197,11 +197,11 @@ namespace NewCore.FunctionAdapters.GPT
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureCurrentAsync()
+    public async Task<double> MeasureCurrentAsync(double param = 0)
     {
       try
       {
-        double result = await _dcwMode.MeasureCurrentAsync();
+        double result = await _dcwMode.MeasureCurrentAsync(param);
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Измерение тока DCW", $"{result} мА", result >= 0, 2);
         return result;
       }

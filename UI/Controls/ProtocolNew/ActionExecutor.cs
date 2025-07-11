@@ -265,7 +265,7 @@ namespace UI.Controls.ProtocolNew
     /// <param name="returnDelegate">Делегат измерения.</param>
     /// <param name="stop">Делегат остановки.</param>
     /// <returns>Задача, представляющая измерение.</returns>
-    internal async Task ReturnMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
+    private async Task ReturnMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
     {
       try
       {

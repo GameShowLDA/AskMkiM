@@ -1,11 +1,12 @@
 ﻿using System.Windows.Controls;
-using AppConfiguration.Interface;
 using AppConfiguration.Enums;
+using AppConfiguration.Interface;
 using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -40,11 +41,7 @@ namespace Mode.Metrology.CI
       ProtocolUI.SetSettings(
         this,
         StartDelegate: ExecuteMeasurementProcess,
-        true,
-        ReturnDelegate: async (CancellationToken token) =>
-        {
-          return await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-        });
+        true);
     }
 
     /// <summary>
@@ -76,7 +73,8 @@ namespace Mode.Metrology.CI
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
-      await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
+
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
       await testMeasurement.FinalizeMeasurement();
     }
 
@@ -121,9 +119,14 @@ namespace Mode.Metrology.CI
       {
         var meterDevice = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
-
         var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.CI, param);
+
         var result = await meterDevice.IrManger.MeasureResistanceAsync(param, firstNorm, lastNorm);
+
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{result} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {firstNorm} до {lastNorm} Ом") { IndentLevel = 2 }, skipPause: true);
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: $"{(Math.Abs(result - param))} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 }, skipPause: true);
+
         return true;
       }
 

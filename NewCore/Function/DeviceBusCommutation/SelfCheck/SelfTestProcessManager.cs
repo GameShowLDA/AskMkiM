@@ -39,7 +39,12 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return;
       }
 
-      await SelfTestConnectionHelper.SettingsMeter(meter);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
+
+      if (!await SelfTestConnectionHelper.SettingsMeter(meter))
+      {
+        return;
+      }
 
       switch (type)
       {
@@ -170,7 +175,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
 
-      if (!await SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(cancellationToken, messageService, selfTestChecker, testType, busContact, circuitName))
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(cancellationToken, messageService, selfTestChecker, testType, busContact, circuitName), messageService))
       {
         return false;
       }
@@ -181,16 +186,21 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       if (meter.ContinuityManager != null)
       {
-        continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true);
-        if (continuityResult)
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
-          await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
-        }
-        else
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-        }
+          continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true);
+          if (continuityResult)
+          {
+            await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
+            await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
+            return true;
+          }
+          else
+          {
+            await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 }, skipPause: true);
+            return false;
+          }
+        }, messageService);
       }
       else
       {
@@ -238,12 +248,12 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
         LogInformation($"Реле {relay} выключено, проверяем целостность цепи...", isDeviceLog: true);
 
-        if (!await SelfTestRetryHelper.CheckRelayStateAsync(cancellationToken, messageService, meter, relay))
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => SelfTestRetryHelper.CheckRelayStateAsync(cancellationToken, messageService, meter, relay), messageService))
         {
           return false;
         }
 
-        if (!await selfTestChecker.ControlRelayAsync(cancellationToken,testType, relay, busContact, 1))
+        if (!await selfTestChecker.ControlRelayAsync(cancellationToken, testType, relay, busContact, 1))
         {
           LogError($"Ошибка при выключении реле {relay} в цепи {circuitName}.", isDeviceLog: true);
           return false;
@@ -304,7 +314,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout:1000);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return true;
     }
   }

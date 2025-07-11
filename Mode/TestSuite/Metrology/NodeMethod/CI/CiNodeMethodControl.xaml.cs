@@ -2,6 +2,7 @@
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.CI
@@ -90,17 +91,24 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
           if (connectResult.Step)
           {
             await protocolUI.ShowMessageAsync(new ShowMessageModel($"Подключение точки {connectResult.PointModel.PointNumber} к шине {AssignedBus}", type: ShowMessageModel.MessageType.Success));
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
+            await protocolUI.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
 
-            var answer = await breakDown.IrManger.MeasureResistanceAsync();
-            var type = ShowMessageModel.MessageType.Success;
-
-            if (answer < (dataModel.Param * 1000))
+            await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
-              type = ShowMessageModel.MessageType.Error;
-            }
+              token.ThrowIfCancellationRequested();
+              var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, 1000, 60000);
+              var type = ShowMessageModel.MessageType.Success;
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} МОм", type: type));
+              if (answer < dataModel.Param)
+              {
+                type = ShowMessageModel.MessageType.Error;
+              }
+
+              // await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
+
+              return type == ShowMessageModel.MessageType.Success ? true : false;
+
+            }, protocolUI);
           }
           else
           {

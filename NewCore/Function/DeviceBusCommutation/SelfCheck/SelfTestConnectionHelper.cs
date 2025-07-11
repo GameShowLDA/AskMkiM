@@ -14,10 +14,18 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
   /// </summary>
   static internal class SelfTestConnectionHelper
   {
-    static internal async Task SettingsMeter(IFastMeter meter)
+    static internal async Task<bool> SettingsMeter(IFastMeter meter)
     {
-      await meter.ConnectableManager.ConnectAsync();
+      var connect = false;
+      connect = (await meter.ConnectableManager.ConnectAsync()).Connect;
+      if (!connect)
+      {
+        return connect;
+      }
+
       await meter.ContinuityManager.SetContinuityModeAsync();
+
+      return connect;
     }
     static internal async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter)
     {

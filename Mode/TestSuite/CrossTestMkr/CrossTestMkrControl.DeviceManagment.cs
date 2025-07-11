@@ -4,6 +4,7 @@ using Utilities.Models;
 using UI.Controls.ProtocolNew;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
+using Utilities;
 
 namespace Mode.TestSuite.CrossTestMkr
 {
@@ -454,34 +455,41 @@ namespace Mode.TestSuite.CrossTestMkr
       foreach (int point in rangePoints)
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Тест точки {point}"));
-
-        // Подключаем точку МКР1 к своей шине
-        await PointConnectAsync(tested_module, bus1, point, cancellationToken);
-
-        // Проверяем наличие замыкания между шинами
         var type = ShowMessageModel.MessageType.Success;
 
-        if (!await GetMeterAnswer(verificat_module, cancellationToken))
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          type = ShowMessageModel.MessageType.Error;
-        }
-        await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Результат проверки точки {point}", type: type) { IndentLevel = 2 });
+          cancellationToken.ThrowIfCancellationRequested();
+          await PointConnectAsync(tested_module, bus1, point, cancellationToken);
 
-        // Отключаем соответствующую точку МКР2 от своей шины
-        await PointDisconnectAsync(verificat_module, bus2, point, cancellationToken);
+          if (!await GetMeterAnswer(verificat_module, cancellationToken))
+          {
+            type = ShowMessageModel.MessageType.Error;
+          }
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Результат проверки точки {point}", type: type) { IndentLevel = 2 }, skipPause: type == ShowMessageModel.MessageType.Error ? true : false);
+
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+        }, ProtocolSelfCheckControl);
+
 
         type = ShowMessageModel.MessageType.Success;
         var message = string.Empty;
 
-        // Проверяем отсутствие замыкания между шинами
-        cancellationToken.ThrowIfCancellationRequested();
-        if (await GetMeterAnswer(verificat_module, cancellationToken))
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          type = ShowMessageModel.MessageType.Error;
-          message = $"Замыкание при отключении точки {point} от шины {bus2}";
-        }
+          await PointDisconnectAsync(verificat_module, bus2, point, cancellationToken);
+          // Проверяем отсутствие замыкания между шинами
+          cancellationToken.ThrowIfCancellationRequested();
+          if (await GetMeterAnswer(verificat_module, cancellationToken))
+          {
+            type = ShowMessageModel.MessageType.Error;
+            message = $"Замыкание при отключении точки {point} от шины {bus2}";
+          }
 
-        await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Результат проверки", message: message, type: type) { IndentLevel = 2 });
+          await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Результат проверки", message: message, type: type) { IndentLevel = 2 }, skipPause: type == ShowMessageModel.MessageType.Error ? true : false);
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+        }, ProtocolSelfCheckControl);
+
 
         // Подключаем точку МКР2 обратно и отключаем соответствующую точку МКР1 от своей шины
         await PointConnectAsync(verificat_module, bus2, point, cancellationToken);

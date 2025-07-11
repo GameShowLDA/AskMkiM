@@ -14,14 +14,16 @@ namespace Utilities
     /// </summary>
     /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
     /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
+    /// <param name="loop">Всегда вызывает повтор, даже если первое измерение без ошибок.</param>
     public static async Task RunWithUserRepeatAsync(
         Func<Task<bool>> operation,
-        IUserMessageService messageService)
+        IUserMessageService messageService,
+        bool loop = false)
     {
-      bool error = false;
-      bool next = true;
+      bool error = loop;
+      bool next = !loop;
 
-      do 
+      do
       {
         bool success = await operation();
 
@@ -36,7 +38,11 @@ namespace Utilities
         }
 
         var action = await messageService.WaitUserActionAsync();
-        if (action == UserAction.Retry)
+        if (action == UserAction.None)
+        {
+          return;
+        }
+        else if (action == UserAction.Retry)
         {
           continue;
         }
@@ -48,6 +54,57 @@ namespace Utilities
         }
       }
       while (error);
+    }
+
+    /// <summary>
+    /// Универсальный цикл для выполнения операции с поддержкой повтора, пропуска и завершения.
+    /// </summary>
+    /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
+    /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
+    /// <param name="loop">Всегда вызывает повтор, даже если первое измерение без ошибок.</param>
+    public static async Task<bool> GetRunWithUserRepeatAsync(
+        Func<Task<bool>> operation,
+        IUserMessageService messageService,
+        bool loop = false)
+    {
+      bool error = loop;
+      bool next = !loop;
+      bool result = true;
+
+      do
+      {
+        bool success = await operation();
+        result = success;
+
+        if (success && next)
+        {
+          return result;
+        }
+        else if (!error)
+        {
+          error = true;
+          next = false;
+        }
+
+        var action = await messageService.WaitUserActionAsync();
+        if (action == UserAction.None)
+        {
+          return result;
+        }
+        else if (action == UserAction.Retry)
+        {
+          continue;
+        }
+        else
+        {
+          next = true;
+          error = false;
+          return result;
+        }
+      }
+      while (error);
+
+      return result;
     }
   }
 }

@@ -142,7 +142,7 @@ namespace NewCore.Base.Function.Breakdown
     /// Запускает тест DCW и возвращает результат измерения тока.
     /// </summary>
     /// <returns>Измеренный ток (в мА).</returns>
-    Task<double> MeasureCurrentAsync();
+    Task<double> MeasureCurrentAsync(double param = 0);
 
     #endregion
   }

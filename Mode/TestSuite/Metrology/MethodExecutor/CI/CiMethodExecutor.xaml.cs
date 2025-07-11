@@ -3,6 +3,7 @@ using AppConfiguration.Execution;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.CI
@@ -85,22 +86,24 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.CI
       /// <inheritdoc />
       public override async Task PerformMeasurement(ProtocolUI protocolUI, DataModel dataModel)
       {
-        var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
-
-        var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, dataModel.Param, 60000);
-        var pause = false;
-        var type = ShowMessageModel.MessageType.Success;
-        if (answer < (dataModel.Param * 1000))
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          type = ShowMessageModel.MessageType.Error;
-          if (await ExecutionConfig.GetIsStopOnErrorEnabled())
-          {
-            pause = true;
-          }
-        }
+          protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type));
+          var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
+
+          var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, dataModel.Param, 60000);
+          var pause = false;
+          var type = ShowMessageModel.MessageType.Success;
+          if (answer < dataModel.Param)
+          {
+            type = ShowMessageModel.MessageType.Error;
+          }
+
+          await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+        }, protocolUI);
       }
 
       public override async Task FinalizeAsync()

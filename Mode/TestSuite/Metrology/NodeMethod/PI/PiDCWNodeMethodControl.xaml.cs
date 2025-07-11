@@ -2,6 +2,7 @@
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.PI
@@ -95,21 +96,22 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
           {
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
 
-            var answer = await breakDown.DcwManger.MeasureCurrentAsync();
-            var type = ShowMessageModel.MessageType.Success;
-
-            bool error = false;
-            if (answer >= dataModel.Param)
+            await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
-              type = ShowMessageModel.MessageType.Error;
-              error = true;
-            }
+              token.ThrowIfCancellationRequested();
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type));
-            if (error)
-            {
-              error = false;
-            }
+              var answer = await breakDown.DcwManger.MeasureCurrentAsync();
+              var type = ShowMessageModel.MessageType.Success;
+
+              if (answer >= dataModel.Param)
+              {
+                type = ShowMessageModel.MessageType.Error;
+              }
+
+              // await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type), skipPause: true);
+
+              return type == ShowMessageModel.MessageType.Success ? true : false;
+            }, protocolUI);
           }
           else
           {

@@ -2,6 +2,7 @@
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -94,6 +95,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
         var token = protocolUI.GetCancellationToken();
 
+
         while (true)
         {
           token.ThrowIfCancellationRequested();
@@ -103,17 +105,22 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
           {
             await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
 
-            var answer = await breakDown.AcwManger.MeasureCurrentAsync();
-            var type = ShowMessageModel.MessageType.Success;
-
-            bool error = false;
-            if (answer >= dataModel.Param)
+            await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
-              type = ShowMessageModel.MessageType.Error;
-              error = true;
-            }
+              token.ThrowIfCancellationRequested();
+              var answer = await breakDown.AcwManger.MeasureCurrentAsync();
+              var type = ShowMessageModel.MessageType.Success;
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type));
+
+              if (answer >= dataModel.Param)
+              {
+                type = ShowMessageModel.MessageType.Error;
+              }
+
+              // await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} мА", type: type), skipPause:true);
+              return type == ShowMessageModel.MessageType.Success ? true : false;
+
+            }, protocolUI);
           }
           else
           {

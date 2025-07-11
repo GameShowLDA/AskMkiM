@@ -3,6 +3,7 @@ using AppConfiguration.Execution;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.PI
@@ -91,20 +92,20 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
-
-        var answer = await breakDown.AcwManger.MeasureCurrentAsync();
-        var pause = false;
-        var type = ShowMessageModel.MessageType.Success;
-        if (answer > dataModel.Param)
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          type = ShowMessageModel.MessageType.Error;
-          if (await ExecutionConfig.GetIsStopOnErrorEnabled())
+          protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
+          var answer = await breakDown.AcwManger.MeasureCurrentAsync();
+          var type = ShowMessageModel.MessageType.Success;
+          if (answer > dataModel.Param)
           {
-            pause = true;
+            type = ShowMessageModel.MessageType.Error;
           }
-        }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА", type: type));
+          // await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА", type: type));
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+
+        }, protocolUI);
       }
 
       public override async Task FinalizeAsync()

@@ -136,11 +136,6 @@ namespace UI.Controls.ProtocolNew
       LoopMeasureResistanceButtonPreviewMouseDown += (sender, e) => LoopMeasureEvent();
       ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
     }
-
-    public void SetReturn(ReturnDelegate returnDelegate)
-    {
-      _returnDelegate = returnDelegate;
-    }
     #endregion
 
     #region Основные методы кнопок.
@@ -436,14 +431,20 @@ namespace UI.Controls.ProtocolNew
       Show(Status.Error, "В будущем добавить сюда реализацию выбора");
       return Task.FromResult(true);
     }
-    public Task<IUserMessageService.UserAction> WaitUserActionAsync()
+    public async Task<IUserMessageService.UserAction> WaitUserActionAsync()
     {
       _userActionTcs = new TaskCompletionSource<IUserMessageService.UserAction>();
 
-      SetNonVisibleAllButton();
-      ShowButtonsOnPause(true);
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsStopOnErrorEnabled())
+      {
 
-      return _userActionTcs.Task;
+        SetNonVisibleAllButton();
+        ShowButtonsOnPause(true);
+
+        return await _userActionTcs.Task;
+      }
+
+      return IUserMessageService.UserAction.None;
     }
   }
 }

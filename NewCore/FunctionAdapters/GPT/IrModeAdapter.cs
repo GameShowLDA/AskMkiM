@@ -138,12 +138,12 @@ namespace NewCore.FunctionAdapters.GPT
       try
       {
         double result = await _irMode.MeasureResistanceAsync(param, rangeFrom, rangeTo);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Измерение сопротивления IR", $"{result} МОм", result >= rangeFrom && result <= rangeTo, 2);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Измерение сопротивления изоляции", $"{result} МОм", result >= rangeFrom && result <= rangeTo, 2);
         return result;
       }
       catch (Exception ex)
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка измерения сопротивления IR", ex.Message, false, 2);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка измерения сопротивления изоляции", ex.Message, false, 2);
         return -1;
       }
     }

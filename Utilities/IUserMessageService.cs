@@ -19,7 +19,8 @@ namespace Utilities
     {
       Retry,
       Continue,
-      Abort
+      Abort,
+      None,
     }
 
     /// <summary>

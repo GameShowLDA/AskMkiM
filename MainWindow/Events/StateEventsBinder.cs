@@ -61,10 +61,16 @@ namespace MainWindowProgram.Events
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
 
       AdminCommand.AdminModeChanged += AdminModeChanged;
+      AdminCommand.PauseInStopChanged += AdminCommand_PauseInStopChanged;
       _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
 
       // _hotkey = new HotkeyListenerService(_mainWindow, () => _consoleManager.ToggleConsole());
+    }
+
+    private async void AdminCommand_PauseInStopChanged(object? sender, bool e)
+    {
+      await ExecutionConfig.SetStopOnError(e);
     }
 
     /// <summary>

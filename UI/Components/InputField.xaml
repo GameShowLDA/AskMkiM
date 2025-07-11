@@ -65,8 +65,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="headerTimeData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Время выполнения в сек." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" Placeholder="от 1 до 999 сек."  Height="40" FontFamily="{DynamicResource WinstonLight}"
-                                          Unit=",сек."/>
+                <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" Placeholder="от 1 до 999 сек."  Height="40" FontFamily="{DynamicResource WinstonLight}" Background="{StaticResource LightPrimarySolidColorBrush}" Unit=",сек."/>
             </Grid>
         </Border>
 
@@ -79,8 +78,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock x:Name="headerTimeRampData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Время нарастания в сек." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" Placeholder="от 0.1 до 999.9 сек." Unit=",сек." Height="40" FontFamily="{DynamicResource WinstonLight}"/>
+                <TextBlock x:Name="headerTimeRampData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Время нарастания в сек." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5" />
+                <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" Placeholder="от 0.1 до 999.9 сек." Unit=",сек." Height="40" FontFamily="{DynamicResource WinstonLight}" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 
@@ -94,7 +93,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="headerVoltageData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" Text="Напряжение в В." FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                <local:TextBoxPlaceholder x:Name="VoltageTextBox" Grid.Row="5" Placeholder="Введите значение..." Unit=",В." Height="40" FontFamily="{DynamicResource WinstonLight}"/>
+                <local:TextBoxPlaceholder x:Name="VoltageTextBox" Grid.Row="5" Placeholder="Введите значение..." Unit=",В." Height="40" FontFamily="{DynamicResource WinstonLight}" Background="{StaticResource LightPrimarySolidColorBrush}"/>
             </Grid>
         </Border>
 

@@ -345,12 +345,14 @@ namespace NewCore.Function.GPT
       };
     }
 
-    public async Task<double> MeasureCurrentAsync()
+    public async Task<double> MeasureCurrentAsync(double param = 0)
     {
       LogInformation("Запуск измерений режима DCW", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
-        return 0;
+      {
+        return param;
+      }
 
       var query = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
       int delay = (int)(await GetRampTimeAsync() + await GetTestTimeAsync()) * 1000;

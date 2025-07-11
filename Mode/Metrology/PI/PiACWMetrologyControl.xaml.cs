@@ -5,6 +5,7 @@ using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -40,10 +41,6 @@ namespace Mode.Metrology.PI
         this,
         StartDelegate: ExecuteMeasurementProcess,
         true,
-        ReturnDelegate: async (CancellationToken token) =>
-        {
-         return await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-        },
         StopDelegate: async (CancellationToken token) =>
         {
           await testMeasurement.FinalizeMeasurement();
@@ -79,7 +76,7 @@ namespace Mode.Metrology.PI
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
-      await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
 
     public ITextAdapter GetControl()

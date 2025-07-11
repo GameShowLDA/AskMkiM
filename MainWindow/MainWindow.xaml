@@ -215,7 +215,7 @@
 
                     <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
 
-                        <MenuItem Header="Тест СИ" >
+                        <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}" >
 
                             <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
                             <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
@@ -236,16 +236,14 @@
 
                         </MenuItem>
 
-                        <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
-                            <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
-                        </MenuItem>
+                        <MenuItem Header="Перекрёстный тест(МКР)" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
 
                     </MenuItem>
-                    
+
                 </MenuItem>
 
                 <MenuItem Header="Сборка" Tag="menuHeader_3" Name="Translation">
-                    
+
                     <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
 
                 </MenuItem>

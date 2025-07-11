@@ -60,6 +60,7 @@ namespace NewCore.Function.Keysight3466new
         return (true, string.Empty);
       }
 
+
       if (_device.IP == null)
       {
         if (IPAddress.TryParse(_device.ConnectionDetails, out IPAddress ip))
@@ -72,13 +73,18 @@ namespace NewCore.Function.Keysight3466new
         }
       }
 
+      using var token = new CancellationTokenSource(2000);
       try
       {
         _device.Client = new TcpClient();
-        await _device.Client.ConnectAsync(_device.IP.ToString(), _device.Port);
+        await _device.Client.ConnectAsync(_device.IP.ToString(), _device.Port, token.Token);
         _device.Stream = _device.Client.GetStream();
         _device.IsConnected = true;
         return (true, string.Empty);
+      }
+      catch (OperationCanceledException)
+      {
+        return (false, "Превышено время подлючения к мультиметру: 2сек.");
       }
       catch (Exception ex)
       {
