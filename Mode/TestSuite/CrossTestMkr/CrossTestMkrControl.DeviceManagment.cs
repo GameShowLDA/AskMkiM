@@ -5,6 +5,7 @@ using UI.Controls.ProtocolNew;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
 using Utilities;
+using Utilities.Interface;
 
 namespace Mode.TestSuite.CrossTestMkr
 {
@@ -50,11 +51,10 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="module">Блок коммутации</param>
     /// <param name="roleName">Название роли блока коммутации</param>
     /// <returns>Возвращает <c>true</c>, если инициализация прошла успешно; иначе — <c>false</c>.</returns>
-    private async Task<bool> InitializeModule(IRelaySwitchModule module, CancellationToken cancellationToken, string roleName = null)
+    private async Task<bool> InitializeModule(IUserMessageService messageService, IRelaySwitchModule module, CancellationToken cancellationToken, string roleName = null)
     {
-      var (state, answer) = await module.ConnectableManager.InitializeAsync();
+      var (state, answer) = await module.ConnectableManager.InitializeAsync(messageService);
       cancellationToken.ThrowIfCancellationRequested();
-      LogInformation($"Ответ модуля - {answer}");
       return state;
     }
 
@@ -63,9 +63,9 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </summary>
     /// <param name="module">Блок коммутации</param>
     /// <returns>Возвращает <c>true</c>, если отключение прошло успешно; иначе — <c>false</c>.</returns>
-    private async Task<bool> DisconnectModule(IRelaySwitchModule module)
+    private async Task<bool> DisconnectModule(IUserMessageService messageService, IRelaySwitchModule module)
     {
-      var state = await module.ConnectableManager.DisconnectAsync();
+      var state = await module.ConnectableManager.DisconnectAsync(messageService);
       return state;
     }
 
@@ -73,9 +73,9 @@ namespace Mode.TestSuite.CrossTestMkr
     /// Выполняет сброс указанного БК.
     /// </summary>
     /// <param name="module">Блок коммутации</param>
-    private async Task ResetModule(IRelaySwitchModule module)
+    private async Task ResetModule(IUserMessageService messageService, IRelaySwitchModule module)
     {
-      await module.ConnectableManager.ResetAsync();
+      await module.ConnectableManager.ResetAsync(messageService);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </summary>
     /// <param name="module">Блок коммутации</param>
     /// <returns>Возвращает <c>true</c>, устройство включилось; иначе — <c>false</c>.</returns>
-    private async Task<bool> MeterEnableAsync(IRelaySwitchModule module, CancellationToken cancellationToken)
+    private async Task<bool> MeterEnableAsync(IUserMessageService messageService, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
       return await module.MeterManager.ConnectMeterAsync();
@@ -120,7 +120,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </summary>
     /// <param name="module">Блок коммутации</param>
     /// <returns>Возвращает <c>true</c>, если устройство выключилось; иначе — <c>false</c>.</returns>
-    private async Task<bool> MeterDisableAsync(IRelaySwitchModule module)
+    private async Task<bool> MeterDisableAsync(IUserMessageService messageService, IRelaySwitchModule module)
     {
       return await module.MeterManager.DisconnectMeterAsync();
     }
@@ -161,6 +161,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </param>
     /// <returns>True, если тест выполнен успешно</returns>
     private async Task<bool> RunPart1(
+      IUserMessageService messageService,
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       List<int> rangePoints,
@@ -178,7 +179,7 @@ namespace Mode.TestSuite.CrossTestMkr
           ),
         IsBlockStart: true
         );
-      bool result = await RunPointTest(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
+      bool result = await RunPointTest(messageService, tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
       StepControlManager.ExitBlock();
       return result;
     }
@@ -203,7 +204,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <c>true</c> — БК сбросятся по завершению,
     /// </param>
     /// <returns>True, если тест выполнен успешно</returns>
-    private async Task<bool> RunPart2(
+    private async Task<bool> RunPart2(IUserMessageService messageService,
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       List<int> rangePoints,
@@ -221,7 +222,7 @@ namespace Mode.TestSuite.CrossTestMkr
           ),
         IsBlockStart: true
         );
-      bool result = await RunPointTest(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
+      bool result = await RunPointTest(messageService, tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
       StepControlManager.ExitBlock();
       return result;
     }
@@ -241,6 +242,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </param>
     /// <returns>True, если тест успешно завершён</returns>
     private async Task<bool> RunPart3(
+    IUserMessageService messageService,
     IRelaySwitchModule tested_module,
     IRelaySwitchModule verificat_module,
     CancellationToken cancellationToken,
@@ -354,8 +356,8 @@ namespace Mode.TestSuite.CrossTestMkr
 
       if (needRestartModuleAfter)
       {
-        await ResetModule(tested_module);
-        await ResetModule(verificat_module);
+        await ResetModule(messageService, tested_module);
+        await ResetModule(messageService, verificat_module);
       }
 
       StepControlManager.ExitBlock();
@@ -426,6 +428,7 @@ namespace Mode.TestSuite.CrossTestMkr
     /// </param>
     /// <returns>True, если все проверки прошли успешно</returns>
     private async Task<bool> RunPointTest(
+      IUserMessageService messageService,
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       List<int> rangePoints,
@@ -498,8 +501,8 @@ namespace Mode.TestSuite.CrossTestMkr
 
       if (needRestartModuleAfter)
       {
-        await ResetModule(tested_module);
-        await ResetModule(verificat_module);
+        await ResetModule(messageService, tested_module);
+        await ResetModule(messageService, verificat_module);
       }
 
       return true;

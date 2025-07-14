@@ -13,6 +13,7 @@ using UI.Controls.ProtocolNew;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 using Utilities;
+using Utilities.Interface;
 
 namespace Mode.Metrology.KC
 {
@@ -48,7 +49,7 @@ namespace Mode.Metrology.KC
         true,
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement();
+          await testMeasurement.FinalizeMeasurement(ProtocolUI);
         });
     }
 
@@ -78,7 +79,7 @@ namespace Mode.Metrology.KC
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole);
 
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
@@ -93,11 +94,15 @@ namespace Mode.Metrology.KC
       public KcMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        await base.ConfigureMeter(metrologicalModeRole, dataModel);
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await fastMeter.ResistanceManager.SetResistanceModeAsync();
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.ResistanceManager.SetResistanceModeAsync(), messageService))
+        {
+          throw new Exception($"Ошибка установка режима измерения сопротивления {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
+        }
       }
 
       /// <inheritdoc />

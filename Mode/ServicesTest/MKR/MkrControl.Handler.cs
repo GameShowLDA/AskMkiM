@@ -84,11 +84,11 @@ namespace Mode.ServicesTest.MKR
       UpdateMkrUI(true);
 
       // Инициализируем устройство
-      await currentDevice.ConnectableManager.InitializeAsync();
+      await currentDevice.ConnectableManager.InitializeAsync(ProtocolSelfCheckControl);
       await ProtocolSelfCheckControl.ShowMessageAsync(
           new ShowMessageModel($"[ИНИЦИАЛИЗАЦИЯ БК {currentDevice.NumberChassis}.{currentDevice.Number}]", goodText.TitleColor));
 
-      await currentDevice.ConnectableManager.ConnectAsync();
+      await currentDevice.ConnectableManager.ConnectAsync(ProtocolSelfCheckControl);
       await ProtocolSelfCheckControl.ShowMessageAsync(
           new ShowMessageModel("[ПОДКЛЮЧЕНИЕ]", goodText.TitleColor));
     }

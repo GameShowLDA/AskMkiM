@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AppConfiguration.Interface;
-using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 
@@ -31,6 +31,7 @@ namespace UI.Components.ProtocolListBox
     public bool HasRetryAction => throw new NotImplementedException();
 
     public bool ClickRetry { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public IButtonService ButtonService { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public ProtocolListBoxUI()
     {

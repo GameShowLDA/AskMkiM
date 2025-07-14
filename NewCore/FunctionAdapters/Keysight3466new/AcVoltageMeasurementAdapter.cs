@@ -26,18 +26,20 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetACVoltageModeAsync()
+    public async Task<bool> SetACVoltageModeAsync()
     {
       try
       {
-        await _measurement.SetACVoltageModeAsync();
+        var reslut = await _measurement.SetACVoltageModeAsync();
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима измерения переменного напряжения",
           "CONF:VOLT:AC",
-          true,
+          reslut,
           1);
+
+        return reslut;
       }
       catch (Exception ex)
       {

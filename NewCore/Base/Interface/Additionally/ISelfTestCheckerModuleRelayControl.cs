@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Interface.Main;
 using NewCore.Base.Function.ModuleRelayControl;
-using Utilities;
+using Utilities.Interface;
 
 namespace NewCore.Base.Interface.Additionally
 {

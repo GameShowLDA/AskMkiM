@@ -26,17 +26,19 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetCapacitanceModeAsync()
+    public async Task<bool> SetCapacitanceModeAsync()
     {
       try
       {
-        await _measurement.SetCapacitanceModeAsync();
+        var result = await _measurement.SetCapacitanceModeAsync();
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима измерения ёмкости",
-          true,
+          result ? true : false,
           1);
+
+        return result;
       }
       catch (Exception ex)
       {

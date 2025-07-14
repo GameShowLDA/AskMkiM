@@ -2,6 +2,7 @@
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using Utilities.Interface;
 using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
@@ -23,19 +24,19 @@ namespace NewCore.Function.DeviceBusCommutation
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       return await InitializeAsync();
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
       return await ResetAsync();
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -75,7 +76,7 @@ namespace NewCore.Function.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {

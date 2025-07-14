@@ -11,7 +11,7 @@ using System.Text.Json;
 using Utilities.Models;
 using AppConfiguration.Enums;
 using AppConfiguration.MeasurementError;
-using Utilities;
+using Utilities.Interface;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 {

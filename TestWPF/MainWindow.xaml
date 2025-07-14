@@ -7,11 +7,12 @@
         xmlns:ChassisManager ="clr-namespace:Mode.Settings.DeviceConfig;assembly=Mode"
         xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew;assembly=UI"
         xmlns:Calendar="clr-namespace:UI.Controls.Calendar;assembly=UI"
+        xmlns:Components="clr-namespace:UI.Components;assembly=UI"
         mc:Ignorable="d"
         MinWidth="800"
         MinHeight="600"
         Title="MainWindow" Height="450" Width="800"
         xmlns:Error ="clr-namespace:TestWPF"
         >
-    <local:TestControl x:Name="TestControl" />
+    <Components:InputField Name="testInput" IsTimeVisible="True" IsVoltageVisible="True" IsBusVisible="True"/>
 </Window>

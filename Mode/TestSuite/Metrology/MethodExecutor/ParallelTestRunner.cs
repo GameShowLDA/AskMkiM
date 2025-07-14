@@ -150,7 +150,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
       {
         cancellationToken.ThrowIfCancellationRequested();
 
-        await module.ConnectableManager.ResetAsync();
+        await module.ConnectableManager.ResetAsync(_protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1);
         await Task.Delay(10);

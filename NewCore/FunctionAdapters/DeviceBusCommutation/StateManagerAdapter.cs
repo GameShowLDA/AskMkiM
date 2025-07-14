@@ -4,6 +4,8 @@ using AppConfiguration.Error.Device;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
@@ -27,28 +29,33 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService userMessageService = null)
     {
       return await InitializeAsync();
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService userMessageService = null)
     {
       return await ResetAsync();
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService userMessageService = null)
     {
-      var (connect, answer) = await _stateManager.ConnectAsync();
+      (bool connect, string answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var result = await _stateManager.ConnectAsync();
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _deviceBusCommutation,
-          "Инициализация устройства",
-          !connect ? answer : string.Empty,
-          connect,
-          1);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _deviceBusCommutation,
+            "Инициализация устройства",
+            !result.Connect ? result.Answer : string.Empty,
+            result.Connect,
+            1);
+
+        return result;
+      }, userMessageService);
 
       if (!connect)
       {
@@ -67,7 +74,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService userMessageService = null)
     {
       var result = await _stateManager.DisconnectAsync();
 
@@ -76,11 +83,6 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
           "Сброс устройства",
           result,
           1);
-
-      if (!result)
-      {
-
-      }
 
       return result;
     }

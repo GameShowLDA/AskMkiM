@@ -1,11 +1,13 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Error.Device.Breakdown;
 using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -43,7 +45,7 @@ namespace Mode.Metrology.PI
         true,
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement();
+          await testMeasurement.FinalizeMeasurement(ProtocolUI);
         });
     }
 
@@ -75,7 +77,7 @@ namespace Mode.Metrology.PI
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole, Data.DataModel);
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
 
@@ -89,16 +91,33 @@ namespace Mode.Metrology.PI
       public PiMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.ConnectAsync();
-        await breakDown.DcwManger.SetModeAsync();
-        await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time);
-        await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime);
-        await breakDown.DcwManger.SetLowCurrentLimitAsync(0);
-        await breakDown.DcwManger.SetHighCurrentLimitAsync(10);
-        await breakDown.DcwManger.SetVoltageAsync(dataModel.Param);
+        string name = breakDown.Name;
+        int chassis = breakDown.NumberChassis;
+        int numer = breakDown.Number;
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+          throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetModeAsync()).Success, messageService))
+          throw DcwExceptionFactory.SetModeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
+          throw DcwExceptionFactory.SetTestTimeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetRampTimeAsync(dataModel.RampTime)).Success, messageService))
+          throw DcwExceptionFactory.SetRampTimeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetLowCurrentLimitAsync(0)).Success, messageService))
+          throw DcwExceptionFactory.SetLowLimitFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetHighCurrentLimitAsync(10)).Success, messageService))
+          throw DcwExceptionFactory.SetHighLimitFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetVoltageAsync(dataModel.Param)).Success, messageService))
+          throw DcwExceptionFactory.SetVoltageFailed(name, chassis, numer);
       }
 
       /// <inheritdoc />
@@ -156,11 +175,11 @@ namespace Mode.Metrology.PI
         return true;
       }
 
-      public override async Task FinalizeMeasurement()
+      public override async Task FinalizeMeasurement(IUserMessageService messageService)
       {
-        await base.FinalizeMeasurement();
+        await base.FinalizeMeasurement(messageService);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

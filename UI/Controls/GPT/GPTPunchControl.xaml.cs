@@ -35,7 +35,7 @@ namespace UI.Controls.GPT
     private async void ConnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       var model = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
-      var connect = await model.ConnectableManager.ConnectAsync();
+      var connect = await model.ConnectableManager.ConnectAsync(null);
 
       if (connect.Connect)
       {
@@ -54,7 +54,7 @@ namespace UI.Controls.GPT
     private async void DisconnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       var model = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
-      var connect = await model.ConnectableManager.DisconnectAsync();
+      var connect = await model.ConnectableManager.DisconnectAsync(null);
       if (connect)
       {
         ConnectMenuItem.Visibility = Visibility.Visible;

@@ -1,4 +1,4 @@
-﻿﻿using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Controls;
 using AppConfiguration.Enums;
 using AppConfiguration.Interface;
@@ -8,6 +8,7 @@ using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -72,11 +73,11 @@ namespace Mode.Metrology.IE
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole);
 
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
 
-      await testMeasurement.FinalizeMeasurement();
+      await testMeasurement.FinalizeMeasurement(ProtocolUI);
     }
 
     public ITextAdapter GetControl()
@@ -89,11 +90,15 @@ namespace Mode.Metrology.IE
       public IeMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        await base.ConfigureMeter(metrologicalModeRole, dataModel);
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await fastMeter.CapacitanceManager.SetCapacitanceModeAsync();
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.CapacitanceManager.SetCapacitanceModeAsync(), messageService))
+        {
+          throw new Exception($"Ошибка установка режима измерения ёмкости {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
+        }
       }
 
       /// <inheritdoc />

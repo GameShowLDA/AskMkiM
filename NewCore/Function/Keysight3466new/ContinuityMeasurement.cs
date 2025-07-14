@@ -28,14 +28,16 @@ namespace NewCore.Function.Keysight3466new
     /// Устанавливает прибор в режим прозвонки (Continuity Test).
     /// </summary>
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    public async Task SetContinuityModeAsync()
+    public async Task<bool> SetContinuityModeAsync()
     {
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:CONT");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?");
+      return answer.Contains("CONT");
     }
 
     /// <summary>

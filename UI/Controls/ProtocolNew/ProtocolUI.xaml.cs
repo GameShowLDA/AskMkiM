@@ -104,6 +104,8 @@ namespace UI.Controls.ProtocolNew
         KeyboardManager.UnregisterGlobalStepHooks();
         DetachKeyboardHandlers();
       };
+
+      ButtonService = this;
     }
     private void AttachKeyboardHandlers()
     {

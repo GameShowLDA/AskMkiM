@@ -43,6 +43,11 @@ namespace AppConfiguration.Base
     static public event Action<string, bool> InfoMessageEvent;
 
     /// <summary>
+    /// Событие, которое вызывается при отчистке информационного сообщения.
+    /// </summary>
+    static public event Action ClearMessageEvent;
+
+    /// <summary>
     /// Событие, которое вызывается при изменении состояния подключения USB устройства.
     /// </summary>
     static public event Action<bool> AdminRightsChanged;
@@ -228,6 +233,11 @@ namespace AppConfiguration.Base
     static public void RaiseInfoMessage(string message, bool clearMessage = false)
     {
       Application.Current.Dispatcher.Invoke(() => InfoMessageEvent?.Invoke(message, clearMessage));
+    }
+
+    static public void RaiseClearMessage()
+    { 
+      Application.Current.Dispatcher.Invoke(() => ClearMessageEvent?.Invoke());
     }
 
     /// <summary>

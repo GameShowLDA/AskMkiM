@@ -8,7 +8,7 @@
     /// <summary>
     /// Устанавливает режим прозвонки.
     /// </summary>
-    Task SetContinuityModeAsync();
+    Task<bool> SetContinuityModeAsync();
 
     /// <summary>
     /// Проверяет наличие проводимости.

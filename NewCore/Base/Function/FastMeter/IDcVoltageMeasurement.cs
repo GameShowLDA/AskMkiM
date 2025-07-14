@@ -8,7 +8,7 @@
     /// <summary>
     /// Устанавливает режим измерения постоянного напряжения.
     /// </summary>
-    Task SetDCVoltageModeAsync();
+    Task<bool> SetDCVoltageModeAsync();
 
     /// <summary>
     /// Измеряет постоянное напряжение.

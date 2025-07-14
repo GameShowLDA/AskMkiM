@@ -16,6 +16,7 @@ using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
 using static AppConfiguration.SystemState.SystemStateManager;
 using static UI.Controls.Message.MessageBox;
+using Utilities.Interface;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -33,6 +34,8 @@ namespace UI.Controls.ProtocolNew
     /// Возвращает текущий статус пошагового режима.
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
+
+    public IButtonService ButtonService { get; set; }
 
     /// <summary>
     /// Действие, которое будет вызвано при нажатии на кнопку "Повторить".

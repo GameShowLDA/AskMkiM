@@ -6,6 +6,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Device;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.LoggerUtility;
@@ -41,7 +42,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
 
-      if (!await SelfTestConnectionHelper.SettingsMeter(meter))
+      if (!await SelfTestConnectionHelper.SettingsMeter(meter, messageService))
       {
         return;
       }
@@ -95,7 +96,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
 
       }
 
-      await meter.ConnectableManager.DisconnectAsync();
+      await meter.ConnectableManager.DisconnectAsync(messageService);
     }
 
 
@@ -108,13 +109,12 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       if (!SelfTestManager.MeterConnect && !SelfTestManager.DbcConnect)
       {
-        if (!await SelfTestConnectionHelper.CheckConnectionsAsync(device, meter))
+        if (!await SelfTestConnectionHelper.CheckConnectionsAsync(device, meter, messageService))
         {
           return false;
         }
       }
-      await device.ConnectableManager.ResetAsync();
-
+      await device.ConnectableManager.ResetAsync(messageService);
 
       var selfTestChecker = device.SelfTestManager;
 

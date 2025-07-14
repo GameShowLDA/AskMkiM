@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Utilities.Models;
 
-namespace Utilities
+namespace Utilities.Interface
 {
   /// <summary>
   /// Интерфейс для отображения сообщений пользователю и управления действиями, доступными при ошибках.
@@ -22,6 +22,7 @@ namespace Utilities
       Abort,
       None,
     }
+    public IButtonService ButtonService { get; set; }
 
     /// <summary>
     /// Асинхронно отображает сообщение пользователю.

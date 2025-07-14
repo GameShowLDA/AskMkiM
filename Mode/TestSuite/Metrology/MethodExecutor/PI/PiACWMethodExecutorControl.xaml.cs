@@ -4,6 +4,7 @@ using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.PI
@@ -60,12 +61,12 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         }
 
         await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
-        await testMeasurement.ConfigureMeter(dataModel);
+        await testMeasurement.ConfigureMeter(ProtocolUI, dataModel);
         await testMeasurement.RunParallelModuleTasksAsync(ProtocolUI, dataModel);
       }
       finally
       {
-        await testMeasurement.FinalizeAsync();
+        await testMeasurement.FinalizeAsync(ProtocolUI);
       }
     }
 
@@ -74,10 +75,10 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
       public PiACWMethodExecutorMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null)
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.ConnectAsync();
+        await breakDown.ConnectableManager.ConnectAsync(messageService);
         await breakDown.AcwManger.SetModeAsync();
         await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
         await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
@@ -108,11 +109,11 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         }, protocolUI);
       }
 
-      public override async Task FinalizeAsync()
+      public override async Task FinalizeAsync(IUserMessageService messageService)
       {
-        await base.FinalizeAsync();
+        await base.FinalizeAsync(messageService);
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

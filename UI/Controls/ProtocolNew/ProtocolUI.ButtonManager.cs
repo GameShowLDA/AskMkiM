@@ -1,11 +1,12 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Utilities.Interface;
 using static Utilities.LoggerUtility;
 
 namespace UI.Controls.ProtocolNew
 {
-  partial class ProtocolUI
+  partial class ProtocolUI : IButtonService
   {
     private TaskCompletionSource<bool>? _adminButtonTcs;
 
@@ -345,7 +346,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Скрывает все кнопки управления.
     /// </summary>
-    private void SetNonVisibleAllButton()
+    public void SetNonVisibleAllButton()
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
@@ -460,6 +461,16 @@ namespace UI.Controls.ProtocolNew
       });
     }
 
+    public void ShowOnlyExitButton()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        SetNonVisibleAllButton();
+        ExitButtonVisibility = Visibility.Visible;
+      });
+
+    }
+
     public void SetupAdminButton()
     {
       Application.Current.Dispatcher.Invoke(() =>
@@ -469,6 +480,11 @@ namespace UI.Controls.ProtocolNew
         adminExit.Visibility = Visibility.Visible;
         adminContinue.Visibility = Visibility.Visible;
       });
+    }
+
+    public void ShowButtonsOnPause()
+    {
+      throw new NotImplementedException();
     }
 
     #endregion

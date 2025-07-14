@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Interface.Main;
-using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
@@ -71,7 +71,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         await CheckBus(messageService, bus, switchingDevice, powerSourceModule, fastMeter);
       }
 
-      await powerSourceModule.ConnectableManager.ResetAsync();
+      await powerSourceModule.ConnectableManager.ResetAsync(messageService);
     }
 
     static private async Task CheckBus(IUserMessageService messageService, SwitchingBus switchingBus, ISwitchingDevice switchingDevice, IPowerSourceModule powerSource, IFastMeter fastMeter)

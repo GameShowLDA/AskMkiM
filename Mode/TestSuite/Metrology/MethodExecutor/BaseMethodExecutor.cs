@@ -2,6 +2,7 @@
 using Mode.Models;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities.Interface;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor
@@ -41,7 +42,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
     /// Настраивает измерительное устройство (мультиметр или ППУ).
     /// </summary>
     /// <param name="dataModel">Модель данных, содержащая параметры измерений.</param>
-    public abstract Task ConfigureMeter(DataModel dataModel = null);
+    public abstract Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null);
 
     /// <summary>
     /// Выполняет измерение.
@@ -71,7 +72,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
         return (false, ex.Message);
       }
 
-      return await _deviceCollector.ConnectAllAsync();
+      return await _deviceCollector.ConnectAllAsync(protocolUI);
     }
 
     /// <summary>
@@ -126,7 +127,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
     /// <summary>
     /// Выполняет общий сброс оборудования.
     /// </summary>
-    public virtual async Task FinalizeAsync()
+    public virtual async Task FinalizeAsync(IUserMessageService messageService)
     {
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }

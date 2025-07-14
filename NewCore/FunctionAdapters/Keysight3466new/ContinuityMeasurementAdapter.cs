@@ -26,11 +26,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetContinuityModeAsync()
+    public async Task<bool> SetContinuityModeAsync()
     {
       try
       {
-        await _measurement.SetContinuityModeAsync();
+        var result = await _measurement.SetContinuityModeAsync();
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
@@ -38,6 +38,8 @@ namespace NewCore.FunctionAdapters.Keysight3466new
           string.Empty,
           true,
           1);
+
+        return result;
       }
       catch (Exception ex)
       {

@@ -13,6 +13,7 @@ using NewCore.Communication;
 using NewCore.Device;
 using Newtonsoft.Json.Linq;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using YamlDotNet.Core.Tokens;
 using static AppConfiguration.Execution.ExecutionConfig;
@@ -70,7 +71,7 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
     private async Task PerformClosureCycle(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
-      if (!(await _moduleRelay.ConnectableManager.InitializeAsync()).Connect)
+      if (!(await _moduleRelay.ConnectableManager.InitializeAsync(messageService)).Connect)
       {
         return;
       }
@@ -86,12 +87,12 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
     private async Task CheckBusesConnection(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule, ISwitchingDevice switchingDevice)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
-      if (!(await switchingDevice.ConnectableManager.InitializeAsync()).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync()).Connect)
+      if (!(await switchingDevice.ConnectableManager.InitializeAsync(messageService)).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync(messageService)).Connect)
       {
         return;
       }
 
-      await switchingDevice.ConnectableManager.ResetAsync();
+      await switchingDevice.ConnectableManager.ResetAsync(messageService);
       if (!await switchingDevice.ConnectorManager.ConnectAllBuses())
       {
         return;

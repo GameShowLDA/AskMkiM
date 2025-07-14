@@ -9,6 +9,7 @@ using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 using static NewCore.Enum.MetrologyEnum;
@@ -50,7 +51,7 @@ namespace Mode.Metrology.PR
           true,
           StopDelegate: async (CancellationToken token) =>
           {
-            await testMeasurement.FinalizeMeasurement();
+            await testMeasurement.FinalizeMeasurement(ProtocolUI);
           });
       }
       catch (Exception ex)
@@ -88,7 +89,7 @@ namespace Mode.Metrology.PR
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole, Data.DataModel);
       await testMeasurement.MintSettings(Data.DataModel);
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
@@ -120,10 +121,13 @@ namespace Mode.Metrology.PR
       }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await fastMeter.DcVoltageManager.SetDCVoltageModeAsync();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.DcVoltageManager.SetDCVoltageModeAsync(), messageService))
+        {
+          throw new Exception($"Ошибка установка режима измерения постоянного напряжения {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
+        }
       }
 
       /// <inheritdoc />
@@ -151,7 +155,7 @@ namespace Mode.Metrology.PR
         await protocolUI.ShowMessageAsync(showMessageModel);
         return true;
       }
-
+      
       /// <summary>
       /// Возвращает диапазон параметров (коэффициенты, ток, напряжение), соответствующий указанному сопротивлению.
       /// </summary>
@@ -191,32 +195,23 @@ namespace Mode.Metrology.PR
           throw new InvalidOperationException("Calibration JSON пуст или отсутствует.");
         }
 
-        // Десериализация
         var ranges = JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(module.ResistanceCalibrationJson);
-
         if (ranges == null || !ranges.Any())
         {
           throw new InvalidOperationException("Не удалось десериализовать калибровочные диапазоны.");
         }
 
-        var range = ranges.FirstOrDefault(r =>
-            resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
-
+        var range = ranges.FirstOrDefault(r => resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
         if (range == null)
         {
           throw new ArgumentOutOfRangeException(nameof(resistance),
               $"Сопротивление {resistance} Ом не входит ни в один из диапазонов.");
         }
 
-        // Процент положения внутри диапазона
-        double percent = (resistance - range.ResistanceMin) /
-                         (range.ResistanceMax - range.ResistanceMin);
-
-        // Преобразование токов в double (миллиамперы)
+        double percent = (resistance - range.ResistanceMin) / (range.ResistanceMax - range.ResistanceMin);
         double real = range.IntegerCurrent + range.DecimalCurrent / 1000.0;
         double fake = range.IntegerCurrentFake + range.DecimalCurrentFake / 1000.0;
-
-        // Интерполяция
+        
         return real + (fake - real) * percent;
       }
     }

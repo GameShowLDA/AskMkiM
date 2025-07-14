@@ -2,7 +2,7 @@
 using NewCore.Communication;
 using System.Windows;
 using System.Windows.Input;
-using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using WindowsInput;
 using static AppConfiguration.Base.EventAggregator;
@@ -96,14 +96,14 @@ namespace UI.Controls.ProtocolNew
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
       {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error));
-          await FinalizeAsync();
-          return;
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
+        await FinalizeAsync();
+        return;
       }
 
       if (preActionDelegate != null)
       {
-        preActionDelegate(ProtocolSelfCheck.GetCancellationToken());
+        await preActionDelegate(ProtocolSelfCheck.GetCancellationToken());
       }
 
       if (startDelegate == null)
@@ -159,25 +159,20 @@ namespace UI.Controls.ProtocolNew
     internal async Task FinalizeAsync(StopDelegate stopDelegate = null, string name = null)
     {
       if (isExit)
+      {
         return;
+      }
 
       isExit = true;
-
-
       LogInformation($"Завершение \"{name}\"");
 
       SerialPortHelper.CloseAllRegisteredSerialPorts();
-
       await CancelProcessTaskAsync(stopDelegate, name);
-
       ResetState();
-
       await ResetSystemAsync();
 
       await HandleProtocolActionsAsync();
-
       ProtocolSelfCheck.ShowOnlyStartButton();
-
       await DisplayCompletionMessage();
 
       StartProcessing?.Invoke(false);
@@ -303,7 +298,6 @@ namespace UI.Controls.ProtocolNew
     {
       _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Retry);
     }
-
 
     #endregion
 

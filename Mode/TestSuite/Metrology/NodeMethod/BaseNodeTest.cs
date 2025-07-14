@@ -4,6 +4,7 @@ using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 
@@ -186,7 +187,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// <summary>
     /// Завершает тест, выполняя очистку и отключение оборудования.
     /// </summary>
-    public virtual async Task FinalizeAsync()
+    public virtual async Task FinalizeAsync(IUserMessageService messageService)
     {
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
@@ -195,7 +196,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// Проверяет и подключает все необходимые устройства перед выполнением теста.
     /// </summary>
     /// <returns>Задача, представляющая операцию подключения.</returns>
-    public virtual async Task<(bool Connect, string Message)> ConnectDevicesAsync()
+    public virtual async Task<(bool Connect, string Message)> ConnectDevicesAsync(IUserMessageService messageService)
     {
       await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования", type: ShowMessageModel.MessageType.Info));
 
@@ -203,7 +204,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
       {
         if (device is IDevice connectableDevice)
         {
-          var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync();
+          var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync(messageService);
           if (!connected)
           {
             return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
@@ -218,7 +219,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     /// Настраивает измерительное устройство (мультиметр или ППУ).
     /// </summary>
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
-    public abstract Task ConfigureMeter(DataModel dataModel = null);
+    public abstract Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null);
 
     public void ResetPoints()
     {
@@ -244,7 +245,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
         return (false, ex.Message);
       }
 
-      var connect = await ConnectDevicesAsync();
+      var connect = await ConnectDevicesAsync(protocolUI);
 
       if (connect.Connect)
       {

@@ -116,7 +116,7 @@
                             <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
 
-                        <CheckBox x:Name="ShinaACheckBox" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
+                        <CheckBox x:Name="ShinaACheckBox" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5" />
                         <TextBlock Text="Шина A" FontFamily="{DynamicResource WinstonMedium}" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}" VerticalAlignment="Center" FontSize="18" Padding="5"/>
 
                         <CheckBox x:Name="ShinaBCheckBox" Grid.Row="1" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>

@@ -73,10 +73,14 @@ namespace UI.Components
     /// </summary>
     private void OnPowerChanged(bool newValue)
     {
-      if (active != newValue)
+      active = newValue;
+      if (newValue)
       {
-        OnPowerButtonClick(null, null);
-        active = newValue;
+        SetConnectedState("Отключить систему");
+      }
+      else
+      {
+        SetDisconnectedState("Подключить систему");
       }
     }
 
@@ -137,6 +141,7 @@ namespace UI.Components
 
       if (taskInProgress)
       {
+        SetDisconnectedState("Подключить систему");
         cancellationToken.Cancel();
         return;
       }
@@ -195,7 +200,7 @@ namespace UI.Components
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await model.ConnectableManager.InitializeAsync();
+      var result = await model.ConnectableManager.InitializeAsync(null);
 
       if (result.Item1)
       {
@@ -203,7 +208,6 @@ namespace UI.Components
         return true;
       }
 
-      SetDisconnectedState("Подключить систему");
       return false;
     }
 
@@ -213,7 +217,7 @@ namespace UI.Components
     private async Task HandleConnectionErrorAsync()
     {
       hasError = true;
-      SetLoadingState("Отменить подключение", (Color)FindResource("RedColor"));
+      SetLoadingState("Отменить подключение", (Color)FindResource("YellowColor"));
 
       bool exitLoop = false;
 
@@ -244,8 +248,11 @@ namespace UI.Components
     {
       for (int i = seconds; i > 0; i--)
       {
+        RaiseInfoMessage($"{message} {i} сек.");
         await Task.Delay(1000);
       }
+      RaiseClearMessage();
+
     }
 
     /// <summary>

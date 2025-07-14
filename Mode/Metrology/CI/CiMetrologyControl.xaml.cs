@@ -7,6 +7,7 @@ using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -67,15 +68,14 @@ namespace Mode.Metrology.CI
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         throw new Exception();
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole, Data.DataModel);
 
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
-      await testMeasurement.FinalizeMeasurement();
+      await testMeasurement.FinalizeMeasurement(ProtocolUI);
     }
 
     public ITextAdapter GetControl()
@@ -88,27 +88,27 @@ namespace Mode.Metrology.CI
       public CiMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        await base.ConfigureMeter(metrologicalModeRole, dataModel);
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
 
-        if (!(await breakDown.ConnectableManager.ConnectAsync()).Connect)
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
         {
           throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
         }
 
-        if (!(await breakDown.IrManger.SetModeAsync()).Success)
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
         {
           throw new Exception($"Ошибка установка режима IR {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
         }
 
-        if (!(await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success)
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
         {
           throw new Exception($"Ошибка установка напряжения {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
         }
 
-        if (!(await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success)
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
         {
           throw new Exception($"Ошибка установка времени теста {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
         }
@@ -130,11 +130,11 @@ namespace Mode.Metrology.CI
         return true;
       }
 
-      public override async Task FinalizeMeasurement()
+      public override async Task FinalizeMeasurement(IUserMessageService messageService)
       {
-        await base.FinalizeMeasurement();
+        await base.FinalizeMeasurement(messageService);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

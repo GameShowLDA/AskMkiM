@@ -11,6 +11,7 @@ using Mode.Metrology.PI;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -44,7 +45,7 @@ namespace Mode.Metrology.KN
         true,
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement();
+          await testMeasurement.FinalizeMeasurement(ProtocolUI);
         });
     }
 
@@ -74,7 +75,7 @@ namespace Mode.Metrology.KN
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole);
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
 
@@ -88,11 +89,15 @@ namespace Mode.Metrology.KN
       public KnMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        await base.ConfigureMeter(metrologicalModeRole, dataModel);
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await fastMeter.AcVoltageManager.SetACVoltageModeAsync();
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.AcVoltageManager.SetACVoltageModeAsync(), messageService))
+        {
+          throw new Exception($"Ошибка установка режима измерения переменного напряжения {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
+        }
       }
 
       /// <inheritdoc />

@@ -3,6 +3,7 @@ using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.PI
@@ -58,9 +59,9 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
-      await testMeasurement.ConfigureMeter(dataModel);
+      await testMeasurement.ConfigureMeter(ProtocolUI, dataModel);
       await testMeasurement.PerformMeasurement(ProtocolUI, dataModel);
-      await testMeasurement.FinalizeAsync();
+      await testMeasurement.FinalizeAsync(ProtocolUI);
     }
 
     private class PiNodeMethod : BaseNodeTest
@@ -68,10 +69,10 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
       public PiNodeMethod() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null)
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.ConnectAsync();
+        await breakDown.ConnectableManager.ConnectAsync(messageService);
         await breakDown.DcwManger.SetModeAsync();
         await breakDown.DcwManger.SetVoltageAsync(dataModel.Voltage);
         await breakDown.DcwManger.SetTestTimeAsync(dataModel.Time);
@@ -120,11 +121,11 @@ namespace Mode.TestSuite.Metrology.NodeMethod.PI
         }
       }
 
-      public override async Task FinalizeAsync()
+      public override async Task FinalizeAsync(IUserMessageService messageService)
       {
-        await base.FinalizeAsync();
+        await base.FinalizeAsync(messageService);
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
         ResetPoints();
       }
     }

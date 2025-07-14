@@ -8,7 +8,7 @@
     /// <summary>
     /// Устанавливает режим измерения переменного напряжения.
     /// </summary>
-    Task SetACVoltageModeAsync();
+    Task<bool> SetACVoltageModeAsync();
 
     /// <summary>
     /// Измеряет переменное напряжение.
