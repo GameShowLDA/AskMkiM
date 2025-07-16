@@ -85,7 +85,8 @@ namespace Mode.TestSuite.Metrology.NodeMethod
       var busSwitcher = Devices.OfType<ISwitchingDevice>().FirstOrDefault();
       var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-      await busSwitcher.ConnectorManager.ConnectBreakdownTester();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI))
+        throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
 
       foreach (var module in relayModules)
       {
@@ -124,7 +125,9 @@ namespace Mode.TestSuite.Metrology.NodeMethod
           endPoint = module.PointCount;
         }
 
-        await UserActionHelper.RunWithUserRepeatAsync(() => module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint), protocolUI);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed($"{startPoint}-{endPoint}", module.Name, module.NumberChassis, module.Number);
+
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", message: $"Подключение точек к шинам", type: ShowMessageModel.MessageType.Info));
         for (int i = startPoint; i <= endPoint; i++)
         {

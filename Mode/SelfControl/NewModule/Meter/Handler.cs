@@ -113,7 +113,8 @@ namespace Mode.SelfControl.NewModule.Meter
 
       if (!await GetIsIdleModeEnabled())
       {
-        await deviceBusCommutation.ConnectorManager.ConnectBreakdownTester();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.ConnectorManager.ConnectBreakdownTester(), ProtocolSelfCheckControl))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(deviceBusCommutation.Name, deviceBusCommutation.NumberChassis, deviceBusCommutation.Number);
       }
 
       await CheckResistance(token);
@@ -121,7 +122,8 @@ namespace Mode.SelfControl.NewModule.Meter
 
       if (!await GetIsIdleModeEnabled())
       {
-        await deviceBusCommutation.ConnectorManager.DisconnectBreakdownTester();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.ConnectorManager.DisconnectBreakdownTester(), ProtocolSelfCheckControl))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.DisconnectBreakdownFailed(deviceBusCommutation.Name, deviceBusCommutation.NumberChassis, deviceBusCommutation.Number);
       }
     }
 
@@ -192,7 +194,8 @@ namespace Mode.SelfControl.NewModule.Meter
           ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
           if (!await GetIsIdleModeEnabled())
           {
-            await deviceBusCommutation.CapacitorManager.ConnectCapacitor(i.ToString(CultureInfo.InvariantCulture));
+            if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.CapacitorManager.ConnectCapacitor(i.ToString(CultureInfo.InvariantCulture)), ProtocolSelfCheckControl))
+              throw AppConfiguration.Error.Device.DeviceBusCommutation.CapacitorExceptionFactory.ConnectFailed(i.ToString());
           }
 
           capacitanceValue.TryGetValue(i, out double meaning);
@@ -203,7 +206,8 @@ namespace Mode.SelfControl.NewModule.Meter
           if (!await GetIsIdleModeEnabled())
           {
             result = await meter.CapacitanceManager.MeasureCapacitanceAsync();
-            await deviceBusCommutation.CapacitorManager.DisconnectCapacitor(i.ToString(CultureInfo.InvariantCulture));
+            if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.CapacitorManager.DisconnectCapacitor(i.ToString(CultureInfo.InvariantCulture)), ProtocolSelfCheckControl))
+              throw AppConfiguration.Error.Device.DeviceBusCommutation.CapacitorExceptionFactory.DisconnectFailed(i.ToString());
           }
 
           if (result >= first && result <= last)

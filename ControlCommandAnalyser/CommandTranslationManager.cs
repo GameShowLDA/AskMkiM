@@ -62,6 +62,7 @@ namespace ControlCommandAnalyser
       AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Формирование данных");
       FormatAndDisplay(models, adapter);
 
+      AppConfiguration.Base.EventAggregator.RaiseInfoMessage("Готово");
       return models;
     }
 

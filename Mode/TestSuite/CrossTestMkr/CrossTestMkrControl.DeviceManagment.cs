@@ -471,8 +471,7 @@ namespace Mode.TestSuite.CrossTestMkr
       BusPoint bus1,
       BusPoint bus2,
       CancellationToken cancellationToken,
-      bool needRestartModuleAfter = true
-      )
+      bool needRestartModuleAfter = true)
     {
       // 1. Подключаем модули к заданным шинам
       await BusConnectAsync(switchingBus1, tested_module, cancellationToken);
@@ -485,10 +484,10 @@ namespace Mode.TestSuite.CrossTestMkr
       //   await PointConnectAsync(verificat_module, bus2, point, cancellationToken);
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Подлючение точек"));
-      await verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last());
 
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last()), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed($"{rangePoints.First()}-{rangePoints.Last()}", verificat_module.Name, verificat_module.NumberChassis, verificat_module.Number);
 
-      // Обработка точек
       foreach (int point in rangePoints)
       {
         await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"Тест точки {point}"));

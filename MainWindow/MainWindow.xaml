@@ -171,7 +171,7 @@
             <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0">
 
-                <MenuItem Header="Файл" Name="File" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1" >
+                <MenuItem Header="Файл" Name="File" Uid="1" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
 
                     <MenuItem Header="Архив" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
@@ -243,9 +243,10 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Сборка" Tag="menuHeader_3" Name="Translation">
+                <MenuItem Header="Выполнение" Tag="menuHeader_3" Name="Translation">
 
-                    <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
+                    <MenuItem Header="Трансляции" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}"/>
+                    <MenuItem Header="Запуск" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}"/>
 
                 </MenuItem>
 
@@ -284,7 +285,6 @@
                     </MenuItem>
 
                 </MenuItem>
-
 
             </Menu>
 

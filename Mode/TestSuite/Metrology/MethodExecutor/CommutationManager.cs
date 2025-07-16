@@ -1,4 +1,5 @@
 ﻿using NewCore.Base.Interface.Main;
+using NewCore.Device;
 using UI.Controls.ProtocolNew;
 using Utilities;
 using static NewCore.Enum.DeviceEnum;
@@ -36,7 +37,8 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
         throw new InvalidOperationException("Коммутационное устройство или ППУ не найдены в списке устройств.");
       }
 
-      await UserActionHelper.RunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI);
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI))
+        throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
 
       var relayModules = _devices.OfType<IRelaySwitchModule>().ToList();
 

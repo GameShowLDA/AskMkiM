@@ -1,13 +1,14 @@
-﻿using AppConfiguration.Base;
-using ICSharpCode.AvalonEdit;
-using MainWindowProgram.Services;
-using MainWindowProgram.ViewModels;
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Effects;
+using AppConfiguration.Base;
+using ICSharpCode.AvalonEdit;
+using MainWindowProgram.HotkeyBindings;
+using MainWindowProgram.Services;
+using MainWindowProgram.ViewModels;
 using UI.Components;
 using UI.Components.FileComparerControls;
 using UI.Controls.Search;
@@ -74,6 +75,8 @@ namespace MainWindowProgram.Events
 
       EventAggregator.CompareFiles += OnCompareFiles;
       EventAggregator.TranslatorActive += EventAggregator_TranslatorActive;
+
+      MenuHotkeyBinder.BindAutoRenumbering(_mainWindow.mainMenu);
     }
 
     private void EventAggregator_TranslatorActive(bool obj)

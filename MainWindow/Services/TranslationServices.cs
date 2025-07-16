@@ -1,11 +1,13 @@
-﻿using AppConfiguration.Base;
+﻿using System.ComponentModel;
+using System.Windows;
+using AppConfiguration.Base;
 using ControlCommandAnalyser;
 using DevZest.Windows.Docking;
 using ICSharpCode.AvalonEdit;
-using System.Windows;
 using UI.Components;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
+using UI.Controls.Message;
 using UI.Controls.TextEditor;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -53,7 +55,7 @@ namespace MainWindowProgram.Services
     /// в соответствии с успешностью распознавания.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
-    public async Task StartTranslationAsync()
+    public async Task BuildAsync()
     {
       var editor = await _multiWindow.GetActiveTextEditor();
       var translationContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
@@ -69,6 +71,30 @@ namespace MainWindowProgram.Services
       else
       {
         ShowEditorNotFoundError();
+      }
+    }
+
+    /// <summary>
+    /// Запускает процесс трансляции текущего открытого текста из редактора.
+    /// Выполняет распознавание команд, логирует результат и применяет подсветку
+    /// в соответствии с успешностью распознавания.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
+    public async Task RunAsync()
+    {
+      var editor = await _multiWindow.GetActiveTextEditor();
+      var container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      var dockManager = container.GetDockControl();
+      if (dockManager == null) return;
+
+      var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (foundDockItem?.Content is not TranslatorItem translator) return;
+
+      editor = translator.GetRightEditor();
+      if (editor == null)
+      {
+        ShowEditorNotFoundError();
+        return;
       }
     }
 

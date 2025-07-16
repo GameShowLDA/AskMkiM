@@ -21,9 +21,9 @@ namespace UI.Controls
     public string SecondFilePath { get; set; }
 
     public int errorCount = 0;
-    
+
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
-    public List<BaseCommandModel> TranslationModels 
+    public List<BaseCommandModel> TranslationModels
     {
       get
       {
@@ -33,11 +33,15 @@ namespace UI.Controls
       {
         translationModels = value;
         ErrorClear();
+
+        bool hasErrors = false;
+
         foreach (var model in value)
         {
           if (model.Errors.Count > 0)
           {
             SetError(model.Errors);
+            hasErrors = true;
           }
         }
       }

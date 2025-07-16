@@ -116,7 +116,6 @@ namespace UI.Controls.TextEditor
       foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
     }
 
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
     /// </summary>
@@ -167,32 +166,28 @@ namespace UI.Controls.TextEditor
           }
           LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
         }
-
       };
     }
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-      // Отслеживаем Ctrl+M
       if (e.Key == Key.M && Keyboard.Modifiers == ModifierKeys.Control)
       {
         var now = DateTime.Now;
         if (_ctrlMPressed && (now - _lastCtrlMTime).TotalMilliseconds < CtrlMTimeoutMs)
         {
-          // Второе нажатие Ctrl+M — свернуть/развернуть текущий блок
           ToggleCurrentFolding();
           _ctrlMPressed = false;
           e.Handled = true;
         }
         else
         {
-          // Первое нажатие Ctrl+M
           _ctrlMPressed = true;
           _lastCtrlMTime = now;
           e.Handled = true;
         }
         return;
       }
-      // Если нажата любая другая клавиша — сбрасываем
+
       if (e.Key != Key.M)
       {
         _ctrlMPressed = false;
