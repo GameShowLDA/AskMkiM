@@ -31,13 +31,13 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService userMessageService = null)
     {
-      return await InitializeAsync();
+      return await InitializeAsync(userMessageService);
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserMessageService userMessageService = null)
     {
-      return await ResetAsync();
+      return await ResetAsync(userMessageService);
     }
 
     /// <inheritdoc />

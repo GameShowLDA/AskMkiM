@@ -1,11 +1,13 @@
-﻿using NewCore.Base.Function.ModuleRelayControl;
+﻿using System.Threading;
+using Mode.Models;
+using NewCore.Base.Function.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
-using Utilities.Models;
 using UI.Controls.ProtocolNew;
-using static NewCore.Enum.DeviceEnum;
-using static Utilities.LoggerUtility;
 using Utilities;
 using Utilities.Interface;
+using Utilities.Models;
+using static NewCore.Enum.DeviceEnum;
+using static Utilities.LoggerUtility;
 
 namespace Mode.TestSuite.CrossTestMkr
 {
@@ -26,7 +28,11 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.BusManager.ConnectBusAsync(bus);
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(bus), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(bus.ToString(), module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -42,7 +48,11 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.BusManager.DisconnectBusAsync(bus);
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.DisconnectBusAsync(bus), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.DisconnectFailed(bus.ToString(), module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -53,9 +63,15 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <returns>Возвращает <c>true</c>, если инициализация прошла успешно; иначе — <c>false</c>.</returns>
     private async Task<bool> InitializeModule(IUserMessageService messageService, IRelaySwitchModule module, CancellationToken cancellationToken, string roleName = null)
     {
-      var (state, answer) = await module.ConnectableManager.InitializeAsync(messageService);
       cancellationToken.ThrowIfCancellationRequested();
-      return state;
+      var (state, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.InitializeAsync(messageService), ProtocolSelfCheckControl);
+
+      if (!state)
+      {
+        AppConfiguration.Error.Device.ConnectionExceptionFactory.InitializeFailed(module.Name, module.NumberChassis, module.Number);
+      }
+
+      return true;
     }
 
     /// <summary>
@@ -65,8 +81,10 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <returns>Возвращает <c>true</c>, если отключение прошло успешно; иначе — <c>false</c>.</returns>
     private async Task<bool> DisconnectModule(IUserMessageService messageService, IRelaySwitchModule module)
     {
-      var state = await module.ConnectableManager.DisconnectAsync(messageService);
-      return state;
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.DisconnectAsync(messageService), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ConnectionExceptionFactory.DisconnectFailed(module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -75,7 +93,8 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <param name="module">Блок коммутации</param>
     private async Task ResetModule(IUserMessageService messageService, IRelaySwitchModule module)
     {
-      await module.ConnectableManager.ResetAsync(messageService);
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.ResetAsync(messageService), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ConnectionExceptionFactory.ResetFailed(module.Name, module.NumberChassis, module.Number);
     }
 
     /// <summary>
@@ -88,7 +107,10 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.PointManager.ConnectRelayAsync(bus, point);
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus, point), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.ToString(), module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -101,7 +123,10 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.PointManager.DisconnectRelayAsync(bus, point);
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus, point), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.ToString(), module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -112,7 +137,10 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> MeterEnableAsync(IUserMessageService messageService, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.MeterManager.ConnectMeterAsync();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.ConnectMeterAsync(), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.MeterExceptionFactory.ConnectFailed(module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -122,7 +150,10 @@ namespace Mode.TestSuite.CrossTestMkr
     /// <returns>Возвращает <c>true</c>, если устройство выключилось; иначе — <c>false</c>.</returns>
     private async Task<bool> MeterDisableAsync(IUserMessageService messageService, IRelaySwitchModule module)
     {
-      return await module.MeterManager.DisconnectMeterAsync();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.DisconnectMeterAsync(), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.MeterExceptionFactory.DisconnectFailed(module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     /// <summary>
@@ -133,7 +164,10 @@ namespace Mode.TestSuite.CrossTestMkr
     private async Task<bool> GetMeterAnswer(IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      return await module.MeterManager.GetMeterResponseAsync();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.GetMeterResponseAsync(), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.MeterExceptionFactory.MeterAnswerFailed(module.Name, module.NumberChassis, module.Number);
+
+      return true;
     }
 
     #endregion

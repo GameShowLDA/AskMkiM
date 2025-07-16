@@ -200,6 +200,7 @@
                         <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
                         <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
                         <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
+                        <MenuItem Header="Режим ПР Т" Name="ModePrMenuItemT" Command="{Binding Metrology.PR_TCommand}" />
                         <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
                         <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
                         <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />

@@ -1,4 +1,7 @@
 ﻿using System.Windows.Controls;
+using System.Xml.Linq;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
@@ -72,10 +75,22 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
       public override async Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null)
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.ConnectAsync(messageService);
-        await breakDown.IrManger.SetModeAsync();
-        await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage);
-        await breakDown.IrManger.SetTestTimeAsync(dataModel.Time);
+        string name = breakDown.Name;
+        int chassis = breakDown.NumberChassis;
+        int numer = breakDown.Number;
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
+          throw IrExceptionFactory.SetModeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
+          throw IrExceptionFactory.SetVoltageFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
+          throw IrExceptionFactory.SetTestTimeFailed(name, chassis, numer);
+
       }
 
       /// <inheritdoc />

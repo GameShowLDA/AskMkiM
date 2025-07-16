@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Error.Device;
 using AppConfiguration.Error.Device.Breakdown;
 using AppConfiguration.Interface;
 using Mode.Base;
@@ -99,7 +100,7 @@ namespace Mode.Metrology.PI
         int numer = breakDown.Number;
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
-          throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetModeAsync()).Success, messageService))
           throw AcwExceptionFactory.SetModeFailed(name, chassis, numer);

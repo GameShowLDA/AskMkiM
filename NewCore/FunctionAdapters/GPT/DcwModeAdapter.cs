@@ -6,6 +6,8 @@ using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.GPT.Data;
 using NewCore.Function.Helpers;
+using Utilities;
+using Utilities.Interface;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -152,13 +154,14 @@ namespace NewCore.FunctionAdapters.GPT
 
     #region Offset
     /// <inheritdoc />
-    public async Task<(bool, string)> SetOffsetAsync(double value)
+    public async Task<(bool, string)> SetOffsetAsync(IUserMessageService messageService, double value)
     {
-      var result = await _dcwMode.SetOffsetAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения DCW", result.Success ? $"{value} мА" : result.Message, result.Success, 1);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _dcwMode.SetOffsetAsync(messageService, value), messageService);
 
-      if (!result.Success)
-        throw DcwExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения DCW", result.Connect ? $"{value} мА" : result.Answer, result.Connect, 1);
+
+      if (!result.Connect)
+        throw DcwExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
       return result;
     }

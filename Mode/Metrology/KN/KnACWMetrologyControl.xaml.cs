@@ -1,8 +1,9 @@
-﻿﻿using System.Windows;
+﻿using System.Windows;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls;
 using AppConfiguration.Enums;
+using AppConfiguration.Error.Device.Multimeter;
 using AppConfiguration.Interface;
 using AppConfiguration.MeasurementError;
 using Mode.Base;
@@ -95,9 +96,7 @@ namespace Mode.Metrology.KN
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.AcVoltageManager.SetACVoltageModeAsync(), messageService))
-        {
-          throw new Exception($"Ошибка установка режима измерения переменного напряжения {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
-        }
+          throw AcExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
       }
 
       /// <inheritdoc />
@@ -127,7 +126,7 @@ namespace Mode.Metrology.KN
           }
         });
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", message: $"{firstNorm:F2}-{lastNorm:F2}"), skipPause:true);
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", message: $"{firstNorm:F2}-{lastNorm:F2}"), skipPause: true);
         if (!string.IsNullOrEmpty(result) && double.TryParse(result, out var value))
         {
           double pog = value - param;
@@ -138,7 +137,7 @@ namespace Mode.Metrology.KN
           showMessageModel.Status = (value >= firstNorm && value <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
           showMessageModel.ExecutionError = (value >= firstNorm && value <= lastNorm) ? false : true;
           showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-          await protocolUI.ShowMessageAsync(showMessageModel, skipPause: true);  
+          await protocolUI.ShowMessageAsync(showMessageModel, skipPause: true);
           await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В", type: showMessageModel.Status), skipPause: true);
         }
         else

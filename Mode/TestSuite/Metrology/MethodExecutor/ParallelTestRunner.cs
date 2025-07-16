@@ -2,6 +2,7 @@
 using Mode.Models;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 
@@ -131,8 +132,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
         //   ShowMessageModel.SuccessMessage.TitleColor,
         //   $"Подключение к шине {bus}"));
 
-        var time = await module.PointManager.ConnectRelayAsync(bus, point.PointNumber);
-        await Task.Delay(10);
+        await UserActionHelper.RunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus, point.PointNumber), _protocolUI);
       }
 
       await Task.Delay(500);
@@ -149,11 +149,14 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
       foreach (var (module, points, _) in groups)
       {
         cancellationToken.ThrowIfCancellationRequested();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.ResetAsync(_protocolUI), _protocolUI))
+          throw AppConfiguration.Error.Device.ConnectionExceptionFactory.ResetFailed(module.Name, module.NumberChassis, module.Number);
 
-        await module.ConnectableManager.ResetAsync(_protocolUI);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1);
-        await Task.Delay(10);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1), _protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1), _protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
       }
     }
 

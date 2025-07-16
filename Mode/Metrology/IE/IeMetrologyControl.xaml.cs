@@ -1,6 +1,7 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Controls;
 using AppConfiguration.Enums;
+using AppConfiguration.Error.Device.Multimeter;
 using AppConfiguration.Interface;
 using AppConfiguration.MeasurementError;
 using Mode.Base;
@@ -96,9 +97,7 @@ namespace Mode.Metrology.IE
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.CapacitanceManager.SetCapacitanceModeAsync(), messageService))
-        {
-          throw new Exception($"Ошибка установка режима измерения ёмкости {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
-        }
+          throw CapacitanceExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
       }
 
       /// <inheritdoc />

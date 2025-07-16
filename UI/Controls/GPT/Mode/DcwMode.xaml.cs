@@ -111,7 +111,7 @@ namespace UI.Controls.GPT.Mode
     private async void RefSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double refValue = Math.Round(RefSlider.Value, 3);
-      await GPTPunchControl.ModelGPT.DcwManger.SetOffsetAsync(refValue);
+      await GPTPunchControl.ModelGPT.DcwManger.SetOffsetAsync(null, refValue);
     }
 
     /// <summary>

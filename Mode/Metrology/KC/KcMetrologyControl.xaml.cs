@@ -14,6 +14,7 @@ using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 using Utilities;
 using Utilities.Interface;
+using AppConfiguration.Error.Device.Multimeter;
 
 namespace Mode.Metrology.KC
 {
@@ -101,6 +102,7 @@ namespace Mode.Metrology.KC
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.ResistanceManager.SetResistanceModeAsync(), messageService))
         {
+          throw ResistanceExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
           throw new Exception($"Ошибка установка режима измерения сопротивления {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
         }
       }

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Error.Device.Multimeter;
 using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
@@ -93,11 +94,8 @@ namespace Mode.Metrology.KN
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.DcVoltageManager.SetDCVoltageModeAsync(), messageService))
-        {
-          throw new Exception($"Ошибка установка режима измерения постоянного напряжения {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
-        }
+          throw DcExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
       }
 
       /// <inheritdoc />

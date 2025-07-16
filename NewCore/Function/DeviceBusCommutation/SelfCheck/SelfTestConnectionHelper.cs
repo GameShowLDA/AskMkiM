@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NewCore.Base.Interface.Main;
+using Utilities;
 using Utilities.Interface;
 using static NewCore.Enum.DeviceEnum;
 
@@ -19,13 +20,15 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     {
       var connect = false;
       connect = (await meter.ConnectableManager.ConnectAsync(userMessageService)).Connect;
+
       if (!connect)
       {
         return connect;
       }
 
-      await meter.ContinuityManager.SetContinuityModeAsync();
-
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => meter.ContinuityManager.SetContinuityModeAsync(), userMessageService))
+      {
+      }
       return connect;
     }
     static internal async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter, IUserMessageService userMessageService)

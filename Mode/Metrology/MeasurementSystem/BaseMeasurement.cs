@@ -345,23 +345,31 @@ namespace Mode.Metrology.MeasurementSystem
 
       foreach (var relayModule in relayModules)
       {
-        await UserActionHelper.RunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), protocolUI);
-        await UserActionHelper.RunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), protocolUI);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.B1.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
       }
 
       if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
-        await UserActionHelper.RunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
       }
       else
       {
         if (modeDevice == MetrologicalDeviceType.Mint)
         {
-          await UserActionHelper.RunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), protocolUI);
-          await UserActionHelper.RunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), protocolUI);
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), protocolUI))
+            throw AppConfiguration.Error.Device.ModuleVoltageCurrent.BusExceptionFactory.ConnectPositiveFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString());
+
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), protocolUI))
+            throw AppConfiguration.Error.Device.ModuleVoltageCurrent.BusExceptionFactory.ConnectNegativeFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString());
         }
 
-        await UserActionHelper.RunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1), protocolUI);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1), protocolUI))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectMultiMeterFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
       }
     }
 
@@ -375,8 +383,11 @@ namespace Mode.Metrology.MeasurementSystem
     {
       await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек"), IsBlockStart: true);
 
-      await UserActionHelper.RunWithUserRepeatAsync(() => relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber), protocolUI);
-      await UserActionHelper.RunWithUserRepeatAsync(() => relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber), protocolUI);
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber), protocolUI))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModules[0].Name, relayModules[0].NumberChassis, relayModules[0].Number);
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber), protocolUI))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModules.Last().Name, relayModules.Last().NumberChassis, relayModules.Last().Number);
     }
     #endregion
   }

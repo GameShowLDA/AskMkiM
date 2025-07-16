@@ -1,10 +1,25 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 using AppConfiguration.Enums;
+using AppConfiguration.Error.Device.Multimeter;
 using AppConfiguration.Interface;
 using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
+using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
@@ -15,27 +30,25 @@ using static NewCore.Enum.DeviceEnum;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
 
+
 namespace Mode.Metrology.PR
 {
   /// <summary>
-  /// Логика взаимодействия для PrMetrologyControl.xaml.
+  /// Логика взаимодействия для PrMetrologyControl.xaml
   /// </summary>
-  public partial class PrMetrologyControl : UserControl, IExecution
+  public partial class PrMetrologyControl : UserControl
   {
-    MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.PR;
+    MetrologicalModeRole metrologicalModeRole => MetrologicalModeRole.KC;
 
     PrMeasurement testMeasurement = new PrMeasurement();
 
     (bool Success, string Message, DataModel DataModel) Data;
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="PrMetrologyControl"/>.
-    /// </summary>
     public PrMetrologyControl()
     {
       InitializeComponent();
       InitializeSettings();
     }
+
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
@@ -90,7 +103,7 @@ namespace Mode.Metrology.PR
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole, Data.DataModel);
-      await testMeasurement.MintSettings(Data.DataModel);
+
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
 
@@ -103,117 +116,36 @@ namespace Mode.Metrology.PR
     {
       public PrMeasurement() : base() { }
 
-      /// <summary>
-      /// Устанавливает настройки на модуль источника напряжения и тока.
-      /// </summary>
-      /// <param name="dataModel">Модель введенных данных.</param>
-      /// <returns></returns>
-      public async Task MintSettings(DataModel dataModel)
-      {
-        var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var meter) ? meter.OfType<IPowerSourceModule>().FirstOrDefault() : null;
-        var data = SelectOptimalCurrentAndVoltage(dataModel.Param, mint);
-
-        int integerPart = data.IntegerCurrent;
-        int decimalPart = data.DecimalCurrent;
-
-        await mint.VoltageManager.SetSourceVoltageAsync(data.Voltage);
-        await mint.CurrentManager.SetCurrentLevelAsync(integerPart, decimalPart);
-      }
-
       /// <inheritdoc />
       public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.DcVoltageManager.SetDCVoltageModeAsync(), messageService))
-        {
-          throw new Exception($"Ошибка установка режима измерения постоянного напряжения {fastMeter.Name}({fastMeter.NumberChassis}.{fastMeter.Number})");
-        }
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.ContinuityManager.SetContinuityModeAsync(), messageService))
+          throw ContinuityExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
       }
 
       /// <inheritdoc />
       public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
-        protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
-        var mint = Devices.TryGetValue(MetrologicalModeRole.PR, out var power) ? power.OfType<IPowerSourceModule>().FirstOrDefault() : null;
-        var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение проверки релейной"));
+        for (int i = 0; i < 10; i++)
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления"), IsBlockStart: true);
+          var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.PR, param);
 
-        var data = SelectOptimalCurrentAndVoltage(param, mint);
-        double currentGenerial = (data.DecimalCurrent / 1000.0) + data.IntegerCurrent;
+          var result = await fastMeter.ContinuityManager.CheckContinuityAsync(param);
 
-        var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.PR, param);
-
-        var voltage = await meterDevice.DcVoltageManager.MeasureDCVoltageAsync(param * (currentGenerial / 1000));
-        double fakeCurrent = GetInterpolatedCurrent(param, mint);
-        var result = voltage / (fakeCurrent / 1000.0);
-
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})", null, $"{result:F2}");
-        showMessageModel.Status = (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
-        showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
-        showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-        await protocolUI.ShowMessageAsync(showMessageModel);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{result} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {firstNorm} до {lastNorm} Ом") { IndentLevel = 2 }, skipPause: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: $"{(Math.Abs(result - param))} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 }, skipPause: true);
+        }
         return true;
       }
-      
-      /// <summary>
-      /// Возвращает диапазон параметров (коэффициенты, ток, напряжение), соответствующий указанному сопротивлению.
-      /// </summary>
-      /// <param name="resistance">Измеренное сопротивление (в Омах).</param>
-      /// <param name="powerSourceModule">Модуль источника питания с диапазонами калибровки.</param>
-      /// <returns>
-      /// Объект <see cref="ResistanceCalibrationRange"/>, соответствующий диапазону сопротивления.
-      /// Если диапазон не найден, возвращается пустой объект со значениями по умолчанию.
-      /// </returns>
-      private ResistanceCalibrationRange SelectOptimalCurrentAndVoltage(double resistance, IPowerSourceModule powerSourceModule)
-      {
-        var json = powerSourceModule.ResistanceCalibrationJson;
 
-        var list = string.IsNullOrWhiteSpace(json)
-          ? new List<ResistanceCalibrationRange>()
-          : JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(json) ?? new List<ResistanceCalibrationRange>();
 
-        var matched = list.FirstOrDefault(r =>
-          resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
-
-        return matched ?? new ResistanceCalibrationRange
-        {
-          ResistanceMin = 0,
-          ResistanceMax = 0,
-          IntegerCurrent = 0,
-          DecimalCurrent = 0,
-          DecimalCurrentFake = 0,
-          IntegerCurrentFake = 0,
-          Voltage = VoltageSources.Supply12V,
-        };
-      }
-
-      public static double GetInterpolatedCurrent(double resistance, IPowerSourceModule module)
-      {
-        if (string.IsNullOrWhiteSpace(module.ResistanceCalibrationJson))
-        {
-          throw new InvalidOperationException("Calibration JSON пуст или отсутствует.");
-        }
-
-        var ranges = JsonSerializer.Deserialize<List<ResistanceCalibrationRange>>(module.ResistanceCalibrationJson);
-        if (ranges == null || !ranges.Any())
-        {
-          throw new InvalidOperationException("Не удалось десериализовать калибровочные диапазоны.");
-        }
-
-        var range = ranges.FirstOrDefault(r => resistance >= r.ResistanceMin && resistance <= r.ResistanceMax);
-        if (range == null)
-        {
-          throw new ArgumentOutOfRangeException(nameof(resistance),
-              $"Сопротивление {resistance} Ом не входит ни в один из диапазонов.");
-        }
-
-        double percent = (resistance - range.ResistanceMin) / (range.ResistanceMax - range.ResistanceMin);
-        double real = range.IntegerCurrent + range.DecimalCurrent / 1000.0;
-        double fake = range.IntegerCurrentFake + range.DecimalCurrentFake / 1000.0;
-        
-        return real + (fake - real) * percent;
-      }
     }
   }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Windows.Controls;
 using AppConfiguration.Enums;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
 using AppConfiguration.Interface;
 using AppConfiguration.MeasurementError;
 using Mode.Base;
@@ -92,26 +94,21 @@ namespace Mode.Metrology.CI
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
+        string name = breakDown.Name;
+        int chassis = breakDown.NumberChassis;
+        int numer = breakDown.Number;
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
-        {
-          throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
-        {
-          throw new Exception($"Ошибка установка режима IR {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+          throw IrExceptionFactory.SetModeFailed(name, chassis, numer);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
-        {
-          throw new Exception($"Ошибка установка напряжения {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+          throw IrExceptionFactory.SetVoltageFailed(name, chassis, numer);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
-        {
-          throw new Exception($"Ошибка установка времени теста {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+          throw IrExceptionFactory.SetTestTimeFailed(name, chassis, numer);
       }
 
       /// <inheritdoc />

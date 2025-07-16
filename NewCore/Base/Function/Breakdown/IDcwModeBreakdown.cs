@@ -1,4 +1,5 @@
 ﻿using NewCore.Function.GPT.Data;
+using Utilities.Interface;
 
 namespace NewCore.Base.Function.Breakdown
 {
@@ -106,7 +107,7 @@ namespace NewCore.Base.Function.Breakdown
     /// Устанавливает смещение DCW.
     /// </summary>
     /// <param name="value">Значение смещения (в мА).</param>
-    Task<(bool Success, string Message)> SetOffsetAsync(double value);
+    Task<(bool Success, string Message)> SetOffsetAsync(IUserMessageService messageService, double value);
 
     /// <summary>
     /// Получает текущее значение смещения DCW.

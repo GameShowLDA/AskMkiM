@@ -85,5 +85,37 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         return false;
       }
     }
+
+    public async Task<double> CheckContinuityAsync(double expectedOutcome)
+    {
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return expectedOutcome;
+      }
+
+      try
+      {
+        double result = await _measurement.CheckContinuityAsync(expectedOutcome);
+
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Результат прозвонки",
+          expectedOutcome.ToString(),
+          true,
+          2);
+
+        return result;
+      }
+      catch (Exception ex)
+      {
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Ошибка при прозвонке",
+          ex.Message,
+          false,
+          2);
+        return -1;
+      }
+    }
   }
 }

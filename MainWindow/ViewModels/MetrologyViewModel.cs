@@ -11,42 +11,47 @@ namespace MainWindowProgram.ViewModels
   public class MetrologyViewModel
   {
     /// <summary>
-    /// Команда открытия режима КС (контроль сопротивления).
+    /// Команда открытия режима КС.
     /// </summary>
     public ICommand KCCommand { get; }
 
     /// <summary>
-    /// Команда открытия режима ИЕ (измерение изоляции).
+    /// Команда открытия режима ИЕ.
     /// </summary>
     public ICommand IECommand { get; }
 
     /// <summary>
-    /// Команда открытия режима СИ (источник тока/напряжения).
+    /// Команда открытия режима СИ.
     /// </summary>
     public ICommand CICommand { get; }
 
     /// <summary>
-    /// Команда открытия режима ПР (прецизионный мультиметр).
+    /// Команда открытия режима ПР T.
+    /// </summary>
+    public ICommand PR_TCommand { get; }
+
+    /// <summary>
+    /// Команда открытия режима ПР.
     /// </summary>
     public ICommand PRCommand { get; }
 
     /// <summary>
-    /// Команда открытия режима ПИ (испытание изоляции) в режиме DCW.
+    /// Команда открытия режима ПИ в режиме DCW.
     /// </summary>
     public ICommand PIDCWCommand { get; }
 
     /// <summary>
-    /// Команда открытия режима ПИ (испытание изоляции) в режиме ACW.
+    /// Команда открытия режима ПИ в режиме ACW.
     /// </summary>
     public ICommand PIACWCommand { get; }
 
     /// <summary>
-    /// Команда открытия режима ПИ (контроль напряжения) в режиме ACW.
+    /// Команда открытия режима КН в режиме ACW.
     /// </summary>
     public ICommand KNACWCommand { get; }
 
     /// <summary>
-    /// Команда открытия режима ПИ (контроль напряжения) в режиме DCW.
+    /// Команда открытия режима КН в режиме DCW.
     /// </summary>
     public ICommand KNDCWCommand { get; }
 
@@ -66,11 +71,12 @@ namespace MainWindowProgram.ViewModels
       KCCommand = new AsyncRelayCommand(_service.OpenKCModeAsync);
       IECommand = new AsyncRelayCommand(_service.OpenIEModeAsync);
       CICommand = new AsyncRelayCommand(_service.OpenCIModeAsync);
-      PRCommand = new AsyncRelayCommand(_service.OpenPRModeAsync);
+      PR_TCommand = new AsyncRelayCommand(_service.OpenPR_TModeAsync);
       PIDCWCommand = new AsyncRelayCommand(_service.OpenPIDCWModeAsync);
       PIACWCommand = new AsyncRelayCommand(_service.OpenPIACWModeAsync);
       KNACWCommand = new AsyncRelayCommand(_service.OpenKNACWModeAsync);
       KNDCWCommand = new AsyncRelayCommand(_service.OpenKNDCWModeAsync);
+      PRCommand = new AsyncRelayCommand(_service.OpenPRModeAsync);
     }
   }
 }

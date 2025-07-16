@@ -4,6 +4,7 @@ using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
@@ -89,8 +90,12 @@ namespace Mode.TestSuite.Metrology.NodeMethod
       foreach (var module in relayModules)
       {
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", message: $"Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info));
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
 
         int startPoint;
         int endPoint;
@@ -119,8 +124,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
           endPoint = module.PointCount;
         }
 
-        await module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint);
-
+        await UserActionHelper.RunWithUserRepeatAsync(() => module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint), protocolUI);
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", message: $"Подключение точек к шинам", type: ShowMessageModel.MessageType.Info));
         for (int i = startPoint; i <= endPoint; i++)
         {
@@ -143,17 +147,33 @@ namespace Mode.TestSuite.Metrology.NodeMethod
       {
         var moduleForOldPoint = relayModules.FirstOrDefault(module => module.NumberChassis == oldPoint.DeviceNumber && module.Number == oldPoint.ModuleNumber);
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"Переподключение точки {oldPoint.DeviceNumber}.{oldPoint.ModuleNumber}.{oldPoint.PointNumber} с шины {AssignedBus} к шине {OppositeBus}"));
-        await moduleForOldPoint.PointManager.DisconnectRelayAsync(AssignedBus, oldPoint.PointNumber);
-        await moduleForOldPoint.PointManager.ConnectRelayAsync(OppositeBus, oldPoint.PointNumber);
+
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
+        {
+          bool error = false;
+          error = await moduleForOldPoint.PointManager.DisconnectRelayAsync(AssignedBus, oldPoint.PointNumber);
+          if (!error)
+          {
+            error = await moduleForOldPoint.PointManager.ConnectRelayAsync(OppositeBus, oldPoint.PointNumber);
+          }
+          return error;
+        }, protocolUI);
       }
 
       if (newPoint != null)
       {
         var moduleForNewPoint = relayModules.FirstOrDefault(module => module.NumberChassis == newPoint.DeviceNumber && module.Number == newPoint.ModuleNumber);
-
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"Переподключение точки {newPoint.DeviceNumber}.{newPoint.ModuleNumber}.{newPoint.PointNumber} с шины {OppositeBus} к шине {AssignedBus}"));
-        await moduleForNewPoint.PointManager.DisconnectRelayAsync(OppositeBus, newPoint.PointNumber);
-        await moduleForNewPoint.PointManager.ConnectRelayAsync(AssignedBus, newPoint.PointNumber);
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
+        {
+          bool error = false;
+          error = await moduleForNewPoint.PointManager.DisconnectRelayAsync(OppositeBus, newPoint.PointNumber);
+          if (!error)
+          {
+            error = await moduleForNewPoint.PointManager.ConnectRelayAsync(AssignedBus, newPoint.PointNumber);
+          }
+          return error;
+        }, protocolUI);
       }
     }
 

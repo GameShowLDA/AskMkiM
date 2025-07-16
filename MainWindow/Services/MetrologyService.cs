@@ -49,6 +49,12 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Открывает пользовательский элемент управления режима ПР.
     /// </summary>
+    public async Task OpenPR_TModeAsync() =>
+        await _multiWindow.AddControlAsync("Режим ПР Т", new PrTMetrologyControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Открывает пользовательский элемент управления режима ПР.
+    /// </summary>
     public async Task OpenPRModeAsync() =>
         await _multiWindow.AddControlAsync("Режим ПР", new PrMetrologyControl(), TypeWindow.DeviceControl);
 

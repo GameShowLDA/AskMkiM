@@ -58,8 +58,7 @@ namespace NewCore.Function.Keysight3466new
       // Убираем возможные пробелы и символы `+` перед числом
       response = response.Trim().Replace("+", "");
 
-      if (double.TryParse(response, System.Globalization.NumberStyles.Float,
-                          System.Globalization.CultureInfo.InvariantCulture, out double resistance))
+      if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double resistance))
       {
         return resistance;
       }
