@@ -484,7 +484,56 @@ namespace UI.Controls.ProtocolNew
 
     public void ShowButtonsOnPause()
     {
-      throw new NotImplementedException();
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        SetNonVisibleAllButton();
+        NextButtonVisibility = Visibility.Visible;
+        ExitButtonVisibility = Visibility.Visible;
+      });
+    }
+
+    public void StartTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = startButton
+      };
+
+      startButton.RaiseEvent(args);
+    }
+
+    public void StopTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = startButton
+      };
+
+      exitButton.RaiseEvent(args);
+    }
+
+    public void PauseTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = startButton
+      };
+
+      pauseButton.RaiseEvent(args);
+    }
+
+    public void NextTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = startButton
+      };
+
+      continueButton.RaiseEvent(args);
     }
 
     #endregion

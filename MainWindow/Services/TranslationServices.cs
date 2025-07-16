@@ -4,13 +4,16 @@ using AppConfiguration.Base;
 using ControlCommandAnalyser;
 using DevZest.Windows.Docking;
 using ICSharpCode.AvalonEdit;
+using Mode.Metrology.IE;
 using UI.Components;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.Message;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static UI.Components.Invoke.OpenFileButton;
 using static UI.Controls.Message.MessageBox;
 
 namespace MainWindowProgram.Services
@@ -84,6 +87,19 @@ namespace MainWindowProgram.Services
     {
       var editor = await _multiWindow.GetActiveTextEditor();
       var container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      if (container == null)
+      {
+        await BuildAsync();
+        editor = await _multiWindow.GetActiveTextEditor();
+        container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      }
+
+      if (container == null)
+      {
+        Show(UI.Controls.Message.MessageBox.Status.Error, $"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля");
+        return;
+      }
+
       var dockManager = container.GetDockControl();
       if (dockManager == null) return;
 
@@ -96,6 +112,22 @@ namespace MainWindowProgram.Services
         ShowEditorNotFoundError();
         return;
       }
+
+      if (translator.ErrorCount > 0)
+      {
+        Show(UI.Controls.Message.MessageBox.Status.Error, $"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля");
+        return;
+      }
+
+      var models = translator.TranslationModels;
+
+      await _multiWindow.DeleteTranslatorItem(translator, EditorType.Translator);
+
+      RunControl runControl = new RunControl();
+      runControl.SetLeftEditor(editor);
+
+      await _multiWindow.AddControlAsync("Выполнитель", runControl, TypeWindow.DeviceControl);
+      runControl.Start(models);
     }
 
     /// <summary>

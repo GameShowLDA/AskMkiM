@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.ProtocolNew"
              xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox"
              xmlns:TextEditor="clr-namespace:UI.Components.ProtocolListBox"
+             xmlns:Icons="clr-namespace:UI.Icon"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
@@ -35,22 +36,50 @@
         
     </UserControl.Resources>
 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-    <Border CornerRadius="0,0,0,0" Background="{StaticResource PrimarySolidColorBrush}">
+        <Grid Background="{StaticResource IsCheckedColorSolidColorBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Name="StartTestButton" Background="{StaticResource IsCheckedColorSolidColorBrush}" Cursor="Hand">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Icons:PlayIcon  Size="20"/>
+                <TextBlock Name="headerFile" Text="Название файла" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
+
+            </Grid>
+
+            <Icons:PauseIcon x:Name="PauseTestButton" Grid.Column="2" Size="20"/>
+            <Icons:StopIcon x:Name="StopTestButton" Grid.Column="3" Size="20"/>
+        </Grid>
+
+        <Border CornerRadius="0,0,0,0" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border  Padding="0,10" Margin="5" CornerRadius="20">
+            <Border  Padding="0,10" Margin="5" CornerRadius="20" Name="MenuButton" Width="300">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                         <GradientStop Color="{StaticResource IsCheckedColor}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
 
-                <Grid>
+                <Grid >
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
@@ -249,4 +278,5 @@
 
         </Grid>
     </Border>
+    </Grid>
 </UserControl>

@@ -1,8 +1,9 @@
-﻿using AppConfiguration.Interface;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AppConfiguration.Interface;
 using static Utilities.LoggerUtility;
 
 namespace UI.Controls.ProtocolNew
@@ -74,6 +75,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public ObservableCollection<object> Items { get; }
 
+    private Window _attachedWindow;
+
     /// <summary>
     /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
     /// Инициализирует компоненты и устанавливает обработчики событий PreviewMouseDown для кнопок.
@@ -94,15 +97,24 @@ namespace UI.Controls.ProtocolNew
 
       this.Loaded += (s, e) =>
       {
+        _attachedWindow = Application.Current?.MainWindow;
+        if (_attachedWindow != null)
+        {
+          Keyboard.AddKeyDownHandler(_attachedWindow, OnGlobalKeyDown);
+        }
+
         KeyboardManager.RegisterGlobalStepHooks();
-        AttachKeyboardHandlers();
         RegisterHotkeys();
       };
 
       this.Unloaded += (s, e) =>
       {
+        if (_attachedWindow != null)
+        {
+          Keyboard.RemoveKeyDownHandler(_attachedWindow, OnGlobalKeyDown);
+        }
+
         KeyboardManager.UnregisterGlobalStepHooks();
-        DetachKeyboardHandlers();
       };
 
       ButtonService = this;
@@ -114,7 +126,22 @@ namespace UI.Controls.ProtocolNew
 
     private void DetachKeyboardHandlers()
     {
-      Keyboard.RemoveKeyDownHandler(Application.Current.MainWindow, OnGlobalKeyDown);
+      try
+      {
+        if (DesignerProperties.GetIsInDesignMode(this))
+          return;
+
+        var window = Application.Current?.MainWindow;
+
+        if (window != null)
+        {
+          Keyboard.RemoveKeyDownHandler(window, OnGlobalKeyDown);
+        }
+      }
+      catch (Exception ex)
+      {
+        LogException("DetachKeyboardHandlers", ex);
+      }
     }
 
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
@@ -188,7 +215,7 @@ namespace UI.Controls.ProtocolNew
     public Task<bool> WaitAdminButtonAsync()
     {
       _adminButtonTcs = new TaskCompletionSource<bool>();
-      
+
       adminContinue.Click += OnAdminContinueClicked;
       adminExit.Click += OnAdminExitClicked;
 
@@ -216,6 +243,11 @@ namespace UI.Controls.ProtocolNew
     {
       adminContinue.Click -= OnAdminContinueClicked;
       adminExit.Click -= OnAdminExitClicked;
+    }
+
+    public void MenuButtonVisibility(bool visibility)
+    {
+      MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;
     }
   }
 }

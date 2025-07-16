@@ -2,11 +2,31 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UI.Controls.Runner"
              mc:Ignorable="d" 
+             xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
+             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
+             xmlns:Icons="clr-namespace:UI.Icon"
              d:DesignHeight="450" d:DesignWidth="800" Background="Red">
     <Grid>
-            
-    </Grid>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="75*"/>
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="40*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid x:Name="LeftBox" Grid.Column="2">
+                <Controls:TextEditorUI/>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Background="{StaticResource RedColorSolidColorBrush}" 
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+
+            <Grid x:Name="RightBox" Grid.Column="0" >
+                <Protocol:ProtocolUI x:Name="ProtocolUI" Header=""/>
+            </Grid>
+        </Grid>
+
 </UserControl>

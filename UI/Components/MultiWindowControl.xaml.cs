@@ -641,6 +641,11 @@ namespace UI.Components
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
+    public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+      await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
+    }
+
     public void OpenFolder()
     {
       if (MultiEditor == null)

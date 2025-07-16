@@ -121,6 +121,11 @@ namespace MainWindowProgram.Services
       return Task.FromResult(foundContainer);
     }
 
+    internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+     await _multiWindowControl.DeleteTranslatorItem(translatorItem, editorType);
+    }
+
     internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);

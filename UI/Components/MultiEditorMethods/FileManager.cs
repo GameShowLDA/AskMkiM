@@ -548,6 +548,26 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
+    internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+      try
+      {
+        TextEditorContainer textEditorContainer = GetContainer(editorType);
+        if (textEditorContainer == null)
+        {
+          return;
+        }
+
+        textEditorContainer.RemoveTranslatorItem(translatorItem);
+      }
+      catch (Exception ex)
+      {
+        Show(Status.Error, $"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        LogException($"Ошибка при чтении файла", ex);
+        return;
+      }
+    }
+
     internal void OpenFolder()
     {
       TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
