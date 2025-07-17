@@ -3,6 +3,7 @@ using DataBaseConfiguration.Services.Device;
 using Mode.Models;
 using NewCore.Base.Device;
 using Utilities.Interface;
+using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor
 {

@@ -39,6 +39,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppConfiguration\AppConfiguration.csproj" />
     <ProjectReference Include="..\ControlCommandAnalyser\ControlCommandAnalyser.csproj" />
+    <ProjectReference Include="..\ControlCommandExecutor\ControlCommandExecutor.csproj" />
     <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
     <ProjectReference Include="..\NewCore\NewCore.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />

@@ -1,5 +1,6 @@
 ﻿using NewCore.Base.Interface.Main;
 using UI.Components.Invoke;
+using Utilities.Models;
 
 namespace Mode.Models
 {

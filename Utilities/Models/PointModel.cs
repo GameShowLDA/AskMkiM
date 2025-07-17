@@ -1,6 +1,10 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Mode.Models
+namespace Utilities.Models
 {
   /// <summary>
   /// Модель точки.
@@ -78,6 +82,20 @@ namespace Mode.Models
     public override string ToString()
     {
       return $"{DeviceNumber}.{ModuleNumber}.{PointNumber}";
+    }
+
+    /// <summary>
+    /// Преобразует список строк формата "x.x.x" в список моделей <see cref="PointModel"/>.
+    /// Некорректные строки будут проигнорированы.
+    /// </summary>
+    /// <param name="pointStrings">Список строк точек.</param>
+    /// <returns>Список <see cref="PointModel"/>.</returns>
+    public static List<PointModel> ConvertToPointModels(List<string> pointStrings)
+    {
+      return pointStrings
+          .Select(PointModel.ParsePointString)
+          .Where(p => p != null)
+          .ToList();
     }
   }
 }

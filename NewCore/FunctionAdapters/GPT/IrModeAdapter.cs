@@ -135,6 +135,10 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = 60000)
     {
+      if (rangeTo == -1)
+      {
+        rangeTo = 60000;
+      }
       try
       {
         double result = await _irMode.MeasureResistanceAsync(param, rangeFrom, rangeTo);

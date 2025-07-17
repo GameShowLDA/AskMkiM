@@ -128,6 +128,7 @@ namespace MainWindowProgram.Services
 
       await _multiWindow.AddControlAsync("Выполнитель", runControl, TypeWindow.DeviceControl);
       runControl.Start(models);
+
     }
 
     /// <summary>

@@ -4,6 +4,7 @@ using Mode.Models;
 using UI.Components;
 using UI.Controls.ProtocolNew;
 using Utilities.Events;
+using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.Base

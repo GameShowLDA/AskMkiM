@@ -12,8 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ControlCommandAnalyser;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
+using ControlCommandExecutor.Execution;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using Utilities;
@@ -78,32 +80,8 @@ namespace UI.Controls.Runner
 
     private async Task StartTest(CancellationToken cancellationToken)
     {
-      int j = 1;
-      while (!cancellationToken.IsCancellationRequested)
-      {
-        await ProtocolUI.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Проверка блока {j}"), IsBlockStart: true);
-
-        for (int i = 1; i <= 100; i++)
-        {
-          await UserActionHelper.RunWithUserRepeatAsync(async () =>
-          {
-
-            var type = Utilities.Models.ShowMessageModel.MessageType.Success;
-            if (i % 100 == 0)
-            {
-              type = Utilities.Models.ShowMessageModel.MessageType.Error;
-            }
-
-            await ProtocolUI.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Тест номер", message: i.ToString(), type: type), skipPause: true);
-            await Task.Delay(100, cancellationToken);
-
-            return type != Utilities.Models.ShowMessageModel.MessageType.Error;
-
-          }, ProtocolUI);
-        }
-
-        j++;
-      }
+      var manager = new CommandExecutionManager(ProtocolUI, ControlProgram);
+      await manager.ExecuteAllAsync();
     }
   }
 }
