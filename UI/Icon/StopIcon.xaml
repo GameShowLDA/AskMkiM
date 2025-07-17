@@ -13,7 +13,7 @@
             <Rectangle Width="60" Height="60"
                  Canvas.Left="20" Canvas.Top="20"
                  RadiusX="4" RadiusY="4"
-                 Fill="{StaticResource RedColorSolidColorBrush}"/>
+                 Fill="#e73355"/>
         </Canvas>
     </Viewbox>
 </UserControl>

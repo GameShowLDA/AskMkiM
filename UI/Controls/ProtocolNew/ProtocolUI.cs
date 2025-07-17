@@ -423,11 +423,20 @@ namespace UI.Controls.ProtocolNew
     #endregion
 
     /// <summary>
-    /// Возвращает токен отмены для текущего действия.
+    /// Возвращает токен отмены для текущего действия, если источник не уничтожен.
     /// </summary>
-    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
-    public CancellationToken GetCancellationToken() =>
-      ActionExecutor.CancellationTokenSource?.Token ?? CancellationToken.None;
+    /// <returns>Токен отмены <see cref="CancellationToken"/> или <see cref="CancellationToken.None"/>.</returns>
+    public CancellationToken GetCancellationToken()
+    {
+      try
+      {
+        return ActionExecutor?.CancellationTokenSource?.Token ?? CancellationToken.None;
+      }
+      catch (ObjectDisposedException)
+      {
+        return CancellationToken.None;
+      }
+    }
 
     public Task<bool> AwaitAdminDecisionAsync(string message)
     {

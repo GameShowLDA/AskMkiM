@@ -16,6 +16,7 @@ using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
+using Utilities;
 using static Utilities.LoggerUtility;
 
 namespace UI.Controls.Runner
@@ -25,10 +26,14 @@ namespace UI.Controls.Runner
   /// </summary>
   public partial class RunControl : UserControl
   {
+    List<BaseCommandModel> ControlProgram = null;
+    private ProtocolUI ProtocolUI { get; set; }
     bool task = false;
     public RunControl()
     {
       InitializeComponent();
+      ProtocolUI = new ProtocolUI(true);
+      MainContent.Content = ProtocolUI;
     }
 
 
@@ -59,24 +64,45 @@ namespace UI.Controls.Runner
     public void Start(List<BaseCommandModel> models)
     {
       ProtocolUI.MenuButtonVisibility(false);
+      ControlProgram = models;
+
       var ok = models[0];
       if (ok.Mnemonic != "ОК")
       {
         return;
       }
-
-      // Header.Text = (ok as OkCommandModel).ObjectCode;
+      
+      ProtocolUI.Header = (ok as OkCommandModel).ObjectCode;
       ProtocolUI.SetSettings(this, StartDelegate: StartTest, false);
     }
 
     private async Task StartTest(CancellationToken cancellationToken)
     {
-      int i = 1;
+      int j = 1;
       while (!cancellationToken.IsCancellationRequested)
       {
-        await ProtocolUI.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Тест номер: {i}"));
-        i++;
-        await Task.Delay(100, cancellationToken); 
+        await ProtocolUI.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Проверка блока {j}"), IsBlockStart: true);
+
+        for (int i = 1; i <= 100; i++)
+        {
+          await UserActionHelper.RunWithUserRepeatAsync(async () =>
+          {
+
+            var type = Utilities.Models.ShowMessageModel.MessageType.Success;
+            if (i % 100 == 0)
+            {
+              type = Utilities.Models.ShowMessageModel.MessageType.Error;
+            }
+
+            await ProtocolUI.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Тест номер", message: i.ToString(), type: type), skipPause: true);
+            await Task.Delay(100, cancellationToken);
+
+            return type != Utilities.Models.ShowMessageModel.MessageType.Error;
+
+          }, ProtocolUI);
+        }
+
+        j++;
       }
     }
   }

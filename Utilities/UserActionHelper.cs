@@ -44,7 +44,7 @@ namespace Utilities
 
         if (messageService.ButtonService != null)
         {
-          messageService.ButtonService.ShowOnlyExitButton();
+          messageService.ButtonService.ShowOnlyStopAndFinishButtons();
         }
 
         if (action == UserAction.None)

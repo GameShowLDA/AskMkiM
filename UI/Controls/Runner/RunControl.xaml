@@ -11,22 +11,22 @@
              d:DesignHeight="450" d:DesignWidth="800" Background="Red">
     <Grid>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="75*"/>
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="40*"/>
-            </Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="75*"/>
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="40*"/>
+        </Grid.ColumnDefinitions>
 
-            <Grid x:Name="LeftBox" Grid.Column="2">
-                <Controls:TextEditorUI/>
-            </Grid>
+        <Grid x:Name="LeftBox" Grid.Column="2">
+            <Controls:TextEditorUI/>
+        </Grid>
 
-            <GridSplitter Grid.Column="1" Background="{StaticResource RedColorSolidColorBrush}" 
+        <GridSplitter Grid.Column="1" Background="{StaticResource RedColorSolidColorBrush}" 
                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
 
-            <Grid x:Name="RightBox" Grid.Column="0" >
-                <Protocol:ProtocolUI x:Name="ProtocolUI" Header=""/>
-            </Grid>
+        <Grid x:Name="RightBox" Grid.Column="0" >
+            <ContentControl  x:Name="MainContent"/>
         </Grid>
+    </Grid>
 
 </UserControl>

@@ -14,6 +14,9 @@ namespace UI.Controls.ProtocolNew
   /// </summary>
   public partial class ProtocolUI : UserControl, ITextAdapter
   {
+
+    bool loaded = false;
+
     /// <summary>
     /// Свойство зависимости для заголовка.
     /// Позволяет изменять заголовок через XAML или код.
@@ -42,6 +45,7 @@ namespace UI.Controls.ProtocolNew
       if (d is ProtocolUI control)
       {
         control.header.Text = e.NewValue as string;
+        control.headerFile.Text = e.NewValue as string;
       }
     }
 
@@ -65,6 +69,19 @@ namespace UI.Controls.ProtocolNew
       set => SetValue(ContentViewProperty, value);
     }
 
+    public static readonly DependencyProperty IsTopMenuVisibleProperty =
+            DependencyProperty.Register(
+                nameof(IsTopMenuVisible),
+                typeof(bool),
+                typeof(ProtocolUI),
+                new PropertyMetadata(false));
+
+    public bool IsTopMenuVisible
+    {
+      get => (bool)GetValue(IsTopMenuVisibleProperty);
+      set => SetValue(IsTopMenuVisibleProperty, value);
+    }
+
     /// <summary>
     /// Команда для установки динамического контента из XAML.
     /// </summary>
@@ -81,19 +98,32 @@ namespace UI.Controls.ProtocolNew
     /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
     /// Инициализирует компоненты и устанавливает обработчики событий PreviewMouseDown для кнопок.
     /// </summary>
-    public ProtocolUI()
+    public ProtocolUI() : this(false) { }
+
+    public ProtocolUI(bool isTopMenuVisible)
     {
+      IsTopMenuVisible = isTopMenuVisible;
+      Items = new ObservableCollection<object>();
+      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+      InitializeInternal();
+    }
+
+    private void InitializeInternal()
+    {
+      if (loaded)
+        return;
+
+      loaded = true;
       InitializeComponent();
       this.DataContext = this;
 
       loopButton.Visibility = Visibility.Collapsed;
-      returnButton.Visibility = Visibility.Collapsed;
-      Items = new ObservableCollection<object>();
+      RepeatButtonElement.Visibility = Visibility.Collapsed;
+
 
       AppConfiguration.Services.UserMessageServiceProvider.Instance = this;
 
       SetupButtons();
-      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
 
       this.Loaded += (s, e) =>
       {
@@ -119,30 +149,6 @@ namespace UI.Controls.ProtocolNew
 
       ButtonService = this;
     }
-    private void AttachKeyboardHandlers()
-    {
-      Keyboard.AddKeyDownHandler(Application.Current.MainWindow, OnGlobalKeyDown);
-    }
-
-    private void DetachKeyboardHandlers()
-    {
-      try
-      {
-        if (DesignerProperties.GetIsInDesignMode(this))
-          return;
-
-        var window = Application.Current?.MainWindow;
-
-        if (window != null)
-        {
-          Keyboard.RemoveKeyDownHandler(window, OnGlobalKeyDown);
-        }
-      }
-      catch (Exception ex)
-      {
-        LogException("DetachKeyboardHandlers", ex);
-      }
-    }
 
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
     {
@@ -155,7 +161,7 @@ namespace UI.Controls.ProtocolNew
       switch (key)
       {
         case Key.Enter:
-          if (StartButton.Visibility == Visibility.Visible)
+          if (StartButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnStartPressed?.Invoke();
           }
@@ -163,11 +169,11 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case Key.P:
-          if (NextButtonVisibility == Visibility.Visible)
+          if (ContinueButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnContinuePressed?.Invoke();
           }
-          else if (PauseButton.Visibility == Visibility.Visible)
+          else if (PauseButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnPausePressed?.Invoke();
           }
@@ -175,7 +181,7 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case Key.Escape:
-          if (ExitButton.Visibility == Visibility.Visible)
+          if (StopButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnExitPressed?.Invoke();
           }
@@ -183,7 +189,7 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case Key.R:
-          if (ReturnMeasureResistanceButtonVisibility == Visibility.Visible)
+          if (RepeatButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnRepeatPressed?.Invoke();
           }
