@@ -32,6 +32,7 @@ namespace UI.Controls.TextEditor
       OPKW
     }
 
+    private ExecutionGlyphMargin _executionMargin;
     private FileType FileTypeDock { get; set; }
     public TextEditorModel TextEditorModel { get; set; }
 
@@ -166,8 +167,25 @@ namespace UI.Controls.TextEditor
           }
           LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
         }
+
+        if (_executionMargin == null)
+        {
+          _executionMargin = new ExecutionGlyphMargin(textEditor);
+          textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
+        }
+
       };
+
     }
+
+    /// <summary>
+    /// Установить маркер на указанную строку, очищая остальные.
+    /// </summary>
+    public void SetActiveLine(int lineNumber)
+    {
+      _executionMargin.SetActiveLine(lineNumber);
+    }
+
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.M && Keyboard.Modifiers == ModifierKeys.Control)

@@ -98,6 +98,8 @@ namespace ControlCommandAnalyser
         var formatter = _formatters.FirstOrDefault(f => f.CanFormat(model));
         IEnumerable<string> lines;
 
+        model.FormattedStartLineNumber = formattedLineNumber;
+
         // Получаем исходные строки для текущей команды
         List<string> sourceLines = GetSourceLines(model, out int startSourceLineNumber);
 

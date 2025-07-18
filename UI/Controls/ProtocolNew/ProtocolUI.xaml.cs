@@ -168,6 +168,14 @@ namespace UI.Controls.ProtocolNew
           e.Handled = true;
           break;
 
+        case Key.F5:
+          if (StartButtonElement.Visibility == Visibility.Visible)
+          {
+            KeyboardManager.OnStartPressed?.Invoke();
+          }
+          e.Handled = true;
+          break;
+
         case Key.P:
           if (ContinueButtonElement.Visibility == Visibility.Visible)
           {

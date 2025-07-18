@@ -77,7 +77,7 @@ namespace ControlCommandAnalyser.Parser
           {
             if (!errorPoints)
             {
-              errorPoints = true; // ошибка уже добавлена, не нужно повторять
+              errorPoints = true;
               baseModel?.Errors.Add(GeneralErrors.MissingPointsMap(baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
             }
 

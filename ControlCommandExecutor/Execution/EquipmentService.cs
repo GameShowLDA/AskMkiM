@@ -39,14 +39,18 @@ namespace ControlCommandExecutor.Execution
     /// </summary>
     private static List<PointModel>? AnalyzedPoints { get; set; }
 
+    static private Dictionary<string, string> PointsMap { get; set; } = new();
+
+
     /// <summary>
     /// Основной метод анализа точек подключения. Проверяет существование всех шасси и модулей, инициализирует их.
     /// </summary>
     /// <param name="points">Список всех точек подключения для анализа.</param>
     /// <param name="userMessageService">Сервис отображения сообщений пользователю.</param>
     /// <exception cref="Exception">Выбрасывается при наличии ошибок в конфигурации оборудования.</exception>
-    public static async Task AnalyzePoints(List<PointModel> points, IUserMessageService userMessageService)
+    public static async Task AnalyzePoints(List<PointModel> points, Dictionary<string, string> keyValuePairs, IUserMessageService userMessageService)
     {
+      PointsMap = keyValuePairs;
       AnalyzedPoints = null;
       ValidRelayModules = new List<IRelaySwitchModule>();
 
@@ -377,5 +381,36 @@ namespace ControlCommandExecutor.Execution
       }
     }
 
+    /// <summary>
+    /// Возвращает ключ из <see cref="PointsMap"/>, соответствующий переданной точке.
+    /// Поскольку словарь построен по строкам, выполняется поиск по совпадению параметров точки.
+    /// </summary>
+    /// <param name="point">Искомая точка.</param>
+    /// <returns>Ключ, если найден; <c>null</c> если не найден.</returns>
+    public static string? GetPointKey(PointModel point)
+    {
+      foreach (var kvp in PointsMap)
+      {
+        var value = kvp.Value;
+
+        var parts = value.Split('.');
+        if (parts.Length != 3)
+          continue;
+
+        if (int.TryParse(parts[0], out int device)
+         && int.TryParse(parts[1], out int module)
+         && int.TryParse(parts[2], out int number))
+        {
+          if (point.DeviceNumber == device &&
+              point.ModuleNumber == module &&
+              point.PointNumber == number)
+          {
+            return kvp.Key;
+          }
+        }
+      }
+
+      return null;
+    }
   }
 }

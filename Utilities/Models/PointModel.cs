@@ -97,5 +97,20 @@ namespace Utilities.Models
           .Where(p => p != null)
           .ToList();
     }
+
+    public override bool Equals(object? obj)
+    {
+      if (obj is not PointModel other)
+        return false;
+
+      return DeviceNumber == other.DeviceNumber
+          && ModuleNumber == other.ModuleNumber
+          && PointNumber == other.PointNumber;
+    }
+
+    public override int GetHashCode()
+    {
+      return HashCode.Combine(DeviceNumber, ModuleNumber, PointNumber);
+    }
   }
 }

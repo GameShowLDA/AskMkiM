@@ -103,7 +103,22 @@ namespace MainWindowProgram.Services
       var dockManager = container.GetDockControl();
       if (dockManager == null) return;
 
-      var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      DockItem? foundDockItem = null;
+
+      // Ждём, пока хотя бы один DockItem появится
+      for (int i = 0; i < 500; i++) // максимум 500 мс
+      {
+        if (dockManager.DockItems.Count > 0)
+        {
+          foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+          if (foundDockItem != null)
+          {
+            break;
+          }
+        }
+        await Task.Delay(10);
+      }
+
       if (foundDockItem?.Content is not TranslatorItem translator) return;
 
       editor = translator.GetRightEditor();

@@ -58,5 +58,7 @@ namespace Utilities.Interface
     /// <param name="canAbort">Показывать кнопку "Завершить".</param>
     /// <returns>Выбранное пользователем действие.</returns>
     Task<UserAction> WaitUserActionAsync();
+
+    public CancellationToken GetCancellationToken();
   }
 }

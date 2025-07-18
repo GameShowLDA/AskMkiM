@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Packaging;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using AppConfiguration.MeasurementError;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
+using ControlCommandExecutor.IrStrategies;
 using NewCore.Base.Interface.Main;
 using Utilities;
 using Utilities.Interface;
@@ -31,31 +33,63 @@ namespace ControlCommandExecutor.Executors
       }
 
       var command = context.Command as SiCommandModel;
+      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
 
       var time = ExtractFirstNumber(command.Time);
       var resistance = ExtractFirstNumber(command.Resistance);
       var voltage = ExtractFirstNumber(command.Voltage);
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение команды {nameCommand}"));
-      
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение команды {nameCommand}"), IsBlockStart: true);
+
       var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
+
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+
+      var modules = points
+          .Select(EquipmentService.GetModuleByPoint)
+          .Where(m => m != null)
+          .DistinctBy(m => (m.NumberChassis, m.Number))
+          .ToList();
+      await SettingModuleRelayControl(modules, context.Console);
+
+      var dbc = EquipmentService.GetSwitchingDevice();
+      await SettingsDeviceBusCommutatuion(dbc, context.Console);
+
       var breakDown = EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-
-
       await SettingBreakdown(breakDown, context.Console, time.Value, resistance.Value, voltage.Value);
 
-      await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
+      
+      if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
-        await context.Console.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
-        var result = await breakDown.IrManger.MeasureResistanceAsync(resistance.Value + 10);
+        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      }
+    }
 
-        bool error = result <= voltage.Value;
-        await context.Console.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{result} Ом", type: (error ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 3 }, skipPause: true);
-        return error;
-      }, context.Console);
+    private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserMessageService userMessageService)
+    {
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(), userMessageService))
+      {
+        throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
+      }
+    }
+    private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserMessageService userMessageService)
+    {
+      foreach (var module in relaySwitchModules)
+      {
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), userMessageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), userMessageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
+      }
     }
 
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserMessageService userMessageService, double time, double resistance, double voltage)

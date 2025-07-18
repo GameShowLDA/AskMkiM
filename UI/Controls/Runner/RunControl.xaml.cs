@@ -16,6 +16,7 @@ using ControlCommandAnalyser;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
+using ICSharpCode.AvalonEdit;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using Utilities;
@@ -36,6 +37,36 @@ namespace UI.Controls.Runner
       InitializeComponent();
       ProtocolUI = new ProtocolUI(true);
       MainContent.Content = ProtocolUI;
+
+      Loaded += RunControl_Loaded;
+
+      LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
+    }
+
+    private void RunControl_Loaded(object sender, RoutedEventArgs e)
+    {
+      FocusMainContent();
+    }
+    private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+      // Отменяем фокусировку и возвращаем в MainContent
+      e.Handled = true;
+      FocusMainContent();
+    }
+    private void FocusMainContent()
+    {
+      if (MainContent.Content is IInputElement focusable && focusable.Focusable)
+      {
+        Keyboard.Focus(focusable);
+      }
+      else if (MainContent.Content is FrameworkElement fe)
+      {
+        fe.Loaded += (_, _) =>
+        {
+          fe.Focus();
+          Keyboard.Focus(fe);
+        };
+      }
     }
 
 
@@ -80,7 +111,15 @@ namespace UI.Controls.Runner
 
     private async Task StartTest(CancellationToken cancellationToken)
     {
-      var manager = new CommandExecutionManager(ProtocolUI, ControlProgram);
+      TextEditorUI? editor = null;
+
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        editor = LeftBox.Children[0] as TextEditorUI;
+      });
+
+      var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram);
+
       await manager.ExecuteAllAsync();
     }
   }

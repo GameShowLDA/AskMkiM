@@ -82,6 +82,7 @@ namespace Utilities
 
       do
       {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
         bool success = await operation();
         result = success;
 

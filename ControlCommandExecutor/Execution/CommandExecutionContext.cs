@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
 using Utilities.Interface;
+using Utilities.TextEditor;
 
 namespace ControlCommandExecutor.Execution
 {
@@ -15,16 +16,18 @@ namespace ControlCommandExecutor.Execution
   {
     public BaseCommandModel Command { get; }
     public IUserMessageService Console { get; }
+    public ITextEditorAdapter TranslationControl { get; }
 
     /// <summary>
     /// Дополнительные данные, общие между исполнителями.
     /// </summary>
     public Dictionary<string, object> Metadata { get; } = new();
 
-    public CommandExecutionContext(BaseCommandModel command, IUserMessageService console)
+    public CommandExecutionContext(BaseCommandModel command, IUserMessageService console, ITextEditorAdapter editorAdapter)
     {
       Command = command;
       Console = console;
+      TranslationControl = editorAdapter;
     }
   }
 }

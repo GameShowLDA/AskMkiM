@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Executors;
 using Utilities.Interface;
+using Utilities.TextEditor;
 
 namespace ControlCommandExecutor.Execution
 {
@@ -17,13 +18,15 @@ namespace ControlCommandExecutor.Execution
   {
     private readonly Dictionary<string, ICommandExecutor> _executors = new();
     private readonly IUserMessageService _console;
+    private readonly ITextEditorAdapter tranlationControl;
 
     public List<BaseCommandModel> CommandsToExecute { get; set; } = new();
 
-    public CommandExecutionManager(IUserMessageService console, List<BaseCommandModel> ControlProgram)
+    public CommandExecutionManager(IUserMessageService console, ITextEditorAdapter textEditor, List<BaseCommandModel> ControlProgram)
     {
       _console = console;
       CommandsToExecute = ControlProgram;
+      tranlationControl = textEditor;
       RegisterExecutors();
     }
 
@@ -45,7 +48,7 @@ namespace ControlCommandExecutor.Execution
     {
       if (_executors.TryGetValue(command.Mnemonic, out var executor))
       {
-        var context = new CommandExecutionContext(command, _console);
+        var context = new CommandExecutionContext(command, _console, tranlationControl);
         await executor.ExecuteAsync(context);
       }
       else

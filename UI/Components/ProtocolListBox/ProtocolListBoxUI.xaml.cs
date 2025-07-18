@@ -169,5 +169,10 @@ namespace UI.Components.ProtocolListBox
     {
       throw new NotImplementedException();
     }
+
+    public CancellationToken GetCancellationToken()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

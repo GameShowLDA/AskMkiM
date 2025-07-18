@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
 using Utilities.Models;
 
@@ -17,10 +18,12 @@ namespace ControlCommandExecutor.Executors
     {
 
       var command = context.Command as RmCommandModel;
+      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+
       var points = command.GetAllDestinationPoints();
 
       List<PointModel> pointsModel = PointModel.ConvertToPointModels(points);
-      await EquipmentService.AnalyzePoints(pointsModel, context.Console);
+      await EquipmentService.AnalyzePoints(pointsModel, command.PointsMap, context.Console);
 
     }
   }

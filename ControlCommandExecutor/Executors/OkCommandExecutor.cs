@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
 
@@ -17,8 +18,15 @@ namespace ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context)
     {
-      var ok = context.Command as OkCommandModel;
-      await context.Console.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Выполнение программы контроля для \"{ok.ObjectName}({ok.ObjectCode})\""));
+      if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      }
+
+      var command = context.Command as OkCommandModel;
+      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+
+      await context.Console.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Выполнение программы контроля для \"{command.ObjectName}({command.ObjectCode})\""));
     }
   }
 }
