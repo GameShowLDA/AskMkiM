@@ -412,5 +412,27 @@ namespace ControlCommandExecutor.Execution
 
       return null;
     }
+
+    /// <summary>
+    /// Возвращает все точки из AnalyzePoints, которые идут до указанной точки по порядку.
+    /// Используется для определения ранее замкнутых точек.
+    /// </summary>
+    /// <param name="currentPoint">Текущая точка, относительно которой выбираются предыдущие.</param>
+    /// <returns>Список точек, предшествующих указанной точке в AnalyzePoints.</returns>
+    public static List<PointModel> GetPointsBefore(PointModel currentPoint)
+    {
+      if (AnalyzedPoints == null)
+        throw new Exception("Список точек не инициализирован. Необходимо вызвать AnalyzePoints.");
+
+      var index = AnalyzedPoints.FindIndex(p =>
+        p.DeviceNumber == currentPoint.DeviceNumber &&
+        p.ModuleNumber == currentPoint.ModuleNumber &&
+        p.PointNumber == currentPoint.PointNumber);
+
+      if (index < 0)
+        throw new Exception($"Указанная точка [{currentPoint.DeviceNumber}.{currentPoint.ModuleNumber}.{currentPoint.PointNumber}] не найдена в AnalyzePoints.");
+
+      return AnalyzedPoints.Take(index).ToList();
+    }
   }
 }

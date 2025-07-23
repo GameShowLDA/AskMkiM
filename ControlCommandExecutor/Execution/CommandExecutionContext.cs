@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using ControlCommandAnalyser.Model;
 using Utilities.Interface;
 using Utilities.TextEditor;
@@ -17,6 +18,13 @@ namespace ControlCommandExecutor.Execution
     public BaseCommandModel Command { get; }
     public IUserMessageService Console { get; }
     public ITextEditorAdapter TranslationControl { get; }
+
+
+    /// <summary>
+    /// Делегат для перехода к команде по номеру (метке). 
+    /// Заполняется менеджером выполнения команд.
+    /// </summary>
+    public Action<string> JumpToCommandNumber { get; set; }
 
     /// <summary>
     /// Дополнительные данные, общие между исполнителями.

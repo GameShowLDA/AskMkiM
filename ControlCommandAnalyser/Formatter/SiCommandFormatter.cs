@@ -22,6 +22,16 @@ namespace ControlCommandAnalyser.Formatter
       if (!string.IsNullOrWhiteSpace(si.UnparsedParameters))
         yield return $"\t{si.UnparsedParameters}";
 
+      // Ключи команды
+      if (si.AlgorithmKey.Count > 0)
+      {
+        yield return $"\tКлючи команды: {string.Join(", ", si.AlgorithmKey)}";
+      }
+      else
+      {
+        yield return $"\tКлючи команды не указаны.";
+      }
+
       // Напряжение
       if (!string.IsNullOrWhiteSpace(si.Voltage))
       {

@@ -25,6 +25,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public static Action? OnStartPressed;
 
+    public static Action? OnStartPressedByStepMode;
+
     /// <summary>
     /// Делегат, вызываемый при нажатии клавиши P (остановка или продолжение).
     /// </summary>

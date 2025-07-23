@@ -176,6 +176,15 @@ namespace UI.Controls.ProtocolNew
           e.Handled = true;
           break;
 
+        case Key.F10:
+        case Key.F11:
+          if (StartButtonElement.Visibility == Visibility.Visible)
+          {
+            KeyboardManager.OnStartPressedByStepMode?.Invoke();
+          }
+          e.Handled = true;
+          break;
+
         case Key.P:
           if (ContinueButtonElement.Visibility == Visibility.Visible)
           {

@@ -207,8 +207,19 @@ namespace UI.Controls.ProtocolNew
     private void RegisterHotkeys()
     {
       KeyboardManager.OnStartPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs()));
+        Application.Current.Dispatcher.Invoke(async () =>
+        {
+          await AppConfiguration.Execution.ExecutionConfig.SetStepByStepMode(false);
+          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+        });
+
+      KeyboardManager.OnStartPressedByStepMode = () =>
+        Application.Current.Dispatcher.Invoke(async () =>
+        {
+          await AppConfiguration.Execution.ExecutionConfig.SetStepByStepMode(true);
+          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+        });
+
 
       KeyboardManager.OnExitPressed = () =>
         Application.Current.Dispatcher.Invoke(() =>

@@ -37,5 +37,10 @@ namespace ControlCommandAnalyser.Model
     /// Проставляется после форматирования.
     /// </summary>
     public int FormattedStartLineNumber { get; set; } = -1;
+
+    /// <summary>
+    /// Ключи алгоритма проверки, указанные в команде.
+    /// </summary>
+    public List<string> AlgorithmKey { get; set; } = new();
   }
 }

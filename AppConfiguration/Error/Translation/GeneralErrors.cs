@@ -163,5 +163,33 @@ namespace AppConfiguration.Error.Translation
       Description = $"Обнаружены нераспознанные параметры: {unparsed}"
     };
 
+    /// <summary>
+    /// Возвращает ошибку, если после вопросительной ЦУ (с "?" или "??") отсутствует ожидаемая команда УП.
+    /// </summary>
+    /// <param name="lineNumber">Номер строки, в которой находится команда ЦУ.</param>
+    /// <param name="command">Текст команды ЦУ.</param>
+    /// <returns>Объект <see cref="ErrorItem"/>, описывающий ошибку отсутствия УП после ЦУ-вопроса.</returns>
+    public static ErrorItem ExpectedConditionalJumpAfterCu(int lineNumber, string command) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Code = ErrorCode.Gen_ExpectedConditionalJumpAfterCu,
+      Description = "После команды ЦУ с вопросом ожидается команда УП (условный переход)"
+    };
+
+    /// <summary>
+    /// Возвращает ошибку, если команда УП стоит после информационной ЦУ (без вопроса), что недопустимо.
+    /// </summary>
+    /// <param name="lineNumber">Номер строки, где находится команда УП.</param>
+    /// <param name="command">Текст команды УП.</param>
+    /// <returns>Объект <see cref="ErrorItem"/>, описывающий ошибку положения УП.</returns>
+    public static ErrorItem ConditionalJumpAfterInformationCu(int lineNumber, string command) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Code = ErrorCode.Gen_ConditionalJumpAfterInformationCu,
+      Description = "Команда УП не должна следовать за информационной ЦУ (без вопроса)"
+    };
+
   }
 }

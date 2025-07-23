@@ -40,8 +40,14 @@ namespace ControlCommandExecutor.Executors
       var time = ExtractFirstNumber(command.Time);
       var resistance = ExtractFirstNumber(command.Resistance);
       var voltage = ExtractFirstNumber(command.Voltage);
+      string message = string.Empty;
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение команды {nameCommand}"), IsBlockStart: true);
+      foreach (var str in command.SourceLines)
+      { 
+        message += "\r\n  " + str;
+      }
+
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1}, IsBlockStart: true);
 
       var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
@@ -62,8 +68,15 @@ namespace ControlCommandExecutor.Executors
       var breakDown = EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, resistance.Value, voltage.Value);
 
-      await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
-      
+      if (command.AlgorithmKey.Contains("К"))
+      {
+        await NodeFullChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
+      }
+      else
+      {
+        await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
+      }
+
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();

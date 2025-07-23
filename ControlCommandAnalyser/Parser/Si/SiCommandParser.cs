@@ -10,6 +10,7 @@ using Utilities; // Для LoggerUtility
 
 namespace ControlCommandAnalyser.Parser.Si
 {
+  [AllowedKeys(AlgorithmKey.С, AlgorithmKey.П, AlgorithmKey.И, AlgorithmKey.Г, AlgorithmKey.Т1, AlgorithmKey.К, AlgorithmKey.Д)]
   /// <summary>
   /// Парсер для команд СИ (сопротивление изоляции).
   /// </summary>
@@ -36,6 +37,15 @@ namespace ControlCommandAnalyser.Parser.Si
         return model;
       }
 
+      for (int i = 0; i < model.SourceLines.ToList().Count; i++)
+      {
+        if (string.IsNullOrEmpty(model.SourceLines[i]) || string.IsNullOrWhiteSpace(model.SourceLines[i]))
+        {
+          model.SourceLines.Remove(model.SourceLines[i]);
+          i--;
+        }
+      }
+
       // Первая строка — параметры (напряжение, сопротивление, время)
       var firstLine = lines[0];
       LoggerUtility.LogDebug($"Исходная первая строка: \"{firstLine}\"");
@@ -47,7 +57,15 @@ namespace ControlCommandAnalyser.Parser.Si
       string remainder = firstLine;
       string? voltage = null, resistance = null, time = null;
 
-      // Парсим параметры
+      // сначала извлекаем ключи
+      model.AlgorithmKey = AlgorithmKeyParser.ExtractKeys(firstLine);
+
+      // затем удаляем их из строки
+      foreach (var key in model.AlgorithmKey)
+      {
+        remainder = firstLine.Replace(key, "", StringComparison.OrdinalIgnoreCase);
+      }
+
       (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
       LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
 
@@ -88,11 +106,9 @@ namespace ControlCommandAnalyser.Parser.Si
         allPoints.AddRange(PointParser.ParsePoints(pointsPart));
         LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
 
-        // Оставляем в remainder только то, что ДО pointsPart
         remainder = remainder.Substring(0, starIdx).Trim();
       }
 
-      // Остальные строки — точки
       for (int i = 1; i < lines.Count; i++)
       {
         var pointLine = lines[i].Trim();
@@ -112,7 +128,7 @@ namespace ControlCommandAnalyser.Parser.Si
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
-      
+
       // Валидация
       if (string.IsNullOrWhiteSpace(voltage) && string.IsNullOrWhiteSpace(resistance) && string.IsNullOrWhiteSpace(time))
       {
@@ -129,6 +145,8 @@ namespace ControlCommandAnalyser.Parser.Si
       {
         LoggerUtility.LogInformation($"Итого найдено точек: {model.Points.Count}");
       }
+
+      AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
 
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 

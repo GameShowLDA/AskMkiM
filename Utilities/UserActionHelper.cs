@@ -1,135 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Utilities.Interface;
-using static System.Net.Mime.MediaTypeNames;
+﻿using Utilities.Interface;
 using static Utilities.Interface.IUserMessageService;
 
 namespace Utilities
 {
+  /// <summary>
+  /// Служебный класс для выполнения операций с поддержкой пользовательского выбора:
+  /// повторить, завершить или пропустить.
+  /// </summary>
   public static class UserActionHelper
   {
     /// <summary>
-    /// Универсальный цикл для выполнения операции с поддержкой повтора, пропуска и завершения.
+    /// Выполняет операцию с поддержкой повтора, завершения и пропуска.
+    /// Завершается после первого успешного выполнения, если <paramref name="loop"/> не включён.
     /// </summary>
-    /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
-    /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
-    /// <param name="loop">Всегда вызывает повтор, даже если первое измерение без ошибок.</param>
+    /// <param name="operation">Асинхронная операция, возвращающая true при успехе.</param>
+    /// <param name="messageService">Сервис пользовательских сообщений.</param>
+    /// <param name="loop">Если true — выполняет цикл хотя бы один раз независимо от результата.</param>
     public static async Task RunWithUserRepeatAsync(
         Func<Task<bool>> operation,
         IUserMessageService messageService,
         bool loop = false)
     {
-      bool error = loop;
-      bool next = !loop;
-
-      do
-      {
-        bool success = await operation();
-
-        if (success && next)
-        {
-          return;
-        }
-        else if (!error)
-        {
-          error = true;
-          next = false;
-        }
-
-
-        var action = await messageService.WaitUserActionAsync();
-
-        if (messageService.ButtonService != null)
-        {
-          messageService.ButtonService.ShowOnlyStopAndFinishButtons();
-        }
-
-        if (action == UserAction.None)
-        {
-          return;
-        }
-        else if (action == UserAction.Retry)
-        {
-          continue;
-        }
-        else
-        {
-          next = true;
-          error = false;
-          return;
-        }
-      }
-      while (error);
+      await RunCoreAsync(operation, messageService, loop);
     }
 
     /// <summary>
-    /// Универсальный цикл для выполнения операции с поддержкой повтора, пропуска и завершения.
+    /// Выполняет операцию с поддержкой пользовательского выбора и возвращает её результат.
     /// </summary>
-    /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
-    /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
-    /// <param name="loop">Всегда вызывает повтор, даже если первое измерение без ошибок.</param>
+    /// <param name="operation">Асинхронная операция, возвращающая true при успехе.</param>
+    /// <param name="messageService">Сервис пользовательских сообщений.</param>
+    /// <param name="loop">Если true — выполняет хотя бы один цикл независимо от результата.</param>
+    /// <returns>True, если операция была успешной.</returns>
     public static async Task<bool> GetRunWithUserRepeatAsync(
         Func<Task<bool>> operation,
         IUserMessageService messageService,
         bool loop = false)
     {
-      bool error = loop;
-      bool next = !loop;
-      bool result = true;
-
-      do
-      {
-        messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        bool success = await operation();
-        result = success;
-
-        if (success && next)
-        {
-          return result;
-        }
-        else if (!error)
-        {
-          error = true;
-          next = false;
-        }
-
-        var action = await messageService.WaitUserActionAsync();
-
-        if (messageService.ButtonService != null)
-        {
-          messageService.ButtonService.ShowOnlyExitButton();
-        }
-
-        if (action == UserAction.None)
-        {
-          return result;
-        }
-        else if (action == UserAction.Retry)
-        {
-          continue;
-        }
-        else
-        {
-          next = true;
-          error = false;
-          return result;
-        }
-      }
-      while (error);
-
-      return result;
+      var result = await RunCoreAsync(operation, messageService, loop);
+      return result.Success;
     }
 
-
     /// <summary>
-    /// Универсальный цикл для выполнения операции с поддержкой повтора, пропуска и завершения.
+    /// Выполняет операцию, возвращающую результат подключения и строку ответа, с поддержкой пользовательского выбора.
     /// </summary>
-    /// <param name="operation">Функция, возвращающая true при успехе и false при ошибке.</param>
-    /// <param name="messageService">Сервис сообщений для ожидания действия пользователя.</param>
-    /// <param name="loop">Всегда вызывает повтор, даже если первое измерение без ошибок.</param>
+    /// <param name="operation">Асинхронная операция, возвращающая результат подключения и строку ответа.</param>
+    /// <param name="messageService">Сервис пользовательских сообщений.</param>
+    /// <param name="loop">Если true — выполняет хотя бы один цикл независимо от результата.</param>
+    /// <returns>Кортеж (успех подключения, строка ответа).</returns>
     public static async Task<(bool Connect, string Answer)> GetRunWithUserRepeatAsync(
         Func<Task<(bool Connect, string Answer)>> operation,
         IUserMessageService messageService,
@@ -137,60 +54,111 @@ namespace Utilities
     {
       bool error = loop;
       bool next = !loop;
-      bool result = true;
-      (bool Connect, string Answer) success;
+      (bool Connect, string Answer) result;
+
       do
       {
-        success = await operation();
-        result = success.Connect;
+        result = await operation();
 
-        if (success.Connect && next)
-        {
-          return success;
-        }
-        else if (!error)
+        if (result.Connect && next)
+          return result;
+
+        if (!error)
         {
           error = true;
           next = false;
         }
 
-        if (messageService != null)
-        {
-          var action = await messageService.WaitUserActionAsync();
-
-          if (messageService.ButtonService != null)
-          {
-            messageService.ButtonService.ShowOnlyExitButton();
-          }
-
-
-          if (action == UserAction.None)
-          {
-            return success;
-          }
-          else if (action == UserAction.Retry)
-          {
-            continue;
-          }
-          else
-          {
-            next = true;
-            error = false;
-            if (messageService.ButtonService != null)
-            {
-              messageService.ButtonService.ShowOnlyStopAndFinishButtons();
-            }
-            return success;
-          }
-        }
-        else
-        {
+        if (messageService == null)
           break;
-        }
+
+        var action = await messageService.WaitUserActionAsync();
+        ApplyButtonMode(messageService, onlyExit: true);
+
+        if (action == UserAction.None)
+          return result;
+
+        if (action == UserAction.Retry)
+          continue;
+
+        next = true;
+        error = false;
+        ApplyButtonMode(messageService, onlyExit: false);
+        return result;
+
       }
       while (error);
 
-      return success;
+      return result;
+    }
+
+    /// <summary>
+    /// Внутренняя логика повтора операции, общая для методов с типом bool.
+    /// </summary>
+    /// <param name="operation">Операция, возвращающая true при успехе.</param>
+    /// <param name="messageService">Сервис пользовательских сообщений.</param>
+    /// <param name="loop">Принудительный запуск повторов независимо от результата.</param>
+    /// <returns>Кортеж (успешность операции, текстовое сообщение).</returns>
+    private static async Task<(bool Success, string Message)> RunCoreAsync(
+        Func<Task<bool>> operation,
+        IUserMessageService messageService,
+        bool loop)
+    {
+      bool error = loop;
+      bool next = !loop;
+
+      do
+      {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+
+        bool success = await operation();
+
+        if (success && next)
+          return (true, string.Empty);
+
+        if (!error)
+        {
+          error = true;
+          next = false;
+        }
+
+        var action = await messageService.WaitUserActionAsync();
+        ApplyButtonMode(messageService, onlyExit: true);
+
+        if (action == UserAction.None)
+        {
+          ApplyButtonMode(messageService, onlyExit: false);
+          return (success, string.Empty);
+        }
+
+        if (action == UserAction.Retry)
+          continue;
+
+        next = true;
+        error = false;
+        ApplyButtonMode(messageService, onlyExit: false);
+        return (success, string.Empty);
+
+      } while (error);
+
+      ApplyButtonMode(messageService, onlyExit: false);
+      return (false, string.Empty);
+    }
+
+    /// <summary>
+    /// Устанавливает режим отображения кнопок в пользовательском интерфейсе.
+    /// </summary>
+    /// <param name="messageService">Сервис пользовательских сообщений.</param>
+    /// <param name="onlyExit">Если true — отображается только кнопка "Завершить", иначе — "Пауза" и "Завершить".</param>
+    private static void ApplyButtonMode(IUserMessageService messageService, bool onlyExit)
+    {
+      if (messageService?.ButtonService == null)
+        return;
+
+      if (onlyExit)
+        messageService.ButtonService.ShowOnlyExitButton();
+      else
+        messageService.ButtonService.ShowOnlyStopAndFinishButtons();
     }
   }
 }
