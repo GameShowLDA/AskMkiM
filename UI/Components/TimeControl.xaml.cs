@@ -29,7 +29,6 @@ namespace UI.Components
 
     public event Action ChangeDate;
 
-    readonly DispatcherTimer DispatcherTimer = new DispatcherTimer();
 
     public bool FullTime { get; set; }
     public TimeControl()
@@ -38,6 +37,7 @@ namespace UI.Components
       Loaded += TimeControl_Loaded;
 
     }
+    readonly DispatcherTimer DispatcherTimer = new DispatcherTimer();
     private void TimeControl_Loaded(object sender, RoutedEventArgs e)
     {
       Clock.Text = DateTime.Now.ToShortTimeString();

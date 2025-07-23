@@ -2,17 +2,13 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppConfiguration.Base;
-using MainWindowProgram.Infrastructure;
 using Microsoft.Win32;
 using UI.Components.ArchiveControls;
-using UI.Components.ArchiveManager.ArchiveFiles.Index;
-using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.Models;
 using UI.Components.FileComparerControls;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace MainWindowProgram.Services
@@ -66,7 +62,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        Show(Status.Error, "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
       }
       else
       {
@@ -91,7 +87,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        Show(Status.Error, "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
       }
       else
       {
@@ -211,7 +207,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        Show(Status.Error, "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
         return null;
       }
       else

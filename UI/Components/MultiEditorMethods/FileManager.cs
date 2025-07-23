@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using AppConfiguration.Base;
 using DevZest.Windows.Docking;
+using Message;
 using Ude;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
@@ -13,7 +14,6 @@ using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace UI.Components.MultiEditorMethods
@@ -52,7 +52,7 @@ namespace UI.Components.MultiEditorMethods
       var nameFile = GetNameFile(path);
       if (string.IsNullOrEmpty(nameFile))
       {
-        Show(Status.Error, "Ошибка при открытии файла", $"Ошибка при открытии файла {path}");
+        MessageBoxCustom.Show("Ошибка при открытии файла", $"Ошибка при открытии файла {path}", image: MessageBoxImage.Error);
         return;
       }
 
@@ -81,7 +81,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        Show(Status.Error, $"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        MessageBoxCustom.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", image: MessageBoxImage.Error);
         LogException($"Ошибка при чтении файла", ex);
       }
     }
@@ -280,7 +280,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        Show(Status.Error, $"Системная ошибка: {ex}", "Ошибка!", MessageBoxButton.OK);
+        MessageBoxCustom.Show($"Системная ошибка: {ex}", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         LogError($"Системная ошибка: {ex}");
         return null;
       }
@@ -504,7 +504,7 @@ namespace UI.Components.MultiEditorMethods
         }
         else
         {
-          Show(Status.Error, "Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK);
+          MessageBoxCustom.Show("Файл был удален или поврежден", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         }
       }
 
@@ -542,7 +542,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        Show(Status.Error, $"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        MessageBoxCustom.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", image: MessageBoxImage.Error);
         LogException($"Ошибка при чтении файла", ex);
         return null;
       }
@@ -562,7 +562,7 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        Show(Status.Error, $"Ошибка при чтении файла: {ex.Message}", "Ошибка");
+        MessageBoxCustom.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", image: MessageBoxImage.Error);
         LogException($"Ошибка при чтении файла", ex);
         return;
       }

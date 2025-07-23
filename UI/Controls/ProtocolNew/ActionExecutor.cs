@@ -1,7 +1,7 @@
-﻿using AppConfiguration.Interface;
-using NewCore.Communication;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using Message;
+using NewCore.Communication;
 using Utilities.Interface;
 using Utilities.Models;
 using WindowsInput;
@@ -9,7 +9,6 @@ using static AppConfiguration.Base.EventAggregator;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static AppConfiguration.Protocol.ProtocolConfig;
 using static AppConfiguration.SystemState.SystemStateManager;
-using static UI.Controls.Message.MessageBox;
 using static Utilities.DelegateManager;
 using static Utilities.LoggerUtility;
 using static Utilities.Models.ShowMessageModel;
@@ -278,13 +277,13 @@ namespace UI.Controls.ProtocolNew
       catch (ObjectDisposedException ex)
       {
         LogException("Token уже утилизирован", ex);
-        Show(Status.Error, $"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK);
+        MessageBoxCustom.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
       catch (Exception ex)
       {
         LogException("Системная ошибка", ex);
-        Show(Status.Error, $"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK);
+        MessageBoxCustom.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
     }

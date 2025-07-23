@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Controls.TextEditor;
 using static UI.Controls.StatusBarControl;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace MainWindowProgram.ViewModels
@@ -118,14 +113,14 @@ namespace MainWindowProgram.ViewModels
             var editor = _viewModel.GetActiveEditor?.Invoke();
             if (editor == null)
             {
-              Show(Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
+              Message.MessageBoxCustom.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
               return;
             }
 
             var path = editor.TextEditorModel.FilePath;
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
-              Show(Status.Error, "Файл не найден", "Ошибка", MessageBoxButton.OK);
+              Message.MessageBoxCustom.Show("Файл не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
               return;
             }
 
@@ -137,8 +132,8 @@ namespace MainWindowProgram.ViewModels
             }
             catch (Exception ex)
             {
-              Show(Status.Error, "Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
-                              "Ошибка", MessageBoxButton.OK);
+              Message.MessageBoxCustom.Show("Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
+                              "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
             }
           };
           menu.Items.Add(item);
@@ -168,7 +163,7 @@ namespace MainWindowProgram.ViewModels
         var editor = _viewModel.GetActiveEditor?.Invoke();
         if (editor == null)
         {
-          Show(Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
+          Message.MessageBoxCustom.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
           return;
         }
 
@@ -179,7 +174,7 @@ namespace MainWindowProgram.ViewModels
         var path = editor.TextEditorModel.FilePath;
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
         {
-          Show(Status.Error, "Файл не найден", "Ошибка", MessageBoxButton.OK);
+          Message.MessageBoxCustom.Show("Файл не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
           return;
         }
 
@@ -194,8 +189,8 @@ namespace MainWindowProgram.ViewModels
         }
         catch (Exception ex)
         {
-          Show(Status.Error, "Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
-                          "Ошибка", MessageBoxButton.OK);
+          Message.MessageBoxCustom.Show("Ошибка при чтении файла в новой кодировке:\n" + ex.Message,
+                          "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         }
       }
     }

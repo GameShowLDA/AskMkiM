@@ -1,14 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using System.IO;
-using System.IO.Packaging;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
 using System.Windows.Media;
+using Message;
+using Microsoft.Win32;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
-using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.FileComparerControls
 {
@@ -55,7 +53,7 @@ namespace UI.Components.FileComparerControls
 
       if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
       {
-        Show(Status.Warning, "Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Warning);
         LogInformation($"Отличия в файлах {this.FirstFilePath} и {this.SecondFilePath} не найдены");
         return;
       }
@@ -139,7 +137,7 @@ namespace UI.Components.FileComparerControls
         }
         else
         {
-          Show(Status.Warning, "Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK);
+          MessageBoxCustom.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
           LogWarning("Попытка сравнить один и тот же файл");
         }
       }
@@ -176,7 +174,7 @@ namespace UI.Components.FileComparerControls
 
       if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
       {
-        Show(Status.Information, "Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
         LogInformation($"Отличия в открытых файлах не найдены");
         return;
       }

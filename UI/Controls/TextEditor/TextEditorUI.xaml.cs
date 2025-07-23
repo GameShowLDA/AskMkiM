@@ -4,17 +4,16 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
-using AppConfiguration.Interface;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
+using Message;
 using UI.Components;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
-using static UI.Controls.Message.MessageBox;
 
 namespace UI.Controls.TextEditor
 {
@@ -436,7 +435,7 @@ namespace UI.Controls.TextEditor
           }
           catch (Exception ex)
           {
-            Show(Status.Error, $"Ошибка при открытии файла: {ex.Message}");
+            MessageBoxCustom.Show($"Ошибка при открытии файла: {ex.Message}", image: MessageBoxImage.Error);
           }
         }
       }

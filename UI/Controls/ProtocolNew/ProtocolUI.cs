@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,16 +6,14 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppConfiguration.Base;
-using AppConfiguration.Interface;
-using NewCore.Base.Device;
+using Message;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static AppConfiguration.Protocol.ProtocolConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
-using static AppConfiguration.SystemState.SystemStateManager;
-using static UI.Controls.Message.MessageBox;
-using Utilities.Interface;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -440,7 +437,7 @@ namespace UI.Controls.ProtocolNew
 
     public Task<bool> AwaitAdminDecisionAsync(string message)
     {
-      Show(Status.Error, "В будущем добавить сюда реализацию выбора");
+      MessageBoxCustom.Show("В будущем добавить сюда реализацию выбора", image: MessageBoxImage.Error);
       return Task.FromResult(true);
     }
     public async Task<IUserMessageService.UserAction> WaitUserActionAsync()

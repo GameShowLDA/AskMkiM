@@ -41,6 +41,7 @@ namespace Message
         case MessageBoxImage.Error:
           var cross = new Icon.CrossIcon { Size = 50 };
           TopPanel.Background = cross.CircleColor;
+          BorderWin.BorderBrush = cross.CircleColor;
           Header.Foreground = cross.IconStrokeColor;
           IconContainer.Children.Add(cross);
           break;
@@ -48,6 +49,7 @@ namespace Message
         case MessageBoxImage.Warning:
           var warning = new Icon.WarningIcon { Size = 50 };
           TopPanel.Background = warning.CircleColor;
+          BorderWin.BorderBrush = warning.CircleColor;
           Header.Foreground = warning.IconStrokeColor;
           IconContainer.Children.Add(warning);
           break;
@@ -55,6 +57,7 @@ namespace Message
         case MessageBoxImage.Information:
           var check = new Icon.CheckIcon { Size = 50 };
           TopPanel.Background = check.CircleColor;
+          BorderWin.BorderBrush = check.CircleColor;
           Header.Foreground = check.IconStrokeColor;
           IconContainer.Children.Add(check);
           break;
@@ -62,6 +65,7 @@ namespace Message
         case MessageBoxImage.Question:
           var question = new Icon.QuestionIcon { Size = 50 };
           TopPanel.Background = question.CircleColor;
+          BorderWin.BorderBrush = question.CircleColor;
           Header.Foreground = question.IconStrokeColor;
           IconContainer.Children.Add(question);
           break;
@@ -128,21 +132,24 @@ namespace Message
 
     public static MessageBoxResult Show(string text = "", string title = "", MessageBoxButton buttons = MessageBoxButton.OK, MessageBoxImage image = MessageBoxImage.None)
     {
-      var window = new MessageBoxCustom(buttons, image)
+     return Application.Current.Dispatcher.Invoke(() =>
       {
-        Title = title
-      };
+        var window = new MessageBoxCustom(buttons, image)
+        {
+          Title = title
+        };
 
-      var _mainWindow = Application.Current.MainWindow;
+        var _mainWindow = Application.Current.MainWindow;
 
-      // можно настроить текст и заголовок, если нужно
-      window.Header.Text = title;
-      window.MessageText.Text = text;
+        // можно настроить текст и заголовок, если нужно
+        window.Header.Text = title;
+        window.MessageText.Text = text;
 
-      _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
-      window.ShowDialog();
-      _mainWindow.Effect = null;
-      return window.Result;
+        _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
+        window.ShowDialog();
+        _mainWindow.Effect = null;
+        return window.Result;
+      });
     }
 
     private void OkButtonVisible()
@@ -167,6 +174,28 @@ namespace Message
     {
       YesButton.Visibility = Visibility.Visible;
       NoButton.Visibility = Visibility.Visible;
+    }
+
+
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+      base.OnPreviewKeyDown(e);
+
+      switch (e.Key)
+      {
+        case Key.Enter:
+          if (OkButton.IsVisible) OkButton_PreviewMouseDown(null, null);
+          break;
+        case Key.Escape:
+          if (CancelButton.IsVisible) CancelButton_PreviewMouseDown(null, null);
+          break;
+        case Key.Y:
+          if (YesButton.IsVisible) YesButton_PreviewMouseDown(null, null);
+          break;
+        case Key.N:
+          if (NoButton.IsVisible) NoButton_PreviewMouseDown(null, null);
+          break;
+      }
     }
   }
 }

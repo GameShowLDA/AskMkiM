@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppConfiguration.Base;
+using Message;
 using Microsoft.Win32;
 using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles;
@@ -13,8 +14,6 @@ using UI.Controls.TextEditor;
 using static UI.Controls.ProtocolNew.ProtocolUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
-using static UI.Controls.Message.MessageBox;
-
 
 namespace UI.Components.ArchiveControls
 {
@@ -125,7 +124,7 @@ namespace UI.Components.ArchiveControls
       }
       else
       {
-        Show(Status.Error, "Файл не найден.", "Ошибка!", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         LogInformation("Файл не найден");
       }
     }
@@ -150,13 +149,13 @@ namespace UI.Components.ArchiveControls
           }
           catch (Exception ex)
           {
-            Show(Status.Error, $"Произошла ошибка: {ex.Message}");
+            MessageBoxCustom.Show($"Произошла ошибка: {ex.Message}", image: MessageBoxImage.Error);
             LogError($"Произошла ошибка: {ex.Message}");
           }
         }
         else
         {
-          Show(Status.Error, "Файл не найден.", "Ошибка!", MessageBoxButton.OK);
+          MessageBoxCustom.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
           LogInformation("Файл не найден");
         }
       }
@@ -176,12 +175,12 @@ namespace UI.Components.ArchiveControls
       bool result = await fileEditor.UpdateFile(archiveDirectory, opkFile.OpkFilename, newOpkFile);
       if (result)
       {
-        Show(Status.Information, "Файл успешно обновлен");
+        MessageBoxCustom.Show("Файл успешно обновлен", image: MessageBoxImage.Information);
         LogInformation($"Файл {opkFile.OpkFilename} в архиве {archiveDirectory} успешно обновлен.");
       }
       else
       {
-        Show(Status.Information, "Не удалось обновить файл. Исходный файл сохранен.");
+        MessageBoxCustom.Show("Не удалось обновить файл. Исходный файл сохранен.", image: MessageBoxImage.Information);
         LogError($"Файл {opkFile.OpkFilename} в архиве {archiveDirectory} не удалось обновить. Исходный файл сохранен.");
       }
     }
@@ -208,11 +207,11 @@ namespace UI.Components.ArchiveControls
         var archiveDirectory = Path.Combine(ArchiveSettings.ArchivePath, $"{_archiveName}.apkw");
         var fileEditor = new FileEditor();
 
-        MessageBoxResult result = Show(
-                Status.Warning,
+        MessageBoxResult result = MessageBoxCustom.Show(
                 "Вы уверены, что хотите удалить этот файл?",
                 "Подтверждение удаления",
-                MessageBoxButton.YesNo);
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
 
         if (result == MessageBoxResult.Yes)
         {
@@ -225,7 +224,7 @@ namespace UI.Components.ArchiveControls
           else
           {
             var message = $"Файл {opkFile.OpkFilename} не удалось корректно удалить из архива {_archiveName}.apkw.";
-            Show(Status.Error, message, "Ошибка!", MessageBoxButton.OK);
+            MessageBoxCustom.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
             LogError(message);
           }
         }
@@ -274,7 +273,7 @@ namespace UI.Components.ArchiveControls
       else
       {
         LogWarning($"Файл {opkFile.OpkFilename} не найден.");
-        Show(Status.Error, "Opk файл не найден в архиве!", "Ошибка!", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Opk файл не найден в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -300,7 +299,7 @@ namespace UI.Components.ArchiveControls
 
     private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      Show(Status.Warning, "Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK);
+      MessageBoxCustom.Show("Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private async void viewOpkFilesDataGrid_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)

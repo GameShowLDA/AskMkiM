@@ -1,4 +1,3 @@
-using AppConfiguration.SystemState;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -6,13 +5,9 @@ using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Threading;
-using UI.Controls;
+using Message;
 using UI.Controls.Search;
 using static Utilities.LoggerUtility;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace MainWindowProgram
@@ -111,12 +106,12 @@ namespace MainWindowProgram
       catch (InvalidOperationException exception)
       {
         LogException($"Ошибка загрузки темы программы", exception);
-        UI.Controls.Message.MessageBox.Show(Status.Error, $"Ошибка загрузки темы: {exception.Message}");
+        MessageBoxCustom.Show($"Ошибка загрузки темы: {exception.Message}", image: MessageBoxImage.Error);
       }
       catch (Exception ex)
       {
         LogException($"Ошибка выполнения программы", ex);
-        UI.Controls.Message.MessageBox.Show(Status.Error, $"Ошибка: {ex.Message}");
+        MessageBoxCustom.Show($"Ошибка: {ex.Message}", image: MessageBoxImage.Error);
       }
     }
 

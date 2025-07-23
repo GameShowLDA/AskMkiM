@@ -2,8 +2,8 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppConfiguration.Base;
+using Message;
 using static AppConfiguration.SystemState.SystemStateManager;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace Mode.Settings.Execution
@@ -27,7 +27,7 @@ namespace Mode.Settings.Execution
     {
       if (await GetIsActivePower() && (sender as CheckBox).IsChecked == true)
       {
-        Show(Status.Error, "Отключите питание системы для перехода в холостой режим!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Отключите питание системы для перехода в холостой режим!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         (sender as CheckBox).IsChecked = !(sender as CheckBox).IsChecked;
         return;
       }

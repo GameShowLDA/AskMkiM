@@ -1,20 +1,17 @@
-﻿using AppConfiguration.Base;
-using DevZest.Windows.Docking;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using AppConfiguration.Base;
+using Message;
 using UI.Components.Invoke;
-using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
 using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
 using UserControl = System.Windows.Controls.UserControl;
-using static UI.Controls.Message.MessageBox;
 
 
 
@@ -90,7 +87,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -214,7 +211,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -233,7 +230,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -252,7 +249,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -271,7 +268,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -301,7 +298,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
 
         return;
@@ -333,7 +330,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
 
         return;
@@ -650,7 +647,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        Show(Status.Error, "Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }

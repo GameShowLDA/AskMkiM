@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Message;
 using Newtonsoft.Json.Linq;
 using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
@@ -9,7 +10,6 @@ using UI.Components.ArchiveManager.Models;
 using Utilities.Encrypter;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
-using static UI.Controls.Message.MessageBox;
 
 
 namespace UI.Components.ArchiveControls
@@ -68,7 +68,7 @@ namespace UI.Components.ArchiveControls
           var data = new List<ApkArchive>();
           if (indexData == null || indexData.Count == 0)
           {
-            Show(Status.Warning, $"У вас еще нет созданных архивов программ контроля.");
+            MessageBoxCustom.Show($"У вас еще нет созданных архивов программ контроля.", image: MessageBoxImage.Warning);
           }
           else
           {
@@ -79,7 +79,7 @@ namespace UI.Components.ArchiveControls
       }
       catch (Exception ex)
       {
-        UI.Controls.Message.MessageBox.Show(Status.Error, $"Ошибка при загрузке файлов: {ex.Message}");
+        MessageBoxCustom.Show($"Ошибка при загрузке файлов: {ex.Message}", image: MessageBoxImage.Error);
       }
     }
 
@@ -147,7 +147,7 @@ namespace UI.Components.ArchiveControls
         var archivename = $"{row.ArchiveName}.apkw";
         if (!File.Exists(Path.Combine(ArchiveSettings.ArchivePath, archivename)))
         {
-          Show(Status.Error, $"Файл {archivename} был удален вне программы", "Ошибка!", MessageBoxButton.OK);
+          MessageBoxCustom.Show($"Файл {archivename} был удален вне программы", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
           LogError($"Файл {archivename} был удален вне программы");
           var indexEditor = new IndexEditor();
           indexEditor.DeleteDataFromIndex(row.ArchiveName);

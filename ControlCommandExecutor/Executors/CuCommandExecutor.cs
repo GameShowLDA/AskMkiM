@@ -7,6 +7,7 @@ using System.Windows;
 using ControlCommandAnalyser;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Execution;
+using Message;
 
 namespace ControlCommandExecutor.Executors
 {
@@ -19,17 +20,16 @@ namespace ControlCommandExecutor.Executors
       var cu = (CuCommandModel)context.Command;
       if (cu.CuType == CuCommandType.Information)
       {
-        // Просто выводим сообщение (информация)
-        MessageBox.Show(cu.MessageText, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBoxCustom.Show(cu.MessageText, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
         CommandExecutionState.LastCuResult = MessageBoxResult.OK;
       }
       else if (cu.CuType == CuCommandType.Question)
       {
         // Вопрос — вызываем с кнопками Yes/No/Esc (или Ok/Cancel если Run/Esc)
-        var result = MessageBox.Show(
+        var result = MessageBoxCustom.Show(
             cu.MessageText,
             "Вопрос",
-            MessageBoxButton.YesNoCancel, MessageBoxImage.Question
+            MessageBoxButton.YesNo, MessageBoxImage.Question
         );
         CommandExecutionState.LastCuResult = result;
       }

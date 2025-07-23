@@ -1,20 +1,12 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 using AppConfiguration.Base;
 using ControlCommandAnalyser;
 using DevZest.Windows.Docking;
-using ICSharpCode.AvalonEdit;
-using Mode.Metrology.IE;
-using UI.Components;
-using UI.Components.MultiEditorMethods;
+using Message;
 using UI.Controls;
-using UI.Controls.Message;
 using UI.Controls.Runner;
 using UI.Controls.TextEditor;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static UI.Components.Invoke.OpenFileButton;
-using static UI.Controls.Message.MessageBox;
 
 namespace MainWindowProgram.Services
 {
@@ -96,7 +88,7 @@ namespace MainWindowProgram.Services
 
       if (container == null)
       {
-        Show(UI.Controls.Message.MessageBox.Status.Error, $"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля");
+        MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
         return;
       }
 
@@ -130,7 +122,7 @@ namespace MainWindowProgram.Services
 
       if (translator.ErrorCount > 0)
       {
-        Show(UI.Controls.Message.MessageBox.Status.Error, $"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля");
+         MessageBoxCustom.Show($"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
         return;
       }
 
@@ -187,7 +179,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     private void ShowEditorNotFoundError()
     {
-      Show(UI.Controls.Message.MessageBox.Status.Error, "Редактор не найден", "Ошибка", MessageBoxButton.OK);
+      MessageBoxCustom.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
     }
 
     /// <summary>

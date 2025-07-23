@@ -1,15 +1,14 @@
-﻿using ICSharpCode.AvalonEdit.Rendering;
-using System.Text.RegularExpressions;
-using System.Windows.Media;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
-using UI.Components.Invoke;
-using UI.Controls.TextEditor;
-using UI.Components.SearchControls;
-using static Utilities.LoggerUtility;
 using System.Windows.Controls;
+using System.Windows.Media;
 using AppConfiguration.Base;
 using DevZest.Windows.Docking;
-using static UI.Controls.Message.MessageBox;
+using ICSharpCode.AvalonEdit.Rendering;
+using Message;
+using UI.Components.SearchControls;
+using UI.Controls.TextEditor;
+using static Utilities.LoggerUtility;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -260,7 +259,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private void ShowEmptySearchWarning()
     {
-      Show(Status.Warning, "Введите текст для поиска.");
+      MessageBoxCustom.Show("Введите текст для поиска.", image: MessageBoxImage.Warning);
       LogWarning("Поле для поиска не заполнено");
     }
 
@@ -293,7 +292,7 @@ namespace UI.Components.MultiEditorMethods
       else
       {
         EventAggregator.RaiseRequestCloseProgress();
-        Show(Status.Warning, "Текст не найден в открытых документах.");
+        MessageBoxCustom.Show("Текст не найден в открытых документах.", image: MessageBoxImage.Warning);
         LogInformation("Текст не найден в открытых документах.");
       }
     }
@@ -385,7 +384,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (results == null || results.Count == 0)
       {
-        Show(Status.Warning, "Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Warning);
         return;
       }
 
@@ -516,7 +515,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (string.IsNullOrEmpty(searchText))
       {
-        Show(Status.Warning, "Введите текст для поиска.");
+        MessageBoxCustom.Show("Введите текст для поиска.", image: MessageBoxImage.Warning);
         LogWarning("Поле для поиска не заполнено");
         return false;
       }
@@ -578,7 +577,7 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Возвращает null и выводит сообщение о том, что текст не найден.</returns>
     private List<SearchResult> HandleNoMatches(string searchText)
     {
-      Show(Status.Error, $"Текст {searchText} не найден.");
+      MessageBoxCustom.Show($"Текст {searchText} не найден.", image: MessageBoxImage.Error);
       LogInformation($"Текст {searchText} не найден.");
       return null;
     }
@@ -702,7 +701,7 @@ namespace UI.Components.MultiEditorMethods
 
             if (index == -1)
             {
-              Show(Status.Warning, "Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен");
+              MessageBoxCustom.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
               return;
             }
           }
@@ -714,7 +713,7 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        Show(Status.Error, $"Текст {_searchText} не найден", "Ошибка");
+        MessageBoxCustom.Show($"Текст {_searchText} не найден", "Ошибка", image: MessageBoxImage.Error);
         return;
       }
     }

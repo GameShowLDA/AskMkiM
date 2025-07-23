@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using static UI.Controls.Message.MessageBox;
+using Message;
 
 
 namespace Mode.Settings.LoggerMessage
@@ -65,7 +65,7 @@ namespace Mode.Settings.LoggerMessage
       else
       {
         Visibility = Visibility.Collapsed;
-        Show(Status.Error, "Доступ запрещен. Неверный PIN-код.", "Ошибка", MessageBoxButton.OK);
+        MessageBoxCustom.Show("Доступ запрещен. Неверный PIN-код.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -132,7 +132,7 @@ namespace Mode.Settings.LoggerMessage
           }
           else
           {
-            Show(Status.Error, "Пожалуйста, перетащите файл с расширением .log", "Неверный формат файла", MessageBoxButton.OK);
+            MessageBoxCustom.Show("Пожалуйста, перетащите файл с расширением .log", "Неверный формат файла", MessageBoxButton.OK, MessageBoxImage.Error);
           }
         }
       }

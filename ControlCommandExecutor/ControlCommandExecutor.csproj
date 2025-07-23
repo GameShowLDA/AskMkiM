@@ -9,6 +9,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\ControlCommandAnalyser\ControlCommandAnalyser.csproj" />
 	  <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
+	  <ProjectReference Include="..\Message\Message.csproj" />
 	  <ProjectReference Include="..\NewCore\NewCore.csproj" />
 	  <ProjectReference Include="..\Utilities\Utilities.csproj" />
 	</ItemGroup>

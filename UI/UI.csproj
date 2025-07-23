@@ -41,6 +41,7 @@
     <ProjectReference Include="..\ControlCommandAnalyser\ControlCommandAnalyser.csproj" />
     <ProjectReference Include="..\ControlCommandExecutor\ControlCommandExecutor.csproj" />
     <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
+    <ProjectReference Include="..\Message\Message.csproj" />
     <ProjectReference Include="..\NewCore\NewCore.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
     <ProjectReference Include="..\WpfDocking-master\Src\WpfDocking.csproj" />
@@ -68,10 +69,6 @@
     <None Update="MKI_PK.xshd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controls\Message\" />
   </ItemGroup>
 
 </Project>
