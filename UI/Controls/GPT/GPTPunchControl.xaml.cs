@@ -34,8 +34,7 @@ namespace UI.Controls.GPT
     /// <param name="e">Данные события мыши.</param>
     private async void ConnectMenuItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      var model = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
-      var connect = await model.ConnectableManager.ConnectAsync(null);
+      var connect = await ModelGPT.ConnectableManager.ConnectAsync(null);
 
       if (connect.Connect)
       {
