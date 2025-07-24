@@ -174,7 +174,25 @@ namespace ControlCommandAnalyser.Parser.Rm
       var result = new List<string>();
       foreach (var line in rawLines)
       {
-        var trimmed = line.Trim();
+        if (line.Contains(" "))
+        {
+          var splitedLine = line.Split(' ');
+          foreach (var line2 in splitedLine)
+          {
+            if (!line2.Equals(string.IsNullOrEmpty))
+            {
+              var lineMatches = Regex.Matches(line2, @"[^=]+=[^=]+");
+              foreach (Match m in lineMatches)
+              {
+                var expr = m.Value.Trim();
+                if (!string.IsNullOrWhiteSpace(expr) && expr.Contains("=") && !expr.StartsWith("=") && !expr.EndsWith("="))
+                  result.Add(expr);
+              }
+            }
+          }
+          continue;
+        }
+        var trimmed = line.Trim(' ');
         if (string.IsNullOrWhiteSpace(trimmed)) continue;
         // Если есть двойное ==, это отдельное выражение
         if (trimmed.Contains("=="))
