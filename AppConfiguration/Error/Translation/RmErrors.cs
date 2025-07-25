@@ -24,6 +24,20 @@ namespace AppConfiguration.Error.Translation
     };
 
     /// <summary>
+    /// Ошибка: возможно присутствует лишний пробел.
+    /// </summary>
+    /// <param name="expr">Исходное выражение.</param>
+    /// <param name="model">Модель RM-команды.</param>
+    /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
+    public static ErrorItem ExtraSpace(string expr, int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Rm_ExtraSpace,
+      Description = $"Не удалось распознать выражение: {expr}. Возможно присутствует лишний пробел."
+    };
+
+    /// <summary>
     /// Ошибка: левая или правая часть выражения пустая.
     /// </summary>
     /// <param name="left">Левая часть выражения.</param>

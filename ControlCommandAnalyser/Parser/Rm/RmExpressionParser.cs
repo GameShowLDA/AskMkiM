@@ -26,7 +26,7 @@ namespace ControlCommandAnalyser.Parser.Rm
         baseCommandModel.Errors.Add(RmErrors.EmptyCommandBody(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
       }
 
-      var expressions = SplitExpressions(rmBlock);
+      var expressions = SplitExpressions(rmBlock, ref baseCommandModel);
       var result = new List<RmPairModel>();
 
       foreach (var expr in expressions)
@@ -168,7 +168,7 @@ namespace ControlCommandAnalyser.Parser.Rm
     /// </summary>
     /// <param name="input">Текстовый блок.</param>
     /// <returns>Список выражений.</returns>
-    public static List<string> SplitExpressions(string input)
+    public static List<string> SplitExpressions(string input, ref RmCommandModel baseCommandModel)
     {
       var rawLines = input.Replace("\r", "").Split('\n');
       var result = new List<string>();
@@ -176,17 +176,22 @@ namespace ControlCommandAnalyser.Parser.Rm
       {
         if (line.Contains(" "))
         {
-          var splitedLine = line.Split(' ');
-          foreach (var line2 in splitedLine)
+          var splitedLines = line.Split(' ');
+          foreach (var splitedLine in splitedLines)
           {
-            if (!line2.Equals(string.IsNullOrEmpty))
+            if (!string.IsNullOrEmpty(splitedLine))
             {
-              var lineMatches = Regex.Matches(line2, @"[^=]+=[^=]+");
+              var lineMatches = Regex.Matches(splitedLine, @"[^=]+=[^=]+");
               foreach (Match m in lineMatches)
               {
                 var expr = m.Value.Trim();
                 if (!string.IsNullOrWhiteSpace(expr) && expr.Contains("=") && !expr.StartsWith("=") && !expr.EndsWith("="))
                   result.Add(expr);
+              }
+              if (lineMatches.Count == 0)
+              {
+                //TODO: создать новую ошиибку
+                baseCommandModel.Errors.Add(RmErrors.ExtraSpace(splitedLine, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
               }
             }
           }

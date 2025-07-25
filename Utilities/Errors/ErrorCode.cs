@@ -136,6 +136,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("RM007")]
     Rm_EmptyCommandBody,
 
+    /// <summary> При парсинге команды РМ найден лишний пробел. </summary>
+    [ErrorCodeTag("RM008")]
+    Rm_ExtraSpace,
+
     /// <summary> Не удалось корректно разобрать выражение в команде СИ. </summary>
     [ErrorCodeTag("SI001")]
     Si_CannotParseExpression,
