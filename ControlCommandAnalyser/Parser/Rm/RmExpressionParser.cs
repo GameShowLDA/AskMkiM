@@ -190,7 +190,6 @@ namespace ControlCommandAnalyser.Parser.Rm
               }
               if (lineMatches.Count == 0)
               {
-                //TODO: создать новую ошиибку
                 baseCommandModel.Errors.Add(RmErrors.ExtraSpace(splitedLine, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
               }
             }
@@ -229,7 +228,7 @@ namespace ControlCommandAnalyser.Parser.Rm
 
       LogDebug($"[ExpandAll] Processing expression: {expr}");
 
-      // Если выражение содержит квадратные скобки, пытаемся их обработать
+      // Если выражение содержит квадратные скобки, пытаемся их обработать TODO: ошибка если нашли []
       if (TryExpandBracketedRanges(expr, result))
       {
         LogDebug($"[ExpandAll] Bracketed range expanded: {expr} -> {string.Join(", ", result)}");
@@ -275,7 +274,17 @@ namespace ControlCommandAnalyser.Parser.Rm
       var compParts = expr.Split('.');
       if (compParts.Length > 1 && compParts.Any(p => p.Contains('-')))
       {
-        var ranges = compParts.Select(ExpandComponent).ToList();
+        if (!string.Equals(compParts.FirstOrDefault(p => p.Contains("-")), compParts.ElementAt(compParts.Length - 1)))
+        {
+          var dashElements = compParts.FirstOrDefault(p => p.Contains("-")).Split('-');
+          if(compParts.ElementAt(0).Equals(dashElements.ElementAt(1))&&
+            compParts.ElementAt(1).Equals(compParts.ElementAt(3)))
+          {
+            var newExpr = $"{compParts.ElementAt(0)}.{compParts.ElementAt(1)}.{dashElements.ElementAt(0)}-{compParts.ElementAt(4)}";
+            compParts = newExpr.Split('.');
+          }
+        }
+         var ranges = compParts.Select(ExpandComponent).ToList();
         foreach (var tuple in CartesianProduct(ranges))
           result.Add(string.Join(".", tuple));
         return true;
@@ -396,6 +405,24 @@ namespace ControlCommandAnalyser.Parser.Rm
     {
       part = part.Trim();
       var diap = Regex.Match(part, @"^([^\s/=]+)-([^\s/=]+)(?:\((\d+)\))?$");
+      if (diap.Success)
+      {
+        string from = diap.Groups[1].Value;
+        string to = diap.Groups[2].Value;
+        int step = diap.Groups[3].Success ? int.Parse(diap.Groups[3].Value) : 1;
+        return ExpandRange("", from, to, step);
+      }
+      else
+        return new List<string> { part };
+    }
+
+    /// <summary>
+    /// Расширяет компонент диапазона с расшренной записью (например, "1.1.1-1.1.100").
+    /// </summary>
+    public static List<string> ExpandExpandedComponent(string part)
+    {
+      part = part.Trim();
+      var diap = Regex.Match(part, @"^(\d+)\.(\d+)\.([^\s/=]+)-(\d+)\.(\d+)\.([^\s/=]+)(?:\((\d+)\))?$");
       if (diap.Success)
       {
         string from = diap.Groups[1].Value;
