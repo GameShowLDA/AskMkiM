@@ -140,6 +140,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("RM008")]
     Rm_ExtraSpace,
 
+    /// <summary> При парсинге команды РМ найдены недопустимые символы. </summary>
+    [ErrorCodeTag("RM009")]
+    Rm_UnacceptableSymbol,
+
     /// <summary> Не удалось корректно разобрать выражение в команде СИ. </summary>
     [ErrorCodeTag("SI001")]
     Si_CannotParseExpression,

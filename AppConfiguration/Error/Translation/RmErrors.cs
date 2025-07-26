@@ -13,7 +13,8 @@ namespace AppConfiguration.Error.Translation
     /// Ошибка: выражение не распознано.
     /// </summary>
     /// <param name="expr">Исходное выражение.</param>
-    /// <param name="model">Модель RM-команды.</param>
+    /// <param name="startLineNumber">Индекс символа строки,где начинается ошибка.</param>
+    /// <param name="command">Команда.</param>
     /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
     public static ErrorItem CannotParseExpression(string expr, int startLineNumber, string command) => new()
     {
@@ -35,6 +36,20 @@ namespace AppConfiguration.Error.Translation
       Command = command,
       Code = ErrorCode.Rm_ExtraSpace,
       Description = $"Не удалось распознать выражение: {expr}. Возможно присутствует лишний пробел."
+    };
+
+    /// <summary>
+    /// Ошибка: возможно присутствует лишний пробел.
+    /// </summary>
+    /// <param name="expr">Исходное выражение.</param>
+    /// <param name="model">Модель RM-команды.</param>
+    /// <returns>Экземпляр ошибки <see cref="ErrorItem"/>.</returns>
+    public static ErrorItem UnacceptableSymbol(string expr, int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Rm_UnacceptableSymbol,
+      Description = $"Обнаружены недопустимые символы в выражении: {expr}."
     };
 
     /// <summary>

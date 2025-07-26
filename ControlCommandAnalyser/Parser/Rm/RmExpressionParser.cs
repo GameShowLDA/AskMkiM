@@ -136,9 +136,9 @@ namespace ControlCommandAnalyser.Parser.Rm
       if (TryProcessGroupedRanges(left, right, middle, result, ref baseCommandModel))
         return;
 
-      var leftList = ExpandAll(left);
-      var rightList = ExpandAll(right);
-      var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle) : Enumerable.Repeat<string?>(null, leftList.Count).ToList();
+      var leftList = ExpandAll(left, ref baseCommandModel);
+      var rightList = ExpandAll(right, ref baseCommandModel);
+      var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle, ref baseCommandModel) : Enumerable.Repeat<string?>(null, leftList.Count).ToList();
 
       // Диагностика: выводим размеры списков
       LogDebug($"[ProcessExpression] Expanded Left: {string.Join(", ", leftList)} (Count: {leftList.Count})");
@@ -221,29 +221,17 @@ namespace ControlCommandAnalyser.Parser.Rm
     /// </summary>
     /// <param name="expr">Выражение для расширения.</param>
     /// <returns>Список расширенных значений.</returns>
-    public static List<string> ExpandAll(string expr)
+    public static List<string> ExpandAll(string expr, ref RmCommandModel baseCommandModel)
     {
       var result = new List<string>();
       expr = expr.Trim();
 
       LogDebug($"[ExpandAll] Processing expression: {expr}");
 
-      // Если выражение содержит квадратные скобки, пытаемся их обработать TODO: ошибка если нашли []
-      if (TryExpandBracketedRanges(expr, result))
+      
+      if (expr.Contains('[') || expr.Contains(']')||expr.Contains('"')||expr.Contains('$') || expr.Contains(','))
       {
-        LogDebug($"[ExpandAll] Bracketed range expanded: {expr} -> {string.Join(", ", result)}");
-        return result;
-      }
-
-      // Если выражение содержит запятые, разделяем его на части
-      if (expr.Contains(","))
-      {
-        var parts = expr.Split(',').Select(part => part.Trim()).ToList();
-        foreach (var part in parts)
-        {
-          result.AddRange(ExpandAll(part)); // Рекурсивно обрабатываем каждую часть
-        }
-        LogDebug($"[ExpandAll] Comma-separated values expanded: {expr} -> {string.Join(", ", result)}");
+        baseCommandModel.Errors.Add(RmErrors.UnacceptableSymbol(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return result;
       }
 
@@ -263,8 +251,6 @@ namespace ControlCommandAnalyser.Parser.Rm
       LogDebug($"[ExpandAll] Single value: {expr}");
       return result;
     }
-
-
 
     /// <summary>
     /// Пытается расширить составные диапазоны (например, "1.1-3.5").
@@ -291,6 +277,7 @@ namespace ControlCommandAnalyser.Parser.Rm
       }
       return false;
     }
+
     /// <summary>
     /// Пытается расширить диапазоны в квадратных скобках (например, "[1-3,5]" или "X[20,30]/1").
     /// </summary>
@@ -417,24 +404,6 @@ namespace ControlCommandAnalyser.Parser.Rm
     }
 
     /// <summary>
-    /// Расширяет компонент диапазона с расшренной записью (например, "1.1.1-1.1.100").
-    /// </summary>
-    public static List<string> ExpandExpandedComponent(string part)
-    {
-      part = part.Trim();
-      var diap = Regex.Match(part, @"^(\d+)\.(\d+)\.([^\s/=]+)-(\d+)\.(\d+)\.([^\s/=]+)(?:\((\d+)\))?$");
-      if (diap.Success)
-      {
-        string from = diap.Groups[1].Value;
-        string to = diap.Groups[2].Value;
-        int step = diap.Groups[3].Success ? int.Parse(diap.Groups[3].Value) : 1;
-        return ExpandRange("", from, to, step);
-      }
-      else
-        return new List<string> { part };
-    }
-
-    /// <summary>
     /// Генерирует декартово произведение списков.
     /// </summary>
     public static IEnumerable<List<string>> CartesianProduct(List<List<string>> sequences)
@@ -461,8 +430,8 @@ namespace ControlCommandAnalyser.Parser.Rm
     {
       // Регулярное выражение для левой части (диапазон чисел, например, "101-300")
       var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
-      // Регулярное выражение для правой части (составной диапазон, например, "1.[3,5].1-100")
-      var rightMatch = Regex.Match(right, @"^(\d+)\.\[([^\]]+)\]\.(\d+)-(\d+)$");
+      // Регулярное выражение для правой части (составной диапазон, например, "1.3.1-100")
+      var rightMatch = Regex.Match(right, @"^(\d+)\.(\d+)\.(\d+)-(\d+)$");
 
       if (leftMatch.Success && rightMatch.Success)
       {
