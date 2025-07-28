@@ -279,51 +279,6 @@ namespace ControlCommandAnalyser.Parser.Rm
     }
 
     /// <summary>
-    /// Пытается расширить диапазоны в квадратных скобках (например, "[1-3,5]" или "X[20,30]/1").
-    /// </summary>
-    private static bool TryExpandBracketedRanges(string expr, List<string> result)
-    {
-      var bracketRegex = new Regex(@"\[([^\[\]]+)\]");
-      var match = bracketRegex.Match(expr);
-      if (match.Success)
-      {
-        // Разделяем выражение на части: до скобок, содержимое скобок и после скобок
-        string prefix = expr.Substring(0, match.Index).Trim();
-        string suffix = expr.Substring(match.Index + match.Length).Trim();
-        var itemsRaw = match.Groups[1].Value.Split(',').Select(s => s.Trim());
-
-        // Создаем список для хранения промежуточных результатов
-        var expandedItems = new List<string>();
-
-        foreach (var item in itemsRaw)
-        {
-          // Если элемент внутри скобок является диапазоном, разворачиваем его
-          var diap = Regex.Match(item, @"^(\d+)-(\d+)$");
-          if (diap.Success)
-          {
-            int from = int.Parse(diap.Groups[1].Value);
-            int to = int.Parse(diap.Groups[2].Value);
-            int sign = to >= from ? 1 : -1;
-            for (int n = from; sign > 0 ? n <= to : n >= to; n += sign)
-            {
-              expandedItems.Add($"{prefix}{n}{suffix}");
-            }
-          }
-          else
-          {
-            // Если элемент не является диапазоном, добавляем его с префиксом и суффиксом
-            expandedItems.Add($"{prefix}{item}{suffix}");
-          }
-        }
-
-        // Добавляем все результаты в итоговый список
-        result.AddRange(expandedItems);
-        return true;
-      }
-      return false;
-    }
-
-    /// <summary>
     /// Пытается расширить диапазоны с разделителями (например, "X1/1-3").
     /// </summary>
     private static bool TryExpandDelimitedRanges(string expr, List<string> result)

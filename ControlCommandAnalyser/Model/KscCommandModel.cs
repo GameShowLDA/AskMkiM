@@ -6,7 +6,30 @@ using System.Threading.Tasks;
 
 namespace ControlCommandAnalyser.Model
 {
+  /// <summary>
+  /// Модель для команды КС (контроль сопротивения).
+  /// </summary>
+  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Б, ControlCommandAnalyser.AlgorithmKey.Д)]
   public class KscCommandModel : BaseCommandModel
   {
+    /// <summary>
+    /// Нижняя граница значеня сопротивления (например, "100<МОм")
+    /// </summary>
+    public string? LowerLimitResistance { get; set; }
+
+    /// <summary>
+    /// Верхняя граница значения сопротивления (например, "МОм<100").
+    /// </summary>
+    public string? HigherLimitResistance { get; set; }
+
+    /// <summary>
+    /// Значение времени (например, "1c").
+    /// </summary>
+    public string? Time { get; set; }
+
+    /// <summary>
+    /// Список точек измерения.
+    /// </summary>
+    public List<string> Points { get; set; } = new();
   }
 }
