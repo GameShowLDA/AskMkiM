@@ -23,7 +23,7 @@ namespace ControlCommandAnalyser.Parser.Kc
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
-      var model = new KscCommandModel
+      var model = new KsCommandModel
       {
         CommandNumber = commandNumber,
         Mnemonic = mnemonic,
@@ -67,22 +67,82 @@ namespace ControlCommandAnalyser.Parser.Kc
       }
 
       (lowerLimitResistance, higherLimitResistance, unit, remainder) = CommonParameterParser.ParseResistanceRange(remainder);
-      LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{lowerLimitResistance}', remainder='{remainder}'");
+      LoggerUtility.LogDebug($"После парсинга напряжения: нижняя граница сопртивления='{lowerLimitResistance}',верхняя граница сопртивления='{higherLimitResistance}', единица измерения = '{unit}' remainder='{remainder}'");
 
       (time, remainder) = CommonParameterParser.ParseTime(remainder);
       LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
 
-      //TODO: создать ошибки для КС
-
       if (string.IsNullOrWhiteSpace(lowerLimitResistance)&& string.IsNullOrWhiteSpace(higherLimitResistance))
       {
-        model.Errors.Add(SiErrors.CannotParseParameters("Не указано напряжение", numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
+        model.Errors.Add(KsErrors.EmptyResistance(numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
       }
 
       model.LowerLimitResistance = lowerLimitResistance;
       model.HigherLimitResistance = higherLimitResistance;
       model.Time = time;
+
+      if(!string.IsNullOrWhiteSpace(model.LowerLimitResistance))
+      {
+        model.LowerLimitResistance += " " + unit;
+      }
+
+      if(!string.IsNullOrWhiteSpace(model.HigherLimitResistance))
+      {
+        model.HigherLimitResistance += " " + unit;
+      }
+      var allPoints = new List<string>();
+      int starIdx = remainder.IndexOf('*');
+      if (starIdx >= 0)
+      {
+        string pointsPart = remainder.Substring(starIdx);
+        LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
+        allPoints.AddRange(PointParser.ParsePoints(pointsPart));
+        LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
+
+        remainder = remainder.Substring(0, starIdx).Trim();
+      }
+
+      for (int i = 1; i < lines.Count; i++)
+      {
+        var pointLine = lines[i].Trim();
+        if (!string.IsNullOrWhiteSpace(pointLine))
+        {
+          LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
+          var pointsBefore = allPoints.Count;
+          allPoints.AddRange(PointParser.ParsePoints(pointLine));
+          LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
+        }
+      }
+      model.Points = allPoints;
+
+      if (!string.IsNullOrEmpty(remainder))
+      {
+        model.UnparsedParameters = "! Не распознанные параметры: ";
+        model.UnparsedParameters += remainder;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
+      }
+
+      // Валидация
+      if (string.IsNullOrWhiteSpace(lowerLimitResistance) && string.IsNullOrWhiteSpace(higherLimitResistance) && string.IsNullOrWhiteSpace(time))
+      {
+        LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{firstLine}' (строка {numberLine})");
+        model.Errors.Add(KsErrors.CannotParseParameters(firstLine, numberLine, $"{commandNumber} {mnemonic}"));
+      }
+
+      if (model.Points.Count == 0)
+      {
+        LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
+        model.Errors.Add(KsErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
+      }
+      else
+      {
+        LoggerUtility.LogInformation($"Итого найдено точек: {model.Points.Count}");
+      }
+
+      AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
+
+      LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
     }

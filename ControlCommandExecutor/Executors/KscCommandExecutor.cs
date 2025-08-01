@@ -14,7 +14,7 @@ namespace ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context)
     {
-      var command = context.Command as KscCommandModel;
+      var command = context.Command as KsCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())

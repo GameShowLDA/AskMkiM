@@ -10,7 +10,7 @@ namespace ControlCommandAnalyser.Model
   /// Модель для команды КС (контроль сопротивения).
   /// </summary>
   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Б, ControlCommandAnalyser.AlgorithmKey.Д)]
-  public class KscCommandModel : BaseCommandModel
+  public class KsCommandModel : BaseCommandModel
   {
     /// <summary>
     /// Нижняя граница значеня сопротивления (например, "100<МОм")
@@ -31,5 +31,10 @@ namespace ControlCommandAnalyser.Model
     /// Список точек измерения.
     /// </summary>
     public List<string> Points { get; set; } = new();
+
+    /// <summary>
+    /// Остаток строки с нераспознанными параметрами.
+    /// </summary>
+    public string? UnparsedParameters { get; set; }
   }
 }

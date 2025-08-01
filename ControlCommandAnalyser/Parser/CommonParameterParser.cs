@@ -64,7 +64,8 @@ namespace ControlCommandAnalyser.Parser.Common
     /// </returns>
     public static (string? Min, string? Max, string? Unit, string Remainder) ParseResistanceRange(string input)
     {
-      var match = Regex.Match(input, @"(?:(?<low>\d+)\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)\s*<\s*(?<high>\d+)?", RegexOptions.IgnoreCase);
+      var match = Regex.Match(input, @"(?:(?<low>\d+)\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)(?:\s*<\s*(?<high>\d+))?", RegexOptions.IgnoreCase);
+
       if (match.Success)
       {
         string? min = match.Groups["low"].Success ? match.Groups["low"].Value : null;

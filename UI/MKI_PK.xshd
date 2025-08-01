@@ -149,17 +149,16 @@
 		<Rule color="Voltage">\s\d+\s*[ВVv]\b</Rule>
 
 		<!--Сопротивление-->
-		<Rule color="Resistance">\s\d+&lt;МОМ(\&lt;\d+)?</Rule>
-		<Rule color="Resistance">\s\d+&gt;МОМ</Rule>
-		<Rule color="Resistance">\sR&gt;\d+МОМ</Rule>
-		<Rule color="Resistance">\sМОМ&lt;\d+</Rule>
-		<Rule color="Resistance">\sМОМ&gt;\d+</Rule>
+		<!-- Универсальное правило -->
+		<Rule color="Resistance">(?i)\d+(\s?&lt;|\s?&gt;)?\s?(Ом|кОм|МОм|ГОм)</Rule>
 
-		<Rule color="Resistance">\s\d+&lt;ОМ(\&lt;\d+)?</Rule>
-		<Rule color="Resistance">\s\d+&gt;ОМ</Rule>
-		<Rule color="Resistance">\sR&gt;\d+ОМ</Rule>
-		<Rule color="Resistance">\sОМ&lt;\d+</Rule>
-		<Rule color="Resistance">\sОМ&gt;\d+</Rule>
+		<!-- Диапазон типа 94<кОм<106 -->
+		<Rule color="Resistance">(?i)\d+&lt;(Ом|кОм|МОм|ГОм)&lt;\d+</Rule>
+
+		<!-- Случаи с R> -->
+		<Rule color="Resistance">(?i)R&gt;\d+(Ом|кОм|МОм|ГОм)</Rule>
+
+
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" />

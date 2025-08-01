@@ -191,6 +191,18 @@ namespace Utilities.Errors
     /// <summary> Ключ не ожидается в данной команде. </summary>
     [ErrorCodeTag("KEY004")]
     Key_NotExpectedInThisCommand,
+
+    /// <summary> Не указаны границы сопротивления для команды КС. </summary>
+    [ErrorCodeTag("KS001")]
+    Ks_EmptyResistance,
+
+    /// <summary> Не удалось корректно разобрать параметры команды КС. </summary>
+    [ErrorCodeTag("KS002")]
+    Ks_CannotParseParameters,
+
+    /// <summary> В команде КС отсутствует список точек. </summary>
+    [ErrorCodeTag("KS003")]
+    Ks_EmptyPoints,
   }
 
   /// <summary>
