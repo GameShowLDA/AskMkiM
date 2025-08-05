@@ -1,17 +1,27 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                        xmlns:CustomControls="clr-namespace:UI.Components" 
+                    xmlns:CustomControls="clr-namespace:UI.Components" 
                     xmlns:SliderConcerter="clr-namespace:UI"
+                    xmlns:LocalizeConv="clr-namespace:UI.Localization"
+                    xmlns:LocalizeStrings="clr-namespace:UI.Localization"
                     >
 
     <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
+    <LocalizeConv:LocalizationConverter x:Key="Loc" />
+
+    <!--Локализация UI-->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_File" Key="menu.file" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Create" Key="menu.file.new" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Open" Key="menu.file.open" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Exit" Key="menu.file.exit" />
+
 
     <!-- Подключаем свои шрифты -->
     <FontFamily x:Key="WinstonBold">pack://application:,,,/UI;component/Resources/#Winston Bold</FontFamily>
     <FontFamily x:Key="WinstonLight">pack://application:,,,/UI;component/Resources/#Winston Light</FontFamily>
     <FontFamily x:Key="WinstonMedium">pack://application:,,,/UI;component/Resources/#Winston Medium</FontFamily>
     <FontFamily x:Key="WinstonRegular">pack://application:,,,/UI;component/Resources/#Winston Regular</FontFamily>
-    
+
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->
     <Color x:Key="LightPrimaryColor">#6a7689</Color>
