@@ -14,7 +14,7 @@ namespace ControlCommandAnalyser.Parser.KSC
 
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
-      var model = new KsCommandModel
+      var model = new KscCommandModel
       {
         CommandNumber = commandNumber,
         Mnemonic = mnemonic,

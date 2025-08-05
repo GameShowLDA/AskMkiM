@@ -34,8 +34,19 @@ namespace ControlCommandAnalyser.Parser.Kc
       if (lines == null || lines.Count == 0)
       {
         LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        model.Errors.Add(KsErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
         return model;
+      }
+
+      var errors = IndentationCheker.CheckIndentationErrors(lines, commandNumber, mnemonic);
+      if (errors.Count > 0)
+      {
+        foreach (var error in errors)
+        {
+          LoggerUtility.LogError(error);
+          model.Errors.Add(GeneralErrors.IndentationError(mnemonic, numberLine, $"{commandNumber} {mnemonic}"));
+          return model;
+        }
       }
 
       for (int i = 0; i < model.SourceLines.ToList().Count; i++)
@@ -57,13 +68,26 @@ namespace ControlCommandAnalyser.Parser.Kc
       string remainder = firstLine;
       string? lowerLimitResistance = null, higherLimitResistance = null, unit = null, time = null;
 
-      // сначала извлекаем ключи
-      model.AlgorithmKey = AlgorithmKeyParser.ExtractKeys(firstLine);
+      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(firstLine);
+
+      foreach (var (key, hasError) in result)
+      {
+        if (hasError)
+        {
+          LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+          model.Errors.Add(KsErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        }
+        else
+        {
+          model.AlgorithmKey.Add(key);
+          LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
+        }
+      }
 
       // затем удаляем их из строки
       foreach (var key in model.AlgorithmKey)
       {
-        remainder = firstLine.Replace(key, "", StringComparison.OrdinalIgnoreCase);
+        remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
       }
 
       (lowerLimitResistance, higherLimitResistance, unit, remainder) = CommonParameterParser.ParseResistanceRange(remainder);
@@ -72,7 +96,7 @@ namespace ControlCommandAnalyser.Parser.Kc
       (time, remainder) = CommonParameterParser.ParseTime(remainder);
       LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
 
-      if (string.IsNullOrWhiteSpace(lowerLimitResistance)&& string.IsNullOrWhiteSpace(higherLimitResistance))
+      if (string.IsNullOrWhiteSpace(lowerLimitResistance) && string.IsNullOrWhiteSpace(higherLimitResistance))
       {
         model.Errors.Add(KsErrors.EmptyResistance(numberLine, $"{commandNumber} {mnemonic}"));
         LoggerUtility.LogWarning($"Не указано сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
@@ -82,22 +106,41 @@ namespace ControlCommandAnalyser.Parser.Kc
       model.HigherLimitResistance = higherLimitResistance;
       model.Time = time;
 
-      if(!string.IsNullOrWhiteSpace(model.LowerLimitResistance))
+      if (!string.IsNullOrWhiteSpace(model.LowerLimitResistance))
       {
         model.LowerLimitResistance += " " + unit;
       }
 
-      if(!string.IsNullOrWhiteSpace(model.HigherLimitResistance))
+      if (!string.IsNullOrWhiteSpace(model.HigherLimitResistance))
       {
         model.HigherLimitResistance += " " + unit;
       }
+
+      if (HasInvalidParameterOrder(firstLine, model.AlgorithmKey, lowerLimitResistance ?? higherLimitResistance, time, out string err))
+      {
+        model.Errors.Add(GeneralErrors.InvalidParameterOrder(mnemonic, numberLine, $"{commandNumber} {mnemonic}", err));
+        LoggerUtility.LogWarning($"Ошибка порядка параметров (строка {numberLine}): {err}");
+        return model;
+      }
+
       var allPoints = new List<string>();
       int starIdx = remainder.IndexOf('*');
       if (starIdx >= 0)
       {
         string pointsPart = remainder.Substring(starIdx);
         LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
-        allPoints.AddRange(PointParser.ParsePoints(pointsPart));
+        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic);
+        allPoints.AddRange(pointsAndErrors.Item1);
+        if (pointsAndErrors.Item2.Count > 0)
+        {
+          foreach (var error in pointsAndErrors.Item2)
+          {
+            error.SourceLineNumber = numberLine;
+            error.Command = $"{commandNumber} {mnemonic}";
+            model.Errors.Add(error);
+            LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
+          }
+        }
         LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
 
         remainder = remainder.Substring(0, starIdx).Trim();
@@ -110,7 +153,18 @@ namespace ControlCommandAnalyser.Parser.Kc
         {
           LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
           var pointsBefore = allPoints.Count;
-          allPoints.AddRange(PointParser.ParsePoints(pointLine));
+          var pointsAndErrors = PointParser.ParsePoints(pointLine, mnemonic);
+          allPoints.AddRange(pointsAndErrors.Item1);
+          if (pointsAndErrors.Item2.Count > 0)
+          {
+            foreach (var error in pointsAndErrors.Item2)
+            {
+              error.SourceLineNumber = numberLine;
+              error.Command = $"{commandNumber} {mnemonic}";
+              model.Errors.Add(error);
+              LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
+            }
+          }
           LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
         }
       }
@@ -146,5 +200,72 @@ namespace ControlCommandAnalyser.Parser.Kc
 
       return model;
     }
+
+    public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? resistanceStart, string? time, out string errorDescription)
+    {
+      errorDescription = string.Empty;
+
+      int idxKey = -1;
+      int idxTime = -1;
+      int idxResistance = -1;
+      int idxPoint = firstLine.IndexOf('*');
+
+      // Позиция первого ключа
+      foreach (var key in algorithmKeys)
+      {
+        int idx = firstLine.IndexOf(key, StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0 && (idxKey == -1 || idx < idxKey))
+          idxKey = idx;
+      }
+
+      // Время
+      if (!string.IsNullOrWhiteSpace(time))
+      {
+        idxTime = firstLine.IndexOf(time, StringComparison.OrdinalIgnoreCase);
+      }
+
+      // Сопротивление
+      if (!string.IsNullOrWhiteSpace(resistanceStart))
+      {
+        idxResistance = firstLine.IndexOf(resistanceStart, StringComparison.OrdinalIgnoreCase);
+      }
+
+      // Проверка порядка
+      // - Ключ должен идти до времени
+      if (idxKey != -1 && idxTime != -1 && idxKey > idxTime)
+      {
+        errorDescription = "Ключ алгоритма указан после времени.";
+        return true;
+      }
+
+      // - Ключ должен идти до сопротивления
+      if (idxKey != -1 && idxResistance != -1 && idxKey > idxResistance)
+      {
+        errorDescription = "Ключ алгоритма указан после сопротивления.";
+        return true;
+      }
+
+      // - Время должно быть после сопротивления
+      if (idxTime != -1 && idxResistance != -1 && idxResistance > idxTime)
+      {
+        errorDescription = "Время указано до сопротивления.";
+        return true;
+      }
+
+      // - Все параметры должны быть до точек
+      if (idxPoint != -1)
+      {
+        if ((idxKey != -1 && idxKey > idxPoint)
+         || (idxTime != -1 && idxTime > idxPoint)
+         || (idxResistance != -1 && idxResistance > idxPoint))
+        {
+          errorDescription = "Один из параметров указан после точек.";
+          return true;
+        }
+      }
+
+      return false;
+    }
+
   }
 }

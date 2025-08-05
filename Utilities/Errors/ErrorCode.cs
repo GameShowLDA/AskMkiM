@@ -59,6 +59,17 @@ namespace Utilities.Errors
     [ErrorCodeTag("GEN011")]
     Gen_ConditionalJumpAfterInformationCu,
 
+    /// <summary> Недопустимые отступы в начале строки перед номером команды или наоборот отсутсвуют необходимые отступы в начале строки тела команды при переносе. </summary>
+    [ErrorCodeTag("GEN012")]
+    Gen_IndentationError,
+
+    /// <summary> Нарушен порядок параметров команды. </summary>
+    [ErrorCodeTag("GEN013")]
+    Gen_InvalidParameterOrder,
+
+    /// <summary> Неверне использование одиночной точки. </summary>
+    [ErrorCodeTag("GEN014")]
+    Gen_InvalidOnePointUse,
 
     /// <summary> В команде УП отсутствует или некорректно указана метка перехода. </summary>
     [ErrorCodeTag("UP001")]
@@ -203,6 +214,14 @@ namespace Utilities.Errors
     /// <summary> В команде КС отсутствует список точек. </summary>
     [ErrorCodeTag("KS003")]
     Ks_EmptyPoints,
+
+    /// <summary> В команде КС пустое тело метода. </summary>
+    [ErrorCodeTag("KS004")]
+    Ks_EmptyCommandBody,
+
+    /// <summary> В команде КС список точек указан до сопротивления. </summary>
+    [ErrorCodeTag("KS005")]
+    Ks_PointsBeforeResistance,
   }
 
   /// <summary>

@@ -45,7 +45,7 @@ namespace ControlCommandAnalyser.Parser.Common
       if (match.Success)
       {
         var resistance = match.Groups["value"].Value.Trim();
-        var remainder = input.Remove(match.Index, match.Length).Trim(' ', ',');
+        var remainder = input.Remove(match.Index, match.Length).Trim(' ');
         return (resistance, remainder);
       }
       return (null, input);
@@ -64,7 +64,10 @@ namespace ControlCommandAnalyser.Parser.Common
     /// </returns>
     public static (string? Min, string? Max, string? Unit, string Remainder) ParseResistanceRange(string input)
     {
-      var match = Regex.Match(input, @"(?:(?<low>\d+)\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)(?:\s*<\s*(?<high>\d+))?", RegexOptions.IgnoreCase);
+      var match = Regex.Match(input,
+                              @"(?:(?<low>\d+(?:[.,]\d+)?)\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)(?:\s*<\s*(?<high>\d+(?:[.,]\d+)?))?",
+                              RegexOptions.IgnoreCase);
+
 
       if (match.Success)
       {
@@ -72,7 +75,7 @@ namespace ControlCommandAnalyser.Parser.Common
         string? max = match.Groups["high"].Success ? match.Groups["high"].Value : null;
         string unit = match.Groups["unit"].Value;
 
-        string remainder = input.Remove(match.Index, match.Length).Trim(' ', ',');
+        string remainder = input.Remove(match.Index, match.Length).Trim(' ');
 
         return (min, max, unit, remainder);
       }
@@ -83,7 +86,8 @@ namespace ControlCommandAnalyser.Parser.Common
 
     public static (string? Time, string Remainder) ParseTime(string input)
     {
-      var match = Regex.Match(input, @"(?<value>\d+\s*[сc])", RegexOptions.IgnoreCase);
+      var match = Regex.Match(input, @"(?:,\s*(?<value>\d+\s*[сc]))", RegexOptions.IgnoreCase);
+
       if (match.Success)
       {
         var time = match.Groups["value"].Value.Trim();
