@@ -25,6 +25,7 @@
 		<Rule color="Mnemonic">\bКЦ\b</Rule>
 		<Rule color="Mnemonic">\bУП\b</Rule>
 		<Rule color="Mnemonic">\bКС\b</Rule>
+		<Rule color="Mnemonic">\bИЕ\b</Rule>
 		<Rule color="Mnemonic">\bЭТ\b</Rule>
 		<Rule color="Mnemonic">\bНЭ\b</Rule>
 
@@ -151,16 +152,16 @@
 		<!--Сопротивление-->
 
 		<!-- Диапазон типа 94<кОм<106 -->
-		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?&lt;(Ом|кОм|МОм|ГОм)&lt;\d+(?:[.,]\d+)?</Rule>
+		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?&lt;(?:Ом|кОм|МОм|ГОм|нф|мкф|пф)&lt;\d+(?:[.,]\d+)?</Rule>
 
 		<!-- Случаи с R> -->
-		<Rule color="Resistance">(?i)R&gt;\d+(?:[.,]\d+)?(Ом|кОм|МОм|ГОм)</Rule>
-		
+		<Rule color="Resistance">(?i)R&gt;\d+(?:[.,]\d+)?(Ом|кОм|МОм|ГОм|нф|мкф|пф)</Rule>
+
 		<!-- Универсальное правило -->
-		<Rule color="Resistance">(?i)(Ом|кОм|МОм|ГОм)&lt;\d+(?:[.,]\d+)?</Rule>
+		<Rule color="Resistance">(?i)(Ом|кОм|МОм|ГОм|нф|мкф|пф)&lt;\d+(?:[.,]\d+)?</Rule>
 
 		<!-- Универсальное правило — только с < -->
-		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?\s?&lt;\s?(Ом|кОм|МОм|ГОм)</Rule>
+		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?\s?&lt;\s?(Ом|кОм|МОм|ГОм|нф|мкф|пф)</Rule>
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" />
