@@ -107,7 +107,7 @@ namespace ControlCommandAnalyser.Parser.Common
         string? max = match.Groups["high"].Success ? match.Groups["high"].Value : null;
         string unit = match.Groups["unit"].Value;
 
-        string remainder = input.Remove(match.Index, match.Length).Trim(' ');
+        string remainder = input.Remove(match.Index, match.Length).Trim(' ', ',');
 
         return (min, max, unit, remainder);
       }

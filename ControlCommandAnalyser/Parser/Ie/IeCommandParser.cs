@@ -66,7 +66,7 @@ namespace ControlCommandAnalyser.Parser.Ie
         firstLine = match.Groups[1].Value.Trim();
 
       string remainder = firstLine;
-      string? lowerLimitCapacity = null, higherLimitCapacity = null, unit = null, time = null;
+      string? lowerLimitCapacity = null, higherLimitCapacity = null, unit = null;
 
       var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(firstLine);
 
@@ -112,7 +112,7 @@ namespace ControlCommandAnalyser.Parser.Ie
         model.HigherLimitCapacity += " " + unit;
       }
 
-      if (HasInvalidParameterOrder(firstLine, model.AlgorithmKey, lowerLimitCapacity ?? higherLimitCapacity, time, out string err))
+      if (HasInvalidParameterOrder(firstLine, model.AlgorithmKey, lowerLimitCapacity ?? higherLimitCapacity, out string err))
       {
         model.Errors.Add(GeneralErrors.InvalidParameterOrder(mnemonic, numberLine, $"{commandNumber} {mnemonic}", err));
         LoggerUtility.LogWarning($"Ошибка порядка параметров (строка {numberLine}): {err}");
@@ -174,7 +174,7 @@ namespace ControlCommandAnalyser.Parser.Ie
       }
 
       // Валидация
-      if (string.IsNullOrWhiteSpace(lowerLimitCapacity) && string.IsNullOrWhiteSpace(higherLimitCapacity) && string.IsNullOrWhiteSpace(time))
+      if (string.IsNullOrWhiteSpace(lowerLimitCapacity) && string.IsNullOrWhiteSpace(higherLimitCapacity))
       {
         LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{firstLine}' (строка {numberLine})");
         model.Errors.Add(KsErrors.CannotParseParameters(firstLine, numberLine, $"{commandNumber} {mnemonic}"));
@@ -197,12 +197,11 @@ namespace ControlCommandAnalyser.Parser.Ie
       return model;
     }
 
-    public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? resistanceStart, string? time, out string errorDescription)
+    public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? resistanceStart, out string errorDescription)
     {
       errorDescription = string.Empty;
 
       int idxKey = -1;
-      int idxTime = -1;
       int idxResistance = -1;
       int idxPoint = firstLine.IndexOf('*');
 
@@ -214,37 +213,16 @@ namespace ControlCommandAnalyser.Parser.Ie
           idxKey = idx;
       }
 
-      // Время
-      if (!string.IsNullOrWhiteSpace(time))
-      {
-        idxTime = firstLine.IndexOf(time, StringComparison.OrdinalIgnoreCase);
-      }
-
       // Сопротивление
       if (!string.IsNullOrWhiteSpace(resistanceStart))
       {
         idxResistance = firstLine.IndexOf(resistanceStart, StringComparison.OrdinalIgnoreCase);
       }
 
-      // Проверка порядка
-      // - Ключ должен идти до времени
-      if (idxKey != -1 && idxTime != -1 && idxKey > idxTime)
-      {
-        errorDescription = "Ключ алгоритма указан после времени.";
-        return true;
-      }
-
       // - Ключ должен идти до сопротивления
       if (idxKey != -1 && idxResistance != -1 && idxKey > idxResistance)
       {
-        errorDescription = "Ключ алгоритма указан после сопротивления.";
-        return true;
-      }
-
-      // - Время должно быть после сопротивления
-      if (idxTime != -1 && idxResistance != -1 && idxResistance > idxTime)
-      {
-        errorDescription = "Время указано до сопротивления.";
+        errorDescription = "Ключ алгоритма указан после электрической емкости.";
         return true;
       }
 
@@ -252,7 +230,6 @@ namespace ControlCommandAnalyser.Parser.Ie
       if (idxPoint != -1)
       {
         if ((idxKey != -1 && idxKey > idxPoint)
-         || (idxTime != -1 && idxTime > idxPoint)
          || (idxResistance != -1 && idxResistance > idxPoint))
         {
           errorDescription = "Один из параметров указан после точек.";
