@@ -120,6 +120,12 @@
   <data name="menu.file" xml:space="preserve">
     <value>Файл</value>
   </data>
+  <data name="menu.file.archive" xml:space="preserve">
+    <value>Архив</value>
+  </data>
+  <data name="menu.file.compare" xml:space="preserve">
+    <value>Сравнить</value>
+  </data>
   <data name="menu.file.exit" xml:space="preserve">
     <value>Выход</value>
   </data>
@@ -128,5 +134,89 @@
   </data>
   <data name="menu.file.open" xml:space="preserve">
     <value>Открыть</value>
+  </data>
+  <data name="menu.file.openfolder" xml:space="preserve">
+    <value>Открыть папку в проводнике</value>
+  </data>
+  <data name="menu.file.print" xml:space="preserve">
+    <value>Печать</value>
+  </data>
+  <data name="menu.file.save" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="menu.file.saveas" xml:space="preserve">
+    <value>Сохранить как...</value>
+  </data>
+  <data name="menu.file.search" xml:space="preserve">
+    <value>Поиск</value>
+  </data>
+  <data name="menu.test.metrology" xml:space="preserve">
+    <value>Метрология</value>
+  </data>
+  <data name="menu.test.metrology.ci" xml:space="preserve">
+    <value>Режим СИ</value>
+  </data>
+  <data name="menu.test.metrology.ie" xml:space="preserve">
+    <value>Режим ИЕ</value>
+  </data>
+  <data name="menu.test.metrology.knacw" xml:space="preserve">
+    <value>Режим КН (переменный)</value>
+  </data>
+  <data name="menu.test.metrology.kndcw" xml:space="preserve">
+    <value>Режим КН (постоянный)</value>
+  </data>
+  <data name="menu.test.metrology.ks" xml:space="preserve">
+    <value>Режим КС</value>
+  </data>
+  <data name="menu.test.metrology.piacw" xml:space="preserve">
+    <value>Режим ПИ (переменный)</value>
+  </data>
+  <data name="menu.test.metrology.pidcw" xml:space="preserve">
+    <value>Режим ПИ (постоянный)</value>
+  </data>
+  <data name="menu.test.metrology.pr" xml:space="preserve">
+    <value>Режим ПР</value>
+  </data>
+  <data name="menu.test.metrology.prt" xml:space="preserve">
+    <value>Режим ПР Т</value>
+  </data>
+  <data name="menu.test.selfcontrol" xml:space="preserve">
+    <value>Самоконтроль</value>
+  </data>
+  <data name="menu.test.selfcontrol.module" xml:space="preserve">
+    <value>Модуль</value>
+  </data>
+  <data name="menu.test.tests" xml:space="preserve">
+    <value>Тесты</value>
+  </data>
+  <data name="menu.test.tests.ci" xml:space="preserve">
+    <value>Тест СИ</value>
+  </data>
+  <data name="menu.test.tests.ci.group" xml:space="preserve">
+    <value>Групповой метод</value>
+  </data>
+  <data name="menu.test.tests.ci.node" xml:space="preserve">
+    <value>Метод узла</value>
+  </data>
+  <data name="menu.test.tests.cross.mkr" xml:space="preserve">
+    <value>Перекрёстный тест(МКР)</value>
+  </data>
+  <data name="menu.test.tests.piacw" xml:space="preserve">
+    <value>Тест ПИ на переменном токе</value>
+  </data>
+  <data name="menu.test.tests.piacw.group" xml:space="preserve">
+    <value>Групповой метод</value>
+  </data>
+  <data name="menu.test.tests.piacw.node" xml:space="preserve">
+    <value>Метод узла</value>
+  </data>
+  <data name="menu.test.tests.pidcw" xml:space="preserve">
+    <value>Тест ПИ на постоянном токе</value>
+  </data>
+  <data name="menu.test.tests.pidcw.group" xml:space="preserve">
+    <value>Групповой метод</value>
+  </data>
+  <data name="menu.test.tests.pidcw.node" xml:space="preserve">
+    <value>Метод узла</value>
   </data>
 </root>

@@ -9,18 +9,61 @@
     <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
     <LocalizeConv:LocalizationConverter x:Key="Loc" />
 
+    <!--#region Локализация -->
     <!--Локализация UI-->
+
+    <!--Меню файл-->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_File" Key="menu.file" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Create" Key="menu.file.new" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Open" Key="menu.file.open" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Exit" Key="menu.file.exit" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Archive" Key="menu.file.archive" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Save" Key="menu.file.save" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_SaveAs" Key="menu.file.saveas" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_OpenFolder" Key="menu.file.openfolder" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Print" Key="menu.file.print" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Search" Key="menu.file.search" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
 
+    <!--Меню-Испытания-Метрология-->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology" Key="menu.test.metrology" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KS" Key="menu.test.metrology.ks" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_IE" Key="menu.test.metrology.ie" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_CI" Key="menu.test.metrology.ci" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_PR" Key="menu.test.metrology.pr" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_PRT" Key="menu.test.metrology.prt" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_PIDCW" Key="menu.test.metrology.pidcw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_PIACW" Key="menu.test.metrology.piacw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KNDCW" Key="menu.test.metrology.kndcw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KNACW" Key="menu.test.metrology.knacw" />
 
-    <!-- Подключаем свои шрифты -->
+    <!--Меню-Испытания-Самоконтроль-->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl" Key="menu.test.selfcontrol" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl_Module" Key="menu.test.selfcontrol.module" />
+
+    <!-- Меню-Испытания-Тесты -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests" Key="menu.test.tests" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_CI" Key="menu.test.tests.ci" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_CI_Node" Key="menu.test.tests.ci.node" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_CI_Group" Key="menu.test.tests.ci.group" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIDCW" Key="menu.test.tests.pidcw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIDCW_Node" Key="menu.test.tests.pidcw.node" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIDCW_Group" Key="menu.test.tests.pidcw.group" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIACW" Key="menu.test.tests.piacw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIACW_Node" Key="menu.test.tests.piacw.node" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIACW_Group" Key="menu.test.tests.piacw.group" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_Cross_MKR" Key="menu.test.tests.cross.mkr" />
+    <!--#endregion-->
+
+    <!--#region Шрифты -->
     <FontFamily x:Key="WinstonBold">pack://application:,,,/UI;component/Resources/#Winston Bold</FontFamily>
     <FontFamily x:Key="WinstonLight">pack://application:,,,/UI;component/Resources/#Winston Light</FontFamily>
     <FontFamily x:Key="WinstonMedium">pack://application:,,,/UI;component/Resources/#Winston Medium</FontFamily>
     <FontFamily x:Key="WinstonRegular">pack://application:,,,/UI;component/Resources/#Winston Regular</FontFamily>
+    <!--#endregion-->
 
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->

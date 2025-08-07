@@ -70,6 +70,24 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Архив.
+        /// </summary>
+        internal static string menu_file_archive {
+            get {
+                return ResourceManager.GetString("menu.file.archive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сравнить.
+        /// </summary>
+        internal static string menu_file_compare {
+            get {
+                return ResourceManager.GetString("menu.file.compare", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Выход.
         /// </summary>
         internal static string menu_file_exit {
@@ -93,6 +111,258 @@ namespace UI.Localization {
         internal static string menu_file_open {
             get {
                 return ResourceManager.GetString("menu.file.open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Открыть папку в проводнике.
+        /// </summary>
+        internal static string menu_file_openfolder {
+            get {
+                return ResourceManager.GetString("menu.file.openfolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Печать.
+        /// </summary>
+        internal static string menu_file_print {
+            get {
+                return ResourceManager.GetString("menu.file.print", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сохранить.
+        /// </summary>
+        internal static string menu_file_save {
+            get {
+                return ResourceManager.GetString("menu.file.save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сохранить как....
+        /// </summary>
+        internal static string menu_file_saveas {
+            get {
+                return ResourceManager.GetString("menu.file.saveas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Поиск.
+        /// </summary>
+        internal static string menu_file_search {
+            get {
+                return ResourceManager.GetString("menu.file.search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Метрология.
+        /// </summary>
+        internal static string menu_test_metrology {
+            get {
+                return ResourceManager.GetString("menu.test.metrology", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим СИ.
+        /// </summary>
+        internal static string menu_test_metrology_ci {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.ci", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим ИЕ.
+        /// </summary>
+        internal static string menu_test_metrology_ie {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.ie", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим КН (переменный).
+        /// </summary>
+        internal static string menu_test_metrology_knacw {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.knacw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим КН (постоянный).
+        /// </summary>
+        internal static string menu_test_metrology_kndcw {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.kndcw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим КС.
+        /// </summary>
+        internal static string menu_test_metrology_ks {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.ks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим ПИ (переменный).
+        /// </summary>
+        internal static string menu_test_metrology_piacw {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.piacw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим ПИ (постоянный).
+        /// </summary>
+        internal static string menu_test_metrology_pidcw {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.pidcw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим ПР.
+        /// </summary>
+        internal static string menu_test_metrology_pr {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.pr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Режим ПР Т.
+        /// </summary>
+        internal static string menu_test_metrology_prt {
+            get {
+                return ResourceManager.GetString("menu.test.metrology.prt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Самоконтроль.
+        /// </summary>
+        internal static string menu_test_selfcontrol {
+            get {
+                return ResourceManager.GetString("menu.test.selfcontrol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Модуль.
+        /// </summary>
+        internal static string menu_test_selfcontrol_module {
+            get {
+                return ResourceManager.GetString("menu.test.selfcontrol.module", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Тесты.
+        /// </summary>
+        internal static string menu_test_tests {
+            get {
+                return ResourceManager.GetString("menu.test.tests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Тест СИ.
+        /// </summary>
+        internal static string menu_test_tests_ci {
+            get {
+                return ResourceManager.GetString("menu.test.tests.ci", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Групповой метод.
+        /// </summary>
+        internal static string menu_test_tests_ci_group {
+            get {
+                return ResourceManager.GetString("menu.test.tests.ci.group", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Метод узла.
+        /// </summary>
+        internal static string menu_test_tests_ci_node {
+            get {
+                return ResourceManager.GetString("menu.test.tests.ci.node", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Перекрёстный тест(МКР).
+        /// </summary>
+        internal static string menu_test_tests_cross_mkr {
+            get {
+                return ResourceManager.GetString("menu.test.tests.cross.mkr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Тест ПИ на переменном токе.
+        /// </summary>
+        internal static string menu_test_tests_piacw {
+            get {
+                return ResourceManager.GetString("menu.test.tests.piacw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Групповой метод.
+        /// </summary>
+        internal static string menu_test_tests_piacw_group {
+            get {
+                return ResourceManager.GetString("menu.test.tests.piacw.group", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Метод узла.
+        /// </summary>
+        internal static string menu_test_tests_piacw_node {
+            get {
+                return ResourceManager.GetString("menu.test.tests.piacw.node", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Тест ПИ на постоянном токе.
+        /// </summary>
+        internal static string menu_test_tests_pidcw {
+            get {
+                return ResourceManager.GetString("menu.test.tests.pidcw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Групповой метод.
+        /// </summary>
+        internal static string menu_test_tests_pidcw_group {
+            get {
+                return ResourceManager.GetString("menu.test.tests.pidcw.group", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Метод узла.
+        /// </summary>
+        internal static string menu_test_tests_pidcw_node {
+            get {
+                return ResourceManager.GetString("menu.test.tests.pidcw.node", resourceCulture);
             }
         }
     }
