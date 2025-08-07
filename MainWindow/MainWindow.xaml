@@ -194,7 +194,7 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Испытания" Tag="menuHeader_2" >
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Tag="menuHeader_2" >
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}" Name="Metrology" Style="{StaticResource SideMenuItemStyle}">
 
@@ -246,10 +246,10 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Выполнение" Tag="menuHeader_3" Name="Translation">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution}, Path=Value}" Tag="menuHeader_3" Name="Translation">
 
-                    <MenuItem Header="Трансляции" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}"/>
-                    <MenuItem Header="Запуск" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Build}, Path=Value}" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Run}, Path=Value}" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}"/>
 
                 </MenuItem>
 

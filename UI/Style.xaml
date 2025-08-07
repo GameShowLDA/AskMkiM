@@ -25,6 +25,7 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Search" Key="menu.file.search" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
 
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test" Key="menu.test" />
     <!--Меню-Испытания-Метрология-->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology" Key="menu.test.metrology" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KS" Key="menu.test.metrology.ks" />
@@ -56,6 +57,11 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIACW_Group" Key="menu.test.tests.piacw.group" />
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_Cross_MKR" Key="menu.test.tests.cross.mkr" />
+
+    <!-- Меню-Выполнение -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution" Key="menu.execution" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Build" Key="menu.execution.build" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Run" Key="menu.execution.run" />
     <!--#endregion-->
 
     <!--#region Шрифты -->

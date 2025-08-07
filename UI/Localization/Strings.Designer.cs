@@ -61,6 +61,33 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение.
+        /// </summary>
+        internal static string menu_execution {
+            get {
+                return ResourceManager.GetString("menu.execution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Трансляции.
+        /// </summary>
+        internal static string menu_execution_build {
+            get {
+                return ResourceManager.GetString("menu.execution.build", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Запуск.
+        /// </summary>
+        internal static string menu_execution_run {
+            get {
+                return ResourceManager.GetString("menu.execution.run", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Файл.
         /// </summary>
         internal static string menu_file {
@@ -156,6 +183,15 @@ namespace UI.Localization {
         internal static string menu_file_search {
             get {
                 return ResourceManager.GetString("menu.file.search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Исптания.
+        /// </summary>
+        internal static string menu_test {
+            get {
+                return ResourceManager.GetString("menu.test", resourceCulture);
             }
         }
         

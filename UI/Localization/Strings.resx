@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="menu.execution" xml:space="preserve">
+    <value>Выполнение</value>
+  </data>
+  <data name="menu.execution.build" xml:space="preserve">
+    <value>Трансляции</value>
+  </data>
+  <data name="menu.execution.run" xml:space="preserve">
+    <value>Запуск</value>
+  </data>
   <data name="menu.file" xml:space="preserve">
     <value>Файл</value>
   </data>
@@ -149,6 +158,9 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Поиск</value>
+  </data>
+  <data name="menu.test" xml:space="preserve">
+    <value>Исптания</value>
   </data>
   <data name="menu.test.metrology" xml:space="preserve">
     <value>Метрология</value>
