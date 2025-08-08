@@ -3,12 +3,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using AppConfiguration.Base;
-using DevZest.Windows.Docking;
 using ICSharpCode.AvalonEdit.Rendering;
 using Message;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
+using UI.Windows.WpfDocking.Windows.Docking;
+using static UI.Controls.Message.MessageBox;
 
 namespace UI.Components.MultiEditorMethods
 {

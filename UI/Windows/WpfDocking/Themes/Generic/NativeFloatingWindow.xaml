@@ -1,0 +1,111 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mwt="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
+    xmlns:common="clr-namespace:UI.Windows.WpfDocking.Windows"
+    xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
+    xmlns:DefaultGUI="clr-namespace:UI.Components" 
+    xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
+
+    <Style TargetType="DefaultGUI:WindowButtons">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Стиль для NativeFloatingWindow -->
+    <Style TargetType="{x:Type primitives:NativeFloatingWindow}">
+        <Setter Property="Left" Value="{Binding Path=Left, Mode=TwoWay}" />
+        <Setter Property="Top" Value="{Binding Path=Top, Mode=TwoWay}" />
+        <Setter Property="Width" Value="{Binding Path=Width, Mode=TwoWay}" />
+        <Setter Property="Height" Value="{Binding Path=Height, Mode=TwoWay}" />
+        <Setter Property="MinWidth" Value="800" />
+        <Setter Property="MinHeight" Value="600" />
+        <Setter Property="ResizeMode" Value="CanResize" />
+        <Setter Property="DoubleClickCommand" Value="{x:Static docking:DockCommands.ToggleFloating}" />
+
+        <!-- Шаблон окна -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type primitives:NativeFloatingWindow}">
+                    <AdornerDecorator>
+                        <Grid Background="Transparent">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                                
+                            <!-- Верхнее меню -->
+                            <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}">
+
+                                <i:Interaction.Behaviors>
+                                    <local:DragMoveBehavior />
+                                </i:Interaction.Behaviors>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                
+                                <DefaultGUI:WindowButtons 
+                                                x:Name="minimizeButton" 
+                                                ChoiceElement="Minimize" 
+                                                Grid.Column="1"
+                                                Size="40"
+                                                Command="{x:Static SystemCommands.MinimizeWindowCommand}" />
+
+
+                                    <DefaultGUI:WindowButtons 
+                                        Grid.Column="2"
+                                                Size="40"
+                                        
+                                                x:Name="maximizeButton"  
+                                                ChoiceElement="Maximize" 
+                                                Command="{x:Static SystemCommands.MaximizeWindowCommand}" />
+
+                                    <DefaultGUI:WindowButtons 
+                                        Grid.Column="3"
+                                                Size="40"
+                                        
+                                        x:Name="exitButton" ChoiceElement="Exit" 
+                                        Command="{x:Static SystemCommands.CloseWindowCommand}" />
+
+                                <Thumb x:Name="PART_DragThumb"
+                                       Grid.Column="0"
+                                       Background="{StaticResource SecondarySolidColorBrush}"
+                                       Height="30"
+                                       VerticalAlignment="Stretch"
+                                       HorizontalAlignment="Stretch"
+                                       IsHitTestVisible="True" />
+                            </Grid>
+
+                            <!-- Основной контент -->
+                            <ContentPresenter Content="{Binding DockTree}" Grid.Row="1"/>
+                        </Grid>
+                    </AdornerDecorator>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Триггеры при необходимости -->
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <!-- Дата-триггеры -->
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding CountOfVisiblePanes}" Value="1">
+                <Setter Property="Title" Value="{Binding FirstVisiblePane.SelectedItem.Title}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

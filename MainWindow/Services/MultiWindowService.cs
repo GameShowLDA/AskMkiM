@@ -1,8 +1,4 @@
-﻿using DevZest.Windows.Docking;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Xml.Linq;
+﻿using System.Windows.Controls;
 using UI.Components;
 using UI.Controls;
 using UI.Controls.TextEditor;

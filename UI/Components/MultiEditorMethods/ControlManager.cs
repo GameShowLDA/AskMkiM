@@ -1,5 +1,5 @@
 ﻿using AppConfiguration.Base;
-using DevZest.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking;
 using ICSharpCode.AvalonEdit;
 using System.Windows;
 using System.Windows.Input;

@@ -13,7 +13,7 @@ using UI.Components.MultiEditorMethods;
 using AppConfiguration.Base;
 using static UI.Components.Invoke.OpenFileButton;
 using UI.Controls;
-using DevZest.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking;
 
 namespace UI.Components
 {

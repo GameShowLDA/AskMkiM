@@ -1,4 +1,7 @@
 ﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using UI.Windows.WpfDocking.Windows.Docking;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;

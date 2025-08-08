@@ -3,10 +3,13 @@ using AppConfiguration.Base;
 using ControlCommandAnalyser;
 using DevZest.Windows.Docking;
 using Message;
+using System.Windows;
 using UI.Controls;
 using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
+using UI.Windows.WpfDocking.Windows.Docking;
+using static UI.Controls.Message.MessageBox;
 
 namespace MainWindowProgram.Services
 {
