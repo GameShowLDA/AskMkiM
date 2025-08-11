@@ -15,6 +15,7 @@ namespace AppConfiguration.Base
     /// Путь к файлу настроек протокола.
     /// </summary>
     static public string ProtocolConfigPath => ".\\Settings\\_protocol_config.yaml";
+    static public string ParameterConfigPath => ".\\Settings\\_parameter_config.yaml";
 
     /// <summary>
     /// Директория для сохранения данных.
