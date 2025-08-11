@@ -25,11 +25,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetDCVoltageModeAsync()
+    public async Task<bool> SetDCVoltageModeAsync()
     {
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -38,6 +38,8 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:DC");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?");
+      return answer.Contains("VOLT:DC");
     }
 
     /// <inheritdoc />

@@ -1,17 +1,19 @@
-﻿using AppConfiguration.Base;
+﻿using System.Windows;
+using AppConfiguration.Base;
 using ControlCommandAnalyser;
 using DevZest.Windows.Docking;
-using ICSharpCode.AvalonEdit;
-using System.Windows;
-using UI.Components;
-using UI.Components.MultiEditorMethods;
+using Message;
 using UI.Controls;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
 {
+  /// <summary>
+  /// Сервис трансляции команд из текстового редактора.
+  /// Обеспечивает распознавание команд, отображение результатов трансляции и работу с двумя редакторами: исходным и переводом.
+  /// </summary>
   public class TranslationServices
   {
     /// <summary>
@@ -24,6 +26,9 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly MainWindow _mainWindow;
 
+    /// <summary>
+    /// Сервис для работы с файлами.
+    /// </summary>
     private readonly FileService _fileService;
 
     /// <summary>
@@ -31,6 +36,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <param name="mainWindow">Главное окно приложения.</param>
     /// <param name="multiWindow">Сервис управления многооконным интерфейсом.</param>
+    /// <param name="fileService">Сервис  для работы с файлами.</param>
     public TranslationServices(MainWindow mainWindow, MultiWindowService multiWindow, FileService fileService)
     {
       _multiWindow = multiWindow;
@@ -44,50 +50,145 @@ namespace MainWindowProgram.Services
     /// в соответствии с успешностью распознавания.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
-    public async Task StartTranslationAsync()
+    public async Task BuildAsync()
     {
-      TextEditorUI editor = await _multiWindow.GetActiveTextEditor();
+      var editor = await _multiWindow.GetActiveTextEditor();
       var translationContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
       if (editor == null && translationContainer != null)
       {
-        var dockManager = translationContainer.GetDockControl();
-        if (dockManager != null)
-        {
-          var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
-          if (foundDockItem != null && foundDockItem.Content is TranslatorItem)
-          {
-            editor = (foundDockItem.Content as TranslatorItem).GetLeftEditor();
-            if (editor == null)
-            {
-              MessageBox.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-              return;
-            }
-            else
-            {
-              EditExistingTranslator(editor, foundDockItem);
-
-            }
-          }
-        }
+        await TryUpdateExistingTranslator(translationContainer);
+      }
+      else if (editor != null)
+      {
+        await TryCreateNewTranslator(editor);
       }
       else
       {
-        string text = editor.Text;
-
-        if (_multiWindow.RemoveActiveTextEditor(true))
-        {
-          await CreateNewTranslator(editor, text);
-        }
+        ShowEditorNotFoundError();
       }
     }
 
+    /// <summary>
+    /// Запускает процесс трансляции текущего открытого текста из редактора.
+    /// Выполняет распознавание команд, логирует результат и применяет подсветку
+    /// в соответствии с успешностью распознавания.
+    /// </summary>
+    /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
+    public async Task RunAsync()
+    {
+      var editor = await _multiWindow.GetActiveTextEditor();
+      var container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      if (container == null)
+      {
+        await BuildAsync();
+        editor = await _multiWindow.GetActiveTextEditor();
+        container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      }
+
+
+      if (container == null)
+      {
+        MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
+        return;
+      }
+
+      var dockManager = container.GetDockControl();
+      if (dockManager == null) return;
+
+      DockItem? foundDockItem = null;
+
+      // Ждём, пока хотя бы один DockItem появится
+      for (int i = 0; i < 500; i++) // максимум 500 мс
+      {
+        if (dockManager.DockItems.Count > 0)
+        {
+          foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+          if (foundDockItem != null)
+          {
+            break;
+          }
+        }
+        await Task.Delay(10);
+      }
+
+      if (foundDockItem?.Content is not TranslatorItem translator) return;
+
+      editor = translator.GetRightEditor();
+      if (editor == null)
+      {
+        ShowEditorNotFoundError();
+        return;
+      }
+
+      if (translator.ErrorCount > 0)
+      {
+         MessageBoxCustom.Show($"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
+        return;
+      }
+
+      var models = translator.TranslationModels;
+
+      await _multiWindow.DeleteTranslatorItem(translator, EditorType.Translator);
+
+      RunControl runControl = new RunControl();
+      runControl.SetLeftEditor(editor);
+
+      await _multiWindow.AddControlAsync("Выполнитель", runControl, TypeWindow.DeviceControl);
+      runControl.Start(models);
+
+    }
 
     /// <summary>
-    /// Редактирует содержимое текстового редактора с странслированным файлом.
+    /// Пытается создать новый транслятор, используя текст из указанного редактора.
     /// </summary>
-    /// <param name="editor">Текстовый редактор с файлом, который необходимо транслировать.</param>
-    /// <param name="foundDockItem">Вкладка с активным транслятором.</param>
+    /// <param name="editor">Редактор с исходным текстом.</param>
+    private async Task TryCreateNewTranslator(TextEditorUI editor)
+    {
+      string text = editor.Text;
+
+      if (_multiWindow.RemoveActiveTextEditor(true))
+      {
+        await CreateNewTranslator(editor, text);
+      }
+    }
+
+    /// <summary>
+    /// Пытается обновить существующий транслятор, если активен соответствующий элемент интерфейса.
+    /// </summary>
+    /// <param name="container">Контейнер, содержащий редактор трансляции.</param>
+    private async Task TryUpdateExistingTranslator(TextEditorContainer container)
+    {
+      var dockManager = container.GetDockControl();
+      if (dockManager == null) return;
+
+      var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (foundDockItem?.Content is not TranslatorItem translator) return;
+
+      var editor = translator.GetLeftEditor();
+      if (editor == null)
+      {
+        ShowEditorNotFoundError();
+        return;
+      }
+
+      EditExistingTranslator(editor, foundDockItem);
+    }
+
+    /// <summary>
+    /// Выводит сообщение об ошибке, если редактор не найден.
+    /// </summary>
+    private void ShowEditorNotFoundError()
+    {
+      MessageBoxCustom.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
+    }
+
+    /// <summary>
+    /// Обновляет существующий компонент транслятора на основе текста из заданного редактора.
+    /// Выполняет трансляцию команд и выводит результат во второй (правый) редактор.
+    /// </summary>
+    /// <param name="editor">Редактор с исходным текстом.</param>
+    /// <param name="foundDockItem">Док-элемент, содержащий компонент транслятора.</param>
     private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
       string text = editor.Text;
@@ -95,18 +196,22 @@ namespace MainWindowProgram.Services
 
       var manager = new CommandTranslationManager();
       var models = manager.ParseAllAndDisplay(text, translateEditor);
-      var item = (foundDockItem.Content as TranslatorItem);
-      item.SetRightEditor(translateEditor);
-      item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
-      item.TranslationModels = models;
+
+      if (foundDockItem.Content is TranslatorItem item)
+      {
+        item.SetRightEditor(translateEditor);
+        item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
+        item.TranslationModels = models;
+      }
     }
 
     /// <summary>
-    /// Создает новый экземпляр транслятора.
+    /// Создаёт новый компонент транслятора, содержащий редактор исходного текста и редактор результата трансляции.
+    /// Выполняет разбор команд и отображает результат трансляции.
     /// </summary>
-    /// <param name="editor">Текстовый редактор с файлом, который необходимо транслировать.</param>
-    /// <param name="text">Текст, который необходимо транслировать.</param>
-    /// <returns>Асинхронную задачу, представляющую собой результат выполнения.</returns>
+    /// <param name="editor">Редактор с исходным текстом.</param>
+    /// <param name="text">Текст, подлежащий трансляции.</param>
+    /// <returns>Асинхронная задача создания компонента транслятора.</returns>
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
     {
       var translateEditor = _fileService.CreateTranslationFileAsync();
@@ -114,6 +219,7 @@ namespace MainWindowProgram.Services
       {
         var manager = new CommandTranslationManager();
         var models = manager.ParseAllAndDisplay(text, translateEditor);
+
         EventAggregator.RaiseTextEditorActivated(editor);
 
         var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);

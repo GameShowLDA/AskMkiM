@@ -4,6 +4,8 @@ using Mode.Models;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 using static Utilities.LoggerUtility;
@@ -50,14 +52,12 @@ namespace Mode.Metrology.MeasurementSystem
       var relayRepo = new RelaySwitchModuleServices();
       var ukshRepo = new SwitchingDeviceServices();
 
-      var mkr1 = relayRepo.GetDevicesByNumberChassis(point1.DeviceNumber)
-       .FirstOrDefault(m => m.Number == point1.ModuleNumber);
+      var mkr1 = relayRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault(m => m.Number == point1.ModuleNumber);
       AddUniqueDevice(mode, mkr1);
 
       if (point1.DeviceNumber != point2.DeviceNumber || point1.ModuleNumber != point2.ModuleNumber)
       {
-        var mkr2 = relayRepo.GetDevicesByNumberChassis(point2.DeviceNumber)
-            .FirstOrDefault(m => m.Number == point2.ModuleNumber);
+        var mkr2 = relayRepo.GetDevicesByNumberChassis(point2.DeviceNumber).FirstOrDefault(m => m.Number == point2.ModuleNumber);
         AddUniqueDevice(mode, mkr2);
       }
 
@@ -138,7 +138,7 @@ namespace Mode.Metrology.MeasurementSystem
 
             if (device is IDevice connectableDevice)
             {
-              var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync();
+              var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync(protocolUI);
               if (!connected)
               {
                 return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
@@ -188,9 +188,9 @@ namespace Mode.Metrology.MeasurementSystem
     /// </summary>
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
-    public virtual async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+    public virtual async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
     {
-      await AppConfiguration.Services.UserMessageServiceProvider.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
     }
 
     /// <summary>
@@ -199,12 +199,12 @@ namespace Mode.Metrology.MeasurementSystem
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
     /// <param name="param">Электрическое значение.</param>
     /// <param name="protocolUI">Пользовательский элемент для вывода в протокол.</param>
-    public abstract Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI);
+    public abstract Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI);
 
     /// <summary>
     /// Завершает измерение, размыкает реле и отключает прибор.
     /// </summary>
-    public virtual async Task FinalizeMeasurement()
+    public virtual async Task FinalizeMeasurement(IUserMessageService messageService)
     {
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -285,9 +285,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <returns>Список модулей коммутации реле или null, если не найдено.</returns>
     public List<IRelaySwitchModule>? GetRelayModules(MetrologicalModeRole mode)
     {
-      return Devices.TryGetValue(mode, out var modules)
-          ? modules.OfType<IRelaySwitchModule>().ToList()
-          : null;
+      return Devices.TryGetValue(mode, out var modules) ? modules.OfType<IRelaySwitchModule>().ToList() : null;
     }
 
     /// <summary>
@@ -297,9 +295,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <returns>Устройство коммутации шин или null, если не найдено.</returns>
     public ISwitchingDevice? GetBusSwitcher(MetrologicalModeRole mode)
     {
-      return Devices.TryGetValue(mode, out var ukshs)
-          ? ukshs.OfType<ISwitchingDevice>().FirstOrDefault()
-          : null;
+      return Devices.TryGetValue(mode, out var ukshs) ? ukshs.OfType<ISwitchingDevice>().FirstOrDefault() : null;
     }
 
     /// <summary>
@@ -309,9 +305,7 @@ namespace Mode.Metrology.MeasurementSystem
     /// <returns>Модуль МИНТ или null, если не найдено.</returns>
     public IPowerSourceModule? GetMintModule(MetrologicalModeRole mode)
     {
-      return Devices.TryGetValue(mode, out var mints)
-          ? mints.OfType<IPowerSourceModule>().FirstOrDefault()
-          : null;
+      return Devices.TryGetValue(mode, out var mints) ? mints.OfType<IPowerSourceModule>().FirstOrDefault() : null;
     }
 
     /// <summary>
@@ -351,23 +345,31 @@ namespace Mode.Metrology.MeasurementSystem
 
       foreach (var relayModule in relayModules)
       {
-        await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
-        await relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.B1.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
       }
 
       if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
-        await busSwitcher.ConnectorManager.ConnectBreakdownTester();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
       }
       else
       {
         if (modeDevice == MetrologicalDeviceType.Mint)
         {
-          await mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1);
-          await mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1);
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToPositiveAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), protocolUI))
+            throw AppConfiguration.Error.Device.ModuleVoltageCurrent.BusExceptionFactory.ConnectPositiveFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString());
+
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToNegativeAsync(NewCore.Enum.DeviceEnum.SwitchingBus.B1), protocolUI))
+            throw AppConfiguration.Error.Device.ModuleVoltageCurrent.BusExceptionFactory.ConnectNegativeFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString());
         }
 
-        await busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectMultimeter(NewCore.Enum.DeviceEnum.SwitchingBusNew.AB1), protocolUI))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectMultiMeterFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
       }
     }
 
@@ -381,8 +383,11 @@ namespace Mode.Metrology.MeasurementSystem
     {
       await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек"), IsBlockStart: true);
 
-      await relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber);
-      await relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber);
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModules[0].PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.A, point1.PointNumber), protocolUI))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModules[0].Name, relayModules[0].NumberChassis, relayModules[0].Number);
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModules.Last().PointManager.ConnectRelayAsync(NewCore.Enum.DeviceEnum.BusPoint.B, point2.PointNumber), protocolUI))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModules.Last().Name, relayModules.Last().NumberChassis, relayModules.Last().Number);
     }
     #endregion
   }

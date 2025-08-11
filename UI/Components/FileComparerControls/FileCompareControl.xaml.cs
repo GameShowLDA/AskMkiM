@@ -1,14 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using System.IO;
-using System.IO.Packaging;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
 using System.Windows.Media;
+using Message;
+using Microsoft.Win32;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
-
 
 namespace UI.Components.FileComparerControls
 {
@@ -55,7 +53,7 @@ namespace UI.Components.FileComparerControls
 
       if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
       {
-        MessageBox.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBoxCustom.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Warning);
         LogInformation($"Отличия в файлах {this.FirstFilePath} и {this.SecondFilePath} не найдены");
         return;
       }
@@ -93,7 +91,7 @@ namespace UI.Components.FileComparerControls
         }
       }
     }
-    
+
     private void ToggleOrientation(object sender, MouseButtonEventArgs e)
     {
       bool toVertical = sender == LeftRight;
@@ -139,7 +137,7 @@ namespace UI.Components.FileComparerControls
         }
         else
         {
-          MessageBox.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+          MessageBoxCustom.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
           LogWarning("Попытка сравнить один и тот же файл");
         }
       }
@@ -176,7 +174,7 @@ namespace UI.Components.FileComparerControls
 
       if (this._fileComparer[0].Count == 0 && this._fileComparer[1].Count == 0)
       {
-        MessageBox.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBoxCustom.Show("Отличия в файлах не найдены", "Отличия не найдены", MessageBoxButton.OK, MessageBoxImage.Information);
         LogInformation($"Отличия в открытых файлах не найдены");
         return;
       }

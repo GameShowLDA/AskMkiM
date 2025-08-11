@@ -4,13 +4,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
-using AppConfiguration.Interface;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
+using Message;
 using UI.Components;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
@@ -31,6 +31,7 @@ namespace UI.Controls.TextEditor
       OPKW
     }
 
+    private ExecutionGlyphMargin _executionMargin;
     private FileType FileTypeDock { get; set; }
     public TextEditorModel TextEditorModel { get; set; }
 
@@ -115,7 +116,6 @@ namespace UI.Controls.TextEditor
       foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
     }
 
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
     /// </summary>
@@ -167,31 +167,44 @@ namespace UI.Controls.TextEditor
           LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
         }
 
+        if (_executionMargin == null)
+        {
+          _executionMargin = new ExecutionGlyphMargin(textEditor);
+          textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
+        }
+
       };
+
     }
+
+    /// <summary>
+    /// Установить маркер на указанную строку, очищая остальные.
+    /// </summary>
+    public void SetActiveLine(int lineNumber)
+    {
+      _executionMargin.SetActiveLine(lineNumber);
+    }
+
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-      // Отслеживаем Ctrl+M
       if (e.Key == Key.M && Keyboard.Modifiers == ModifierKeys.Control)
       {
         var now = DateTime.Now;
         if (_ctrlMPressed && (now - _lastCtrlMTime).TotalMilliseconds < CtrlMTimeoutMs)
         {
-          // Второе нажатие Ctrl+M — свернуть/развернуть текущий блок
           ToggleCurrentFolding();
           _ctrlMPressed = false;
           e.Handled = true;
         }
         else
         {
-          // Первое нажатие Ctrl+M
           _ctrlMPressed = true;
           _lastCtrlMTime = now;
           e.Handled = true;
         }
         return;
       }
-      // Если нажата любая другая клавиша — сбрасываем
+
       if (e.Key != Key.M)
       {
         _ctrlMPressed = false;
@@ -422,7 +435,7 @@ namespace UI.Controls.TextEditor
           }
           catch (Exception ex)
           {
-            MessageBox.Show($"Ошибка при открытии файла: {ex.Message}");
+            MessageBoxCustom.Show($"Ошибка при открытии файла: {ex.Message}", image: MessageBoxImage.Error);
           }
         }
       }

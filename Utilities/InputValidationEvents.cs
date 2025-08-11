@@ -112,7 +112,7 @@ namespace Utilities.Events
         return;
       }
 
-      var dispatcher = Application.Current?.Dispatcher;
+      var dispatcher = System.Windows.Application.Current?.Dispatcher;
 
       if (dispatcher != null && !dispatcher.CheckAccess())
       {

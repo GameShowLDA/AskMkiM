@@ -155,7 +155,14 @@ namespace MainWindowProgram.Services
       return Task.FromResult(foundContainer);
     }
 
-    /// <summary>
+
+    internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+     await _multiWindowControl.DeleteTranslatorItem(translatorItem, editorType);
+    }
+
+
+ /// <summary>
     /// Добавляет вкладку с транслятором.
     /// </summary>
     /// <param name="editor">Текстовый редактор с файлом, который необходимо транслировать.</param>

@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
+using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Parser.Common;
 
 namespace ControlCommandAnalyser.Model
 {
+
   /// <summary>
   /// Модель для команды СИ (сопротивление изоляции).
   /// </summary>
+  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К)]
   public class SiCommandModel : BaseCommandModel, IHasPoints
   {
     /// <summary>

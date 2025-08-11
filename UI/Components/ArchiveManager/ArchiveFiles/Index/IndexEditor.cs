@@ -1,17 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.IO.Compression;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
-using static Utilities.LoggerUtility;
 using System.Windows;
+using System.Windows.Controls;
+using Message;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.Models;
+using static Utilities.LoggerUtility;
+
 
 namespace UI.Components.ArchiveManager.ArchiveFiles.Index
 {
@@ -376,7 +373,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
       using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Update))
       {
         var indexEntry = archive.GetEntry(ArchiveSettings.IndexName);
-        JArray jsonArray;
 
         if (indexEntry == null)
         {
@@ -428,7 +424,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
             {
               Application.Current.Dispatcher.Invoke(() =>
               {
-                MessageBox.Show($"Ошибка при загрузке файлов: {ex.Message}");
+                MessageBoxCustom.Show($"Ошибка при загрузке файлов: {ex.Message}", image: MessageBoxImage.Error);
               });
               return false;
             }

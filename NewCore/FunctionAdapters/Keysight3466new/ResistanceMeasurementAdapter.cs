@@ -34,9 +34,9 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetResistanceModeAsync()
+    public async Task<bool> SetResistanceModeAsync()
     {
-      await _resistanceMeasurement.SetResistanceModeAsync();
+      var result = await _resistanceMeasurement.SetResistanceModeAsync();
 
       if (UserMessageServiceProvider.Instance != null)
       {
@@ -44,9 +44,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима измерения сопротивления",
-          true,
+          result,
           1);
       }
+
+      return result;
     }
   }
 }

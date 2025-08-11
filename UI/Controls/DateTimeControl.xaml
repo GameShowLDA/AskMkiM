@@ -5,15 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls"
              xmlns:Component="clr-namespace:UI.Components"
+             xmlns:Calendar ="clr-namespace:UI.Controls.Calendar"
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="160">
     <Grid>  
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/> 
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
         <Component:TimeControl x:Name="Time" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0"/>
-        <Component:DateControl x:Name="Date" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <Component:DateControl x:Name="Date" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+        <Popup x:Name="CalendarPopup"
+         Placement="Bottom"
+         StaysOpen="False"
+         AllowsTransparency="True">
+            <Border>
+                <Calendar:CalendarControl x:Name="CalendarControl" />
+            </Border>
+        </Popup>
     </Grid>
 </UserControl>

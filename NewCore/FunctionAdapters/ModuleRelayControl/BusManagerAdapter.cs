@@ -34,15 +34,11 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var description = $"{type} шины [{bus}]";
 
       var result = await _busManager.ConnectBusAsync(bus, lowVoltage);
-
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
           $"Подключение {description}",
           result,
           1);
-
-      if (!result)
-        throw BusExceptionFactory.ConnectFailed(description);
 
       return result;
     }
@@ -60,9 +56,6 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
           $"Отключение {description}",
           result,
           1);
-
-      if (!result)
-        throw BusExceptionFactory.DisconnectFailed(description);
 
       return result;
     }

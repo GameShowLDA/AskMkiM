@@ -5,6 +5,7 @@ using ConsoleUI.ConsoleLogic;
 using static Utilities.LoggerUtility;
 using System.Runtime.InteropServices;
 
+
 namespace MainWindowProgram
 {
   /// <summary>
@@ -23,7 +24,6 @@ namespace MainWindowProgram
       ES_CONTINUOUS = 0x80000000,
       ES_DISPLAY_REQUIRED = 0x00000002,
       ES_SYSTEM_REQUIRED = 0x00000001,
-      // ES_AWAYMODE_REQUIRED = 0x00000040 // если хочешь поддержать режим "away"
     }
 
     [DllImport("kernel32.dll")]
@@ -50,30 +50,27 @@ namespace MainWindowProgram
 
       try
       {
-        // 1. Создаём MainWindow (не показываем)
         var mainWindow = new MainWindow
         {
-            Visibility = Visibility.Hidden
+          Visibility = Visibility.Hidden
         };
 
-        // 2. Асинхронно инициализируем MainWindow
         await mainWindow.InitializeAsync();
-
-        // 3. Ждём завершения анимации SplashWindow
         await splashWindow.WaitForCloseAsync();
 
-        // 4. Показываем MainWindow
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
         mainWindow.Visibility = Visibility.Visible;
         mainWindow.Closed += (s, _) =>
         {
-            SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+          SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
         };
+
+        Application.Current.MainWindow = mainWindow;
       }
       catch (Exception ex)
       {
         LogException(ex, "Произошла ошибка запуска приложения.");
-        MessageBox.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        Message.MessageBoxCustom.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         Application.Current.Shutdown();
       }
     }

@@ -85,7 +85,7 @@ namespace ConsoleUtilities.Interactor
 
     private async Task InitializeModuleAsync(IRelaySwitchModule module)
     {
-      var result = await module.ConnectableManager.InitializeAsync();
+      var result = await module.ConnectableManager.InitializeAsync(null);
       if (result.Connect)
       {
         Console.ForegroundColor = ConsoleColor.Green;

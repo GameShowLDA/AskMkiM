@@ -2,6 +2,7 @@
 using NewCore.Base.DeviceResponses;
 using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using Utilities.Interface;
 using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
@@ -23,20 +24,19 @@ namespace NewCore.Function.DeviceBusCommutation
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       return await InitializeAsync();
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
-      await Task.Delay(100);
       return await ResetAsync();
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -76,16 +76,16 @@ namespace NewCore.Function.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
         return true;
       }
 
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
+      DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
       string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout:1000);
-      return result == "2.0.1";
+      return result.Contains("2.0.1");
     }
   }
 }

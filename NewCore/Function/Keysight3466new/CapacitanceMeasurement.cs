@@ -26,11 +26,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetCapacitanceModeAsync()
+    public async Task<bool> SetCapacitanceModeAsync()
     {
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -39,6 +39,8 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:CAP");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+      return answer.Contains("CAP");
     }
 
     /// <inheritdoc />

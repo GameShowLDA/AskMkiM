@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Message;
 
 namespace UI.Controls.GPT.Mode
 {
@@ -24,7 +25,7 @@ namespace UI.Controls.GPT.Mode
       try
       {
         var systemData = await GPTPunchControl.ModelGPT.IrManger.ReadConfigurationAsync();
-        
+
         // Заполняем элементы управления
         VoltageSlider.Value = systemData.Voltage / 1000.0; // Переводим напряжение из В в кВ
         RhiSlider.Value = Math.Round(systemData.HighResistanceLimit, 0); // Округляем до целого числа
@@ -41,7 +42,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при загрузке конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при загрузке конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -62,7 +63,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -121,7 +122,7 @@ namespace UI.Controls.GPT.Mode
       catch (Exception ex)
       {
         TestResultText.Text = $"Результат теста: ОШИБКА!";
-        MessageBox.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
   }

@@ -1,9 +1,14 @@
 ﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using System.Xml.Linq;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
 using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static NewCore.Enum.DeviceEnum;
@@ -113,7 +118,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
 
       if (!await GetIsIdleModeEnabled())
       {
-        await InitializeVoltageCurrentSourceAsync();
+        await InitializeVoltageCurrentSourceAsync(ProtocolSelfCheckControl);
       }
 
       await CheckVoltageLevelsAsync(0.1, 0.9, 0.1, 20, token);
@@ -131,14 +136,22 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     /// <summary>
     /// Инициализирует источник напряжения и тока.
     /// </summary>
-    private async Task InitializeVoltageCurrentSourceAsync()
+    private async Task InitializeVoltageCurrentSourceAsync(IUserMessageService messageService)
     {
       LogInformation("Инициализация источника напряжения и тока");
-      await switchingDevice.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1);
-      await moduleVoltageCurrentSource.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
-      await moduleVoltageCurrentSource.BusManager.ConnectBusToPositiveAsync(SwitchingBus.B2);
 
-      await meter.DcVoltageManager.MeasureDCVoltageAsync();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await switchingDevice.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1)), messageService))
+        throw new Exception("Ошибка подлкючения мультиметра на УКШ к шине AB1");
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await moduleVoltageCurrentSource.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2)), messageService))
+        throw new Exception("Ошибка подлкючения шины A2");
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await moduleVoltageCurrentSource.BusManager.ConnectBusToPositiveAsync(SwitchingBus.B2)), messageService))
+        throw new Exception("Ошибка подлкючения шины B2");
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await meter.DcVoltageManager.SetDCVoltageModeAsync()), messageService))
+        throw DcwExceptionFactory.SetModeFailed(meter.Name, meter.NumberChassis, meter.Number);
+
       await Task.Delay(40);
     }
 
@@ -159,7 +172,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
         double roundedVoltage = Math.Round(voltage, 1);
         await SetVoltageAndShowMessage(roundedVoltage);
         await SetVoltageIfNotIdle(roundedVoltage);
-        await MeasureAndCompareVoltage(roundedVoltage, delay, token);
+        await MeasureAndCompareVoltage(roundedVoltage, delay, token, ProtocolSelfCheckControl);
       }
     }
 
@@ -196,17 +209,20 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     /// <param name="voltage">Ожидаемое напряжение.</param>
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
-    private async Task MeasureAndCompareVoltage(double voltage, int delay, CancellationToken token)
+    private async Task MeasureAndCompareVoltage(double voltage, int delay, CancellationToken token, IUserMessageService userMessageService)
     {
       double tolerance = 0.0001;
       double firstNorm = voltage - (0.01 * voltage + 0.1);
       double lastNorm = voltage + (0.01 * voltage + 0.1);
 
-      await Task.Delay(40, token).ConfigureAwait(true);
-      double result = await GetMeasurementResult(voltage, delay, token);
+      await UserActionHelper.RunWithUserRepeatAsync(async () =>
+      {
+        double result = await GetMeasurementResult(voltage, delay, token);
 
-      bool error = !(result >= firstNorm - tolerance && result <= lastNorm + tolerance);
-      await ShowMeasurementResult(firstNorm, lastNorm, result, error);
+        bool error = !(result >= firstNorm - tolerance && result <= lastNorm + tolerance);
+        await ShowMeasurementResult(firstNorm, lastNorm, result, error);
+        return error;
+      }, userMessageService);
 
       await Task.Delay(1, token);
     }
@@ -244,7 +260,7 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     /// <param name="error">Флаг ошибки.</param>
     private async Task ShowMeasurementResult(double firstNorm, double lastNorm, double result, bool error)
     {
-      var messageType = !error ? MessageType.Success: MessageType.Error;
+      var messageType = !error ? MessageType.Success : MessageType.Error;
       var statusText = !error ? "В норме" : "Вне нормы";
       LogInformation($"Результат измерения: {result} В ({firstNorm} - {lastNorm}). Статус: {statusText}");
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\t\tРезультат измерений ({Math.Round(firstNorm, 2)} - {Math.Round(lastNorm, 2)})", null, Math.Round(result, 2).ToString(CultureInfo.CurrentCulture) + "\r\n", type: messageType));
@@ -257,9 +273,15 @@ namespace Mode.SelfControl.NewModule.ModuleVoltageCurrentSource
     private async Task ResetVoltageCurrentSourceAsync()
     {
       await moduleVoltageCurrentSource.CurrentManager.SetCurrentLevelAsync(0, 0);
-      await moduleVoltageCurrentSource.BusManager.DisconnectBusToPositiveAsync(SwitchingBus.A1);
-      await moduleVoltageCurrentSource.BusManager.DisconnectBusToNegativeAsync(SwitchingBus.B1);
-      await switchingDevice.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1);
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => moduleVoltageCurrentSource.BusManager.DisconnectBusToPositiveAsync(SwitchingBus.A1), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleVoltageCurrent.BusExceptionFactory.DisconnectPositiveFailed(SwitchingBus.A1.ToString());
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => moduleVoltageCurrentSource.BusManager.DisconnectBusToNegativeAsync(SwitchingBus.B1), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleVoltageCurrent.BusExceptionFactory.DisconnectNegativeFailed(SwitchingBus.B1.ToString());
+
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => switchingDevice.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectMultiMeterFailed(switchingDevice.Name, switchingDevice.NumberChassis, switchingDevice.Number);
     }
   }
 }

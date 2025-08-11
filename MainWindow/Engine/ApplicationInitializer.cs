@@ -70,6 +70,7 @@ namespace MainWindowProgram.Engine
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
       InfoMessageEvent += messageHandler.SetInfoMessage;
+      ClearMessageEvent += messageHandler.ClearMessage;
       LogInformation("Настройки инициализированы.");
     }
   }

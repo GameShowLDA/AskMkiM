@@ -2,7 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                         xmlns:CustomControls="clr-namespace:UI.Components" 
                     xmlns:SliderConcerter="clr-namespace:UI"
-                    
                     >
 
     <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
@@ -23,6 +22,7 @@
     <Color x:Key="IsCheckedColor">#1f242b</Color>
     <Color x:Key="RedColor">#b23a48</Color>
     <Color x:Key="GreenColor">#4b7765</Color>
+    <Color x:Key="YellowColor">#e69138</Color>
 
     <SolidColorBrush x:Key="LightPrimarySolidColorBrush" Color="{DynamicResource LightPrimaryColor}"/>
     <SolidColorBrush x:Key="PrimarySolidColorBrush" Color="{DynamicResource PrimaryColor}"/>
@@ -33,6 +33,7 @@
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="{DynamicResource IsCheckedColor}"/>
     <SolidColorBrush x:Key="RedColorSolidColorBrush" Color="{DynamicResource RedColor}"/>
     <SolidColorBrush x:Key="GreenColorSolidColorBrush" Color="{DynamicResource GreenColor}"/>
+    <SolidColorBrush x:Key="YellowColorSolidColorBrush" Color="{DynamicResource YellowColor}"/>
 
     <!--#region Стили метрологии -->
 

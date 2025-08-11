@@ -12,7 +12,7 @@
     <Grid>
         <Protocol:ProtocolUI x:Name="ProtocolUI" Header="СИ - Метод узла">
             <Protocol:ProtocolUI.ContentView>
-                <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" UnitElectrical=",ГОм"/>
+                <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" UnitElectrical=",МОм"/>
             </Protocol:ProtocolUI.ContentView>
         </Protocol:ProtocolUI>
     </Grid>

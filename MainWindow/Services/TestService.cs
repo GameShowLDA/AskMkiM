@@ -32,42 +32,42 @@ namespace MainWindowProgram.Services
     /// Добавляет элемент управления для теста методом узла СИ в multiEditors.
     /// </summary>
     public async Task AddCiNodeMethodControlAsync() =>
-      await _multiWindow.AddControlAsync("Метод узла СИ", new CiNodeMethodControl(), TypeWindow.DeviceControl);
+      _multiWindow.AddControlAsync("Метод узла СИ", new CiNodeMethodControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста методом узла ПИ(DCW) в multiEditors.
     /// </summary>
     public async Task AddPiDCWNodeMethodControlAsync() =>
-      await _multiWindow.AddControlAsync("Метод узла ПИ(DCW)", new PiDCWNodeMethodControl(), TypeWindow.DeviceControl);
+      _multiWindow.AddControlAsync("Метод узла ПИ(DCW)", new PiDCWNodeMethodControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста методом узла ПИ(ACW) в multiEditors.
     /// </summary>
     public async Task AddPiACWNodeMethodControlAsync() =>
-      await _multiWindow.AddControlAsync("Метод узла ПИ(ACW)", new PiACWNodeMethodControl(), TypeWindow.DeviceControl);
+      _multiWindow.AddControlAsync("Метод узла ПИ(ACW)", new PiACWNodeMethodControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом СИ в multiEditors.
     /// </summary>
     public async Task AddCiMethodExecutorControlAsync() =>
-      await _multiWindow.AddControlAsync("Групповой метод СИ", new CiMethodExecutor(), TypeWindow.DeviceControl);
+       _multiWindow.AddControlAsync("Групповой метод СИ", new CiMethodExecutor(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом ПИ(ACW) в multiEditors.
     /// </summary>
     public async Task AddPiACWMethodExecutorControlAsync() =>
-      await _multiWindow.AddControlAsync("Групповой метод ПИ(ACW)", new PiACWMethodExecutorControl(), TypeWindow.DeviceControl);
+       _multiWindow.AddControlAsync("Групповой метод ПИ(ACW)", new PiACWMethodExecutorControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом ПИ(DCW) в multiEditors.
     /// </summary>
     public async Task AddPiDCWMethodExecutorControlAsync() =>
-      await _multiWindow.AddControlAsync("Групповой метод ПИ(DCW)", new PiDCWMethodExecutorControl(), TypeWindow.DeviceControl);
+       _multiWindow.AddControlAsync("Групповой метод ПИ(DCW)", new PiDCWMethodExecutorControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для перекрёстного теста МКР в multiEditors.
     /// </summary>
     public async Task AddCrossTestMkrExecutorControlAsync() =>
-      await _multiWindow.AddControlAsync("Перекрёстный тест МКР", new CrossTestMkrControl(), TypeWindow.DeviceControl);
+       _multiWindow.AddControlAsync("Перекрёстный тест МКР", new CrossTestMkrControl(), TypeWindow.DeviceControl);
   }
 }

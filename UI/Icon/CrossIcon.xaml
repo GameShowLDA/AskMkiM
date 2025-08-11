@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="UI.Icon.CrossIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root"
+             Width="{Binding Size, ElementName=root}"
+             Height="{Binding Size, ElementName=root}">
+    <Viewbox Stretch="Fill">
+        <Grid Width="100" Height="100">
+            <Ellipse Fill="{Binding CircleColor, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                     Width="100" Height="100"/>
+            <Path Stroke="{Binding IconStrokeColor, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  StrokeThickness="16" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                  Data="M 30,30 L 70,70 M 70,30 L 30,70"/>
+        </Grid>
+    </Viewbox>
+</UserControl>

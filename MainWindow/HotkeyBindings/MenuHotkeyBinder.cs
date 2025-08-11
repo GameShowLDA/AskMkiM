@@ -1,4 +1,6 @@
 ﻿using DataBaseConfiguration;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,16 +11,16 @@ using static Utilities.LoggerUtility;
 namespace MainWindowProgram.HotkeyBindings
 {
   /// <summary>
-  /// Обеспечивает привязку горячих клавиш из базы данных к элементам меню.
+  /// Обеспечивает привязку горячих клавиш из базы данных к элементам меню и поддерживает иерархическую навигацию по Ctrl+X.
   /// </summary>
   public static class MenuHotkeyBinder
   {
+    private static MenuItem? _currentOpenMenu;
+    private static string? _currentUidPrefix;
+
     /// <summary>
     /// Привязывает горячие клавиши к пунктам меню, основываясь на Tag и ActionName.
     /// </summary>
-    /// <param name="window">Главное окно, в которое добавляются привязки.</param>
-    /// <param name="dataContext">Контекст данных, содержащий команды.</param>
-    /// <param name="context">Контекст базы данных с горячими клавишами.</param>
     public static void Attach(MainWindow window, object dataContext, AppDbContext context)
     {
       if (window.mainMenu != null)
@@ -41,9 +43,9 @@ namespace MainWindowProgram.HotkeyBindings
 
       var hotkeys = context.FileHotKeys.ToList();
       var converter = new KeyGestureConverter();
-      var menuItems = FindLogicalChildren<MenuItem>(window);
+      var menuItems = FindLogicalChildren<MenuItem>(window).ToList();
 
-      LogInformation($"▶ Найдено {menuItems.Count()} пунктов меню для анализа горячих клавиш.");
+      LogInformation($"▶ Найдено {menuItems.Count} пунктов меню для анализа горячих клавиш.");
 
       foreach (var menuItem in menuItems)
       {
@@ -78,14 +80,109 @@ namespace MainWindowProgram.HotkeyBindings
           LogWarning($"⚠️ Команда не найдена для пункта меню: {actionName}");
         }
       }
+
+      // Добавляем глобальную обработку Ctrl+Shift+N и Ctrl+N
+      ComponentDispatcher.ThreadPreprocessMessage += (ref MSG msg, ref bool handled) =>
+      {
+        ProcessHierarchyKeyCombination(menuItems, msg, ref handled);
+      };
     }
 
     /// <summary>
-    /// Глобально привязывает горячую клавишу Ctrl+Shift+[номер] к пункту верхнего меню.
-    /// При нажатии горячей клавиши меню раскрывается и подсвечивается, как при нажатии Alt.
+    /// Обрабатывает Ctrl+Shift+N и Ctrl+N по иерархии Uid.
     /// </summary>
-    /// <param name="window">Главное окно приложения.</param>
-    /// <param name="menuItem">Пункт меню верхнего уровня, к которому привязывается горячая клавиша.</param>
+    private static void ProcessHierarchyKeyCombination(List<MenuItem> allItems, MSG msg, ref bool handled)
+    {
+      const int WM_KEYDOWN = 0x0100;
+      const int WM_SYSKEYDOWN = 0x0104;
+
+      if (msg.message != WM_KEYDOWN && msg.message != WM_SYSKEYDOWN)
+        return;
+
+      var key = KeyInterop.KeyFromVirtualKey((int)msg.wParam);
+
+      // Ctrl+Shift+N — открыть верхнее меню
+      if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+      {
+        if (key >= Key.D1 && key <= Key.D9)
+        {
+          string uid = (key - Key.D0).ToString();
+          var target = GetMenuItemByUid(allItems, uid);
+          if (target != null)
+          {
+            CloseAllMenus(allItems);
+            target.IsSubmenuOpen = true;
+            target.Focus();
+            _currentOpenMenu = target;
+            _currentUidPrefix = uid;
+            handled = true;
+
+            LogInformation($"📂 Открыт верхний пункт меню с Uid={uid}");
+          }
+        }
+      }
+      // Ctrl+N — открыть или выполнить подпункт
+      else if (Keyboard.Modifiers == ModifierKeys.Control && _currentOpenMenu != null)
+      {
+        if (key >= Key.D1 && key <= Key.D9)
+        {
+          string uid = $"{_currentUidPrefix}.{(key - Key.D0)}";
+          var children = _currentOpenMenu.Items.OfType<MenuItem>().ToList();
+          var child = GetMenuItemByUid(children, uid);
+
+          if (child != null)
+          {
+            TryExecuteOrOpen(allItems, child);
+            handled = true;
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// Пытается выполнить команду меню или открыть подменю.
+    /// </summary>
+    private static void TryExecuteOrOpen(List<MenuItem> allItems, MenuItem menuItem)
+    {
+      if (menuItem.HasItems)
+      {
+        menuItem.IsSubmenuOpen = true;
+        menuItem.Focus();
+        _currentOpenMenu = menuItem;
+        _currentUidPrefix = menuItem.Uid;
+
+        LogInformation($"📂 Открыт вложенный пункт меню с Uid={menuItem.Uid}");
+      }
+      else if (menuItem.Command != null && menuItem.Command.CanExecute(null))
+      {
+        menuItem.Command.Execute(null);
+        ResetMenuState();
+        CloseAllMenus(allItems);
+
+        LogInformation($"✅ Выполнена команда из пункта меню с Uid={menuItem.Uid}");
+      }
+    }
+
+    /// <summary>
+    /// Сброс текущей иерархии.
+    /// </summary>
+    private static void ResetMenuState()
+    {
+      _currentOpenMenu = null;
+      _currentUidPrefix = null;
+    }
+
+    /// <summary>
+    /// Находит MenuItem с указанным Uid.
+    /// </summary>
+    private static MenuItem? GetMenuItemByUid(IEnumerable<MenuItem> items, string uid)
+    {
+      return items.FirstOrDefault(m => m.Uid == uid);
+    }
+
+    /// <summary>
+    /// Привязывает Ctrl+Shift+N к раскрытию верхнего уровня по Tag.
+    /// </summary>
     private static void BindHotkeyToMenuItem(MainWindow window, MenuItem menuItem)
     {
       if (menuItem.Tag is not string tag)
@@ -122,12 +219,10 @@ namespace MainWindowProgram.HotkeyBindings
 
               menuItem.Dispatcher.Invoke(() =>
               {
-                // Найдём родительский Menu, чтобы отдать фокус
                 var parentMenu = FindParent<Menu>(menuItem);
-                parentMenu?.Focus(); // Фокус на всё меню
-
-                menuItem.Focus();    // Фокус на конкретный пункт
-                menuItem.IsSubmenuOpen = true; // Открываем
+                parentMenu?.Focus();
+                menuItem.Focus();
+                menuItem.IsSubmenuOpen = true;
               });
 
               handled = true;
@@ -139,6 +234,15 @@ namespace MainWindowProgram.HotkeyBindings
       {
         LogDebug($"Тег {tag} не соответствует шаблону menuHeader_X");
       }
+    }
+
+    /// <summary>
+    /// Закрывает все раскрытые меню.
+    /// </summary>
+    private static void CloseAllMenus(IEnumerable<MenuItem> items)
+    {
+      foreach (var item in items)
+        item.IsSubmenuOpen = false;
     }
 
     /// <summary>
@@ -174,5 +278,77 @@ namespace MainWindowProgram.HotkeyBindings
         }
       }
     }
+    public static void RenumberVisibleMenuItemsWithUid(MenuItem menuItem, string uidPrefix)
+    {
+      if (!menuItem.HasItems)
+        return;
+
+      int index = 1;
+
+      foreach (var item in menuItem.Items.OfType<MenuItem>())
+      {
+        if (item is not MenuItem mi)
+          continue;
+
+        if (mi.Visibility == Visibility.Visible && index <= 9)
+        {
+          string baseText = StripHeaderText(mi.Header?.ToString());
+          mi.Header = $"{index}. {baseText}";
+          mi.Uid = $"{uidPrefix}.{index}";
+
+          if (mi.HasItems)
+            RenumberVisibleMenuItemsWithUid(mi, mi.Uid);
+
+          index++;
+        }
+        else
+        {
+          // Очистка Uid и Header, чтобы не участвовали в логике
+          mi.Uid = string.Empty;
+          mi.Header = StripHeaderText(mi.Header?.ToString());
+
+          if (mi.HasItems)
+            RenumberVisibleMenuItemsWithUid(mi, string.Empty);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Убирает нумерацию (например, "1. Архив" → "Архив").
+    /// </summary>
+    private static string StripHeaderText(string? header)
+    {
+      if (string.IsNullOrWhiteSpace(header))
+        return string.Empty;
+
+      var dotIndex = header.IndexOf('.');
+      if (dotIndex >= 0 && dotIndex + 1 < header.Length)
+        return header.Substring(dotIndex + 1).Trim();
+
+      return header.Trim();
+    }
+
+    /// <summary>
+    /// Подключает автоматическую нумерацию всех верхних пунктов меню при открытии.
+    /// </summary>
+    /// <param name="menu">Главное меню, например mainMenu.</param>
+    public static void BindAutoRenumbering(Menu menu)
+    {
+      var topLevelItems = menu.Items.OfType<MenuItem>().ToList();
+
+      for (int i = 0; i < topLevelItems.Count; i++)
+      {
+        var topMenuItem = topLevelItems[i];
+        string uidPrefix = (i + 1).ToString();
+
+        topMenuItem.Uid = uidPrefix;
+
+        topMenuItem.SubmenuOpened += (_, _) =>
+        {
+          MenuHotkeyBinder.RenumberVisibleMenuItemsWithUid(topMenuItem, uidPrefix);
+        };
+      }
+    }
+
   }
 }

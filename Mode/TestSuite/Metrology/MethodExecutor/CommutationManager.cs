@@ -1,5 +1,7 @@
 ﻿using NewCore.Base.Interface.Main;
+using NewCore.Device;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using static NewCore.Enum.DeviceEnum;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor
@@ -35,14 +37,18 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
         throw new InvalidOperationException("Коммутационное устройство или ППУ не найдены в списке устройств.");
       }
 
-      await busSwitcher.ConnectorManager.ConnectBreakdownTester();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(), protocolUI))
+        throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
 
       var relayModules = _devices.OfType<IRelaySwitchModule>().ToList();
 
       foreach (var module in relayModules)
       {
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1), protocolUI))
+          throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
       }
     }
   }

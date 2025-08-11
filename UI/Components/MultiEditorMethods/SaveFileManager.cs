@@ -4,11 +4,11 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
 using DevZest.Windows.Docking;
+using Message;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
 using Path = System.IO.Path;
 
 namespace UI.Components.MultiEditorMethods
@@ -34,7 +34,7 @@ namespace UI.Components.MultiEditorMethods
       var needToSave = fileManager.CompareFiles(control);
       if (needToSave)
       {
-        result = MessageBox.Show(
+        result = MessageBoxCustom.Show(
             $"Сохранить файл {control.Title} перед закрытием?",
             "Подтверждение",
             MessageBoxButton.YesNo,
@@ -195,11 +195,8 @@ namespace UI.Components.MultiEditorMethods
         File.WriteAllText(filePath, fileData);
       }
       LogInformation($"Файл {filePath} сохранен");
-      MessageBox.Show($"Файл {filePath} сохранен");
+      MessageBoxCustom.Show($"Файл {filePath} сохранен", image: MessageBoxImage.Information);
       return true;
-      //}
-
-      //return false;
     }
 
     /// <summary>

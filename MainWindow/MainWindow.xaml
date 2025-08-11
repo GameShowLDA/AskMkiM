@@ -19,6 +19,8 @@
         MinWidth="800"
         MinHeight="600"
         WindowState="Maximized"
+        
+        Name="MainWinApp"
         >
     <Window.Resources>
 
@@ -33,7 +35,7 @@
         </Style>
 
         <Style TargetType="{x:Type MenuItem}">
-            
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
@@ -78,7 +80,7 @@
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
             <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
             <Setter Property="Cursor" Value="Hand"/>
-            
+
         </Style>
 
         <Style x:Key="SideMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -169,7 +171,7 @@
             <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0">
 
-                <MenuItem Header="Файл" Name="File" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1" >
+                <MenuItem Header="Файл" Name="File" Uid="1" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
 
                     <MenuItem Header="Архив" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
@@ -190,59 +192,65 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Метрология" Name="Metrology" Tag="menuHeader_2">
+                <MenuItem Header="Испытания" Tag="menuHeader_2" >
 
-                    <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
-                    <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
-                    <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
-                    <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
-                    <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
-                    <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
-                    <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
-                    <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
+                    <MenuItem Header="Метрология" Name="Metrology" Style="{StaticResource SideMenuItemStyle}">
 
-                </MenuItem>
-
-                <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
-
-                    <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
-
-                </MenuItem>
-
-                <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4">
-
-                    <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
+                        <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
+                        <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
+                        <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
+                        <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
+                        <MenuItem Header="Режим ПР Т" Name="ModePrMenuItemT" Command="{Binding Metrology.PR_TCommand}" />
+                        <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
+                        <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
+                        <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
+                        <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
 
                     </MenuItem>
 
-                    <MenuItem Header="Тест ПИ на постоянном токе" Style="{StaticResource SideMenuItemStyle}">
+                    <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3" Style="{StaticResource SideMenuItemStyle}">
 
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
-
-                    </MenuItem>
-
-                    <MenuItem Header="Тест ПИ на переменном токе" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
+                        <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
 
                     </MenuItem>
 
-                    <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
-                        <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+                    <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
+
+                        <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}" >
+
+                            <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
+                            <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="Тест ПИ на постоянном токе" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
+                            <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="Тест ПИ на переменном токе" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
+                            <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="Перекрёстный тест(МКР)" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+
                     </MenuItem>
 
                 </MenuItem>
 
-                <MenuItem Header="Трансляция" Name="Translation" Tag="menuHeader_5">
-                    <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
+                <MenuItem Header="Выполнение" Tag="menuHeader_3" Name="Translation">
+
+                    <MenuItem Header="Трансляции" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}"/>
+                    <MenuItem Header="Запуск" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}"/>
+
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_6">
+                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_4">
 
                     <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
                     <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
@@ -277,7 +285,6 @@
                     </MenuItem>
 
                 </MenuItem>
-
 
             </Menu>
 
@@ -339,6 +346,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -349,7 +357,7 @@
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
 				/>
 
-            
+
             <Controls:StatusBarControl
                 Grid.Column="1" 
                 x:Name="StatusBar"
@@ -360,16 +368,23 @@
 
             <Controls:DateTimeControl Opacity="0.7"
                 x:Name="TimeBlock" 
+                Margin="0,0,10,0" 
+                FontSize="13" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                Grid.Column="3" 
+                Cursor="Hand"
+				/>
+
+            <Components:KeyboardLayoutComponent Opacity="0.7"
+                x:Name="LanguageBlock" 
                 VerticalAlignment="Center" 
-                Margin="10,0,20,0" 
                 FontSize="15" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="2" 
-                HorizontalAlignment="Right"
 				/>
 
             <DefaultGUI:PowerButton
-                Grid.Column="3" 
+                Grid.Column="4" 
                 Width="200"
                 Name="PowerButton"
                 />

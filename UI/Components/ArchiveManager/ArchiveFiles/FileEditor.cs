@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using System.IO;
 using System.IO.Compression;
 using System.Windows;
-using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
-using YamlDotNet.Serialization;
-using static Utilities.LoggerUtility;
+using Message;
 using Microsoft.Win32;
-using System.IO;
+using Newtonsoft.Json;
+using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
+using YamlDotNet.Serialization;
+using static Utilities.LoggerUtility;
 
 
 namespace UI.Components.ArchiveManager.ArchiveFiles
@@ -90,7 +91,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
         }
         else
         {
-          MessageBox.Show("Файл с таким именем уже существует в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          MessageBoxCustom.Show("Файл с таким именем уже существует в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
           LogInformation("Файл с таким именем уже существует в архиве");
           return false;
         }
@@ -355,7 +356,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
           string filePath = saveFileDialog.FileName;
           File.WriteAllText(filePath, content);
           LogInformation($"Файл {foundOpkPath} считан и записан.");
-          MessageBox.Show($"Файл {fileName}.pk успешно сохранен!", "Файл сохранен", MessageBoxButton.OK, MessageBoxImage.Information);
+          MessageBoxCustom.Show($"Файл {fileName}.pk успешно сохранен!", "Файл сохранен", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {

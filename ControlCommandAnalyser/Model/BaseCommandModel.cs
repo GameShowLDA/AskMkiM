@@ -31,5 +31,16 @@ namespace ControlCommandAnalyser.Model
     /// Номер строки, с которой начинается команда (в исходном тексте).
     /// </summary>
     public int StartLineNumber { get; set; }
+
+    /// <summary>
+    /// Номер строки, с которой начинается команда в отформатированном (трансляционном) тексте.
+    /// Проставляется после форматирования.
+    /// </summary>
+    public int FormattedStartLineNumber { get; set; } = -1;
+
+    /// <summary>
+    /// Ключи алгоритма проверки, указанные в команде.
+    /// </summary>
+    public List<string> AlgorithmKey { get; set; } = new();
   }
 }

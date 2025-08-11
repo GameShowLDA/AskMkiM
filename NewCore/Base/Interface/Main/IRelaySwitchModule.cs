@@ -27,5 +27,7 @@ namespace NewCore.Base.Interface.Main
     /// Менеджер для управления реле и точками подключения.
     /// </summary>
     IPointManager PointManager { get; set; }
+
+    ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }
 }

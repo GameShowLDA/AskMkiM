@@ -59,11 +59,13 @@ namespace Mode.SelfControl.DeviceCheck
         switch (type)
         {
           case RelayDeviceType.RelaySwitchModule when device is IRelaySwitchModule relay:
-            // обработка relay
+            var dbcChassinumbers = relay.NumberChassis;
+            var dbc = new SwitchingDeviceServices().GetDevicesByNumberChassis(dbcChassinumbers).FirstOrDefault();
+            await relay.SelfTestManager.StartSelfCheck(ProtocolUI.GetCancellationToken(), part, ProtocolUI, dbc);
             break;
 
           case RelayDeviceType.SwitchingDevice when device is ISwitchingDevice switcher:
-            await switcher.SelfTestManager.StartSelfCheck(ProtocolUI, part, switcher, meter);
+            await switcher.SelfTestManager.StartSelfCheck(ProtocolUI.GetCancellationToken(), ProtocolUI, part, switcher, meter);
             break;
 
           case RelayDeviceType.PowerSourceModule when device is IPowerSourceModule mint:

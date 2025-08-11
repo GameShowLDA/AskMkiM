@@ -1,57 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Utilities.Interface;
 using static Utilities.LoggerUtility;
 
 namespace UI.Controls.ProtocolNew
 {
-  partial class ProtocolUI
+  partial class ProtocolUI : IButtonService
   {
     private TaskCompletionSource<bool>? _adminButtonTcs;
-
-    #region Кнопки.
-
-    /// <summary>
-    /// Возвращает кнопку "Запуск".
-    /// </summary>
-    public Button StartButton => startButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Повторить".
-    /// </summary>
-    public Button RepeatButton => returnButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Зациклить".
-    /// </summary>
-    public Button LoopButton => loopButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Остановить".
-    /// </summary>
-    public Button PauseButton => pauseButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Поверх".
-    /// </summary>
-    public Button StepOverButton => stepOverButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Вглубь".
-    /// </summary>
-    public Button StepIntoButton => stepIntoButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Продолжить".
-    /// </summary>
-    public Button ContinueButton => continueButton;
-
-    /// <summary>
-    /// Возвращает кнопку "Завершить".
-    /// </summary>
-    public Button ExitButton => exitButton;
-
-    #endregion
 
     #region Делегаты по нажатию кнопок.
 
@@ -111,8 +68,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility StartMeasureResistanceButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => startButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => startButton.Visibility = value); }
+      get { return Application.Current.Dispatcher.Invoke(() => StartButtonElement.Visibility); }
+      set { Application.Current.Dispatcher.Invoke(() => StartButtonElement.Visibility = value); }
     }
 
     /// <summary>
@@ -120,8 +77,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility ReturnMeasureResistanceButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => returnButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => returnButton.Visibility = value); }
+      get { return Application.Current.Dispatcher.Invoke(() => RepeatButtonElement.Visibility); }
+      set { Application.Current.Dispatcher.Invoke(() => RepeatButtonElement.Visibility = value); }
     }
 
     /// <summary>
@@ -138,8 +95,14 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility PauseButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => pauseButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => pauseButton.Visibility = value); }
+      get
+      {
+        return Application.Current.Dispatcher.Invoke(() => PauseButtonElement.Visibility);
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(() => PauseButtonElement.Visibility = value);
+      }
     }
 
     /// <summary>
@@ -147,8 +110,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility StepOverButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => stepOverButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => stepOverButton.Visibility = value); }
+      get { return Application.Current.Dispatcher.Invoke(() => StepOverButtonElement.Visibility); }
+      set { Application.Current.Dispatcher.Invoke(() => StepOverButtonElement.Visibility = value); }
     }
 
     /// <summary>
@@ -156,8 +119,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility StepIntoButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => stepIntoButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => stepIntoButton.Visibility = value); }
+      get { return Application.Current.Dispatcher.Invoke(() => StepIntoButtonElement.Visibility); }
+      set { Application.Current.Dispatcher.Invoke(() => StepIntoButtonElement.Visibility = value); }
     }
 
     /// <summary>
@@ -165,8 +128,8 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility NextButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => continueButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => continueButton.Visibility = value); }
+      get { return Application.Current.Dispatcher.Invoke(() => ContinueButtonElement.Visibility); }
+      set { Application.Current.Dispatcher.Invoke(() => ContinueButtonElement.Visibility = value); }
     }
 
     /// <summary>
@@ -174,8 +137,14 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public Visibility ExitButtonVisibility
     {
-      get { return Application.Current.Dispatcher.Invoke(() => exitButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => exitButton.Visibility = value); }
+      get
+      {
+        return Application.Current.Dispatcher.Invoke(() => StopButtonElement.Visibility);
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(() => StopButtonElement.Visibility = value);
+      }
     }
 
     #endregion
@@ -203,8 +172,8 @@ namespace UI.Controls.ProtocolNew
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
 
       SetNonVisibleAllButton();
-      continueButton.Visibility = Visibility.Visible;
-      exitButton.Visibility = Visibility.Visible;
+      ContinueButtonElement.Visibility = Visibility.Visible;
+      StopButtonElement.Visibility = Visibility.Visible;
 
       PauseButtonPreviewMouseDown?.Invoke(this, e);
     }
@@ -218,8 +187,8 @@ namespace UI.Controls.ProtocolNew
 
       SetNonVisibleAllButton();
 
-      pauseButton.Visibility = Visibility.Visible;
-      exitButton.Visibility = Visibility.Visible;
+      PauseButtonElement.Visibility = Visibility.Visible;
+      StopButtonElement.Visibility = Visibility.Visible;
 
       NextButtonPreviewMouseDown?.Invoke(this, e);
     }
@@ -232,9 +201,55 @@ namespace UI.Controls.ProtocolNew
       LogInformation($"Сработан обработчик события для кнопки \"Завершить\"");
 
       SetNonVisibleAllButton();
-      startButton.Visibility = Visibility.Visible;
-
+      StartButtonElement.Visibility = Visibility.Visible;
       ExitButtonPreviewMouseDown?.Invoke(this, e);
+    }
+    private void RegisterHotkeys()
+    {
+      KeyboardManager.OnStartPressed = () =>
+        Application.Current.Dispatcher.Invoke(async () =>
+        {
+          await AppConfiguration.Execution.ExecutionConfig.SetStepByStepMode(false);
+          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+        });
+
+      KeyboardManager.OnStartPressedByStepMode = () =>
+        Application.Current.Dispatcher.Invoke(async () =>
+        {
+          await AppConfiguration.Execution.ExecutionConfig.SetStepByStepMode(true);
+          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+        });
+
+
+      KeyboardManager.OnExitPressed = () =>
+        Application.Current.Dispatcher.Invoke(() =>
+          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs()));
+
+      KeyboardManager.OnPausePressed = () =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
+      };
+
+      KeyboardManager.OnContinuePressed = () =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
+      };
+
+      KeyboardManager.OnRepeatPressed = () =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+          ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
+      };
+    }
+
+    private MouseButtonEventArgs CreateMouseArgs()
+    {
+      return new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.MouseLeftButtonDownEvent
+      };
     }
     #endregion
 
@@ -296,33 +311,36 @@ namespace UI.Controls.ProtocolNew
     private void SetupEventHandlers()
     {
       SetEventControls();
-      startButton.PreviewMouseDown += StartMeasureResistanceButton_PreviewMouseDown;
-      returnButton.PreviewMouseDown += ReturnMeasureResistanceButton_PreviewMouseDown;
+      StartButtonElement.PreviewMouseDown += StartMeasureResistanceButton_PreviewMouseDown;
+      StopButtonElement.PreviewMouseDown += ExitButton_PreviewMouseDown;
+
+      PauseButtonElement.PreviewMouseDown += StopButton_PreviewMouseDown;
+      ContinueButtonElement.PreviewMouseDown += NextButton_PreviewMouseDown;
+
+      StepOverButtonElement.PreviewMouseDown += TopLayer_PreviewMouseDown;
+      StepIntoButtonElement.PreviewMouseDown += BottomLayer_PreviewMouseDown;
+
+      RepeatButtonElement.PreviewMouseDown += ReturnMeasureResistanceButton_PreviewMouseDown;
       loopButton.PreviewMouseDown += LoopMeasureResistanceButton_PreviewMouseDown;
-      pauseButton.PreviewMouseDown += StopButton_PreviewMouseDown;
-      stepOverButton.PreviewMouseDown += TopLayer_PreviewMouseDown;
-      stepIntoButton.PreviewMouseDown += BottomLayer_PreviewMouseDown;
-      continueButton.PreviewMouseDown += NextButton_PreviewMouseDown;
-      exitButton.PreviewMouseDown += ExitButton_PreviewMouseDown;
     }
 
     /// <summary>
     /// Скрывает все кнопки управления.
     /// </summary>
-    private void SetNonVisibleAllButton()
+    public void SetNonVisibleAllButton()
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        startButton.Visibility = Visibility.Collapsed;
-        pauseButton.Visibility = Visibility.Collapsed;
-        continueButton.Visibility = Visibility.Collapsed;
-        exitButton.Visibility = Visibility.Collapsed;
+        StartButtonElement.Visibility = Visibility.Collapsed;
+        PauseButtonElement.Visibility = Visibility.Collapsed;
+        ContinueButtonElement.Visibility = Visibility.Collapsed;
+        StopButtonElement.Visibility = Visibility.Collapsed;
 
-        returnButton.Visibility = Visibility.Collapsed;
+        RepeatButtonElement.Visibility = Visibility.Collapsed;
         loopButton.Visibility = Visibility.Collapsed;
 
-        stepOverButton.Visibility = Visibility.Collapsed;
-        stepIntoButton.Visibility = Visibility.Collapsed;
+        StepOverButtonElement.Visibility = Visibility.Collapsed;
+        StepIntoButtonElement.Visibility = Visibility.Collapsed;
 
         adminContinue.Visibility = Visibility.Collapsed;
         adminExit.Visibility = Visibility.Collapsed;
@@ -337,7 +355,7 @@ namespace UI.Controls.ProtocolNew
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetNonVisibleAllButton();
-        startButton.Visibility = Visibility.Visible;
+        StartButtonElement.Visibility = Visibility.Visible;
       });
     }
 
@@ -352,12 +370,12 @@ namespace UI.Controls.ProtocolNew
         SetNonVisibleAllButton();
         if (ActionExecutor.StepMode)
         {
-          StepOverButton.Visibility = Visibility.Visible;
-          StepIntoButton.Visibility = Visibility.Visible;
+          StepOverButtonElement.Visibility = Visibility.Visible;
+          StepIntoButtonElement.Visibility = Visibility.Visible;
         }
 
-        pauseButton.Visibility = Visibility.Visible;
-        exitButton.Visibility = Visibility.Visible;
+        PauseButtonElement.Visibility = Visibility.Visible;
+        StopButtonElement.Visibility = Visibility.Visible;
       });
     }
 
@@ -372,12 +390,12 @@ namespace UI.Controls.ProtocolNew
         SetNonVisibleAllButton();
         if (stepMode)
         {
-          StepOverButton.Visibility = Visibility.Visible;
-          StepIntoButton.Visibility = Visibility.Visible;
+          StepOverButtonElement.Visibility = Visibility.Visible;
+          StepIntoButtonElement.Visibility = Visibility.Visible;
         }
 
-        pauseButton.Visibility = Visibility.Visible;
-        exitButton.Visibility = Visibility.Visible;
+        PauseButtonElement.Visibility = Visibility.Visible;
+        StopButtonElement.Visibility = Visibility.Visible;
       });
     }
 
@@ -388,21 +406,25 @@ namespace UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        StepIntoButton.Visibility = Visibility.Collapsed;
-        StepOverButton.Visibility = Visibility.Collapsed;
+        StepIntoButtonElement.Visibility = Visibility.Collapsed;
+        StepOverButtonElement.Visibility = Visibility.Collapsed;
       });
     }
 
     /// <summary>
     /// Отображает кнопки при паузе.
     /// </summary>
-    public void ShowButtonsOnPause()
+    public void ShowButtonsOnPause(bool repeatVisible = false)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetNonVisibleAllButton();
         NextButtonVisibility = Visibility.Visible;
         ExitButtonVisibility = Visibility.Visible;
+        if (repeatVisible)
+        {
+          ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
+        }
       });
     }
 
@@ -420,6 +442,16 @@ namespace UI.Controls.ProtocolNew
       });
     }
 
+    public void ShowOnlyExitButton()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        SetNonVisibleAllButton();
+        ExitButtonVisibility = Visibility.Visible;
+      });
+
+    }
+
     public void SetupAdminButton()
     {
       Application.Current.Dispatcher.Invoke(() =>
@@ -431,8 +463,59 @@ namespace UI.Controls.ProtocolNew
       });
     }
 
-    #endregion
+    public void ShowButtonsOnPause()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        SetNonVisibleAllButton();
+        NextButtonVisibility = Visibility.Visible;
+        ExitButtonVisibility = Visibility.Visible;
+      });
+    }
 
-   
+    public void StartTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = StartButtonElement
+      };
+
+      StartButtonElement.RaiseEvent(args);
+    }
+
+    public void StopTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = StopButtonElement
+      };
+
+      StopButtonElement.RaiseEvent(args);
+    }
+
+    public void PauseTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = PauseButtonElement
+      };
+
+      PauseButtonElement.RaiseEvent(args);
+    }
+
+    public void NextTask()
+    {
+      var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+      {
+        RoutedEvent = UIElement.PreviewMouseDownEvent,
+        Source = ContinueButtonElement
+      };
+
+      ContinueButtonElement.RaiseEvent(args);
+    }
+    #endregion
   }
 }

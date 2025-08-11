@@ -26,11 +26,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetContinuityModeAsync()
+    public async Task<bool> SetContinuityModeAsync()
     {
       try
       {
-        await _measurement.SetContinuityModeAsync();
+        var result = await _measurement.SetContinuityModeAsync();
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
@@ -38,6 +38,8 @@ namespace NewCore.FunctionAdapters.Keysight3466new
           string.Empty,
           true,
           1);
+
+        return result;
       }
       catch (Exception ex)
       {
@@ -52,7 +54,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<bool> CheckContinuityAsync()
+    public async Task<bool> CheckContinuityAsync(bool expectedOutcome)
     {
       if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -61,7 +63,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
       try
       {
-        var result = await _measurement.CheckContinuityAsync();
+        var result = await _measurement.CheckContinuityAsync(expectedOutcome);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
@@ -81,6 +83,38 @@ namespace NewCore.FunctionAdapters.Keysight3466new
           false,
           2);
         return false;
+      }
+    }
+
+    public async Task<double> CheckContinuityAsync(double expectedOutcome)
+    {
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return expectedOutcome;
+      }
+
+      try
+      {
+        double result = await _measurement.CheckContinuityAsync(expectedOutcome);
+
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Результат прозвонки",
+          expectedOutcome.ToString(),
+          true,
+          2);
+
+        return result;
+      }
+      catch (Exception ex)
+      {
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Ошибка при прозвонке",
+          ex.Message,
+          false,
+          2);
+        return -1;
       }
     }
   }

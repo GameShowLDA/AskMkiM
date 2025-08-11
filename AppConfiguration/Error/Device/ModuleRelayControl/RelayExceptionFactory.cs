@@ -18,10 +18,22 @@ namespace AppConfiguration.Error.Device.ModuleRelayControl
         new($"Ошибка подключения точки {description}");
 
     /// <summary>
+    /// Ошибка подключения отдельной точки.
+    /// </summary>
+    public static DeviceException ConnectPointFailed(string point, string name, int chassis, int number) =>
+        new($"Ошибка подключения точки {point} на {name}({chassis}.{number})");
+
+    /// <summary>
     /// Ошибка отключения отдельной точки.
     /// </summary>
     public static DeviceException DisconnectPointFailed(string description) =>
         new($"Ошибка отключения точки {description}");
+
+    /// <summary>
+    /// Ошибка подключения отдельной точки.
+    /// </summary>
+    public static DeviceException DisconnectPointFailed(string point, string name, int chassis, int number) =>
+        new($"Ошибка отключения точки {point} на {name}({chassis}.{number})");
 
     /// <summary>
     /// Ошибка подключения диапазона точек.

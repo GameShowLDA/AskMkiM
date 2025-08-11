@@ -21,5 +21,10 @@ namespace ControlCommandAnalyser.Model
       foreach (var kv in PointsMap)
         yield return $"{kv.Key} => {kv.Value}";
     }
+
+    public List<string> GetAllDestinationPoints()
+    {
+      return PointsMap.Values.ToList();
+    }
   }
 }

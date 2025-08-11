@@ -162,7 +162,6 @@ namespace UI.Components
       return fileManager.GetContainer(editorType);
     }
 
-
     /// <summary>
     /// Получает активный текстовый редактор.
     /// </summary>
@@ -373,6 +372,11 @@ namespace UI.Components
     internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       return fileManager.AddTranslatorItem(editor, translateEditor, editorType);
+    }
+
+    internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+      await fileManager.DeleteTranslatorItem(translatorItem, editorType);
     }
 
     internal void OpenFolder()

@@ -61,6 +61,16 @@ namespace MainWindowProgram
     }
 
     /// <summary>
+    /// Отчищает информационное сообщение.
+    /// </summary>
+    /// <param name="message">Текст информационного сообщения.</param>
+    /// <param name="clearMessage">Если true, сообщение будет автоматически очищено.</param>
+    public void ClearMessage()
+    {
+      SetMessage(string.Empty, (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"], false);
+    }
+
+    /// <summary>
     /// Устанавливает сообщение в TextBlock с заданным цветом. 
     /// Если параметр clearMessage равен true, запускается таймер для автоматического очищения сообщения.
     /// </summary>

@@ -75,7 +75,10 @@ namespace NewCore.Function.ModuleRelayControl
       }
 
       DeviceCommand cmd = new DeviceCommand(7);
-      return (await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000)).Contains("105.1");
+      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      // TODO : Нормально распарсить ответ МКР.
+      var result = answer.Contains("7.1");
+      return result;
     }
   }
 }

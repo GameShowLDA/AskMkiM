@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AppConfiguration.Interface;
+using Utilities.Interface;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 
@@ -26,6 +27,11 @@ namespace UI.Components.ProtocolListBox
   {
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
     public string Header { get; set ; }
+
+    public bool HasRetryAction => throw new NotImplementedException();
+
+    public bool ClickRetry { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public IButtonService ButtonService { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public ProtocolListBoxUI()
     {
@@ -115,7 +121,7 @@ namespace UI.Components.ProtocolListBox
       return AppendLineAsync(emptyLine);
     }
 
-    public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false)
+    public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false)
     {
       await AppendLineAsync(model);
     }
@@ -140,6 +146,31 @@ namespace UI.Components.ProtocolListBox
     }
 
     public Task<bool> WaitAdminButtonAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    public void RegisterRetryAction(Func<Task> retryAction)
+    {
+      throw new NotImplementedException();
+    }
+
+    public Task TryInvokeRetryAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    public void ClearRetryAction()
+    {
+      throw new NotImplementedException();
+    }
+
+    public Task<IUserMessageService.UserAction> WaitUserActionAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    public CancellationToken GetCancellationToken()
     {
       throw new NotImplementedException();
     }

@@ -8,7 +8,7 @@
     /// <summary>
     /// Устанавливает режим измерения ёмкости.
     /// </summary>
-    Task SetCapacitanceModeAsync();
+    Task<bool> SetCapacitanceModeAsync();
 
     /// <summary>
     /// Выполняет измерение ёмкости.

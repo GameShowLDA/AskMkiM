@@ -1,16 +1,22 @@
-﻿using System.IO;
+﻿using AppConfiguration.Base;
+using Message;
+using Microsoft.Win32;
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfiguration.Base;
-using Microsoft.Win32;
+using System.Windows.Shapes;
 using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.TextEditor;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using static UI.Controls.ProtocolNew.ProtocolUI;
+using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 
@@ -27,7 +33,7 @@ namespace UI.Components.ArchiveControls
     private OpkFile opkFile { get; set; }
 
     /// <summary>
-    /// Событие возникает при нажатии на кнопку "Открыть".
+    /// Событие возникает при нажатии на кнопку "Проосмотр".
     /// </summary>
     public event PreviewMouseDownEventHandler StartMeasureResistanceButtonPreviewMouseDown;
 
@@ -101,15 +107,18 @@ namespace UI.Components.ArchiveControls
 
     private async void Add_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      OpenFileDialog openFileDialog = OpenPkFile();
+      OpenFileDialog openFileDialog = OpenPkFile(true);
 
       if (openFileDialog.ShowDialog() == true)
       {
-        var archiveDirectory = $"{Path.Combine(ArchiveSettings.ArchivePath, _archiveName)}.apkw";
-        var pkEditor = new PkEditor();
-        string filePath = openFileDialog.FileName;
-        await TryConvertPkToOpkAsync(archiveDirectory, pkEditor, filePath);
-        await ShowOpkFiles();
+        string[] selectedFiles = openFileDialog.FileNames;
+        foreach (var file in selectedFiles)
+        {
+          var archiveDirectory = $"{Path.Combine(ArchiveSettings.ArchivePath, _archiveName)}.apkw";
+          var pkEditor = new PkEditor();
+          await TryConvertPkToOpkAsync(archiveDirectory, pkEditor, file);
+          await ShowOpkFiles();
+        }
       }
     }
 
@@ -123,7 +132,7 @@ namespace UI.Components.ArchiveControls
       }
       else
       {
-        MessageBox.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
         LogInformation("Файл не найден");
       }
     }
@@ -132,7 +141,7 @@ namespace UI.Components.ArchiveControls
     {
       if (opkFile != null)
       {
-        OpenFileDialog openFileDialog = OpenPkFile();
+        OpenFileDialog openFileDialog = OpenPkFile(false);
 
         if (openFileDialog.ShowDialog() == true)
         {
@@ -148,24 +157,25 @@ namespace UI.Components.ArchiveControls
           }
           catch (Exception ex)
           {
-            MessageBox.Show($"Произошла ошибка: {ex.Message}");
+            MessageBoxCustom.Show($"Произошла ошибка: {ex.Message}", image: MessageBoxImage.Error);
             LogError($"Произошла ошибка: {ex.Message}");
           }
         }
         else
         {
-          MessageBox.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          MessageBoxCustom.Show("Файл не найден.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
           LogInformation("Файл не найден");
         }
       }
     }
 
-    private static OpenFileDialog OpenPkFile()
+    private static OpenFileDialog OpenPkFile(bool  multiselect)
     {
       return new OpenFileDialog
       {
         Filter = "Pk files (*.pk, *.PK, *.Pk)|*.pk;*.PK;*.Pk",
-        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+        Multiselect = multiselect,
+        //InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
       };
     }
 
@@ -174,12 +184,12 @@ namespace UI.Components.ArchiveControls
       bool result = await fileEditor.UpdateFile(archiveDirectory, opkFile.OpkFilename, newOpkFile);
       if (result)
       {
-        MessageBox.Show("Файл успешно обновлен");
+        MessageBoxCustom.Show("Файл успешно обновлен", image: MessageBoxImage.Information);
         LogInformation($"Файл {opkFile.OpkFilename} в архиве {archiveDirectory} успешно обновлен.");
       }
       else
       {
-        MessageBox.Show("Не удалось обновить файл. Исходный файл сохранен.");
+        MessageBoxCustom.Show("Не удалось обновить файл. Исходный файл сохранен.", image: MessageBoxImage.Information);
         LogError($"Файл {opkFile.OpkFilename} в архиве {archiveDirectory} не удалось обновить. Исходный файл сохранен.");
       }
     }
@@ -206,7 +216,7 @@ namespace UI.Components.ArchiveControls
         var archiveDirectory = Path.Combine(ArchiveSettings.ArchivePath, $"{_archiveName}.apkw");
         var fileEditor = new FileEditor();
 
-        MessageBoxResult result = MessageBox.Show(
+        MessageBoxResult result = MessageBoxCustom.Show(
                 "Вы уверены, что хотите удалить этот файл?",
                 "Подтверждение удаления",
                 MessageBoxButton.YesNo,
@@ -223,7 +233,7 @@ namespace UI.Components.ArchiveControls
           else
           {
             var message = $"Файл {opkFile.OpkFilename} не удалось корректно удалить из архива {_archiveName}.apkw.";
-            MessageBox.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBoxCustom.Show(message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
             LogError(message);
           }
         }
@@ -272,7 +282,7 @@ namespace UI.Components.ArchiveControls
       else
       {
         LogWarning($"Файл {opkFile.OpkFilename} не найден.");
-        MessageBox.Show("Opk файл не найден в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Opk файл не найден в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -288,17 +298,18 @@ namespace UI.Components.ArchiveControls
 
     private async void viewButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      LogInformation($"Сработан обработчик события для кнопки \"Открыть\"");
+      LogInformation($"Сработан обработчик события для кнопки \"Просмотр\"");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
-      var textEditor = new TextEditorUI();
+      var textEditorModel = new TextEditorModel(foundOpkPath, Path.GetFileName(foundOpkPath), Encoding.UTF8);
+      var textEditor = new TextEditorUI(FileType.OPK, textEditorModel);
       textEditor.Text = content;
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }
 
     private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      MessageBox.Show("Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK);
+      MessageBoxCustom.Show("Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private async void viewOpkFilesDataGrid_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -306,7 +317,8 @@ namespace UI.Components.ArchiveControls
       LogInformation($"Сработан обработчик события для двойного клика по строке opk-архива");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
-      var textEditor = new TextEditorUI();
+      var textEditorModel = new TextEditorModel(foundOpkPath, Path.GetFileName(foundOpkPath), Encoding.UTF8);
+      var textEditor = new TextEditorUI(FileType.OPK, textEditorModel);
       textEditor.Text = content;
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }

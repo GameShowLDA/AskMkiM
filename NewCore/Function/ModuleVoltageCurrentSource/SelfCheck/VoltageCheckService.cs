@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Interface;
 using NewCore.Base.Interface.Main;
+using Utilities.Interface;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 

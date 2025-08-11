@@ -1,10 +1,9 @@
-﻿using AppConfiguration.Base;
-using Microsoft.Win32;
-using System;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
+using AppConfiguration.Base;
+using Message;
+using Microsoft.Win32;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.FileComparerControls
@@ -57,7 +56,7 @@ namespace UI.Components.FileComparerControls
         this.Focus();
       };
 
-      this.Loaded += FileCompareWindow_Loaded; 
+      this.Loaded += FileCompareWindow_Loaded;
     }
 
     private void FileCompareWindow_Loaded(object sender, RoutedEventArgs e)
@@ -116,7 +115,7 @@ namespace UI.Components.FileComparerControls
           }
           else
           {
-            MessageBox.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBoxCustom.Show("Вы уже выбрали этот файл для сравнения", "Неверный путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
             LogWarning("Попытка сравнить один и тот же файл");
           }
         }
@@ -130,7 +129,7 @@ namespace UI.Components.FileComparerControls
 
       if (string.IsNullOrEmpty(firstPath) || string.IsNullOrEmpty(secondPath))
       {
-        MessageBox.Show("Укажите путь к файлу для сравнения", "Не указан путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Укажите путь к файлу для сравнения", "Не указан путь к файлу", MessageBoxButton.OK, MessageBoxImage.Warning);
         LogWarning("Не указан путь к одному или нескольким файлам для сравнения");
       }
       else
@@ -149,14 +148,14 @@ namespace UI.Components.FileComparerControls
       if (!File.Exists(firstPath))
       {
         var message = "Неверно указан путь к первому файлу для сравнения";
-        MessageBox.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
         LogError("Неверно указан путь к первому файлу для сравнения");
         return false;
       }
       if (!File.Exists(secondPath))
       {
         var message = "Неверно указан путь ко второму файлу для сравнения";
-        MessageBox.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show(message, "Файл не найден", MessageBoxButton.OK, MessageBoxImage.Error);
         LogError(message);
         return false;
       }

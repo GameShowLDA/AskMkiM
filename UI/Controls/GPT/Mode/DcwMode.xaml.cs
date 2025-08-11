@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using NewCore.Base.Interface.Main;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using Message;
 
 namespace UI.Controls.GPT.Mode
 {
@@ -49,7 +48,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -110,7 +109,7 @@ namespace UI.Controls.GPT.Mode
     private async void RefSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
       double refValue = Math.Round(RefSlider.Value, 3);
-      await GPTPunchControl.ModelGPT.DcwManger.SetOffsetAsync(refValue);
+      await GPTPunchControl.ModelGPT.DcwManger.SetOffsetAsync(null, refValue);
     }
 
     /// <summary>
@@ -149,7 +148,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -168,7 +167,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
   }

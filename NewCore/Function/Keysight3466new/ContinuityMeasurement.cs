@@ -28,14 +28,16 @@ namespace NewCore.Function.Keysight3466new
     /// Устанавливает прибор в режим прозвонки (Continuity Test).
     /// </summary>
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    public async Task SetContinuityModeAsync()
+    public async Task<bool> SetContinuityModeAsync()
     {
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:CONT");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+      return answer.Contains("CONT");
     }
 
     /// <summary>
@@ -45,7 +47,7 @@ namespace NewCore.Function.Keysight3466new
     /// <c>true</c>, если обнаружено соединение (низкое сопротивление), иначе <c>false</c>.
     /// </returns>
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    public async Task<bool> CheckContinuityAsync()
+    public async Task<bool> CheckContinuityAsync(bool expectedOutcome)
     {
       if (!_device.IsConnected)
       {
@@ -53,7 +55,37 @@ namespace NewCore.Function.Keysight3466new
       }
 
       string response = await _device.DeviceProtocol.QueryAsync("MEAS:CONT?", timeout: 1000);
-      return response != "+9.90000000E+37";
+      return (response != "+9.90000000E+37") == expectedOutcome;
+    }
+
+    /// <summary>
+    /// Проверяет проводимость между измерительными щупами.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c>, если обнаружено соединение (низкое сопротивление), иначе <c>false</c>.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
+    public async Task<double> CheckContinuityAsync(double expectedOutcome)
+    {
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:CONT?", timeout: 1000);
+      string count = (response.Split("+")).Last();
+      int intCount = int.Parse(count);
+
+      response = (response.Substring(0, 6).Split("+"))[1].Replace('.',',');
+      double result = -1;
+      double.TryParse(response, out result);
+
+      for (int i = 0; i < intCount; i++)
+      {
+        result *= 10;
+      }
+
+      return result;
     }
   }
 }
