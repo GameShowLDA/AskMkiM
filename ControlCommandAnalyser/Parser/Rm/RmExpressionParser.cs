@@ -259,6 +259,7 @@ namespace ControlCommandAnalyser.Parser.Rm
       }
       return false;
     }
+
     /// <summary>
     /// Пытается расширить диапазоны в квадратных скобках (например, "[1-3,5]" или "X[20,30]/1").
     /// </summary>

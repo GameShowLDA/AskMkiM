@@ -48,7 +48,7 @@ namespace ControlCommandAnalyser.Parser.Pi
       (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
       LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
 
-      (thresholdResistance, remainder) = CommonParameterParser.ParseThresholdResistance(remainder);
+      (thresholdResistance, remainder) = CommonParameterParser.ParseResistance(remainder);
       LoggerUtility.LogDebug($"После парсинга порогового сопротивления: threshold='{thresholdResistance}', remainder='{remainder}'");
 
       (time, remainder) = CommonParameterParser.ParseTime(remainder);
