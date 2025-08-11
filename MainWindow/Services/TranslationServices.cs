@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using AppConfiguration.Base;
 using ControlCommandAnalyser;
-using DevZest.Windows.Docking;
 using Message;
 using System.Windows;
 using UI.Controls;

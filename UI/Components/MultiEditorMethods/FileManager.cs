@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using AppConfiguration.Base;
-using DevZest.Windows.Docking;
 using Message;
 using Ude;
 using UI.Components.FileComparerControls;
@@ -144,7 +143,7 @@ namespace UI.Components.MultiEditorMethods
 
         if (textEditorContainer.DockManager.DockItems.Count == 0)
         {
-          RemoveTextEditorContainer(textEditorContainer);
+          RemoveTextEditorContainer(textEditorContainer, EditorType.TextEditor);
         }
 
         return closed;
@@ -230,7 +229,7 @@ namespace UI.Components.MultiEditorMethods
             FilePaths.Remove(dockItem.TabText);
             if (FilePaths.Count == 0)
             {
-              RemoveTextEditorContainer(textEditorContainer);
+              RemoveTextEditorContainer(textEditorContainer, EditorType.TextEditor);
             }
           }
         }
@@ -270,7 +269,7 @@ namespace UI.Components.MultiEditorMethods
               FilePaths.Remove(dockItem.TabText);
               if (FilePaths.Count == 0)
               {
-                RemoveTextEditorContainer(textEditorContainer);
+                RemoveTextEditorContainer(textEditorContainer, EditorType.TextEditor);
               }
             }
           }
@@ -290,10 +289,10 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private void RemoveTextEditorContainer(TextEditorContainer textEditorContainer)
+    private void RemoveTextEditorContainer(TextEditorContainer textEditorContainer, EditorType editorType)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-      var foundPage = OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
+      var foundPage = OpenPages.FirstOrDefault(page => page.Text == editorType.ToString());
       controlManager.RemoveControl(foundPage, textEditorContainer);
     }
 
@@ -591,6 +590,10 @@ namespace UI.Components.MultiEditorMethods
         }
 
         textEditorContainer.RemoveTranslatorItem(translatorItem);
+        if(textEditorContainer.DockManager.DockItems.Count == 0)
+        {
+          RemoveTextEditorContainer(textEditorContainer, EditorType.Translator);
+        }
       }
       catch (Exception ex)
       {

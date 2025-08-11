@@ -168,7 +168,12 @@ namespace ControlCommandAnalyser.Parser.Kc
           LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
         }
       }
-      model.Points = allPoints;
+      foreach(var point in allPoints)
+      {
+        var points = point.Split(',');
+        model.Points.Add((int.Parse(points[0]), int.Parse(points[1])));
+      }
+      //model.Points = allPoints;
 
       if (!string.IsNullOrEmpty(remainder))
       {
