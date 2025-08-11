@@ -187,7 +187,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Исптания.
+        ///   Ищет локализованную строку, похожую на Испытания.
         /// </summary>
         internal static string menu_test {
             get {

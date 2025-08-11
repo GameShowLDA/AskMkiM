@@ -32,6 +32,11 @@ namespace AppConfiguration.Parameter
       if (string.Equals(_currentLanguage, lang, StringComparison.OrdinalIgnoreCase))
         return;
 
+      if (lang == null || lang == string.Empty)
+      {
+        lang = "ru";
+      }
+
       _currentLanguage = lang.ToLower();
       LanguageChanged?.Invoke(_currentLanguage);
     }
