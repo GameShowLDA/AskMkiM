@@ -43,11 +43,11 @@ namespace ControlCommandExecutor.Executors
       string message = string.Empty;
 
       foreach (var str in command.SourceLines)
-      { 
+      {
         message += "\r\n  " + str;
       }
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1}, IsBlockStart: true);
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1 }, IsBlockStart: true);
 
       var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
@@ -63,6 +63,8 @@ namespace ControlCommandExecutor.Executors
       await SettingModuleRelayControl(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
+      var dmcMode = await dbc.ConnectorManager.GetSuccesCurrentMode(NewCore.Base.Function.DBC.TypeConnector.BreakdownTester);
+
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
       var breakDown = EquipmentService.GetBreakdownTesterOrThrow(context.Console);
@@ -72,6 +74,10 @@ namespace ControlCommandExecutor.Executors
       {
         await NodeFullChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
       }
+      else if (command.AlgorithmKey.Contains("Г"))
+      {
+        await MethodExecutor.CheckSequenceAsync(points, context.Console, resistance.Value);
+      }
       else
       {
         await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
@@ -79,7 +85,13 @@ namespace ControlCommandExecutor.Executors
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+        await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс устройств") { IndentLevel = 1 });
+
+        await dbc.ConnectableManager.ResetAsync();
+        foreach (var item in modules)
+        {
+          await item.ConnectableManager.ResetAsync();
+        }
       }
     }
 
@@ -94,6 +106,7 @@ namespace ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
+        await module.ConnectableManager.ResetAsync();
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(NewCore.Enum.DeviceEnum.SwitchingBus.A1), userMessageService))
         {
           throw AppConfiguration.Error.Device.ModuleRelayControl.BusExceptionFactory.ConnectFailed(NewCore.Enum.DeviceEnum.SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);

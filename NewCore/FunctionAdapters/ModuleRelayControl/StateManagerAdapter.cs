@@ -1,11 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using AppConfiguration.Error.Device;
+using NewCore.Base.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
-using NewCore.Base.Interface.Main;
-using NewCore.Base.Device;
-using AppConfiguration.Error.Device;
-using NewCore.Device;
 using Utilities;
 using Utilities.Interface;
 
@@ -81,8 +77,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
-          "Сброс модуля коммутации реле",
-          result ? "Операция выполнена успешно" : "Ошибка выполнения команды",
+          "Сброс устройства",
+         string.Empty,
           result,
           1);
 

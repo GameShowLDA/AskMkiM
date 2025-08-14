@@ -10,7 +10,6 @@ using Utilities; // Для LoggerUtility
 
 namespace ControlCommandAnalyser.Parser.Si
 {
-  [AllowedKeys(AlgorithmKey.С, AlgorithmKey.П, AlgorithmKey.И, AlgorithmKey.Г, AlgorithmKey.Т1, AlgorithmKey.К, AlgorithmKey.Д)]
   /// <summary>
   /// Парсер для команд СИ (сопротивление изоляции).
   /// </summary>

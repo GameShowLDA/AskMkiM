@@ -61,6 +61,42 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Админ.
+        /// </summary>
+        internal static string menu_admin {
+            get {
+                return ResourceManager.GetString("menu.admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Погрешность.
+        /// </summary>
+        internal static string menu_admin_error {
+            get {
+                return ResourceManager.GetString("menu.admin.error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Управление.
+        /// </summary>
+        internal static string menu_admin_management {
+            get {
+                return ResourceManager.GetString("menu.admin.management", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на USB.
+        /// </summary>
+        internal static string menu_admin_usb {
+            get {
+                return ResourceManager.GetString("menu.admin.usb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Выполнение.
         /// </summary>
         internal static string menu_execution {
@@ -183,6 +219,51 @@ namespace UI.Localization {
         internal static string menu_file_search {
             get {
                 return ResourceManager.GetString("menu.file.search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Справка.
+        /// </summary>
+        internal static string menu_help {
+            get {
+                return ResourceManager.GetString("menu.help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Настройки.
+        /// </summary>
+        internal static string menu_settings {
+            get {
+                return ResourceManager.GetString("menu.settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конфигурация.
+        /// </summary>
+        internal static string menu_settings_config {
+            get {
+                return ResourceManager.GetString("menu.settings.config", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение.
+        /// </summary>
+        internal static string menu_settings_execution {
+            get {
+                return ResourceManager.GetString("menu.settings.execution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Протокол.
+        /// </summary>
+        internal static string menu_settings_protocol {
+            get {
+                return ResourceManager.GetString("menu.settings.protocol", resourceCulture);
             }
         }
         
@@ -399,6 +480,96 @@ namespace UI.Localization {
         internal static string menu_test_tests_pidcw_node {
             get {
                 return ResourceManager.GetString("menu.test.tests.pidcw.node", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конечная точка a.b.c.
+        /// </summary>
+        internal static string point_finalPoint {
+            get {
+                return ResourceManager.GetString("point.finalPoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Начальная точка a.b.c.
+        /// </summary>
+        internal static string point_startingPoint {
+            get {
+                return ResourceManager.GetString("point.startingPoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Административная панель.
+        /// </summary>
+        internal static string settings_execution_admin {
+            get {
+                return ResourceManager.GetString("settings.execution.admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отладка ошибок выполнения .
+        /// </summary>
+        internal static string settings_execution_admin_debuggingError {
+            get {
+                return ResourceManager.GetString("settings.execution.admin.debuggingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение режимов.
+        /// </summary>
+        internal static string settings_execution_executionModes {
+            get {
+                return ResourceManager.GetString("settings.execution.executionModes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Пошаговый режим.
+        /// </summary>
+        internal static string settings_execution_executionModes_stepByStepMode {
+            get {
+                return ResourceManager.GetString("settings.execution.executionModes.stepByStepMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Остановка по ошибке.
+        /// </summary>
+        internal static string settings_execution_executionModes_stopOnError {
+            get {
+                return ResourceManager.GetString("settings.execution.executionModes.stopOnError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Холостой режим.
+        /// </summary>
+        internal static string settings_execution_idleMode {
+            get {
+                return ResourceManager.GetString("settings.execution.idleMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение с ошибками.
+        /// </summary>
+        internal static string settings_execution_idleMode_errSimulation {
+            get {
+                return ResourceManager.GetString("settings.execution.idleMode.errSimulation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Холостой режим выполнения.
+        /// </summary>
+        internal static string settings_execution_idleMode_runMode {
+            get {
+                return ResourceManager.GetString("settings.execution.idleMode.runMode", resourceCulture);
             }
         }
     }

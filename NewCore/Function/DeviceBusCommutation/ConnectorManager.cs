@@ -1,8 +1,9 @@
-﻿using NewCore.Base.Function.DBC;
+﻿using System;
+using NewCore.Base.Function.DBC;
 using NewCore.Communication;
+using static AppConfiguration.Execution.ExecutionConfig;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -159,9 +160,8 @@ namespace NewCore.Function.DeviceBusCommutation
       }
 
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-      await Task.Delay(10);
-      return true;
+      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      return answer.Contains("5.7.1.1");
     }
 
     #endregion
@@ -171,7 +171,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectAllBuses()
     {
-     return  await SetAllBusesStatus(true);
+      return await SetAllBusesStatus(true);
     }
 
     /// <inheritdoc />
@@ -220,6 +220,12 @@ namespace NewCore.Function.DeviceBusCommutation
       return false;
     }
 
-
+    public async Task<bool> GetSuccesCurrentMode(TypeConnector mode)
+    {
+      var command = new DeviceCommand(51);
+      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var expectingResult = $"51.{(int)mode}";
+      return answer.Contains(expectingResult);
+    }
   }
 }

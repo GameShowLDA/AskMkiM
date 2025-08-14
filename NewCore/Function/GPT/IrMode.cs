@@ -31,6 +31,10 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled()) return (true, string.Empty);
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} IR";
+      if ((await GetModeAsync()).Success)
+      {
+        return (true, string.Empty);
+      }
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
@@ -70,13 +74,18 @@ namespace NewCore.Function.GPT
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
 
+      double actual = await GetVoltageAsync();
+      if (Math.Abs(actual - value) < 1.0)
+        return (true, string.Empty);
+
+
       string kvFormatted = (value / 1000).ToString("F3", CultureInfo.InvariantCulture);
       string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_VOLTAGE)} {kvFormatted}";
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         await _gptModel.DeviceProtocol.QueryAsync(command);
-        double actual = await GetVoltageAsync();
+        actual = await GetVoltageAsync();
 
         if (Math.Abs(actual - value) < 1.0)
           return (true, string.Empty);

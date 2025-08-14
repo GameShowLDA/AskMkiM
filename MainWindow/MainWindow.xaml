@@ -253,26 +253,31 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_4">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Setting}, Path=Value}" Name="Settings" Tag="menuHeader_4">
 
-                    <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
-                    <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
-                    <MenuItem Header="Протокол" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
-
-                </MenuItem>
-
-                <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Setting_Config}, Path=Value}" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Setting_Execution}, Path=Value}" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Setting_Protocol}, Path=Value}" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
 
                 </MenuItem>
 
-                <MenuItem Header="Администрирование" Name="Admin">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Name="HelpText" Command="{Binding Settings.HelpCommand}">
 
-                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Admin.ErrorCommand}"/>
+                </MenuItem>
+
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Name="Admin">
+
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Error}, Path=Value}" Name="ErrorMenuItem" Command="{Binding Admin.ErrorCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_USB}, Path=Value}" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
+                    
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
                     <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
-                    <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
 
-                    <MenuItem Header="Управление" Name="DeviceManagment">
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
                         <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
                         <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />

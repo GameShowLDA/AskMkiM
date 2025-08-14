@@ -12,7 +12,7 @@
     <!--#region Локализация -->
     <!--Локализация UI-->
 
-    <!--Меню файл-->
+    <!--#region Файл -->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_File" Key="menu.file" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Create" Key="menu.file.new" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Open" Key="menu.file.open" />
@@ -24,9 +24,10 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Print" Key="menu.file.print" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Search" Key="menu.file.search" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
-
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test" Key="menu.test" />
-    <!--Меню-Испытания-Метрология-->
+    <!--#endregion-->
+
+    <!--#region Метрология -->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology" Key="menu.test.metrology" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KS" Key="menu.test.metrology.ks" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_IE" Key="menu.test.metrology.ie" />
@@ -37,12 +38,14 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_PIACW" Key="menu.test.metrology.piacw" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KNDCW" Key="menu.test.metrology.kndcw" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KNACW" Key="menu.test.metrology.knacw" />
+    <!--#endregion-->
 
-    <!--Меню-Испытания-Самоконтроль-->
+    <!--#region Самоконтроль -->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl" Key="menu.test.selfcontrol" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl_Module" Key="menu.test.selfcontrol.module" />
+    <!--#endregion-->
 
-    <!-- Меню-Испытания-Тесты -->
+    <!--#region Тесты -->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests" Key="menu.test.tests" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_CI" Key="menu.test.tests.ci" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_CI_Node" Key="menu.test.tests.ci.node" />
@@ -57,11 +60,46 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIACW_Group" Key="menu.test.tests.piacw.group" />
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_Cross_MKR" Key="menu.test.tests.cross.mkr" />
+    <!--#endregion-->
 
-    <!-- Меню-Выполнение -->
+    <!--#region Выполнение -->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution" Key="menu.execution" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Build" Key="menu.execution.build" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Run" Key="menu.execution.run" />
+    <!--#endregion-->
+
+    <!--#region Настройки -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Setting" Key="menu.settings" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Setting_Config" Key="menu.settings.config" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Setting_Execution" Key="menu.settings.execution" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Setting_Protocol" Key="menu.settings.protocol" />
+    <!--#endregion-->
+
+    <!--#region Справка -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help" Key="menu.help" />
+    <!--#endregion-->
+
+    <!--#region Админ -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin" Key="menu.admin" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin_Error" Key="menu.admin.error" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin_USB" Key="menu.admin.usb" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin_Management" Key="menu.admin.management" />
+    <!--#endregion-->
+
+    <!--#region Настройки выполения -->
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_AdminPanel" Key="settings.execution.admin" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_AdminPanel_DebuggingError" Key="settings.execution.admin.debuggingError" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ExecutionModes" Key="settings.execution.executionModes" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ExecutionModes_StepByStepMode" Key="settings.execution.executionModes.stepByStepMode" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ExecutionModes_StopOnError" Key="settings.execution.executionModes.stopOnError" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode" Key="settings.execution.idleMode" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_ErrorSimulation" Key="settings.execution.idleMode.errSimulation" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_IdleExecutionMode" Key="settings.execution.idleMode.runMode" />
+    <!--#endregion-->
+
+    <!--#region Точки -->
+    <LocalizeStrings:LocalizedString x:Key="Point_StartingPoint" Key="point.startingPoint" />
+    <LocalizeStrings:LocalizedString x:Key="Point_FinalPoint" Key="point.finalPoint" />
     <!--#endregion-->
 
     <!--#region Шрифты -->
@@ -70,7 +108,6 @@
     <FontFamily x:Key="WinstonMedium">pack://application:,,,/UI;component/Resources/#Winston Medium</FontFamily>
     <FontFamily x:Key="WinstonRegular">pack://application:,,,/UI;component/Resources/#Winston Regular</FontFamily>
     <!--#endregion-->
-
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->
     <Color x:Key="LightPrimaryColor">#6a7689</Color>

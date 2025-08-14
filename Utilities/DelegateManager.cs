@@ -1,6 +1,4 @@
-﻿using Utilities.Models;
-
-namespace Utilities
+﻿namespace Utilities
 {
   public static class DelegateManager
   {
