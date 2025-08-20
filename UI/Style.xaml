@@ -116,7 +116,7 @@
 
     <!--<Color x:Key="PrimaryColor">#465060</Color>-->
     <Color x:Key="LightPrimaryColor">#6a7689</Color>
-    <Color x:Key="PrimaryColor">#465060</Color>
+    <Color x:Key="PrimaryColor">#3a4655</Color>
     <Color x:Key="SecondaryColor">#303843</Color>
     <Color x:Key="ForegroundColor">#f3f0f9</Color>
     <Color x:Key="ActiveColor">#1ca3e9</Color>

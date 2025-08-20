@@ -62,8 +62,8 @@
                            Center="0.50,0.40"
                            RadiusX="1.20" RadiusY="1.20">
                 <!-- ближе к твоему #465060, но объёмнее -->
-                <GradientStop Color="#465060" Offset="0.00"/>
-                <GradientStop Color="#3B4452" Offset="1.00"/>
+                <GradientStop Color="{StaticResource SecondaryColor}" Offset="0.00"/>
+                <GradientStop Color="{StaticResource PrimaryColor}" Offset="1.00"/>
             </RadialGradientBrush>
         </Grid.Background>
 
@@ -178,8 +178,8 @@
             Margin="0,0,0,20"
             Padding="20,10"
             CornerRadius="10"
-            Background="#33000000"
-            BorderBrush="#40FFFFFF"
+            Background="{StaticResource SecondarySolidColorBrush}"
+            BorderBrush="{StaticResource ForegroundSolidColorBrush}"
             BorderThickness="1"
             IsHitTestVisible="False"
             Opacity="0"
