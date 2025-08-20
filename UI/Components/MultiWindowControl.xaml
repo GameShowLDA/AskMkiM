@@ -7,9 +7,15 @@
              xmlns:SearchControls="clr-namespace:UI.Components.SearchControls"
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
+             xmlns:WinPlaceholder="clr-namespace:UI.Controls"
+             xmlns:IvertConvertVis="clr-namespace:UI.Controls.ProtocolNew"
              mc:Ignorable="d" 
              Background="{StaticResource PrimarySolidColorBrush}"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <IvertConvertVis:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <!-- Верхняя панель -->
@@ -26,7 +32,8 @@
         <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Transparent" Orientation="Horizontal"/>
 
         <!-- Контейнер для редакторов -->
-        <local:MultiEditorControl x:Name="MultiEditor" Grid.Row="1"/>
+        <local:MultiEditorControl x:Name="MultiEditor"
+                                  Grid.Row="1"/>
 
         <!-- Разделитель -->
         <GridSplitter x:Name="MultiWindowSplitter" Grid.Row="2" Height="5" Background="{StaticResource IsCheckedColorSolidColorBrush}"

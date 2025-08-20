@@ -29,8 +29,9 @@ namespace AppConfiguration.Parameter
     /// </summary>
     public static async Task SetLanguageAsync(string lang)
     {
-      if (string.Equals(_currentLanguage, lang, StringComparison.OrdinalIgnoreCase))
+      if (string.Equals(_currentLanguage, lang, StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(lang))
         return;
+
 
       _currentLanguage = lang.ToLower();
       LanguageChanged?.Invoke(_currentLanguage);

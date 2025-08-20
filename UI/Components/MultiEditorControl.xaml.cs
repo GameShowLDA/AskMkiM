@@ -102,6 +102,11 @@ namespace UI.Components
       textSearchManager.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
     }
 
+    public int Counts
+    {
+      get => fileManager.GetCountConrols();
+    }
+
     /// <summary>
     /// Обрабатывает событие нажатия левой кнопки мыши на верхней панели.
     /// При двойном клике создаёт новый файл.
@@ -178,6 +183,8 @@ namespace UI.Components
     {
       controlManager.AddControl(header, control, tabType, description);
     }
+
+    public bool GetEmtyControl() => controlManager.GetEmtyControl();
 
     /// <summary>
     /// Открывает диалоговое окно для открытия файла.

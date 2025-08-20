@@ -43,6 +43,11 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private readonly MultiEditorControl multiEditorControl;
 
+    public int GetCountConrols()
+    {
+      return UserControls.Count;
+    }
+
     /// <summary>
     /// Открывает файл, который находится по заданному пути, в текстовом редакторе.
     /// </summary>
@@ -268,6 +273,7 @@ namespace UI.Components.MultiEditorMethods
               {
                 RemoveTextEditorContainer(textEditorContainer);
               }
+
             }
           }
         };

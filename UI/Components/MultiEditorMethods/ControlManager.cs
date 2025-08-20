@@ -314,6 +314,15 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Вовзращает true, если вкладок нет. 
+    /// </summary>
+    /// <returns></returns>
+    public bool GetEmtyControl()
+    {
+      return fileManager.OpenPages.Count == 0 && fileManager.UserControls.Count == 0;
+    }
+
+    /// <summary>
     /// Отображает указанный элемент управления, скрывая остальные.
     /// </summary>
     /// <param name="control">Элемент управления для отображения.</param>
