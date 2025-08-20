@@ -32,6 +32,24 @@ namespace UI.Components
     /// </summary>
     internal List<UserControl> userControls = new List<UserControl>();
 
+
+    // NEW: read-only DP IsEmpty — true, когда нет ни одной вкладки/контрола
+    private static readonly DependencyPropertyKey IsEmptyPropertyKey =
+      DependencyProperty.RegisterReadOnly(
+        nameof(IsEmpty),
+        typeof(bool),
+        typeof(MultiWindowControl),
+        new PropertyMetadata(true));
+
+    public static readonly DependencyProperty IsEmptyProperty = IsEmptyPropertyKey.DependencyProperty;
+
+    /// <summary>Признак, что в окне нет ни одного открытого элемента (вкладки/контрола).</summary>
+    public bool IsEmpty
+    {
+      get => (bool)GetValue(IsEmptyProperty);
+      private set => SetValue(IsEmptyPropertyKey, value);
+    }
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
     /// </summary>
@@ -42,6 +60,13 @@ namespace UI.Components
     {
       InitializeComponent();
       EventAggregator.TextEditorContainerClosing += OnTextEditorClosig;
+      UpdateIsEmpty();
+    }
+
+    //  единая точка пересчёта флага пустоты
+    private void UpdateIsEmpty()
+    {
+      IsEmpty = openPages.Count == 0 && userControls.Count == 0;
     }
 
     private void OnTextEditorClosig(bool textEditorClosing, string textEditorName)
@@ -60,6 +85,8 @@ namespace UI.Components
         CloseSearchResults();
         EventAggregator.RaiseCloseSearchWindow();
       }
+
+      UpdateIsEmpty();
     }
 
     /// <summary>
@@ -152,6 +179,8 @@ namespace UI.Components
       SearchResultsRow.MinHeight = 0;
       SearchResults.Visibility = Visibility.Collapsed;
       MultiWindowSplitter.Visibility = Visibility.Collapsed;
+
+      UpdateIsEmpty();
     }
 
     /// <summary>
@@ -388,6 +417,8 @@ namespace UI.Components
       MultiWindowSplitter.Visibility = Visibility.Visible;
       SearchResultsRow.Height = new GridLength(200);
       SearchResults.Visibility = Visibility.Visible;
+
+      UpdateIsEmpty();
     }
 
     /// <summary>
@@ -448,6 +479,8 @@ namespace UI.Components
       openPages.Clear();
       userControls.Clear();
       searchResultsTextBlock.Text = string.Empty;
+
+      UpdateIsEmpty();
     }
 
     /// <summary>
@@ -535,6 +568,8 @@ namespace UI.Components
           int index = openPages.IndexOf(page);
           var userControl = userControls[index];
           ShowControl(userControl, page);
+
+          UpdateIsEmpty();
           return true;
         }
       }
@@ -551,6 +586,8 @@ namespace UI.Components
     {
       openPages.Add(tabButton);
       userControls.Add(control);
+
+      UpdateIsEmpty();
     }
 
     /// <summary>
@@ -562,6 +599,8 @@ namespace UI.Components
     {
       ContentPanel.Children.Add(control);
       SearchResultsTopPanel.Children.Add(tabButton);
+
+      UpdateIsEmpty();
     }
 
     /// <summary>
@@ -625,6 +664,7 @@ namespace UI.Components
         }
 
         CloseSearchResultsActions();
+        UpdateIsEmpty();
       }
     }
 

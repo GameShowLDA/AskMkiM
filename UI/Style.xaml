@@ -26,6 +26,7 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test" Key="menu.test" />
+
     <!--Меню-Испытания-Метрология-->
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology" Key="menu.test.metrology" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Metrology_KS" Key="menu.test.metrology.ks" />
@@ -63,6 +64,47 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Build" Key="menu.execution.build" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Run" Key="menu.execution.run" />
     <!--#endregion-->
+
+    <!-- #region Меню - Настройки -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Settings" Key="menu.settings" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Settings_Configuration" Key="menu.settings.configuration" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Settings_Execution" Key="menu.settings.execution" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Settings_Protocol" Key="menu.settings.protocol" />
+    <!-- #endregion -->
+
+    <!-- #region Входные данные -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Title" Key="input.bus.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_A" Key="input.bus.a" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_B" Key="input.bus.b" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Electrical_Title" Key="input.electrical.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_First_Title" Key="input.first.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Second_Title" Key="input.second.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Time_Title" Key="input.time.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_TimeRamp_Title" Key="input.timeramp.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Voltage_Title" Key="input.voltage.title" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Placeholder" Key="input.placeholder" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Placeholder_Time" Key="input.time.placeholder" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Unit_Seconds" Key="unit.seconds.suffix" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Unit_Volts" Key="unit.volts.suffix" />
+    <!-- #endregion -->
+
+    <!-- #region ProtocolUI -->
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Header_File"        Key="protocol.header.file" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Header_Title"       Key="protocol.header.title" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Start"          Key="protocol.button.start" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Repeat"         Key="protocol.button.repeat" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Loop"           Key="protocol.button.loop" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Stop"           Key="protocol.button.stop" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_StepOver"       Key="protocol.button.stepover" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_StepInto"       Key="protocol.button.stepinto" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Continue"       Key="protocol.button.continue" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Exit"           Key="protocol.button.exit" />
+    <!-- #endregion -->
+
+
 
     <!--#region Шрифты -->
     <FontFamily x:Key="WinstonBold">pack://application:,,,/UI;component/Resources/#Winston Bold</FontFamily>

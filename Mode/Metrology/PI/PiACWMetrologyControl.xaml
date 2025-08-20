@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Protocol:ProtocolUI x:Name="ProtocolUI" Header="Режим ПИ (ACW)">
+        <Protocol:ProtocolUI x:Name="ProtocolUI" Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIACW}, Path=Value}">
             <Protocol:ProtocolUI.ContentView>
                 <Custom:InputField Height="Auto" IsTimeVisible="True" IsTimeRampVisible="True" UnitElectrical=",В"/>
             </Protocol:ProtocolUI.ContentView>

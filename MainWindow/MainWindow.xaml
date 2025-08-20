@@ -253,11 +253,11 @@
 
                 </MenuItem>
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_4">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings}, Path=Value}" Name="Settings" Tag="menuHeader_4">
 
-                    <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
-                    <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
-                    <MenuItem Header="Протокол" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Configuration}, Path=Value}" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Execution}, Path=Value}" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Protocol}, Path=Value}" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
 
                 </MenuItem>
 

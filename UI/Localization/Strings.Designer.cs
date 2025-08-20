@@ -61,6 +61,105 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Шина A.
+        /// </summary>
+        internal static string input_bus_a {
+            get {
+                return ResourceManager.GetString("input.bus.a", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Шина B.
+        /// </summary>
+        internal static string input_bus_b {
+            get {
+                return ResourceManager.GetString("input.bus.b", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Шина для проверки.
+        /// </summary>
+        internal static string input_bus_title {
+            get {
+                return ResourceManager.GetString("input.bus.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Электрический параметр.
+        /// </summary>
+        internal static string input_electrical_title {
+            get {
+                return ResourceManager.GetString("input.electrical.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Начальная точка a.b.c.
+        /// </summary>
+        internal static string input_first_title {
+            get {
+                return ResourceManager.GetString("input.first.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Введите значение....
+        /// </summary>
+        internal static string input_placeholder {
+            get {
+                return ResourceManager.GetString("input.placeholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конечная точка a.b.c.
+        /// </summary>
+        internal static string input_second_title {
+            get {
+                return ResourceManager.GetString("input.second.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на от 1 до 999 сек..
+        /// </summary>
+        internal static string input_time_placeholder {
+            get {
+                return ResourceManager.GetString("input.time.placeholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Время выполнения в сек..
+        /// </summary>
+        internal static string input_time_title {
+            get {
+                return ResourceManager.GetString("input.time.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Время нарастания в сек..
+        /// </summary>
+        internal static string input_timeramp_title {
+            get {
+                return ResourceManager.GetString("input.timeramp.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Напряжение в В..
+        /// </summary>
+        internal static string input_voltage_title {
+            get {
+                return ResourceManager.GetString("input.voltage.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Выполнение.
         /// </summary>
         internal static string menu_execution {
@@ -183,6 +282,42 @@ namespace UI.Localization {
         internal static string menu_file_search {
             get {
                 return ResourceManager.GetString("menu.file.search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Настройки.
+        /// </summary>
+        internal static string menu_settings {
+            get {
+                return ResourceManager.GetString("menu.settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конфигурация.
+        /// </summary>
+        internal static string menu_settings_configuration {
+            get {
+                return ResourceManager.GetString("menu.settings.configuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение.
+        /// </summary>
+        internal static string menu_settings_execution {
+            get {
+                return ResourceManager.GetString("menu.settings.execution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Протокол.
+        /// </summary>
+        internal static string menu_settings_protocol {
+            get {
+                return ResourceManager.GetString("menu.settings.protocol", resourceCulture);
             }
         }
         
@@ -399,6 +534,114 @@ namespace UI.Localization {
         internal static string menu_test_tests_pidcw_node {
             get {
                 return ResourceManager.GetString("menu.test.tests.pidcw.node", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ПРОДОЛЖИТЬ(P).
+        /// </summary>
+        internal static string protocol_button_continue {
+            get {
+                return ResourceManager.GetString("protocol.button.continue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ЗАВЕРШИТЬ(Esc).
+        /// </summary>
+        internal static string protocol_button_exit {
+            get {
+                return ResourceManager.GetString("protocol.button.exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ЗАЦИКЛИТЬ.
+        /// </summary>
+        internal static string protocol_button_loop {
+            get {
+                return ResourceManager.GetString("protocol.button.loop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ПОВТОРИТЬ(R).
+        /// </summary>
+        internal static string protocol_button_repeat {
+            get {
+                return ResourceManager.GetString("protocol.button.repeat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ЗАПУСТИТЬ(Enter).
+        /// </summary>
+        internal static string protocol_button_start {
+            get {
+                return ResourceManager.GetString("protocol.button.start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Вглубь(F11).
+        /// </summary>
+        internal static string protocol_button_stepinto {
+            get {
+                return ResourceManager.GetString("protocol.button.stepinto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Поверх(F10).
+        /// </summary>
+        internal static string protocol_button_stepover {
+            get {
+                return ResourceManager.GetString("protocol.button.stepover", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ОСТАНОВИТЬ(P).
+        /// </summary>
+        internal static string protocol_button_stop {
+            get {
+                return ResourceManager.GetString("protocol.button.stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Название файла.
+        /// </summary>
+        internal static string protocol_header_file {
+            get {
+                return ResourceManager.GetString("protocol.header.file", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Ваша надпись.
+        /// </summary>
+        internal static string protocol_header_title {
+            get {
+                return ResourceManager.GetString("protocol.header.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ,сек..
+        /// </summary>
+        internal static string unit_seconds_suffix {
+            get {
+                return ResourceManager.GetString("unit.seconds.suffix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ,В..
+        /// </summary>
+        internal static string unit_volts_suffix {
+            get {
+                return ResourceManager.GetString("unit.volts.suffix", resourceCulture);
             }
         }
     }

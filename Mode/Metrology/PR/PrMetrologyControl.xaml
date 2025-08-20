@@ -9,7 +9,7 @@
              xmlns:Custom="clr-namespace:UI.Components;assembly=UI"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Protocol:ProtocolUI x:Name="ProtocolUI" Header="Режим ПР">
+        <Protocol:ProtocolUI x:Name="ProtocolUI" Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}">
             <Protocol:ProtocolUI.ContentView>
                 <Custom:InputField Height="Auto" UnitElectrical=",Ом"/>
             </Protocol:ProtocolUI.ContentView>

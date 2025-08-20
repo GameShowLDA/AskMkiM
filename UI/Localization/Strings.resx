@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="input.placeholder" xml:space="preserve">
+    <value>Введите значение...</value>
+  </data>
+  <data name="input.first.title" xml:space="preserve">
+    <value>Начальная точка a.b.c</value>
+  </data>
+  <data name="input.second.title" xml:space="preserve">
+    <value>Конечная точка a.b.c</value>
+  </data>
   <data name="menu.execution" xml:space="preserve">
     <value>Выполнение</value>
   </data>
@@ -158,6 +167,18 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Поиск</value>
+  </data>
+  <data name="menu.settings" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="menu.settings.configuration" xml:space="preserve">
+    <value>Конфигурация</value>
+  </data>
+  <data name="menu.settings.execution" xml:space="preserve">
+    <value>Выполнение</value>
+  </data>
+  <data name="menu.settings.protocol" xml:space="preserve">
+    <value>Протокол</value>
   </data>
   <data name="menu.test" xml:space="preserve">
     <value>Исптания</value>
@@ -230,5 +251,65 @@
   </data>
   <data name="menu.test.tests.pidcw.node" xml:space="preserve">
     <value>Метод узла</value>
+  </data>
+  <data name="input.time.title" xml:space="preserve">
+    <value>Время выполнения в сек.</value>
+  </data>
+  <data name="input.time.placeholder" xml:space="preserve">
+    <value>от 1 до 999 сек.</value>
+  </data>
+  <data name="input.timeramp.title" xml:space="preserve">
+    <value>Время нарастания в сек.</value>
+  </data>
+  <data name="input.voltage.title" xml:space="preserve">
+    <value>Напряжение в В.</value>
+  </data>
+  <data name="input.bus.title" xml:space="preserve">
+    <value>Шина для проверки</value>
+  </data>
+  <data name="input.bus.a" xml:space="preserve">
+    <value>Шина A</value>
+  </data>
+  <data name="input.bus.b" xml:space="preserve">
+    <value>Шина B</value>
+  </data>
+  <data name="unit.seconds.suffix" xml:space="preserve">
+    <value>,сек.</value>
+  </data>
+  <data name="unit.volts.suffix" xml:space="preserve">
+    <value>,В.</value>
+  </data>
+  <data name="input.electrical.title" xml:space="preserve">
+    <value>Электрический параметр</value>
+  </data>
+  <data name="protocol.header.file" xml:space="preserve">
+    <value>Название файла</value>
+  </data>
+  <data name="protocol.header.title" xml:space="preserve">
+    <value>Ваша надпись</value>
+  </data>
+  <data name="protocol.button.start" xml:space="preserve">
+    <value>ЗАПУСТИТЬ(Enter)</value>
+  </data>
+  <data name="protocol.button.repeat" xml:space="preserve">
+    <value>ПОВТОРИТЬ(R)</value>
+  </data>
+  <data name="protocol.button.loop" xml:space="preserve">
+    <value>ЗАЦИКЛИТЬ</value>
+  </data>
+  <data name="protocol.button.stop" xml:space="preserve">
+    <value>ОСТАНОВИТЬ(P)</value>
+  </data>
+  <data name="protocol.button.stepover" xml:space="preserve">
+    <value>Поверх(F10)</value>
+  </data>
+  <data name="protocol.button.stepinto" xml:space="preserve">
+    <value>Вглубь(F11)</value>
+  </data>
+  <data name="protocol.button.continue" xml:space="preserve">
+    <value>ПРОДОЛЖИТЬ(P)</value>
+  </data>
+  <data name="protocol.button.exit" xml:space="preserve">
+    <value>ЗАВЕРШИТЬ(Esc)</value>
   </data>
 </root>

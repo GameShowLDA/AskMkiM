@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="input.placeholder" xml:space="preserve">
+    <value>Enter a value...</value>
+  </data>
+  <data name="input.first.title" xml:space="preserve">
+    <value>Start point a.b.c</value>
+  </data>
+  <data name="input.second.title" xml:space="preserve">
+    <value>End point a.b.c</value>
+  </data>
   <data name="menu.execution" xml:space="preserve">
     <value>Execution</value>
   </data>
@@ -158,6 +167,18 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="menu.settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="menu.settings.configuration" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="menu.settings.execution" xml:space="preserve">
+    <value>Execution</value>
+  </data>
+  <data name="menu.settings.protocol" xml:space="preserve">
+    <value>Protocol</value>
   </data>
   <data name="menu.test" xml:space="preserve">
     <value>Test</value>
@@ -230,5 +251,65 @@
   </data>
   <data name="menu.test.tests.pidcw.node" xml:space="preserve">
     <value>Node Method</value>
+  </data>
+  <data name="input.time.title" xml:space="preserve">
+    <value>Execution time, sec</value>
+  </data>
+  <data name="input.time.placeholder" xml:space="preserve">
+    <value>from 1 to 999 sec</value>
+  </data>
+  <data name="input.timeramp.title" xml:space="preserve">
+    <value>Ramp time, sec</value>
+  </data>
+  <data name="input.voltage.title" xml:space="preserve">
+    <value>Voltage, V</value>
+  </data>
+  <data name="input.bus.title" xml:space="preserve">
+    <value>Bus for check</value>
+  </data>
+  <data name="input.bus.a" xml:space="preserve">
+    <value>Bus A</value>
+  </data>
+  <data name="input.bus.b" xml:space="preserve">
+    <value>Bus B</value>
+  </data>
+  <data name="unit.seconds.suffix" xml:space="preserve">
+    <value>,sec.</value>
+  </data>
+  <data name="unit.volts.suffix" xml:space="preserve">
+    <value>,V.</value>
+  </data>
+  <data name="input.electrical.title" xml:space="preserve">
+    <value>Electrical parameter</value>
+  </data>
+  <data name="protocol.header.file" xml:space="preserve">
+    <value>File name</value>
+  </data>
+  <data name="protocol.header.title" xml:space="preserve">
+    <value>Your title</value>
+  </data>
+  <data name="protocol.button.start" xml:space="preserve">
+    <value>START (Enter)</value>
+  </data>
+  <data name="protocol.button.repeat" xml:space="preserve">
+    <value>REPEAT (R)</value>
+  </data>
+  <data name="protocol.button.loop" xml:space="preserve">
+    <value>LOOP</value>
+  </data>
+  <data name="protocol.button.stop" xml:space="preserve">
+    <value>STOP (P)</value>
+  </data>
+  <data name="protocol.button.stepover" xml:space="preserve">
+    <value>Step Over (F10)</value>
+  </data>
+  <data name="protocol.button.stepinto" xml:space="preserve">
+    <value>Step Into (F11)</value>
+  </data>
+  <data name="protocol.button.continue" xml:space="preserve">
+    <value>CONTINUE (P)</value>
+  </data>
+  <data name="protocol.button.exit" xml:space="preserve">
+    <value>EXIT (Esc)</value>
   </data>
 </root>

@@ -97,6 +97,8 @@
                                 Background="{StaticResource SecondarySolidColorBrush}"  
                                 Orientation="Horizontal"/>
                     <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
+                
+                
                 </Grid>
 
             </Grid>
