@@ -1,6 +1,7 @@
 ﻿using AppConfiguration.Base;
 using DevZest.Windows.Docking;
 using ICSharpCode.AvalonEdit;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -367,7 +368,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="userControls">Список пользовательских контролов, представленных элементами <see cref="UserControl"/>.</param>
     /// <param name="filePaths">Словарь, содержащий пути к файлам, где ключ — имя файла, а значение — путь к файлу.</param>
     /// <param name="multiEditorControl">Экземпляр <see cref="MultiEditorControl"/> для взаимодействия с редактором.</param>
-    public ControlManager(List<OpenFileButton> openPages, List<UserControl> userControls, Dictionary<string, string> filePaths, MultiEditorControl multiEditorControl)
+    public ControlManager(ObservableCollection<OpenFileButton> openPages, ObservableCollection<UserControl> userControls, Dictionary<string, string> filePaths, MultiEditorControl multiEditorControl)
     {
       this.fileManager = new FileManager(multiEditorControl);
       this.fileManager.OpenPages = openPages;

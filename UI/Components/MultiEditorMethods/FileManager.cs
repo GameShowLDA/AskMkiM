@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
+﻿using AppConfiguration.Base;
+using DevZest.Windows.Docking;
+using Message;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
-using AppConfiguration.Base;
-using DevZest.Windows.Docking;
-using Message;
 using Ude;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
@@ -26,12 +27,12 @@ namespace UI.Components.MultiEditorMethods
     /// <summary>
     /// Получает или задает список объектов кнопки, представляющей открытую страницу. 
     /// </summary>
-    public List<OpenFileButton> OpenPages { get; set; }
+    public ObservableCollection<OpenFileButton> OpenPages { get; set; }
 
     /// <summary>
     /// Получает или задает список пользовательских контролов, которые отображаются в приложении.
     /// </summary>
-    public List<UserControl> UserControls { get; set; }
+    public ObservableCollection<UserControl> UserControls { get; set; }
 
     /// <summary>
     /// Получает или задает словарь, где имя файла - ключ, а путь к файлу - значение.
@@ -625,8 +626,8 @@ namespace UI.Components.MultiEditorMethods
     public FileManager(MultiEditorControl multiEditorControl)
     {
       this.FilePaths = new Dictionary<string, string>();
-      this.UserControls = new List<UserControl>();
-      this.OpenPages = new List<OpenFileButton>();
+      this.UserControls = new ObservableCollection<UserControl>();
+      this.OpenPages = new ObservableCollection<OpenFileButton>();
       this.multiEditorControl = multiEditorControl;
     }
   }

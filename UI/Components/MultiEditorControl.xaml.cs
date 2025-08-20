@@ -62,6 +62,22 @@ namespace UI.Components
     /// </summary>
     public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
 
+    private static readonly DependencyPropertyKey CountsPropertyKey =
+    DependencyProperty.RegisterReadOnly(
+      nameof(Counts),
+      typeof(int),
+      typeof(MultiEditorControl),
+      new FrameworkPropertyMetadata(0));
+
+    public static readonly DependencyProperty CountsProperty = CountsPropertyKey.DependencyProperty;
+
+    /// <summary>Текущее число контролов внутри редактора.</summary>
+    public int Counts
+    {
+      get => (int)GetValue(CountsProperty);
+      private set => SetValue(CountsPropertyKey, value);
+    }
+
     /// <summary>
     /// Инициализирует экземпляр <see cref="FileManager"/> и устанавливает связь с текущим контролом.
     /// </summary>
@@ -95,16 +111,17 @@ namespace UI.Components
       this.KeyDown += MultiWindowControl_KeyDown;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
       InitializeManagers();
+
+      Counts = fileManager.GetCountConrols();
+      fileManager.UserControls.CollectionChanged += (s, a) =>
+      {
+        Counts = fileManager.UserControls.Count;
+      };
     }
 
     private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
     {
       textSearchManager.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
-    }
-
-    public int Counts
-    {
-      get => fileManager.GetCountConrols();
     }
 
     /// <summary>
