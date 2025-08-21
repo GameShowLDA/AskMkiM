@@ -5,11 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mode.Settings.SettingsProgramm"
              xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
+             xmlns:Execution="clr-namespace:UI.Controls.Settings.Execution;assembly=UI"
+             xmlns:Procol="clr-namespace:UI.Controls.Settings.Protocol;assembly=UI"
+
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+
+        <Style x:Key="ShadowButtonStyle" TargetType="Button" BasedOn="{StaticResource ConfigButtonStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        </Style>
+
+    </UserControl.Resources>
+
+
+
     <Border Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="20" Margin="20">
+
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -24,61 +39,12 @@
                 VerticalAlignment="Center"  
                 Grid.Row="0"/>
 
+            <Execution:ExecutionControl Grid.Row="1"/>
+
             <!--Протокол-->
-            <Border Grid.Row="2" Background="{StaticResource IsCheckedColorSolidColorBrush80}" Margin="15,10" CornerRadius="15" BorderThickness="1" BorderBrush="{StaticResource ForegroundSolidColorBrush60}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock 
-                        Text="Протокол" 
-                        FontSize="18" 
-                        Padding="10,10"
-                        Foreground="{StaticResource ForegroundSolidColorBrush}"
-                        FontFamily="{StaticResource WinstonMedium}"
-                        VerticalAlignment="Center"  
-                        Grid.Row="0"/>
-
-                    <WrapPanel Orientation="Horizontal" Grid.Row="1">
-
-                        <Components:SettingsCard
-                            Title="Отображение оборудования"
-                            Description="Отображение информации выполняемых устройствами операций. В режиме отключения выводятся лишь измеренные значения. Ошибки показываются независимо от настройки."
-                            IsChecked="{Binding IdleMode, Mode=TwoWay}" 
-                            Margin="10,10"
-                            VerticalAlignment="Top"
-                            />
-
-                        <Components:SettingsCard 
-                            Title="Вывод времени операции" 
-                            Description="Показывает, сколько времени прошло с момента запуска на каждом шаге выполнения."
-                            IsChecked="{Binding IdleMode, Mode=TwoWay}" 
-                            Margin="10,10"
-                            VerticalAlignment="Top"
-                            />
-
-                        <Components:SettingsCard
-                            Title="Сохранение протокола"
-                            Description="Автоматически сохраняет протокол каждого запуска. Имя файла содержит дату, время и название выполняемых действий."
-                            IsChecked="{Binding IdleMode, Mode=TwoWay}" 
-                            Margin="10,10"
-                            VerticalAlignment="Top"
-                            />
-
-                        <Components:SettingsCard
-                            Title="Печать протокола"
-                            Description="По завершении выполнения отображает диалог выбора принтера для печати итогового протокола."
-                            IsChecked="{Binding IdleMode, Mode=TwoWay}" 
-                            Margin="10,10"
-                            VerticalAlignment="Top"
-                            />
-                    </WrapPanel>
-
-                </Grid>
-            </Border>
+            <Procol:ProtocolControl Grid.Row="2" x:Name="ProtocolManager"/>
 
         </Grid>
+
     </Border>
 </UserControl>

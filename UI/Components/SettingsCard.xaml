@@ -29,18 +29,18 @@
               SnapsToDevicePixels="True">
                             <!-- база -->
                             <Border x:Name="Box"
-                  Background="{StaticResource SecondarySolidColorBrush}"
-                  BorderBrush="#415163"
-                  BorderThickness="1"
-                  CornerRadius="4"
-                  SnapsToDevicePixels="True"
-                  RenderOptions.EdgeMode="Aliased"/>
+                                Background="{StaticResource SecondarySolidColorBrush}"
+                                BorderBrush="#415163"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True"
+                                RenderOptions.EdgeMode="Aliased"/>
                             <!-- опциональный лёгкий внутренний блик для объёма -->
                             <Border x:Name="Inset"
-                  CornerRadius="4"
-                  BorderThickness="1"
-                  BorderBrush="#20FFFFFF"
-                  IsHitTestVisible="False"/>
+                                CornerRadius="4"
+                                BorderThickness="1"
+                                BorderBrush="#20FFFFFF"
+                                IsHitTestVisible="False"/>
 
                            
                         </Grid>
@@ -48,8 +48,8 @@
                         <ControlTemplate.Triggers>
                             <!-- Checked -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Box" Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush80}"/>
-                                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                                <Setter TargetName="Box" Property="Background" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource ActiveForegroundSolidColorBrush80}"/>
                             </Trigger>
 
                             <!-- Hover -->

@@ -76,6 +76,18 @@ namespace AppConfiguration.Protocol
       });
     }
 
+    public static async Task SetProtocolModel(ProtocolModel protocolModel)
+    {
+      await Task.Run(() =>
+      {
+        ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
+        ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
+        ProtocolModel.AutoSaveProtocol = protocolModel.AutoSaveProtocol;
+        ProtocolModel.AutoPrintProtocol = protocolModel.AutoPrintProtocol;
+        ProtocolModel.DisplayOperationTime = protocolModel.DisplayOperationTime;
+      });
+    }
+
     #endregion
 
     #region Get.
@@ -109,6 +121,20 @@ namespace AppConfiguration.Protocol
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
     public static async Task<bool> GetTimeStart() => await Task.Run(() => ProtocolModel.DisplayOperationTime);
+
+    public static async Task<ProtocolModel> GetProtocolModel()
+    {
+      return await Task.Run(() =>
+      {
+        ProtocolModel protocolModel = new ProtocolModel();
+        protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;
+        protocolModel.ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol;
+        protocolModel.AutoSaveProtocol = ProtocolModel.AutoSaveProtocol;
+        protocolModel.AutoPrintProtocol = ProtocolModel.AutoPrintProtocol;
+        protocolModel.DisplayOperationTime = ProtocolModel.DisplayOperationTime;
+        return protocolModel;
+      });
+    }
 
     #endregion
 

@@ -18,9 +18,13 @@ namespace UI.Components
   /// <summary> Карточка настройки с чекбоксом, заголовком и описанием. </summary>
   public partial class SettingsCard : UserControl
   {
+    private bool _suppressEvents = true; // по умолчанию гасим до Loaded
+
     public SettingsCard()
     {
       InitializeComponent();
+      Loaded += (_, __) => _suppressEvents = false;   // можно слать события
+      Unloaded += (_, __) => _suppressEvents = true;  // гасим на выгрузке
     }
 
     // Заголовок
@@ -45,12 +49,37 @@ namespace UI.Components
 
     // Состояние чекбокса
     public static readonly DependencyProperty IsCheckedProperty =
-      DependencyProperty.Register(nameof(IsChecked), typeof(bool), typeof(SettingsCard), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+      DependencyProperty.Register(nameof(IsChecked), typeof(bool), typeof(SettingsCard), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsCheckedChanged));
 
     public bool IsChecked
     {
       get => (bool)GetValue(IsCheckedProperty);
       set => SetValue(IsCheckedProperty, value);
+    }
+
+    /// <summary>Событие при изменении состояния чекбокса.</summary>
+    public event EventHandler<bool>? CheckedChanged;
+
+    private static void OnIsCheckedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      var control = (SettingsCard)d;
+
+      if (control._suppressEvents || PresentationSource.FromVisual(control) == null)
+        return;
+
+      control.OnCheckedChanged((bool)e.NewValue);
+    }
+
+    protected virtual void OnCheckedChanged(bool newValue)
+    {
+      CheckedChanged?.Invoke(this, newValue);
+    }
+
+    protected override void OnVisualParentChanged(DependencyObject oldParent)
+    {
+      base.OnVisualParentChanged(oldParent);
+      // Когда нас вынимают из визуального дерева, события гасим немедленно.
+      if (VisualParent == null) _suppressEvents = true;
     }
   }
 }
