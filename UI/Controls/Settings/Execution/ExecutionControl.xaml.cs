@@ -1,8 +1,11 @@
-﻿using Message;
+﻿using AppConfiguration.Execution;
+using AppConfiguration.Protocol;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
-using static AppConfiguration.SystemState.SystemStateManager;
+using System.Windows.Input;
 using static AppConfiguration.Execution.ExecutionConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
 
 namespace UI.Controls.Settings.Execution
 {
@@ -11,77 +14,137 @@ namespace UI.Controls.Settings.Execution
   /// </summary>
   public partial class ExecutionControl : UserControl
   {
-    private bool _canSave;
+
+    /// <summary>
+    /// Базовая (сохранённая) модель выполнения, считанная при загрузке.
+    /// Используется как эталон для сравнения с текущими значениями UI.
+    /// </summary>
+    private ExecutionModel _baseExecutionModel { get; set; }
+
+    /// <summary>
+    /// Глобальный флаг наличия несохранённых изменений в разделе.
+    /// <para>True — есть отличия от сохранённой модели; False — всё совпадает.</para>
+    /// </summary>
+    public bool HasUnsavedChanges { get; private set; }
 
     public ExecutionControl()
     {
       InitializeComponent();
       Loaded += ExecutionControl_Loaded;
-      Unloaded += ExecutionControl_Unloaded;
+
     }
 
-    private void ExecutionControl_Unloaded(object sender, RoutedEventArgs e)
+    private async void ExecutionControl_Loaded(object sender, RoutedEventArgs e)
     {
-      _canSave = false;
-      IdleMode.CheckedChanged -= IdleMode_CheckedChanged;
-      StepByStepMode.CheckedChanged -= StepByStepMode_CheckedChanged;
-      ErrorSimulation.CheckedChanged -= ErrorSimulation_CheckedChanged;
-      StopInError.CheckedChanged -= StopInError_CheckedChanged;
-    }
+      _baseExecutionModel = await GetExecitonModel();
+      DefalultData();
 
-    private async void ExecutionControl_Loaded(object? sender, RoutedEventArgs e)
-    {
-      _canSave = false;
-      await SetConfiguration();
-
+      StopInError.CheckedChanged += CheckedChanged;
+      StepByStepMode.CheckedChanged += CheckedChanged;
+      ErrorSimulation.CheckedChanged += CheckedChanged;
       IdleMode.CheckedChanged += IdleMode_CheckedChanged;
-      StepByStepMode.CheckedChanged += StepByStepMode_CheckedChanged;
-      ErrorSimulation.CheckedChanged += ErrorSimulation_CheckedChanged;
-      StopInError.CheckedChanged += StopInError_CheckedChanged;
 
-      _canSave = true;
+      Success.PreviewMouseDown += Success_PreviewMouseDown;
+      Error.PreviewMouseDown += Error_PreviewMouseDown;
+
+      Error.Visibility = Visibility.Collapsed;
+      Success.Visibility = Visibility.Collapsed;
+      HasUnsavedChanges = false;
     }
-
-    private async void StopInError_CheckedChanged(object? sender, bool e) => await NewDataSaveAsync();
-    private async void StepByStepMode_CheckedChanged(object? s, bool e) => await NewDataSaveAsync();
-    private async void ErrorSimulation_CheckedChanged(object? s, bool e) => await NewDataSaveAsync();
-
-    private async void IdleMode_CheckedChanged(object? sender, bool isChecked)
+    /// <summary>
+    /// Клик по галочке «сохранить»: сохраняет текущую модель,
+    /// перечитывает базу и скрывает индикаторы изменений.
+    /// </summary>
+    private async void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      // isChecked — это новое значение из SettingsCard.CheckedChanged
-      if (await GetIsActivePower() && isChecked)
-      {
-        MessageBoxCustom.Show("Отключите питание системы для перехода в холостой режим!",
-                              "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        IdleMode.IsChecked = false; // откатываем
-        return;
-      }
-      await NewDataSaveAsync();
-    }
+      await SaveProtocolModel(GetModel());
+      _baseExecutionModel = await GetExecitonModel();
 
+      Error.Visibility = Visibility.Collapsed;
+      Success.Visibility = Visibility.Collapsed;
+      HasUnsavedChanges = false;
+    }
 
     /// <summary>
-    /// Сохраняет новые данные конфигурации в модель и применяет их.
+    /// Клик по кресту «отменить»: откатывает значения к сохранённой модели
+    /// и скрывает индикаторы изменений.
     /// </summary>
-    private async Task NewDataSaveAsync()
+    private void Error_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (!_canSave) return;
+      DefalultData();
 
-      await SetIdleMode((bool)IdleMode.IsChecked);
-      await SetStepByStepMode((bool)StepByStepMode.IsChecked);
-      await SetStopOnError((bool)StopInError.IsChecked);
-      await SetIsErrorSimulationMode((bool)ErrorSimulation.IsChecked);
-
-      await RewriteExecutionConfigAsync();
+      Error.Visibility = Visibility.Collapsed;
+      Success.Visibility = Visibility.Collapsed;
+      HasUnsavedChanges = false;
     }
 
-    /// <summary>Читает конфигурацию и проставляет значения в UI.</summary>
-    private async Task SetConfiguration()
+    private async void IdleMode_CheckedChanged(object? sender, bool e)
     {
-      IdleMode.IsChecked = await GetIsIdleModeEnabled();
-      StepByStepMode.IsChecked = await GetIsStepByStepModeEnabled();
-      StopInError.IsChecked = await GetIsStopOnErrorEnabled();
-      ErrorSimulation.IsChecked = await GetIsErrorSimulationEnabled();
+      if (await GetIsActivePower() && (sender as CheckBox).IsChecked == true)
+      {
+        MessageBoxCustom.Show("Отключите питание системы для перехода в холостой режим!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        (sender as CheckBox).IsChecked = !(sender as CheckBox).IsChecked;
+        return;
+      }
+      else
+      {
+        CheckedChanged(sender, e);
+      }
+    }
+
+    /// <summary>
+    /// Унифицированный обработчик изменений любого переключателя.
+    /// Сравнивает текущую модель с сохранённой и показывает/скрывает индикаторы.
+    /// </summary>
+    private void CheckedChanged(object? sender, bool e)
+    {
+      if (!ProtocolEquals(_baseExecutionModel, GetModel()))
+      {
+        Error.Visibility = Visibility.Visible;
+        Success.Visibility = Visibility.Visible;
+        HasUnsavedChanges = true;
+      }
+      else
+      {
+        Error.Visibility = Visibility.Collapsed;
+        Success.Visibility = Visibility.Collapsed;
+        HasUnsavedChanges = false;
+      }
+    }
+
+    /// <summary>
+    /// Формирует модель протокола из текущих значений элементов UI.
+    /// </summary>
+    private ExecutionModel GetModel()
+    {
+      var model = new ExecutionModel
+      {
+        StopOnError = StopInError.IsChecked,
+        StepByStepMode = StepByStepMode.IsChecked,
+        IsErrorSimulationMode = ErrorSimulation.IsChecked,
+        IdleModeExecution = IdleMode.IsChecked
+      };
+      return model;
+    }
+
+    /// <summary>
+    /// Сравнивает две модели протокола по всем флагам.
+    /// </summary>
+    private static bool ProtocolEquals(ExecutionModel a, ExecutionModel b) =>
+      a.IdleModeExecution == b.IdleModeExecution &&
+      a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
+      a.StepByStepMode == b.StepByStepMode &&
+      a.StopOnError == b.StopOnError;
+
+    /// <summary>
+    /// Заполняет элементы UI значениями из базовой (сохранённой) модели.
+    /// </summary>
+    private void DefalultData()
+    {
+      IdleMode.IsChecked = _baseExecutionModel.IdleModeExecution;
+      ErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
+      StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
+      StopInError.IsChecked = _baseExecutionModel.StopOnError;
     }
   }
 }
