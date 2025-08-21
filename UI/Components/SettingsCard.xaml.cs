@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace UI.Components
+{
+  /// <summary> Карточка настройки с чекбоксом, заголовком и описанием. </summary>
+  public partial class SettingsCard : UserControl
+  {
+    public SettingsCard()
+    {
+      InitializeComponent();
+    }
+
+    // Заголовок
+    public static readonly DependencyProperty TitleProperty =
+      DependencyProperty.Register(nameof(Title), typeof(string), typeof(SettingsCard), new PropertyMetadata("Заголовок"));
+
+    public string Title
+    {
+      get => (string)GetValue(TitleProperty);
+      set => SetValue(TitleProperty, value);
+    }
+
+    // Описание
+    public static readonly DependencyProperty DescriptionProperty =
+      DependencyProperty.Register(nameof(Description), typeof(string), typeof(SettingsCard), new PropertyMetadata("Описание"));
+
+    public string Description
+    {
+      get => (string)GetValue(DescriptionProperty);
+      set => SetValue(DescriptionProperty, value);
+    }
+
+    // Состояние чекбокса
+    public static readonly DependencyProperty IsCheckedProperty =
+      DependencyProperty.Register(nameof(IsChecked), typeof(bool), typeof(SettingsCard), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+    public bool IsChecked
+    {
+      get => (bool)GetValue(IsCheckedProperty);
+      set => SetValue(IsCheckedProperty, value);
+    }
+  }
+}

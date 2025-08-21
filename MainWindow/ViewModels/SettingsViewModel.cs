@@ -27,6 +27,7 @@ namespace MainWindowProgram.ViewModels
 
     public ICommand HelpCommand { get; }
 
+    public ICommand SettingsCommand { get; }
     /// <summary>
     /// Сервис для работы с настройками.
     /// </summary>
@@ -44,6 +45,7 @@ namespace MainWindowProgram.ViewModels
       ConfigCommand = new AsyncRelayCommand(_service.OpenConfigurationAsync);
       ProtocolCommand = new AsyncRelayCommand(_service.OpenProtocolAsync);
       HelpCommand = new AsyncRelayCommand(_service.HelpTextAsync);
+      SettingsCommand = new AsyncRelayCommand(_service.OpenSettingsAsync);
     }
   }
 }

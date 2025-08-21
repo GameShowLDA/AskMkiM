@@ -133,7 +133,6 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
 
     private async Task<bool> CheckPoint(CancellationToken token, IUserMessageService messageService, IRelaySwitchModule relaySwitchModule, int point)
     {
-      bool error = false;
       token.ThrowIfCancellationRequested();
 
       string answer = !await GetIsIdleModeEnabled()
