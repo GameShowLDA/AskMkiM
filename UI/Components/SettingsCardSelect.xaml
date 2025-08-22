@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="UI.Components.SettingsCardSelect"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+                          d:DesignHeight="84" d:DesignWidth="320" MaxWidth="300">
+    <UserControl.Resources>
+        <!-- те же локальные кисти, что и в SettingsCard -->
+        <SolidColorBrush x:Key="CardBorder" Color="#415163"/>
+        <SolidColorBrush x:Key="TitleBrush" Color="#E7EDF4"/>
+        <SolidColorBrush x:Key="DescBrush" Color="#A9B5C3"/>
+    </UserControl.Resources>
+    
+    <Border Background="{StaticResource SecondarySolidColorBrush}"
+          BorderBrush="{StaticResource CardBorder}"
+          BorderThickness="1"
+          CornerRadius="14"
+          Padding="10"
+          SnapsToDevicePixels="True">
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!-- текст -->
+                <ColumnDefinition Width="12"/>
+                <!-- зазор -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- селект -->
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок/описание слева -->
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                 Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 FontSize="15"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource TitleBrush}"
+                 Margin="0,0,0,2"
+                 FontFamily="{DynamicResource WinstonMedium}"
+                 TextWrapping="Wrap"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                 Text="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 FontSize="12"
+                 Foreground="{StaticResource DescBrush}"
+                 TextWrapping="Wrap"/>
+
+            <!-- Выпадающий список справа -->
+            <ComboBox Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
+                MinWidth="130"
+                VerticalAlignment="Top"
+                Background="{StaticResource SecondarySolidColorBrush}"
+                BorderBrush="{StaticResource CardBorder}"
+                Foreground="{StaticResource TitleBrush}"
+                Padding="4"
+                ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                DisplayMemberPath="{Binding DisplayMemberPath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedValuePath="{Binding SelectedValuePath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedValue="{Binding SelectedValue, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectionChanged="ComboBox_SelectionChanged"/>
+        </Grid>
+    </Border>
+    
+</UserControl>

@@ -13,9 +13,7 @@
         <SolidColorBrush x:Key="CheckBg"        Color="#2B333D"/>
         <SolidColorBrush x:Key="CheckBorder"    Color="#415163"/>
 
-        <!-- Стиль чекбокса под макет -->
         <Style x:Key="SettingsCheckBox" TargetType="CheckBox">
-            <!-- компактный размер + выравнивание -->
             <Setter Property="Width" Value="18"/>
             <Setter Property="Height" Value="18"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
@@ -24,9 +22,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
-                        <!-- размер берём у самого CheckBox -->
-                        <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}"
-              SnapsToDevicePixels="True">
+                        <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" SnapsToDevicePixels="True">
+                            
                             <!-- база -->
                             <Border x:Name="Box"
                                 Background="{StaticResource SecondarySolidColorBrush}"
@@ -35,7 +32,7 @@
                                 CornerRadius="4"
                                 SnapsToDevicePixels="True"
                                 RenderOptions.EdgeMode="Aliased"/>
-                            <!-- опциональный лёгкий внутренний блик для объёма -->
+                            
                             <Border x:Name="Inset"
                                 CornerRadius="4"
                                 BorderThickness="1"

@@ -86,4 +86,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controls\Settings\UI\" />
+  </ItemGroup>
+
 </Project>

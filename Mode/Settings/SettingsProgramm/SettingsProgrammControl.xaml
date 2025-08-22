@@ -39,7 +39,7 @@
                 VerticalAlignment="Center"  
                 Grid.Row="0"/>
 
-            <Execution:ExecutionControl Grid.Row="1"/>
+            <Execution:ExecutionControl Grid.Row="1" x:Name="ExecutionManager"/>
 
             <!--Протокол-->
             <Procol:ProtocolControl Grid.Row="2" x:Name="ProtocolManager"/>

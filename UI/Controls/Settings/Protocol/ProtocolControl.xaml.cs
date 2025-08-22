@@ -61,7 +61,8 @@ namespace UI.Controls.Settings.Protocol
     /// Клик по галочке «сохранить»: сохраняет текущую модель,
     /// перечитывает базу и скрывает индикаторы изменений.
     /// </summary>
-    private async void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private async void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await SaveData();
+    public async Task SaveData()
     {
       await SaveProtocolModel(GetModel());
       _baseProtocolModel = await GetProtocolModel();
