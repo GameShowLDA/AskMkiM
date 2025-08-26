@@ -53,6 +53,7 @@ namespace AppConfiguration.Error.Translation
       Description = "Команда СИ должна содержать хотя бы один параметр. Тело команды не может быть пустым."
     };
 
+    /// <summary>
     /// Ошибка: Ошибка при проверке одно из разряда в групповом методе.
     /// </summary>
     /// <param name="command">Номер команды и мнемоника.</param>
