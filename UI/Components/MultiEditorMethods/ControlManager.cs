@@ -1,14 +1,11 @@
 ﻿using AppConfiguration.Base;
-using UI.Windows.WpfDocking.Windows.Docking;
-using ICSharpCode.AvalonEdit;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
-using UI.Controls;
 using UI.Controls.TextEditor;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using UI.Windows.WpfDocking.Windows.Docking;
 using static UI.Components.Invoke.OpenFileButton;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -21,7 +18,7 @@ namespace UI.Components.MultiEditorMethods
   {
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
 
-    FileManager fileManager { get; set; }
+    internal FileManager fileManager { get; set; }
 
     private MultiEditorControl multiEditorControl { get; set; }
 
@@ -30,17 +27,22 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="tabButton">Вкладка для удаления.</param>
     /// <param name="control">Элемент управления для удаления.</param>
-    public void RemoveControl(OpenFileButton tabButton, UserControl control, bool isTranslation = false)
+    public async Task RemoveControl(OpenFileButton tabButton, UserControl control, bool isTranslation = false)
     {
-      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control) || control is TextEditorUI && isTranslation == false)
+      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control)
+        || control is TextEditorUI && isTranslation == false)
       {
         int index = -1;
+        EditorType editorType = null;
         if (control is TextEditorUI)
         {
-          if (tabButton.Text == "Текстовый редактор")
+          if (tabButton.Text == EditorType.TextEditor.ToString())
           {
-            var container = fileManager.UserControls.FirstOrDefault(textEditorContainer => textEditorContainer.GetType() == typeof(TextEditorContainer));
-            if (container is TextEditorContainer foundContainer)
+            editorType = EditorType.TextEditor;
+            var container = fileManager.OpenPages.FirstOrDefault(textEditorContainer
+              => textEditorContainer.Text == editorType.ToString());
+            var containerIndex = fileManager.OpenPages.IndexOf(container);
+            if (fileManager.UserControls[containerIndex] is TextEditorContainer foundContainer)
             {
               var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
               if (foundDockItem != null)
@@ -62,6 +64,12 @@ namespace UI.Components.MultiEditorMethods
 
         RemoveTabAndControl(tabButton, control);
         ShowNextTab(index);
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        if (fileManager.UserControls.OfType<TextEditorContainer>().Count() == 0 || activeTab == null
+          || !(fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer))
+        {
+          EventAggregator.RaiseCloseSearchWindow();
+        }
       }
     }
 
@@ -75,7 +83,7 @@ namespace UI.Components.MultiEditorMethods
       var result = MessageBoxResult.No;
       var saveFileResult = false;
       if (control.Content is TextEditorUI)
-      { // TODO: индекс изменить
+      { 
         var saveFileManager = new SaveFileManager(fileManager);
         saveFileManager.SaveFileDialog(ref result, ref saveFileResult, control);
       }

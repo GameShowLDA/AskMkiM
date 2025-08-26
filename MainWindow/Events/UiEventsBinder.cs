@@ -71,7 +71,7 @@ namespace MainWindowProgram.Events
 
       _mainWindow.SearchWindow.ClearHighlights += _multiWindow.OnSearchWindowClosing;
 
-      EventAggregator.OpenOpk += OnOpenOpk;
+      //EventAggregator.OpenOpk += OnOpenOpk;
 
       EventAggregator.CompareFiles += OnCompareFiles;
       EventAggregator.TranslatorActive += EventAggregator_TranslatorActive;
@@ -194,13 +194,6 @@ namespace MainWindowProgram.Events
     private void SearchWindow_ReplaceTextHandler(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       _multiWindow.ReplaceData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
-    }
-
-    private void OnOpenOpk(UserControl userControl, string elementName, string elementData)
-    {
-      var texteditor = userControl as TextEditorUI;
-      texteditor.IsReadOnly = true;
-      _multiWindow.AddControl(elementName, texteditor, TypeWindow.Files);
     }
   }
 }

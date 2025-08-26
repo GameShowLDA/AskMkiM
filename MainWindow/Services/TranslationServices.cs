@@ -1,14 +1,12 @@
-﻿using System.Windows;
-using AppConfiguration.Base;
+﻿using AppConfiguration.Base;
 using ControlCommandAnalyser;
+using ControlCommandAnalyser.Model.Ok;
 using Message;
 using System.Windows;
 using UI.Controls;
 using UI.Controls.Runner;
 using UI.Controls.TextEditor;
-using static UI.Components.Invoke.OpenFileButton;
 using UI.Windows.WpfDocking.Windows.Docking;
-using static UI.Controls.Message.MessageBox;
 
 namespace MainWindowProgram.Services
 {
@@ -24,11 +22,6 @@ namespace MainWindowProgram.Services
     private readonly MultiWindowService _multiWindow;
 
     /// <summary>
-    /// Ссылка на главное окно приложения.
-    /// </summary>
-    private readonly MainWindow _mainWindow;
-
-    /// <summary>
     /// Сервис для работы с файлами.
     /// </summary>
     private readonly FileService _fileService;
@@ -36,13 +29,11 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AdminServices"/>.
     /// </summary>
-    /// <param name="mainWindow">Главное окно приложения.</param>
     /// <param name="multiWindow">Сервис управления многооконным интерфейсом.</param>
     /// <param name="fileService">Сервис  для работы с файлами.</param>
-    public TranslationServices(MainWindow mainWindow, MultiWindowService multiWindow, FileService fileService)
+    public TranslationServices(MultiWindowService multiWindow, FileService fileService)
     {
       _multiWindow = multiWindow;
-      _mainWindow = mainWindow;
       _fileService = fileService;
     }
 
@@ -53,8 +44,8 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task BuildAsync()
-    {
-      var editor = await _multiWindow.GetActiveTextEditor();
+     {
+      var editor = await _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var translationContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
       if (editor == null && translationContainer != null)
@@ -79,12 +70,12 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      var editor = await _multiWindow.GetActiveTextEditor();
+      var editor = await _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       if (container == null)
       {
         await BuildAsync();
-        editor = await _multiWindow.GetActiveTextEditor();
+        editor = await _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
         container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       }
 
@@ -124,7 +115,7 @@ namespace MainWindowProgram.Services
 
       if (translator.ErrorCount > 0)
       {
-         MessageBoxCustom.Show($"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
         return;
       }
 
@@ -134,10 +125,15 @@ namespace MainWindowProgram.Services
 
       RunControl runControl = new RunControl();
       runControl.SetLeftEditor(editor);
+      var foundItem = models.FirstOrDefault(item => item.GetType() == typeof(OkCommandModel));
+      if (foundItem != null && foundItem is OkCommandModel okCommandModel)
+      {
+        runControl.FileName = okCommandModel.ObjectCode;
+      }
 
-      await _multiWindow.AddControlAsync("Выполнитель", runControl, TypeWindow.DeviceControl);
+      await _multiWindow.AddRunItem(runControl, EditorType.Run);
+
       runControl.Start(models);
-
     }
 
     /// <summary>
@@ -150,6 +146,7 @@ namespace MainWindowProgram.Services
 
       if (_multiWindow.RemoveActiveTextEditor(true))
       {
+        EventAggregator.RaiseTextEditorContainerClosing(true, editor.TextEditorModel.FileName);
         await CreateNewTranslator(editor, text);
       }
     }

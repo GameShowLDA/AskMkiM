@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppConfiguration.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -194,6 +195,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
     }
 
     public event Action<bool> CloseItem;
+    public event Action<bool> ItemClosed;
 
     private static void OnAllowedDockTreePositionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -1238,6 +1240,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
       {
         CloseItem?.Invoke(true);
         Hide();
+        ItemClosed?.Invoke(true);
         return true;
       }
       else

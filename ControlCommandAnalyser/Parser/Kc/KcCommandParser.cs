@@ -96,10 +96,17 @@ namespace ControlCommandAnalyser.Parser.Kc
       (time, remainder) = CommonParameterParser.ParseTime(remainder);
       LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
 
-      if (string.IsNullOrWhiteSpace(lowerLimitResistance) && string.IsNullOrWhiteSpace(higherLimitResistance))
+      if (string.IsNullOrEmpty(lowerLimitResistance) && string.IsNullOrEmpty(higherLimitResistance))
       {
         model.Errors.Add(KsErrors.EmptyResistance(numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
+        LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
+        if (!string.IsNullOrEmpty(remainder))
+        {
+          model.UnparsedParameters = "! Не распознанные параметры: ";
+          model.UnparsedParameters += remainder;
+          model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
+        }
+        return model;
       }
 
       model.LowerLimitResistance = lowerLimitResistance;
@@ -168,12 +175,7 @@ namespace ControlCommandAnalyser.Parser.Kc
           LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
         }
       }
-      foreach(var point in allPoints)
-      {
-        var points = point.Split(',');
-        model.Points.Add((int.Parse(points[0]), int.Parse(points[1])));
-      }
-      //model.Points = allPoints;
+      model.Points = allPoints;
 
       if (!string.IsNullOrEmpty(remainder))
       {

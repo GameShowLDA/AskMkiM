@@ -228,8 +228,8 @@ namespace ControlCommandAnalyser.Parser.Rm
 
       LogDebug($"[ExpandAll] Processing expression: {expr}");
 
-      
-      if (expr.Contains('[') || expr.Contains(']')||expr.Contains('"')||expr.Contains('$') || expr.Contains(','))
+
+      if (expr.Contains('[') || expr.Contains(']') || expr.Contains('"') || expr.Contains('$') || expr.Contains(','))
       {
         baseCommandModel.Errors.Add(RmErrors.UnacceptableSymbol(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return result;
@@ -263,14 +263,14 @@ namespace ControlCommandAnalyser.Parser.Rm
         if (!string.Equals(compParts.FirstOrDefault(p => p.Contains("-")), compParts.ElementAt(compParts.Length - 1)))
         {
           var dashElements = compParts.FirstOrDefault(p => p.Contains("-")).Split('-');
-          if(compParts.ElementAt(0).Equals(dashElements.ElementAt(1))&&
+          if (compParts.ElementAt(0).Equals(dashElements.ElementAt(1)) &&
             compParts.ElementAt(1).Equals(compParts.ElementAt(3)))
           {
             var newExpr = $"{compParts.ElementAt(0)}.{compParts.ElementAt(1)}.{dashElements.ElementAt(0)}-{compParts.ElementAt(4)}";
             compParts = newExpr.Split('.');
           }
         }
-         var ranges = compParts.Select(ExpandComponent).ToList();
+        var ranges = compParts.Select(ExpandComponent).ToList();
         foreach (var tuple in CartesianProduct(ranges))
           result.Add(string.Join(".", tuple));
         return true;

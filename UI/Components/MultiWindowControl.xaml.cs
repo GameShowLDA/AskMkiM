@@ -1,15 +1,13 @@
-﻿using System.Windows;
 ﻿using AppConfiguration.Base;
-using UI.Windows.WpfDocking.Windows.Docking;
+using Message;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfiguration.Base;
-using Message;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
 using static Utilities.LoggerUtility;
@@ -56,12 +54,14 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Закрывает таблицу с результатами поиска.
+    /// </summary>
     private void CloseSearchResultsActions()
     {
       if (openPages.Count <= 0 && userControls.Count <= 0)
       {
         CloseSearchResults();
-        EventAggregator.RaiseCloseSearchWindow();
       }
     }
 
@@ -155,6 +155,17 @@ namespace UI.Components
       SearchResultsRow.MinHeight = 0;
       SearchResults.Visibility = Visibility.Collapsed;
       MultiWindowSplitter.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>
+    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// </returns>
+    public TextEditorUI GetActiveTextEditor(EditorType editorType)
+    {
+      return MultiEditor.GetActiveTextEditor(editorType);
     }
 
     /// <summary>
@@ -259,6 +270,7 @@ namespace UI.Components
 
       MultiEditor.SaveFileAs();
     }
+
 
     /// <summary>
     /// Отправляет текущий файл на печать.
@@ -641,6 +653,11 @@ namespace UI.Components
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
+    public Task AddRunItem(RunControl runControl, EditorType editorType)
+    {
+      return MultiEditor.AddRunItem(runControl, editorType);
+    }
+
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
@@ -656,6 +673,11 @@ namespace UI.Components
       }
 
       MultiEditor.OpenFolder();
+    }
+
+    public async Task OpenArchiveAsync()
+    {
+      await MultiEditor.OpenArchiveAsync();
     }
   }
 }

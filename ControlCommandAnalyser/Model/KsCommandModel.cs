@@ -30,7 +30,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public List<(int, int)> Points { get; set; } = new();
+    public List<string> Points { get; set; } = new();
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

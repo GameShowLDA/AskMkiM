@@ -31,6 +31,7 @@ namespace UI.Controls.Runner
   {
     List<BaseCommandModel> ControlProgram = null;
     private ProtocolUI ProtocolUI { get; set; }
+    public string FileName {  get; set; }
     bool task = false;
     public RunControl()
     {
@@ -107,6 +108,7 @@ namespace UI.Controls.Runner
       
       ProtocolUI.Header = (ok as OkCommandModel).ObjectCode;
       ProtocolUI.SetSettings(this, StartDelegate: StartTest, false);
+      this.FileName = ProtocolUI.Header;
     }
 
     private async Task StartTest(CancellationToken cancellationToken)

@@ -70,7 +70,7 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\tЗаданные точки:";
 
         foreach (var point in ks.Points)
-          yield return $"\t\t{point.Item1},{point.Item2}";
+          yield return $"\t\t{point}";
       }
       else
       {

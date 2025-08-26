@@ -219,9 +219,22 @@ namespace Utilities.Errors
     [ErrorCodeTag("KS004")]
     Ks_EmptyCommandBody,
 
-    /// <summary> В команде КС список точек указан до сопротивления. </summary>
-    [ErrorCodeTag("KS005")]
-    Ks_PointsBeforeResistance,
+    /// <summary> Не указаны границы емкости для команды ИЕ. </summary>
+    [ErrorCodeTag("IE001")]
+    Ie_EmptyCapacity,
+
+    /// <summary> Не удалось корректно разобрать параметры команды ИЕ. </summary>
+    [ErrorCodeTag("IE002")]
+    Ie_CannotParseParameters,
+
+    /// <summary> В команде ИЕ отсутствует список точек. </summary>
+    [ErrorCodeTag("IE003")]
+    Ie_EmptyPoints,
+
+    /// <summary> В команде ИЕ пустое тело метода. </summary>
+    [ErrorCodeTag("IE004")]
+    Ie_EmptyCommandBody,
+
   }
 
   /// <summary>

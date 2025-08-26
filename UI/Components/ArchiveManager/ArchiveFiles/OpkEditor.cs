@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Compression;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
@@ -17,16 +12,14 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
     /// <summary>
     /// Создает новый файл .opk.
     /// </summary>
-    /// <exception cref="FileNotFoundException"></exception>
     public async Task CreateOpk(string path, OpkFile newOpkFile, List<string> content)
     {
       var archiveEditor = new ArchiveEditor();
       var fileEditor = new FileEditor();
       var indexEditor = new IndexEditor();
-      var isArchiveOpened = false;
       var isFileAdded = false;
 
-      isArchiveOpened = await archiveEditor.OpenArchive(path);
+      var isArchiveOpened = await archiveEditor.OpenArchive(path);
       if (isArchiveOpened)
       {
         isFileAdded = await fileEditor.AddFileToArchive(path, content, newOpkFile.OpkFilename, FileFormatEnum.Pk);

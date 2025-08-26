@@ -1,12 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Xml.Serialization;
-using ICSharpCode.AvalonEdit;
-using UI.Controls.ErrorList;
+﻿using System.Windows.Controls;
 using UI.Controls.TextEditor;
-using System;
-using Utilities.Errors;
 using Utilities.Models;
 using ControlCommandAnalyser.Model;
 

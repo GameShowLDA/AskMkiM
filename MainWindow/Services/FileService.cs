@@ -1,11 +1,13 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using ICSharpCode.AvalonEdit;
+using Microsoft.Win32;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfiguration.Base;
-using Microsoft.Win32;
 using UI.Components.ArchiveControls;
 using UI.Components.ArchiveManager.Models;
 using UI.Components.FileComparerControls;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
@@ -32,8 +34,6 @@ namespace MainWindowProgram.Services
     private readonly Func<bool> _isLockedProvider;
 
     private bool _isSearchWindowOpen;
-
-    private Action SearchWindowClosing;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
@@ -134,6 +134,7 @@ namespace MainWindowProgram.Services
     public async Task SearchFileAsync()
     {
       TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+
       if (_isSearchWindowOpen == false && activeEditor != null)
       {
         _mainWindow.SearchWindow.Owner = _mainWindow;
@@ -182,22 +183,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task OpenArchiveAsync()
     {
-      var allArchives = new TableAllArchivesControl();
-      await _multiWindow.AddControlAsync("Архив", allArchives, TypeWindow.Files);
-      allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
-    }
-
-    private async void ArchiveControl_ArchiveSelected(object sender, MouseButtonEventArgs e)
-    {
-      var dataGrid = e.Source as DataGrid;
-      if (dataGrid?.SelectedItem is ApkArchive selectedArchive)
-      {
-        if (selectedArchive != null)
-        {
-          var archiveName = selectedArchive.ArchiveName;
-          await _multiWindow.AddControlAsync(archiveName, new TableApkArchiveControl(archiveName), TypeWindow.Files);
-        }
-      }
+      await _multiWindow.OpenArchiveAsync();
     }
 
     /// <summary>

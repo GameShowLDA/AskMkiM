@@ -109,19 +109,7 @@
                        HorizontalAlignment="Center"/>
                     </Button>
 
-                    <Button x:Name="translateButton" 
-                    Margin="15,10,10,0"
-                    Style="{StaticResource MetrologyButtonStyle}"
-                    PreviewMouseDown="translateButton_PreviewMouseDown"
-                    Grid.Row="5"
-                    HorizontalAlignment="Left"
-                    Visibility="Hidden" >
-                        <TextBlock Text="Транслировать" 
-                           TextTrimming="CharacterEllipsis" 
-                           TextWrapping="NoWrap" 
-                           VerticalAlignment="Center" 
-                           HorizontalAlignment="Center"/>
-                    </Button>
+                    
                 </Grid>
             </Border>
 

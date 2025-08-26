@@ -1,19 +1,18 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using AppConfiguration.Base;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UI.Components.Invoke;
-using UI.Controls.TextEditor;
-using Application = System.Windows.Application;
-using UserControl = System.Windows.Controls.UserControl;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using UI.Components.SearchControls;
 using UI.Components.MultiEditorMethods;
-using AppConfiguration.Base;
-using static UI.Components.Invoke.OpenFileButton;
+using UI.Components.SearchControls;
 using UI.Controls;
-using UI.Windows.WpfDocking.Windows.Docking;
+using UI.Controls.ProtocolNew;
+using UI.Controls.Runner;
+using UI.Controls.TextEditor;
+using static UI.Components.Invoke.OpenFileButton;
+using Application = System.Windows.Application;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components
 {
@@ -71,7 +70,7 @@ namespace UI.Components
       textSearchManager = new TextSearchManager(fileManager, this);
       controlManager = new ControlManager(fileManager, this);
       saveFileManager = new SaveFileManager(fileManager);
-      textReplacementManager = new TextReplacementManager(fileManager, this, controlManager);
+      textReplacementManager = new TextReplacementManager(fileManager); 
     }
 
     /// <summary>
@@ -92,8 +91,11 @@ namespace UI.Components
         _clickTimer.Stop();
       };
 
+      this.KeyDown -= MultiWindowControl_KeyDown;
       this.KeyDown += MultiWindowControl_KeyDown;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
+      ProtocolUI.AnotherKeyPressed -= MultiWindowControl_KeyDown;
+      ProtocolUI.AnotherKeyPressed += MultiWindowControl_KeyDown;
       InitializeManagers();
     }
 
@@ -128,6 +130,15 @@ namespace UI.Components
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
+    public TextEditorUI GetActiveTextEditor(EditorType editorType)
+    {
+      return fileManager.GetActiveTextEditor(editorType);
+    }
+
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
     public TextEditorUI GetActiveTextEditor()
     {
       return fileManager.GetActiveTextEditor();
@@ -144,7 +155,7 @@ namespace UI.Components
       var page = fileManager.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
       if (control != null && page != null)
       {
-        controlManager.RemoveControl(page, control);
+        controlManager.RemoveControl(page, control).ConfigureAwait(true);
       }
     }
 
@@ -231,7 +242,18 @@ namespace UI.Components
         if (activeTab != null)
         {
           int index = fileManager.OpenPages.IndexOf(activeTab);
-          RemoveControl(activeTab, fileManager.UserControls[index]);
+          if (fileManager.UserControls[index] is TextEditorContainer textEditorContainer)
+          {
+            var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveDocument == true);
+            if (foundItem != null)
+            {
+              foundItem.PerformClose();
+            }
+          }
+          else
+          {
+            RemoveControl(activeTab, fileManager.UserControls[index]);
+          }
         }
       }
     }
@@ -347,7 +369,7 @@ namespace UI.Components
 
     private int CalculateGlobalStartOffset(int lineStartOffset, string lineText, string searchText)
     {
-      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.Ordinal);
+      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.OrdinalIgnoreCase);
 
       if (wordStartIndex >= 0)
       {
@@ -369,6 +391,11 @@ namespace UI.Components
       return fileManager.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
+    internal Task AddRunItem(RunControl runControl, EditorType editorType)
+    {
+      return fileManager.AddRunItem(runControl, editorType);
+    }
+
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await fileManager.DeleteTranslatorItem(translatorItem, editorType);
@@ -377,6 +404,11 @@ namespace UI.Components
     internal void OpenFolder()
     {
       fileManager.OpenFolder();
+    }
+
+    internal async Task OpenArchiveAsync()
+    {
+      await fileManager.OpenArchiveAsync();
     }
   }
 }

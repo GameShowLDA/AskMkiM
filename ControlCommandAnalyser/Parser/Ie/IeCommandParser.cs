@@ -34,7 +34,7 @@ namespace ControlCommandAnalyser.Parser.Ie
       if (lines == null || lines.Count == 0)
       {
         LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(KsErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        model.Errors.Add(IeErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
         return model;
       }
 
@@ -75,7 +75,7 @@ namespace ControlCommandAnalyser.Parser.Ie
         if (hasError)
         {
           LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-          model.Errors.Add(KsErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+          model.Errors.Add(IeErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
         }
         else
         {
@@ -93,10 +93,17 @@ namespace ControlCommandAnalyser.Parser.Ie
       (lowerLimitCapacity, higherLimitCapacity, unit, remainder) = CommonParameterParser.ParseCapacityRange(remainder);
       LoggerUtility.LogDebug($"После парсинга напряжения: нижняя граница электрической емкости='{lowerLimitCapacity}',верхняя граница электрической емкости='{higherLimitCapacity}', единица измерения = '{unit}' remainder='{remainder}'");
 
-      if (string.IsNullOrWhiteSpace(lowerLimitCapacity) && string.IsNullOrWhiteSpace(higherLimitCapacity))
+      if (string.IsNullOrEmpty(lowerLimitCapacity) && string.IsNullOrEmpty(higherLimitCapacity))
       {
-        model.Errors.Add(KsErrors.EmptyResistance(numberLine, $"{commandNumber} {mnemonic}"));
+        model.Errors.Add(IeErrors.EmptyCapacity(numberLine, $"{commandNumber} {mnemonic}"));
         LoggerUtility.LogWarning($"Не указана электрическая емкость (строка {numberLine}): {commandNumber} {mnemonic}");
+        if (!string.IsNullOrEmpty(remainder))
+        {
+          model.UnparsedParameters = "! Не распознанные параметры: ";
+          model.UnparsedParameters += remainder;
+          model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
+        }
+        return model;
       }
 
       model.LowerLimitCapacity = lowerLimitCapacity;
@@ -177,13 +184,13 @@ namespace ControlCommandAnalyser.Parser.Ie
       if (string.IsNullOrWhiteSpace(lowerLimitCapacity) && string.IsNullOrWhiteSpace(higherLimitCapacity))
       {
         LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{firstLine}' (строка {numberLine})");
-        model.Errors.Add(KsErrors.CannotParseParameters(firstLine, numberLine, $"{commandNumber} {mnemonic}"));
+        model.Errors.Add(IeErrors.CannotParseParameters(firstLine, numberLine, $"{commandNumber} {mnemonic}"));
       }
 
       if (model.Points.Count == 0)
       {
         LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(KsErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
+        model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
       }
       else
       {

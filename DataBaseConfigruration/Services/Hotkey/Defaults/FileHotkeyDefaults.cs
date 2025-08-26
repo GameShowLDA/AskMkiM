@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataBaseConfiguration.Services.Hotkey.Defaults
+﻿namespace DataBaseConfiguration.Services.Hotkey.Defaults
 {
   using System.Collections.Generic;
 

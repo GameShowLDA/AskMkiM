@@ -17,7 +17,7 @@ using UI.Controls.TextEditor;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using static UI.Controls.ProtocolNew.ProtocolUI;
 using static UI.Controls.TextEditor.TextEditorUI;
-using static Utilities.LoggerUtility;
+using static Utilities.LoggerUtility; 
 using Path = System.IO.Path;
 
 namespace UI.Components.ArchiveControls
@@ -246,7 +246,6 @@ namespace UI.Components.ArchiveControls
       {
         saveAsButton.Visibility = Visibility.Visible;
         viewButton.Visibility = Visibility.Visible;
-        translateButton.Visibility = Visibility.Visible;
         var row = (sender as DataGrid).SelectedItem as OpkFile;
         if (row != null)
         {
@@ -304,12 +303,7 @@ namespace UI.Components.ArchiveControls
       var textEditorModel = new TextEditorModel(foundOpkPath, Path.GetFileName(foundOpkPath), Encoding.UTF8);
       var textEditor = new TextEditorUI(FileType.OPK, textEditorModel);
       textEditor.Text = content;
-      EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
-    }
-
-    private void translateButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      MessageBoxCustom.Show("Тут будет функционал для трансляции opk файла:)", "Заглушка", MessageBoxButton.OK, MessageBoxImage.Warning);
+      EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}");
     }
 
     private async void viewOpkFilesDataGrid_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -320,7 +314,7 @@ namespace UI.Components.ArchiveControls
       var textEditorModel = new TextEditorModel(foundOpkPath, Path.GetFileName(foundOpkPath), Encoding.UTF8);
       var textEditor = new TextEditorUI(FileType.OPK, textEditorModel);
       textEditor.Text = content;
-      EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
+      EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}");
     }
   }
 }

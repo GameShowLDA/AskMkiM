@@ -118,7 +118,7 @@ namespace ControlCommandAnalyser.Parser.Common
 
     public static (string? Time, string Remainder) ParseTime(string input)
     {
-      var match = Regex.Match(input, @"(?:,\s*(?<value>\d+\s*[сc]))", RegexOptions.IgnoreCase);
+      var match = Regex.Match(input, @"(?:,\s*(?<value>\d+\s*[сc]))", RegexOptions.IgnoreCase); // TODO: добавить мс
 
       if (match.Success)
       {
