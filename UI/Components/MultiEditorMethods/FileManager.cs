@@ -1,27 +1,26 @@
-﻿using AppConfiguration.Base;
-using Message;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using AppConfiguration.Base;
+using Message;
 using Ude;
 using UI.Components.ArchiveControls;
 using UI.Components.ArchiveManager.Models;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using UI.Windows.WpfDocking.Windows.Docking;
-using Utilities;
 using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
-using System.Windows.Controls;
-using UI.Controls.Runner;
-using System.Windows.Media;
-using NLog.Common;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -314,7 +313,7 @@ namespace UI.Components.MultiEditorMethods
       {
         Title = nameFile,
         TabText = nameFile,
-        Content = textEditor 
+        Content = textEditor
       };
 
       EventAggregator.OpenOpk -= OnOpenOpk;
