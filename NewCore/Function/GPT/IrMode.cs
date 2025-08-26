@@ -243,17 +243,71 @@ namespace NewCore.Function.GPT
     {
       if (await GetIsIdleModeEnabled()) return param;
 
-      var testCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      await _gptModel.DeviceProtocol.QueryAsync(testCommand, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
+      await Task.Delay(delayBeforeCall);
 
-      string response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
+      int totalTicks = (int)((timeDelay * 1000) / 200) - 1;
+      var timer = new System.Timers.Timer();
+      timer.Interval = 200;
+      timer.AutoReset = true;
+      int tickCount = 0;
+      string response = string.Empty;
+      var testCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
+
+      timer.Elapsed += async (s, a) =>
+       {
+         tickCount++;
+         response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
+         if (response.ToLower().Contains("fail"))
+         {
+           await _gptModel.DeviceProtocol.QueryAsync(testCommand);
+         }
+       };
+
+      await _gptModel.DeviceProtocol.QueryAsync(testCommand);
+      timer.Start();
+
+      var task = Task.Run(async () =>
+      {
+        while (tickCount <= totalTicks)
+        {
+          await Task.Delay(1);
+        }
+      });
+
+      Task.WaitAny(task);
+
+      timer.Stop();
+      timer.Dispose();
+
+      while (true)
+      {
+        response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
+        if (!response.ToLower().Contains("test"))
+        {
+          break;
+        }
+
+        await Task.Delay(50);
+      }
+
+      response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
       var parts = response.Split(',');
 
       string raw = parts.ElementAtOrDefault(3)?.ToLower() ?? throw new FormatException("Нет результата измерения.");
       double multiplier = raw.EndsWith("gohm") ? 1000 : raw.EndsWith("mohm") ? 1 : raw.EndsWith("kohm") ? 0.001 : throw new FormatException("Неизвестный формат.");
       raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
+      double value = -1;
 
-      return double.TryParse(raw, out var value) ? value * multiplier : throw new FormatException("Ошибка преобразования значения сопротивления.");
+      while (!double.TryParse(raw, out  value))
+      {
+        response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
+        parts = response.Split(',');
+        raw = parts.ElementAtOrDefault(3)?.ToLower() ?? throw new FormatException("Нет результата измерения.");
+        multiplier = raw.EndsWith("gohm") ? 1000 : raw.EndsWith("mohm") ? 1 : raw.EndsWith("kohm") ? 0.001 : throw new FormatException("Неизвестный формат.");
+        raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
+      }
+
+      return double.TryParse(raw, out value) ? value * multiplier : throw new FormatException("Ошибка преобразования значения сопротивления.");
     }
 
     public async Task<IrConfiguration> ReadConfigurationAsync()

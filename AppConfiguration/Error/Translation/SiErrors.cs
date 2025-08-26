@@ -52,5 +52,51 @@ namespace AppConfiguration.Error.Translation
       Code = ErrorCode.Si_EmptyCommandBody,
       Description = "Команда СИ должна содержать хотя бы один параметр. Тело команды не может быть пустым."
     };
+
+    /// Ошибка: Ошибка при проверке одно из разряда в групповом методе.
+    /// </summary>
+    /// <param name="command">Номер команды и мнемоника.</param>
+    /// <param name="step">Номер разряда.</param>
+    /// <param name="countStep">Кол-во разрядов.</param>
+    /// <param name="resultMeasure">Результат измерения.</param>
+    /// <returns></returns>
+    public static ErrorItem WrongDigitCheckForGroupedMethod(string command, int step, int countStep, string resultMeasure) => new()
+    {
+      MeasureResult = resultMeasure,
+      Command = command,
+      Code = ErrorCode.Si_WrongDigitCheckForGroupedMethod,
+      Description = $"Ошибка при проверке разряда {step} ({countStep}) при групповом методе."
+    };
+
+    /// <summary>
+    /// Ошибка: Ошибка при проверке одно из разряда в групповом методе.
+    /// </summary>
+    /// <param name="command">Номер команды и мнемоника.</param>
+    /// <param name="step">Номер разряда.</param>
+    /// <param name="countStep">Кол-во разрядов.</param>
+    /// <param name="resultMeasure">Результат измерения.</param>
+    /// <returns></returns>
+    public static ErrorItem NodeExecutePointError(string command, string point,  string resultMeasure) => new()
+    {
+      MeasureResult = resultMeasure,
+      Command = command,
+      Code = ErrorCode.Si_NodeExecutePointError,
+      Description = $"Ошибка при проверке точки {point}  при методе полного узла."
+    };
+
+    /// <summary>
+    /// Ошибка: Ошибка замкнутой цепи.
+    /// </summary>
+    /// <param name="command">Номер команды и мнемоника.</param>
+    /// <param name="step">Номер разряда.</param>
+    /// <param name="countStep">Кол-во разрядов.</param>
+    /// <param name="resultMeasure">Результат измерения.</param>
+    /// <returns></returns>
+    public static ErrorItem ChainError(string command, string chain) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Si_ChainError,
+      Description = $"Замкнутая цепь {chain}"
+    };
   }
 }

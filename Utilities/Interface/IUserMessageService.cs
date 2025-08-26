@@ -60,5 +60,6 @@ namespace Utilities.Interface
     Task<UserAction> WaitUserActionAsync();
 
     public CancellationToken GetCancellationToken();
+
   }
 }

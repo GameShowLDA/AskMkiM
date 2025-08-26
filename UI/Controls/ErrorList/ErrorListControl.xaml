@@ -78,9 +78,11 @@
                     FontFamily="{DynamicResource WinstonLight}"
                     FontSize="14"/>
                 <!-- Номер строки -->
-                <DataGridTextColumn Header="Строка" Binding="{Binding ., Converter={StaticResource ErrorLinePairConverter}}"  Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <DataGridTextColumn Header="Строка" x:Name="StringsNumber" Binding="{Binding ., Converter={StaticResource ErrorLinePairConverter}}"  Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
                 <!-- Номер команды -->
                 <DataGridTextColumn Header="Команда" Width="80" Binding="{Binding Command}" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <!--Результат измерения-->
+                <DataGridTextColumn x:Name="MeasureResult" Header="Результат измерения" Binding="{Binding MeasureResult}" Width="150" FontFamily="{DynamicResource WinstonLight}" FontSize="14" Visibility="Collapsed"/>
                 <!-- Описание ошибки -->
                 <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
             </DataGrid.Columns>

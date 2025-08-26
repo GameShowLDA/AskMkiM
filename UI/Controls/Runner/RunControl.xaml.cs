@@ -20,6 +20,7 @@ using ICSharpCode.AvalonEdit;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using Utilities;
+using Utilities.Models;
 using static Utilities.LoggerUtility;
 
 namespace UI.Controls.Runner
@@ -30,6 +31,7 @@ namespace UI.Controls.Runner
   public partial class RunControl : UserControl
   {
     List<BaseCommandModel> ControlProgram = null;
+    public int ErrorCount { get; private set; } = 0;
     private ProtocolUI ProtocolUI { get; set; }
     bool task = false;
     public RunControl()
@@ -39,7 +41,6 @@ namespace UI.Controls.Runner
       MainContent.Content = ProtocolUI;
 
       Loaded += RunControl_Loaded;
-
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
     }
 
@@ -104,7 +105,7 @@ namespace UI.Controls.Runner
       {
         return;
       }
-      
+
       ProtocolUI.Header = (ok as OkCommandModel).ObjectCode;
       ProtocolUI.SetSettings(this, StartDelegate: StartTest, false);
     }
@@ -119,8 +120,33 @@ namespace UI.Controls.Runner
       });
 
       var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram);
+      manager.ClearError += ErrorClear;
+      manager.AddError += AddError;
 
       await manager.ExecuteAllAsync();
     }
+    private void AddError(ErrorItem errorItem)
+    {
+      Application.Current.Dispatcher?.Invoke(() =>
+      {
+        ErrorListBoxVertical.Errors.Add(errorItem);
+        ErrorCount++;
+
+        if (ErrorCount > 0)
+        {
+          AppConfiguration.Base.EventAggregator.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+        }
+      });
+    }
+
+    private void ErrorClear()
+    {
+      Application.Current.Dispatcher?.Invoke(() =>
+      {
+        ErrorListBoxVertical.Errors.Clear();
+        ErrorCount = 0;
+      });
+    }
+
   }
 }

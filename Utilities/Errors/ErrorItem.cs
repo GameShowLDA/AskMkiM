@@ -14,6 +14,7 @@ namespace Utilities.Models
     public string Command { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
+    public string MeasureResult { get; set; } = string.Empty;
     public ErrorCode? Code { get; set; }
   }
 }

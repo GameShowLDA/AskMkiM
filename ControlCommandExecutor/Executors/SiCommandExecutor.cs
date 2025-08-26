@@ -63,7 +63,6 @@ namespace ControlCommandExecutor.Executors
       await SettingModuleRelayControl(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-      var dmcMode = await dbc.ConnectorManager.GetSuccesCurrentMode(NewCore.Base.Function.DBC.TypeConnector.BreakdownTester);
 
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
@@ -72,11 +71,11 @@ namespace ControlCommandExecutor.Executors
 
       if (command.AlgorithmKey.Contains("К"))
       {
-        await NodeFullChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
+        await NodeFullChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
-        await MethodExecutor.CheckSequenceAsync(points, context.Console, resistance.Value);
+        await MethodExecutor.CheckSequenceAsync(context.CommandExecutionManager, command,  points, context.Console, resistance.Value);
       }
       else
       {
@@ -97,6 +96,8 @@ namespace ControlCommandExecutor.Executors
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserMessageService userMessageService)
     {
+     await dbc.ConnectableManager.ResetAsync(userMessageService);
+
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(), userMessageService))
       {
         throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);

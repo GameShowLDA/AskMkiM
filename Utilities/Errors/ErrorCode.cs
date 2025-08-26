@@ -171,6 +171,18 @@ namespace Utilities.Errors
     [ErrorCodeTag("SI004")]
     Si_EmptyCommandBody,
 
+    /// <summary> Ошибка при проверке разряда при групповом методе. </summary>
+    [ErrorCodeTag("SI005")]
+    Si_WrongDigitCheckForGroupedMethod,
+
+    /// <summary> Ошибка при проверке точки про методе полного узла. </summary>
+    [ErrorCodeTag("SI006")]
+    Si_NodeExecutePointError,
+
+    /// <summary> Ошибка при замкнутной цепи. </summary>
+    [ErrorCodeTag("SI007")]
+    Si_ChainError,
+
     /// <summary> Не удалось корректно разобрать выражение в команде ПИ. </summary>
     [ErrorCodeTag("PI001")]
     Pi_CannotParseExpression,
