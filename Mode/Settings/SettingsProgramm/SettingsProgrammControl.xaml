@@ -7,6 +7,7 @@
              xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
              xmlns:Execution="clr-namespace:UI.Controls.Settings.Execution;assembly=UI"
              xmlns:Procol="clr-namespace:UI.Controls.Settings.Protocol;assembly=UI"
+             xmlns:UiSetting="clr-namespace:UI.Controls.Settings.UserInterface;assembly=UI"
 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -43,6 +44,8 @@
 
             <!--Протокол-->
             <Procol:ProtocolControl Grid.Row="2" x:Name="ProtocolManager"/>
+            
+            <UiSetting:UiSettingsControl Grid.Row="3" x:Name="InterfaceManager"/>
 
         </Grid>
 

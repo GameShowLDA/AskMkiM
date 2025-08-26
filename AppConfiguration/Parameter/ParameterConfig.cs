@@ -1,4 +1,5 @@
 ﻿using AppConfiguration.Base;
+using AppConfiguration.Execution;
 using AppConfiguration.Protocol;
 
 namespace AppConfiguration.Parameter
@@ -28,8 +29,9 @@ namespace AppConfiguration.Parameter
     {
       await Task.Run(async () =>
       {
-        ParameterModel.Language = enable;
-        await LanguageSettings.SetLanguageAsync(enable);
+        var lang = string.IsNullOrWhiteSpace(enable) ? "ru" : enable.ToLowerInvariant();
+        ParameterModel.Language = lang;
+        await LanguageSettings.SetLanguageAsync(lang);
       });
     }
     #endregion
@@ -42,6 +44,40 @@ namespace AppConfiguration.Parameter
     /// <returns>true, если отображается; false, если скрывается.</returns>
     public static async Task<string> GetLanguage() => await Task.Run(() => ParameterModel.Language);
 
+    public static async Task<ParameterModel> GetParameterModel()
+    {
+      return await Task.Run(() =>
+      {
+        ParameterModel parametrModel = new ParameterModel();
+        parametrModel.Language = ParameterModel.Language;
+        return parametrModel;
+      });
+    }
+
+    public static async Task SaveProtocolModel(ParameterModel protocolModel)
+    {
+      await Task.Run(() =>
+      {
+        ParameterModel.Language = protocolModel.Language;
+      });
+
+      await RewriteExecutionConfigAsync();
+      await LanguageSettings.SetLanguageAsync(ParameterModel.Language);
+
+    }
+
+    /// <summary>
+    /// Перезаписывает конфигурацию выполнений.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task RewriteExecutionConfigAsync()
+    {
+      ParameterModel executionModel = new ParameterModel();
+      executionModel.Language = ParameterModel.Language;
+
+      ParameterFileManager executionFileManager = new ParameterFileManager(FileLocations.ParameterConfigPath);
+      await executionFileManager.RewriteFileAsync(executionModel);
+    }
 
     #endregion
   }
