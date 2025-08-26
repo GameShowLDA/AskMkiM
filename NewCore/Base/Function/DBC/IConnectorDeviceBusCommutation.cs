@@ -1,4 +1,5 @@
-﻿using static NewCore.Enum.DeviceEnum;
+﻿using NewCore.Base.Function.DBC;
+using static NewCore.Enum.DeviceEnum;
 
 /// <summary>
 /// Интерфейс для управления коммутацией устройств на шинах.
@@ -56,4 +57,11 @@ public interface IConnectorDeviceBusCommutation
   /// </summary>
   /// <returns></returns>
   Task<bool> DisconnectAllBuses();
+
+  /// <summary>
+  /// Возвращает результат проверки замкнутой цепи.
+  /// </summary>
+  /// <param name="mode">Проверяемая цепь.</param>
+  /// <returns></returns>
+  Task<bool> GetSuccesCurrentMode(TypeConnector mode);
 }

@@ -1,12 +1,13 @@
-﻿using Mode.ServicesTest.MESH;
-using Mode.ServicesTest.MINT;
-using Mode.ServicesTest.MKR;
-using Mode.ServicesTest.UKSH;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mode.Device.DBC;
+using Mode.ServicesTest.MESH;
+using Mode.ServicesTest.MINT;
+using Mode.ServicesTest.MKR;
+using Mode.ServicesTest.UKSH;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -52,6 +53,6 @@ namespace MainWindowProgram.Services
     /// Добавляет элемент управления для сервисного обслуживания модуля типа УКШ в multiEditors.
     /// </summary>
     public async Task AddServicesTestUkshControlAsync() =>
-      await _multiWindow.AddControlAsync("Сервисный режим: модуль UKSH", new UkshControl(), TypeWindow.DeviceControl);
+      await _multiWindow.AddControlAsync("Сервисный режим: модуль UKSH", new DBCManager(), TypeWindow.DeviceControl);
   }
 }

@@ -78,7 +78,7 @@
 
         </Grid>
 
-        <Border CornerRadius="0,0,0,0" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}">
+        <Border Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

@@ -30,6 +30,30 @@ namespace UI.Controls.ErrorList
       DataContext = this;
     }
 
+    public Visibility StringsNumberVisible 
+    {
+      get
+      {
+        return StringsNumber.Visibility;
+      }
+      set
+      { 
+        StringsNumber.Visibility = value;
+      }
+    }
+
+    public Visibility MeasureResultVisible
+    {
+      get
+      {
+        return MeasureResult.Visibility;
+      }
+      set
+      {
+        MeasureResult.Visibility = value;
+      }
+    }
+
     /// <summary>
     /// Событие вызывается при двойном клике по строке с ошибкой.
     /// </summary>

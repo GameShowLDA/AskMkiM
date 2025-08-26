@@ -86,6 +86,7 @@ namespace MainWindowProgram.Services
         container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       }
 
+
       if (container == null)
       {
         MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);

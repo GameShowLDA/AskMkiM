@@ -20,37 +20,65 @@ namespace MainWindowProgram.ViewModels
     private int _lineCount;
     private string _encodingName = "UTF-8";
 
+    /// <summary>
+    /// Номер строки, на которой находдится каретка.
+    /// </summary>
     public int Line
     {
       get => _line;
       set { _line = value; OnPropertyChanged(nameof(Line)); }
     }
 
+    /// <summary>
+    /// Номер колонки, на которой находится каретка.
+    /// </summary>
     public int Column
     {
       get => _column;
       set { _column = value; OnPropertyChanged(nameof(Column)); }
     }
 
+    /// <summary>
+    /// Количество строк в открытом документе.
+    /// </summary>
     public int LineCount
     {
       get => _lineCount;
       set { _lineCount = value; OnPropertyChanged(nameof(LineCount)); }
     }
 
+    /// <summary>
+    /// Название кодировки документа.
+    /// </summary>
     public string EncodingName
     {
       get => _encodingName;
       set { _encodingName = value; OnPropertyChanged(nameof(EncodingName)); }
     }
 
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
     public Func<TextEditorUI?>? GetActiveEditor { get; set; }
 
+    /// <summary>
+    /// Текущая кодировка документа.
+    /// </summary>
     public Encoding CurrentEncoding { get; private set; } = Encoding.UTF8;
 
+    /// <summary>
+    /// Команда смены кодировки документа на кодировку, выбранную из списка. 
+    /// </summary>
     public ICommand ChangeEncodingCommand { get; }
+
+    /// <summary>
+    /// Команда смены кодировки докумена с TF-8 на IBM866(DOS) и обратно.
+    /// </summary>
     public ICommand ToggleEncodingCommand { get; }
 
+    /// <summary>
+    /// Конструктор, инициализирующий ViewModel нижней панели редактора.
+    /// </summary>
     public TextEditorStatusViewModel()
     {
       ChangeEncodingCommand = new ChangeEncodingMouseCommand(this);
@@ -58,6 +86,7 @@ namespace MainWindowProgram.ViewModels
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
     private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 

@@ -191,5 +191,39 @@ namespace AppConfiguration.Error.Translation
       Description = "Команда УП не должна следовать за информационной ЦУ (без вопроса)"
     };
 
+    /// <summary>
+    /// Возвращает ошибку, если имеются отступы в начале строки перед номером команды.
+    /// </summary>
+    /// <param name="mnemonic">Мнемоника неизвестной команды.</param>
+    /// <param name="lineNumber">Номер строки, где обнаружена неизвестная команда.</param>
+    /// <param name="command">Полный текст команды, вызвавшей ошибку.</param>
+    /// <returns>
+    /// Объект <see cref="ErrorItem"/>, описывающий ошибку: команда не распознана.
+    /// </returns>
+    public static ErrorItem IndentationError(string mnemonic, int lineNumber, string command) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Description = $"Возможно присутсвуют лишние пробелы перед номером команды или отсутсвуют необходимые отступы при переносе тела команды {mnemonic}.",
+      Code = ErrorCode.Gen_UnknownCommand
+    };
+
+    /// <summary>
+    /// Возвращает ошибку, если нарушен порядок параметров команды.
+    /// </summary>
+    /// <param name="mnemonic">Мнемоника неизвестной команды.</param>
+    /// <param name="lineNumber">Номер строки, где обнаружена неизвестная команда.</param>
+    /// <param name="command">Полный текст команды, вызвавшей ошибку.</param>
+    /// <returns>
+    /// Объект <see cref="ErrorItem"/>, описывающий ошибку: команда не распознана.
+    /// </returns>
+    public static ErrorItem InvalidParameterOrder(string mnemonic, int lineNumber, string command, string descr) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Description = $"{descr}",
+      Code = ErrorCode.Gen_InvalidParameterOrder
+    };
+
   }
 }

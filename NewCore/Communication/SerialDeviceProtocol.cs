@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NewCore.Base.Device;
 using static Utilities.LoggerUtility;
@@ -35,7 +37,7 @@ namespace NewCore.Communication
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
     {
       LogDebug($"[{_device.Name}] Захват _portLock", isDeviceLog: true);
       await OperationLock.WaitAsync();
@@ -43,20 +45,28 @@ namespace NewCore.Communication
       try
       {
         if (delayBeforeCall > 0)
-          await DelayBeforeCall(delayBeforeCall);
+        {
+          await DelayBeforeCall(delayBeforeCall, cancellationToken);
+        }
 
         try
         {
           if (!EnsurePortOpen())
+          {
             return HandlePortOpenFailure();
+          }
 
-          PreparePortForCommand(command);
+          await PreparePortForCommand(command, cancellationToken, timeout);
 
           if (responseDelay > 0)
-            await DelayBeforeRead(responseDelay);
+          {
+            await DelayBeforeRead(responseDelay, cancellationToken);
+          }
 
           if (timeout > 0)
-            return await ReadResponseWithTimeout(timeout);
+          {
+            return await ReadResponseWithTimeout(timeout, cancellationToken);
+          }
 
           LogDebug("Таймаут чтения не задан, возвращается пустой ответ.", isDeviceLog: true);
           return string.Empty;
@@ -78,10 +88,10 @@ namespace NewCore.Communication
     /// Выполняет задержку перед отправкой команды устройству.
     /// </summary>
     /// <param name="delayBeforeCall">Время задержки в миллисекундах.</param>
-    private async Task DelayBeforeCall(int delayBeforeCall)
+    private async Task DelayBeforeCall(int delayBeforeCall, CancellationToken cancellationToken)
     {
       LogDebug($"Задержка перед вызовом: {delayBeforeCall} мс", isDeviceLog: true);
-      await Task.Delay(delayBeforeCall);
+      await Task.Delay(delayBeforeCall, cancellationToken);
     }
 
     /// <summary>
@@ -98,7 +108,7 @@ namespace NewCore.Communication
     /// Подготавливает COM-порт к отправке команды: очищает буферы и отправляет команду.
     /// </summary>
     /// <param name="command">Команда для отправки устройству.</param>
-    private void PreparePortForCommand(string command)
+    private async Task PreparePortForCommand(string command, CancellationToken cancellationToken, int timeDelay = 0)
     {
       LogDebug($"COM-порт открыт: {_serialPort.IsOpen}, Скорость: {_serialPort.BaudRate}, Handshake: {_serialPort.Handshake}", isDeviceLog: true);
       LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}", isDeviceLog: true);
@@ -106,22 +116,22 @@ namespace NewCore.Communication
       _serialPort.DiscardInBuffer();
       _serialPort.DiscardOutBuffer();
       _serialPort.WriteLine(command);
-
+     
       LogDebug($"Команда отправлена. BytesToRead до задержки: {_serialPort.BytesToRead}", isDeviceLog: true);
     }
 
-    private async Task DelayBeforeRead(double responseDelay)
+    private async Task DelayBeforeRead(double responseDelay, CancellationToken cancellationToken)
     {
       int roundedDelay = (int)Math.Ceiling(responseDelay) + 300;
       LogDebug($"Задержка перед чтением ответа: {roundedDelay} мс", isDeviceLog: true);
-      await Task.Delay(roundedDelay);
+      await Task.Delay(roundedDelay, cancellationToken);
     }
 
     /// <summary>
     /// Выполняет задержку перед чтением ответа от устройства.
     /// </summary>
     /// <param name="responseDelay">Время задержки в миллисекундах.</param>
-    private async Task<string> ReadResponseWithTimeout(int timeout)
+    private async Task<string> ReadResponseWithTimeout(int timeout, CancellationToken cancellationToken)
     {
       _serialPort.ReadTimeout = timeout;
       var responseBuilder = new StringBuilder();
@@ -129,6 +139,8 @@ namespace NewCore.Communication
 
       while (stopwatch.ElapsedMilliseconds < timeout)
       {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
           int availableBytes = _serialPort.BytesToRead;
@@ -141,7 +153,7 @@ namespace NewCore.Communication
           }
           else
           {
-            await Task.Delay(10); 
+            await Task.Delay(10);
           }
         }
         catch (Exception ex)

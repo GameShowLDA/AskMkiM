@@ -59,6 +59,17 @@ namespace Utilities.Errors
     [ErrorCodeTag("GEN011")]
     Gen_ConditionalJumpAfterInformationCu,
 
+    /// <summary> Недопустимые отступы в начале строки перед номером команды или наоборот отсутсвуют необходимые отступы в начале строки тела команды при переносе. </summary>
+    [ErrorCodeTag("GEN012")]
+    Gen_IndentationError,
+
+    /// <summary> Нарушен порядок параметров команды. </summary>
+    [ErrorCodeTag("GEN013")]
+    Gen_InvalidParameterOrder,
+
+    /// <summary> Неверне использование одиночной точки. </summary>
+    [ErrorCodeTag("GEN014")]
+    Gen_InvalidOnePointUse,
 
     /// <summary> В команде УП отсутствует или некорректно указана метка перехода. </summary>
     [ErrorCodeTag("UP001")]
@@ -136,6 +147,14 @@ namespace Utilities.Errors
     [ErrorCodeTag("RM007")]
     Rm_EmptyCommandBody,
 
+    /// <summary> При парсинге команды РМ найден лишний пробел. </summary>
+    [ErrorCodeTag("RM008")]
+    Rm_ExtraSpace,
+
+    /// <summary> При парсинге команды РМ найдены недопустимые символы. </summary>
+    [ErrorCodeTag("RM009")]
+    Rm_UnacceptableSymbol,
+
     /// <summary> Не удалось корректно разобрать выражение в команде СИ. </summary>
     [ErrorCodeTag("SI001")]
     Si_CannotParseExpression,
@@ -151,6 +170,18 @@ namespace Utilities.Errors
     /// <summary> Тело команды СИ отсутствует или пустое. </summary>
     [ErrorCodeTag("SI004")]
     Si_EmptyCommandBody,
+
+    /// <summary> Ошибка при проверке разряда при групповом методе. </summary>
+    [ErrorCodeTag("SI005")]
+    Si_WrongDigitCheckForGroupedMethod,
+
+    /// <summary> Ошибка при проверке точки про методе полного узла. </summary>
+    [ErrorCodeTag("SI006")]
+    Si_NodeExecutePointError,
+
+    /// <summary> Ошибка при замкнутной цепи. </summary>
+    [ErrorCodeTag("SI007")]
+    Si_ChainError,
 
     /// <summary> Не удалось корректно разобрать выражение в команде ПИ. </summary>
     [ErrorCodeTag("PI001")]
@@ -183,6 +214,26 @@ namespace Utilities.Errors
     /// <summary> Ключ не ожидается в данной команде. </summary>
     [ErrorCodeTag("KEY004")]
     Key_NotExpectedInThisCommand,
+
+    /// <summary> Не указаны границы сопротивления для команды КС. </summary>
+    [ErrorCodeTag("KS001")]
+    Ks_EmptyResistance,
+
+    /// <summary> Не удалось корректно разобрать параметры команды КС. </summary>
+    [ErrorCodeTag("KS002")]
+    Ks_CannotParseParameters,
+
+    /// <summary> В команде КС отсутствует список точек. </summary>
+    [ErrorCodeTag("KS003")]
+    Ks_EmptyPoints,
+
+    /// <summary> В команде КС пустое тело метода. </summary>
+    [ErrorCodeTag("KS004")]
+    Ks_EmptyCommandBody,
+
+    /// <summary> В команде КС список точек указан до сопротивления. </summary>
+    [ErrorCodeTag("KS005")]
+    Ks_PointsBeforeResistance,
   }
 
   /// <summary>

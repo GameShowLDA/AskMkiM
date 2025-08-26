@@ -1,17 +1,22 @@
-﻿using System.IO;
+﻿using AppConfiguration.Base;
+using Message;
+using Microsoft.Win32;
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfiguration.Base;
-using Message;
-using Microsoft.Win32;
+using System.Windows.Shapes;
 using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.TextEditor;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using static UI.Controls.ProtocolNew.ProtocolUI;
+using static UI.Controls.TextEditor.TextEditorUI;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 
@@ -28,7 +33,7 @@ namespace UI.Components.ArchiveControls
     private OpkFile opkFile { get; set; }
 
     /// <summary>
-    /// Событие возникает при нажатии на кнопку "Открыть".
+    /// Событие возникает при нажатии на кнопку "Проосмотр".
     /// </summary>
     public event PreviewMouseDownEventHandler StartMeasureResistanceButtonPreviewMouseDown;
 
@@ -102,15 +107,18 @@ namespace UI.Components.ArchiveControls
 
     private async void Add_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      OpenFileDialog openFileDialog = OpenPkFile();
+      OpenFileDialog openFileDialog = OpenPkFile(true);
 
       if (openFileDialog.ShowDialog() == true)
       {
-        var archiveDirectory = $"{Path.Combine(ArchiveSettings.ArchivePath, _archiveName)}.apkw";
-        var pkEditor = new PkEditor();
-        string filePath = openFileDialog.FileName;
-        await TryConvertPkToOpkAsync(archiveDirectory, pkEditor, filePath);
-        await ShowOpkFiles();
+        string[] selectedFiles = openFileDialog.FileNames;
+        foreach (var file in selectedFiles)
+        {
+          var archiveDirectory = $"{Path.Combine(ArchiveSettings.ArchivePath, _archiveName)}.apkw";
+          var pkEditor = new PkEditor();
+          await TryConvertPkToOpkAsync(archiveDirectory, pkEditor, file);
+          await ShowOpkFiles();
+        }
       }
     }
 
@@ -133,7 +141,7 @@ namespace UI.Components.ArchiveControls
     {
       if (opkFile != null)
       {
-        OpenFileDialog openFileDialog = OpenPkFile();
+        OpenFileDialog openFileDialog = OpenPkFile(false);
 
         if (openFileDialog.ShowDialog() == true)
         {
@@ -161,12 +169,13 @@ namespace UI.Components.ArchiveControls
       }
     }
 
-    private static OpenFileDialog OpenPkFile()
+    private static OpenFileDialog OpenPkFile(bool  multiselect)
     {
       return new OpenFileDialog
       {
         Filter = "Pk files (*.pk, *.PK, *.Pk)|*.pk;*.PK;*.Pk",
-        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+        Multiselect = multiselect,
+        //InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
       };
     }
 
@@ -289,10 +298,11 @@ namespace UI.Components.ArchiveControls
 
     private async void viewButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      LogInformation($"Сработан обработчик события для кнопки \"Открыть\"");
+      LogInformation($"Сработан обработчик события для кнопки \"Просмотр\"");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
-      var textEditor = new TextEditorUI();
+      var textEditorModel = new TextEditorModel(foundOpkPath, Path.GetFileName(foundOpkPath), Encoding.UTF8);
+      var textEditor = new TextEditorUI(FileType.OPK, textEditorModel);
       textEditor.Text = content;
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }
@@ -307,7 +317,8 @@ namespace UI.Components.ArchiveControls
       LogInformation($"Сработан обработчик события для двойного клика по строке opk-архива");
       string foundOpkPath = await GetOpkPath();
       var content = File.ReadAllText(foundOpkPath);
-      var textEditor = new TextEditorUI();
+      var textEditorModel = new TextEditorModel(foundOpkPath, Path.GetFileName(foundOpkPath), Encoding.UTF8);
+      var textEditor = new TextEditorUI(FileType.OPK, textEditorModel);
       textEditor.Text = content;
       EventAggregator.RaiseOpenOpk(textEditor, $"{opkFile.OpkFilename}", content);
     }

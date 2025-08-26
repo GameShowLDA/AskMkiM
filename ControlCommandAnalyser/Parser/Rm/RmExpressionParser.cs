@@ -26,7 +26,7 @@ namespace ControlCommandAnalyser.Parser.Rm
         baseCommandModel.Errors.Add(RmErrors.EmptyCommandBody(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
       }
 
-      var expressions = SplitExpressions(rmBlock);
+      var expressions = SplitExpressions(rmBlock, ref baseCommandModel);
       var result = new List<RmPairModel>();
 
       foreach (var expr in expressions)
@@ -136,9 +136,9 @@ namespace ControlCommandAnalyser.Parser.Rm
       if (TryProcessGroupedRanges(left, right, middle, result, ref baseCommandModel))
         return;
 
-      var leftList = ExpandAll(left);
-      var rightList = ExpandAll(right);
-      var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle) : Enumerable.Repeat<string?>(null, leftList.Count).ToList();
+      var leftList = ExpandAll(left, ref baseCommandModel);
+      var rightList = ExpandAll(right, ref baseCommandModel);
+      var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle, ref baseCommandModel) : Enumerable.Repeat<string?>(null, leftList.Count).ToList();
 
       // Диагностика: выводим размеры списков
       LogDebug($"[ProcessExpression] Expanded Left: {string.Join(", ", leftList)} (Count: {leftList.Count})");
@@ -168,13 +168,35 @@ namespace ControlCommandAnalyser.Parser.Rm
     /// </summary>
     /// <param name="input">Текстовый блок.</param>
     /// <returns>Список выражений.</returns>
-    public static List<string> SplitExpressions(string input)
+    public static List<string> SplitExpressions(string input, ref RmCommandModel baseCommandModel)
     {
       var rawLines = input.Replace("\r", "").Split('\n');
       var result = new List<string>();
       foreach (var line in rawLines)
       {
-        var trimmed = line.Trim();
+        if (line.Contains(" "))
+        {
+          var splitedLines = line.Split(' ');
+          foreach (var splitedLine in splitedLines)
+          {
+            if (!string.IsNullOrEmpty(splitedLine))
+            {
+              var lineMatches = Regex.Matches(splitedLine, @"[^=]+=[^=]+");
+              foreach (Match m in lineMatches)
+              {
+                var expr = m.Value.Trim();
+                if (!string.IsNullOrWhiteSpace(expr) && expr.Contains("=") && !expr.StartsWith("=") && !expr.EndsWith("="))
+                  result.Add(expr);
+              }
+              if (lineMatches.Count == 0)
+              {
+                baseCommandModel.Errors.Add(RmErrors.ExtraSpace(splitedLine, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+              }
+            }
+          }
+          continue;
+        }
+        var trimmed = line.Trim(' ');
         if (string.IsNullOrWhiteSpace(trimmed)) continue;
         // Если есть двойное ==, это отдельное выражение
         if (trimmed.Contains("=="))
@@ -199,29 +221,17 @@ namespace ControlCommandAnalyser.Parser.Rm
     /// </summary>
     /// <param name="expr">Выражение для расширения.</param>
     /// <returns>Список расширенных значений.</returns>
-    public static List<string> ExpandAll(string expr)
+    public static List<string> ExpandAll(string expr, ref RmCommandModel baseCommandModel)
     {
       var result = new List<string>();
       expr = expr.Trim();
 
       LogDebug($"[ExpandAll] Processing expression: {expr}");
 
-      // Если выражение содержит квадратные скобки, пытаемся их обработать
-      if (TryExpandBracketedRanges(expr, result))
+      
+      if (expr.Contains('[') || expr.Contains(']')||expr.Contains('"')||expr.Contains('$') || expr.Contains(','))
       {
-        LogDebug($"[ExpandAll] Bracketed range expanded: {expr} -> {string.Join(", ", result)}");
-        return result;
-      }
-
-      // Если выражение содержит запятые, разделяем его на части
-      if (expr.Contains(","))
-      {
-        var parts = expr.Split(',').Select(part => part.Trim()).ToList();
-        foreach (var part in parts)
-        {
-          result.AddRange(ExpandAll(part)); // Рекурсивно обрабатываем каждую часть
-        }
-        LogDebug($"[ExpandAll] Comma-separated values expanded: {expr} -> {string.Join(", ", result)}");
+        baseCommandModel.Errors.Add(RmErrors.UnacceptableSymbol(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return result;
       }
 
@@ -242,8 +252,6 @@ namespace ControlCommandAnalyser.Parser.Rm
       return result;
     }
 
-
-
     /// <summary>
     /// Пытается расширить составные диапазоны (например, "1.1-3.5").
     /// </summary>
@@ -252,54 +260,19 @@ namespace ControlCommandAnalyser.Parser.Rm
       var compParts = expr.Split('.');
       if (compParts.Length > 1 && compParts.Any(p => p.Contains('-')))
       {
-        var ranges = compParts.Select(ExpandComponent).ToList();
-        foreach (var tuple in CartesianProduct(ranges))
-          result.Add(string.Join(".", tuple));
-        return true;
-      }
-      return false;
-    }
-
-    /// <summary>
-    /// Пытается расширить диапазоны в квадратных скобках (например, "[1-3,5]" или "X[20,30]/1").
-    /// </summary>
-    private static bool TryExpandBracketedRanges(string expr, List<string> result)
-    {
-      var bracketRegex = new Regex(@"\[([^\[\]]+)\]");
-      var match = bracketRegex.Match(expr);
-      if (match.Success)
-      {
-        // Разделяем выражение на части: до скобок, содержимое скобок и после скобок
-        string prefix = expr.Substring(0, match.Index).Trim();
-        string suffix = expr.Substring(match.Index + match.Length).Trim();
-        var itemsRaw = match.Groups[1].Value.Split(',').Select(s => s.Trim());
-
-        // Создаем список для хранения промежуточных результатов
-        var expandedItems = new List<string>();
-
-        foreach (var item in itemsRaw)
+        if (!string.Equals(compParts.FirstOrDefault(p => p.Contains("-")), compParts.ElementAt(compParts.Length - 1)))
         {
-          // Если элемент внутри скобок является диапазоном, разворачиваем его
-          var diap = Regex.Match(item, @"^(\d+)-(\d+)$");
-          if (diap.Success)
+          var dashElements = compParts.FirstOrDefault(p => p.Contains("-")).Split('-');
+          if(compParts.ElementAt(0).Equals(dashElements.ElementAt(1))&&
+            compParts.ElementAt(1).Equals(compParts.ElementAt(3)))
           {
-            int from = int.Parse(diap.Groups[1].Value);
-            int to = int.Parse(diap.Groups[2].Value);
-            int sign = to >= from ? 1 : -1;
-            for (int n = from; sign > 0 ? n <= to : n >= to; n += sign)
-            {
-              expandedItems.Add($"{prefix}{n}{suffix}");
-            }
-          }
-          else
-          {
-            // Если элемент не является диапазоном, добавляем его с префиксом и суффиксом
-            expandedItems.Add($"{prefix}{item}{suffix}");
+            var newExpr = $"{compParts.ElementAt(0)}.{compParts.ElementAt(1)}.{dashElements.ElementAt(0)}-{compParts.ElementAt(4)}";
+            compParts = newExpr.Split('.');
           }
         }
-
-        // Добавляем все результаты в итоговый список
-        result.AddRange(expandedItems);
+         var ranges = compParts.Select(ExpandComponent).ToList();
+        foreach (var tuple in CartesianProduct(ranges))
+          result.Add(string.Join(".", tuple));
         return true;
       }
       return false;
@@ -412,8 +385,8 @@ namespace ControlCommandAnalyser.Parser.Rm
     {
       // Регулярное выражение для левой части (диапазон чисел, например, "101-300")
       var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
-      // Регулярное выражение для правой части (составной диапазон, например, "1.[3,5].1-100")
-      var rightMatch = Regex.Match(right, @"^(\d+)\.\[([^\]]+)\]\.(\d+)-(\d+)$");
+      // Регулярное выражение для правой части (составной диапазон, например, "1.3.1-100")
+      var rightMatch = Regex.Match(right, @"^(\d+)\.(\d+)\.(\d+)-(\d+)$");
 
       if (leftMatch.Success && rightMatch.Success)
       {

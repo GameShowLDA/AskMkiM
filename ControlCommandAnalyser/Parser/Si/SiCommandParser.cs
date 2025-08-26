@@ -10,7 +10,6 @@ using Utilities; // Для LoggerUtility
 
 namespace ControlCommandAnalyser.Parser.Si
 {
-  [AllowedKeys(AlgorithmKey.С, AlgorithmKey.П, AlgorithmKey.И, AlgorithmKey.Г, AlgorithmKey.Т1, AlgorithmKey.К, AlgorithmKey.Д)]
   /// <summary>
   /// Парсер для команд СИ (сопротивление изоляции).
   /// </summary>
@@ -58,12 +57,27 @@ namespace ControlCommandAnalyser.Parser.Si
       string? voltage = null, resistance = null, time = null;
 
       // сначала извлекаем ключи
-      model.AlgorithmKey = AlgorithmKeyParser.ExtractKeys(firstLine);
+      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(firstLine);
+
+      foreach (var (key, hasError) in result)
+      {
+        if (hasError)
+        {
+          LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+          model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        }
+        else
+        {
+          model.AlgorithmKey.Add(key);
+          LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
+        }
+      }
+
 
       // затем удаляем их из строки
       foreach (var key in model.AlgorithmKey)
       {
-        remainder = firstLine.Replace(key, "", StringComparison.OrdinalIgnoreCase);
+        remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
       }
 
       (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
@@ -103,7 +117,19 @@ namespace ControlCommandAnalyser.Parser.Si
       {
         string pointsPart = remainder.Substring(starIdx);
         LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
-        allPoints.AddRange(PointParser.ParsePoints(pointsPart));
+        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic);
+        allPoints.AddRange(pointsAndErrors.Item1);
+        if (pointsAndErrors.Item2.Count > 0)
+        {
+          foreach (var error in pointsAndErrors.Item2)
+          {
+            error.SourceLineNumber = numberLine;
+            error.Command = $"{commandNumber} {mnemonic}";
+            
+            model.Errors.Add(error);
+            LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
+          }
+        }
         LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
 
         remainder = remainder.Substring(0, starIdx).Trim();
@@ -116,7 +142,18 @@ namespace ControlCommandAnalyser.Parser.Si
         {
           LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
           var pointsBefore = allPoints.Count;
-          allPoints.AddRange(PointParser.ParsePoints(pointLine));
+          var pointsAndErrors = PointParser.ParsePoints(pointLine, mnemonic);
+          allPoints.AddRange(pointsAndErrors.Item1);
+          if (pointsAndErrors.Item2.Count > 0)
+          {
+            foreach (var error in pointsAndErrors.Item2)
+            {
+              error.SourceLineNumber = numberLine;
+              error.Command = $"{commandNumber} {mnemonic}";
+              model.Errors.Add(error);
+              LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
+            }
+          }
           LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
         }
       }

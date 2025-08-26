@@ -19,6 +19,8 @@ namespace ControlCommandExecutor.Execution
     public IUserMessageService Console { get; }
     public ITextEditorAdapter TranslationControl { get; }
 
+    public CommandExecutionManager CommandExecutionManager { get; }
+
 
     /// <summary>
     /// Делегат для перехода к команде по номеру (метке). 
@@ -31,11 +33,12 @@ namespace ControlCommandExecutor.Execution
     /// </summary>
     public Dictionary<string, object> Metadata { get; } = new();
 
-    public CommandExecutionContext(BaseCommandModel command, IUserMessageService console, ITextEditorAdapter editorAdapter)
+    public CommandExecutionContext(CommandExecutionManager commandExecutionManager, BaseCommandModel command, IUserMessageService console, ITextEditorAdapter editorAdapter)
     {
       Command = command;
       Console = console;
       TranslationControl = editorAdapter;
+      CommandExecutionManager = commandExecutionManager;
     }
   }
 }

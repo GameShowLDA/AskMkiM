@@ -44,6 +44,11 @@ namespace UI.Components
       EventAggregator.TextEditorContainerClosing += OnTextEditorClosig;
     }
 
+    /// <summary>
+    /// Обрабатывает события, происходящие при закрытии текстового редактора.
+    /// </summary>
+    /// <param name="textEditorClosing">Переменная, отвечающая за то закрывается текстовый редактор или вкладка другого типа.</param>
+    /// <param name="textEditorName">Название файла, открытого в текстовом редакторе.</param>
     private void OnTextEditorClosig(bool textEditorClosing, string textEditorName)
     {
       if (textEditorClosing)
@@ -53,6 +58,9 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Обрабатывает закрытие панеои с результатми поиска по тексту.
+    /// </summary>
     private void CloseSearchResultsActions()
     {
       if (openPages.Count <= 0 && userControls.Count <= 0)
@@ -165,6 +173,11 @@ namespace UI.Components
       return MultiEditor.GetActiveTextEditor();
     }
 
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       return MultiEditor.RemoveActiveTextEditor(isTranslation);
@@ -441,6 +454,9 @@ namespace UI.Components
       searchResultsTextBlock.Text = overallSearchText;
     }
 
+    /// <summary>
+    /// Подготавливает область вывода результатов поиска по тексту.
+    /// </summary>
     private void PrepareSearchResultsArea()
     {
       SearchResultsTopPanel.Children.Clear();
@@ -629,11 +645,23 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Получает активный контейнер с вкладками.
+    /// </summary>
+    /// <param name="editorType">Тип вкладок.</param>
+    /// <returns>Найденный контейнер.</returns>
     public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
     {
       return MultiEditor.GetActiveTextEditorContainer(editorType);
     }
 
+    /// <summary>
+    /// Добавляет вкладку с транслятором.
+    /// </summary>
+    /// <param name="editor">Текстовый редактор с транслируемым файлом.</param>
+    /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
+    /// <param name="editorType">Тип вкладки.</param>
+    /// <returns>Асинхронная задача, представляющая результат добавления вкладки с <see cref="TranslatorItem"/>.</returns>
     public Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
@@ -644,6 +672,9 @@ namespace UI.Components
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
     }
 
+    /// <summary>
+    /// Открывает папку, содержащую файл, в проводнике.
+    /// </summary>
     public void OpenFolder()
     {
       if (MultiEditor == null)

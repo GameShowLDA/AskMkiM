@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
 using Utilities;
 using Utilities.Interface;
@@ -24,7 +27,7 @@ namespace ControlCommandExecutor.IrStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(List<PointModel> points, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(CommandExecutionManager manager, SiCommandModel siCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
     {
       ErrorsPoints = new List<PointModel>();
 
@@ -44,7 +47,7 @@ namespace ControlCommandExecutor.IrStrategies
         await DisconnectFromBusBAsync(point, messageService);
         await ConnectToBusAAsync(point, messageService);
 
-        if (!await PerformMeasurementAsync(resistance, messageService))
+        if (!await PerformMeasurementAsync(resistance, messageService, manager, siCommandModel, EquipmentService.GetPointKey(point)))
         {
           ErrorsPoints.Add(point);
         }
@@ -75,6 +78,8 @@ namespace ControlCommandExecutor.IrStrategies
                   message: $"Обнаружена замкнутая цепь: {chainStr}",
                   type: ShowMessageModel.MessageType.Error)
               { IndentLevel = 3 });
+
+          manager.AddErrorMethod(SiErrors.ChainError($"{siCommandModel.CommandNumber} {siCommandModel.Mnemonic}", chainStr));
         }
       }
 
@@ -190,7 +195,7 @@ namespace ControlCommandExecutor.IrStrategies
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<bool> PerformMeasurementAsync(double resistance, IUserMessageService messageService)
+    private static async Task<bool> PerformMeasurementAsync(double resistance, IUserMessageService messageService, CommandExecutionManager manager = null, SiCommandModel siCommandModel = null, string point = null)
     {
       var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
@@ -200,6 +205,12 @@ namespace ControlCommandExecutor.IrStrategies
         var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= resistance : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
 
         await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{answer} МОм", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+
+        if (manager != null && siCommandModel != null && point != null && !result)
+        {
+          manager.AddErrorMethod(SiErrors.NodeExecutePointError($"{siCommandModel.CommandNumber} {siCommandModel.Mnemonic}", point, ($"{answer} МОм (>{resistance} МОм)")));
+        }
+
         return result;
       }, messageService);
 

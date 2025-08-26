@@ -147,6 +147,21 @@ namespace UI.Controls.ProtocolNew
       }
     }
 
+    /// <summary>
+    /// Получает или устанавливает видимость кнопки "Завершить".
+    /// </summary>
+    public Visibility ButtonPanelsVisibility
+    {
+      get
+      {
+        return Application.Current.Dispatcher.Invoke(() => ButtonPanels.Visibility);
+      }
+      set
+      {
+        Application.Current.Dispatcher.Invoke(() => ButtonPanels.Visibility = value);
+      }
+    }
+
     #endregion
 
     #region События кнопок.

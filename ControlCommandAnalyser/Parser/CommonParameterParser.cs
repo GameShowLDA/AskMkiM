@@ -45,15 +45,81 @@ namespace ControlCommandAnalyser.Parser.Common
       if (match.Success)
       {
         var resistance = match.Groups["value"].Value.Trim();
-        var remainder = input.Remove(match.Index, match.Length).Trim(' ', ',');
+        var remainder = input.Remove(match.Index, match.Length).Trim(' ');
         return (resistance, remainder);
       }
       return (null, input);
     }
 
+    /// <summary>
+    /// Парсит выражения сопротивлений вида "94&lt;кОм&lt;106", "94&lt;кОм", "кОм&lt;106".
+    /// </summary>
+    /// <param name="input">Входная строка.</param>
+    /// <returns>
+    /// Кортеж: 
+    /// - Min — минимальное значение сопротивления (если задано),
+    /// - Max — максимальное значение сопротивления (если задано),
+    /// - Unit — единица измерения сопротивления (Ом, кОм, МОм, ГОм),
+    /// - Remainder — остаток строки после удаления выражения.
+    /// </returns>
+    public static (string? Min, string? Max, string? Unit, string Remainder) ParseResistanceRange(string input)
+    {
+      var match = Regex.Match(input,
+                              @"(?:(?<low>\d+(?:[.,]\d+)?)\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)(?:\s*<\s*(?<high>\d+(?:[.,]\d+)?))?",
+                              RegexOptions.IgnoreCase);
+
+
+      if (match.Success)
+      {
+        string? min = match.Groups["low"].Success ? match.Groups["low"].Value : null;
+        string? max = match.Groups["high"].Success ? match.Groups["high"].Value : null;
+        string unit = match.Groups["unit"].Value;
+
+        string remainder = input.Remove(match.Index, match.Length).Trim(' ');
+
+        return (min, max, unit, remainder);
+      }
+
+      return (null, null, null, input);
+    }
+
+    /// <summary>
+    /// Парсит выражения сопротивлений вида "94&lt;кОм&lt;106", "94&lt;кОм", "кОм&lt;106".
+    /// </summary>
+    /// <param name="input">Входная строка.</param>
+    /// <returns>
+    /// Кортеж: 
+    /// - Min — минимальное значение сопротивления (если задано),
+    /// - Max — максимальное значение сопротивления (если задано),
+    /// - Unit — единица измерения сопротивления (Ом, кОм, МОм, ГОм),
+    /// - Remainder — остаток строки после удаления выражения.
+    /// </returns>
+    public static (string? Min, string? Max, string? Unit, string Remainder) ParseCapacityRange(string input)
+    {
+      var match = Regex.Match(input,
+                              @"(?:(?<low>\d+(?:[.,]\d+)?)\s*<\s*)?(?<unit>нф|мкф|пф)(?:\s*<\s*(?<high>\d+(?:[.,]\d+)?))?",
+                              RegexOptions.IgnoreCase);
+
+
+      if (match.Success)
+      {
+        string? min = match.Groups["low"].Success ? match.Groups["low"].Value : null;
+        string? max = match.Groups["high"].Success ? match.Groups["high"].Value : null;
+        string unit = match.Groups["unit"].Value;
+
+        string remainder = input.Remove(match.Index, match.Length).Trim(' ', ',');
+
+        return (min, max, unit, remainder);
+      }
+
+      return (null, null, null, input);
+    }
+    
+
     public static (string? Time, string Remainder) ParseTime(string input)
     {
-      var match = Regex.Match(input, @"(?<value>\d+\s*[сc])", RegexOptions.IgnoreCase);
+      var match = Regex.Match(input, @"(?:,\s*(?<value>\d+\s*[сc]))", RegexOptions.IgnoreCase);
+
       if (match.Success)
       {
         var time = match.Groups["value"].Value.Trim();

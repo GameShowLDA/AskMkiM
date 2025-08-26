@@ -27,10 +27,12 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
+
                 <TextBlock Name="headerFirstData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" 
                            Text="{Binding Source={StaticResource LS_Input_First_Title}, Path=Value}" FontSize="18" Foreground="{StaticResource ForegroundSolidColorBrush}"  Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
                 <local:TextBoxPlaceholder Grid.Row="1" FontFamily="{DynamicResource WinstonLight}" x:Name="FirstTextBox" 
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" Text="1.1.1" Height="40" Background="{StaticResource LightPrimarySolidColorBrush}"/>
+
             </Grid>
         </Border>
 

@@ -155,6 +155,11 @@ namespace UI.Components
       return fileManager.GetActiveTextEditor();
     }
 
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       return fileManager.RemoveActiveTextEditor(isTranslation);

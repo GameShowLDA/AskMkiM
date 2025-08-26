@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Executors;
 using Utilities.Interface;
+using Utilities.Models;
 using Utilities.TextEditor;
 
 namespace ControlCommandExecutor.Execution
@@ -19,6 +20,25 @@ namespace ControlCommandExecutor.Execution
     private readonly Dictionary<string, ICommandExecutor> _executors = new();
     private readonly IUserMessageService _console;
     private readonly ITextEditorAdapter tranlationControl;
+
+    /// <summary>
+    /// Событие, которое вызывается при изменении состояния блокировки.
+    /// </summary>
+    public event Action<ErrorItem> AddError;
+    public event Action ClearError;
+
+    /// <summary>
+    /// Флаг, указывающий, активно ли питание системы.
+    /// </summary>
+    public void ClearErrorsMethod()
+    {
+      ClearError?.Invoke();
+    }
+
+    public void AddErrorMethod(ErrorItem errorItem)
+    { 
+      AddError?.Invoke(errorItem);
+    }
 
     public List<BaseCommandModel> CommandsToExecute { get; set; } = new();
 
@@ -41,13 +61,15 @@ namespace ControlCommandExecutor.Execution
         var command = CommandsToExecute[i];
 
         // Создаём контекст и передаём ссылку на JumpToCommandNumber делегатом/через context
-        var context = new CommandExecutionContext(command, _console, tranlationControl)
+        var context = new CommandExecutionContext(this, command, _console, tranlationControl)
         {
           JumpToCommandNumber = (number) =>
           {
             int newIndex = CommandsToExecute.FindIndex(cmd => cmd.CommandNumber == number);
             if (newIndex >= 0)
-              i = newIndex - 1; // -1 потому что в конце будет ++
+            {
+              i = newIndex - 1;
+            }
           }
         };
 
@@ -71,7 +93,7 @@ namespace ControlCommandExecutor.Execution
     {
       if (_executors.TryGetValue(command.Mnemonic, out var executor))
       {
-        var context = new CommandExecutionContext(command, _console, tranlationControl);
+        var context = new CommandExecutionContext(this, command, _console, tranlationControl);
         await executor.ExecuteAsync(context);
       }
       else

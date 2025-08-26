@@ -102,7 +102,7 @@
                     Grid.Row="4"
                     HorizontalAlignment="Left"
                     Visibility="Hidden">
-                        <TextBlock Text="Открыть" 
+                        <TextBlock Text="Просмотр" 
                        TextTrimming="CharacterEllipsis" 
                        TextWrapping="NoWrap" 
                        VerticalAlignment="Center" 

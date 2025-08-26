@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AppConfiguration.Error.Device.DeviceBusCommutation;
+using NewCore.Base.Function.DBC;
 using NewCore.Enum;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
@@ -139,6 +140,12 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       if (!result)
         throw ConnectorExceptionFactory.DisconnectFailed(description);
 
+      return result;
+    }
+
+    public async Task<bool> GetSuccesCurrentMode(TypeConnector mode)
+    {
+      var result = await _connectorManager.GetSuccesCurrentMode(mode);
       return result;
     }
   }

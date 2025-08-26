@@ -20,12 +20,12 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock 
-            Text="Холостой режим" 
-            FontSize="20" 
-            Padding="15,5,0,15"
-            Style="{StaticResource ConfigTextBlockHeaderStyle}"
-            VerticalAlignment="Center"  
-            />
+                    Text="{Binding Source={StaticResource Settings_Execution_IdleMode}, Path=Value}"
+                    FontSize="20" 
+                    Padding="15,5,0,15"
+                    Style="{StaticResource ConfigTextBlockHeaderStyle}"
+                    VerticalAlignment="Center"  
+                    />
                 <GroupBox Grid.Row="1" BorderThickness="0">
 
                     <Grid>
@@ -43,14 +43,15 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox Name="idleMode"  Style="{StaticResource AnimatedSwitch}" Width="20" Checked="IdleMode_Checked" Unchecked="IdleMode_Checked"/>
                             <TextBlock 
-                        Text="Холостой режим выполнения" 
+                    Text="{Binding Source={StaticResource Settings_Execution_IdleMode_IdleExecutionMode}, Path=Value}"
+                                
                         Grid.Column="1" 
                         Foreground="{StaticResource ForegroundSolidColorBrush}" 
                         FontSize="18"
                         />
                         </Grid>
 
-                       
+
 
                         <Grid Grid.Row="1" Margin="5">
                             <Grid.ColumnDefinitions>
@@ -59,7 +60,8 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox Name="isErrorSimulation" VerticalAlignment="Center" Style="{DynamicResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="ExecutionDelay_Checked" Unchecked="ExecutionDelay_Checked"/>
                             <TextBlock 
-                        Text="Выполнение с ошибками" 
+                    Text="{Binding Source={StaticResource Settings_Execution_IdleMode_ErrorSimulation}, Path=Value}"
+                                
                         Grid.Column="1" 
                         Foreground="{StaticResource ForegroundSolidColorBrush}" 
                         FontSize="18" />
@@ -76,7 +78,8 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock 
-            Text="Выполнение режимов" 
+                    Text="{Binding Source={StaticResource Settings_Execution_ExecutionModes}, Path=Value}"
+                    
             FontSize="20" 
             Padding="15,5,0,15" 
             Style="{StaticResource ConfigTextBlockHeaderStyle}"
@@ -99,7 +102,8 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox Name="stepByStep" Style="{StaticResource AnimatedSwitch}" Checked="StepByStep_Checked"  Unchecked="StepByStep_Checked"/>
                             <TextBlock 
-                        Text="Пошаговый режим" 
+                    Text="{Binding Source={StaticResource Settings_Execution_ExecutionModes_StepByStepMode}, Path=Value}"
+                                
                         Grid.Column="1" 
                         Foreground="{StaticResource ForegroundSolidColorBrush}"  
                         FontSize="18" />
@@ -111,7 +115,9 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <CheckBox  Name="stopOnError" Style="{StaticResource AnimatedSwitch}" Checked="StepByStep_Checked"  Unchecked="StepByStep_Checked"/>
-                            <TextBlock Text="Остановка по ошибке" Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}"  FontSize="18" />
+                            <TextBlock 
+                                 Text="{Binding Source={StaticResource Settings_Execution_ExecutionModes_StopOnError}, Path=Value}"
+                                Grid.Column="1" Foreground="{StaticResource ForegroundSolidColorBrush}"  FontSize="18" />
                         </Grid>
                     </Grid>
                 </GroupBox>
@@ -124,7 +130,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock 
-                    Text="Административная панель" 
+                    Text="{Binding Source={StaticResource Settings_Execution_AdminPanel}, Path=Value}"
                     FontSize="20" 
                     Padding="15,5,0,15" 
                     Style="{StaticResource ConfigTextBlockHeaderStyle}"
@@ -149,7 +155,7 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox Name="debugError" Style="{StaticResource AnimatedSwitch}" Checked="debugError_Checked" Unchecked="debugError_Checked" />
                             <TextBlock 
-                                Text="Отладка ошибок выполнения" 
+                    Text="{Binding Source={StaticResource Settings_Execution_AdminPanel_DebuggingError}, Path=Value}"
                                 Grid.Column="1" 
                                 Foreground="{StaticResource ForegroundSolidColorBrush}"  
                                 FontSize="18" />

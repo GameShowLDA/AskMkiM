@@ -23,6 +23,8 @@ namespace ControlCommandExecutor.Executors
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       }
 
+      context.CommandExecutionManager.ClearErrorsMethod();
+
       var command = context.Command as OkCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
 

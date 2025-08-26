@@ -26,7 +26,7 @@ namespace UI.Components.ProtocolListBox
   public partial class ProtocolListBoxUI : UserControl, IUserMessageService
   {
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
-    public string Header { get; set ; }
+    public string Header { get; set; }
 
     public bool HasRetryAction => throw new NotImplementedException();
 
@@ -138,8 +138,8 @@ namespace UI.Components.ProtocolListBox
         string header = string.IsNullOrWhiteSpace(m.Header) ? "" : $"{m.Header}: ";
         return $"{indent}{header}{m.Message} | {m.Time}";
       })));
-	}
-	
+    }
+
     public Task<bool> AwaitAdminDecisionAsync(string message)
     {
       throw new NotImplementedException();
@@ -167,7 +167,7 @@ namespace UI.Components.ProtocolListBox
 
     public Task<IUserMessageService.UserAction> WaitUserActionAsync()
     {
-      throw new NotImplementedException();
+      return null;
     }
 
     public CancellationToken GetCancellationToken()
