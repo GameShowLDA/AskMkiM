@@ -1,10 +1,10 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using Message;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfiguration.Base;
-using Message;
 using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 
@@ -19,11 +19,7 @@ namespace UI.Components.ArchiveControls
     /// <summary>
     /// Указывает, активно ли главное окно или основной диалог.
     /// </summary>
-    public static bool IsMainActive
-    {
-      get;
-      set;
-    }
+    public static bool IsMainActive { get; set; }
 
     /// <summary>
     /// Определяет, разрешено ли закрытие окна или диалога.

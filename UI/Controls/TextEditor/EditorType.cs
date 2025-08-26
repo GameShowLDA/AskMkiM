@@ -2,8 +2,10 @@
 {
   public sealed class EditorType
   {
-    public static readonly EditorType TextEditor = new("Текстовый редактор");
-    public static readonly EditorType Translator = new("Трансляторы");
+    public static readonly EditorType TextEditor = new ("Текстовый редактор");
+    public static readonly EditorType Translator = new ("Трансляторы");
+    public static readonly EditorType Archive = new ("Архив");
+    public static readonly EditorType Run = new ("Выполнитель");
 
     public string DisplayName { get; }
 

@@ -1,9 +1,9 @@
-﻿using System.IO;
-using System.IO.Compression;
-using System.Windows;
-using Message;
+﻿using Message;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using System.IO;
+using System.IO.Compression;
+using System.Windows;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
@@ -193,18 +193,21 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
     {
       if (string.IsNullOrEmpty(archivePath) || string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(newOpkFilePath))
       {
+        LogError("Один из параметров пуст.");
         return false;
         throw new ArgumentException("Один из параметров пуст");
       }
 
       if (!File.Exists(archivePath))
       {
+        LogError($"Архив {archivePath} не найден");
         return false;
         throw new FileNotFoundException("Архив не найден", archivePath);
       }
 
       if (!File.Exists(newOpkFilePath))
       {
+        LogError($"Новый файл {newOpkFilePath} не найден");
         return false;
         throw new FileNotFoundException("Новый файл не найден", newOpkFilePath);
       }

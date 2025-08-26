@@ -1,10 +1,7 @@
-﻿using DevZest.Windows.Docking;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Xml.Linq;
+﻿using System.Windows.Controls;
 using UI.Components;
 using UI.Controls;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
 
@@ -110,6 +107,12 @@ namespace MainWindowProgram.Services
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Асинхронную задачу, представляющую результат поиска текстового редактора.</returns>
+    public Task<TextEditorUI> GetActiveTextEditor(EditorType editorType)
+    {
+      var foundEditor = _multiWindowControl.GetActiveTextEditor(editorType);
+      return Task.FromResult(foundEditor);
+    }
+
     public Task<TextEditorUI> GetActiveTextEditor()
     {
       var foundEditor = _multiWindowControl.GetActiveTextEditor();
@@ -174,7 +177,12 @@ namespace MainWindowProgram.Services
       return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-    /// <summary>
+    internal Task AddRunItem(RunControl runControl, EditorType editorType)
+    {
+      return _multiWindowControl.AddRunItem(runControl, editorType);
+    }
+
+  /// <summary>
     /// Открывает папку, содержащую файл, в проводнике.
     /// </summary>
     /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
@@ -182,6 +190,11 @@ namespace MainWindowProgram.Services
     {
       _multiWindowControl.OpenFolder();
       return Task.CompletedTask;
+    }
+
+    public async Task OpenArchiveAsync()
+    {
+      await _multiWindowControl.OpenArchiveAsync();
     }
   }
 }

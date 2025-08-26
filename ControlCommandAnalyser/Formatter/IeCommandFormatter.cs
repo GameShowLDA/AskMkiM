@@ -13,53 +13,47 @@ namespace ControlCommandAnalyser.Formatter
 
     public IEnumerable<string> Format(BaseCommandModel model)
     {
-      if (model is not IeCommandModel ks)
+      if (model is not IeCommandModel ie)
         yield break;
 
       // Первая строка: номер, мнемоника, нераспознанные параметры (если есть)
-      var firstLine = $"{ks.CommandNumber} {ks.Mnemonic}";
+      var firstLine = $"{ie.CommandNumber} {ie.Mnemonic}";
       yield return firstLine;
 
-      if (!string.IsNullOrWhiteSpace(ks.UnparsedParameters))
-        yield return $"\t{ks.UnparsedParameters}";
+      if (!string.IsNullOrWhiteSpace(ie.UnparsedParameters))
+        yield return $"\t{ie.UnparsedParameters}";
 
       // Ключи команды
-      if (ks.AlgorithmKey.Count > 0)
+      if (ie.AlgorithmKey.Count > 0)
       {
-        yield return $"\tКлючи команды: {string.Join(", ", ks.AlgorithmKey)}";
+        yield return $"\tКлючи команды: {string.Join(", ", ie.AlgorithmKey)}";
       }
       else
       {
         yield return $"\tКлючи команды не указаны.";
       }
 
+      if(string.IsNullOrWhiteSpace(ie.LowerLimitCapacity)&& string.IsNullOrWhiteSpace(ie.HigherLimitCapacity))
+      {
+        yield return $"\tЭлектрическая емкость не задана!";
+      }
       // Нижний порог электрической емкости
-      if (!string.IsNullOrWhiteSpace(ks.LowerLimitCapacity))
+      else if (!string.IsNullOrWhiteSpace(ie.LowerLimitCapacity))
       {
-        yield return $"\tНижний порог электрической емкости: {ks.LowerLimitCapacity}";
+        yield return $"\tНижний порог электрической емкости: {ie.LowerLimitCapacity}";
       }
-      else
-      {
-        yield return $"\tНижний порог электрической емкости не задан.";
-      }
-
-
       // Верхний порог электрической емкости
-      if (!string.IsNullOrWhiteSpace(ks.HigherLimitCapacity))
+      else if(!string.IsNullOrWhiteSpace(ie.HigherLimitCapacity))
       {
-        yield return $"\tВерхний порог электрической емкости: {ks.HigherLimitCapacity}";
-      }
-      else
-      {
-        yield return $"\tВерхний порог электрической емкости не задан.";
+        yield return $"\tВерхний порог электрической емкости: {ie.HigherLimitCapacity}";
       }
 
-      if (ks.Points.Count > 0)
+      if (ie.Points.Count > 0)
       {
         // Точки
         yield return $"\tЗаданные точки:";
 
-        foreach (var point in ks.Points)
+        foreach (var point in ie.Points)
           yield return $"\t\t{point}";
       }
       else

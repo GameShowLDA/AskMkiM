@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.TextEditor"
-             xmlns:dz="http://schemas.devzest.com/presentation/docking"
+             xmlns:dz="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel Background="{StaticResource IsCheckedColorSolidColorBrush}">

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using UI.Components.ArchiveManager.Models;
 using static Utilities.LoggerUtility;
 
@@ -159,8 +155,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
       {
         dictionary.Add("прим", string.Empty);
       }
-      //if (dictionary.Count == 4)
-      //{
       var strWithoutSpaces = string.Join(string.Empty, dictionary["ок"].Split(' '));
       var startIndex = strWithoutSpaces.IndexOf("10") + 4;
       var endIndex = strWithoutSpaces.LastIndexOf("*");
@@ -187,7 +181,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
       }
       opkFile.Description = RemoveSpaces(dictionary["прим"]);
 
-      //}
       return opkFile;
     }
 

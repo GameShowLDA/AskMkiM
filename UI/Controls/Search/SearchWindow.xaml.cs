@@ -62,7 +62,6 @@ namespace UI.Controls.Search
       EventAggregator.ReplaceWordButtonPressed += OnReplaceWordButtonPressed;
       EventAggregator.ReplaceAllWordsButtonPressed += OnReplaceAllWordsButtonPressed;
       EventAggregator.CloseSearchWindow += OnCloseSearchWindowRequested;
-      //EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
       EventAggregator.SearchTextRequested += OnSearchTextRequested;
       this.Focus();
       SearchTextBox.Focus();
@@ -198,6 +197,7 @@ namespace UI.Controls.Search
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
       showAnimation.Begin();
     }
+
     public void CloseDialog()
     {
       ClearHighlights?.Invoke();
@@ -506,8 +506,6 @@ namespace UI.Controls.Search
       }
     }
 
-
-
     private void StopAnimations()
     {
       if (Resources["ShowAnimation"] is Storyboard showAnimation)
@@ -519,8 +517,5 @@ namespace UI.Controls.Search
       WindowContainer.RenderTransform = new TranslateTransform(0, 0); // Сброс
       WindowContainer.Opacity = 1;
     }
-
-
-
   }
 }

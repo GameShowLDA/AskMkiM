@@ -1,5 +1,5 @@
 ﻿using AppConfiguration.Interface;
-using DevZest.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UI.Components.MultiEditorMethods;
+using AppConfiguration.Base;
 
 namespace UI.Controls.TextEditor
 {
@@ -46,9 +48,8 @@ namespace UI.Controls.TextEditor
       var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
       if (foundDockItem != null)
       {
-        if (foundDockItem.Content is TextEditorUI)
+        if (foundDockItem.Content is TextEditorUI textEditor)
         {
-          var textEditor = (TextEditorUI)foundDockItem.Content;
           return textEditor;
         }
       }

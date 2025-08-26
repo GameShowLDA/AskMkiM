@@ -14,7 +14,7 @@ namespace UI.Controls.ProtocolNew
   /// </summary>
   public partial class ProtocolUI : UserControl, ITextAdapter
   {
-
+    static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     bool loaded = false;
 
     /// <summary>
@@ -212,8 +212,18 @@ namespace UI.Controls.ProtocolNew
           }
           e.Handled = true;
           break;
+          // TODO: закрытие обычных вкладок через alt+x
+        default:
+          var focus = Keyboard.FocusedElement;
+          if (key == Key.LeftAlt || key == Key.RightAlt)
+          {
+            AnotherKeyPressed?.Invoke(sender, e);
+          }
+          break;
       }
     }
+
+
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       StepControlManager.IsStepInto = false;

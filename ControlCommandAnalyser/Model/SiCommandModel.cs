@@ -8,7 +8,8 @@ namespace ControlCommandAnalyser.Model
   /// <summary>
   /// Модель для команды СИ (сопротивление изоляции).
   /// </summary>
-  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, ControlCommandAnalyser.AlgorithmKey.Г)]
+  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,
+    ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
   public class SiCommandModel : BaseCommandModel, IHasPoints
   {
     /// <summary>

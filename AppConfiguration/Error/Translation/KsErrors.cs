@@ -52,17 +52,5 @@ namespace AppConfiguration.Error.Translation
       Code = ErrorCode.Ks_EmptyCommandBody,
       Description = "Команда КС должна содержать хотя бы один параметр. Тело команды не может быть пустым."
     };
-
-    /// <summary>
-    /// Ошибка: команда КС не содержит ни одного параметра.
-    /// </summary>
-    public static ErrorItem PointsBeforeResistance(int startLineNumber, string command) => new()
-    {
-      SourceLineNumber = startLineNumber,
-      Command = command,
-      Code = ErrorCode.Ks_PointsBeforeResistance,
-      Description = $"Список точек не должен идти до указания сопротивления."
-    };
-
   }
 }

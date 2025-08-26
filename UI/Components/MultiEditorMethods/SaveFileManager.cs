@@ -3,13 +3,14 @@ using System.Text;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
-using DevZest.Windows.Docking;
 using Message;
+using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
 using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
 using Path = System.IO.Path;
+using Microsoft.Win32.SafeHandles;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -118,7 +119,7 @@ namespace UI.Components.MultiEditorMethods
     {
       var saveFileDialog = new SaveFileDialog
       {
-        Filter = "Text Files (*.txt)|*.txt|RTF Files (*.rtf)|*.rtf",
+        Filter = "Файлы программ контроля (*.pk, *.PK, *.Pk)|*.pk;*.PK;*.Pk|Текстовые файлы (*.txt)|*.txt",
         Title = "Сохранить файл как",
         FileName = GetActiveTabName(),
       };
@@ -143,10 +144,9 @@ namespace UI.Components.MultiEditorMethods
     {
       var activeTextEditorContainerTab = GetTextEditorContainerTab();
       int index = fileManager.OpenPages.IndexOf(activeTextEditorContainerTab);
-      if (fileManager.UserControls[index] is TextEditorContainer)
+      if (fileManager.UserControls[index] is TextEditorContainer activeTextEditorContainer)
       {
-        var activeTextEditorContainer = fileManager.UserControls[index] as TextEditorContainer;
-        var activeTab = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab => tab.Background == (Brush)Application.Current.Resources["GreenColorSolidColorBrush"]);
+        var activeTab = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
         return activeTab != null ? Path.GetFileNameWithoutExtension(activeTab.Title) : string.Empty;
       }
       return string.Empty;
@@ -173,22 +173,16 @@ namespace UI.Components.MultiEditorMethods
     /// <summary>
     /// Сохраняет данные из текстового редактора.
     /// </summary>
-    /// <param name="activeTab">Активная вкладка с документом.</param>
     /// <param name="filePath">Путь к открытому файлу.</param>
     /// <returns><c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
     private bool SaveDataFromTextEditor(TextEditorUI textEditor, string filePath)
     {
-      //string fileData = string.Empty;
-
-      //int index = fileManager.OpenPages.IndexOf(activeTab);
-      //if (fileManager.UserControls[index] is TextEditorUI)
-      //{
-      //  var textEditor = fileManager.UserControls[index] as TextEditorUI;
       var fileData = textEditor.Text;
       if (filePath.ToLower().Contains(".pk") && !filePath.ToLower().Contains(".pkw"))
       {
+        var encoding = textEditor.TextEditorModel.Encoding;
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        File.WriteAllText(filePath, fileData, Encoding.GetEncoding(866));
+        File.WriteAllText(filePath, fileData, encoding == null ? Encoding.GetEncoding(866) : encoding);
       }
       else
       {
@@ -206,12 +200,8 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="filePath">Путь к файлу.</param>
     private void RenamePage(DockItem activeTab, string filePath)
     {
-      //var acivePage = fileManager.OpenPages.FirstOrDefault(p => p == activeTab);
-      //if (acivePage != null)
-      //{
-      activeTab.TabText = System.IO.Path.GetFileName(filePath);
+      activeTab.TabText = Path.GetFileName(filePath);
       activeTab.Title = activeTab.TabText;
-      //}
     }
 
     /// <summary>

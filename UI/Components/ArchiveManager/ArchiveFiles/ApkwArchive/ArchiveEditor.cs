@@ -1,14 +1,13 @@
-﻿using System.IO.Compression;
+﻿using Newtonsoft.Json.Linq;
 using System.IO;
+using System.IO.Compression;
 using System.Security.Cryptography;
+using UI.Components.ArchiveControls;
+using UI.Components.ArchiveManager.ArchiveFiles.Index;
+using UI.Components.ArchiveManager.Models;
+using Utilities.Encrypter;
 using YamlDotNet.Serialization;
 using static Utilities.LoggerUtility;
-using UI.Components.ArchiveManager.Models;
-using Newtonsoft.Json.Linq;
-using UI.Components.ArchiveManager.ArchiveFiles.Index;
-using UI.Components.ArchiveControls;
-using Microsoft.VisualBasic.ApplicationServices;
-using Utilities.Encrypter;
 
 
 namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
@@ -58,8 +57,8 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
           }
           return false;
         },
-        archiveFullPath, isNewArchive: true
-        );
+        archiveFullPath, 
+        isNewArchive: true);
       }
       catch (Exception ex)
       {
@@ -81,8 +80,8 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
         return await archiveEncryption.ExecuteSecureOperation<bool>(async tempPath =>
         {
           return OpenArchiveInternal(tempPath);
-        }, path
-        );
+        }, 
+        path);
       }
       catch (CryptographicException ex)
       {

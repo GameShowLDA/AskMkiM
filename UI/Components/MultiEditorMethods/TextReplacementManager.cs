@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
+using System.Windows.Media;
 using UI.Components.SearchControls;
+using UI.Controls;
 using UI.Controls.TextEditor;
-using static Utilities.LoggerUtility;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -18,32 +18,6 @@ namespace UI.Components.MultiEditorMethods
     /// Экземпляр класса <see cref="FileManager"/> для управления файлами.
     /// </summary>
     private FileManager fileManager { get; set; }
-    /// <summary>
-    /// Экземпляр класса <see cref="FileManager"/> для управления файлами.
-    /// </summary>
-    private ControlManager controlManager { get; set; }
-
-    /// <summary>
-    /// Экземпляр класса <see cref="MultiEditorControl"/> для управления мульти-редактором.
-    /// </summary>
-    private MultiEditorControl multiEditorControl { get; set; }
-
-    /// <summary>
-    /// Словарь, хранящий результаты поиска для каждого открытого файла.
-    /// Ключ - имя файла, значение - список результатов поиска для этого файла.
-    /// </summary>
-    Dictionary<string, List<SearchResult>> foundInOpenedFiles = new Dictionary<string, List<SearchResult>>();
-
-    /// <summary>
-    /// Список результатов поиска, полученных для текущего документа.
-    /// </summary>
-    private List<SearchResult> foundResults = new List<SearchResult>();
-
-    /// <summary>
-    /// Индекс текущего результата поиска, на который нужно перейти.
-    /// </summary>
-    private int currentIndex = -1;
-
     /// <summary>
     /// Текст для поиска.
     /// </summary>
@@ -62,21 +36,34 @@ namespace UI.Components.MultiEditorMethods
 
     internal void ReplaceWord(string fileName, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      if (textEditorContainer != null)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-        var foundPage = textEditorContainer.DockManager.DockItems.FirstOrDefault(page => page.Title == fileName);
-        if (foundPage != null && foundPage.Content.GetType() == typeof(TextEditorUI))
+        if (textEditorContainer != null)
         {
-          var foundTextEditor = foundPage.Content as TextEditorUI;
-          ReplaceTextInEditor(foundTextEditor, searchResult, startOffset, replaceText, searchText);
+          var foundPage = textEditorContainer.DockManager.DockItems.FirstOrDefault(page => page.Title == fileName);
+          if (foundPage != null && (foundPage.Content is TextEditorUI || foundPage.Content is TranslatorItem))
+          {
+            if (foundPage.Content is TextEditorUI textEditor)
+            {
+              ReplaceTextInEditor(textEditor, searchResult, startOffset, replaceText, searchText);
+            }
+            else if (foundPage.Content is TranslatorItem translatorItem)
+            {
+              ReplaceTextInEditor(translatorItem.GetLeftEditor(), searchResult, startOffset, replaceText, searchText);
+            }
+            else
+            {
+              return;
+            }
+          }
         }
       }
     }
 
-    private void ReplaceTextInEditor(UserControl editor, SearchResult searchResult, int startOffset, string replaceText, string searchText)
+    private void ReplaceTextInEditor(TextEditorUI textEditor, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      if (editor is TextEditorUI textEditor && searchResult != null)
+      if (searchResult != null)
       {
         var document = textEditor.Document;
         var text = document.Text;
@@ -88,11 +75,9 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    public TextReplacementManager(FileManager fileManager, MultiEditorControl multiEditorControl, ControlManager controlManager)
+    public TextReplacementManager(FileManager fileManager)
     {
       this.fileManager = fileManager;
-      this.multiEditorControl = multiEditorControl;
-      this.controlManager = controlManager;
     }
   }
 }

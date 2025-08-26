@@ -91,6 +91,11 @@ namespace ControlCommandAnalyser.Parser.Si
 
       model.Voltage = voltage;
       model.Resistance = resistance;
+      if (string.IsNullOrEmpty(time))
+      {
+        LoggerUtility.LogDebug($"Для времени установлено значение по умолчанию 5 с.'");
+        time = "5 с";
+      }
       model.Time = time;
 
       if (string.IsNullOrWhiteSpace(voltage))
@@ -125,7 +130,7 @@ namespace ControlCommandAnalyser.Parser.Si
           {
             error.SourceLineNumber = numberLine;
             error.Command = $"{commandNumber} {mnemonic}";
-            
+
             model.Errors.Add(error);
             LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
           }
