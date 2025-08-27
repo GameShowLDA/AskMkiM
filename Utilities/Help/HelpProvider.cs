@@ -1,7 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -13,13 +12,13 @@ namespace Utilities.Help
   {
     private static HelpViewerWindow _helpWindow;
 
-    // Attached property для Func<EnumHelpCommands>
+    // 1) Для совместимости: Func<string>-провайдер старого типа
     public static readonly DependencyProperty HelpKeyProviderProperty =
-      DependencyProperty.RegisterAttached(
-        "HelpKeyProvider",
-        typeof(Func<string>),
-        typeof(HelpProvider),
-        new PropertyMetadata(null));
+        DependencyProperty.RegisterAttached(
+            "HelpKeyProvider",
+            typeof(Func<string>),
+            typeof(HelpProvider),
+            new PropertyMetadata(null));
 
     public static void SetHelpKeyProvider(DependencyObject element, Func<string> provider)
         => element.SetValue(HelpKeyProviderProperty, provider);
@@ -27,55 +26,79 @@ namespace Utilities.Help
     public static Func<string>? GetHelpKeyProvider(DependencyObject element)
         => element.GetValue(HelpKeyProviderProperty) as Func<string>;
 
-    //public enum EnumHelpCommands
-    //{
-    //  None,       // Для открытия начальной страницы
-    //  Unknown,    // Для нераспознанных команд
-    //  [Description("КЦ")] KTs,
-    //  [Description("ОК")] OK,
-    //  [Description("ПИ")] PI,
-    //  [Description("ПР")] PR,
-    //  [Description("РМ")] RM,
-    //  [Description("СИ")] SI,
-    //  [Description("СП")] SP,
-    //  [Description("ЦУ")] TsU,
-    //  [Description("УП")] UP,
-    //}
+    // 2) Новое простое string-свойство для ключа справки
+    public static readonly DependencyProperty HelpKeyProperty =
+        DependencyProperty.RegisterAttached(
+            "HelpKey",
+            typeof(string),
+            typeof(HelpProvider),
+            new PropertyMetadata(null));
+
+    public static void SetHelpKey(DependencyObject element, string key)
+        => element.SetValue(HelpKeyProperty, key);
+
+    public static string? GetHelpKey(DependencyObject element)
+        => (string?)element.GetValue(HelpKeyProperty);
+
+    // 3) Храним последний элемент под мышью
+    private static DependencyObject? _lastHoverElement;
 
     /// <summary>
-    /// Регистрирует глобальный обработчик F1.
+    /// Вызывается один раз в конструкторе окна: устанавливает обработчики MouseMove и F1.
     /// </summary>
     public static void RegisterHelp(Window window)
     {
+      // Запоминаем элемент под курсором при каждом движении мыши
+      window.PreviewMouseMove += (s, e) =>
+      {
+        _lastHoverElement = e.OriginalSource as DependencyObject;
+      };
+
+      // Обрабатываем F1
       window.PreviewKeyDown += (s, e) =>
       {
         if (e.Key != Key.F1) return;
 
-        // 1) получаем строку из провайдера
-        DependencyObject? el = Keyboard.FocusedElement as DependencyObject
+        // Сначала пробуем последний элемент под мышью,
+        // потом — фокус, потом — DirectlyOver
+        DependencyObject? el = _lastHoverElement
+                              ?? Keyboard.FocusedElement as DependencyObject
                               ?? Mouse.DirectlyOver as DependencyObject;
+
         string command = "";
+
+        // Идём вверх по визуальному дереву, ища HelpKey или Func-провайдер
         while (el != null)
         {
-          var prov = GetHelpKeyProvider(el);
-          if (prov != null)
+          // 1) простое свойство HelpKey
+          var simpleKey = GetHelpKey(el);
+          if (!string.IsNullOrWhiteSpace(simpleKey))
           {
-            var text = prov().Trim();
-            if (!string.IsNullOrWhiteSpace(text))
+            command = simpleKey!;
+            break;
+          }
+
+          // 2) старый Func-провайдер
+          var provider = GetHelpKeyProvider(el);
+          if (provider != null)
+          {
+            var txt = provider().Trim();
+            if (!string.IsNullOrWhiteSpace(txt))
             {
-              command = text;
+              command = txt;
               break;
             }
           }
+
           el = VisualTreeHelper.GetParent(el);
         }
 
-        // 2) если ничего не нашли, смотрим Tag как fallback
+        // 3) fallback: ищем ближайший Tag, если ничего не нашли
         if (string.IsNullOrWhiteSpace(command))
         {
-          var fe = FindElementWithTag(el);
-          var tag = fe?.Tag as string;
-          command = string.IsNullOrWhiteSpace(tag) ? "" : tag.Trim();
+          var tagEl = FindElementWithTag(_lastHoverElement);
+          if (tagEl is FrameworkElement fe && fe.Tag is string tag)
+            command = tag.Trim();
         }
 
         ShowHelp(command);
@@ -83,7 +106,7 @@ namespace Utilities.Help
       };
     }
 
-
+    // Помощник для поиска Tag в родителях
     private static FrameworkElement? FindElementWithTag(DependencyObject? element)
     {
       while (element != null)
@@ -96,7 +119,7 @@ namespace Utilities.Help
     }
 
     /// <summary>
-    /// Открывает нужный раздел справки.
+    /// Формирует URL и открывает окно справки или браузер.
     /// </summary>
     public static void ShowHelp(string command)
     {
@@ -115,80 +138,30 @@ namespace Utilities.Help
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Не удалось открыть справку!\nОбратитесь к разработчику!", "Справка");
+        MessageBox.Show("Не удалось открыть справку!\nОбратитесь к разработчику!", "Справка");
         LogError($"Не удалось запустить Help-сервер: {ex.Message}");
         return;
       }
 
-      string url;
-      if (string.IsNullOrWhiteSpace(command))
-      {
-        url = $"http://localhost:{HelpServer.Port}/index.html";
-      }
-      else
-      {
-        // Экранируем спецсимволы в параметре
-        var esc = Uri.EscapeDataString(command);
-        url = $"http://localhost:{HelpServer.Port}/index.html?cmd={esc}";
-      }
+      string url = string.IsNullOrWhiteSpace(command)
+          ? $"http://localhost:{HelpServer.Port}/index.html"
+          : $"http://localhost:{HelpServer.Port}/index.html?cmd={Uri.EscapeDataString(command)}";
 
       OpenHelpViewer(url);
     }
-
-
-    //private static string GetCommandDescription(EnumHelpCommands command)
-    //{
-    //  var field = typeof(EnumHelpCommands).GetField(command.ToString());
-    //  if (field == null) return command.ToString();
-
-    //  var attribute = field.GetCustomAttribute<DescriptionAttribute>();
-    //  return attribute?.Description ?? command.ToString();
-    //}
-
-    //private static void OpenInitialHelp()
-    //{
-    //  // Убеждаемся, что папка есть
-    //  var helpDir = Path.Combine(
-    //      AppDomain.CurrentDomain.BaseDirectory,
-    //      "Help", "AppHelp");
-    //  if (!Directory.Exists(helpDir))
-    //  {
-    //    MessageBox.Show("Папка с справкой не найдена.", "Справка");
-    //    return;
-    //  }
-
-    //  // Запускаем HTTP-сервер
-    //  try
-    //  {
-    //    HelpServer.EnsureStarted();
-    //  }
-    //  catch (Exception ex)
-    //  {
-    //    MessageBox.Show($"Не удалось запустить Help-сервер: {ex.Message}", "Справка");
-    //    return;
-    //  }
-
-    //  string url = $"http://localhost:{HelpServer.Port}/index.html";
-    //  OpenHelpViewer(url);
-    //}
 
     private static void OpenHelpViewer(string url)
     {
       try
       {
         if (Application.Current.Dispatcher.CheckAccess())
-        {
           ShowHelpWindow(url);
-        }
         else
-        {
           Application.Current.Dispatcher.Invoke(() => ShowHelpWindow(url));
-        }
       }
       catch (Exception ex)
       {
         Debug.WriteLine($"Ошибка открытия Help Viewer: {ex}");
-        // Fallback: открытие в системном браузере
         Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
       }
     }
@@ -206,23 +179,5 @@ namespace Utilities.Help
       _helpWindow.Activate();
       _helpWindow.Focus();
     }
-
-    /// <summary>
-    /// Парсит enum по его [Description("...")] атрибуту.
-    /// </summary>
-    //public static bool TryGetByDescription(string description, out EnumHelpCommands result)
-    //{
-    //  foreach (var field in typeof(EnumHelpCommands).GetFields(BindingFlags.Public | BindingFlags.Static))
-    //  {
-    //    var attr = field.GetCustomAttribute<DescriptionAttribute>();
-    //    if (attr != null && attr.Description.Equals(description, StringComparison.OrdinalIgnoreCase))
-    //    {
-    //      result = (EnumHelpCommands)field.GetValue(null)!;
-    //      return true;
-    //    }
-    //  }
-    //  result = default;
-    //  return false;
-    //}
   }
 }
