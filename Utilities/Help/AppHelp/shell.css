@@ -1,0 +1,311 @@
+﻿/* ---------- ОБОЛОЧКА (index.html) ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI',Tahoma,Geneva,Verdana,sans-serif
+}
+
+body {
+    background: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden
+}
+
+/* Header */
+.header {
+    background: linear-gradient(90deg,#1a3a8f,#2c5cc5);
+    color: #fff;
+    padding: 15px 20px;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    z-index: 10
+}
+
+    .header h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        margin-bottom: 3px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,.3)
+    }
+
+    .header p {
+        font-size: 14px;
+        opacity: .9
+    }
+
+/* Layout */
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative
+}
+
+.resizer {
+    width: 8px;
+    background: #d0d0d0;
+    cursor: col-resize;
+    z-index: 1;
+    transition: .2s
+}
+
+    .resizer:hover {
+        background: #a0a0a0
+    }
+
+.primary-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 250px;
+    background: #fff;
+    border-right: 1px solid #ccc;
+    overflow: hidden
+}
+
+.secondary-area {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    min-width: 350px;
+    background: #f8f9fa;
+    overflow: hidden
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    background: #e6e6e6;
+    border-bottom: 1px solid #ccc
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    border-right: 1px solid #d0d0d0;
+    transition: .2s;
+    position: relative;
+    user-select: none
+}
+
+    .tab.active {
+        background: #fff;
+        color: #1a3a8f;
+        font-weight: 600
+    }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #1a3a8f
+        }
+
+    .tab:hover:not(.active) {
+        background: #f0f0f0
+    }
+
+.tab-content {
+    flex: 1;
+    overflow: auto;
+    padding: 15px;
+    display: none
+}
+
+    .tab-content.active {
+        display: block
+    }
+
+/* Nav-bar */
+.nav-bar {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    gap: 15px
+}
+
+.breadcrumb {
+    font-size: 14px;
+    color: #555;
+    flex: 1
+}
+
+    .breadcrumb span {
+        color: #1a3a8f;
+        font-weight: 500
+    }
+
+.nav-buttons {
+    display: flex;
+    gap: 8px
+}
+
+.nav-btn {
+    padding: 6px 12px;
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: .2s;
+    color: #495057;
+    user-select: none
+}
+
+    .nav-btn:hover {
+        background: #dde2e6
+    }
+
+    .nav-btn:disabled {
+        opacity: .5;
+        cursor: not-allowed
+    }
+
+.bookmark-btn.active {
+    background: #ffeeba;
+    border-color: #ffd04a
+}
+
+/* Tree */
+.tree {
+    list-style: none;
+    padding-left: 0;
+    font-size: 14px
+}
+
+    .tree ul {
+        list-style: none;
+        padding-left: 20px;
+        display: none
+    }
+
+    .tree li {
+        margin: 5px 0
+    }
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: .2s;
+    user-select: none
+}
+
+    .tree-item:hover {
+        background: #f0f5ff
+    }
+
+    .tree-item.active {
+        background: #e1ebff;
+        font-weight: 500
+    }
+
+.toggle {
+    width: 14px;
+    text-align: center;
+    margin-right: 4px;
+    color: #555
+}
+
+.tree-item .icon {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #5c7cfa;
+    width: 18px
+}
+
+/* Search & Bookmarks */
+.search-container {
+    margin-bottom: 15px;
+    position: relative
+}
+
+.search-box {
+    width: 100%;
+    padding: 10px 35px 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px
+}
+
+.clear-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 16px;
+    color: #ccc;
+    display: none
+}
+
+    .clear-btn:hover {
+        color: #999
+    }
+
+.search-results {
+    margin-top: 10px
+}
+
+.result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer
+}
+
+    .result-item:hover {
+        background: #f8f9fa
+    }
+
+.bookmark-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: .2s
+}
+
+    .bookmark-item:hover {
+        background: #f8f9fa
+    }
+
+/* Content wrapper (iframe-host) */
+.content-area {
+    flex: 1;
+    overflow: auto; /* скролл будет здесь, а не в iframe */
+    padding: 0; /* убрали внутренний отступ: страница сама даст свой */
+    background: #fff;
+    margin: 15px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    position: relative; /* понадобится, если захотите absolute-layout внутри */
+}
+
+.content-area iframe {
+    display: block; /* убирает «лишние» 4 px от inline-iframe */
+    width: 100%;
+    border: 0;
+}
+
+/* Footer */
+.footer {
+    padding: 8px 15px;
+    background: #e9ecef;
+    font-size: 12px;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6
+}

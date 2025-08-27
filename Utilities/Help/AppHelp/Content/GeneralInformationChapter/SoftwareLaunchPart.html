@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>5. Запуск программного обеспечения</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../../content.css">
+</head>
+<body>
+    <main class="page-content">
+
+        <h2>5. Запуск программного обеспечения</h2>
+
+        <h3 id="far">5.1 Добавление пункта в меню Far Manager</h3>
+        <p>Для быстрого запуска ПОАСК можно создать пункт в пользовательском меню Far:</p>
+        <ol>
+            <li>Нажмите <kbd>F9</kbd> и выберите <strong>Commands → Edit&nbsp;User&nbsp;Menu</strong>.</li>
+            <li>В группе <strong>Main menu</strong> нажмите <kbd>Insert</kbd>.</li>
+            <li>
+                В поле «Command» укажите полный путь к исполняемому файлу
+                <code>mkfw.exe</code> или используйте относительный, например:<br>
+                <code>..\MKF_EXE\mkfw.exe</code>
+            </li>
+            <li>Задайте понятное название (например — «ПОАСК») и сохраните изменения.</li>
+        </ol>
+
+        <figure class="screenshot">
+            <img src="drex_part1.5_custom.png" alt="Пример пункта запуска ПОАСК в Far Manager">
+        </figure>
+
+        <h3 id="windows">5.2 Запуск из Windows</h3>
+        <p>
+            Варианты запуска из графической среды (ярлык на рабочем столе, закрепление в меню
+            «Пуск», автоматический запуск и др.) приведены во
+            <a href="part11.1.3.htm">[11, п. 1.3]</a>.
+        </p>
+
+    </main>
+</body>
+</html>
