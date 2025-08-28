@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using UI.Components.ArchiveManager.Models;
 using static Utilities.LoggerUtility;
 
@@ -159,22 +155,32 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
       {
         dictionary.Add("прим", string.Empty);
       }
-      if (dictionary.Count == 4)
+      var strWithoutSpaces = string.Join(string.Empty, dictionary["ок"].Split(' '));
+      var startIndex = strWithoutSpaces.IndexOf("10") + 4;
+      var endIndex = strWithoutSpaces.LastIndexOf("*");
+      opkFile.Marking = strWithoutSpaces.Substring(startIndex, endIndex - startIndex);
+      if (string.IsNullOrEmpty(opkFile.Marking))
       {
-        var strWithoutSpaces = string.Join(string.Empty, dictionary["ок"].Split(' '));
-        var startIndex = strWithoutSpaces.IndexOf("10") + 4;
-        var endIndex = strWithoutSpaces.LastIndexOf("*");
-        opkFile.Marking = strWithoutSpaces.Substring(startIndex, endIndex - startIndex);
-        opkFile.Name = dictionary["ок"].Substring(dictionary["ок"].LastIndexOf("*") + 1);
-        opkFile.Order = RemoveSpaces(dictionary["заказ"]);
-        opkFile.Department = RemoveSpaces(dictionary["цех"]);
-        if (dictionary["прим"] == null || dictionary["прим"] == string.Empty)
-        {
-          opkFile.Description = dictionary["прим"];
-        }
-        opkFile.Description = RemoveSpaces(dictionary["прим"]);
-
+        opkFile.Marking = "Нет обозначения ОК";
       }
+      if (dictionary.ContainsKey("ок"))
+      {
+        opkFile.Name = dictionary["ок"].Substring(dictionary["ок"].LastIndexOf("*") + 1);
+      }
+      if (dictionary.ContainsKey("заказ"))
+      {
+        opkFile.Order = RemoveSpaces(dictionary["заказ"]);
+      }
+      if (dictionary.ContainsKey("цех"))
+      {
+        opkFile.Department = RemoveSpaces(dictionary["цех"]);
+      }
+      if (string.IsNullOrEmpty(dictionary["прим"]))
+      {
+        opkFile.Description = dictionary["прим"];
+      }
+      opkFile.Description = RemoveSpaces(dictionary["прим"]);
+
       return opkFile;
     }
 

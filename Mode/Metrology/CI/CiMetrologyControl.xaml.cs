@@ -1,11 +1,15 @@
 ﻿using System.Windows.Controls;
-using AppConfiguration.Interface;
 using AppConfiguration.Enums;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
+using AppConfiguration.Interface;
 using AppConfiguration.MeasurementError;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -40,11 +44,7 @@ namespace Mode.Metrology.CI
       ProtocolUI.SetSettings(
         this,
         StartDelegate: ExecuteMeasurementProcess,
-        true,
-        ReturnDelegate: async (CancellationToken token) =>
-        {
-          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-        });
+        true);
     }
 
     /// <summary>
@@ -70,14 +70,14 @@ namespace Mode.Metrology.CI
       var connect = await testMeasurement.ConnectToEquipment(first, second, metrologicalModeRole, ProtocolUI);
       if (!connect.Connect)
       {
-        await ProtocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
         throw new Exception();
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
-      await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
-      await testMeasurement.FinalizeMeasurement();
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole, Data.DataModel);
+
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
+      await testMeasurement.FinalizeMeasurement(ProtocolUI);
     }
 
     public ITextAdapter GetControl()
@@ -90,47 +90,48 @@ namespace Mode.Metrology.CI
       public CiMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        await base.ConfigureMeter(metrologicalModeRole, dataModel);
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
+        string name = breakDown.Name;
+        int chassis = breakDown.NumberChassis;
+        int numer = breakDown.Number;
 
-        if (!(await breakDown.ConnectableManager.ConnectAsync()).Connect)
-        {
-          throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
 
-        if (!(await breakDown.IrManger.SetModeAsync()).Success)
-        {
-          throw new Exception($"Ошибка установка режима IR {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
+          throw IrExceptionFactory.SetModeFailed(name, chassis, numer);
 
-        if (!(await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success)
-        {
-          throw new Exception($"Ошибка установка напряжения {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
+          throw IrExceptionFactory.SetVoltageFailed(name, chassis, numer);
 
-        if (!(await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success)
-        {
-          throw new Exception($"Ошибка установка времени теста {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-        }
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
+          throw IrExceptionFactory.SetTestTimeFailed(name, chassis, numer);
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         var meterDevice = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
-
         var (firstNorm, lastNorm) = ErrorProviderLocator.Provider.GetRange(TypeCommand.CI, param);
+
         var result = await meterDevice.IrManger.MeasureResistanceAsync(param, firstNorm, lastNorm);
+
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{result} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {firstNorm} до {lastNorm} Ом") { IndentLevel = 2 }, skipPause: true);
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: $"{(Math.Abs(result - param))} Ом", type: (result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 }, skipPause: true);
+
+        return true;
       }
 
-      public override async Task FinalizeMeasurement()
+      public override async Task FinalizeMeasurement(IUserMessageService messageService)
       {
-        await base.FinalizeMeasurement();
+        await base.FinalizeMeasurement(messageService);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

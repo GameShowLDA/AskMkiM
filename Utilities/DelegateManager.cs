@@ -1,6 +1,4 @@
-﻿using Utilities.Models;
-
-namespace Utilities
+﻿namespace Utilities
 {
   public static class DelegateManager
   {
@@ -26,6 +24,6 @@ namespace Utilities
     /// Делегат для метода повтора и зацикливания.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
-    public delegate Task ReturnDelegate(CancellationToken cancellationToken);
+    public delegate Task<bool> ReturnDelegate(CancellationToken cancellationToken);
   }
 }

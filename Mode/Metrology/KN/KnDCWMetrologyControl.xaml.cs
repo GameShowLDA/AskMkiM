@@ -1,11 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Error.Device.Multimeter;
 using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using Mode.Metrology.PI;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 namespace Mode.Metrology.KN
@@ -40,13 +43,9 @@ namespace Mode.Metrology.KN
         this,
         StartDelegate: ExecuteMeasurementProcess,
         true,
-        ReturnDelegate: async (CancellationToken token) =>
-        {
-          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-        },
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement();
+          await testMeasurement.FinalizeMeasurement(ProtocolUI);
         });
     }
 
@@ -76,8 +75,8 @@ namespace Mode.Metrology.KN
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole);
-      await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole);
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
 
     public ITextAdapter GetControl()
@@ -90,15 +89,17 @@ namespace Mode.Metrology.KN
       public KnMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
-        await base.ConfigureMeter(metrologicalModeRole, dataModel);
+        await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-        await fastMeter.DcVoltageManager.SetDCVoltageModeAsync();
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.DcVoltageManager.SetDCVoltageModeAsync(), messageService))
+          throw DcExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
 
@@ -128,7 +129,7 @@ namespace Mode.Metrology.KN
           }
         });
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}"));
+        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\tДиапазон допускаемых значений", null, $"{firstNorm:F2}-{lastNorm:F2}"), skipPause: true);
         if (!string.IsNullOrEmpty(result) && double.TryParse(result, out var value))
         {
           double pog = value - param;
@@ -139,13 +140,15 @@ namespace Mode.Metrology.KN
           showMessageModel.Status = (!answer ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error);
           showMessageModel.ExecutionError = (value >= firstNorm && value <= lastNorm) ? false : true;
           showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-          await protocolUI.ShowMessageAsync(showMessageModel);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В", type: showMessageModel.Status));
+          await protocolUI.ShowMessageAsync(showMessageModel, skipPause: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("\tПогрешность измерения", message: $"{pog}В", type: showMessageModel.Status), skipPause: true);
         }
         else
         {
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Некорректно введённое эталонное значение напряжения.", type: ShowMessageModel.MessageType.Error));
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Некорректно введённое эталонное значение напряжения.", type: ShowMessageModel.MessageType.Error), skipPause: true);
         }
+
+        return true;
       }
     }
   }

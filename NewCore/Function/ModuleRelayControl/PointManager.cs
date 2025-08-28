@@ -103,7 +103,7 @@ namespace NewCore.Function.ModuleRelayControl
         Number = 11,
         FirstParameter = firstPoint,
         SecondParameter = lastPoint,
-        ThirdParameter = (int)bus * 10 + 1, 
+        ThirdParameter = (int)bus * 10 + 1,
       };
 
       string commandText = cmd.ToString();
@@ -178,14 +178,7 @@ namespace NewCore.Function.ModuleRelayControl
 
       var cmd = new DeviceCommand(6, numberPoint);
       string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-
-      var parsed = BaseResponse.FromJson(response);
-      if (parsed?.Answer?.StartsWith($"6.{numberPoint}.") == true)
-      {
-        return response;
-      }
-
-      return $"Ошибка при проверке точки {numberPoint}: некорректный ответ или не получен.";
+      return response;
     }
   }
 }

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using AppConfiguration.Error.Device;
+using NewCore.Base.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
-using NewCore.Base.Interface.Main;
-using NewCore.Base.Device;
-using AppConfiguration.Error.Device;
-using NewCore.Device;
+using Utilities;
+using Utilities.Interface;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
@@ -28,28 +26,33 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
-      return await InitializeAsync();
+      return await InitializeAsync(messageService);
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
-      return await ResetAsync();
+      return await ResetAsync(messageService);
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
-      var (result, answer) = await _stateManager.ConnectAsync();
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var answer = await _stateManager.ConnectAsync();
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _moduleRelayControl,
-          "Инициализация модуля коммутации реле",
-          !result ? answer : string.Empty,
-          result,
-          1);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _moduleRelayControl,
+            "Инициализация модуля коммутации реле",
+            !answer.Connect ? answer.Answer : string.Empty,
+            answer.Connect,
+            1);
+        return answer;
+      }, messageService);
+
 
       if (!result)
       {
@@ -68,14 +71,14 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       var result = await _stateManager.DisconnectAsync();
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
-          "Сброс модуля коммутации реле",
-          result ? "Операция выполнена успешно" : "Ошибка выполнения команды",
+          "Сброс устройства",
+         string.Empty,
           result,
           1);
 

@@ -9,6 +9,7 @@ using NewCore.Base.Device;
 using NewCore.Base.Function.DBC;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using Utilities;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {

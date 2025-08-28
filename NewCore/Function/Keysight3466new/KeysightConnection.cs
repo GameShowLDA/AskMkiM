@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using NewCore.Base.Device;
 using NewCore.Base.Function.FastMeter;
 using NewCore.Device;
+using Utilities.Interface;
 using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
@@ -33,7 +34,7 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -53,12 +54,13 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
+
 
       if (_device.IP == null)
       {
@@ -72,13 +74,18 @@ namespace NewCore.Function.Keysight3466new
         }
       }
 
+      using var token = new CancellationTokenSource(2000);
       try
       {
         _device.Client = new TcpClient();
-        await _device.Client.ConnectAsync(_device.IP.ToString(), _device.Port);
+        await _device.Client.ConnectAsync(_device.IP.ToString(), _device.Port, token.Token);
         _device.Stream = _device.Client.GetStream();
         _device.IsConnected = true;
         return (true, string.Empty);
+      }
+      catch (OperationCanceledException)
+      {
+        return (false, "Превышено время подлючения к мультиметру: 2сек.");
       }
       catch (Exception ex)
       {
@@ -89,27 +96,34 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
         return true;
       }
+
       await _device.DeviceProtocol.OperationLock.WaitAsync();
+      try
+      {
+        _device.Stream?.Close();
+        _device.Stream = null;
 
-      _device.Stream?.Close();
-      _device.Stream = null;
+        _device.Client?.Close();
+        _device.Client = null;
 
-      _device.Client?.Close();
-      _device.Client = null;
+        _device.IsConnected = false;
 
-      _device.IsConnected = false;
-
-      return true;
+        return true;
+      }
+      finally
+      {
+        _device.DeviceProtocol.OperationLock.Release();
+      }
     }
 
     /// <inheritdoc />
-    public Task<bool> ResetAsync()
+    public Task<bool> ResetAsync(IUserMessageService messageService = null)
     { 
       return Task.FromResult(true);
     }

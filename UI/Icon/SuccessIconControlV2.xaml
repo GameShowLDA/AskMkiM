@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="UI.Icon.SuccessIconControlV2"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:UI.Icon"
+             mc:Ignorable="d"
+             d:DesignWidth="28" d:DesignHeight="28"
+             Cursor="Hand"
+             Width="28" Height="28">
+
+    <Grid>
+        <!-- Круг -->
+        <Border x:Name="Circle"
+          Background="{Binding CircleBackground, RelativeSource={RelativeSource AncestorType=local:SuccessIconControlV2}}"
+          BorderBrush="{Binding CircleBorder, RelativeSource={RelativeSource AncestorType=local:SuccessIconControlV2}}"
+          BorderThickness="{Binding CircleBorderThickness, RelativeSource={RelativeSource AncestorType=local:SuccessIconControlV2}}"
+          CornerRadius="999"
+          SnapsToDevicePixels="True"/>
+
+        <!-- Галочка в фиксированном икон-боксе 50×50 (как в V1) -->
+        <Viewbox Stretch="Uniform" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Canvas Width="50" Height="50">
+                <Path x:Name="Tick"
+            Data="M10,25 L20,35 L40,15"
+            Stroke="{Binding CheckBrush, RelativeSource={RelativeSource AncestorType=local:SuccessIconControlV2}}"
+            StrokeThickness="{Binding CheckThickness, RelativeSource={RelativeSource AncestorType=local:SuccessIconControlV2}}"
+            StrokeStartLineCap="Round"
+            StrokeEndLineCap="Round"
+            StrokeLineJoin="Round"
+            Fill="Transparent"
+            StrokeDashArray="40 200"
+            StrokeDashOffset="200"/>
+            </Canvas>
+        </Viewbox>
+    </Grid>
+
+
+</UserControl>

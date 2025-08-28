@@ -7,6 +7,7 @@
         
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
+        xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 
@@ -18,6 +19,8 @@
         MinWidth="800"
         MinHeight="600"
         WindowState="Maximized"
+        
+        Name="MainWinApp"
         >
     <Window.Resources>
 
@@ -32,7 +35,7 @@
         </Style>
 
         <Style TargetType="{x:Type MenuItem}">
-            
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
@@ -77,7 +80,7 @@
             <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
             <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
             <Setter Property="Cursor" Value="Hand"/>
-            
+
         </Style>
 
         <Style x:Key="SideMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -168,98 +171,112 @@
             <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
                 Foreground="{StaticResource ForegroundSolidColorBrush}" Grid.Column="0" BorderThickness="0">
 
-                <MenuItem Header="Файл" Name="File" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1" >
+                <MenuItem 
+                   Header="{Binding Source={StaticResource LS_Menu_File}, Path=Value}"
+                    Name="File" Uid="1" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
 
-                    <MenuItem Header="Архив" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Archive}, Path=Value}" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
-                    <MenuItem Header="Сохранить" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
-                    <MenuItem Header="Сохранить как" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
-                    <MenuItem Header="Печать" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
-                    <MenuItem Header="Поиск" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Save}, Path=Value}" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_SaveAs}, Path=Value}" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_OpenFolder}, Path=Value}" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Print}, Path=Value}" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <MenuItem Header="Открыть" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
-                    <MenuItem Header="Создать" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
-                    <MenuItem Header="Сравнить" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <MenuItem Header="Выход" Command="{Binding File.ExitApplicationCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Exit}, Path=Value}" Tag="ExitApplication" Command="{Binding File.ExitApplicationCommand}"/>
 
                 </MenuItem>
 
-                <MenuItem Header="Метрология" Name="Metrology" Tag="menuHeader_2">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Tag="menuHeader_2" >
 
-                    <MenuItem Header="Режим КС" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
-                    <MenuItem Header="Режим ИЕ" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
-                    <MenuItem Header="Режим СИ" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
-                    <MenuItem Header="Режим ПР" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
-                    <MenuItem Header="Режим ПИ (постоянный)" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
-                    <MenuItem Header="Режим ПИ (переменный)" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
-                    <MenuItem Header="Режим КН (постоянный)" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
-                    <MenuItem Header="Режим КН (переменный)" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}" Name="Metrology" Style="{StaticResource SideMenuItemStyle}">
 
-                </MenuItem>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KS}, Path=Value}" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_IE}, Path=Value}" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_CI}, Path=Value}" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
 
-                <MenuItem Header="Самоконтроль" Name="SelfControl" Tag="menuHeader_3">
-
-                    <MenuItem Header="Модуль"  Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
-
-                </MenuItem>
-
-                <MenuItem  Header="Тесты" Name="TestControl" Tag="menuHeader_4">
-
-                    <MenuItem Header="Тест СИ" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PRT}, Path=Value}" Name="ModePrMenuItemT" Command="{Binding Metrology.PR_TCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIDCW}, Path=Value}" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIACW}, Path=Value}"  Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNDCW}, Path=Value}"  Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNACW}, Path=Value}"  Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
 
                     </MenuItem>
 
-                    <MenuItem Header="Тест ПИ на постоянном токе" Style="{StaticResource SideMenuItemStyle}">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_SelfControl}, Path=Value}"  Name="SelfControl" Tag="menuHeader_3" Style="{StaticResource SideMenuItemStyle}">
 
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiDCW"   Command="{Binding Test.PiDCWMethodExecutorCommand}" />
-
-                    </MenuItem>
-
-                    <MenuItem Header="Тест ПИ на переменном токе" Style="{StaticResource SideMenuItemStyle}">
-
-                        <MenuItem Header="Метод узла" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
-                        <MenuItem Header="Групповой метод" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_SelfControl_Module}, Path=Value}"   Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
 
                     </MenuItem>
 
-                    <MenuItem Header="МКР" Style="{StaticResource SideMenuItemStyle}">
-                        <MenuItem Header="Перекрёстный тест" Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+                    <MenuItem   Header="{Binding Source={StaticResource LS_Menu_Test_Tests}, Path=Value}"  Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI}, Path=Value}"  Style="{StaticResource SideMenuItemStyle}" >
+
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Node}, Path=Value}"  Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Group}, Path=Value}"  Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW}, Path=Value}" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Node}, Path=Value}"  Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Group}, Path=Value}"    Command="{Binding Test.PiDCWMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW}, Path=Value}" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Node}, Path=Value}" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Group}, Path=Value}"  Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
+
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+
                     </MenuItem>
 
                 </MenuItem>
 
-                <MenuItem Header="Трансляция" Name="Translation" Tag="menuHeader_5">
-                    <MenuItem Header="Запуск трансляции"  Tag="StartTranslation" Name="StartTranslation" Command="{Binding Translation.StartTranslationCommand}"/>
-                </MenuItem>
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution}, Path=Value}" Tag="menuHeader_3" Name="Translation">
 
-                <MenuItem Header="Настройки" Name="Settings" Tag="menuHeader_6">
-
-                    <MenuItem Header="Конфигурация" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
-                    <MenuItem Header="Выполнение" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
-                    <MenuItem Header="Протокол" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Build}, Path=Value}" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Run}, Path=Value}" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}"/>
 
                 </MenuItem>
 
-                <MenuItem Header="Справка" Name="HelpText" Command="{Binding Settings.HelpCommand}">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings}, Path=Value}" Name="Settings" Tag="menuHeader_4">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Configuration}, Path=Value}" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Execution}, Path=Value}" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Protocol}, Path=Value}" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
+                    <MenuItem Header="Параметры ПО"  Command="{Binding Settings.SettingsCommand}"/>
+                </MenuItem>
+
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Name="HelpText" Command="{Binding Settings.HelpCommand}">
 
                 </MenuItem>
 
-                <MenuItem Header="Администрирование" Name="Admin">
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Name="Admin">
 
-                    <MenuItem Header="Погрешности" Name="ErrorMenuItem" Command="{Binding Admin.ErrorCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Error}, Path=Value}" Name="ErrorMenuItem" Command="{Binding Admin.ErrorCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_USB}, Path=Value}" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
+                    
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+
                     <MenuItem Header="Console" Name="SendCommandMenuItem" Command="{Binding Admin.SendCommandCommand}"/>
                     <MenuItem Header="Logger" Name="LoggerMenuItem" Command="{Binding Admin.LoggerCommand}"/>
-                    <MenuItem Header="USB" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
 
-                    <MenuItem Header="Управление" Name="DeviceManagment">
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
                         <MenuItem Header="МеШ" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
                         <MenuItem Header="МИНТ" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
@@ -275,7 +292,6 @@
                     </MenuItem>
 
                 </MenuItem>
-
 
             </Menu>
 
@@ -328,13 +344,15 @@
         <Grid 
             Name="BottomPanel"
             Grid.Row="2" 
-            Height="40" 
+            Height="30" 
             Background="{StaticResource SecondarySolidColorBrush}"
             >
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
@@ -343,12 +361,37 @@
                 VerticalAlignment="Center" 
                 Padding="10,0,0,0" 
                 FontSize="14" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}"
-                >
-                Тут будет информационый текст
-            </TextBlock>
-            <DefaultGUI:PowerButton
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
+				/>
+
+
+            <Controls:StatusBarControl
+                Grid.Column="1" 
+                x:Name="StatusBar"
+                HorizontalAlignment="Right"
+                Visibility="Hidden"
+                />
+
+
+            <Controls:DateTimeControl Opacity="0.7"
+                x:Name="TimeBlock" 
+                Margin="0,0,10,0" 
+                FontSize="13" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                Grid.Column="3" 
+                Cursor="Hand"
+				/>
+
+            <Components:KeyboardLayoutComponent Opacity="0.7"
+                x:Name="LanguageBlock" 
+                VerticalAlignment="Center" 
+                FontSize="15" 
+                Foreground="{StaticResource ForegroundSolidColorBrush}" 
                 Grid.Column="2" 
+				/>
+
+            <DefaultGUI:PowerButton
+                Grid.Column="4" 
                 Width="200"
                 Name="PowerButton"
                 />

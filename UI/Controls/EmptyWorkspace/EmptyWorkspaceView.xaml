@@ -1,0 +1,263 @@
+﻿<UserControl x:Class="UI.Controls.EmptyWorkspace.EmptyWorkspaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:UI.Controls.EmptyWorkspace"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800"
+             IsHitTestVisible="False"
+             Language="ru-RU">
+
+    <!-- ===== РЕСУРСЫ ===== -->
+    <UserControl.Resources>
+        <!-- Центральное мягкое свечение -->
+        <RadialGradientBrush x:Key="CenterGlowBrush"
+                         ColorInterpolationMode="ScRgbLinearInterpolation"
+                         RadiusX="0.55" RadiusY="0.55"
+                         Center="0.52,0.60" GradientOrigin="0.52,0.60">
+            <GradientStop Color="#1AE6EDF7" Offset="0.00"/>
+            <GradientStop Color="#00E6EDF7" Offset="1.00"/>
+        </RadialGradientBrush>
+
+        <!-- Виньетка по краям -->
+        <RadialGradientBrush x:Key="VignetteBrush"
+                         ColorInterpolationMode="ScRgbLinearInterpolation"
+                         RadiusX="0.98" RadiusY="0.98"
+                         Center="0.5,0.5" GradientOrigin="0.5,0.5">
+            <GradientStop Color="#00000000" Offset="0.68"/>
+            <GradientStop Color="#26000000" Offset="0.85"/>
+            <GradientStop Color="#66000000" Offset="1.00"/>
+        </RadialGradientBrush>
+
+        <!-- Едва заметная «шумина» для убирания бэндинга -->
+        <VisualBrush x:Key="SubtleNoiseBrush"
+             TileMode="Tile" Viewport="0,0,64,64" ViewportUnits="Absolute"
+             Viewbox="0,0,64,64" ViewboxUnits="Absolute" Opacity="0.03">
+            <VisualBrush.Visual>
+                <Grid Background="Transparent" Width="64" Height="64" RenderOptions.BitmapScalingMode="HighQuality">
+                    <!-- редкие «пиксели» разной яркости -->
+                    <Rectangle Width="1" Height="1" Fill="#14FFFFFF" Margin="6,11,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Rectangle Width="1" Height="1" Fill="#12000000" Margin="23,29,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Rectangle Width="1" Height="1" Fill="#10FFFFFF" Margin="41,47,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Rectangle Width="1" Height="1" Fill="#12000000" Margin="13,53,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Rectangle Width="1" Height="1" Fill="#10FFFFFF" Margin="52,19,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                </Grid>
+            </VisualBrush.Visual>
+        </VisualBrush>
+
+        <!-- Конвертеры -->
+        <local:DateTimeToStringConverter x:Key="DateTimeToString"/>
+        <local:TimeOfDayGreetingConverter x:Key="TimeOfDayGreeting"/>
+    </UserControl.Resources>
+
+    <!-- ===== КОРНЕВОЙ GRID ===== -->
+    <Grid>
+
+        <!-- Градиентный фон с «дыханием» -->
+        <Grid.Background>
+            <RadialGradientBrush x:Name="BackgroundBrush"
+                           ColorInterpolationMode="ScRgbLinearInterpolation"
+                           GradientOrigin="0.50,0.40"
+                           Center="0.50,0.40"
+                           RadiusX="1.20" RadiusY="1.20">
+                <!-- ближе к твоему #465060, но объёмнее -->
+                <GradientStop Color="{StaticResource SecondaryColor}" Offset="0.00"/>
+                <GradientStop Color="{StaticResource PrimaryColor}" Offset="1.00"/>
+            </RadialGradientBrush>
+        </Grid.Background>
+
+        <!-- центральное свечение -->
+        <Rectangle IsHitTestVisible="False" Fill="{StaticResource CenterGlowBrush}">
+            <Rectangle.Effect>
+                <BlurEffect Radius="4"/>
+            </Rectangle.Effect>
+        </Rectangle>
+
+        <!-- виньетка -->
+        <Rectangle IsHitTestVisible="False" Fill="{StaticResource VignetteBrush}"/>
+
+        <!-- шум -->
+        <Rectangle IsHitTestVisible="False" Fill="{StaticResource SubtleNoiseBrush}"/>
+
+        <!-- ===== ЦЕНТРАЛЬНЫЙ БЛОК ===== -->
+        <Border x:Name="CenterBlock"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#00000000"
+            Padding="0">
+            <Border.Effect>
+                <!-- деликатная подсветка блока -->
+                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.25"/>
+            </Border.Effect>
+
+            <Grid TextOptions.TextFormattingMode="Display" SnapsToDevicePixels="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Время -->
+                <TextBlock x:Name="TimeText"
+                   Grid.Row="0"
+                   Text="{Binding CurrentDateTime,
+                                  RelativeSource={RelativeSource AncestorType=UserControl},
+                                  Converter={StaticResource DateTimeToString},
+                                  ConverterParameter=HH:mm:ss}"
+                   Foreground="{StaticResource ForegroundSolidColorBrush}"
+                   FontFamily="{DynamicResource WinstonBold}"
+                   FontSize="60"
+                   TextAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Opacity="0"/>
+
+                <!-- День недели | Дата -->
+                <TextBlock x:Name="DateText"
+                   Grid.Row="1"
+                   Margin="0,8,0,0"
+                   TextAlignment="Center"
+                   HorizontalAlignment="Center"
+                   FontFamily="{DynamicResource WinstonLight}"
+                   Opacity="0">
+                    <TextBlock.FontSize>20</TextBlock.FontSize>
+
+          <!-- День недели -->
+          <Run Text="{Binding CurrentDateTime,
+                              RelativeSource={RelativeSource AncestorType=UserControl},
+                              Converter={StaticResource DateTimeToString},
+                              ConverterParameter=dddd|TitleCase}">
+            <Run.Foreground>
+              <SolidColorBrush
+                  Color="{Binding Color, Source={StaticResource ForegroundSolidColorBrush}}"
+                  Opacity="0.85"/>
+            </Run.Foreground>
+          </Run>
+
+          <!-- Разделитель -->
+          <Run Text="  |  ">
+            <Run.Foreground>
+              <SolidColorBrush
+                  Color="{Binding Color, Source={StaticResource ForegroundSolidColorBrush}}"
+                  Opacity="0.35"/>
+            </Run.Foreground>
+          </Run>
+
+          <!-- Дата -->
+          <Run Text="{Binding CurrentDateTime,
+                              RelativeSource={RelativeSource AncestorType=UserControl},
+                              Converter={StaticResource DateTimeToString},
+                              ConverterParameter=d MMMM yyyy}"
+               FontSize="22">
+            <Run.Foreground>
+              <SolidColorBrush
+                  Color="{Binding Color, Source={StaticResource ForegroundSolidColorBrush}}"
+                  Opacity="0.85"/>
+            </Run.Foreground>
+          </Run>
+                </TextBlock>
+
+                <!-- Подсказка под датой -->
+                <TextBlock x:Name="HintText"
+                   Grid.Row="2"
+                   Margin="0,15,0,0"
+                   Text="Откройте файл, чтобы начать работу"
+                   Foreground="{StaticResource ForegroundSolidColorBrush}"
+                   FontFamily="{DynamicResource WinstonLight}"
+                   FontSize="16"
+                   Opacity="0.0"
+                   TextAlignment="Center"
+                   HorizontalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ===== ПЛАШКА ПРИВЕТСТВИЯ ВНИЗУ ===== -->
+        <Border x:Name="GreetingBar"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,20"
+            Padding="20,10"
+            CornerRadius="10"
+            Background="{StaticResource SecondarySolidColorBrush}"
+            BorderBrush="{StaticResource ForegroundSolidColorBrush}"
+            BorderThickness="1"
+            IsHitTestVisible="False"
+            Opacity="0"
+            Panel.ZIndex="100">
+            <TextBlock Text="{Binding CurrentDateTime,
+                                RelativeSource={RelativeSource AncestorType=UserControl},
+                                Converter={StaticResource TimeOfDayGreeting}}"
+                 Foreground="{StaticResource ForegroundSolidColorBrush}"
+                 FontFamily="{DynamicResource WinstonBold}"
+                 FontSize="18"
+                 TextAlignment="Center"/>
+        </Border>
+
+        <!-- ===== ВЕРСИЯ ПО / ДАТА СБОРКИ (внизу справа) ===== -->
+        <TextBlock HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Margin="0,0,14,10"
+               FontFamily="{DynamicResource WinstonLight}"
+               FontSize="12"
+               Opacity="0.45"
+               Foreground="{StaticResource ForegroundSolidColorBrush}"
+               Text="{Binding AppVersion, FallbackValue=Версия 1.0.0 • Сборка 20.08.2025}"/>
+
+        <!-- ===== АНИМАЦИИ: дыхание + появление ===== -->
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                        <!-- дыхание радиуса -->
+                        <DoubleAnimation Storyboard.TargetName="BackgroundBrush"
+                             Storyboard.TargetProperty="RadiusX"
+                             From="1.20" To="1.40"
+                             Duration="0:0:7"/>
+                        <DoubleAnimation Storyboard.TargetName="BackgroundBrush"
+                             Storyboard.TargetProperty="RadiusY"
+                             From="1.20" To="1.40"
+                             Duration="0:0:7"/>
+                        <!-- едва заметное «плавание» центра -->
+                        <PointAnimation Storyboard.TargetName="BackgroundBrush"
+                            Storyboard.TargetProperty="Center"
+                            From="0.50,0.40" To="0.52,0.42"
+                            Duration="0:0:10"/>
+                        <PointAnimation Storyboard.TargetName="BackgroundBrush"
+                            Storyboard.TargetProperty="GradientOrigin"
+                            From="0.50,0.40" To="0.48,0.38"
+                            Duration="0:0:10"/>
+                    </Storyboard>
+                </BeginStoryboard>
+
+                <BeginStoryboard>
+                    <Storyboard>
+                        <!-- появление времени -->
+                        <DoubleAnimation Storyboard.TargetName="TimeText"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1"
+                             Duration="0:0:0.35"/>
+                        <!-- появление даты -->
+                        <DoubleAnimation Storyboard.TargetName="DateText"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1"
+                             BeginTime="0:0:0.15"
+                             Duration="0:0:0.35"/>
+                        <!-- появление подсказки -->
+                        <DoubleAnimation Storyboard.TargetName="HintText"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1"
+                             BeginTime="0:0:0.30"
+                             Duration="0:0:0.35"/>
+                        <!-- появление плашки приветствия -->
+                        <DoubleAnimation Storyboard.TargetName="GreetingBar"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="0.95"
+                             BeginTime="0:0:0.40"
+                             Duration="0:0:0.35"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+    </Grid>
+</UserControl>

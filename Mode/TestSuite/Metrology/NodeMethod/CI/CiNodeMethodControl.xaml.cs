@@ -1,7 +1,12 @@
 ﻿using System.Windows.Controls;
+using System.Xml.Linq;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.NodeMethod.CI
@@ -57,9 +62,9 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, NewCore.Enum.DeviceEnum.BusPoint.A);
-      await testMeasurement.ConfigureMeter(dataModel);
+      await testMeasurement.ConfigureMeter(ProtocolUI, dataModel);
       await testMeasurement.PerformMeasurement(ProtocolUI, dataModel);
-      await testMeasurement.FinalizeAsync();
+      await testMeasurement.FinalizeAsync(ProtocolUI);
     }
 
     private class CiNodeMethod : BaseNodeTest
@@ -67,13 +72,25 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
       public CiNodeMethod() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null)
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.ConnectAsync();
-        await breakDown.IrManger.SetModeAsync();
-        await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage);
-        await breakDown.IrManger.SetTestTimeAsync(dataModel.Time);
+        string name = breakDown.Name;
+        int chassis = breakDown.NumberChassis;
+        int numer = breakDown.Number;
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
+          throw IrExceptionFactory.SetModeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
+          throw IrExceptionFactory.SetVoltageFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
+          throw IrExceptionFactory.SetTestTimeFailed(name, chassis, numer);
+
       }
 
       /// <inheritdoc />
@@ -90,17 +107,24 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
           if (connectResult.Step)
           {
             await protocolUI.ShowMessageAsync(new ShowMessageModel($"Подключение точки {connectResult.PointModel.PointNumber} к шине {AssignedBus}", type: ShowMessageModel.MessageType.Success));
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
+            await protocolUI.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
 
-            var answer = await breakDown.IrManger.MeasureResistanceAsync();
-            var type = ShowMessageModel.MessageType.Success;
-
-            if (answer < (dataModel.Param * 1000))
+            await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
-              type = ShowMessageModel.MessageType.Error;
-            }
+              token.ThrowIfCancellationRequested();
+              var answer = await breakDown.IrManger.MeasureResistanceAsync(dataModel.Param, 1000, 60000);
+              var type = ShowMessageModel.MessageType.Success;
 
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} МОм", type: type));
+              if (answer < dataModel.Param)
+              {
+                type = ShowMessageModel.MessageType.Error;
+              }
+
+              // await protocolUI.ShowMessageAsync(new ShowMessageModel("\tРезультат измерения", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
+
+              return type == ShowMessageModel.MessageType.Success ? true : false;
+
+            }, protocolUI);
           }
           else
           {
@@ -109,11 +133,11 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
         }
       }
 
-      public override async Task FinalizeAsync()
+      public override async Task FinalizeAsync(IUserMessageService messageService)
       {
-        await base.FinalizeAsync();
+        await base.FinalizeAsync(messageService);
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

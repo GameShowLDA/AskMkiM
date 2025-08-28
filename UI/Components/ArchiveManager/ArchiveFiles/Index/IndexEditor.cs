@@ -1,17 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Message;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO.Compression;
+using Newtonsoft.Json.Linq;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO.Compression;
+using System.Windows;
 using System.Windows.Controls;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
-using static Utilities.LoggerUtility;
-using System.Windows;
 using UI.Components.ArchiveManager.Models;
+using static Utilities.LoggerUtility;
+
 
 namespace UI.Components.ArchiveManager.ArchiveFiles.Index
 {
@@ -36,8 +33,8 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
             RewriteIndexEntry(archive, jsonArray);
           }
           return true;
-        }, filePath
-        );
+        }, 
+        filePath);
       }
       catch (Exception ex)
       {
@@ -98,7 +95,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
       }
     }
 
-    // TODO: шифрование индекса    
     public void DeleteDataFromIndex(string fileName)
     {
       var indexPath = Path.Combine(ArchiveSettings.ArchivePath, ArchiveSettings.IndexName);
@@ -190,7 +186,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
       return jsonArray;
     }
 
-    public static async Task<List<Models.ApkArchive>> GetApkArrayAsync(string indexPath, List<Models.ApkArchive> existingArchives)
+    public static async Task<List<ApkArchive>> GetApkArrayAsync(string indexPath, List<ApkArchive> existingArchives)
     {
       if (File.Exists(indexPath))
       {
@@ -200,9 +196,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
           try
           {
             var data = File.ReadAllText(indexPath);
-            //var newData = Helper.FileEncryptionManager.Encrypt(data);            
             content = Utilities.Encrypter.FileEncryptionManager.Decrypt(data);
-            // = await reader.ReadToEndAsync();
           }
           catch (Exception ex)
           {
@@ -211,19 +205,19 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
           }
           try
           {
-            existingArchives = JsonConvert.DeserializeObject<List<Models.ApkArchive>>(content)
-                ?? new List<Models.ApkArchive>();
+            existingArchives = JsonConvert.DeserializeObject<List<ApkArchive>>(content)
+                ?? new List<ApkArchive>();
           }
           catch (JsonException)
           {
-            existingArchives = new List<Models.ApkArchive>();
+            existingArchives = new List<ApkArchive>();
             if (content == "{}" || content == string.Empty)
             {
               return existingArchives;
             }
             else
             {
-              var existingArchive = JsonConvert.DeserializeObject<Models.ApkArchive>(content);
+              var existingArchive = JsonConvert.DeserializeObject<ApkArchive>(content);
               if (existingArchive != null)
               {
                 existingArchives.Add(existingArchive);
@@ -235,10 +229,10 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
       return existingArchives;
     }
 
-    public async Task<bool> RewriteApkwIndex(Models.ApkArchive newApkw)
+    public async Task<bool> RewriteApkwIndex(ApkArchive newApkw)
     {
       var indexPath = Path.Combine(ArchiveSettings.ArchivePath, ArchiveSettings.IndexName);
-      List<Models.ApkArchive> existingArchives = new List<Models.ApkArchive>();
+      List<ApkArchive> existingArchives = new List<ApkArchive>();
 
       existingArchives = await GetApkArrayAsync(indexPath, existingArchives);
 
@@ -376,7 +370,6 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
       using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Update))
       {
         var indexEntry = archive.GetEntry(ArchiveSettings.IndexName);
-        JArray jsonArray;
 
         if (indexEntry == null)
         {
@@ -428,7 +421,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.Index
             {
               Application.Current.Dispatcher.Invoke(() =>
               {
-                MessageBox.Show($"Ошибка при загрузке файлов: {ex.Message}");
+                MessageBoxCustom.Show($"Ошибка при загрузке файлов: {ex.Message}", image: MessageBoxImage.Error);
               });
               return false;
             }

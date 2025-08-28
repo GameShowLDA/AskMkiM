@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Execution;
 using AppConfiguration.MeasurementError;
+using AppConfiguration.Parameter;
 using AppConfiguration.Protocol;
 
 namespace AppConfiguration.Base
@@ -37,6 +38,16 @@ namespace AppConfiguration.Base
       await ProtocolConfig.SetPrintProtocol(executionModel.AutoPrintProtocol);
       await ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
       await ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
+    }
+
+
+    /// <summary>
+    /// Устанавливает текущую модель протокола (ProtocolModel).
+    /// </summary>
+    /// <param name="executionModel">Модель протокола.</param>
+    static public async Task SerParametrModelAsync(ParameterModel executionModel)
+    {
+      await ParameterConfig.SetLanguage(executionModel.Language);
     }
   }
 }

@@ -1,4 +1,6 @@
-﻿namespace NewCore.Base.Device
+﻿using Utilities.Interface;
+
+namespace NewCore.Base.Device
 {
   /// <summary>
   /// Определяет интерфейс для компонентов, требующих инициализации,
@@ -10,24 +12,24 @@
     /// Выполняет инициализацию компонента, подготавливая его к подключению.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию. Возвращает <c>true</c>, если инициализация прошла успешно; иначе — <c>false</c>.</returns>
-    Task<(bool Connect, string Answer)> InitializeAsync();
+    Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService userMessageService = null);
 
     /// <summary>
     /// Выполняет подключение к компоненту.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию. Возвращает <c>true</c>, если подключение прошло успешно; иначе — <c>false</c>.</returns>
-    Task<(bool Connect, string Answer)> ConnectAsync();
+    Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService userMessageService = null);
 
     /// <summary>
     /// Выполняет отключение от компонента.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию. Возвращает <c>true</c>, если отключение прошло успешно; иначе — <c>false</c>.</returns>
-    Task<bool> DisconnectAsync();
+    Task<bool> DisconnectAsync(IUserMessageService userMessageService = null);
 
     /// <summary>
     /// Выполняет сброс устройства.
     /// </summary>
     /// <returns></returns>
-    Task<bool> ResetAsync();
+    Task<bool> ResetAsync(IUserMessageService userMessageService = null);
   }
 }

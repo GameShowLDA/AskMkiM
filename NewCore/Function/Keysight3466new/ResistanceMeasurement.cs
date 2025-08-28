@@ -22,11 +22,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetResistanceModeAsync()
+    public async Task<bool> SetResistanceModeAsync()
     {
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -35,6 +35,9 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:RES");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+
+      return answer.Contains("RES");
     }
 
     /// <inheritdoc />
@@ -55,8 +58,7 @@ namespace NewCore.Function.Keysight3466new
       // Убираем возможные пробелы и символы `+` перед числом
       response = response.Trim().Replace("+", "");
 
-      if (double.TryParse(response, System.Globalization.NumberStyles.Float,
-                          System.Globalization.CultureInfo.InvariantCulture, out double resistance))
+      if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double resistance))
       {
         return resistance;
       }

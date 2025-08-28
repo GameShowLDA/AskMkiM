@@ -4,6 +4,7 @@ using NewCore.Base.Function.ManagerChassis;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Device;
+using Utilities.Interface;
 using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ManagerChassis
@@ -25,7 +26,7 @@ namespace NewCore.Function.ManagerChassis
     public StateManager(Device.ManagerChassis managerChassis) => _chassisModel = managerChassis;
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -38,7 +39,7 @@ namespace NewCore.Function.ManagerChassis
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -51,13 +52,13 @@ namespace NewCore.Function.ManagerChassis
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       return await InitializeAsync();
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
       return await ResetAsync();
     }

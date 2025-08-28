@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -61,10 +62,20 @@ namespace MainWindowProgram.Events
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
 
       AdminCommand.AdminModeChanged += AdminModeChanged;
+      AdminCommand.PauseInStopChanged += AdminCommand_PauseInStopChanged;
+      AdminCommand.PowerChanged += AdminCommand_PowerChanged;
       _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
+    }
 
-      // _hotkey = new HotkeyListenerService(_mainWindow, () => _consoleManager.ToggleConsole());
+    private async void AdminCommand_PowerChanged(object? sender, bool e)
+    {
+      await SystemStateManager.SetIsActivePower(e);
+    }
+
+    private async void AdminCommand_PauseInStopChanged(object? sender, bool e)
+    {
+      await ExecutionConfig.SetStopOnError(e);
     }
 
     /// <summary>

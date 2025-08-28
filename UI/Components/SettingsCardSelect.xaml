@@ -1,0 +1,203 @@
+﻿<UserControl x:Class="UI.Components.SettingsCardSelect"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="84" d:DesignWidth="320" MaxWidth="300">
+
+    <UserControl.Resources>
+        <!-- те же локальные кисти, что и в SettingsCard -->
+        <SolidColorBrush x:Key="CardBorder" Color="#415163"/>
+        <SolidColorBrush x:Key="TitleBrush" Color="#E7EDF4"/>
+        <SolidColorBrush x:Key="DescBrush" Color="#A9B5C3"/>
+
+        <!-- hover/active для бордеров как у чекбокса -->
+        <SolidColorBrush x:Key="HoverBorder" Color="#50657B"/>
+        <SolidColorBrush x:Key="TileBg"     Color="#2B333D"/>
+        <!-- фон плитки выпадающего списка -->
+        <SolidColorBrush x:Key="ItemHover"  Color="#2F3B49"/>
+        <SolidColorBrush x:Key="ItemSelected" Color="#344352"/>
+
+        <!-- Стиль комбобокса в духе SettingsCheckBox -->
+        <Style x:Key="SettingsComboBox" TargetType="ComboBox">
+            <!-- поле крупнее -->
+            <Setter Property="MinWidth" Value="200"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
+            <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,0,44,0"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <!-- плитка -->
+                            <Border x:Name="Bd"
+                  CornerRadius="12"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"/>
+
+                            <!-- текст выбранного -->
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                            VerticalAlignment="Center"
+                            Content="{Binding SelectedItem, RelativeSource={RelativeSource TemplatedParent}}"
+                            ContentTemplate="{TemplateBinding ItemTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
+
+                            <!-- кнопка-оверлей справа -->
+                            <ToggleButton x:Name="PART_DropDownButton"
+                                Background="Transparent" BorderThickness="0" Focusable="False"
+                                IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                HorizontalAlignment="Right" VerticalAlignment="Stretch"
+                                Width="44" Cursor="Hand">
+                                <!-- стрелка: по умолчанию ВНИЗ -->
+                                <Path x:Name="Arrow"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Data="M 2 8 L 9 14 L 16 8"    
+                                        Stroke="{StaticResource TitleBrush}"
+                                        StrokeThickness="2.2"
+                                        StrokeStartLineCap="Round"
+                                        StrokeEndLineCap="Round"
+                                        RenderTransformOrigin="0.5,0.5">
+                                    <!-- ВАЖНО -->
+                                    <Path.RenderTransform>
+                                        <RotateTransform Angle="0"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </ToggleButton>
+
+                            <!-- выпадающий список на полную ширину -->
+                            <Popup x:Name="PART_Popup"
+                 Placement="Bottom"
+                 IsOpen="{TemplateBinding IsDropDownOpen}"
+                 StaysOpen="False"
+                 AllowsTransparency="True"
+                 PopupAnimation="Fade">
+                                <Border CornerRadius="12"
+                    Background="{StaticResource TileBg}"
+                    BorderBrush="{StaticResource CardBorder}"
+                    BorderThickness="1"
+                    MinWidth="{Binding ActualWidth, ElementName=Bd}">
+                                    <!-- ширина = ширине поля -->
+                                    <ScrollViewer CanContentScroll="True" MaxHeight="340">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource HoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource HoverBorder}"/>
+                            </Trigger>
+                            <!-- открыто: стрелка ВВЕРХ -->
+                            <Trigger SourceName="PART_DropDownButton" Property="IsChecked" Value="True">
+                                <Setter TargetName="Arrow" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="180"/>
+                                    </Setter.Value>
+                                    <!-- ↑ -->
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <!-- пункты выпадашки выше/шире -->
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
+                        <Setter Property="FontSize" Value="15"/>
+                        <Setter Property="MinHeight" Value="40"/>
+                        <Setter Property="Padding" Value="14,10"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="ItemBd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                        <ContentPresenter VerticalAlignment="Center" Margin="6,0"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter TargetName="ItemBd" Property="Background" Value="{StaticResource ItemHover}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBd" Property="Background" Value="{StaticResource ItemSelected}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="ItemBd" Property="Opacity" Value="0.6"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+    </UserControl.Resources>
+
+    <!-- Карточка -->
+    <Border Background="{StaticResource SecondarySolidColorBrush}"
+          BorderBrush="{StaticResource CardBorder}"
+          BorderThickness="1"
+          CornerRadius="14"
+          Padding="10"
+          SnapsToDevicePixels="True">
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок/описание -->
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                 Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 FontSize="15"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource TitleBrush}"
+                 Margin="0,0,0,2"
+                 FontFamily="{DynamicResource WinstonMedium}"
+                 TextWrapping="Wrap"/>
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                 Text="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 FontSize="12"
+                 Foreground="{StaticResource DescBrush}"
+                 TextWrapping="Wrap"/>
+
+            <!-- Select: выглядит как «плитка» как у чекбокса -->
+            <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                Margin="0,6,0,0"
+                Style="{StaticResource SettingsComboBox}"
+                ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                DisplayMemberPath="{Binding DisplayMemberPath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedValuePath="{Binding SelectedValuePath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedValue="{Binding SelectedValue, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectionChanged="ComboBox_SelectionChanged"/>
+        </Grid>
+    </Border>
+</UserControl>

@@ -52,6 +52,9 @@ namespace MainWindowProgram.Services
     /// Открывает WebView2 со справочником к программе.
     /// </summary>
     /// <returns>Задача, представляющая операцию открытия интерфейса протокола.</returns>
+    public async Task OpenSettingsAsync() =>
+      await _multiWindow.AddControlAsync("Параметры", new Mode.Settings.SettingsProgramm.SettingsProgrammControl(), TypeWindow.Settings);
+
     public async Task HelpTextAsync() =>
       HelpProvider.ShowHelp(null);
     

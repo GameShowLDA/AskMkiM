@@ -12,9 +12,14 @@ namespace MainWindowProgram.ViewModels
   public class TranslationViewModel
   {
     /// <summary>
-    /// Команда открытия интерфейса управления ППУ (пробойной установкой).
+    /// Команда запуска сборки программы контроля.
     /// </summary>
-    public ICommand StartTranslationCommand { get; }
+    public ICommand BuildCommand { get; }
+
+    /// <summary>
+    /// Команда запуска исполнителя команды контроля.
+    /// </summary>
+    public ICommand RunCommand { get; }
 
     /// <summary>
     /// Сервис административных функций.
@@ -28,7 +33,8 @@ namespace MainWindowProgram.ViewModels
     public TranslationViewModel(TranslationServices service)
     {
       _service = service;
-      StartTranslationCommand = new AsyncRelayCommand(_service.StartTranslationAsync);
+      BuildCommand = new AsyncRelayCommand(_service.BuildAsync);
+      RunCommand = new AsyncRelayCommand(_service.RunAsync);
     }
   }
 }

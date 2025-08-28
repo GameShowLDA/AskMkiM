@@ -10,6 +10,7 @@ dotnet_diagnostic.SA1119.severity = none
 dotnet_diagnostic.SA1124.severity = none
 dotnet_diagnostic.SA1127.severity = none
 dotnet_diagnostic.SA1128.severity = none
+dotnet_diagnostic.SA1134.severity = none
 
 dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1201.severity = none
@@ -75,6 +76,8 @@ csharp_style_prefer_extended_property_pattern = true:suggestion
 csharp_style_var_for_built_in_types = false:silent
 csharp_style_var_when_type_is_apparent = false:silent
 csharp_style_var_elsewhere = false:silent
+csharp_style_prefer_implicitly_typed_lambda_expression = true:suggestion
+csharp_style_prefer_unbound_generic_type_in_nameof = true:suggestion
 
 [*.{cs,vb}]
 #### Стили именования ####

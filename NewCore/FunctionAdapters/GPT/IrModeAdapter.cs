@@ -132,18 +132,26 @@ namespace NewCore.FunctionAdapters.GPT
     #endregion
 
     #region Измерение и конфигурация
+    public async Task StopMeasure()
+    {
+      await _irMode.StopMeasure();
+    }
 
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = 60000)
     {
+      if (rangeTo == -1)
+      {
+        rangeTo = 60000;
+      }
       try
       {
         double result = await _irMode.MeasureResistanceAsync(param, rangeFrom, rangeTo);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Измерение сопротивления IR", $"{result} МОм", result >= rangeFrom && result <= rangeTo, 2);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Измерение сопротивления изоляции", $"{result} МОм", result >= rangeFrom && result <= rangeTo, 2);
         return result;
       }
       catch (Exception ex)
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка измерения сопротивления IR", ex.Message, false, 2);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка измерения сопротивления изоляции", ex.Message, false, 2);
         return -1;
       }
     }
@@ -156,6 +164,7 @@ namespace NewCore.FunctionAdapters.GPT
     }
 
     public List<int> GetVoltagesForResistance(double resistance) => _irMode.GetVoltagesForResistance(resistance);
+
 
     #endregion
   }

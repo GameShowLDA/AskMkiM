@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" FontWeight="Bold" Background="{StaticResource PrimarySolidColorBrush}" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}">
+             d:DesignHeight="1000" d:DesignWidth="800" FontWeight="Bold" Background="{StaticResource PrimarySolidColorBrush}" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}">
     <Grid>
         <!-- Определение строк -->
         <Grid.RowDefinitions>

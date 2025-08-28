@@ -6,6 +6,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleVoltageCurrentSource;
+using Utilities.Interface;
 
 namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
 {
@@ -24,7 +25,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       var (success, message) = await _stateManager.ConnectAsync();
 
@@ -37,7 +38,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
       bool success = await _stateManager.DisconnectAsync();
 
@@ -50,7 +51,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       var (success, message) = await _stateManager.InitializeAsync();
 
@@ -63,7 +64,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       bool success = await _stateManager.ResetAsync();
 

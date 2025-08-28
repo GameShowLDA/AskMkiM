@@ -1,8 +1,12 @@
 ﻿using System.Windows.Controls;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
 using AppConfiguration.Execution;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor.PI
@@ -59,12 +63,12 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         }
 
         await testMeasurement.SetupCommutation(ProtocolUI, first, second, dataModel.ActiveBus);
-        await testMeasurement.ConfigureMeter(dataModel);
+        await testMeasurement.ConfigureMeter(ProtocolUI, dataModel);
         await testMeasurement.RunParallelModuleTasksAsync(ProtocolUI, dataModel);
       }
       finally
       {
-        await testMeasurement.FinalizeAsync();
+        await testMeasurement.FinalizeAsync(ProtocolUI);
       }
     }
 
@@ -73,16 +77,30 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
       public PiACWMethodExecutorMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null)
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.ConnectAsync();
-        await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage);
-        await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
-        await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
-        await breakDown.AcwManger.SetHighCurrentLimitAsync(dataModel.Param);
-        await breakDown.AcwManger.SetFrequencyAsync(50);
+        var name = breakDown.Name;
+        var chassis = breakDown.NumberChassis;
+        var number = breakDown.Number;
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
+          throw AcwExceptionFactory.SetVoltageFailed(name, chassis, number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
+          throw AcwExceptionFactory.SetTestTimeFailed(name, chassis, number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime)).Success, messageService))
+          throw AcwExceptionFactory.SetRampTimeFailed(name, chassis, number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetHighCurrentLimitAsync(dataModel.Param)).Success, messageService))
+          throw AcwExceptionFactory.SetHighLimitFailed(name, chassis, number);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetFrequencyAsync(50)).Success, messageService))
+          throw AcwExceptionFactory.SetFrequencyFailed(name, chassis, number);
       }
 
       /// <inheritdoc />
@@ -91,27 +109,27 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
-
-        var answer = await breakDown.AcwManger.MeasureCurrentAsync();
-        var pause = false;
-        var type = ShowMessageModel.MessageType.Success;
-        if (answer > dataModel.Param)
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          type = ShowMessageModel.MessageType.Error;
-          if (await ExecutionConfig.GetIsStopOnErrorEnabled())
+          protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
+          var answer = await breakDown.AcwManger.MeasureCurrentAsync();
+          var type = ShowMessageModel.MessageType.Success;
+          if (answer > dataModel.Param)
           {
-            pause = true;
+            type = ShowMessageModel.MessageType.Error;
           }
-        }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА", type: type));
+          // await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА", type: type));
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+
+        }, protocolUI);
       }
 
-      public override async Task FinalizeAsync()
+      public override async Task FinalizeAsync(IUserMessageService messageService)
       {
-        await base.FinalizeAsync();
+        await base.FinalizeAsync(messageService);
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

@@ -9,7 +9,7 @@
     /// Асинхронно устанавливает режим измерения сопротивления.
     /// </summary>
     /// <returns>Задача, завершающаяся после установки режима.</returns>
-    Task SetResistanceModeAsync();
+    Task<bool> SetResistanceModeAsync();
 
     /// <summary>
     /// Асинхронно выполняет измерение сопротивления.

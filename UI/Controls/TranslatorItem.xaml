@@ -11,9 +11,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-
-
-
         <!-- Вертикальный режим -->
         <Grid x:Name="VerticalPanel" Grid.Column="1" Visibility="Visible" Grid.Row="2" Cursor="">
             <Grid.RowDefinitions>
@@ -23,7 +20,7 @@
                 <!-- Редакторы (split) -->
                 <RowDefinition Height="5"/>
                 <!-- Сплиттер -->
-                <RowDefinition Height="0.3*" MinHeight="50"/>
+                <RowDefinition Height="Auto" MinHeight="50"/>
                 <!-- Окно ошибок -->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -37,15 +34,15 @@
                     BorderThickness="0,0,0,1"
                     Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
                 <TextBlock 
-         x:Name="FirstVerticalFileName"
-         Text="Сравнение файлов"
-         Margin="10,5"
-         FontWeight="SemiBold"
-         FontSize="14"
-         Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
-         VerticalAlignment="Center"
-         HorizontalAlignment="Stretch" 
-         TextWrapping="Wrap"/>
+                    x:Name="FirstFileName"
+                    Text="Сравнение файлов"
+                    Margin="10,5"
+                    FontWeight="SemiBold"
+                    FontSize="14"
+                    Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" 
+                    TextWrapping="Wrap"/>
             </Border>
 
             <Grid Grid.Column="0" Grid.Row="1"  x:Name="LeftBox" >
@@ -61,7 +58,7 @@
                  Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
 
                 <TextBlock 
-                     x:Name="SecondVerticalFileName"
+                     x:Name="SecondFileName"
                      Text="Сравнение файлов"
                      Margin="10,5"
                      FontWeight="SemiBold"
@@ -77,33 +74,17 @@
                 <Controls:TextEditorUI />
             </Grid>
 
-            <GridSplitter Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+            <GridSplitter  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                Height="5"
                Background="{StaticResource RedColorSolidColorBrush}"
                HorizontalAlignment="Stretch"
                VerticalAlignment="Stretch"
                ResizeDirection="Rows"/>
-            <!-- Окно ошибок снизу, на всю ширину -->
+
             <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-
-                <Border Grid.Row="0"
-                     BorderThickness="0,0,0,1"
-                     Background="{StaticResource IsCheckedColorSolidColorBrush}">
-                    <TextBlock 
-             x:Name="ErrorListVertical"
-             Text="Список ошибок"
-             Margin="10,5"
-             FontWeight="SemiBold"
-             FontSize="14"
-             Foreground="{StaticResource ForegroundSolidColorBrush}"
-             VerticalAlignment="Center"
-             HorizontalAlignment="Stretch" 
-             TextWrapping="Wrap"/>
-                </Border>
 
                 <ErrorList:ErrorListControl Grid.Row="1" x:Name="ErrorListBoxVertical"/>
             </Grid>

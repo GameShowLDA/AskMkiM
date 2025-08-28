@@ -62,7 +62,7 @@ namespace Mode.SelfControl.NewModule.DeviceBusCommutation
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Запуск проверки оборудования", SuccessMessage.TitleColor));
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
 
-      await deviceBusCommutation.ConnectableManager.ResetAsync();
+      await deviceBusCommutation.ConnectableManager.ResetAsync(ProtocolSelfCheckControl);
       errorRelays = new List<int>();
 
       // TODO : Реализовать самоконтроль

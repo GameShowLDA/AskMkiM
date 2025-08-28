@@ -1,12 +1,13 @@
 ﻿using System.IO.Ports;
 using System.Net;
 using System.Windows;
-using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
+using Message;
 using Mode.Settings.DeviceConfig.Base.BaseSettingsConfig;
 using NewCore.Base;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
+
 
 namespace Mode.Settings.DeviceConfig.Base
 {
@@ -118,7 +119,7 @@ namespace Mode.Settings.DeviceConfig.Base
         return GetSerialPort(defaultSettingControl).ToString();
       }
 
-      MessageBox.Show("Устройство не принадлежит к известным типам (DeviceWithIP или DeviceWithCOM).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+      MessageBoxCustom.Show("Устройство не принадлежит к известным типам (DeviceWithIP или DeviceWithCOM).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       return null;
     }
 

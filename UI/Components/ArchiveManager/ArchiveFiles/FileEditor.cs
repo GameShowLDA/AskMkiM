@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using Message;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+using System.IO;
 using System.IO.Compression;
 using System.Windows;
 using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
-using YamlDotNet.Serialization;
-using static Utilities.LoggerUtility;
-using Microsoft.Win32;
-using System.IO;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
+using YamlDotNet.Serialization;
+using static Utilities.LoggerUtility;
 
 
 namespace UI.Components.ArchiveManager.ArchiveFiles
@@ -90,7 +91,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
         }
         else
         {
-          MessageBox.Show("Файл с таким именем уже существует в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          MessageBoxCustom.Show("Файл с таким именем уже существует в архиве!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
           LogInformation("Файл с таким именем уже существует в архиве");
           return false;
         }
@@ -192,18 +193,21 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
     {
       if (string.IsNullOrEmpty(archivePath) || string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(newOpkFilePath))
       {
+        LogError("Один из параметров пуст.");
         return false;
         throw new ArgumentException("Один из параметров пуст");
       }
 
       if (!File.Exists(archivePath))
       {
+        LogError($"Архив {archivePath} не найден");
         return false;
         throw new FileNotFoundException("Архив не найден", archivePath);
       }
 
       if (!File.Exists(newOpkFilePath))
       {
+        LogError($"Новый файл {newOpkFilePath} не найден");
         return false;
         throw new FileNotFoundException("Новый файл не найден", newOpkFilePath);
       }
@@ -355,7 +359,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles
           string filePath = saveFileDialog.FileName;
           File.WriteAllText(filePath, content);
           LogInformation($"Файл {foundOpkPath} считан и записан.");
-          MessageBox.Show($"Файл {fileName}.pk успешно сохранен!", "Файл сохранен", MessageBoxButton.OK, MessageBoxImage.Information);
+          MessageBoxCustom.Show($"Файл {fileName}.pk успешно сохранен!", "Файл сохранен", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {

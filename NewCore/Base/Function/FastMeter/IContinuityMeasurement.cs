@@ -8,11 +8,16 @@
     /// <summary>
     /// Устанавливает режим прозвонки.
     /// </summary>
-    Task SetContinuityModeAsync();
+    Task<bool> SetContinuityModeAsync();
 
     /// <summary>
     /// Проверяет наличие проводимости.
     /// </summary>
-    Task<bool> CheckContinuityAsync();
+    Task<bool> CheckContinuityAsync(bool expectedOutcome);
+
+    /// <summary>
+    /// Проверяет наличие проводимости.
+    /// </summary>
+    Task<double> CheckContinuityAsync(double expectedOutcome);
   }
 }

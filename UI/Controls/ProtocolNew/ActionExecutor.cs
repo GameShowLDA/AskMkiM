@@ -1,6 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using Message;
 using NewCore.Communication;
+using Utilities.Interface;
 using Utilities.Models;
 using WindowsInput;
 using static AppConfiguration.Base.EventAggregator;
@@ -93,14 +95,14 @@ namespace UI.Controls.ProtocolNew
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!await GetIsIdleModeEnabled() && !await GetIsActivePower() && checkPower)
       {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error));
-          await FinalizeAsync();
-          return;
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
+        await FinalizeAsync();
+        return;
       }
 
       if (preActionDelegate != null)
       {
-        preActionDelegate(ProtocolSelfCheck.GetCancellationToken());
+        await preActionDelegate(ProtocolSelfCheck.GetCancellationToken());
       }
 
       if (startDelegate == null)
@@ -136,15 +138,14 @@ namespace UI.Controls.ProtocolNew
       await ExecuteTaskAsync(startDelegate, stop, name, isRepeatEnabled);
     }
 
-
     /// <summary>
     /// Завершение текущей выполняемой задачи.
     /// </summary>
     /// <param name="stopDelegate">Делегат для завершения задачи.</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
-    internal async Task StopAsync(StopDelegate stopDelegate)
+    internal async Task StopAsync(StopDelegate stopDelegate, TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs)
     {
-
+      _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Abort);
       await FinalizeAsync(stopDelegate);
     }
 
@@ -157,25 +158,20 @@ namespace UI.Controls.ProtocolNew
     internal async Task FinalizeAsync(StopDelegate stopDelegate = null, string name = null)
     {
       if (isExit)
+      {
         return;
+      }
 
       isExit = true;
-
-
       LogInformation($"Завершение \"{name}\"");
 
       SerialPortHelper.CloseAllRegisteredSerialPorts();
-
       await CancelProcessTaskAsync(stopDelegate, name);
-
       ResetState();
-
       await ResetSystemAsync();
 
       await HandleProtocolActionsAsync();
-
       ProtocolSelfCheck.ShowOnlyStartButton();
-
       await DisplayCompletionMessage();
 
       StartProcessing?.Invoke(false);
@@ -184,7 +180,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Ставит выполнение метода на паузу.
     /// </summary>
-    internal async Task PauseAsync(CancellationToken cancellationToken)
+    internal async Task PauseAsync(CancellationToken cancellationToken, IUserMessageService userMessageService)
     {
       if (!IsPaused)
       {
@@ -201,7 +197,7 @@ namespace UI.Controls.ProtocolNew
     /// Возобновляет выполнение метода после паузы.
     /// </summary>
     /// <param name="stepMode">Флаг, указывающий, нужно ли возобновить в пошаговом режиме.</param>
-    internal void Resume(bool stepMode)
+    internal void Resume(bool stepMode, IUserMessageService userMessageService, TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs)
     {
       LogInformation("Срабатывание возобновления при самоконтроле");
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
@@ -210,6 +206,7 @@ namespace UI.Controls.ProtocolNew
       }
 
       IsPaused = false;
+      _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Continue);
     }
 
     /// <summary>
@@ -262,7 +259,7 @@ namespace UI.Controls.ProtocolNew
     /// <param name="returnDelegate">Делегат измерения.</param>
     /// <param name="stop">Делегат остановки.</param>
     /// <returns>Задача, представляющая измерение.</returns>
-    internal async Task ReturnMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
+    private async Task ReturnMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
     {
       try
       {
@@ -280,15 +277,25 @@ namespace UI.Controls.ProtocolNew
       catch (ObjectDisposedException ex)
       {
         LogException("Token уже утилизирован", ex);
-        MessageBox.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
       catch (Exception ex)
       {
         LogException("Системная ошибка", ex);
-        MessageBox.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
         await FinalizeAsync(stop);
       }
+    }
+
+    /// <summary>
+    /// Выполняет повтор действия, зарегистрированного в <see cref="IUserMessageService"/>, при нажатии на кнопку "Повторить".
+    /// Если повторное действие не задано, ничего не происходит.
+    /// </summary>
+    /// <returns>Задача, представляющая выполнение действия повтора.</returns>
+    internal async Task ReturnMeasureEvent(IUserMessageService _userMessageService, TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs)
+    {
+      _userActionTcs?.TrySetResult(IUserMessageService.UserAction.Retry);
     }
 
     #endregion
@@ -590,6 +597,10 @@ namespace UI.Controls.ProtocolNew
 
       await SetIsLocked(false);
     }
+    #endregion
+
+    #region Повтор действий.
+
     #endregion
 
     #region Настройки подключения к классу.

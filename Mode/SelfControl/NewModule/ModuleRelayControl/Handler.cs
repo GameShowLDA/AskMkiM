@@ -2,6 +2,7 @@
 using Mode.SelfControl.Module.ModuleRelayControl;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.DelegateManager;
@@ -68,7 +69,9 @@ namespace Mode.SelfControl.NewModule.ModuleRelayControl
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\r\nСамоконтроль МКР"));
 
-      await moduleRelayControl.MeterManager.ConnectMeterAsync();
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => moduleRelayControl.MeterManager.ConnectMeterAsync(), ProtocolSelfCheckControl))
+        throw AppConfiguration.Error.Device.ModuleRelayControl.MeterExceptionFactory.ConnectFailed(moduleRelayControl.Name, moduleRelayControl.NumberChassis, moduleRelayControl.Number);
+
       await PerformClosureCycle(token);
 
       ProtocolSelfCheckControl.PauseButtonVisibility = Visibility.Collapsed;

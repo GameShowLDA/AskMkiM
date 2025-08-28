@@ -121,6 +121,8 @@ namespace NewCore.Base.Function.Breakdown
     /// <returns>Объект с текущими настройками IR.</returns>
     Task<IrConfiguration> ReadConfigurationAsync();
 
+    Task StopMeasure();
+
     #endregion
   }
 }

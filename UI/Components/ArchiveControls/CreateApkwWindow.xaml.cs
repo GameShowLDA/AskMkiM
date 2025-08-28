@@ -1,12 +1,13 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using Message;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
 using UI.Components.ArchiveManager;
-using AppConfiguration.Base;
+using UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive;
+
 
 namespace UI.Components.ArchiveControls
 {
@@ -18,11 +19,7 @@ namespace UI.Components.ArchiveControls
     /// <summary>
     /// Указывает, активно ли главное окно или основной диалог.
     /// </summary>
-    public static bool IsMainActive
-    {
-      get;
-      set;
-    }
+    public static bool IsMainActive { get; set; }
 
     /// <summary>
     /// Определяет, разрешено ли закрытие окна или диалога.
@@ -214,12 +211,12 @@ namespace UI.Components.ArchiveControls
         }
         else
         {
-          MessageBox.Show("Возникла ошибка при создании архива. Повторите попытку позднее.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+          MessageBoxCustom.Show("Возникла ошибка при создании архива. Повторите попытку позднее.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при создании архива: {ex.Message}");
+        MessageBoxCustom.Show($"Ошибка при создании архива: {ex.Message}", image: MessageBoxImage.Error);
       }
     }
 
@@ -227,14 +224,14 @@ namespace UI.Components.ArchiveControls
     {
       if (string.IsNullOrWhiteSpace(newArchiveName.Text) || newArchiveName.Text.ToString() == newArchiveName.Tag.ToString())
       {
-        MessageBox.Show("Пожалуйста, введите название архива");
+        MessageBoxCustom.Show("Пожалуйста, введите название архива", image: MessageBoxImage.Warning);
         newArchiveName.Focus();
         return false;
       }
 
       if (newArchiveName.Text.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0)
       {
-        MessageBox.Show("Название содержит недопустимые символы");
+        MessageBoxCustom.Show("Название содержит недопустимые символы", image: MessageBoxImage.Error);
         return false;
       }
 
