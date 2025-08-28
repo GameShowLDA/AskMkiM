@@ -183,6 +183,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("SI007")]
     Si_ChainError,
 
+    /// <summary> Ошибка при замкнутной паре. </summary>
+    [ErrorCodeTag("SI008")]
+    Si_PairError,
+
     /// <summary> Не удалось корректно разобрать выражение в команде ПИ. </summary>
     [ErrorCodeTag("PI001")]
     Pi_CannotParseExpression,
@@ -246,6 +250,19 @@ namespace Utilities.Errors
     /// <summary> В команде ИЕ пустое тело метода. </summary>
     [ErrorCodeTag("IE004")]
     Ie_EmptyCommandBody,
+
+
+    /// <summary> Ошибка при проверке точки про методе полного узла в команде ПР. </summary>
+    [ErrorCodeTag("SI006")]
+    Pr_NodeExecutePointError,
+
+    /// <summary> Ошибка при замкнутной цепи в команде ПР. </summary>
+    [ErrorCodeTag("PR007")]
+    Pr_ChainError,
+
+    /// <summary> В команде ПР замкнутые точки. </summary>
+    [ErrorCodeTag("PR008")]
+    Pr_PairError,
 
   }
 

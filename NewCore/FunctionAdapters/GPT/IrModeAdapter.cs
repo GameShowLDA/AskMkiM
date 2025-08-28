@@ -132,6 +132,10 @@ namespace NewCore.FunctionAdapters.GPT
     #endregion
 
     #region Измерение и конфигурация
+    public async Task StopMeasure()
+    {
+      await _irMode.StopMeasure();
+    }
 
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = 60000)
     {
@@ -160,6 +164,7 @@ namespace NewCore.FunctionAdapters.GPT
     }
 
     public List<int> GetVoltagesForResistance(double resistance) => _irMode.GetVoltagesForResistance(resistance);
+
 
     #endregion
   }

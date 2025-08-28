@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Parser.Common;
 
@@ -8,10 +9,11 @@ namespace ControlCommandAnalyser.Model
   /// <summary>
   /// Модель для команды СИ (сопротивление изоляции).
   /// </summary>
-  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,
+  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, /*ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,*/
     ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
   public class SiCommandModel : BaseCommandModel, IHasPoints
   {
+
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").
     /// </summary>
@@ -36,5 +38,7 @@ namespace ControlCommandAnalyser.Model
     /// Остаток строки с нераспознанными параметрами.
     /// </summary>
     public string? UnparsedParameters { get; set; }
+
+    public override IPointError PointErrors => new SiErrors();
   }
 }

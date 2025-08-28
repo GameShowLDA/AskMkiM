@@ -239,10 +239,19 @@ namespace NewCore.Function.GPT
 
     #region Measure & Config
 
+
+    public async Task StopMeasure()
+    {
+      string response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF");
+      await _gptModel.DeviceProtocol.QueryAsync(response);
+    }
+
+
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1)
     {
       if (await GetIsIdleModeEnabled()) return param;
 
+      await StopMeasure();
       await Task.Delay(delayBeforeCall);
 
       int totalTicks = (int)((timeDelay * 1000) / 200) - 1;
@@ -253,14 +262,29 @@ namespace NewCore.Function.GPT
       string response = string.Empty;
       var testCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
 
+      var model = new MeasurementData();
+
       timer.Elapsed += async (s, a) =>
        {
          tickCount++;
+
+         await Task.Delay(100);
          response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
-         if (response.ToLower().Contains("fail"))
+
+         model = ParseMeasurement(response);
+         if (model.Status.ToLower().Contains("fail"))
          {
            await _gptModel.DeviceProtocol.QueryAsync(testCommand);
          }
+         else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > param)
+         {
+           await _gptModel.IrManger.StopMeasure();
+           tickCount = totalTicks + 1;
+           timer.Stop();
+           return;
+         }
+
+         model = null;
        };
 
       await _gptModel.DeviceProtocol.QueryAsync(testCommand);
@@ -298,7 +322,7 @@ namespace NewCore.Function.GPT
       raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
       double value = -1;
 
-      while (!double.TryParse(raw, out  value))
+      while (!double.TryParse(raw, out value))
       {
         response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
         parts = response.Split(',');
@@ -342,6 +366,65 @@ namespace NewCore.Function.GPT
     {
       string cleaned = input.Replace(suffix, "").Trim().Replace(".", ",");
       return double.TryParse(cleaned, out var result) ? result : 0.0;
+    }
+
+    private static MeasurementData ParseMeasurement(string input)
+    {
+      // Разделяем строку по запятым
+      var parts = input.Split(',');
+
+      if (parts.Length != 5)
+      {
+        throw new ArgumentException("Неверный формат входящей строки");
+      }
+
+      try
+      {
+        string raw = parts.ElementAtOrDefault(3)?.ToLower() ?? throw new FormatException("Нет результата измерения.");
+        double multiplier = raw.EndsWith("gohm") ? 1000 : raw.EndsWith("mohm") ? 1 : raw.EndsWith("kohm") ? 0.001 : throw new FormatException("Неизвестный формат.");
+        raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
+        double value = -1;
+
+        return new MeasurementData()
+        {
+          Mode = parts[0].Trim(),
+          Status = parts[1].Trim(),
+          Resistance = double.TryParse(raw, out value) ? value * multiplier : -1
+        };
+      }
+      catch
+      {
+        throw new FormatException("Ошибка преобразования значения сопротивления.");
+      }
+    }
+
+
+    private class MeasurementData
+    {
+      /// <summary>
+      /// Режим измерения.
+      /// </summary>
+      public string Mode { get; set; }
+
+      /// <summary>
+      /// Статус теста.
+      /// </summary>
+      public string Status { get; set; }
+
+      /// <summary>
+      ///  Напряжение (переводится из строкового формата).
+      /// </summary>
+      public double Voltage { get; set; }
+
+      /// <summary>
+      /// Сопротивление (также преобразуется из строки).
+      /// </summary>
+      public double Resistance { get; set; }
+
+      /// <summary>
+      ///  Время, прошедшее с начала теста (преобразуемое значение времени).
+      /// </summary>
+      public TimeSpan ElapsedTime { get; set; }
     }
 
     #endregion

@@ -73,6 +73,9 @@ namespace NewCore.Function.Keysight3466new
       }
 
       string response = await _device.DeviceProtocol.QueryAsync("MEAS:CONT?", timeout: 1000);
+      if (response.Contains("+9.90000000E+37"))
+        return 1001;
+
       string count = (response.Split("+")).Last();
       int intCount = int.Parse(count);
 

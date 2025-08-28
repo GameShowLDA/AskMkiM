@@ -7,7 +7,7 @@ namespace AppConfiguration.Error.Translation
   /// <summary>
   /// Содержит шаблоны ошибок, возникающих при парсинге выражений СИ-команд.
   /// </summary>
-  public static class SiErrors
+  public class SiErrors : IPointError
   {
     /// <summary>
     /// Ошибка: выражение не распознано.
@@ -69,15 +69,8 @@ namespace AppConfiguration.Error.Translation
       Description = $"Ошибка при проверке разряда {step} ({countStep}) при групповом методе."
     };
 
-    /// <summary>
-    /// Ошибка: Ошибка при проверке одно из разряда в групповом методе.
-    /// </summary>
-    /// <param name="command">Номер команды и мнемоника.</param>
-    /// <param name="step">Номер разряда.</param>
-    /// <param name="countStep">Кол-во разрядов.</param>
-    /// <param name="resultMeasure">Результат измерения.</param>
-    /// <returns></returns>
-    public static ErrorItem NodeExecutePointError(string command, string point,  string resultMeasure) => new()
+    /// <inheritdoc />
+    public ErrorItem NodeExecutePointError(string command, string point, string resultMeasure) => new()
     {
       MeasureResult = resultMeasure,
       Command = command,
@@ -85,19 +78,21 @@ namespace AppConfiguration.Error.Translation
       Description = $"Ошибка при проверке точки {point}  при методе полного узла."
     };
 
-    /// <summary>
-    /// Ошибка: Ошибка замкнутой цепи.
-    /// </summary>
-    /// <param name="command">Номер команды и мнемоника.</param>
-    /// <param name="step">Номер разряда.</param>
-    /// <param name="countStep">Кол-во разрядов.</param>
-    /// <param name="resultMeasure">Результат измерения.</param>
-    /// <returns></returns>
-    public static ErrorItem ChainError(string command, string chain) => new()
+    /// <inheritdoc />
+    public ErrorItem ChainError(string command, string chain) => new()
     {
       Command = command,
       Code = ErrorCode.Si_ChainError,
       Description = $"Замкнутая цепь {chain}"
+    };
+
+
+    /// <inheritdoc />
+    public ErrorItem PairError(string command, string pointFirst, string pointLast) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Si_PairError,
+      Description = $"Замкнутая пара точек: {pointFirst}, {pointLast}"
     };
   }
 }
