@@ -15,6 +15,10 @@ namespace Utilities.Errors
   /// </summary>
   public enum ErrorCode
   {
+    #region Транслятор
+
+    #region Общие ошибки
+
     /// <summary> Первая команда в управляющей программе должна быть ОК. </summary>
     [ErrorCodeTag("GEN001")]
     Gen_FirstMustBeOk,
@@ -71,6 +75,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("GEN014")]
     Gen_InvalidOnePointUse,
 
+    #endregion
+
+    #region Режим УМ
+
     /// <summary> В команде УП отсутствует или некорректно указана метка перехода. </summary>
     [ErrorCodeTag("UP001")]
     Up_MissingOrInvalidUpLabel,
@@ -78,6 +86,10 @@ namespace Utilities.Errors
     /// <summary> Метка перехода, указанная в команде УП, не найдена среди доступных команд. </summary>
     [ErrorCodeTag("UP002")]
     Up_UpLabelNotFound,
+
+    #endregion
+
+    #region Режим ОК
 
     /// <summary> Не удалось корректно разобрать первую строку команды ОК. </summary>
     [ErrorCodeTag("OK001")]
@@ -119,6 +131,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("OK010")]
     Ok_ObjectNameTooLong,
 
+    #endregion
+
+    #region Режим РМ
+
     /// <summary> Не удалось корректно разобрать выражение в команде РМ. </summary>
     [ErrorCodeTag("RM001")]
     Rm_CannotParseExpression,
@@ -155,6 +171,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("RM009")]
     Rm_UnacceptableSymbol,
 
+    #endregion
+
+    #region Режим СИ
+
     /// <summary> Не удалось корректно разобрать выражение в команде СИ. </summary>
     [ErrorCodeTag("SI001")]
     Si_CannotParseExpression,
@@ -187,6 +207,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("SI008")]
     Si_PairError,
 
+    #endregion
+
+    #region Режим ПИ
+
     /// <summary> Не удалось корректно разобрать выражение в команде ПИ. </summary>
     [ErrorCodeTag("PI001")]
     Pi_CannotParseExpression,
@@ -203,21 +227,9 @@ namespace Utilities.Errors
     [ErrorCodeTag("PI004")]
     Pi_EmptyCommandBody,
 
-    /// <summary> Использованный ключ не разрешён для данной команды. </summary>
-    [ErrorCodeTag("KEY001")]
-    Key_NotAllowedForCommand,
+    #endregion
 
-    /// <summary> Ключ не распознан среди допустимых. </summary>
-    [ErrorCodeTag("KEY002")]
-    Key_NotRecognized,
-
-    /// <summary> Использована конфликтная пара ключей, несовместимая в рамках одной команды. </summary>
-    [ErrorCodeTag("KEY003")]
-    Key_ConflictPair,
-
-    /// <summary> Ключ не ожидается в данной команде. </summary>
-    [ErrorCodeTag("KEY004")]
-    Key_NotExpectedInThisCommand,
+    #region Режим КС
 
     /// <summary> Не указаны границы сопротивления для команды КС. </summary>
     [ErrorCodeTag("KS001")]
@@ -235,6 +247,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("KS004")]
     Ks_EmptyCommandBody,
 
+    #endregion
+
+    #region Режим ИЕ
+
     /// <summary> Не указаны границы емкости для команды ИЕ. </summary>
     [ErrorCodeTag("IE001")]
     Ie_EmptyCapacity,
@@ -251,6 +267,9 @@ namespace Utilities.Errors
     [ErrorCodeTag("IE004")]
     Ie_EmptyCommandBody,
 
+    #endregion
+
+    #region Режим ПР
 
     /// <summary> Ошибка при проверке точки про методе полного узла в команде ПР. </summary>
     [ErrorCodeTag("PR006")]
@@ -263,7 +282,52 @@ namespace Utilities.Errors
     /// <summary> В команде ПР замкнутые точки. </summary>
     [ErrorCodeTag("PR008")]
     Pr_PairError,
+    #endregion
 
+    #region Ключи команд
+
+    /// <summary> Использованный ключ не разрешён для данной команды. </summary>
+    [ErrorCodeTag("KEY001")]
+    Key_NotAllowedForCommand,
+
+    /// <summary> Ключ не распознан среди допустимых. </summary>
+    [ErrorCodeTag("KEY002")]
+    Key_NotRecognized,
+
+    /// <summary> Использована конфликтная пара ключей, несовместимая в рамках одной команды. </summary>
+    [ErrorCodeTag("KEY003")]
+    Key_ConflictPair,
+
+    /// <summary> Ключ не ожидается в данной команде. </summary>
+    [ErrorCodeTag("KEY004")]
+    Key_NotExpectedInThisCommand,
+    #endregion
+
+    #endregion
+
+    #region Оборудование
+
+    #region МКР
+    /// <summary> Первая команда в управляющей программе должна быть ОК. </summary>
+    
+    [ErrorCodeTag("MKR001")]
+    MKR_PointError,
+
+    #endregion
+
+    #region УКШ
+
+    #endregion
+
+    #region ППУ
+
+    #endregion
+
+    #region Мультиметр
+
+    #endregion
+
+    #endregion
   }
 
   /// <summary>

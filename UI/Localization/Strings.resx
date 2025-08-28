@@ -312,4 +312,7 @@
   <data name="protocol.button.exit" xml:space="preserve">
     <value>ЗАВЕРШИТЬ(Esc)</value>
   </data>
+  <data name="menu.help" xml:space="preserve">
+    <value>Справка</value>
+  </data>
 </root>

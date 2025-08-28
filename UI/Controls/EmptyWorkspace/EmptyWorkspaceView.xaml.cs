@@ -28,7 +28,7 @@ namespace UI.Controls.EmptyWorkspace
     public DateTime CurrentDateTime
     {
       get => _currentDateTime;
-      private set
+      set
       {
         if (_currentDateTime != value)
         {

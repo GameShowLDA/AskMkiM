@@ -1,35 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using AppConfiguration.Error.Translation;
-using ControlCommandAnalyser.Model;
+﻿using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Execution;
-using NewCore.Base.Device;
-using NewCore.Base.Interface.Main;
 using Utilities;
 using Utilities.Interface;
 using Utilities.Models;
-using static NewCore.Enum.DeviceEnum;
+using static ControlCommandExecutor.BaseStrategies.NodeFullChecker;
 
-namespace ControlCommandExecutor.IrStrategies
+namespace ControlCommandExecutor.BaseStrategies
 {
   internal static class MethodExecutor
   {
-    static private List<PointModel> ErrorsPoints = new List<PointModel>();
-
-    /// <summary>
-    /// Активная шина, соответствующая биту '1'.
-    /// </summary>
-    static BusPoint AssignedBus { get; set; }
-
-    /// <summary>
-    /// Противоположная шина, соответствующая биту '0'.
-    /// </summary>
-    static BusPoint OppositeBus { get; set; }
-
     /// <summary>
     /// Количество разрядов в двоичном представлении номера точки.
     /// </summary>
@@ -43,27 +22,23 @@ namespace ControlCommandExecutor.IrStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(CommandExecutionManager manager, SiCommandModel siCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
     {
       ResultMessages = new List<ShowMessageModel>();
-      ErrorsPoints = new List<PointModel>();
       HighestBitCount = GetHighestPointBinaryDigits(points);
       var binaryPoints = ConvertToReversedBinaryRange(points, HighestBitCount);
 
-      AssignedBus = BusPoint.A;
-      OppositeBus = BusPoint.B;
       for (int step = 0; step < HighestBitCount; step++)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
         await ConnectPointsToBusAsync(binaryPoints, step, messageService);
-        if (!await PerformMeasurement(manager, siCommandModel, messageService, resistance, step))
+        if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
         {
           await DisconnectPointsToBusAsync(binaryPoints, step, messageService);
           await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при проверке разряда {step} ({HighestBitCount})", type: ShowMessageModel.MessageType.Error), IsBlockStart: true);
 
-
           await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
-          await NodeFullChecker.CheckSequenceAsync(manager, siCommandModel, points, messageService, resistance);
+          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(performMeasurementAsync, manager, siCommandModel, points, messageService, resistance);
 
           return;
         }
@@ -237,35 +212,6 @@ namespace ControlCommandExecutor.IrStrategies
           await DisconnectFromBusBAsync(point.point, messageService);
         }
       }
-    }
-
-    static public async Task<bool> PerformMeasurement(CommandExecutionManager manager, SiCommandModel siCommandModel, IUserMessageService messageService, double resistance, int step)
-    {
-      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
-      return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-      {
-        messageService.GetCancellationToken().ThrowIfCancellationRequested();
-
-        await messageService.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
-
-        var answer = await breadDown.IrManger.MeasureResistanceAsync(resistance, resistance, 60000);
-        var pause = false;
-        var type = ShowMessageModel.MessageType.Success;
-        if (answer < resistance)
-        {
-          type = ShowMessageModel.MessageType.Error;
-        }
-
-        var resultMessgae = new ShowMessageModel($"Результат измерения разряда {step}({GetBitString(step)})", message: $"{answer.ToString()} МОм", type: type) { IndentLevel = 2 };
-        await messageService.ShowMessageAsync(resultMessgae, skipPause: true);
-        ResultMessages.Add(resultMessgae);
-        if (type == ShowMessageModel.MessageType.Error)
-        { 
-          manager.AddErrorMethod(SiErrors.WrongDigitCheckForGroupedMethod($"{siCommandModel.CommandNumber} {siCommandModel.Mnemonic}", step, HighestBitCount, $"{answer.ToString()} МОм (>{resistance}МОм)"));
-        }
-
-        return type == ShowMessageModel.MessageType.Success ? true : false;
-      }, messageService);
     }
 
     /// <summary>

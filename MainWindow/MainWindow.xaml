@@ -214,6 +214,7 @@
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_SelfControl}, Path=Value}"  Name="SelfControl" Tag="menuHeader_3" Style="{StaticResource SideMenuItemStyle}">
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_SelfControl_Module}, Path=Value}"   Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
+                        <MenuItem Header="Система" Name="SelfControlAllMenuItem" Command="{Binding SelfTest.SelfTestSystemCommand}"/>
 
                     </MenuItem>
 

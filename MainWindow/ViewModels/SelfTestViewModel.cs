@@ -17,6 +17,7 @@ namespace MainWindowProgram.ViewModels
     /// Команда отображения метода узла СИ.
     /// </summary>
     public ICommand SelfTestModuleCommand { get; }
+    public ICommand SelfTestSystemCommand { get; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TestViewModel"/>.
@@ -27,6 +28,7 @@ namespace MainWindowProgram.ViewModels
       _selfTestServices = testService;
 
       SelfTestModuleCommand = new AsyncRelayCommand(_selfTestServices.AddSelfTestModuleAsync);
+      SelfTestSystemCommand = new AsyncRelayCommand(_selfTestServices.AddSelfTestSystemAsync);
     }
   }
 }

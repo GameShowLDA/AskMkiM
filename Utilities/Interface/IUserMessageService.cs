@@ -61,5 +61,11 @@ namespace Utilities.Interface
 
     public CancellationToken GetCancellationToken();
 
+    void AddError(ErrorItem errorItem);
+
+    int GetLastLineNumberAsync();
+
+    Task MoveToLineAsync(int lineNumber);
+
   }
 }

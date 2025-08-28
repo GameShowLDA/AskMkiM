@@ -286,6 +286,15 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Справка.
+        /// </summary>
+        internal static string menu_help {
+            get {
+                return ResourceManager.GetString("menu.help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Настройки.
         /// </summary>
         internal static string menu_settings {

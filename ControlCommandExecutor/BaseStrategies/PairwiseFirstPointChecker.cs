@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Execution;
 using Utilities;
 using Utilities.Interface;
 using Utilities.Models;
 
-namespace ControlCommandExecutor.IrStrategies
+namespace ControlCommandExecutor.BaseStrategies
 {
   internal static class PairwiseFirstPointChecker
   {
-    static private List<PointModel> ErrorsPoints = new List<PointModel>();
     static private PointModel _basePoint;
 
     /// <summary>
@@ -23,9 +21,8 @@ namespace ControlCommandExecutor.IrStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(CommandExecutionManager manager, SiCommandModel siCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(NodeAccumulationChecker.PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
     {
-      ErrorsPoints = new List<PointModel>();
       if (points == null || points.Count <= 0)
       {
         return;
@@ -42,11 +39,11 @@ namespace ControlCommandExecutor.IrStrategies
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка пары {_basePoint.ToString()} и {point.ToString()}") { IndentLevel = 1 }, IsBlockStart: true);
         await ConnectToBusAAsync(point, messageService);
-        if (!await PerformMeasurementAsync(resistance, messageService))
+        if (!await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken()))
         {
           await messageService.ShowMessageAsync(new ShowMessageModel("Обнаружено замыкание между", message: $"{_basePoint.ToString()}, {point.ToString()}", type: ShowMessageModel.MessageType.Error)
           { IndentLevel = 3 });
-          manager.AddErrorMethod(siCommandModel.PointErrors.PairError($"{siCommandModel.CommandNumber} {siCommandModel.Mnemonic}", _basePoint.ToString(), point.ToString()));
+          manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", _basePoint.ToString(), point.ToString()));
         }
         await DisconnectFromBusAAsync(point, messageService);
       }
@@ -122,27 +119,6 @@ namespace ControlCommandExecutor.IrStrategies
       {
         throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
       }
-    }
-
-    /// <summary>
-    /// Выполняет измерение между уже подключёнными точками.
-    /// Предполагается, что коммутация завершена заранее.
-    /// </summary>
-    /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<bool> PerformMeasurementAsync(double resistance, IUserMessageService messageService)
-    {
-      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
-
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-      {
-        var answer = await breadDown.IrManger.MeasureResistanceAsync(resistance);
-        var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= resistance : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
-
-        await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{answer} МОм", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 }, skipPause: true);
-        return result;
-      }, messageService);
-
-      return result;
     }
   }
 }

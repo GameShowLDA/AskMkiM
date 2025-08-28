@@ -7,6 +7,7 @@
              xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox"
              xmlns:TextEditor="clr-namespace:UI.Components.ProtocolListBox"
              xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
@@ -288,7 +289,21 @@
                 </Border>
 
                 <Grid Grid.Column="1" Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" MaxHeight="300"/>
+                    </Grid.RowDefinitions>
                     <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox"/>
+
+                    <GridSplitter  Grid.Row="1" 
+                        Height="5"
+                        Background="{StaticResource RedColorSolidColorBrush}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        ResizeDirection="Rows"/>
+
+                    <ErrorList:ErrorListControl Grid.Row="2"  x:Name="ErrorListBoxVertical" StringsNumberVisible="Collapsed" MeasureResultVisible="Collapsed"/>
                 </Grid>
 
 
