@@ -268,7 +268,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Сохранить как....
+        ///   Ищет локализованную строку, похожую на Сохранить как.
         /// </summary>
         internal static string menu_file_saveas {
             get {
