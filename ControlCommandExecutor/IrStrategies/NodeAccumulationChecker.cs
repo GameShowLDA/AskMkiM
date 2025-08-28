@@ -34,7 +34,7 @@ namespace ControlCommandExecutor.IrStrategies
         if (!await PerformMeasurementAsync(resistance, messageService))
         {
           step = 0;
-          var localized = await LocalizeFaultyPointAsync(EquipmentService.GetPointsBefore(point), resistance, messageService);
+          var localized = await LocalizeFaultyPointAsync(EquipmentService.GetPointsBefore(points, point), resistance, messageService);
 
           if (localized != null)
           {

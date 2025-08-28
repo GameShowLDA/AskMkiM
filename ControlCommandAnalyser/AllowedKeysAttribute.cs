@@ -10,7 +10,7 @@ namespace ControlCommandAnalyser
 {
   public  enum AlgorithmKey
   {
-    ЗР, ЗС, С, П, И, Г, Т1, Ш, Т, Б, К, Н, Д
+    ЗР, ЗС, П, И, Г, С, Т1, Ш, Т, Б, К, Н, Д
   }
 
   [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]

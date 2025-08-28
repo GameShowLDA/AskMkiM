@@ -84,7 +84,7 @@ namespace ControlCommandAnalyser.Parser.Common
     }
 
     /// <summary>
-    /// Парсит выражения сопротивлений вида "94&lt;кОм&lt;106", "94&lt;кОм", "кОм&lt;106".
+    /// Парсит выражения ёскости вида "94&lt;мкф&lt;106", "94&lt;мкф", "мкф&lt;106".
     /// </summary>
     /// <param name="input">Входная строка.</param>
     /// <returns>

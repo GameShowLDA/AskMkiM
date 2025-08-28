@@ -66,11 +66,10 @@ namespace ControlCommandAnalyser.Parser
       {
         var key = matchedKeys[i];
         bool hasError = (i == matchedKeys.Count - 1) && !hasTrailingComma;
-        result.Add((key, hasError));
+        result.Add((key, false));
       }
 
       return result;
     }
-
   }
 }

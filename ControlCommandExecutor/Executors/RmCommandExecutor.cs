@@ -24,7 +24,6 @@ namespace ControlCommandExecutor.Executors
 
       List<PointModel> pointsModel = PointModel.ConvertToPointModels(points);
       await EquipmentService.AnalyzePoints(pointsModel, command.PointsMap, context.Console);
-
     }
   }
 }

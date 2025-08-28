@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfiguration.Error.Translation;
 using Utilities.Errors;
 using Utilities.Models;
 
@@ -11,7 +12,7 @@ namespace ControlCommandAnalyser.Model
   /// <summary>
   /// Базовая модель любой команды после разбора.
   /// </summary>
-  public abstract class BaseCommandModel
+  public abstract class BaseCommandModel : IError
   {
     /// <summary>
     /// Номер команды.
@@ -42,5 +43,7 @@ namespace ControlCommandAnalyser.Model
     /// Ключи алгоритма проверки, указанные в команде.
     /// </summary>
     public List<string> AlgorithmKey { get; set; } = new();
+
+    public virtual IPointError PointErrors => null;
   }
 }

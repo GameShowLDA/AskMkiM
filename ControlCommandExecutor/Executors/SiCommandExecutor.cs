@@ -8,16 +8,17 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using AppConfiguration.Enums;
+using AppConfiguration.Error.Translation;
 using AppConfiguration.MeasurementError;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
 using ControlCommandExecutor.IrStrategies;
+using Message;
 using NewCore.Base.Interface.Main;
 using Utilities;
 using Utilities.Interface;
 using Utilities.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ControlCommandExecutor.Executors
 {
@@ -52,7 +53,6 @@ namespace ControlCommandExecutor.Executors
       var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-
       await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
 
       var modules = points
@@ -71,15 +71,23 @@ namespace ControlCommandExecutor.Executors
 
       if (command.AlgorithmKey.Contains("К"))
       {
-        await NodeFullChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
+        // await NodeFullChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
+        BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
+        await BaseStrategies.NodeFullChecker.CheckSequenceAsync(measure, context.CommandExecutionManager, command, points, context.Console, resistance.Value);
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
         await MethodExecutor.CheckSequenceAsync(context.CommandExecutionManager, command,  points, context.Console, resistance.Value);
       }
+      else if (command.AlgorithmKey.Contains("Т1"))
+      {
+        await PairwiseFirstPointChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
+      }
       else
       {
-        await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
+        // await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
+        BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
+        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(context.CommandExecutionManager, command, measure, points, context.Console, resistance.Value, context.Console.GetCancellationToken());
       }
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
@@ -164,6 +172,56 @@ namespace ControlCommandExecutor.Executors
         return result;
 
       return null;
+    }
+
+    /// <summary>
+    /// Выполняет измерение между уже подключёнными точками.
+    /// Предполагается, что коммутация завершена заранее.
+    /// </summary>
+    /// <returns>Задача, представляющая измерение.</returns>
+    private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    {
+      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var answer = await breadDown.IrManger.MeasureResistanceAsync(value);
+        var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= value : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{answer} МОм", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+        return result;
+      }, messageService);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Выполняет измерение между уже подключёнными точками.
+    /// Предполагается, что коммутация завершена заранее.
+    /// </summary>
+    /// <returns>Задача, представляющая измерение.</returns>
+    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    {
+      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
+      double answer = -1;
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
+
+        answer = await breadDown.IrManger.MeasureResistanceAsync(value, value, 60000);
+        var pause = false;
+        var type = ShowMessageModel.MessageType.Success;
+        if (answer < value)
+        {
+          type = ShowMessageModel.MessageType.Error;
+        }
+
+        return type == ShowMessageModel.MessageType.Success ? true : false;
+      }, messageService);
+
+      return(result, answer);
     }
   }
 }
