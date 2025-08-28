@@ -253,7 +253,7 @@ namespace Utilities.Errors
 
 
     /// <summary> Ошибка при проверке точки про методе полного узла в команде ПР. </summary>
-    [ErrorCodeTag("SI006")]
+    [ErrorCodeTag("PR006")]
     Pr_NodeExecutePointError,
 
     /// <summary> Ошибка при замкнутной цепи в команде ПР. </summary>
