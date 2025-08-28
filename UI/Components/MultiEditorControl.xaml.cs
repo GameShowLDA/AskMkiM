@@ -1,18 +1,19 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using AppConfiguration.Base;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UI.Components.Invoke;
-using UI.Controls.TextEditor;
-using Application = System.Windows.Application;
-using UserControl = System.Windows.Controls.UserControl;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using UI.Components.SearchControls;
 using UI.Components.MultiEditorMethods;
-using AppConfiguration.Base;
-using static UI.Components.Invoke.OpenFileButton;
+using UI.Components.SearchControls;
 using UI.Controls;
+using UI.Controls.ProtocolNew;
+using UI.Controls.Runner;
+using UI.Controls.TextEditor;
+using static UI.Components.Invoke.OpenFileButton;
+using Application = System.Windows.Application;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components
 {
@@ -61,6 +62,22 @@ namespace UI.Components
     /// </summary>
     public event Action<string, bool?, Dictionary<string, List<SearchResult>>> SearchResultsReady;
 
+    private static readonly DependencyPropertyKey CountsPropertyKey =
+    DependencyProperty.RegisterReadOnly(
+      nameof(Counts),
+      typeof(int),
+      typeof(MultiEditorControl),
+      new FrameworkPropertyMetadata(0));
+
+    public static readonly DependencyProperty CountsProperty = CountsPropertyKey.DependencyProperty;
+
+    /// <summary>Текущее число контролов внутри редактора.</summary>
+    public int Counts
+    {
+      get => (int)GetValue(CountsProperty);
+      private set => SetValue(CountsPropertyKey, value);
+    }
+
     /// <summary>
     /// Инициализирует экземпляр <see cref="FileManager"/> и устанавливает связь с текущим контролом.
     /// </summary>
@@ -70,7 +87,7 @@ namespace UI.Components
       textSearchManager = new TextSearchManager(fileManager, this);
       controlManager = new ControlManager(fileManager, this);
       saveFileManager = new SaveFileManager(fileManager);
-      textReplacementManager = new TextReplacementManager(fileManager, this, controlManager);
+      textReplacementManager = new TextReplacementManager(fileManager); 
     }
 
     /// <summary>
@@ -91,9 +108,18 @@ namespace UI.Components
         _clickTimer.Stop();
       };
 
+      this.KeyDown -= MultiWindowControl_KeyDown;
       this.KeyDown += MultiWindowControl_KeyDown;
       EventAggregator.FoundTextSelectRow += OnFoundTextSelectRow;
+      ProtocolUI.AnotherKeyPressed -= MultiWindowControl_KeyDown;
+      ProtocolUI.AnotherKeyPressed += MultiWindowControl_KeyDown;
       InitializeManagers();
+
+      Counts = fileManager.GetCountConrols();
+      fileManager.UserControls.CollectionChanged += (s, a) =>
+      {
+        Counts = fileManager.UserControls.Count;
+      };
     }
 
     private void OnFoundTextSelectRow(string fileName, int lineNumber, int startOffset, string lineText, string searchText)
@@ -127,23 +153,47 @@ namespace UI.Components
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
-    public TextEditorUI GetActiveTextEditor()
+    public TextEditorUI GetActiveTextEditor(EditorType editorType)
     {
-      return fileManager.GetActiveTextEditor();
-    }
-
-    public bool RemoveActiveTextEditor()
-    {
-      return fileManager.RemoveActiveTextEditor();
+      return fileManager.GetActiveTextEditor(editorType);
     }
 
     /// <summary>
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
-    public TextEditorContainer GetActiveTextEditorContainer()
+    public TextEditorUI GetActiveTextEditor()
     {
-      return fileManager.GetTextEditorContainer();
+      return fileManager.GetActiveTextEditor();
+    }
+
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>
+    public bool RemoveActiveTextEditor(bool isTranslation)
+    {
+      return fileManager.RemoveActiveTextEditor(isTranslation);
+    }
+
+    public void RemoveControl(EditorType editorType)
+    {
+      var control = fileManager.GetContainer(editorType);
+      var page = fileManager.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
+      if (control != null && page != null)
+      {
+        controlManager.RemoveControl(page, control).ConfigureAwait(true);
+      }
+    }
+
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
+    public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
+    {
+      return fileManager.GetContainer(editorType);
     }
 
     /// <summary>
@@ -167,6 +217,8 @@ namespace UI.Components
     {
       controlManager.AddControl(header, control, tabType, description);
     }
+
+    public bool GetEmtyControl() => controlManager.GetEmtyControl();
 
     /// <summary>
     /// Открывает диалоговое окно для открытия файла.
@@ -220,7 +272,18 @@ namespace UI.Components
         if (activeTab != null)
         {
           int index = fileManager.OpenPages.IndexOf(activeTab);
-          RemoveControl(activeTab, fileManager.UserControls[index]);
+          if (fileManager.UserControls[index] is TextEditorContainer textEditorContainer)
+          {
+            var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveDocument == true);
+            if (foundItem != null)
+            {
+              foundItem.PerformClose();
+            }
+          }
+          else
+          {
+            RemoveControl(activeTab, fileManager.UserControls[index]);
+          }
         }
       }
     }
@@ -248,7 +311,7 @@ namespace UI.Components
         if (activeTextEditorContainer != null)
         {
           var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab =>
-            tab.IsActiveItem==true);
+            tab.IsActiveItem == true);
           return saveFileManager.SaveFile(activeDockItem);
         }
       }
@@ -336,7 +399,7 @@ namespace UI.Components
 
     private int CalculateGlobalStartOffset(int lineStartOffset, string lineText, string searchText)
     {
-      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.Ordinal);
+      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.OrdinalIgnoreCase);
 
       if (wordStartIndex >= 0)
       {
@@ -353,9 +416,29 @@ namespace UI.Components
       SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
     }
 
-    internal TranslatorItem GetActiveTranslatorContainer()
+    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
     {
-      return fileManager.GetActiveTranslatorContainer();
+      return fileManager.AddTranslatorItem(editor, translateEditor, editorType);
+    }
+
+    internal Task AddRunItem(RunControl runControl, EditorType editorType)
+    {
+      return fileManager.AddRunItem(runControl, editorType);
+    }
+
+    internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+      await fileManager.DeleteTranslatorItem(translatorItem, editorType);
+    }
+
+    internal void OpenFolder()
+    {
+      fileManager.OpenFolder();
+    }
+
+    internal async Task OpenArchiveAsync()
+    {
+      await fileManager.OpenArchiveAsync();
     }
   }
 }

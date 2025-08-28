@@ -36,6 +36,11 @@ namespace MainWindowProgram.ViewModels
     public ICommand SaveFileAsCommand { get; }
 
     /// <summary>
+    /// Команда сохранения файла под другим именем.
+    /// </summary>
+    public ICommand OpenFolderCommand { get; }
+
+    /// <summary>
     /// Команда отправки файла на печать.
     /// </summary>
     public ICommand PrintFileCommand { get; }
@@ -71,6 +76,7 @@ namespace MainWindowProgram.ViewModels
       OpenFileCommand = new AsyncRelayCommand(_fileService.OpenFileAsync);
       SaveFileCommand = new AsyncRelayCommand(_fileService.SaveFileAsync);
       SaveFileAsCommand = new AsyncRelayCommand(_fileService.SaveFileAsAsync);
+      OpenFolderCommand = new AsyncRelayCommand(_fileService.OpenFolder);
       PrintFileCommand = new AsyncRelayCommand(_fileService.PrintFileAsync);
       ExitApplicationCommand = new AsyncRelayCommand(_fileService.ExitApplicationAsync);
       SearchFileCommand = new AsyncRelayCommand(_fileService.SearchFileAsync);

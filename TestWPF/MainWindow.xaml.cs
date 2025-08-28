@@ -1,4 +1,7 @@
 ﻿using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using Utilities;
 using Utilities.Models;
 
 namespace TestWPF
@@ -11,18 +14,6 @@ namespace TestWPF
     public MainWindow()
     {
       InitializeComponent();
-      InitializeSettings();
     }
-
-
-    /// <summary>
-    /// Инициализирует все необходимые настройки для компонента.
-    /// Очищает предыдущий контент и добавляет новые элементы управления.
-    /// </summary>
-    public void InitializeSettings()
-    {
-
-    }
-
   }
 }

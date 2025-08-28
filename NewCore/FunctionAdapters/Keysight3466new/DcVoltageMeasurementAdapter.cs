@@ -26,18 +26,20 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetDCVoltageModeAsync()
+    public async Task<bool> SetDCVoltageModeAsync()
     {
       try
       {
-        await _measurement.SetDCVoltageModeAsync();
+        var result = await _measurement.SetDCVoltageModeAsync();
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима измерения постоянного напряжения",
           "CONF:VOLT:DC",
-          true, 
+          result, 
           1);
+
+        return result;
       }
       catch (Exception ex)
       {

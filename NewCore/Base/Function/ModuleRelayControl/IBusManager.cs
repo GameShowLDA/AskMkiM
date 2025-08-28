@@ -21,7 +21,7 @@ namespace NewCore.Base.Function.ModuleRelayControl
     /// <param name="bus">Размыкаемая шина.</param>
     /// <param name="lowVoltage">true - низковольтная шина, false - высоковольтная.</param>
     /// <returns>Результат размыкания шины.</returns>
-    Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage);
+    Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage = true);
 
     /// <summary>
     /// Пытается получить номер шины на основе значения перечисления SwitchingBus.

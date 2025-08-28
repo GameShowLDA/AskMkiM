@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MainWindowProgram.Services;
+﻿using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using Utilities.Help;
 
@@ -31,7 +26,7 @@ namespace MainWindowProgram.Engine
       var settings = new SettingsService(multi);
       var windowService = new WindowService(window, window.mainMenu, window.ButtonsPanel, () => window.IsLocked);
       var selfTest = new SelfTestServices(multi);
-      var translation = new TranslationServices(window, multi, file);
+      var translation = new TranslationServices(multi, file);
 
       var viewModel = new MainWindowViewModel(
           metrology,
@@ -46,6 +41,7 @@ namespace MainWindowProgram.Engine
       );
 
       HelpProvider.RegisterHelp(window);
+
       return (viewModel, usb);
     }
   }

@@ -3,6 +3,7 @@ using Mode.Base;
 using Mode.TestSuite.Metrology.MethodExecutor;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities.Interface;
 using Utilities.Models;
 
 namespace TestWPF
@@ -63,7 +64,7 @@ namespace TestWPF
       // await testMeasurement.ConfigureMeter(dataModel);
       // await testMeasurement.RunAllStepsAsync(ProtocolUI, dataModel);
       await testMeasurement.RunParallelModuleTasksAsync(ProtocolUI, dataModel);
-      await testMeasurement.FinalizeAsync();
+      await testMeasurement.FinalizeAsync(ProtocolUI);
     }
   }
   public class TestMeasurement : BaseMethodExecutor
@@ -71,10 +72,10 @@ namespace TestWPF
     public TestMeasurement() : base() { }
 
     /// <inheritdoc />
-    public override async Task ConfigureMeter(DataModel dataModel = null)
+    public override async Task ConfigureMeter(IUserMessageService messageService, DataModel dataModel = null)
     {
       var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-      await breakDown.ConnectableManager.ConnectAsync();
+      await breakDown.ConnectableManager.ConnectAsync(messageService);
       await breakDown.IrManger.SetModeAsync();
       await breakDown.IrManger.SetVoltageAsync(dataModel.Voltage);
       await breakDown.IrManger.SetTestTimeAsync(dataModel.Time);
@@ -98,11 +99,11 @@ namespace TestWPF
       await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type));
     }
 
-    public override async Task FinalizeAsync()
+    public override async Task FinalizeAsync(IUserMessageService messageService)
     {
-      await base.FinalizeAsync();
+      await base.FinalizeAsync(messageService);
       var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-      await breakDown.ConnectableManager.DisconnectAsync();
+      await breakDown.ConnectableManager.DisconnectAsync(messageService);
     }
   }
 }

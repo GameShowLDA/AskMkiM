@@ -1,0 +1,108 @@
+﻿<Window x:Class="Message.MessageBoxCustom"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Message"
+        mc:Ignorable="d"
+        Title="MessageBox"  
+        Width="500"
+        WindowStyle="None" 
+        AllowsTransparency="True" 
+        Background="#303843" 
+        ShowInTaskbar="False"
+        VerticalAlignment="Stretch"
+        Topmost="True" 
+        WindowStartupLocation="CenterScreen"
+        FontSize="15"
+        SizeToContent="Height">
+    <Window.Resources>
+        <Style x:Key="OkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,2"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#45A049"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CancelButtonStyle" TargetType="Button" BasedOn="{StaticResource OkButtonStyle}">
+            <Setter Property="Background" Value="#9E9E9E"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#8E8E8E"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="YesButtonStyle" TargetType="Button" BasedOn="{StaticResource OkButtonStyle}">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NoButtonStyle" TargetType="Button" BasedOn="{StaticResource OkButtonStyle}">
+            <Setter Property="Background" Value="#F44336"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#D32F2F"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderThickness="2" BorderBrush="White" Name="BorderWin">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Name="TopPanel">
+                <TextBlock x:Name="Header" Text="Заголовок сообщения" Foreground="White" VerticalAlignment="Center" Padding="10" FontSize="20"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Name="IconContainer" Background="Transparent" Margin="10" Width="50" Height="50" HorizontalAlignment="Left"/>
+
+                <StackPanel Grid.Column="1" Margin="10" VerticalAlignment="Center" >
+                    <TextBox Name="MessageText" TextWrapping="Wrap" FontSize="18" Background="Transparent"
+                         BorderThickness="0" IsReadOnly="True" Foreground="White"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="2" HorizontalAlignment="Right" Margin="10" VerticalAlignment="Center" Orientation="Horizontal">
+                <Button Name="OkButton" Style="{StaticResource OkButtonStyle}" PreviewMouseDown="OkButton_PreviewMouseDown" Content="Ок [Enter]" Height="30" />
+                <Button Name="CancelButton" Style="{StaticResource CancelButtonStyle}" PreviewMouseDown="CancelButton_PreviewMouseDown" Content="Отмена [Esc]" Height="30" Margin="5"/>
+                <Button Name="YesButton" Style="{StaticResource YesButtonStyle}" PreviewMouseDown="YesButton_PreviewMouseDown" Content="Да [Y]" Height="30" Margin="5" />
+                <Button Name="NoButton" Style="{StaticResource NoButtonStyle}" PreviewMouseDown="NoButton_PreviewMouseDown" Content="Нет [N]" Height="30" Margin="5"/>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</Window>

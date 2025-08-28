@@ -20,7 +20,7 @@
         WindowStartupLocation="CenterScreen"
         Background="Transparent">
 
-    <Border Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="30">
+    <Border Background="{StaticResource IsCheckedColorSolidColorBrush}" CornerRadius="30">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -29,7 +29,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Text="Введите эталонное значение в В." Foreground="{StaticResource ForegroundSolidColorBrush}" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <Border Grid.Row="1" Background="{StaticResource LightPrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+            <Border Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
                 <TextBox 
                      Background="Transparent" 
                      BorderThickness="0" 

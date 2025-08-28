@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using NewCore.Base.Device;
 using NewCore.Base.Function.ModuleRelayControl;
+using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
 using NewCore.Enum;
@@ -65,5 +66,9 @@ namespace DataBaseConfiguration.Models.Device
     /// <inheritdoc />
     [NotMapped]
     public IDeviceProtocol DeviceProtocol { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
+    public ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }
 }

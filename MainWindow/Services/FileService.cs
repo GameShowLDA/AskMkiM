@@ -1,17 +1,17 @@
-﻿using System.Windows;
+﻿using AppConfiguration.Base;
+using ICSharpCode.AvalonEdit;
+using Microsoft.Win32;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppConfiguration.Base;
-using MainWindowProgram.Infrastructure;
-using Microsoft.Win32;
 using UI.Components.ArchiveControls;
-using UI.Components.ArchiveManager.ArchiveFiles.Index;
-using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.Models;
 using UI.Components.FileComparerControls;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
+
 
 namespace MainWindowProgram.Services
 {
@@ -29,13 +29,11 @@ namespace MainWindowProgram.Services
     private readonly MainWindow _mainWindow;
 
     /// <summary>
-    /// Делегат, предоставляющий актуальное знанчение состояния блокировки приложения.
+    /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
 
     private bool _isSearchWindowOpen;
-
-    private Action SearchWindowClosing;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
@@ -64,7 +62,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
       }
       else
       {
@@ -89,7 +87,7 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
       }
       else
       {
@@ -135,7 +133,9 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      if (_isSearchWindowOpen == false)
+      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+
+      if (_isSearchWindowOpen == false && activeEditor != null)
       {
         _mainWindow.SearchWindow.Owner = _mainWindow;
         _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
@@ -143,12 +143,18 @@ namespace MainWindowProgram.Services
         _isSearchWindowOpen = true;
       }
 
-      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
-      string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-      if (!string.IsNullOrEmpty(selectedText))
+      if (activeEditor != null)
       {
-        EventAggregator.RaiseSearchTextRequested(selectedText);
+        string selectedText = activeEditor?.TextArea.Selection.GetText();
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          EventAggregator.RaiseSearchTextRequested(selectedText);
+        }
+      }
+      else
+      {
+        return;
       }
     }
 
@@ -177,22 +183,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task OpenArchiveAsync()
     {
-      var allArchives = new TableAllArchivesControl();
-      await _multiWindow.AddControlAsync("Архив", allArchives, TypeWindow.Files);
-      allArchives.ArchiveSelected += ArchiveControl_ArchiveSelected;
-    }
-
-    private async void ArchiveControl_ArchiveSelected(object sender, MouseButtonEventArgs e)
-    {
-      var dataGrid = e.Source as DataGrid;
-      if (dataGrid?.SelectedItem is ApkArchive selectedArchive)
-      {
-        if (selectedArchive != null)
-        {
-          var archiveName = selectedArchive.ArchiveName;
-          await _multiWindow.AddControlAsync(archiveName, new TableApkArchiveControl(archiveName), TypeWindow.Files);
-        }
-      }
+      await _multiWindow.OpenArchiveAsync();
     }
 
     /// <summary>
@@ -202,13 +193,19 @@ namespace MainWindowProgram.Services
     {
       if (_isLockedProvider())
       {
-        MessageBox.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
         return null;
       }
       else
       {
         return _multiWindow.CreateTranslationFileAsync();
       }
+    }
+
+    internal async Task OpenFolder()
+    {
+      await _multiWindow.OpenFolder();
+
     }
   }
 }

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:UI.Components.SearchControls"
              mc:Ignorable="d"
              Width="24" Height="24">
+    
     <UserControl.RenderTransform>
         <RotateTransform x:Name="RootRotate" Angle="0" CenterX="12" CenterY="12"/>
     </UserControl.RenderTransform>

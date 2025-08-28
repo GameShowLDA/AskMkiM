@@ -1,14 +1,15 @@
-﻿using ICSharpCode.AvalonEdit.Rendering;
+﻿using AppConfiguration.Base;
+using ICSharpCode.AvalonEdit.Rendering;
+using Message;
 using System.Text.RegularExpressions;
-using System.Windows.Media;
 using System.Windows;
-using UI.Components.Invoke;
-using UI.Controls.TextEditor;
-using UI.Components.SearchControls;
-using static Utilities.LoggerUtility;
 using System.Windows.Controls;
-using AppConfiguration.Base;
-using DevZest.Windows.Docking;
+using System.Windows.Media;
+using UI.Components.SearchControls;
+using UI.Controls;
+using UI.Controls.TextEditor;
+using UI.Windows.WpfDocking.Windows.Docking;
+using static Utilities.LoggerUtility;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -160,20 +161,37 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        var activeTextEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-        if (activeTextEditorContainer != null)
-        {
-          var dockItems = activeTextEditorContainer.DockManager.DockItems;
-          var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
-          if (dockItems[index].Content is TextEditorUI)
-          {
-            var textEditor = dockItems[index].Content as TextEditorUI;
-            var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
 
-            if (allOccurrences != null)
+        if (activeTab != null)
+        {
+          int pageIndex = fileManager.OpenPages.IndexOf(activeTab);
+
+          if (fileManager.UserControls[pageIndex] is TextEditorContainer textEditorContainer)
+          {
+            var foundDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+            if (foundDockItem != null)
             {
-              InitializeCurrentIndex();
-              GoToOccurrence(currentIndex);
+              TextEditorUI textEditor = new TextEditorUI();
+              if (foundDockItem.Content is TextEditorUI)
+              {
+                textEditor = foundDockItem.Content as TextEditorUI;
+              }
+              else if (foundDockItem.Content is TranslatorItem translatorItem)
+              {
+                textEditor = translatorItem.GetLeftEditor();
+              }
+              else
+              {
+                return;
+              }
+              var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
+
+              if (allOccurrences != null)
+              {
+                InitializeCurrentIndex();
+                GoToOccurrence(currentIndex);
+              }
             }
           }
         }
@@ -198,22 +216,32 @@ namespace UI.Components.MultiEditorMethods
           var foundDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
           if (foundDockItem != null)
           {
-            if (foundDockItem.Content is TextEditorUI textEditor)
+            TextEditorUI textEditor = new TextEditorUI();
+            if (foundDockItem.Content is TextEditorUI)
             {
-              switch (searchParameters)
-              {
-                case "FindNext":
-                  NextOccurrence(_searchArea, textEditor);
-                  break;
+              textEditor = foundDockItem.Content as TextEditorUI;
+            }
+            else if (foundDockItem.Content is TranslatorItem translatorItem)
+            {
+              textEditor = translatorItem.GetLeftEditor();
+            }
+            else
+            {
+              return;
+            }
+            switch (searchParameters)
+            {
+              case "FindNext":
+                NextOccurrence(_searchArea, textEditor);
+                break;
 
-                case "FindPrevious":
-                  PreviousOccurrence(_searchArea, textEditor);
-                  break;
+              case "FindPrevious":
+                PreviousOccurrence(_searchArea, textEditor);
+                break;
 
-                case "FindAll":
-                  await FindAllAsync(_searchText, _wholeWord, _caseWord, _searchArea);
-                  break;
-              }
+              case "FindAll":
+                await FindAllAsync(_searchText, _wholeWord, _caseWord, _searchArea);
+                break;
             }
           }
         }
@@ -258,7 +286,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private void ShowEmptySearchWarning()
     {
-      MessageBox.Show("Введите текст для поиска.");
+      MessageBoxCustom.Show("Введите текст для поиска.", image: MessageBoxImage.Warning);
       LogWarning("Поле для поиска не заполнено");
     }
 
@@ -291,7 +319,7 @@ namespace UI.Components.MultiEditorMethods
       else
       {
         EventAggregator.RaiseRequestCloseProgress();
-        MessageBox.Show("Текст не найден в открытых документах.");
+        MessageBoxCustom.Show("Текст не найден в открытых документах.", image: MessageBoxImage.Warning);
         LogInformation("Текст не найден в открытых документах.");
       }
     }
@@ -316,6 +344,14 @@ namespace UI.Components.MultiEditorMethods
         if (page.Dispatcher.Invoke(() => page.Content) is TextEditorUI textEditor)
         {
           pageText = textEditor.Dispatcher.Invoke(() => textEditor.Text);
+        }
+        else if (page.Dispatcher.Invoke(() => page.Content) is TranslatorItem translatorItem)
+        {
+          pageText = translatorItem.Dispatcher.Invoke(() => translatorItem.GetLeftEditor().Document.Text);
+        }
+        else
+        {
+          pageText = null;
         }
         return new { pageName, pageText };
       }).Where(x => x.pageText != null).ToList();
@@ -342,35 +378,39 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Коллекцию вкладок, в которых находятся текстовые редакторы, где необходимо провести поиск по тексту.</returns>
     private List<DockItem> SetSearchAreaPages(int searchArea)
     {
-      var activeTextEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      var searchPages = new List<DockItem>();
-      if (searchArea == 0 || searchArea == 2)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer activeTextEditorContainer)
       {
-        //var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        //var pageIndex = fileManager.OpenPages.IndexOf(activeTab);
-        //searchPages.Add(fileManager.OpenPages[pageIndex]);
-        if (activeTextEditorContainer != null)
+        var searchPages = new List<DockItem>();
+        if (searchArea == 0 || searchArea == 2)
         {
-          var dockItems = activeTextEditorContainer.DockManager.DockItems;
-          var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
-          if (dockItems[index].Content is TextEditorUI)
+          if (activeTextEditorContainer != null)
           {
-            searchPages.Add(dockItems[index]);
+            var dockItems = activeTextEditorContainer.DockManager.DockItems;
+            var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
+            if (dockItems[index].Content is TextEditorUI || dockItems[index].Content is TranslatorItem)
+            {
+              searchPages.Add(dockItems[index]);
+            }
           }
         }
+        else
+        {
+          foreach (var item in activeTextEditorContainer.DockManager.DockItems)
+          {
+            if (item.Content.GetType() == typeof(TextEditorUI) || item.Content.GetType() == typeof(TranslatorItem))
+            {
+              searchPages.Add(item);
+            }
+          }
+        }
+
+        return searchPages;
       }
       else
       {
-        foreach (var item in activeTextEditorContainer.DockManager.DockItems)
-        {
-          if (item.Content.GetType() == typeof(TextEditorUI))
-          {
-            searchPages.Add(item);
-          }
-        }
+        return null;
       }
-
-      return searchPages;
     }
 
     /// <summary>
@@ -383,7 +423,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (results == null || results.Count == 0)
       {
-        MessageBox.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Результаты поиска пусты!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Warning);
         return;
       }
 
@@ -406,19 +446,29 @@ namespace UI.Components.MultiEditorMethods
 
       if (searchArea == 0 || searchArea == 2)
       {
-        var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-        var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true && item.Content.GetType() == typeof(TextEditorUI));
-        if (activeDockItem != null)
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
         {
-          var textEditor = activeDockItem.Content as TextEditorUI;
-          fullText.Add(textEditor, textEditor.Text);
+          var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true
+          && (item.Content.GetType() == typeof(TextEditorUI) || item.Content.GetType() == typeof(TranslatorItem)));
+          if (activeDockItem != null)
+          {
+            if (activeDockItem.Content is TextEditorUI textEditor)
+            {
+              fullText.Add(textEditor, textEditor.Text);
+            }
+            else if (activeDockItem.Content is TranslatorItem translatorItem)
+            {
+              var foundTextEditor = translatorItem.GetLeftEditor();
+              fullText.Add(foundTextEditor, foundTextEditor.Text);
+            }
+          }
         }
       }
       else
       {
         AddTextFromAllDocuments(fullText);
       }
-
       return fullText;
     }
 
@@ -428,15 +478,25 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="fullText">Словарь для хранения текста.</param>
     private void AddTextFromAllDocuments(Dictionary<UserControl, string> fullText)
     {
-      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-
-      foreach (var item in textEditorContainer.DockManager.DockItems)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-        if (item.Content is TextEditorUI textEditor)
+        foreach (var item in textEditorContainer.DockManager.DockItems)
         {
-          if (!fullText.ContainsKey(textEditor))
+          if (item.Content is TextEditorUI textEditor)
           {
-            fullText.Add(textEditor, textEditor.Text);
+            if (!fullText.ContainsKey(textEditor))
+            {
+              fullText.Add(textEditor, textEditor.Text);
+            }
+          }
+          else if (item.Content is TranslatorItem translatorItem)
+          {
+            var translator = translatorItem.GetLeftEditor();
+            if (!fullText.ContainsKey(translator))
+            {
+              fullText.Add(translator, translator.Text);
+            }
           }
         }
       }
@@ -514,7 +574,7 @@ namespace UI.Components.MultiEditorMethods
     {
       if (string.IsNullOrEmpty(searchText))
       {
-        MessageBox.Show("Введите текст для поиска.");
+        MessageBoxCustom.Show("Введите текст для поиска.", image: MessageBoxImage.Warning);
         LogWarning("Поле для поиска не заполнено");
         return false;
       }
@@ -576,7 +636,7 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Возвращает null и выводит сообщение о том, что текст не найден.</returns>
     private List<SearchResult> HandleNoMatches(string searchText)
     {
-      MessageBox.Show($"Текст {searchText} не найден.");
+      MessageBoxCustom.Show($"Текст {searchText} не найден.", image: MessageBoxImage.Error);
       LogInformation($"Текст {searchText} не найден.");
       return null;
     }
@@ -591,6 +651,20 @@ namespace UI.Components.MultiEditorMethods
         if (userControl is TextEditorUI textEditor)
         {
           ClearHighlights(textEditor);
+        }
+        else if (userControl is TextEditorContainer textEditorContainer)
+        {
+          foreach (var item in textEditorContainer.DockManager.DockItems)
+          {
+            if (item.Content is TextEditorUI textEditorUI)
+            {
+              ClearHighlights(textEditorUI);
+            }
+            else if (item.Content is TranslatorItem translatorItem)
+            {
+              ClearHighlights(translatorItem.GetLeftEditor());
+            }
+          }
         }
       }
     }
@@ -667,9 +741,6 @@ namespace UI.Components.MultiEditorMethods
       return results;
     }
 
-
-
-
     /// <summary>
     /// Переход к следующему вхождению.
     /// </summary>
@@ -700,7 +771,7 @@ namespace UI.Components.MultiEditorMethods
 
             if (index == -1)
             {
-              MessageBox.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен");
+              MessageBoxCustom.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
               return;
             }
           }
@@ -712,7 +783,7 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        MessageBox.Show($"Текст {_searchText} не найден", "Ошибка");
+        MessageBoxCustom.Show($"Текст {_searchText} не найден", "Ошибка", image: MessageBoxImage.Error);
         return;
       }
     }
@@ -724,28 +795,29 @@ namespace UI.Components.MultiEditorMethods
     private int SwitchToNextDocument()
     {
       int currentIndex = GetCurrentIndex();
-      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-
-      if (currentIndex >= 0 && currentIndex < textEditorContainer.DockManager.DockItems.Count - 1)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-        int nextIndex = GetNextValidIndex(currentIndex + 1);
-
-        if (nextIndex >= 0)
+        if (currentIndex >= 0 && currentIndex < textEditorContainer.DockManager.DockItems.Count - 1)
         {
-          ShowNextPage(nextIndex);
-          return nextIndex;
+          int nextIndex = GetNextValidIndex(currentIndex + 1);
+
+          if (nextIndex >= 0)
+          {
+            ShowNextPage(nextIndex);
+            return nextIndex;
+          }
+        }
+        else
+        {
+          int nextIndex = GetNextValidIndex(0);
+          if (nextIndex >= 0)
+          {
+            ShowNextPage(nextIndex);
+            return nextIndex;
+          }
         }
       }
-      else
-      {
-        int nextIndex = GetNextValidIndex(0);
-        if (nextIndex >= 0)
-        {
-          ShowNextPage(nextIndex);
-          return nextIndex;
-        }
-      }
-
       return -1;
     }
 
@@ -755,11 +827,14 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Индекс текущей активной вкладки, или -1 если активная вкладка не найдена.</returns>
     private int GetCurrentIndex()
     {
-      var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      if (textEditroContainer != null)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-        var dockItems = textEditroContainer.DockManager.DockItems;
-        return dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
+        if (textEditorContainer != null)
+        {
+          var dockItems = textEditorContainer.DockManager.DockItems;
+          return dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
+        }
       }
       return -1;
     }
@@ -771,17 +846,18 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Индекс следующей вкладки с текстовым редактором, или -1, если таковой не найден.</returns>
     private int GetNextValidIndex(int startIndex)
     {
-      // TODO: придумать как обнулять счетчик и потом снова его запускать
-
-      var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      if (textEditroContainer != null)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-        var dockItems = textEditroContainer.DockManager.DockItems;
-        for (int i = startIndex; i < dockItems.Count; i++)
+        if (textEditorContainer != null)
         {
-          if (dockItems[i].Content is TextEditorUI)
+          var dockItems = textEditorContainer.DockManager.DockItems;
+          for (int i = startIndex; i < dockItems.Count; i++)
           {
-            return i;
+            if (dockItems[i].Content is TextEditorUI || dockItems[i].Content is TranslatorItem)
+            {
+              return i;
+            }
           }
         }
       }
@@ -795,11 +871,14 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="nextIndex">Индекс следующей вкладки, которую нужно отобразить.</param>
     private void ShowNextPage(int nextIndex)
     {
-      var textEditroContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      if (textEditroContainer != null)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-        var dockItems = textEditroContainer.DockManager.DockItems;
-        dockItems[nextIndex].Show(textEditroContainer.DockManager);
+        if (textEditorContainer != null)
+        {
+          var dockItems = textEditorContainer.DockManager.DockItems;
+          dockItems[nextIndex].Show(textEditorContainer.DockManager);
+        }
       }
     }
 
@@ -835,15 +914,27 @@ namespace UI.Components.MultiEditorMethods
     {
       if (index >= 0 && index < foundResults.Count)
       {
-
-        var textEditroContainer = fileManager.UserControls.FirstOrDefault(editor => editor.GetType() == typeof(TextEditorContainer));
-        if (textEditroContainer != null)
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
         {
-          var activeDockItem = (textEditroContainer as TextEditorContainer).DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
-          if (activeDockItem != null)
+          if (textEditorContainer != null)
           {
-            if (activeDockItem.Content is TextEditorUI textEditor)
+            var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+            if (activeDockItem != null)
             {
+              TextEditorUI textEditor = new TextEditorUI();
+              if (activeDockItem.Content is TextEditorUI)
+              {
+                textEditor = activeDockItem.Content as TextEditorUI;
+              }
+              else if (activeDockItem.Content is TranslatorItem translatorItem)
+              {
+                textEditor = translatorItem.GetLeftEditor();
+              }
+              else
+              {
+                return;
+              }
               var result = foundResults[index];
               textEditor.MarkerService.ClearAllMarkers();
               textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, (Color)ColorConverter.ConvertFromString("#b23a48"));
@@ -876,25 +967,31 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     public void OnSearchWindowClosing()
     {
-      var textEditorContainer = fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
-      if (textEditorContainer != null)
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
-
-        foreach (var control in textEditorContainer.DockManager.DockItems)
+        if (textEditorContainer != null)
         {
-          if (control.Content is TextEditorUI textEditor)
+          foreach (var control in textEditorContainer.DockManager.DockItems)
           {
-            ClearHighlights(textEditor);
+            if (control.Content is TextEditorUI textEditor)
+            {
+              ClearHighlights(textEditor);
+            }
+            else if (control.Content is TranslatorItem item)
+            {
+              ClearHighlights(item.GetLeftEditor());
+            }
           }
-        }
 
-        _pendingHighlights.Clear();
-        _fullText = new Dictionary<UserControl, string>();
-        _wholeWord = false;
-        _caseWord = false;
-        _searchArea = 0;
-        _searchParameters = string.Empty;
-        hasChanged = true;
+          _pendingHighlights.Clear();
+          _fullText = new Dictionary<UserControl, string>();
+          _wholeWord = false;
+          _caseWord = false;
+          _searchArea = 0;
+          _searchParameters = string.Empty;
+          hasChanged = true;
+        }
       }
     }
 
@@ -912,10 +1009,45 @@ namespace UI.Components.MultiEditorMethods
       {
         return;
       }
-
-      var foundDockItem = foundPage.DockManager.DockItems.FirstOrDefault(item => item.Title == fileName);
-      if (foundDockItem.Content is TextEditorUI textEditor)
+      var foundDockItem = new DockItem();
+      if (foundPage.DockManager.DockItems.Any(item => item.Title == fileName))
       {
+        foundDockItem = foundPage.DockManager.DockItems.FirstOrDefault(item => item.Title == fileName);
+      }
+      else
+      {
+        foreach (var tab in fileManager.OpenPages)
+        {
+          if (fileManager.UserControls[fileManager.OpenPages.IndexOf(tab)] is TextEditorContainer editorContainer)
+          {
+            foreach (var item in editorContainer.DockManager.DockItems)
+            {
+              if (item.Title == fileName)
+              {
+                foundDockItem = item;
+                foundPage = editorContainer;
+                multiEditorControl.controlManager.ShowControl(foundPage, tab);
+              }
+            }
+          }
+        }
+      }
+      var textEditor = new TextEditorUI();
+      if (foundDockItem.Content is TextEditorUI)
+      {
+        textEditor = foundDockItem.Content as TextEditorUI;
+      }
+      else if (foundDockItem.Content is TranslatorItem translatorItem)
+      {
+        textEditor = translatorItem.GetLeftEditor();
+      }
+      else
+      {
+        return;
+      }
+      if (textEditor != null)
+      {
+
         if (textEditor.MarkerService == null)
         {
           LogError("markerService == null");
@@ -923,7 +1055,6 @@ namespace UI.Components.MultiEditorMethods
         }
 
         foundDockItem.Show(foundPage.DockManager);
-        //ShowControl(textEditor, foundPage);
         textEditor.MarkerService.ClearAllMarkers();
 
         var ranges = FindAllOccurrencesInLine(lineText, startOffset);
@@ -946,7 +1077,15 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Страница с данным файлом, или null, если не найдена.</returns>
     private TextEditorContainer FindFilePage()
     {
-      return fileManager.UserControls.OfType<TextEditorContainer>().FirstOrDefault();
+      var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab != null && fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
+      {
+        return textEditorContainer;
+      }
+      else
+      {
+        return null;
+      }
     }
 
     /// <summary>
@@ -982,18 +1121,6 @@ namespace UI.Components.MultiEditorMethods
     {
       this.fileManager = fileManager;
       this.multiEditorControl = multiEditorControl;
-    }
-
-    /// <summary>
-    /// Конструктор, для инициализации <see cref="TextSearchManager"/>.
-    /// </summary>
-    /// <param name="fileManager">Экземпляр класса <see cref="FileManager"/>.</param>
-    /// <param name="multiEditorControl">Экземпляр <see cref="MultiEditorControl"/> для взаимодействия с редактором.</param>
-    /// <param name="searchText">Искомый текст.</param>
-    public TextSearchManager(FileManager fileManager, MultiEditorControl multiEditorControl, string searchText)
-      : this(fileManager, multiEditorControl)
-    {
-      this._searchText = searchText;
     }
   }
 }

@@ -5,8 +5,10 @@ using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
+using Message;
 using UI.Controls.Search;
 using static Utilities.LoggerUtility;
+
 
 namespace MainWindowProgram
 {
@@ -55,6 +57,8 @@ namespace MainWindowProgram
     /// </summary>
     public SearchWindow SearchWindow;
 
+    private readonly TextEditorStatusViewModel _statusBarViewModel = new();
+
     #endregion
 
     /// <summary>
@@ -69,6 +73,9 @@ namespace MainWindowProgram
       _viewModel = vm;
       _usbServices = usb;
 
+      StatusBar.DataContext = _statusBarViewModel;
+      _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
+
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
     }
@@ -79,7 +86,7 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices);
+      lifecycle.Initialize(this, _usbServices, _statusBarViewModel);
       new CommandLineParser(_usbServices).ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
 
@@ -99,12 +106,12 @@ namespace MainWindowProgram
       catch (InvalidOperationException exception)
       {
         LogException($"Ошибка загрузки темы программы", exception);
-        MessageBox.Show($"Ошибка загрузки темы: {exception.Message}");
+        MessageBoxCustom.Show($"Ошибка загрузки темы: {exception.Message}", image: MessageBoxImage.Error);
       }
       catch (Exception ex)
       {
         LogException($"Ошибка выполнения программы", ex);
-        MessageBox.Show($"Ошибка: {ex.Message}");
+        MessageBoxCustom.Show($"Ошибка: {ex.Message}", image: MessageBoxImage.Error);
       }
     }
 

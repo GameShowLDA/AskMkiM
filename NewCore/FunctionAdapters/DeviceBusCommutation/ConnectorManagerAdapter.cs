@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AppConfiguration.Error.Device.DeviceBusCommutation;
+using NewCore.Base.Function.DBC;
 using NewCore.Enum;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
@@ -111,6 +112,40 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       if (!result)
         throw ConnectorExceptionFactory.DisconnectFailed(description);
 
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectAllBuses()
+    {
+      var description = $"(AB1, AB2, AB3, AB4)";
+      var result = await _connectorManager.ConnectAllBuses();
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed(description);
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectAllBuses()
+    {
+      var description = $"(AB1, AB2, AB3, AB4)";
+      var result = await _connectorManager.DisconnectAllBuses();
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", result, 1);
+
+      if (!result)
+        throw ConnectorExceptionFactory.DisconnectFailed(description);
+
+      return result;
+    }
+
+    public async Task<bool> GetSuccesCurrentMode(TypeConnector mode)
+    {
+      var result = await _connectorManager.GetSuccesCurrentMode(mode);
       return result;
     }
   }

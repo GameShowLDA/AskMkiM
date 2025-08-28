@@ -3,6 +3,7 @@ using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using NewCore.Base.Interface.Main;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TestConsole.GPT
 {
@@ -17,6 +18,7 @@ namespace TestConsole.GPT
         Console.WriteLine("1. Проверка подлючения");
         Console.WriteLine("2. Проверка времени нарастания");
         Console.WriteLine("3. Проверка скорости изменений параметров");
+        Console.WriteLine("4. Тест завершения измерения");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
@@ -40,6 +42,9 @@ namespace TestConsole.GPT
             await CheckTime();
             break;
 
+          case 4:
+            await TestStop();
+            break;
 
           case 0:
             return;
@@ -122,6 +127,15 @@ namespace TestConsole.GPT
       }
 
       return null;
+    }
+
+    private static async Task TestStop()
+    {
+      var tester = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
+      if (tester != null)
+      {
+        await tester.IrManger.StopMeasure();
+      }
     }
   }
 }

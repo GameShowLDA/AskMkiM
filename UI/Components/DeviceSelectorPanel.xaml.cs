@@ -49,7 +49,9 @@ namespace UI.Components
 
     private void PartData_DeviceSelected(object obj)
     {
+      var selectedDevice = RelayData.SelectedItem;
       FastMeterSelectionVisibility = Visibility.Visible;
+
       LoadMeter();
     }
 
@@ -71,12 +73,12 @@ namespace UI.Components
         var enumType = checker2.GetTestTypeEnum();
         SetSelfControlEnum(enumType);
       }
-      // else if (selectedDevice is IRelaySwitchModule relayModule &&
-      //          relayModule.SelfTestManager is ISelfTestCheckerDeviceBusCommutation checker3)
-      // {
-      //   var enumType = checker3.GetTestTypeEnum();
-      //   SetSelfControlEnum(enumType);
-      // }
+      else if (selectedDevice is IRelaySwitchModule relayModule &&
+               relayModule.SelfTestManager is ISelfTestCheckerModuleRelayControl checker3)
+      {
+        var enumType = checker3.GetTestTypeEnum();
+        SetSelfControlEnum(enumType);
+      }
     }
 
 

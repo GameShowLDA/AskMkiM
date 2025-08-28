@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using UI.Icon;
 
 namespace UI.Components
 {
@@ -107,5 +108,25 @@ namespace UI.Components
         Command.Execute(null);
       }
     }
+
+    public static readonly DependencyProperty SizeProperty =
+      DependencyProperty.Register(nameof(Size), typeof(double), typeof(WindowButtons),
+          new PropertyMetadata(64.0, OnSizeChanged));
+
+    public double Size
+    {
+      get => (double)GetValue(SizeProperty);
+      set => SetValue(SizeProperty, value);
+    }
+
+    private static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is WindowButtons icon)
+      {
+        icon.Width = icon.Size;
+        icon.Height = icon.Size;
+      }
+    }
+
   }
 }

@@ -37,10 +37,7 @@ namespace ConsoleUI.ConsoleUI
       // Подписка на вывод
       ConsoleTextManager.Instance.Subscribe(AppendLogEntry);
       Loaded += (_, _) => CommandInput.Focus();
-
-      Closed += (_, _) =>
-        ConsoleTextManager.Instance.Unsubscribe(AppendLogEntry);
-
+      Closed += (_, _) => ConsoleTextManager.Instance.Unsubscribe(AppendLogEntry);
 
       // Перехватываем Alt+F4, чтобы окно закрывалось,
       // а не пробовало скрыться через Toggle

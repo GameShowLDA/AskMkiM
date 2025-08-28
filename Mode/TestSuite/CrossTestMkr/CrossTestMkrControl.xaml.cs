@@ -62,9 +62,9 @@ namespace Mode.TestSuite.CrossTestMkr
 
       // Настройка контроля и передача необходимых делегатов
       ProtocolSelfCheckControl.SetSettings(
-        this, 
-        StartDelegate: ExecuteTestProcess, 
-        true, 
+        this,
+        StartDelegate: ExecuteTestProcess,
+        true,
         StopDelegate: Stop);
       //ProtocolSelfCheckControl.Header = "Перекрёстный тест";
 
@@ -174,16 +174,16 @@ namespace Mode.TestSuite.CrossTestMkr
 
       // 4. Подготовка оборудования
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования"), IsBlockStart: true);
-      await InitializeModule(testedModuleRelayControl, cancellationToken, "тестируемый");
-      await InitializeModule(verificatModuleRelayControl, cancellationToken, "проверяющий");
+      await InitializeModule(ProtocolSelfCheckControl, testedModuleRelayControl, cancellationToken, "тестируемый");
+      await InitializeModule(ProtocolSelfCheckControl, verificatModuleRelayControl, cancellationToken, "проверяющий");
 
       await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"), IsBlockStart: true);
-      await MeterEnableAsync(verificatModuleRelayControl, cancellationToken);
+      await MeterEnableAsync(ProtocolSelfCheckControl, verificatModuleRelayControl, cancellationToken);
 
       // 5. Собственно сам тест
-      await RunPart1(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
-      await RunPart2(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
-      await RunPart3(testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
+      await RunPart1(ProtocolSelfCheckControl, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
+      await RunPart2(ProtocolSelfCheckControl, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
+      await RunPart3(ProtocolSelfCheckControl, testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
     }
 
     /// <summary>

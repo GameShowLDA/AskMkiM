@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,14 +6,14 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppConfiguration.Base;
-using AppConfiguration.Interface;
-using NewCore.Base.Device;
+using Message;
 using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static AppConfiguration.Protocol.ProtocolConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
 using static Utilities.DelegateManager;
 using static Utilities.Models.ShowMessageModel;
-using static AppConfiguration.SystemState.SystemStateManager;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -33,6 +32,14 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
+    public IButtonService ButtonService { get; set; }
+
+    /// <summary>
+    /// Действие, которое будет вызвано при нажатии на кнопку "Повторить".
+    /// </summary>
+    private Func<Task> _retryAction;
+
+
     /// <summary>
     /// Главное окно приложения, используемое для отображения интерфейса.
     /// </summary>
@@ -44,6 +51,8 @@ namespace UI.Controls.ProtocolNew
     readonly ActionExecutor ActionExecutor;
 
     bool _checkPower = true;
+
+    private TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs;
 
     #region Делегаты выполнения.
 
@@ -127,7 +136,6 @@ namespace UI.Controls.ProtocolNew
       LoopMeasureResistanceButtonPreviewMouseDown += (sender, e) => LoopMeasureEvent();
       ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
     }
-
     #endregion
 
     #region Основные методы кнопок.
@@ -138,7 +146,7 @@ namespace UI.Controls.ProtocolNew
     /// Прерывает выполнение текущего процесса.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
-    public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate);
+    public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate, _userActionTcs);
 
     /// <summary>
     /// Начинает запуск измерения.
@@ -150,7 +158,7 @@ namespace UI.Controls.ProtocolNew
     /// Завершение текущей выполняемой задачи.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate);
+    private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate, _userActionTcs);
 
     /// <summary>
     /// Выполняет завершающие действия после завершения процесса.
@@ -167,12 +175,12 @@ namespace UI.Controls.ProtocolNew
     /// Приостанавливает метод на паузу.
     /// </summary>
     /// <returns></returns>
-    public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken());
+    public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken(), this);
 
     /// <summary>
     /// Возобновляет метод после паузы.
     /// </summary>
-    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode);
+    public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this, _userActionTcs);
 
     #endregion
 
@@ -186,7 +194,7 @@ namespace UI.Controls.ProtocolNew
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
     /// </summary>
-    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(_returnDelegate, _stopDelegate);
+    private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(this, _userActionTcs);
 
     #endregion
 
@@ -207,13 +215,13 @@ namespace UI.Controls.ProtocolNew
     #endregion
 
     #region Методы.
-    
+
     /// <summary>
     /// Выводит информацию в протокол.
     /// </summary>
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
-    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false)
+    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false)
     {
       await CheckBlockStart(IsBlockStart);
 
@@ -223,7 +231,7 @@ namespace UI.Controls.ProtocolNew
       }
       await ShouldShowDetailedProtocol(showMessageModel);
       CheckStatus(ref showMessageModel);
-      
+
       await protocolTextBox.AppendLineAsync(showMessageModel);
 
       if (ActionExecutor.IsPaused)
@@ -231,7 +239,10 @@ namespace UI.Controls.ProtocolNew
         await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
       }
 
-      await CheckPause(showMessageModel.Status);
+      if (!skipPause)
+      {
+        await CheckPause(showMessageModel.Status);
+      }
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
@@ -409,16 +420,40 @@ namespace UI.Controls.ProtocolNew
     #endregion
 
     /// <summary>
-    /// Возвращает токен отмены для текущего действия.
+    /// Возвращает токен отмены для текущего действия, если источник не уничтожен.
     /// </summary>
-    /// <returns>Токен отмены <see cref="CancellationToken"/>.</returns>
-    public CancellationToken GetCancellationToken() =>
-      ActionExecutor.CancellationTokenSource?.Token ?? CancellationToken.None;
+    /// <returns>Токен отмены <see cref="CancellationToken"/> или <see cref="CancellationToken.None"/>.</returns>
+    public CancellationToken GetCancellationToken()
+    {
+      try
+      {
+        return ActionExecutor?.CancellationTokenSource?.Token ?? CancellationToken.None;
+      }
+      catch (ObjectDisposedException)
+      {
+        return CancellationToken.None;
+      }
+    }
 
     public Task<bool> AwaitAdminDecisionAsync(string message)
     {
-      MessageBox.Show("В будущем добавить сюда реализацию выбора");
+      MessageBoxCustom.Show("В будущем добавить сюда реализацию выбора", image: MessageBoxImage.Error);
       return Task.FromResult(true);
+    }
+    public async Task<IUserMessageService.UserAction> WaitUserActionAsync()
+    {
+      _userActionTcs = new TaskCompletionSource<IUserMessageService.UserAction>();
+
+      if (await AppConfiguration.Execution.ExecutionConfig.GetIsStopOnErrorEnabled())
+      {
+
+        SetNonVisibleAllButton();
+        ShowButtonsOnPause(true);
+
+        return await _userActionTcs.Task;
+      }
+
+      return IUserMessageService.UserAction.None;
     }
   }
 }

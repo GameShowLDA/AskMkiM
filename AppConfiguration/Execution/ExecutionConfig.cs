@@ -1,9 +1,10 @@
-﻿using System;
+﻿using AppConfiguration.Base;
+using AppConfiguration.Protocol;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AppConfiguration.Base;
 
 namespace AppConfiguration.Execution
 {
@@ -100,7 +101,32 @@ namespace AppConfiguration.Execution
     /// <returns>true, если включена; false, если выключена.</returns>
     public static async Task<bool> GetIsStepByStepModeEnabled() => await Task.Run(() => ExecutionModel.StepByStepMode);
 
+    public static async Task<ExecutionModel> GetExecitonModel()
+    {
+      return await Task.Run(() =>
+      {
+        ExecutionModel executionModel = new ExecutionModel();
+        executionModel.IdleModeExecution = ExecutionModel.IdleModeExecution;
+        executionModel.IsErrorSimulationMode = ExecutionModel.IsErrorSimulationMode;
+        executionModel.StepByStepMode = ExecutionModel.StepByStepMode;
+        executionModel.StopOnError = ExecutionModel.StopOnError;
+        return executionModel;
+      });
+    }
     #endregion
+
+    public static async Task SaveProtocolModel(ExecutionModel protocolModel)
+    {
+      await Task.Run(() =>
+      {
+        ExecutionModel.IdleModeExecution = protocolModel.IdleModeExecution;
+        ExecutionModel.IsErrorSimulationMode = protocolModel.IsErrorSimulationMode;
+        ExecutionModel.StepByStepMode = protocolModel.StepByStepMode;
+        ExecutionModel.StopOnError = protocolModel.StopOnError;
+      });
+
+      await RewriteExecutionConfigAsync();
+    }
 
     /// <summary>
     /// Перезаписывает конфигурацию выполнений.

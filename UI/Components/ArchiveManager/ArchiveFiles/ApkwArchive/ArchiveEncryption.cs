@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Utilities.Encrypter;
 using static Utilities.LoggerUtility;
 
@@ -113,9 +108,9 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
         counter++;
       }
 
-      if (!System.IO.File.Exists(tempPath) && needCreate)
+      if (!File.Exists(tempPath) && needCreate)
       {
-        using (FileStream fs = System.IO.File.Create(tempPath))
+        using (FileStream fs = File.Create(tempPath))
         {
           LogInformation($"Создан временный файл: {tempPath}");
         }
@@ -172,7 +167,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
       LogInformation($"Расшифровка файла: {archivePath}");
       string decryptedSting = InitializeArchiveDecryption(archivePath);
       byte[] decryptedData = Convert.FromBase64String(decryptedSting);
-      System.IO.File.WriteAllBytes(tempPath, decryptedData);
+      File.WriteAllBytes(tempPath, decryptedData);
       LogInformation($"Файл {archivePath} успешно расшифрован");
     }
 
@@ -184,7 +179,7 @@ namespace UI.Components.ArchiveManager.ArchiveFiles.ApkwArchive
     /// <returns>Расшифрованные данные архива.</returns>
     public static string InitializeArchiveDecryption(string encryptedArchivePath)
     {
-      byte[] encryptedData = System.IO.File.ReadAllBytes(encryptedArchivePath);
+      byte[] encryptedData = File.ReadAllBytes(encryptedArchivePath);
       string base64String = Convert.ToBase64String(encryptedData);
       return FileEncryptionManager.Decrypt(base64String);
     }

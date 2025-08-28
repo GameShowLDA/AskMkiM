@@ -2,6 +2,8 @@
 using DataBaseConfiguration.Services.Device;
 using Mode.Models;
 using NewCore.Base.Device;
+using Utilities.Interface;
+using Utilities.Models;
 
 namespace Mode.TestSuite.Metrology.MethodExecutor
 {
@@ -48,13 +50,13 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
     /// Подключает все устройства, поддерживающие интерфейс <see cref="IDevice"/>.
     /// </summary>
     /// <returns>Результат подключения.</returns>
-    public async Task<(bool Connect, string Message)> ConnectAllAsync()
+    public async Task<(bool Connect, string Message)> ConnectAllAsync(IUserMessageService messageService)
     {
       foreach (var device in Devices)
       {
         if (device is IDevice connectable)
         {
-          var (connected, message) = await connectable.ConnectableManager.ConnectAsync();
+          var (connected, message) = await connectable.ConnectableManager.ConnectAsync(messageService);
           if (!connected)
           {
             return (false, $"Не удалось подключить устройство {connectable.Name}({connectable.Number}) - {message}");

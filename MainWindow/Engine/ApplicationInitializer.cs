@@ -6,6 +6,7 @@ using static AppConfiguration.Base.EventAggregator;
 using static Utilities.LoggerUtility;
 using AppConfiguration.Theme;
 using DataBaseConfiguration;
+using AppConfiguration.Parameter;
 
 namespace MainWindowProgram.Engine
 {
@@ -28,6 +29,7 @@ namespace MainWindowProgram.Engine
     public async Task InitializeAsync()
     {
       CheckStatusProgram();
+      await LanguageSettings.InitializeAsync();
       await StartSettingsAsync();
     }
 
@@ -57,9 +59,10 @@ namespace MainWindowProgram.Engine
       {
         var executionTask = ExecutionSettingsManager.ReadExecutionModeAsync();
         var protocolTask = ProtocolSettingsManager.ReadProtocolModeAsync();
+        var parameterTask = ParameterSettingsManager.ReadParameterModeAsync();
         var db = DataBaseConfig.InitializeDB();
 
-        await Task.WhenAll(executionTask, protocolTask, db);
+        await Task.WhenAll(executionTask, protocolTask, parameterTask, db);
         await ThemeSettingsManager.ReadThemeModeAsync();
       }
       catch (Exception ex)
@@ -70,6 +73,7 @@ namespace MainWindowProgram.Engine
       ErrorMessageEvent += messageHandler.SetErrorMessage;
       WarningMessageEvent += messageHandler.SetWarningMessage;
       InfoMessageEvent += messageHandler.SetInfoMessage;
+      ClearMessageEvent += messageHandler.ClearMessage;
       LogInformation("Настройки инициализированы.");
     }
   }

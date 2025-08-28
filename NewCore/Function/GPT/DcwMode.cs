@@ -4,10 +4,11 @@ using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
 using NewCore.Function.GPT.Command;
 using NewCore.Function.GPT.Data;
+using Utilities.Interface;
+using static AppConfiguration.Execution.ExecutionConfig;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -270,7 +271,7 @@ namespace NewCore.Function.GPT
 
     #region Offset
 
-    public async Task<(bool Success, string Message)> SetOffsetAsync(double value)
+    public async Task<(bool Success, string Message)> SetOffsetAsync(IUserMessageService messageService, double value)
     {
       LogInformation($"Устанавливаем смещение DCW: {value:F3} мА", isDeviceLog: true);
 
@@ -345,12 +346,14 @@ namespace NewCore.Function.GPT
       };
     }
 
-    public async Task<double> MeasureCurrentAsync()
+    public async Task<double> MeasureCurrentAsync(double param = 0)
     {
       LogInformation("Запуск измерений режима DCW", isDeviceLog: true);
 
       if (await GetIsIdleModeEnabled())
-        return 0;
+      {
+        return param;
+      }
 
       var query = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
       int delay = (int)(await GetRampTimeAsync() + await GetTestTimeAsync()) * 1000;

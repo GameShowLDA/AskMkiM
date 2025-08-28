@@ -11,12 +11,40 @@
 	<Color name="OkParam" foreground="#FFB300" />
 	<Color name="RmPoint" foreground="#00BCD4" />
 	<Color name="RmAddress" foreground="#FF6F00" />
+	<Color name="OkValue" foreground="#00FFFF" />
+	<Color name="ErrorLine" foreground="#FF2D2D" />
 
 	<RuleSet ignoreCase="false">
+
+
+		<!-- Вся строка с ! красная -->
+		<Rule color="ErrorLine">^.*!.*$</Rule>
 		
+		<!--Время-->
+		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
+
+		<!--Напряжение-->
+		<Rule color="Voltage">\s\d+\s*[ВVv]\b</Rule>
+
+		<!--Сопротивление-->
+
+		<!-- Диапазон типа 94<кОм<106 -->
+		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?&lt;(?:Ом|кОм|МОм|ГОм|нф|мкф|пф)&lt;\d+(?:[.,]\d+)?</Rule>
+
+		<!-- Случаи с R> -->
+		<Rule color="Resistance">(?i)R&gt;\d+(?:[.,]\d+)?(Ом|кОм|МОм|ГОм|нф|мкф|пф)</Rule>
+
+		<!-- Универсальное правило -->
+		<Rule color="Resistance">(?i)(Ом|кОм|МОм|ГОм|нф|мкф|пф)&lt;\d+(?:[.,]\d+)?</Rule>
+
+		<!-- Универсальное правило — только с < -->
+		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?\s?&lt;\s?(Ом|кОм|МОм|ГОм|нф|мкф|пф)</Rule>
+
 		<!-- Данные РМ -->
-		<Rule color="RmPoint">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
+		<Rule color="OkParam">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
 		<Rule color="RmAddress">(?&lt;=&gt;\s*)[\d\.]+</Rule>
+		<Rule color="OkValue">^\s*\d+\.\d+\.\d+\s*$</Rule>
+
 
 		<!-- Номер команды -->
 		<Rule color="CommandNumber">^\s*\d+\b</Rule>
@@ -31,12 +59,17 @@
 		<Rule color="Mnemonic">\bПИ\b</Rule>
 		<Rule color="Mnemonic">\bКЦ\b</Rule>
 		<Rule color="Mnemonic">\bУП\b</Rule>
+		<Rule color="Mnemonic">\bКС\b</Rule>
+		<Rule color="Mnemonic">\bИЕ\b</Rule>
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" />
 		<Span color="Comment" begin="//" end="\n" />
 
-		
+		<!--Обозначения-->
+		<Rule color="OkParam">^[ \t]*[А-Яа-яA-Za-z_0-9]+(?=\s*=)</Rule>
+		<Rule color="OkValue">(?&lt;=\=)[^\r\n]+</Rule>
+
 
 	</RuleSet>
 </SyntaxDefinition>

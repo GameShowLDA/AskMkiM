@@ -4,13 +4,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
-using AppConfiguration.Interface;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
+using Message;
 using UI.Components;
 using Utilities.Help;
 using Utilities.TextEditor;
@@ -32,7 +32,9 @@ namespace UI.Controls.TextEditor
       OPKW
     }
 
+    private ExecutionGlyphMargin _executionMargin;
     private FileType FileTypeDock { get; set; }
+    public TextEditorModel TextEditorModel { get; set; }
 
     private FoldingManager foldingManager;
     private OpkwFoldingStrategy foldingStrategy = new OpkwFoldingStrategy();
@@ -115,17 +117,18 @@ namespace UI.Controls.TextEditor
       foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
     }
 
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
     /// </summary>
     /// <remarks>
     /// Этот конструктор вызывается при создании экземпляра класса. Он инициализирует компоненты UI и подготавливает текстовый редактор для работы.
     /// </remarks>
-    public TextEditorUI(FileType fileType = FileType.None)
+    public TextEditorUI(FileType fileType = FileType.None, TextEditorModel textEditorModel = null)
     {
       InitializeComponent();
       FileTypeDock = fileType;
+      TextEditorModel = textEditorModel;
+
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
 
       Loaded += (s, e) =>
@@ -165,67 +168,44 @@ namespace UI.Controls.TextEditor
           LogDebug($"Highlighting: {textEditor.SyntaxHighlighting?.Name}");
         }
 
+        if (_executionMargin == null)
+        {
+          _executionMargin = new ExecutionGlyphMargin(textEditor);
+          textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
+        }
+
       };
 
-      HelpProvider.SetHelpKeyProvider(textEditor, () =>
-      {
-        var sel = textEditor.SelectedText?.Trim();
-        return string.IsNullOrWhiteSpace(sel) ? "" : sel;
-      });
     }
 
-    //private static bool IsValidCommand(string text, out HelpProvider.EnumHelpCommands command)
-    //{
-    //  command = HelpProvider.EnumHelpCommands.Unknown;
-
-    //  // Проверяем прямое соответствие enum
-    //  if (Enum.TryParse<HelpProvider.EnumHelpCommands>(text, true, out var directEnum))
-    //  {
-    //    // Для одиночных символов делаем дополнительную проверку
-    //    if (text.Length == 1 &&
-    //        directEnum != HelpProvider.EnumHelpCommands.OK &&
-    //        directEnum != HelpProvider.EnumHelpCommands.UP)
-    //    {
-    //      return false;
-    //    }
-
-    //    command = directEnum;
-    //    return true;
-    //  }
-
-    //  // Проверяем соответствие по Description
-    //  if (HelpProvider.TryGetByDescription(text, out var byDesc))
-    //  {
-    //    command = byDesc;
-    //    return true;
-    //  }
-
-    //  return false;
-    //}
+    /// <summary>
+    /// Установить маркер на указанную строку, очищая остальные.
+    /// </summary>
+    public void SetActiveLine(int lineNumber)
+    {
+      _executionMargin.SetActiveLine(lineNumber);
+    }
 
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-      // Отслеживаем Ctrl+M
       if (e.Key == Key.M && Keyboard.Modifiers == ModifierKeys.Control)
       {
         var now = DateTime.Now;
         if (_ctrlMPressed && (now - _lastCtrlMTime).TotalMilliseconds < CtrlMTimeoutMs)
         {
-          // Второе нажатие Ctrl+M — свернуть/развернуть текущий блок
           ToggleCurrentFolding();
           _ctrlMPressed = false;
           e.Handled = true;
         }
         else
         {
-          // Первое нажатие Ctrl+M
           _ctrlMPressed = true;
           _lastCtrlMTime = now;
           e.Handled = true;
         }
         return;
       }
-      // Если нажата любая другая клавиша — сбрасываем
+
       if (e.Key != Key.M)
       {
         _ctrlMPressed = false;
@@ -456,7 +436,7 @@ namespace UI.Controls.TextEditor
           }
           catch (Exception ex)
           {
-            MessageBox.Show($"Ошибка при открытии файла: {ex.Message}");
+            MessageBoxCustom.Show($"Ошибка при открытии файла: {ex.Message}", image: MessageBoxImage.Error);
           }
         }
       }

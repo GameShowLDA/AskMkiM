@@ -35,7 +35,7 @@ namespace Utilities.TextEditor
     /// <summary>
     /// Явно заданный цвет для этого диапазона.
     /// </summary>
-    public Color? ColorOverride { get; set; }
+    public System.Windows.Media.Color? ColorOverride { get; set; }
 
     public HighlightRange(int line, int start, int length, HighlightTarget target)
     {

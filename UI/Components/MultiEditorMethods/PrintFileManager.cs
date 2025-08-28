@@ -1,4 +1,5 @@
 ﻿using AppConfiguration.Interface;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -20,7 +21,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="openPages">Список вкладок, представляющих открытые страницы.</param>
     /// <param name="userControls">Список пользовательских контролов, ассоциированных с открытыми страницами.</param>
-    public static void PrintFile(List<OpenFileButton> openPages, List<UserControl> userControls)
+    public static void PrintFile(ObservableCollection<OpenFileButton> openPages, ObservableCollection<UserControl> userControls)
     {
       var activeTab = openPages.FirstOrDefault(page =>
         page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);

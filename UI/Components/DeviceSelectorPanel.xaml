@@ -47,7 +47,7 @@
                 <Custom:ChoiceDevice x:Name="PartData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите тип проверку"/>
             </Grid>
         </Border>
-        
+
         <Border Name="FastMeterSelectionControl"  Margin="5" Grid.Row="3" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
@@ -58,6 +58,6 @@
                 <Custom:ChoiceDevice x:Name="MeterData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите измеритель"/>
             </Grid>
         </Border>
-        
+
     </Grid>
 </UserControl>

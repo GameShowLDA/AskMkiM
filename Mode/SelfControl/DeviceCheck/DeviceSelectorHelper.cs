@@ -68,8 +68,6 @@ namespace Mode.SelfControl.DeviceCheck
         panel.Dispatcher.Invoke(TryGet);
 
       return result;
-
-      return result;
     }
 
     /// <summary>

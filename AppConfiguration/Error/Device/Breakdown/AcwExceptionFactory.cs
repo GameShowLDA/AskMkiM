@@ -41,7 +41,7 @@ namespace AppConfiguration.Error.Device.Breakdown
     /// Исключение при ошибке установки времени нарастания (Ramp Time) ACW.
     /// </summary>
     public static DeviceException SetRampTimeFailed(string name, int chassis, int number, string reason = null) =>
-        new($"Ошибка установки Ramp Time ACW {name}({chassis}.{number}){Format(reason)}");
+        new($"Ошибка установки времени нарстания ACW {name}({chassis}.{number}){Format(reason)}");
 
     /// <summary>
     /// Исключение при ошибке установки частоты ACW.

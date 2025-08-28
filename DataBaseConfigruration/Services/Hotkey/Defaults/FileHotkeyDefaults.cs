@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataBaseConfiguration.Services.Hotkey.Defaults
+﻿namespace DataBaseConfiguration.Services.Hotkey.Defaults
 {
   using System.Collections.Generic;
 
@@ -31,7 +25,8 @@ namespace DataBaseConfiguration.Services.Hotkey.Defaults
         { "PrintFile", "Ctrl+P" },
         { "SearchFile", "Ctrl+F" },
         { "CompareFile", "Ctrl+K" },
-        { "StartTranslation", "Ctrl+F9" },
+        { "Build", "Ctrl+F9" },
+        { "Run", "Ctrl+F5" },
 
         // Выход
         { "ExitApplication", "Alt+F4" }

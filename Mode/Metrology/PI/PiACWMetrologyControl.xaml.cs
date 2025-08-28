@@ -1,10 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using AppConfiguration.Error.Device;
+using AppConfiguration.Error.Device.Breakdown;
 using AppConfiguration.Interface;
 using Mode.Base;
 using Mode.Metrology.MeasurementSystem;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
 
@@ -40,13 +44,9 @@ namespace Mode.Metrology.PI
         this,
         StartDelegate: ExecuteMeasurementProcess,
         true,
-        ReturnDelegate: async (CancellationToken token) =>
-        {
-          await testMeasurement.PerformMeasurement(metrologicalModeRole, Data.DataModel.Param, ProtocolUI);
-        },
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement();
+          await testMeasurement.FinalizeMeasurement(ProtocolUI);
         });
     }
 
@@ -78,8 +78,8 @@ namespace Mode.Metrology.PI
       }
 
       await testMeasurement.SetupCommutation(ProtocolUI, first, second, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(metrologicalModeRole, Data.DataModel);
-      await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI);
+      await testMeasurement.ConfigureMeter(ProtocolUI, metrologicalModeRole, Data.DataModel);
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, param, ProtocolUI), ProtocolUI, true);
     }
 
     public ITextAdapter GetControl()
@@ -92,21 +92,40 @@ namespace Mode.Metrology.PI
       public PiMeasurement() : base() { }
 
       /// <inheritdoc />
-      public override async Task ConfigureMeter(MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
+      public override async Task ConfigureMeter(IUserMessageService messageService, MetrologicalModeRole metrologicalModeRole, DataModel dataModel = null)
       {
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.ConnectAsync();
-        await breakDown.AcwManger.SetModeAsync();
-        await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time);
-        await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime);
-        await breakDown.AcwManger.SetFrequencyAsync(50);
-        await breakDown.AcwManger.SetLowCurrentLimitAsync(0);
-        await breakDown.AcwManger.SetHighCurrentLimitAsync(10);
-        await breakDown.AcwManger.SetVoltageAsync(dataModel.Param);
+        string name = breakDown.Name;
+        int chassis = breakDown.NumberChassis;
+        int numer = breakDown.Number;
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+          throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetModeAsync()).Success, messageService))
+          throw AcwExceptionFactory.SetModeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetTestTimeAsync(dataModel.Time)).Success, messageService))
+          throw AcwExceptionFactory.SetTestTimeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetRampTimeAsync(dataModel.RampTime)).Success, messageService))
+          throw AcwExceptionFactory.SetRampTimeFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetFrequencyAsync(50)).Success, messageService))
+          throw AcwExceptionFactory.SetFrequencyFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetLowCurrentLimitAsync(0)).Success, messageService))
+          throw AcwExceptionFactory.SetLowLimitFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetHighCurrentLimitAsync(10)).Success, messageService))
+          throw AcwExceptionFactory.SetHighLimitFailed(name, chassis, numer);
+
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetVoltageAsync(dataModel.Param)).Success, messageService))
+          throw AcwExceptionFactory.SetVoltageFailed(name, chassis, numer);
       }
 
       /// <inheritdoc />
-      public override async Task PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
+      public override async Task<bool> PerformMeasurement(MetrologicalModeRole metrologicalModeRole, double param, ProtocolUI protocolUI)
       {
         var meterDevice = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
@@ -156,13 +175,15 @@ namespace Mode.Metrology.PI
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Ошибка", ShowMessageModel.ErrorMessage.TitleColor, "Некорректно введённое эталонное значение напряжения."));
         }
+
+        return true;
       }
 
-      public override async Task FinalizeMeasurement()
+      public override async Task FinalizeMeasurement(IUserMessageService messageService)
       {
-        await base.FinalizeMeasurement();
+        await base.FinalizeMeasurement(messageService);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.PI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.DisconnectAsync();
+        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

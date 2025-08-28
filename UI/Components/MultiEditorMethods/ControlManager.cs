@@ -1,12 +1,12 @@
 ﻿using AppConfiguration.Base;
-using DevZest.Windows.Docking;
-using ICSharpCode.AvalonEdit;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls.TextEditor;
+using UI.Windows.WpfDocking.Windows.Docking;
 using static UI.Components.Invoke.OpenFileButton;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -19,7 +19,7 @@ namespace UI.Components.MultiEditorMethods
   {
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
 
-    FileManager fileManager { get; set; }
+    internal FileManager fileManager { get; set; }
 
     private MultiEditorControl multiEditorControl { get; set; }
 
@@ -28,27 +28,28 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="tabButton">Вкладка для удаления.</param>
     /// <param name="control">Элемент управления для удаления.</param>
-    public void RemoveControl(OpenFileButton tabButton, UserControl control)
+    public async Task RemoveControl(OpenFileButton tabButton, UserControl control, bool isTranslation = false)
     {
-      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control) || control is TextEditorUI)
+      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control)
+        || control is TextEditorUI && isTranslation == false)
       {
         int index = -1;
+        EditorType editorType = null;
         if (control is TextEditorUI)
         {
-          if (tabButton.Text == "Текстовый редактор")
+          if (tabButton.Text == EditorType.TextEditor.ToString())
           {
-            var container = fileManager.UserControls.FirstOrDefault(textEditorContainer => textEditorContainer.GetType() == typeof(TextEditorContainer));
-            if (container is TextEditorContainer)
+            editorType = EditorType.TextEditor;
+            var container = fileManager.OpenPages.FirstOrDefault(textEditorContainer
+              => textEditorContainer.Text == editorType.ToString());
+            var containerIndex = fileManager.OpenPages.IndexOf(container);
+            if (fileManager.UserControls[containerIndex] is TextEditorContainer foundContainer)
             {
-              var foundContainer = container as TextEditorContainer;
               var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
               if (foundDockItem != null)
               {
-                if (control is TextEditorUI)
-                {
-                  ShowSaveDialogForControl(foundDockItem);
-                  return;
-                }
+                ShowSaveDialogForControl(foundDockItem);
+                return;
               }
             }
           }
@@ -59,12 +60,17 @@ namespace UI.Components.MultiEditorMethods
         }
         if (control is TextEditorContainer)
         {
-          // ShowSaveDialogForControl(control);
           HandleClosingEvents(control, tabButton);
         }
 
         RemoveTabAndControl(tabButton, control);
         ShowNextTab(index);
+        var activeTab = fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        if (fileManager.UserControls.OfType<TextEditorContainer>().Count() == 0 || activeTab == null
+          || !(fileManager.UserControls[fileManager.OpenPages.IndexOf(activeTab)] is TextEditorContainer))
+        {
+          EventAggregator.RaiseCloseSearchWindow();
+        }
       }
     }
 
@@ -73,14 +79,12 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="control">Элемент управления для проверки.</param>
     /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
-    private bool
-
-      ShowSaveDialogForControl(DockItem control)
+    private bool ShowSaveDialogForControl(DockItem control)
     {
       var result = MessageBoxResult.No;
       var saveFileResult = false;
       if (control.Content is TextEditorUI)
-      { // TODO: индекс изменить
+      { 
         var saveFileManager = new SaveFileManager(fileManager);
         saveFileManager.SaveFileDialog(ref result, ref saveFileResult, control);
       }
@@ -150,6 +154,8 @@ namespace UI.Components.MultiEditorMethods
 
           _pendingHighlights.Remove(fileName);
         }
+        EventAggregator.RaiseTextEditorActivated(control);
+
       }
 
       bool isTextEditorContainer = control is TextEditorContainer;
@@ -189,21 +195,21 @@ namespace UI.Components.MultiEditorMethods
       ShowControl(control, tabButton);
     }
 
+    /// <summary>
+    /// Добавляет контрол сравнения файлов в панель и создает соответствующую вкладку.
+    /// </summary>
+    /// <param name="header">Название вкладки.</param>
+    /// <param name="control">Пользовательский элемент сранения файлов.</param>
     private void AddFileCompareControl(string header, UserControl control)
     {
       var fileManager = new FileManager(multiEditorControl);
-      var textEditorContainer = fileManager.GetTextEditorContainer();
+      var textEditorContainer = fileManager.GetContainer(EditorType.TextEditor);
       if (textEditorContainer == null)
       {
-        textEditorContainer = fileManager.CreateTextEditorContainer();
+        textEditorContainer = fileManager.CreateContainer(EditorType.TextEditor);
       }
-      var dockItem = new DockItem
-      {
-        Title = header,
-        TabText = header,
-        Content = control
-      };
-      fileManager.ShowDockItem(textEditorContainer, dockItem);
+
+      fileManager.ShowNewDockItem(header, textEditorContainer, control);
     }
 
     /// <summary>
@@ -322,16 +328,33 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Вовзращает true, если вкладок нет. 
+    /// </summary>
+    /// <returns></returns>
+    public bool GetEmtyControl()
+    {
+      return fileManager.OpenPages.Count == 0 && fileManager.UserControls.Count == 0;
+    }
+
+    /// <summary>
     /// Отображает указанный элемент управления, скрывая остальные.
     /// </summary>
     /// <param name="control">Элемент управления для отображения.</param>
-    private void ActivePage(OpenFileButton control, MultiEditorControl multiEditorControl)
+    public void ActivePage(OpenFileButton control, MultiEditorControl multiEditorControl)
     {
       foreach (OpenFileButton child in multiEditorControl.TopPanel.Children)
       {
         if (control.Text == child.Text)
         {
           child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
+          if (control.Text == "Текстовый редактор")
+          {
+            EventAggregator.RaiseTranslatorActivated(true);
+          }
+          else
+          {
+            EventAggregator.RaiseTranslatorActivated(false);
+          }
         }
         else
         {
@@ -358,7 +381,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="userControls">Список пользовательских контролов, представленных элементами <see cref="UserControl"/>.</param>
     /// <param name="filePaths">Словарь, содержащий пути к файлам, где ключ — имя файла, а значение — путь к файлу.</param>
     /// <param name="multiEditorControl">Экземпляр <see cref="MultiEditorControl"/> для взаимодействия с редактором.</param>
-    public ControlManager(List<OpenFileButton> openPages, List<UserControl> userControls, Dictionary<string, string> filePaths, MultiEditorControl multiEditorControl)
+    public ControlManager(ObservableCollection<OpenFileButton> openPages, ObservableCollection<UserControl> userControls, Dictionary<string, string> filePaths, MultiEditorControl multiEditorControl)
     {
       this.fileManager = new FileManager(multiEditorControl);
       this.fileManager.OpenPages = openPages;

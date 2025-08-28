@@ -193,7 +193,7 @@ namespace TestConsole
     {
       LogInformation($"Запуск теста: {circuitName}");
 
-      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 1))
+      if (!await selfTestChecker.ExecuteSelfTestAsync(new CancellationToken(), testType, busContact, 1))
       {
         LogError($"Ошибка при замыкании: {circuitName}.");
         return false;
@@ -206,7 +206,7 @@ namespace TestConsole
       bool continuityResult = false;
       if (meter.ContinuityManager != null)
       {
-        continuityResult = await meter.ContinuityManager.CheckContinuityAsync();
+        continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true);
         if (continuityResult)
         {
           LogDebug($"Цепь {circuitName} прошла проверку!");
@@ -227,7 +227,7 @@ namespace TestConsole
       }
 
       // Размыкаем цепь
-      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 2))
+      if (!await selfTestChecker.ExecuteSelfTestAsync(new CancellationToken(), testType, busContact, 2))
       {
         LogError($"Ошибка при размыкании: {circuitName}.");
         return false;
@@ -261,7 +261,7 @@ namespace TestConsole
         LogInformation($"Проверка реле {relay} в цепи {circuitName}...");
 
         await Task.Delay(1);
-        if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 2))
+        if (!await selfTestChecker.ControlRelayAsync(new CancellationToken(), testType, relay, busContact, 2))
         {
           LogError($"Ошибка при включении реле {relay} в цепи {circuitName}.");
           return false;
@@ -270,8 +270,8 @@ namespace TestConsole
         LogInformation($"Реле {relay} выключено, проверяем целостность цепи...");
 
         await Task.Delay(25);
-        var result = await meter.ContinuityManager.CheckContinuityAsync();
-        if (!result)
+        var result = await meter.ContinuityManager.CheckContinuityAsync(false);
+        if (result)
         {
           LogDebug($"Реле {relay} успешно протестировано.");
         }
@@ -281,7 +281,7 @@ namespace TestConsole
         }
 
         await Task.Delay(1);
-        if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 1))
+        if (!await selfTestChecker.ControlRelayAsync(new CancellationToken(), testType, relay, busContact, 1))
         {
           LogError($"Ошибка при выключении реле {relay} в цепи {circuitName}.");
           return false;

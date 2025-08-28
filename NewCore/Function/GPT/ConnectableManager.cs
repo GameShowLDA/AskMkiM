@@ -1,12 +1,13 @@
-﻿using NewCore.Base.Device;
-using NewCore.Device;
-using System.IO.Ports;
+﻿using System.IO.Ports;
 using System.Management;
 using System.Security.Cryptography;
 using System.Xml.Linq;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using NewCore.Base.Device;
+using NewCore.Device;
 using NewCore.Function.GPT.Data;
+using Utilities.Interface;
+using static AppConfiguration.Execution.ExecutionConfig;
+using static Utilities.LoggerUtility;
 
 namespace NewCore.Function.GPT
 {
@@ -27,7 +28,7 @@ namespace NewCore.Function.GPT
     private GPT79904 _gptModel { get; set; }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -84,7 +85,7 @@ namespace NewCore.Function.GPT
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -129,7 +130,7 @@ namespace NewCore.Function.GPT
 
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       if (await GetIsIdleModeEnabled())
       {
@@ -182,7 +183,7 @@ namespace NewCore.Function.GPT
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       return true;
     }

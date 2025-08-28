@@ -79,7 +79,7 @@ namespace ConsoleUtilities.Interactor
 
     private async Task InitializeChassisAsync(IChassisManager chassis)
     {
-      var result = await chassis.ConnectableManager.InitializeAsync();
+      var result = await chassis.ConnectableManager.InitializeAsync(null);
       if (result.Connect)
       {
         Console.ForegroundColor = ConsoleColor.Green;

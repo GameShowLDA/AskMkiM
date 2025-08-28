@@ -76,6 +76,7 @@ namespace AppConfiguration.Protocol
       });
     }
 
+
     #endregion
 
     #region Get.
@@ -110,12 +111,42 @@ namespace AppConfiguration.Protocol
     /// <returns>true, если отображается; false, если скрывается.</returns>
     public static async Task<bool> GetTimeStart() => await Task.Run(() => ProtocolModel.DisplayOperationTime);
 
+    public static async Task<ProtocolModel> GetProtocolModel()
+    {
+      return await Task.Run(() =>
+      {
+        ProtocolModel protocolModel = new ProtocolModel();
+        protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;
+        protocolModel.ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol;
+        protocolModel.AutoSaveProtocol = ProtocolModel.AutoSaveProtocol;
+        protocolModel.AutoPrintProtocol = ProtocolModel.AutoPrintProtocol;
+        protocolModel.DisplayOperationTime = ProtocolModel.DisplayOperationTime;
+        return protocolModel;
+      });
+    }
+
     #endregion
+
+
+
+    public static async Task SaveProtocolModel(ProtocolModel protocolModel)
+    {
+      await Task.Run(() =>
+      {
+        ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
+        ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
+        ProtocolModel.AutoSaveProtocol = protocolModel.AutoSaveProtocol;
+        ProtocolModel.AutoPrintProtocol = protocolModel.AutoPrintProtocol;
+        ProtocolModel.DisplayOperationTime = protocolModel.DisplayOperationTime;
+      });
+
+      await RewriteProtocolConfig();
+    }
 
     /// <summary>
     /// Перезаписывает конфигурационный файл протокола с текущими настройками.
     /// </summary>
-    public static async void RewriteProtocolConfig()
+    public static async Task RewriteProtocolConfig()
     {
       ProtocolModel protocolModel = new ProtocolModel();
       protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;

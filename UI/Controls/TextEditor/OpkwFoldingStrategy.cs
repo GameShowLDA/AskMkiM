@@ -9,7 +9,7 @@ namespace UI.Controls.TextEditor
   {
     // Только номер команды + допустимая мнемоника
     private static readonly Regex CommandHeaderRegex = new(
-      @"^\s*(\d+)\s+(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП)\b",
+      @"^\s*(\d+)\s+(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС)\b",
       RegexOptions.Compiled | RegexOptions.Multiline);
 
     public void UpdateFoldings(FoldingManager manager, TextDocument document)

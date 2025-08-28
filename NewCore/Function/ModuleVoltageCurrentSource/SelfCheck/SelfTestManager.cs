@@ -10,6 +10,7 @@ using NewCore.Base.Function.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
 using NewCore.Communication;
+using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 
@@ -31,7 +32,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         return;
       }
 
-      if (!await CheckConnectionsAsync(dbc, meter, powerDevice))
+      if (!await CheckConnectionsAsync(messageService, dbc, meter, powerDevice))
       {
         return;
       }
@@ -42,7 +43,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
         case TypeConnector.FullCheck:
           await DeviceCommandSender.ResetAllSystem();
-          await SettingsMeter(meter);
+          await SettingsMeter(meter, messageService);
           await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
           await powerDevice.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B2);
           await dbc.DeviceProtocol.QueryAsync(new DeviceCommand(5, 2, 2, 1).ToString());
@@ -57,7 +58,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
 
         case TypeConnector.OutputVoltageCheck:
-          await SettingsMeter(meter);
+          await SettingsMeter(meter, messageService);
           await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2);
           await powerDevice.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B2);
           await dbc.DeviceProtocol.QueryAsync(new DeviceCommand(5, 2, 2, 1).ToString());
@@ -77,13 +78,13 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
     }
 
-    private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter, IPowerSourceModule powerSource)
+    private static async Task<bool> CheckConnectionsAsync(IUserMessageService messageService, ISwitchingDevice device, IFastMeter meter, IPowerSourceModule powerSource)
     {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
-      var result1 = await device.ConnectableManager.InitializeAsync();
-      var result2 = await meter.ConnectableManager.InitializeAsync();
-      var result3 = await powerSource.ConnectableManager.InitializeAsync();
+      var result1 = await device.ConnectableManager.InitializeAsync(messageService);
+      var result2 = await meter.ConnectableManager.InitializeAsync(messageService);
+      var result3 = await powerSource.ConnectableManager.InitializeAsync(messageService);
       Console.ForegroundColor = ConsoleColor.White;
 
       if (result1.Connect && result2.Connect && result3.Connect)
@@ -114,9 +115,9 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       return false;
     }
 
-    private static async Task SettingsMeter(IFastMeter meter)
+    private static async Task SettingsMeter(IFastMeter meter, IUserMessageService messageService)
     {
-      await meter.ConnectableManager.ConnectAsync();
+      await meter.ConnectableManager.ConnectAsync(messageService);
       await meter.DcVoltageManager.SetDCVoltageModeAsync();
     }
 

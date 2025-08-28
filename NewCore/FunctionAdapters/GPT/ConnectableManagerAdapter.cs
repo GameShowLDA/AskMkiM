@@ -6,6 +6,7 @@ using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
+using Utilities.Interface;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -23,7 +24,7 @@ namespace NewCore.FunctionAdapters.GPT
       _manager = new ConnectableManager(device);
     }
 
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
       var (result, answer) = await _manager.ConnectAsync();
 
@@ -42,7 +43,7 @@ namespace NewCore.FunctionAdapters.GPT
       return (result, answer);
     }
 
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserMessageService messageService = null)
     {
       var result = await _manager.DisconnectAsync();
 
@@ -61,7 +62,7 @@ namespace NewCore.FunctionAdapters.GPT
       return result;
     }
 
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserMessageService messageService = null)
     {
       var (result, answer) = await _manager.InitializeAsync();
 
@@ -78,7 +79,7 @@ namespace NewCore.FunctionAdapters.GPT
       return (result, answer);
     }
 
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserMessageService messageService = null)
     {
       var result = await _manager.ResetAsync();
 

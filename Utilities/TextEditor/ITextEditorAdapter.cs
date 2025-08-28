@@ -17,5 +17,10 @@ namespace Utilities.TextEditor
     /// <param name="text">Текст для редактора.</param>
     /// <param name="highlights">Список диапазонов подсветки.</param>
     void SetTextAndHighlighting(string text, List<HighlightRange> highlights);
+
+    /// <summary>
+    /// Установить маркер на указанную строку, очищая остальные.
+    /// </summary>
+    public void SetActiveLine(int lineNumber);
   }
 }

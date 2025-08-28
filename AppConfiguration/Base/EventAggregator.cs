@@ -1,13 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AppConfiguration.SystemState.SystemStateManager;
-using static AppConfiguration.Admin.AdminConfig;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+using static AppConfiguration.Admin.AdminConfig;
+using static AppConfiguration.SystemState.SystemStateManager;
+using static Utilities.LoggerUtility;
+
 
 namespace AppConfiguration.Base
 {
@@ -43,6 +39,11 @@ namespace AppConfiguration.Base
     static public event Action<string, bool> InfoMessageEvent;
 
     /// <summary>
+    /// Событие, которое вызывается при отчистке информационного сообщения.
+    /// </summary>
+    static public event Action ClearMessageEvent;
+
+    /// <summary>
     /// Событие, которое вызывается при изменении состояния подключения USB устройства.
     /// </summary>
     static public event Action<bool> AdminRightsChanged;
@@ -51,6 +52,13 @@ namespace AppConfiguration.Base
     /// Событие, которое вызывается, когда активно окно типа TextEditor.
     /// </summary>
     static public event Action<bool> TextEditorActive;
+
+    public static event Action<UserControl>? TextEditorActivated;
+
+    /// <summary>
+    /// Событие, которое вызывается, когда активно окно типа TranslatorItem.
+    /// </summary>
+    public static event Action<bool> TranslatorActive;
 
     /// <summary>
     /// Событие, которое вызывается, когда закрывается окно типа TextEditor.
@@ -93,11 +101,6 @@ namespace AppConfiguration.Base
     public static event Action<string> SearchTextRequested;
 
     /// <summary>
-    /// Событие, которое вызывается, когда обновляется искомый текст.
-    /// </summary>
-    public static event Action<string> SearchTextUpdated;
-
-    /// <summary>
     /// Событие, которое вызывается, когда происходит переключение активного окна.
     /// </summary>
     public static event Action<bool> ActiveEditorChanged;
@@ -130,7 +133,7 @@ namespace AppConfiguration.Base
     /// <summary>
     /// Событие, которое вызывается для открытия нового Opk-файла.
     /// </summary>
-    static public event Action<UserControl, string, string> OpenOpk;
+    static public event Action<UserControl, string> OpenOpk;
 
     /// <summary>
     /// Событие, которое вызывается при нажатии на кнопку "Сравнить".
@@ -197,23 +200,13 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод вывода ошибки в блок информации программы.
-    /// </summary>
-    /// <param name="message">Сообщение.</param>
-    /// <param name="clearMessage">Удалить сообщение?</param>
-    static public void RaiseErrorMessage(string message, bool clearMessage = false)
-    {
-      ErrorMessageEvent?.Invoke(message, clearMessage);
-    }
-
-    /// <summary>
     /// Метод вывода предупреждения в блок информации программы.
     /// </summary>
     /// <param name="message">Сообщение.</param>
     /// <param name="clearMessage">Удалить сообщение?</param>
     static public void RaiseWarningMessage(string message, bool clearMessage = false)
     {
-      WarningMessageEvent?.Invoke(message, clearMessage);
+      Application.Current.Dispatcher.Invoke(() => WarningMessageEvent?.Invoke(message, clearMessage)); 
     }
 
     /// <summary>
@@ -223,7 +216,12 @@ namespace AppConfiguration.Base
     /// <param name="clearMessage">Удалить сообщение?</param>
     static public void RaiseInfoMessage(string message, bool clearMessage = false)
     {
-      InfoMessageEvent?.Invoke(message, clearMessage);
+      Application.Current.Dispatcher.Invoke(() => InfoMessageEvent?.Invoke(message, clearMessage));
+    }
+
+    static public void RaiseClearMessage()
+    { 
+      Application.Current.Dispatcher.Invoke(() => ClearMessageEvent?.Invoke());
     }
 
     /// <summary>
@@ -232,7 +230,25 @@ namespace AppConfiguration.Base
     /// <param name="elementName">Имя нового элемента.</param>
     static public void RaiseTextEditorActive(bool isTextEditorContainer)
     {
-      TextEditorActive?.Invoke(isTextEditorContainer);
+      Application.Current.Dispatcher.Invoke(() => TextEditorActive?.Invoke(isTextEditorContainer));
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTextEditorActivated(UserControl aciveTextEditorUI)
+    {
+      TextEditorActivated?.Invoke(aciveTextEditorUI);
+    }
+
+    /// <summary>
+    /// Метод для вызова события, когда активное окно - TextEditor.
+    /// </summary>
+    /// <param name="elementName">Имя нового элемента.</param>
+    static public void RaiseTranslatorActivated(bool aciveTextEditorUI)
+    {
+      TranslatorActive?.Invoke(aciveTextEditorUI);
     }
 
     /// <summary>
@@ -281,29 +297,11 @@ namespace AppConfiguration.Base
     }
 
     /// <summary>
-    /// Метод для вызова события, когда SearchWindow вновь становится активным.
-    /// </summary>
-    /// <param name="elementName">Имя нового элемента.</param>
-    static public void RaiseSearchWindowActivated(bool isActivated)
-    {
-      SearchWindowAtivated?.Invoke(isActivated);
-    }
-
-    /// <summary>
     /// Метод для вызова события, которое вызывается, когда нажата кнопка для открытия окна поиска по тексту и есть выделенный текст, который передается в окно поиска.
     /// </summary>
     public static void RaiseSearchTextRequested(string selectedText)
     {
       SearchTextRequested?.Invoke(selectedText);
-    }
-
-    /// <summary>
-    /// Метод для вызова события, которое вызывается, когда искомы текст в окне поиска обновляется.
-    /// </summary>
-    /// <param name="text"></param>
-    public static void RaiseSearchTextUpdated(string text)
-    {
-      SearchTextUpdated?.Invoke(text);
     }
 
     /// <summary>
@@ -363,9 +361,10 @@ namespace AppConfiguration.Base
     /// Метод для вызова события добавления нового элемента.
     /// </summary>
     /// <param name="elementName">Имя нового элемента.</param>
-    static public void RaiseOpenOpk(UserControl userControl,string elementName, string elementData)
+    static public void RaiseOpenOpk(UserControl userControl,string elementName)
     {
-      OpenOpk?.Invoke(userControl, elementName, elementData);
+      LogDebug($"Происходит вызов события для добавления нового элемента \"{elementName}\".");
+      OpenOpk?.Invoke(userControl, elementName);
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System.Windows;
 using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
+using Utilities;
 using Utilities.Models;
 using static AppConfiguration.Execution.ExecutionConfig;
 using static Utilities.DelegateManager;
@@ -112,7 +113,8 @@ namespace Mode.SelfControl.NewModule.Meter
 
       if (!await GetIsIdleModeEnabled())
       {
-        await deviceBusCommutation.ConnectorManager.ConnectBreakdownTester();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.ConnectorManager.ConnectBreakdownTester(), ProtocolSelfCheckControl))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(deviceBusCommutation.Name, deviceBusCommutation.NumberChassis, deviceBusCommutation.Number);
       }
 
       await CheckResistance(token);
@@ -120,7 +122,8 @@ namespace Mode.SelfControl.NewModule.Meter
 
       if (!await GetIsIdleModeEnabled())
       {
-        await deviceBusCommutation.ConnectorManager.DisconnectBreakdownTester();
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.ConnectorManager.DisconnectBreakdownTester(), ProtocolSelfCheckControl))
+          throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.DisconnectBreakdownFailed(deviceBusCommutation.Name, deviceBusCommutation.NumberChassis, deviceBusCommutation.Number);
       }
     }
 
@@ -131,53 +134,47 @@ namespace Mode.SelfControl.NewModule.Meter
     private async Task CheckResistance(CancellationToken token)
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-      await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tКонтроль сопротивления"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tКонтроль сопротивления"));
 
       await meter.ResistanceManager.MeasureResistanceAsync();
 
       await Task.Delay(1, token);
       for (int i = 1; i <= 8; i++)
       {
-        ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-        if (!await GetIsIdleModeEnabled())
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          await deviceBusCommutation.ResistorManager.ConnectResistor(i.ToString(CultureInfo.InvariantCulture));
-        }
-
-        resistanceValue.TryGetValue(i, out double meaning);
-        double result = await GetIsErrorSimulationEnabled() ? 0 : meaning;
-        double first = meaning - (0.01 * meaning + 5);
-        double last = meaning + (0.01 * meaning + 5);
-
-        if (!await GetIsIdleModeEnabled())
-        {
-          result = await meter.ResistanceManager.MeasureResistanceAsync();
-          await deviceBusCommutation.ResistorManager.DisconnectResistor(i.ToString(CultureInfo.InvariantCulture));
-        }
-
-        if (result >= first && result <= last)
-        {
-          await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Success));
-        }
-        else
-        {
-          await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Error));
-          if (await GetIsStopOnErrorEnabled())
+          bool error = false;
+          ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
+          if (!await GetIsIdleModeEnabled())
           {
-            if (returnMeasure)
-            {
-              i--;
-              returnMeasure = false;
-              ProtocolSelfCheckControl.ReturnMeasureResistanceButtonVisibility = Visibility.Collapsed;
-            }
+            await deviceBusCommutation.ResistorManager.ConnectResistor(i.ToString(CultureInfo.InvariantCulture));
           }
-        }
 
-        await Task.Delay(1, token);
+          resistanceValue.TryGetValue(i, out double meaning);
+          double result = await GetIsErrorSimulationEnabled() ? 0 : meaning;
+          double first = meaning - (0.01 * meaning + 5);
+          double last = meaning + (0.01 * meaning + 5);
+
+          if (!await GetIsIdleModeEnabled())
+          {
+            result = await meter.ResistanceManager.MeasureResistanceAsync();
+            await deviceBusCommutation.ResistorManager.DisconnectResistor(i.ToString(CultureInfo.InvariantCulture));
+          }
+
+          if (result >= first && result <= last)
+          {
+            await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Success), skipPause: true);
+          }
+          else
+          {
+            await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel($"\t\tРезистор №{i}: ({first} - {last} Ом)", null, $"{result} Ом", type: ShowMessageModel.MessageType.Error), skipPause: true);
+            error = true;
+          }
+
+          return error;
+        }, ProtocolSelfCheckControl);
       }
+      await Task.Delay(1, token);
     }
 
     /// <summary>
@@ -187,39 +184,48 @@ namespace Mode.SelfControl.NewModule.Meter
     private async Task CheckCapacitance(CancellationToken token)
     {
       ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-      await ProtocolSelfCheckControl.ShowMessageAsync(
-        new ShowMessageModel("\tКонтроль ёмкости"));
+      await ProtocolSelfCheckControl.ShowMessageAsync(new ShowMessageModel("\tКонтроль ёмкости"));
       for (int i = 1; i <= 6; i++)
       {
-        ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
-        if (!await GetIsIdleModeEnabled())
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          await deviceBusCommutation.CapacitorManager.ConnectCapacitor(i.ToString(CultureInfo.InvariantCulture));
-        }
 
-        capacitanceValue.TryGetValue(i, out double meaning);
-        double result = meaning;
-        double first = meaning - (0.05 * meaning + 0.0005);
-        double last = meaning + (0.05 * meaning + 0.0005);
+          bool error = false;
+          ProtocolSelfCheckControl.GetCancellationToken().ThrowIfCancellationRequested();
+          if (!await GetIsIdleModeEnabled())
+          {
+            if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.CapacitorManager.ConnectCapacitor(i.ToString(CultureInfo.InvariantCulture)), ProtocolSelfCheckControl))
+              throw AppConfiguration.Error.Device.DeviceBusCommutation.CapacitorExceptionFactory.ConnectFailed(i.ToString());
+          }
 
-        if (!await GetIsIdleModeEnabled())
-        {
-          result = await meter.CapacitanceManager.MeasureCapacitanceAsync();
-          await deviceBusCommutation.CapacitorManager.DisconnectCapacitor(i.ToString(CultureInfo.InvariantCulture));
-        }
+          capacitanceValue.TryGetValue(i, out double meaning);
+          double result = meaning;
+          double first = meaning - (0.05 * meaning + 0.0005);
+          double last = meaning + (0.05 * meaning + 0.0005);
 
-        if (result >= first && result <= last)
-        {
-          await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", type: MessageType.Success));
-        }
-        else
-        {
-          await ProtocolSelfCheckControl.ShowMessageAsync(
-            new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", type: MessageType.Error));
-        }
+          if (!await GetIsIdleModeEnabled())
+          {
+            result = await meter.CapacitanceManager.MeasureCapacitanceAsync();
+            if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => deviceBusCommutation.CapacitorManager.DisconnectCapacitor(i.ToString(CultureInfo.InvariantCulture)), ProtocolSelfCheckControl))
+              throw AppConfiguration.Error.Device.DeviceBusCommutation.CapacitorExceptionFactory.DisconnectFailed(i.ToString());
+          }
 
-        await Task.Delay(200, token);
+          if (result >= first && result <= last)
+          {
+            await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", type: MessageType.Success));
+          }
+          else
+          {
+            await ProtocolSelfCheckControl.ShowMessageAsync(
+              new ShowMessageModel($"\t\tКонденсатор №{i}: ({first} - {last} мкФ)", null, $"{result} мкФ", type: MessageType.Error));
+
+            error = true;
+          }
+
+          await Task.Delay(200, token);
+          return error;
+        }, ProtocolSelfCheckControl);
       }
     }
   }

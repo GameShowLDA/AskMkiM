@@ -37,7 +37,7 @@ namespace NewCore.Communication
     public SemaphoreSlim OperationLock { get; set; }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
     {
       try
       {
@@ -61,7 +61,6 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
-          await Task.Delay(100);
           using var cts = new CancellationTokenSource(timeout);
 
           try

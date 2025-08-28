@@ -22,11 +22,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetACVoltageModeAsync()
+    public async Task<bool> SetACVoltageModeAsync()
     {
       if (await GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -35,6 +35,8 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+      return answer.Contains("VOLT:AC");
     }
 
     /// <inheritdoc />
