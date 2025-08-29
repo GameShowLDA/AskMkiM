@@ -15,9 +15,15 @@ namespace ControlCommandAnalyser.Parser.Pr
   {
     public bool CanParse(string mnemonic) => mnemonic == "ПР";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
+
+      if (rmCommandModel == null)
+      {
+        throw new Exception("РМ не сущесвует...");
+      }
+
       var model = new PrCommandModel
       {
         CommandNumber = commandNumber,
@@ -84,7 +90,6 @@ namespace ControlCommandAnalyser.Parser.Pr
         remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
       }
 
-      remainder = remainder.Replace(",","");
 
       (lowerLimitResistance, higherLimitResistance, unit, remainder) = CommonParameterParser.ParseResistanceRange(remainder);
       LoggerUtility.LogDebug($"После парсинга напряжения: нижняя граница сопртивления='{lowerLimitResistance}',верхняя граница сопртивления='{higherLimitResistance}', единица измерения = '{unit}' remainder='{remainder}'");
@@ -122,13 +127,13 @@ namespace ControlCommandAnalyser.Parser.Pr
         return model;
       }
 
-      var allPoints = new List<string>();
+      var allPoints = new List<PointsModel>();
       int starIdx = remainder.IndexOf('*');
       if (starIdx >= 0)
       {
         string pointsPart = remainder.Substring(starIdx);
         LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
-        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic);
+        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic, rmCommandModel);
         allPoints.AddRange(pointsAndErrors.Item1);
         if (pointsAndErrors.Item2.Count > 0)
         {

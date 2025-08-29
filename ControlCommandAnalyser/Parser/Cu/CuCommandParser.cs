@@ -15,7 +15,7 @@ namespace ControlCommandAnalyser.Parser.Cu
   {
     public bool CanParse(string mnemonic) => mnemonic == "ЦУ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       var model = new CuCommandModel
       {

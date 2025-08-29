@@ -50,11 +50,23 @@ namespace ControlCommandAnalyser.Formatter
 
       if (ie.Points.Count > 0)
       {
-        // Точки
         yield return $"\tЗаданные точки:";
-
-        foreach (var point in ie.Points)
-          yield return $"\t\t{point}";
+        foreach (var pointModel in ie.Points)
+        {
+          foreach (var point in pointModel.Points)
+          {
+            var status = string.Empty;
+            if (pointModel.Status == true)
+            {
+              status = "#";
+            }
+            else
+            {
+              status = "*";
+            }
+            yield return $"\t\t{status} {point}";
+          }
+        }
       }
       else
       {

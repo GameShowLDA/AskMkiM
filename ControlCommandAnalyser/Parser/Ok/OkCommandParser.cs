@@ -14,8 +14,13 @@ namespace ControlCommandAnalyser.Parser.Ok
   {
     public bool CanParse(string mnemonic) => mnemonic == "ОК";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
+      if (rmCommandModel == null)
+      {
+        throw new Exception("РМ не сущесвует...");
+      }
+
       var model = new OkCommandModel
       {
         CommandNumber = commandNumber,

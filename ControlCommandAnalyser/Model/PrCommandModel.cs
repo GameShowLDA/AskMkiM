@@ -1,15 +1,17 @@
-﻿using System;
+﻿using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Model.Chains;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AppConfiguration.Error.Translation;
+using Utilities.Models;
 
 namespace ControlCommandAnalyser.Model
 {
    [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, /*ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,*/
     ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
-  public class PrCommandModel : BaseCommandModel, IHasPoints, IError
+  public class PrCommandModel : BaseCommandModel, IError
   {
     /// <summary>
     /// Нижняя граница значеня сопротивления (например, "100<МОм")
@@ -24,7 +26,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public List<string> Points { get; set; } = new();
+    public ShemeModel Sheme { get; set; }
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

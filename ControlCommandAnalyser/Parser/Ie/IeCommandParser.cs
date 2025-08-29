@@ -1,5 +1,6 @@
 ﻿using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Parser.Common;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Models;
 
 namespace ControlCommandAnalyser.Parser.Ie
 {
@@ -19,7 +21,7 @@ namespace ControlCommandAnalyser.Parser.Ie
   {
     public bool CanParse(string mnemonic) => mnemonic == "ИЕ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
@@ -126,14 +128,16 @@ namespace ControlCommandAnalyser.Parser.Ie
         return model;
       }
 
-      var allPoints = new List<string>();
+      var allPoints = new PartChainModel(new List<PointModel>());
+      var chainModel = new ChainModel();
+      var shemeModel = 
       int starIdx = remainder.IndexOf('*');
       if (starIdx >= 0)
       {
         string pointsPart = remainder.Substring(starIdx);
         LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
-        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic);
-        allPoints.AddRange(pointsAndErrors.Item1);
+        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic, rmCommandModel);
+        allPoints.PointModels = pointsAndErrors.Item1.PointModels;
         if (pointsAndErrors.Item2.Count > 0)
         {
           foreach (var error in pointsAndErrors.Item2)
@@ -144,7 +148,7 @@ namespace ControlCommandAnalyser.Parser.Ie
             LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
           }
         }
-        LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
+        LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.PointModels.Count}");
 
         remainder = remainder.Substring(0, starIdx).Trim();
       }
@@ -155,9 +159,9 @@ namespace ControlCommandAnalyser.Parser.Ie
         if (!string.IsNullOrWhiteSpace(pointLine))
         {
           LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
-          var pointsBefore = allPoints.Count;
-          var pointsAndErrors = PointParser.ParsePoints(pointLine, mnemonic);
-          allPoints.AddRange(pointsAndErrors.Item1);
+          var pointsBefore = allPoints.PointModels.Count;
+          var pointsAndErrors = PointParser.ParsePoints(pointLine, mnemonic, rmCommandModel);
+          allPoints.PointModels.AddRange(pointsAndErrors.Item1.PointModels);
           if (pointsAndErrors.Item2.Count > 0)
           {
             foreach (var error in pointsAndErrors.Item2)
@@ -168,10 +172,11 @@ namespace ControlCommandAnalyser.Parser.Ie
               LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
             }
           }
-          LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
+          LoggerUtility.LogDebug($"Добавлено точек: {allPoints.PointModels.Count - pointsBefore}");
         }
       }
       model.Points = allPoints;
+
 
       if (!string.IsNullOrEmpty(remainder))
       {

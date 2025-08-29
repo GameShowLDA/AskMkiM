@@ -92,6 +92,7 @@ namespace Utilities.Models
     /// <returns>Список <see cref="PointModel"/>.</returns>
     public static List<PointModel> ConvertToPointModels(List<string> pointStrings)
     {
+      //var points = new List<PointModel>();
       return pointStrings
           .Select(PointModel.ParsePointString)
           .Where(p => p != null)

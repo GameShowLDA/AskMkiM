@@ -64,11 +64,23 @@ namespace ControlCommandAnalyser.Formatter
 
       if (si.Points.Count > 0)
       {
-        // Точки
         yield return $"\tЗаданные точки:";
-
-        foreach (var point in si.Points)
-          yield return $"\t\t{point}";
+        foreach (var pointModel in si.Points)
+        {
+          foreach (var point in pointModel.Points)
+          {
+            var status = string.Empty;
+            if (pointModel.Status == true)
+            {
+              status = "#";
+            }
+            else
+            {
+              status = "*";
+            }
+            yield return $"\t\t{status} {point}";
+          }
+        }
       }
       else
       {

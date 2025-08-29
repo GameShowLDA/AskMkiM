@@ -50,7 +50,9 @@ namespace ControlCommandExecutor.Executors
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1 }, IsBlockStart: true);
 
-      var points = PointModel.ConvertToPointModels(command.Points);
+      var points = (List<PointModel>)(command.Points.Select(x => PointModel.ConvertToPointModels(x.Points)).Where(x => x != null));
+
+      //var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));

@@ -11,7 +11,7 @@ namespace ControlCommandAnalyser.Model
   /// </summary>
   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, /*ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,*/
     ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
-  public class SiCommandModel : BaseCommandModel, IHasPoints
+  public class SiCommandModel : BaseCommandModel
   {
 
     /// <summary>
@@ -32,7 +32,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public List<string> Points { get; set; } = new();
+    public List<PointsModel> Points { get; set; } = new();
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

@@ -47,8 +47,22 @@ namespace ControlCommandAnalyser.Formatter
       if (pi.Points.Count > 0)
       {
         yield return $"\tЗаданные точки:";
-        foreach (var point in pi.Points)
-          yield return $"\t\t{point}";
+        foreach (var pointModel in pi.Points)
+        {
+          foreach (var point in pointModel.Points)
+          {
+            var status = string.Empty;
+            if (pointModel.Status == true)
+            {
+              status = "#";
+            }
+            else
+            {
+              status = "*";
+            }
+            yield return $"\t\t{status} {point}";
+          }
+        }
       }
       else
       {

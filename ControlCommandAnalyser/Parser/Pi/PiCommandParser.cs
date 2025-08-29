@@ -15,9 +15,14 @@ namespace ControlCommandAnalyser.Parser.Pi
   {
     public bool CanParse(string mnemonic) => mnemonic == "ПИ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
+
+      if (rmCommandModel == null)
+      {
+        throw new Exception("РМ не сущесвует...");
+      }
 
       var model = new PiCommandModel
       {
@@ -76,7 +81,7 @@ namespace ControlCommandAnalyser.Parser.Pi
         LoggerUtility.LogWarning($"Не указано время (строка {numberLine}): {commandNumber} {mnemonic}");
       }
 
-      var allPoints = new List<string>();
+      var allPoints = new List<PointsModel>();
       int starIdx = remainder.IndexOf('*');
       if (starIdx >= 0)
       {

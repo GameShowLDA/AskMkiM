@@ -19,7 +19,7 @@ namespace ControlCommandAnalyser.Parser.Kc
     public bool CanParse(string mnemonic) => mnemonic == "КС";
 
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
@@ -130,13 +130,13 @@ namespace ControlCommandAnalyser.Parser.Kc
         return model;
       }
 
-      var allPoints = new List<string>();
+      var allPoints = new List<PointsModel>();
       int starIdx = remainder.IndexOf('*');
       if (starIdx >= 0)
       {
         string pointsPart = remainder.Substring(starIdx);
         LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
-        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic);
+        var pointsAndErrors = OldPointParser.ParsePoints(pointsPart, mnemonic);
         allPoints.AddRange(pointsAndErrors.Item1);
         if (pointsAndErrors.Item2.Count > 0)
         {
@@ -160,7 +160,7 @@ namespace ControlCommandAnalyser.Parser.Kc
         {
           LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
           var pointsBefore = allPoints.Count;
-          var pointsAndErrors = PointParser.ParsePoints(pointLine, mnemonic);
+          var pointsAndErrors = OldPointParser.ParsePoints(pointLine, mnemonic);
           allPoints.AddRange(pointsAndErrors.Item1);
           if (pointsAndErrors.Item2.Count > 0)
           {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
+using Utilities.Models;
 
 namespace ControlCommandAnalyser.Formatter
 {
@@ -52,11 +53,30 @@ namespace ControlCommandAnalyser.Formatter
 
       if (pr.Points.Count > 0)
       {
-        // Точки
         yield return $"\tЗаданные точки:";
-
-        foreach (var point in pr.Points)
-          yield return $"\t\t{point}";
+        foreach (var pointModel in pr.Points)
+        {
+          foreach (var point in pointModel.Points)
+          {
+            if (PointModel.ParsePointString(point) == null)
+            {
+              yield return string.Empty;// TODO: выводить ошибку преобразования точки
+            }
+            else
+            {
+              var status = string.Empty;
+              if (pointModel.Status == true)
+              {
+                status = "#";
+              }
+              else
+              {
+                status = "*";
+              }
+              yield return $"\t\t{status} {point}";
+            }
+          }
+        }
       }
       else
       {
