@@ -283,5 +283,15 @@ namespace UI.Controls.ProtocolNew
     {
       MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void ArrowButton_Click(object sender, RoutedEventArgs e)
+    {
+      var vis = ArrowButton.IsArrowUp ? Visibility.Visible : Visibility.Collapsed;
+
+      header.Visibility = vis;
+      ContentPanel.Visibility = vis;
+      BigButtonsPanel.Visibility = vis;
+    }
+
   }
 }
