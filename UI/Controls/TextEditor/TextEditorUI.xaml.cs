@@ -176,6 +176,14 @@ namespace UI.Controls.TextEditor
 
       };
 
+      HelpProvider.SetHelpKeyProvider(textEditor, () =>
+      {
+        // Берём текущий выделенный текст
+        var sel = textEditor.SelectedText?.Trim();
+
+        // Если ничего не выделено – отдаём «Текстовый редактор»
+        return string.IsNullOrWhiteSpace(sel) ? "DescriptionWorkTextEditor" : sel;
+      });
     }
 
     /// <summary>

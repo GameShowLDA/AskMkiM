@@ -4,6 +4,7 @@ using NewCore.Base.Interface.Main;
 using System.Windows.Controls;
 using System.Windows.Media;
 using UI.Controls.ProtocolNew;
+using Utilities.Help;
 using Utilities.Models;
 using static NewCore.Enum.DeviceEnum;
 using static Utilities.LoggerUtility;
@@ -49,6 +50,13 @@ namespace Mode.TestSuite.CrossTestMkr
     {
       InitializeComponent();
       _ = InitializeSettingsAsync();
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "CrossTestMkr");
+      };
     }
 
     #region Инициализация

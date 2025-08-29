@@ -286,6 +286,60 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Справка.
+        /// </summary>
+        internal static string menu_help {
+            get {
+                return ResourceManager.GetString("menu.help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на О программе.
+        /// </summary>
+        internal static string menu_help_aboutProgram {
+            get {
+                return ResourceManager.GetString("menu.help.aboutProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Список команд.
+        /// </summary>
+        internal static string menu_help_fastMenuCommand {
+            get {
+                return ResourceManager.GetString("menu.help.fastMenuCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Общие сведенья.
+        /// </summary>
+        internal static string menu_help_generalInformation {
+            get {
+                return ResourceManager.GetString("menu.help.generalInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Язык программ контроля.
+        /// </summary>
+        internal static string menu_help_languageControlPrograms {
+            get {
+                return ResourceManager.GetString("menu.help.languageControlPrograms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Состав программы.
+        /// </summary>
+        internal static string menu_help_programComposition {
+            get {
+                return ResourceManager.GetString("menu.help.programComposition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Настройки.
         /// </summary>
         internal static string menu_settings {

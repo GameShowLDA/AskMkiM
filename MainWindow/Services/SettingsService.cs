@@ -55,8 +55,41 @@ namespace MainWindowProgram.Services
     public async Task OpenSettingsAsync() =>
       await _multiWindow.AddControlAsync("Параметры", new Mode.Settings.SettingsProgramm.SettingsProgrammControl(), TypeWindow.Settings);
 
-    public async Task HelpTextAsync() =>
-      HelpProvider.ShowHelp(null);
-    
+    /// <summary>
+    /// Открывает справочник на нужной странице
+    /// </summary>
+    /// <param name="value">id страницы справочника</param>
+    public static void HelpTextAsync(string value) =>
+      HelpProvider.ShowHelp(value);
+
+    /// <summary>
+    /// Открывает раздел "Общая информация" в справочнике
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия локального сервера с открытым справочником</returns>
+    public async Task HelpOpenGeneralInformation() => HelpTextAsync("GeneralInformation");
+
+    /// <summary>
+    /// Открывает раздел "Язык программ контроля" в справочнике
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия локального сервера с открытым справочником</returns>
+    public async Task HelpOpenLanguageControlPrograms() => HelpTextAsync("LanguageControlPrograms");
+
+    /// <summary>
+    /// Открывает раздел "Состав программы" в справочнике
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия локального сервера с открытым справочником</returns>
+    public async Task HelpOpenProgramComposition() => HelpTextAsync("ProgramComposition");
+
+    /// <summary>
+    /// Открывает страницу "О программе" в справочнике
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия локального сервера с открытым справочником</returns>
+    public async Task HelpOpenAboutProgram() => HelpTextAsync("AboutProgram");
+
+    /// <summary>
+    /// Открывает станицу "Быстрое меню команд"
+    /// </summary>
+    /// <returns>Задача, представляющая операцию открытия локального сервера с открытым меню</returns>
+    public async Task HelpOpenFastMenuCommand() => HelpProvider.OpenFastMenuCommand();
   }
 }

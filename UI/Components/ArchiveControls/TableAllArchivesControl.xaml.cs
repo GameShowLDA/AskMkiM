@@ -8,6 +8,7 @@ using UI.Components.ArchiveManager;
 using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
 using Utilities.Encrypter;
+using Utilities.Help;
 using static Utilities.LoggerUtility;
 using Path = System.IO.Path;
 
@@ -55,6 +56,13 @@ namespace UI.Components.ArchiveControls
       {
         indexData = new JArray();
       }
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "FuncArchive");
+      };
     }
 
 

@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainWindowProgram"
         
+        xmlns:utilities="clr-namespace:Utilities.Help;assembly=Utilities"
+        
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
         xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
@@ -175,22 +177,22 @@
                    Header="{Binding Source={StaticResource LS_Menu_File}, Path=Value}"
                     Name="File" Uid="1" BorderBrush="#FF303843" OpacityMask="#FF303843" Tag="menuHeader_1">
 
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Archive}, Path=Value}" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Archive}, Path=Value}" Tag="OpenArchive" Name="ArchiveMenuItem" Command="{Binding File.OpenArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Save}, Path=Value}" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_SaveAs}, Path=Value}" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_OpenFolder}, Path=Value}" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Print}, Path=Value}" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" />
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Save}, Path=Value}" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}" utilities:HelpProvider.HelpKey="FuncSave"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_SaveAs}, Path=Value}" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}" utilities:HelpProvider.HelpKey="FuncSaveAs"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_OpenFolder}, Path=Value}" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}" utilities:HelpProvider.HelpKey="FuncOpenFolderInExplorer"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Print}, Path=Value}" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" utilities:HelpProvider.HelpKey="FuncPrint"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" utilities:HelpProvider.HelpKey="FuncSearch"/>
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" />
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" />
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" utilities:HelpProvider.HelpKey="FuncCreate"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" utilities:HelpProvider.HelpKey="FuncCompare"/>
 
                     <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Exit}, Path=Value}" Tag="ExitApplication" Command="{Binding File.ExitApplicationCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Exit}, Path=Value}" Tag="ExitApplication" Command="{Binding File.ExitApplicationCommand}" utilities:HelpProvider.HelpKey="FuncExit"/>
 
                 </MenuItem>
 
@@ -198,16 +200,16 @@
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}" Name="Metrology" Style="{StaticResource SideMenuItemStyle}">
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KS}, Path=Value}" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_IE}, Path=Value}" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_CI}, Path=Value}" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KS}, Path=Value}" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" utilities:HelpProvider.HelpKey="UtilityModeKC"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_IE}, Path=Value}" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" utilities:HelpProvider.HelpKey="UtilityModeIE"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_CI}, Path=Value}" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" utilities:HelpProvider.HelpKey="UtilityModeSI"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" utilities:HelpProvider.HelpKey="UtilityModePR"/>
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PRT}, Path=Value}" Name="ModePrMenuItemT" Command="{Binding Metrology.PR_TCommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIDCW}, Path=Value}" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIACW}, Path=Value}"  Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNDCW}, Path=Value}"  Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNDCWCommand}" />
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNACW}, Path=Value}"  Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNACWCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PRT}, Path=Value}" Name="ModePrMenuItemT" Command="{Binding Metrology.PR_TCommand}" utilities:HelpProvider.HelpKey="UtilityModePR"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIDCW}, Path=Value}" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" utilities:HelpProvider.HelpKey="UtilityModePI"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIACW}, Path=Value}"  Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" utilities:HelpProvider.HelpKey="UtilityModePI"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNDCW}, Path=Value}"  Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNDCWCommand}" utilities:HelpProvider.HelpKey="UtilityModeKN"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNACW}, Path=Value}"  Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNACWCommand}" utilities:HelpProvider.HelpKey="UtilityModeKN"/>
 
                     </MenuItem>
 
@@ -221,26 +223,26 @@
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI}, Path=Value}"  Style="{StaticResource SideMenuItemStyle}" >
 
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Node}, Path=Value}"  Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" />
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Group}, Path=Value}"  Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" />
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Node}, Path=Value}"  Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" utilities:HelpProvider.HelpKey="TestSINodeMethod"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Group}, Path=Value}"  Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" utilities:HelpProvider.HelpKey="TestSIGroupMethod"/>
 
                         </MenuItem>
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW}, Path=Value}" Style="{StaticResource SideMenuItemStyle}">
 
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Node}, Path=Value}"  Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" />
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Group}, Path=Value}"    Command="{Binding Test.PiDCWMethodExecutorCommand}" />
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Node}, Path=Value}"  Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" utilities:HelpProvider.HelpKey="TestPINodeMethod"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Group}, Path=Value}"    Command="{Binding Test.PiDCWMethodExecutorCommand}" utilities:HelpProvider.HelpKey="TestPIGroupMethod"/>
 
                         </MenuItem>
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW}, Path=Value}" Style="{StaticResource SideMenuItemStyle}">
 
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Node}, Path=Value}" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" />
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Group}, Path=Value}"  Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" />
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Node}, Path=Value}" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" utilities:HelpProvider.HelpKey="TestPINodeMethod"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Group}, Path=Value}"  Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" utilities:HelpProvider.HelpKey="TestPIGroupMethod"/>
 
                         </MenuItem>
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" utilities:HelpProvider.HelpKey="CrossTestMkr"/>
 
                     </MenuItem>
 
@@ -248,20 +250,25 @@
 
                 <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution}, Path=Value}" Tag="menuHeader_3" Name="Translation">
 
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Build}, Path=Value}" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Run}, Path=Value}" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Build}, Path=Value}" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Run}, Path=Value}" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
 
                 </MenuItem>
 
                 <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings}, Path=Value}" Name="Settings" Tag="menuHeader_4">
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Configuration}, Path=Value}" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Execution}, Path=Value}" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Protocol}, Path=Value}" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Configuration}, Path=Value}" Name="ConfigMenuItem" Command="{Binding Settings.ConfigCommand}" utilities:HelpProvider.HelpKey="SettingsConfiguration"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Execution}, Path=Value}" Name="ExecutionMenuItem" Command="{Binding Settings.ExecutionCommand}" utilities:HelpProvider.HelpKey="SettingsExecution"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Settings_Protocol}, Path=Value}" Name="ProtocolMenuItem" Command="{Binding Settings.ProtocolCommand}" utilities:HelpProvider.HelpKey="SettingsProtocol"/>
                     <MenuItem Header="Параметры ПО"  Command="{Binding Settings.SettingsCommand}"/>
                 </MenuItem>
 
-                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Name="HelpText" Command="{Binding Settings.HelpCommand}">
-
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Name="HelpText">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_GeneralInformation}, Path=Value}" Name="HelpTextGeneralInformation" Command="{Binding Settings.HelpOpenGeneralInformation}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_LanguageControlPrograms}, Path=Value}" Name="HelpTextLanguageControlPrograms" Command="{Binding Settings.HelpOpenLanguageControlPrograms}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_ProgramComposition}, Path=Value}" Name="HelpTextProgramComposition" Command="{Binding Settings.HelpOpenProgramComposition}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_AboutProgram}, Path=Value}" Name="HelpTextAboutProgram" Command="{Binding Settings.HelpOpenAboutProgram}"/>
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>
                 </MenuItem>
 
                 <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Name="Admin">

@@ -5,6 +5,7 @@
              xmlns:components="clr-namespace:UI.Components"
              xmlns:Icon="clr-namespace:UI.Icon"
              xmlns:ErrorConv ="clr-namespace:Utilities.Errors;assembly=Utilities"
+             xmlns:help="clr-namespace:Utilities.Help;assembly=Utilities"
              x:Name="root">
     <UserControl.Resources>
         <SolidColorBrush x:Key="ErrorListBackground" Color="#1E1E1E"/>
@@ -48,6 +49,8 @@
                     <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
                     <Setter Property="BorderThickness" Value="0"/>
                     <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="help:HelpProvider.HelpKey" 
+                            Value="{Binding Code, Converter={StaticResource ErrorCodeToTagConverter}}"/>
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="#264F78"/>

@@ -144,25 +144,39 @@ namespace Utilities.Help
       }
 
       string url = string.IsNullOrWhiteSpace(command)
-          ? $"http://localhost:{HelpServer.Port}/index.html"
-          : $"http://localhost:{HelpServer.Port}/index.html?cmd={Uri.EscapeDataString(command)}";
+          ? "/index.html"
+          : $"/index.html?cmd={Uri.EscapeDataString(command)}";
 
       OpenHelpViewer(url);
     }
 
-    private static void OpenHelpViewer(string url)
+    public static void OpenFastMenuCommand() => 
+      OpenHelpViewer("/FastMenuCommand.html");
+
+    private static void OpenHelpViewer(string relativeFileAddress)
     {
       try
       {
+        HelpServer.EnsureStarted();
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show("Не удалось открыть справку!\nОбратитесь к разработчику!", "Справка");
+        LogError($"Не удалось запустить Help-сервер: {ex.Message}");
+        return;
+      }
+
+      try
+      {
         if (Application.Current.Dispatcher.CheckAccess())
-          ShowHelpWindow(url);
+          ShowHelpWindow($"http://localhost:{HelpServer.Port}"+relativeFileAddress);
         else
-          Application.Current.Dispatcher.Invoke(() => ShowHelpWindow(url));
+          Application.Current.Dispatcher.Invoke(() => ShowHelpWindow($"http://localhost:{HelpServer.Port}" + relativeFileAddress));
       }
       catch (Exception ex)
       {
         Debug.WriteLine($"Ошибка открытия Help Viewer: {ex}");
-        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo($"http://localhost:{HelpServer.Port}" + relativeFileAddress) { UseShellExecute = true });
       }
     }
 

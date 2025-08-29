@@ -180,6 +180,24 @@
   <data name="menu.settings.protocol" xml:space="preserve">
     <value>Протокол</value>
   </data>
+  <data name="menu.help" xml:space="preserve">
+	<value>Справка</value>
+  </data>
+  <data name="menu.help.generalInformation" xml:space="preserve">
+	<value>Общие сведенья</value>
+  </data>
+  <data name="menu.help.languageControlPrograms" xml:space="preserve">
+	<value>Язык программ контроля</value>
+  </data>
+  <data name="menu.help.programComposition" xml:space="preserve">
+	<value>Состав программы</value>
+  </data>
+  <data name="menu.help.aboutProgram" xml:space="preserve">
+	<value>О программе</value>
+  </data>
+	<data name="menu.help.fastMenuCommand" xml:space="preserve">
+		<value>Список команд</value>
+	</data>
   <data name="menu.test" xml:space="preserve">
     <value>Испытания</value>
   </data>
