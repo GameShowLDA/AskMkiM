@@ -16,7 +16,7 @@
     </UserControl.Resources>
 
     <Grid>
-        <Border CornerRadius="20" Background="{StaticResource SecondarySolidColorBrush}">
+        <Border CornerRadius="20,20,0,0" Background="{StaticResource SecondarySolidColorBrush}">
             <ListBox x:Name="ProtocolListBox"
                  Background="Transparent"
                  BorderThickness="0"
