@@ -7,59 +7,75 @@ namespace ControlCommandAnalyser.Parser
 {
   public class PointParser
   {
-
-    public static (PartChainModel, List<ErrorItem>) ParsePoints(string expr, string mnemonic, RmCommandModel rmCommandModel)
+    public static (SchemeModel, List<ErrorItem>) ParsePoints(string expr, string mnemonic, RmCommandModel rmCommandModel)
     {
-      var points = new List<PointModel>();
       var errors = new List<ErrorItem>();
+      var points = new List<PointModel>();
+      var partChainModels = new List<PartChainModel>();
+      var chainModels = new List<ChainModel>();
+      var schemeModel = new SchemeModel(chainModels);
       var status = false;
       // Удаляем пробелы и ведущие/замыкающие *
       expr = expr.Replace(" ", "").Trim('*');
       if (string.IsNullOrEmpty(expr))
       {
-        return (new PartChainModel(points), errors);
+        return (null, errors);
       }
-      var chainsArray = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries); // тут получаются chain
-      var partChainList = new List<string>();
+      var chainsArray = expr.Split(new[] { "**" }, StringSplitOptions.RemoveEmptyEntries);
+      // каждый элемент в chainsArray - это отдельная цепь
+      var partChainList = new List<List<string>>();
+      // проходимся по цепям и разбиваем их до строк с PartChainModel
       for (int i = 0; i < chainsArray.Length; i++)
       {
-        partChainList.AddRange(CheckIfConnected(chainsArray[i]));
+        partChainList.Add(CheckIfConnected(chainsArray[i])); // тут получим массив с чаcтями (partChainModel)
       }
-      var pointsStringsList = new List<string>();
-      var pointsRangesList = new List<string>();
-      for (int i = 0; i < partChainList.Count; i++)
+      for (int i = 0; i < partChainList.Count; i++)// проходимся по всем цепям
       {
-        if (!string.IsNullOrEmpty(partChainList[i]))
+        var pointsRangesList = new List<string>();
+        for (int j = 0; j < partChainList[i].Count; j++)//проходимся по массивам с частями цепей
         {
-          if (partChainList[i].Contains(','))
+          var pointsStringsList = new List<string>();
+          if (!string.IsNullOrEmpty(partChainList[i][j]))
           {
-            pointsStringsList = partChainList[i].Split(",").ToList();
-          }
-          else
-          {
-            pointsStringsList = partChainList[i].Split(",").ToList();
-          }
-          for (int j = 0; j < pointsStringsList.Count; j++)
-          {
-            if (pointsStringsList[j].Contains("-"))
+            // получаем точки
+            if (partChainList[i][j].Contains(','))
             {
-              var processedPoints = ProcessedPoints(pointsStringsList[j], errors, mnemonic);
-              pointsRangesList.AddRange(processedPoints);
+              pointsStringsList = partChainList[i][j].Split(",").ToList();
             }
             else
             {
-              pointsRangesList.Add(pointsStringsList[j]);
+              pointsStringsList.Add(partChainList[i][j]);
+            }
+            for (int k = 0; k < pointsStringsList.Count; k++)
+            {
+              if (pointsStringsList[j].Contains("-"))
+              {
+                var processedPoints = ProcessedPoints(pointsStringsList[j], errors, mnemonic);
+                pointsRangesList.AddRange(processedPoints);
+              }
+              else
+              {
+                pointsRangesList.Add(pointsStringsList[j]);
+              }
+            }
+            // теперь точки одной цепи нужно отправить в CommandPostAnalyzer.GetPointsModel чтобы получить соответсвующие точки из РМ
+            var result = CommandPostAnalyzer.GetPointsModel(pointsRangesList, rmCommandModel.PointsMap);
+            if (!result.Item1)
+            {
+              points.AddRange(result.Item2);
             }
           }
-          var result = CommandPostAnalyzer.GetPointsModel(pointsRangesList, rmCommandModel.PointsMap);
-          if (!result.Item1)
-          {
-            points.AddRange(result.Item2);
-          }
+          partChainModels.Add(new PartChainModel(points));
+          points.Clear();
+          // в List<PartChainModel> добавить новый элемент с полученными точками(List<PointModel>)
         }
-
+        // добавить в List<ChainModel> полученную цепь (List<PartChainModel>) и перейти к обработке следующей
+        chainModels.Add(new ChainModel(partChainModels));
+        partChainModels.Clear();
       }
-      return (new PartChainModel(points), errors); // а на выходе 
+      // готовый List<ChainModel> присвоить SchemeModel
+      schemeModel.ChainModels = chainModels;
+      return (schemeModel, errors); // а на выходе 
     }
 
     /// <summary>
@@ -102,7 +118,7 @@ namespace ControlCommandAnalyser.Parser
             {
               result.Add($"{n}");
             }
-          }          
+          }
         }
       }
       else if ((token.Length == 1 || token.Length > 1 && !token.Any(c => new[] { '\\', '-', '/', '.', ',' }.Contains(c))) && mnemonic == "КС")
