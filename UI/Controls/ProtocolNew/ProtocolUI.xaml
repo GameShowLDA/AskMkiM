@@ -302,27 +302,32 @@
                     </Grid.Resources>
                     
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*" MinHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
+                                                                 Path=ActualHeight,
+                                                                 Converter={StaticResource MultiplyConverter},
+                                                                 ConverterParameter=0.5}"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto" MaxHeight="300"/>
+                        
+                        <RowDefinition Height="Auto" MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
+                                                                 Path=ActualHeight,
+                                                                 Converter={StaticResource MultiplyConverter},
+                                                                 ConverterParameter=0.5}"/>
                     </Grid.RowDefinitions>
-                    <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox"/>
+                    
+                    <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />
 
-                    <GridSplitter  Grid.Row="1" 
+                    <GridSplitter  
+                        Grid.Row="1" 
                         Height="5"
                         Background="{StaticResource RedColorSolidColorBrush}"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
                         ResizeDirection="Rows"/>
 
                     <ErrorList:ErrorListControl Grid.Row="2"
                               x:Name="ErrorListBoxVertical"
                               StringsNumberVisible="Collapsed"
                               MeasureResultVisible="Collapsed"
-                              MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
-                                                  Path=ActualHeight,
-                                                  Converter={StaticResource MultiplyConverter},
-                                                  ConverterParameter=0.5}"/>
+                              />
                 </Grid>
 
 

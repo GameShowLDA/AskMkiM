@@ -5,6 +5,7 @@
              xmlns:components="clr-namespace:UI.Components"
              xmlns:Icon="clr-namespace:UI.Icon"
              xmlns:ErrorConv ="clr-namespace:Utilities.Errors;assembly=Utilities"
+             MinHeight="28"
              x:Name="root">
     <UserControl.Resources>
         <SolidColorBrush x:Key="ErrorListBackground" Color="#1E1E1E"/>
@@ -33,8 +34,7 @@
                 ColumnHeaderHeight="28"
                 MouseDoubleClick="DataGrid_MouseDoubleClick"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                CanUserResizeColumns="False">
+                >
             <DataGrid.Resources>
                 <Style x:Key="CellTextTrim" TargetType="TextBlock">
                     <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
