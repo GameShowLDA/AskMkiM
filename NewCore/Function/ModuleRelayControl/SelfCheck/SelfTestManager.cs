@@ -171,12 +171,12 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
         showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
 
         await messageService.ShowMessageAsync(showMessageModel, skipPause: true);
-        var lastLine = messageService.GetLastLineNumberAsync();
-        messageService.AddError(AppConfiguration.Error.Device.ModuleRelayControl.ModuleRelayControlError.PointError(lastLine, $"{relaySwitchModule.NumberChassis}.{model.NumberDevice}.{model.NumberPoint}"));
 
         model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
         if (!model.SelfControl)
         {
+          var lastLine = messageService.GetLastLineNumberAsync();
+          messageService.AddError(AppConfiguration.Error.Device.ModuleRelayControl.ModuleRelayControlError.PointError(lastLine, $"{relaySwitchModule.NumberChassis}.{model.NumberDevice}.{model.NumberPoint}"));
           showMessageModel = new ShowMessageModel()
           {
             Header = $"Подключение точки",
