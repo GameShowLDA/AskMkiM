@@ -1,0 +1,436 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Список команд</title>
+    <style>
+        /* Базовая стилизация — автономная страница */
+        :root {
+            --bg: #ffffff;
+            --text: #222;
+            --muted: #667085;
+            --brand: #1a3a8f;
+            --brand-2: #2c5cc5;
+            --line: #e6e7eb;
+            --btn-bg: #f6f8ff;
+            --btn-bg-hover: #d4e0ff;
+            --btn-border: #8099ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Segoe UI, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.45;
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 16px 40px;
+        }
+
+        header.page-header {
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 10px;
+        }
+
+        header .kicker {
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: .02em;
+            margin-bottom: 2px;
+        }
+
+        header h1 {
+            margin: 0 0 6px;
+            color: var(--brand);
+            font-size: 28px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        header p.subtitle {
+            margin: 0 0 12px;
+            color: var(--muted);
+        }
+
+        /* Сетка кнопок: 2 столбца на десктопе, 1 на узких экранах */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 720px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Кнопка-плитка команды */
+        .cmd-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 5px 10px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background .15s ease, transform .06s ease, border-color .15s ease;
+            text-align: left;
+        }
+
+            .cmd-btn:hover {
+                background: var(--btn-bg-hover);
+                border-color: var(--brand-2);
+            }
+
+            .cmd-btn:active {
+                transform: translateY(1px);
+            }
+
+        .cmd-code {
+            min-width: 56px;
+            height: 40px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--brand);
+            background: #eef3ff;
+            border: 1px solid var(--btn-border);
+        }
+
+        .cmd-info {
+            display: grid;
+            gap: 2px;
+        }
+
+        .cmd-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .cmd-sub {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* Просмотр в iframe */
+        .viewer {
+            display: none;
+            margin-top: 10px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+            .viewer.active {
+                display: block;
+            }
+
+        .backbar {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 10px;
+            color: var(--muted);
+        }
+
+            .backbar.active {
+                display: flex;
+            }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #f5f7fb;
+            border: 1px solid var(--line);
+            color: var(--brand-2);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background .15s ease, border-color .15s ease;
+            font-weight: 600;
+        }
+
+            .back-link:hover {
+                background: #eef3ff;
+                border-color: var(--btn-border);
+            }
+
+        .back-hint {
+            font-size: 13px;
+        }
+
+        iframe.page-frame {
+            width: 100%;
+            height: calc(100vh - 180px); /* чтобы помещалось во вьюпорт */
+            border: none;
+            display: block;
+            background: #fff;
+        }
+
+        /* Скрытие списка при просмотре */
+        .grid.hidden {
+            display: none;
+        }
+
+        /* Маленькая панель с заголовком текущей команды */
+        .current-title {
+            margin: 0;
+            font-size: 18px;
+            color: var(--brand);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="page-header">
+            <div class="kicker">Навигация по справке</div>
+            <h1>Список команд</h1>
+            <p class="subtitle">Выберите команду — соответствующая страница откроется ниже в этой же вкладке. Возврат к списку: кнопка «Вернуться назад» или клавиша <strong>Esc</strong>.</p>
+        </header>
+
+        <!-- Список кнопок -->
+        <section id="cmd-list" class="grid" aria-label="Список команд">
+            <!-- 5.1 Организация процесса -->
+            <button class="cmd-btn" data-code="ОК" data-title="ОК — Объект контроля" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandOK_Part.html">
+                <div class="cmd-code">ОК</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Объект контроля</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="СП" data-title="СП — Схема подключения" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandSP_Part.html">
+                <div class="cmd-code">СП</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Схема подключения</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="РМ" data-title="РМ — Рабочее место" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandRM_Part.html">
+                <div class="cmd-code">РМ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Рабочее место</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="ЦУ" data-title="ЦУ — Сообщение оператору" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandTsU_Part.html">
+                <div class="cmd-code">ЦУ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Сообщение оператору</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="ЦП" data-title="ЦП — Цикл повторения" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandTsP_Part.html">
+                <div class="cmd-code">ЦП</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Цикл повторения</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="БП" data-title="БП — Безусловный переход" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandBP_Part.html">
+                <div class="cmd-code">БП</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Безусловный переход</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="УП" data-title="УП — Условный переход" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandUP_Part.html">
+                <div class="cmd-code">УП</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Условный переход</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="КЦ" data-title="КЦ — Конец программы контроля" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandKTs_Part.html">
+                <div class="cmd-code">КЦ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Конец программы контроля</div>
+                </div>
+            </button>
+
+            <!-- 5.2 Измерительные команды -->
+            <button class="cmd-btn" data-code="СИ" data-title="СИ — Сопротивление изоляции" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandSI_Part.html">
+                <div class="cmd-code">СИ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Сопротивление изоляции</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="ПИ" data-title="ПИ — Прочность изоляции" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandPI_Part.html">
+                <div class="cmd-code">ПИ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Прочность изоляции</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="КН" data-title="КН — Контроль напряжения" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKN_Part.html">
+                <div class="cmd-code">КН</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Контроль напряжения</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="КС" data-title="КС — Контроль сопротивлений" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKC_Part.html">
+                <div class="cmd-code">КС</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Контроль сопротивлений</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="НЭ" data-title="НЭ — Нелинейные элементы" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandNE_Part.html">
+                <div class="cmd-code">НЭ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Нелинейные элементы</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="ИЕ" data-title="ИЕ — Измерение ёмкости" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandIE_Part.html">
+                <div class="cmd-code">ИЕ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Измерение ёмкости</div>
+                </div>
+            </button>
+            <button class="cmd-btn" data-code="КЩ" data-title="КЩ — Контроль щупом" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKSh_Part.html">
+                <div class="cmd-code">КЩ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Контроль щупом</div>
+                </div>
+            </button>
+
+            <!-- 5.3 Управление устройствами АСК -->
+            <button class="cmd-btn" data-code="ВШ" data-title="ВШ — Включение шин коммутатора" 
+                    data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandVSh_Part.html">
+                <div class="cmd-code">ВШ</div>
+                <div class="cmd-info">
+                <div class="cmd-title">Включение шин коммутатора</div>
+                </div>
+            </button>
+        </section>
+
+        <!-- Панель возврата и заголовок текущей страницы -->
+        <div id="backbar" class="backbar" role="navigation" aria-label="Возврат">
+            <a id="backLink" class="back-link" href="#" title="Вернуться к списку (Esc)">
+                <span aria-hidden="true">←</span> Вернуться назад
+            </a>
+            <h2 id="currentTitle" class="current-title"></h2>
+            <span class="back-hint">Подсказка: нажмите Esc, чтобы закрыть страницу и вернуться к кнопкам.</span>
+        </div>
+
+        <!-- Просмотр страницы -->
+        <section id="viewer" class="viewer" aria-label="Просмотр страницы команды">
+            <iframe id="pageFrame" class="page-frame" src="" title="Страница команды"></iframe>
+        </section>
+    </div>
+
+    <script>
+    (function () {
+      const list = document.getElementById('cmd-list');
+      const backbar = document.getElementById('backbar');
+      const backLink = document.getElementById('backLink');
+      const viewer = document.getElementById('viewer');
+      const frame = document.getElementById('pageFrame');
+      const currentTitle = document.getElementById('currentTitle');
+
+      function showList() {
+        // вернуть список
+        list.classList.remove('hidden');
+        backbar.classList.remove('active');
+        viewer.classList.remove('active');
+        currentTitle.textContent = '';
+        frame.removeAttribute('src');
+
+        // чистим hash чтобы «чистая» ссылка в адресной строке
+        if (location.hash) history.pushState('', document.title, location.pathname + location.search);
+      }
+
+      function openPage(src, title, code) {
+        if (!src) return;
+
+        // показать панель и iframe
+        currentTitle.textContent = title || code || 'Страница';
+        list.classList.add('hidden');
+        backbar.classList.add('active');
+        viewer.classList.add('active');
+
+        // загрузить страницу
+        frame.src = src;
+
+        // записать в hash (можно делиться ссылкой вида commands-hub.html#ОК)
+        if (code) location.hash = encodeURIComponent(code);
+      }
+
+      // Клик по кнопке команды
+      list.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cmd-btn');
+        if (!btn) return;
+
+        const src = btn.dataset.src;
+        const title = btn.dataset.title;
+        const code = btn.dataset.code;
+        openPage(src, title, code);
+      });
+
+      // Вернуться назад
+      backLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showList();
+      });
+
+      // Esc = назад
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          if (viewer.classList.contains('active')) {
+            e.preventDefault();
+            showList();
+          }
+        }
+      });
+
+      // Если в URL уже есть hash (например, #КН) — открыть соответствующую команду
+      function tryOpenFromHash() {
+        const hash = decodeURIComponent(location.hash || '').replace(/^#/, '');
+        if (!hash) return false;
+        const btn = [...document.querySelectorAll('.cmd-btn')].find(b => b.dataset.code === hash);
+        if (!btn) return false;
+        openPage(btn.dataset.src, btn.dataset.title, btn.dataset.code);
+        return true;
+      }
+
+      // При первой загрузке — попробовать открыть из hash, иначе показать список
+      if (!tryOpenFromHash()) {
+        showList();
+      }
+
+      // Если пользователь вручную меняет hash
+      window.addEventListener('hashchange', () => {
+        if (!tryOpenFromHash()) showList();
+      });
+    })();
+    </script>
+</body>
+</html>

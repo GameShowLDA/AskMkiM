@@ -1,0 +1,482 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>О программе</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+    <div class="page-content about">
+        <header class="about-hero">
+            <h1 class="about-title">AskMkiM <span class="about-badge">v&nbsp;1.0&nbsp;</span></h1>
+            <p class="about-lead">Программа управления системой АСК-МКИ-М.</p>
+        </header>
+
+        <!-- Вертикальный стек карточек -->
+        <section class="about-stack" aria-label="Информация о программе">
+            <!-- Карточка 1 -->
+            <!--<article class="about-card" role="group" aria-labelledby="about-card-brief">
+                <h2 id="about-card-brief" class="about-card-title">Кратко о продукте</h2>
+                <div class="about-card-body">
+                    <p>AskMkiM помогает создавать, проверять и запускать сценарии контроля в системе АСК-МКИ-М. Интерфейс ориентирован на обычных пользователей: понятные окна, встроенные подсказки и удобный поиск.</p>
+                </div>
+            </article>-->
+
+            <!-- Карточка 2 -->
+            <article class="about-card" role="group" aria-labelledby="about-card-contacts">
+                <h2 id="about-card-contacts" class="about-card-title">Контакты</h2>
+                <div class="about-card-body">
+                    <ul class="about-list">
+                        <li><strong>Телефон:</strong> <a href="tel:+73412560461">+7 (3412) 56-04-61</a></li>
+                        <li><strong>E-mail:</strong> <a href="mailto:askmki.dep149@axion.ru">askmki.dep149@axion.ru</a></li>
+                    </ul>
+
+                    <h3>Разработчики</h3>
+                    <p>АО "Ижевский мотозавод "Аксион-Холдинг"</p>
+
+                    <h3>Исполнители</h3>
+                    <p>Лукашин Д.А., Толстых А.А., Зорина Ю.А., Фомин И.В.</p>
+                </div>
+            </article>
+
+            <!-- Карточка 3 -->
+            <article class="about-card" role="group" aria-labelledby="about-card-details">
+                <h2 id="about-card-details" class="about-card-title">Подробности</h2>
+                <div class="about-card-body">
+                    <dl class="about-dl">
+                        <dt>Название</dt>
+                        <dd>AskMkiM</dd>
+                        <dt>Версия</dt>
+                        <dd>1.0</dd>
+                        <dt>Официальный сайт</dt>
+                        <dd><em>будет добавлен</em></dd>
+                        <dt>Дата/номер сборки</dt>
+                        <dd><em>будет добавлено</em></dd>
+                        <dt>Системные требования</dt>
+                        <dd><em>будет добавлено</em></dd>
+                        <dt>Авторские права</dt>
+                        <dd><em>будет добавлено</em></dd>
+                    </dl>
+                </div>
+            </article>
+        </section>
+
+        <!-- Кнопки внизу: по разным углам -->
+        <footer class="about-footer" aria-label="Действия">
+            <button type="button" class="about-btn about-btn-left" onclick="About.open('license')">Лицензионное соглашение</button>
+            <button type="button" class="about-btn about-btn-right" onclick="About.open('support')">Поддержка</button>
+        </footer>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="about-license" class="about-modal" hidden aria-labelledby="about-license-title" aria-modal="true" role="dialog">
+        <button class="about-close" type="button" aria-label="Закрыть" onclick="About.close()">×</button>
+        <h2 id="about-license-title">Лицензионное соглашение</h2>
+        <div class="about-modal-body">
+            <p>
+                <em>
+                    Настоящее соглашение регулирует условия использования программного обеспечения,
+                    поставляемого в составе системы АСК-МКИ-М / AskMkiM. Устанавливая или используя Продукт,
+                    вы подтверждаете согласие с условиями ниже.
+                </em>
+            </p>
+
+            <h3>1. Термины и определения</h3>
+            <ul>
+                <li>
+                    <strong>Продукт</strong> — программное обеспечение (включая управляющие программы,
+                    вспомогательные утилиты и ПО, поставляемое в рамках техподдержки), устанавливаемое на компьютер. <!-- :contentReference[oaicite:0]{index=0} -->
+                </li>
+                <li><strong>Изготовитель / Правообладатель</strong> — АО «Ижевский мотозавод “Аксион-холдинг”»; также сохраняются личные неимущественные права авторов ПО. <!-- :contentReference[oaicite:1]{index=1} --></li>
+                <li><strong>Пользователь</strong> — организация, использующая Продукт на законных основаниях. <!-- :contentReference[oaicite:2]{index=2} --></li>
+            </ul>
+
+            <h3>2. Правообладание</h3>
+            <p>
+                Все авторские права на ПО принадлежат правообладателю; отдельные авторские права
+                могут принадлежать указанным авторам. Правообладатель вправе изменять условия
+                лицензии для последующих версий ПО. <!-- :contentReference[oaicite:3]{index=3} -->
+            </p>
+
+            <h3>3. Предоставляемые права</h3>
+            <ul>
+                <li>
+                    Пользователю предоставляется <strong>бессрочная неисключительная лицензия</strong> на использование
+                    Продукта по его функциональному назначению. <!-- :contentReference[oaicite:4]{index=4} -->
+                </li>
+                <li>
+                    <strong>Число копий</strong> для внутреннего использования не ограничено при условии их установки
+                    на компьютеры, принадлежащие Пользователю. <!-- :contentReference[oaicite:5]{index=5} -->
+                </li>
+                <li>
+                    Продукт поставляется <strong>в составе системы АСК-МКИ-М</strong>; взимание платы за распространение без письменного
+                    разрешения правообладателя не допускается. <!-- :contentReference[oaicite:6]{index=6} -->
+                </li>
+            </ul>
+
+            <h3>4. Ограничения</h3>
+            <ul>
+                <li>
+                    Запрещены: декомпиляция, дизассемблирование, модификация, создание производных версий,
+                    сдача в аренду/наём, продажа, передача третьим лицам, размещение в интернете и на общедоступных ресурсах
+                    — кроме случаев, прямо разрешённых настоящим соглашением. <!-- :contentReference[oaicite:7]{index=7} --><!-- :contentReference[oaicite:8]{index=8} -->
+                </li>
+                <li>Передача Продукта третьей стороне без согласия Изготовителя не допускается. <!-- :contentReference[oaicite:9]{index=9} --></li>
+            </ul>
+
+            <h3>5. Права на результаты и резервные копии</h3>
+            <ul>
+                <li>
+                    Права на файлы и результаты, создаваемые Пользователем с помощью Продукта, принадлежат Пользователю,
+                    если иное не предусмотрено отдельными договорами. <!-- :contentReference[oaicite:10]{index=10} -->
+                </li>
+                <li>Пользователь вправе создать одну <strong>резервную копию</strong> ПО для архивирования или переустановки. <!-- :contentReference[oaicite:11]{index=11} --></li>
+            </ul>
+
+            <h3>6. Гарантии и ответственность</h3>
+            <p>
+                Продукт предоставляется по принципу <strong>«как есть»</strong>, без каких-либо прямых или косвенных гарантий.
+                Использование осуществляется на риск Пользователя. Изготовитель и/или авторы не несут ответственности
+                за любой ущерб, в том числе за потерю данных или упущенную выгоду, возникшие в результате использования
+                или невозможности использования Продукта. <!-- :contentReference[oaicite:12]{index=12} --><!-- :contentReference[oaicite:13]{index=13} -->
+            </p>
+
+            <h3>7. Обновления и техподдержка</h3>
+            <p>
+                Новые версии Продукта, а также компоненты, поставляемые в рамках технической поддержки,
+                подпадают под действие настоящего соглашения, если иное не предусмотрено отдельными документами. <!-- :contentReference[oaicite:14]{index=14} -->
+            </p>
+
+            <h3>8. Документы, поставка и соблюдение прав третьих лиц</h3>
+            <p>
+                Поставщик предоставляет дистрибутивы и документацию на русском языке. ПО передаётся безвозмездно
+                (стоимость включена в поставляемое оборудование и является неотделимой). Поставщик гарантирует
+                законность предоставления прав на использование ПО и несёт ответственность по претензиям третьих лиц
+                о нарушении прав при использовании ПО Пользователем. <!-- :contentReference[oaicite:15]{index=15} -->
+            </p>
+
+            <h3>9. Вступление в силу и прекращение</h3>
+            <ul>
+                <li>Факт установки/использования Продукта означает принятие Пользователем условий настоящего соглашения. <!-- :contentReference[oaicite:16]{index=16} --><!-- :contentReference[oaicite:17]{index=17} --></li>
+                <li>В случае несогласия с условиями Пользователь обязан удалить Продукт и прекратить его использование. <!-- :contentReference[oaicite:18]{index=18} --></li>
+                <li>
+                    Нарушение условий (включая запреты из раздела «Ограничения») влечёт немедленное прекращение действия
+                    лицензии и может преследоваться по закону. <!-- :contentReference[oaicite:19]{index=19} -->
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="about-support" class="about-modal" hidden aria-labelledby="about-support-title" aria-modal="true" role="dialog">
+        <button class="about-close" type="button" aria-label="Закрыть" onclick="About.close()">×</button>
+        <h2 id="about-support-title">Поддержка проекта</h2>
+        <div class="about-modal-body">
+            <p>Средства идут на поддержку и развитие AskMkiM. Спасибо!</p>
+            <table>
+                <thead><tr><th>Реквизит</th><th>Значение</th></tr></thead>
+                <tbody>
+                    <tr><td>Получатель</td><td><em>ООО « … »</em></td></tr>
+                    <tr><td>ИНН / КПП</td><td><em>… / …</em></td></tr>
+                    <tr><td>Банк</td><td><em>…</em></td></tr>
+                    <tr><td>Р/с</td><td><em>…</em></td></tr>
+                    <tr><td>К/с</td><td><em>…</em></td></tr>
+                    <tr><td>БИК</td><td><em>…</em></td></tr>
+                    <tr><td>Назначение платежа</td><td>Поддержка разработки AskMkiM</td></tr>
+                </tbody>
+            </table>
+            <p>По вопросам поддержки: <a href="mailto:askmki.dep149@axion.ru">askmki.dep149@axion.ru</a>, <a href="tel:+73412560461">+7 (3412) 56-04-61</a>.</p>
+        </div>
+    </div>
+
+    <!-- Стили страницы и модалок -->
+    <style>
+        /* Шапка */
+        .about-hero {
+            margin-bottom: .8rem;
+        }
+
+        .about-title {
+            margin: 0 0 .2rem 0;
+            font-size: 2rem;
+            line-height: 1.2;
+        }
+
+        .about-badge {
+            display: inline-block;
+            font-size: .9rem;
+            background: #eef0f3;
+            border: 1px solid #cfd3d7;
+            border-radius: .5rem;
+            padding: .1rem .5rem;
+            margin-left: .5rem;
+        }
+
+        .about-lead {
+            margin: 0;
+            color: #444;
+        }
+
+        /* ВЕРТИКАЛЬНЫЙ стек карточек */
+        .about-stack {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .about-card {
+            border: 1px solid #d8d8d8;
+            border-radius: .6rem;
+            background: #fff;
+            padding: .9rem 1rem;
+        }
+
+        .about-card-title {
+            margin: 0 0 .5rem 0;
+            font-size: 1.2rem;
+            line-height: 1.35;
+        }
+
+        .about-card-body {
+            margin: 0;
+        }
+
+        /* Контент внутри карточек */
+        .about-list {
+            margin: .2rem 0 0 0;
+            padding-left: 1.1rem;
+        }
+
+        .about-dl {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            column-gap: .8rem;
+            row-gap: .25rem;
+            margin: 0;
+        }
+
+            .about-dl dt {
+                font-weight: 600;
+            }
+
+            .about-dl dd {
+                margin: 0;
+            }
+
+        /* Кнопки внизу страницы */
+        .about-footer {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between; /* по разным углам */
+            gap: .5rem;
+        }
+
+        .about-btn {
+            padding: .55em .9em;
+            border: 1px solid #333;
+            background: #f3f3f3;
+            cursor: pointer;
+            border-radius: 6px;
+            font: inherit;
+            min-width: 200px;
+        }
+
+            .about-btn:hover {
+                background: #e9e9e9;
+            }
+
+        .about-btn-left {
+            align-self: flex-start;
+        }
+
+        .about-btn-right {
+            align-self: flex-end;
+        }
+
+        /* Глобальная подложка и модалка */
+        .about-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            z-index: 2147483000;
+            background: rgba(0,0,0,.45);
+            backdrop-filter: blur(2px);
+        }
+
+            .about-backdrop.is-open {
+                display: block;
+            }
+
+        .about-modal {
+            width: min(820px, 92vw);
+            max-height: min(80vh, 840px);
+            overflow: auto;
+            background: #fff;
+            color: #222;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.5);
+            padding: 18px 22px;
+            outline: none;
+            position: relative;
+        }
+
+            .about-modal h2 {
+                margin: 0 0 .6em 0;
+            }
+
+        .about-modal-body > :first-child {
+            margin-top: 0;
+        }
+
+        .about-close {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            border: 0;
+            background: transparent;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            color: #666;
+        }
+
+            .about-close:hover {
+                color: #000;
+            }
+
+        /* Таблица внутри модалки (самодостаточная стилизация,
+        т.к. модалка выносится из .page-content и глобальные селекторы не применятся) */
+        .about-modal table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: .8em 0;
+        }
+
+        .about-modal th, .about-modal td {
+            border: 1px solid #333;
+            padding: .35em .6em;
+            text-align: left;
+        }
+
+        .about-modal thead th {
+            border-bottom: 4px solid #000;
+            background: #f3f3f3;
+            font-weight: 700;
+        }
+
+        /* Блокировка скролла и блюр всего сайта (Dr.Explain обёртка — #pageLayout / .b-pageLayout) */
+        html.about-modal-open, body.about-modal-open {
+            overflow: hidden !important;
+        }
+
+            html.about-modal-open #pageLayout,
+            html.about-modal-open .b-pageLayout {
+                filter: blur(2px);
+                pointer-events: none;
+                user-select: none;
+            }
+
+        /* Адаптивные мелочи */
+        @media (max-width: 560px) {
+            .about-btn {
+                min-width: 46%;
+            }
+        }
+    </style>
+
+    <!-- Скрипт: глобальные модалки -->
+    <script>
+        // Глобальный объект
+        window.About = (() => {
+            let backdrop, activeModal = null;
+            // где модалка жила изначально
+            const parking = new WeakMap();
+
+            function ensureBackdrop() {
+                if (backdrop) return backdrop;
+                backdrop = document.createElement('div');
+                backdrop.className = 'about-backdrop';
+                // закрытие по клику в фон
+                backdrop.addEventListener('click', e => {
+                    if (e.target === backdrop) close();
+                });
+                document.body.appendChild(backdrop);
+                return backdrop;
+            }
+
+            // безопасно выгружаем из подложки всё, что там есть, возвращая на место
+            function emptyBackdrop() {
+                while (backdrop.firstChild) {
+                    const node = backdrop.firstChild;
+                    const park = parking.get(node);
+                    if (park && park.parent) {
+                        park.parent.insertBefore(node, park.next || null);
+                    } else {
+                        backdrop.removeChild(node);
+                    }
+                }
+            }
+
+            function open(id) {
+                const modal = document.getElementById('about-' + id);
+                if (!modal) return;
+
+                ensureBackdrop();
+
+                // запоминаем исходного родителя/позицию один раз
+                if (!parking.has(modal)) {
+                    parking.set(modal, { parent: modal.parentNode, next: modal.nextSibling });
+                }
+
+                // возвращаем в исходное место всё, что могло остаться в подложке
+                emptyBackdrop();
+
+                // готовим модалку и переносим в подложку
+                modal.hidden = false;
+                modal.style.margin = '0';
+                modal.style.position = 'absolute';
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                backdrop.appendChild(modal);
+
+                // показываем подложку
+                backdrop.classList.add('is-open');
+                document.documentElement.classList.add('about-modal-open');
+                document.body.classList.add('about-modal-open');
+                activeModal = modal;
+
+                document.addEventListener('keydown', onEsc);
+                modal.setAttribute('tabindex', '-1');
+                modal.focus();
+            }
+
+            function close() {
+                if (!activeModal || !backdrop) return;
+
+                // возвращаем модалку туда, где она жила
+                const park = parking.get(activeModal);
+                if (park && park.parent) {
+                    park.parent.insertBefore(activeModal, park.next || null);
+                }
+
+                activeModal.hidden = true;
+
+                backdrop.classList.remove('is-open');
+                document.documentElement.classList.remove('about-modal-open');
+                document.body.classList.remove('about-modal-open');
+
+                activeModal = null;
+                document.removeEventListener('keydown', onEsc);
+            }
+
+            function onEsc(e) {
+                if (e.key === 'Escape') close();
+            }
+
+            return { open, close };
+        })();
+    </script>
+</body>
+</html>

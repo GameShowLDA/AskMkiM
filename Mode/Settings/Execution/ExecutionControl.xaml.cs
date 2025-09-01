@@ -1,5 +1,6 @@
 ﻿using System.Windows.Controls;
 using AppConfiguration.Base;
+using Utilities.Help;
 
 namespace Mode.Settings.Execution
 {
@@ -18,6 +19,13 @@ namespace Mode.Settings.Execution
       start = true;
 
       Loaded += ExecutionControl_Loaded;
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "SettingsExecution");
+      };
     }
   }
 }

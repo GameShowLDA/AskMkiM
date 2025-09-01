@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Message;
 using Microsoft.Win32;
 using UI.Controls.TextEditor;
+using Utilities.Help;
 using static Utilities.LoggerUtility;
 
 namespace UI.Components.FileComparerControls
@@ -28,6 +29,13 @@ namespace UI.Components.FileComparerControls
       this.FirstFilePath = firstFilePath;
       this.SecondFilePath = secondFilePath;
       LoadFiles();
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "FuncCompare");
+      };
     }
 
     private void LoadFiles()

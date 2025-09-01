@@ -14,6 +14,7 @@ using UI.Components.ArchiveManager.ArchiveFiles.Index;
 using UI.Components.ArchiveManager.Models;
 using UI.Components.MultiEditorMethods;
 using UI.Controls.TextEditor;
+using Utilities.Help;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using static UI.Controls.ProtocolNew.ProtocolUI;
 using static UI.Controls.TextEditor.TextEditorUI;
@@ -43,6 +44,13 @@ namespace UI.Components.ArchiveControls
       _archiveName = archiveName;
       this.Loaded += async (s, e) => await ShowOpkFiles();
       EventAggregator.AdminRightsChanged += ApplicationDataHandler_AdminRightsChanged;
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "FuncArchive");
+      };
     }
 
 

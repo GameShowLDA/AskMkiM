@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>3.3 Команда Compile/Make — Трансляция ИПК</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../../../content.css">
+</head>
+<body>
+    <main class="page-content">
+
+        <h2>3.3 Команда Compile/Make&nbsp;—&nbsp;трансляция&nbsp;ИПК</h2>
+
+        <p>
+            Перед запуском компиляции исходная программа контроля
+            (<abbr title="Исходный текст программы контроля">ИПК</abbr>)
+            должна быть открыта в активном окне редактора
+            (см.&nbsp;[11&nbsp;п.&nbsp;10.1]).
+            Трансляция вызывается пунктом меню
+            <em>Compile → Make</em> или горячей клавишей <kbd>F9</kbd>.
+        </p>
+
+        <figure>
+            <!-- замените путь к файлу на фактический -->
+            <img src="drex_part5.3.3_custom_2.png"
+                 alt="Окно настроек команды Compile/Make"
+                 width="600" height="170">
+        </figure>
+
+        <h3>Опции окна Compile/Make</h3>
+
+        <h4>Количество ошибок</h4>
+        <p>
+            Максимальное число сообщений <q>?Error</q> или <q>?Config</q>,
+            после которого трансляция прерывается досрочно.
+        </p>
+
+        <h4 id="warnings">Вывод предупреждений</h4>
+        <p>
+            Разрешает показывать «сомнительные» участки кода
+            (префикс <q>?Warning</q>) в окне «Сообщения».
+            Дополнительная фильтрация отдельных типов предупреждений
+            настраивается через <em>Options → Warning</em>.
+        </p>
+
+        <p>
+            Для запуска трансляции нажмите <kbd>Enter</kbd>;
+            <kbd>Esc</kbd> отменяет операцию (уже созданные
+            файлы выполнения при этом не удаляются).
+        </p>
+
+    </main>
+</body>
+</html>

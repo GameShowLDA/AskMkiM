@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Utilities.Errors;
+using Utilities.Help;
 using Utilities.Models;
 
 namespace UI.Controls.ErrorList
@@ -28,6 +29,13 @@ namespace UI.Controls.ErrorList
     {
       InitializeComponent();
       DataContext = this;
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "DescriptionWorkTranslator");
+      };
     }
 
     public Visibility StringsNumberVisible 

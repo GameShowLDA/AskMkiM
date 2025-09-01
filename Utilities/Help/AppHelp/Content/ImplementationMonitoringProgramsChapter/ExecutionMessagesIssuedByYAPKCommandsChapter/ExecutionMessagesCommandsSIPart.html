@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>3.23 СИ (Сопротивление Изоляции)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../../../content.css">
+</head>
+<body>
+    <main class="page-content">
+
+        <h2>3.23 СИ (Сопротивление Изоляции)</h2>
+
+        <p>
+            Команда СИ выдает общие сообщения, см. п.п. 3.2.2, 3.2.4, 3.2.5, 3.2.6 и 3.2.7.
+        </p>
+
+        <p>
+            <strong>Примеры:</strong>
+            <ul>
+                <li>?LOC "5050" Rизм(К4/31,К1/1#К1/91)=499.4кОм д.быть > 1МОм</li>
+                <li>?ERR 244-246 "5440 СИ" Ошибки "Замыкание" д.быть > 5МОм</li>
+                <li>$LOC "40" *К4/41,,К4/61,,К4/71,,К4/81*</li>
+                <li>?ERR 5 "50 СИ" Rизм(К4/41,К4/81) < 87.47МОм д.быть>150МОм - (Команда СИ с ключом "Т1").</li>
+                <li>?FAT 121 "60 СИ" Нет подкл К4/41 к A1,B1</li>
+                <li>?MOD 187 "76 СИ" Замыкание шин A1 и B1</li>
+            </ul>
+        </p>
+
+    </main>
+</body>
+</html>

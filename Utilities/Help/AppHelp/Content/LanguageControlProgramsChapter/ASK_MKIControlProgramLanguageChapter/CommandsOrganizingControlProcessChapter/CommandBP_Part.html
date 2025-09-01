@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>5.1.6 Команда БП (Безусловный Переход)</title>
+    <link rel="stylesheet" href="../../../../content.css">
+</head>
+<body>
+    <main class="page-content">
+        <h2>5.1.6 Команда <code>БП</code> (Безусловный Переход)</h2>
+
+        <p><strong>БП</strong> — безусловно переходит к команде с указанной меткой.</p>
+
+        <h3>Синтаксис</h3>
+        <pre>
+&ltномер&gt; БП &lt;метка&gt;
+        </pre>
+        <ul>
+            <li><code>метка</code> — метка команды, куда будет выполнен переход.</li>
+            <li>Переход «сам на себя» запрещён.</li>
+            <li>Перед исполнением всегда проверяется нажатие <kbd>Esc</kbd> для остановки ПК.</li>
+        </ul>
+
+        <h3>Пример</h3>
+        <pre>
+25 БП 310   — перейти на команду с меткой 310
+        </pre>
+    </main>
+</body>
+</html>

@@ -10,13 +10,2068 @@
 
 	<ItemGroup>
 		<None Remove="C:\Users\Lukashin\.nuget\packages\nlog.config\4.7.15\contentFiles\any\any\NLog.config" />
+		<None Remove="Help\AppHelp\content.css" />
+		<None Remove="Help\AppHelp\Content\AboutProgramPart.html" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\BlockMenuPCArchiveWindowPart.html" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileArchiveCommandOpenExistingPCArchivePart.html" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileBuildCommandCreatingNewPCArchivePart.html" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\drex_part6.2.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\drex_part6.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_5.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_6.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_7.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_8.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.4_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.5_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.5_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\EditingArchiveControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\OrganizationArchiveControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\ArchiveControlProgramsChapter\SearchMenuPCArchiveWindowPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMakeCommandIPKBroadcastPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMenu_BroadcastPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PCBroadcastProcessPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PreparingForBroadcastPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\ControlProgramFormatsPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\CorrectionErrorsInControlProgramPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\DevelopmentSourceTextsControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\drex_part5.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsChapter\RenumberingLabelsInMonitoringProgramPart.html" />
+		<None Remove="Help\AppHelp\Content\BroadcastControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\AutomatedDevelopmentControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CheckingCircuitsSpecifiedFlowCurrentPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CheckingInsulationBetweenCircuitsPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandOKPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandRMPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandsCheckingIntegrityCircuitsOKPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandTsUPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandVShPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\ConnectingDevicePart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\DiagramCableBeingTestedPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\CombinationFunctionalControlPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlCapacitancesAndInductorsManualControlPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlNon_LinearElementsCommandNEPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\OhmicResistanceControlCommandKCPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ConclusionsDevelopmentControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ConnectingControlObjectASKPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\CombiningSwitchingBlocksByInputsPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\ControlResponseTimeSwitchingElementsOKPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\ControlSwitchingElementsOKPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\drex_part4.4.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\drex_part4.4.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\GeneralInformationControlFunctioningPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\MeasurementCommandsInPCWithFunctionControlPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\drex_part4.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\drex_part4.6_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\drex_part4.5.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\FORMacroAbbreviatedCommandWritingPart.html" />
+		<None Remove="Help\AppHelp\Content\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\MACROMacroDevelopmentStandardVerificationAlgorithmsPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\BriefCharacteristicsPOASKPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\CommandLineKeysPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\ComputerRequirementsPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\ConfiguringPOASKPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.8_custom.png" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.8_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\InformationAboutSoftwareDeliveryPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\PasswordsByPOASKPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\SoftwareInstallationPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\SoftwareLaunchPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationChapter\UserReactionToFatalErrorInPOASKPart.html" />
+		<None Remove="Help\AppHelp\Content\GeneralInformationPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_5.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsBPPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsETPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsGIPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKCPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKIPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKNPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKPPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKTsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKUPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsNEPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsOCPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsOKPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsOTPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPEPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPIPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPRPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPTPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsRMPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsRTPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsSIPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsSKPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsSPPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsTsGPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsTsPPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsTsUPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsUPPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsVIPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsVShPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\GeneralMessagesPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\MessageStructurePart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\AutoSaveExecutionProtocolsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\CommandsForWorkingWithExecutionProtocolPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\drex_part7.4.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\drex_part7.4.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\TypesMessagesOutputExecutionProtocolPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\CompletionMonitoringProgramPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\ProcessExecutingControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.10_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.11_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.11_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.9_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunBreakCommandAbortExecutionPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunCommandCommandExecuteCommandsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunDoubleCommandRepeatCommandPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunEraseCommandRemovingOldExecutionProtocolsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunGotoCommandTransferControlCommandPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunHaltCommandWorkingWithStopListPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunLoadCommandLoadingExecutionProtocolPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunNumberCommandFindCommandByTagPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunPrintCommandPrintingExecutionProtocolPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunRunCommandRunToEndPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunToggleCommandSettingResettingStopPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\StoppingExecutionMonitoringProgramPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\InfoMenuExecutionInformationPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_5.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_6.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsExecuteMenuRunningProgramsAndTestsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsMessageMenuMessageColorsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsReportMenuExecutionProtocolPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\SetDefaultOptionsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\BroadcastControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\drex_part7.1.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\OptionsForExecutingMonitoringProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\AbbreviatedRecordEnumerationIdentifierPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\RangeRecordingSequenceIdentifiersPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandGI_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandOS_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandOT_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandPT_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandSK_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandVI_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandVSh_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\drex_part3.5.3.7_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandBP_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandKTs_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandOK_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandRM_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandSP_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandTsP_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandTsU_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandUP_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandET_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandIE_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandII_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKC_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKI_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKN_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKSh_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKU_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandNE_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandPE_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandPI_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandPR_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandRD_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandRT_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandSI_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandTsG_Part.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.10_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.11_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.14_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.7_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.8_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.9_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguagePart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\drex_part3.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\drex_part3.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\drex_part3.6_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsBasicConceptsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsElementsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\AddressesCommandPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlTimePart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlVoltagePart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ExposureTimePart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\FlowCurrentPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\RangeValuesControlledParameterPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\VerificationAlgorithmKeysPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\DesignationCommandPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\LabelCommandPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsPart.html" />
+		<None Remove="Help\AppHelp\Content\LanguageControlProgramsPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_5.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.8_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncArchivePart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncComparePart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncCreatePart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncExitPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncOpenFolderInExplorerPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncOpenPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncPrintPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSaveAsPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSavePart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSearchPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.5_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeIEPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeKCPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeKNPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModePIPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModePRPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeSIPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsConfigurationPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsExecutionPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsProtocolPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\CrossTestMkrPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\drex_part14.4.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupMethodPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\DescriptionWorkTextEditorPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_10.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_11.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_12.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_5.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_6.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_7.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_8.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_9.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\HotKeysTextEditorPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\SearchWindowTextEditorPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\DescriptionWorkTranslatorPart.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\drex_part16.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS004_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS005_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK004_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK005_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK006_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK007_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK008_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK009_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK010_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI004_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM004_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM005_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM006_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM007_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM008_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM009_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI004_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN004_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN005_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN006_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN007_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN008_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN009_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN010_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN011_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN012_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN013_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN014_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY001_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY002_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY003_Part.html" />
+		<None Remove="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectingPointToPKBusRK1TRPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectPointsToPKGroupMethodRKRGVRPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ControlNonlinearElementsTSTNLNPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.10_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.10_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.11_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.11_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.12_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.12_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.13_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.13_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.1_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.6_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.7_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.7_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.8_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.8_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.9_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.9_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchboardByGroupMethodPRKOMGPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchByNodeMethodPRKOMUPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\IsolationResistanceSwitchByGroupMethodSIKOMGPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\IsolationResistanceSwitchByNodeMethodSIKOMGPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\OnOffSwitchingStandVKLSTPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\RegistersCheckPORTSPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\RemovingStaticFromSwitchInputsSTATICAPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchboardCrossTestPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchInsulationResistanceCorrectionRIZCOMTPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchRelayResistanceControlRKOMMPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SystemDevicesTestsPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.1_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\PointToBusSwitchingTimePart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeADCToBusesPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeKZSHRelayPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeVoltmeterBusbarsPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\drex_part9.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.3_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.3_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\Menu_ReactionOnErrorPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\Menu_ReactionToEscButtonPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\TestContinuationMenuPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.13_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.13_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.14_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.14_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.1_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.1_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.2_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.2_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.5_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_3.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_4.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\IEPGRCapacityMeasurementIEPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementLeakageCurrentUsingRCT_KUPGRPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\PKIPGRMeasuringResistanceUsingRCT_SIPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\R2TPGRMeasuringResistance2WireCircuitPRTPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\R4TPGRMeasurementResistanceRelay4PointRTPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RACPPGRResistanceMeasurementUsingADC_PRPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RETPGRMeasuringResistance2WireCircuitETPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RV7PGRMeasuringResistanceInOhmmeterModeCSPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\TIMEPGRMeasurementIntervalsCIPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UACPPGRMeasurementConstantVoltageKNPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPKIPGR_PKIVoltageMeasurementPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPPUPGRMeasurementUppuPIPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UV7PGRMeasurementConstantVoltageKN_TPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\VV7PGRMeasurementACVoltageKNTPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.5_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.5_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.7_custom.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.7_custom_2.png" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\ExecutionSelfControlTestPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestADCPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestDigitalVoltmeterPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPINTPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPKIPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPPUPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestSwitchingDevicesPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestSwitchPart.html" />
+		<None Remove="Help\AppHelp\Content\TestsAndUtilitiesChapter\Test_TestsMenuPart.html" />
+		<None Remove="Help\AppHelp\scripts.js" />
+		<None Remove="Help\AppHelp\shell.css" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="Help\AppHelp\Content\AboutProgramPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\DescriptionWorkTranslatorPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\drex_part16.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_5.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\InfoMenuExecutionInformationPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\BroadcastControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\drex_part7.1.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\OptionsForExecutingMonitoringProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Help\AppHelp\content.css">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\BlockMenuPCArchiveWindowPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileArchiveCommandOpenExistingPCArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileBuildCommandCreatingNewPCArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\drex_part6.2.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\drex_part6.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_5.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_6.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_7.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.3_custom_8.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.4_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.5_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\drex_part6.5_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\EditingArchiveControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\OrganizationArchiveControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ArchiveControlProgramsChapter\SearchMenuPCArchiveWindowPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMakeCommandIPKBroadcastPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMenu_BroadcastPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PCBroadcastProcessPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PreparingForBroadcastPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\ControlProgramFormatsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\CorrectionErrorsInControlProgramPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\DevelopmentSourceTextsControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\drex_part5.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\BroadcastControlProgramsChapter\RenumberingLabelsInMonitoringProgramPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\AutomatedDevelopmentControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CheckingCircuitsSpecifiedFlowCurrentPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CheckingInsulationBetweenCircuitsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandRMPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandsCheckingIntegrityCircuitsOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandTsUPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandVShPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\ConnectingDevicePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\DiagramCableBeingTestedPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\CombinationFunctionalControlPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlCapacitancesAndInductorsManualControlPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlNon_LinearElementsCommandNEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\OhmicResistanceControlCommandKCPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ConclusionsDevelopmentControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ConnectingControlObjectASKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\CombiningSwitchingBlocksByInputsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\ControlResponseTimeSwitchingElementsOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\ControlSwitchingElementsOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\drex_part4.4.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\drex_part4.4.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\GeneralInformationControlFunctioningPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\ControlFunctioningChapter\MeasurementCommandsInPCWithFunctionControlPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\drex_part4.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\drex_part4.6_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\drex_part4.5.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\FORMacroAbbreviatedCommandWritingPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\MACROMacroDevelopmentStandardVerificationAlgorithmsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\BriefCharacteristicsPOASKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\CommandLineKeysPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\ComputerRequirementsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\ConfiguringPOASKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.8_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\drex_part1.8_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\InformationAboutSoftwareDeliveryPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\PasswordsByPOASKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\SoftwareInstallationPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\SoftwareLaunchPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\GeneralInformationChapter\UserReactionToFatalErrorInPOASKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsBPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsETPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsGIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKCPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKNPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKTsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsKUPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsNEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsOCPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsOTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsPTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsRMPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsRTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsSIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsSKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsSPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsTsGPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsTsPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsTsUPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsUPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsVIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsVShPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\GeneralMessagesPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\MessageStructurePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\AutoSaveExecutionProtocolsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\CommandsForWorkingWithExecutionProtocolPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\drex_part7.4.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\drex_part7.4.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\TypesMessagesOutputExecutionProtocolPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\CompletionMonitoringProgramPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\ProcessExecutingControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.10_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.11_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.11_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.9_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunBreakCommandAbortExecutionPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunCommandCommandExecuteCommandsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunDoubleCommandRepeatCommandPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunEraseCommandRemovingOldExecutionProtocolsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunGotoCommandTransferControlCommandPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunHaltCommandWorkingWithStopListPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunLoadCommandLoadingExecutionProtocolPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunNumberCommandFindCommandByTagPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunPrintCommandPrintingExecutionProtocolPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunRunCommandRunToEndPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunToggleCommandSettingResettingStopPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\StoppingExecutionMonitoringProgramPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_5.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_6.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsExecuteMenuRunningProgramsAndTestsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsMessageMenuMessageColorsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsReportMenuExecutionProtocolPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\SetDefaultOptionsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\AbbreviatedRecordEnumerationIdentifierPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\RangeRecordingSequenceIdentifiersPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandGI_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandOS_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandOT_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandPT_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandSK_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandVI_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandVSh_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\drex_part3.5.3.7_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandBP_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandKTs_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandOK_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandRM_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandSP_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandTsP_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandTsU_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\CommandUP_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandET_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandIE_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandII_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKC_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKI_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKN_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKSh_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandKU_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandNE_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandPE_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandPI_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandPR_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandRD_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandRT_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandSI_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandTsG_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.10_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.11_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.14_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.7_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.8_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.9_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguagePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\drex_part3.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\drex_part3.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\drex_part3.6_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsBasicConceptsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsElementsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\AddressesCommandPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlTimePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlVoltagePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ExposureTimePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\FlowCurrentPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\RangeValuesControlledParameterPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\VerificationAlgorithmKeysPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\DesignationCommandPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\LabelCommandPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_5.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.8_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncComparePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncCreatePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncExitPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncOpenFolderInExplorerPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncOpenPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncPrintPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSaveAsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSavePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSearchPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.5_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\drex_part14.2.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeIEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeKCPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeKNPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModePIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModePRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabMetrologyChapter\UtilityModeSIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsConfigurationPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsExecutionPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsProtocolPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\CrossTestMkrPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\drex_part14.4.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupMethodPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\DescriptionWorkTextEditorPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_10.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_11.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_12.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_5.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_6.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_7.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_8.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_9.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\HotKeysTextEditorPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\SearchWindowTextEditorPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK010_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN010_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN011_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN012_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN013_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN014_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectingPointToPKBusRK1TRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectPointsToPKGroupMethodRKRGVRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ControlNonlinearElementsTSTNLNPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.10_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.10_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.11_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.11_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.12_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.12_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.13_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.13_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.1_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.6_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.7_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.7_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.8_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.8_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.9_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.9_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchboardByGroupMethodPRKOMGPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchByNodeMethodPRKOMUPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\IsolationResistanceSwitchByGroupMethodSIKOMGPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\IsolationResistanceSwitchByNodeMethodSIKOMGPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\OnOffSwitchingStandVKLSTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\RegistersCheckPORTSPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\RemovingStaticFromSwitchInputsSTATICAPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchboardCrossTestPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchInsulationResistanceCorrectionRIZCOMTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchRelayResistanceControlRKOMMPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SystemDevicesTestsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.1_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\PointToBusSwitchingTimePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeADCToBusesPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeKZSHRelayPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeVoltmeterBusbarsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\drex_part9.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.3_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.3_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\Menu_ReactionOnErrorPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\Menu_ReactionToEscButtonPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\TestContinuationMenuPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.13_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.13_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.14_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.14_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.1_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.1_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.2_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.2_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.5_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_4.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\IEPGRCapacityMeasurementIEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementLeakageCurrentUsingRCT_KUPGRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\PKIPGRMeasuringResistanceUsingRCT_SIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\R2TPGRMeasuringResistance2WireCircuitPRTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\R4TPGRMeasurementResistanceRelay4PointRTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RACPPGRResistanceMeasurementUsingADC_PRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RETPGRMeasuringResistance2WireCircuitETPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RV7PGRMeasuringResistanceInOhmmeterModeCSPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\TIMEPGRMeasurementIntervalsCIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UACPPGRMeasurementConstantVoltageKNPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPKIPGR_PKIVoltageMeasurementPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPPUPGRMeasurementUppuPIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UV7PGRMeasurementConstantVoltageKN_TPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\VV7PGRMeasurementACVoltageKNTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.5_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.5_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.7_custom.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.7_custom_2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\ExecutionSelfControlTestPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestADCPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestDigitalVoltmeterPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPINTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPKIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPPUPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestSwitchingDevicesPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestSwitchPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\Content\TestsAndUtilitiesChapter\Test_TestsMenuPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="Help\AppHelp\index.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="Help\AppHelp\FastMenuCommand.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\scripts.js">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\shell.css">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="Help\AppHelp\style.css">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Help\AppHelp\TextEditor\HelpF1.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="Help\AppHelp\TextEditor\description.html">
@@ -28,6 +2083,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NLog" Version="5.4.0" />
 		<PackageReference Include="NLog.Config" Version="4.7.15" />
@@ -44,6 +2100,33 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandRM.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandTsU.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandPR.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandSI.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandPI.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandKTs.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandUP.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandSP.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Help\AppHelp\TextEditor\CommandList\PageCommandOK.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="NLog.config">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
