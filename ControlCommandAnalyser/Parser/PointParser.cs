@@ -1,65 +1,240 @@
 ﻿using ControlCommandAnalyser.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using ControlCommandAnalyser.Model.Chains;
 using System.Text.RegularExpressions;
+using Utilities.Models;
 
-public static class PointParser
+namespace ControlCommandAnalyser.Parser
 {
-  /// <summary>
-  /// Парсит строку и возвращает список всех точек по очереди.
-  /// </summary>
-  public static (List<string>,List<Utilities.Models.ErrorItem>) ParsePoints(string expr, string mnemonic)
+  public class PointParser
   {
-    var points = new List<string>();
-    var errors = new List<Utilities.Models.ErrorItem>();
-    // Удаляем пробелы и ведущие/замыкающие *
-    expr = expr.Replace(" ", "").Trim('*');
-    if (string.IsNullOrEmpty(expr)) return (points, errors);
-
-    // Разбиваем по *
-    var tokens = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
-
-    // Перебираем токены
-    for (int i = 0; i < tokens.Length; i++)
+    /// <summary>
+    /// Разбор блока точек '*...*' в SchemeModel.
+    /// Правила:
+    /// - Одна '*' внутри блока разделяет ЦЕПИ.
+    /// - '#': части внутри одной цепи.
+    /// - ',': перечисление токенов (точка или диапазон).
+    /// - Диапазоны: 87-90, 1.2.7-10, 1.2.7-1.2.10, Х51/51-60.
+    /// - Спец-кейс: токен, заканчивающийся '-' и следующий сегмент после '*' — конец диапазона
+    ///   (пример 'Х51/51-*60') → каждая раскрытая точка = отдельная цепь.
+    /// - Для КС: одиночная точка (один исходный токен БЕЗ '-') в части запрещена.
+    /// </summary>
+    public static (SchemeModel, List<ErrorItem>) ParsePoints(string expr, string mnemonic, RmCommandModel rmCommandModel)
     {
-      string token = tokens[i];
+      var errors = new List<ErrorItem>();
+      var chainModels = new List<ChainModel>();
 
-      // Если диапазон: ищем паттерн вида PREFIX/START- (например, X17/1-)
-      var rangeMatch = Regex.Match(token, @"^(?<prefix>.+?/)(?<start>\d+)-$");
-      if (rangeMatch.Success && i + 1 < tokens.Length)
+      // Убираем все пробелы/табы/переводы строк и внешние '*'
+      expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
+      expr = expr.Trim('*');
+      if (string.IsNullOrEmpty(expr))
+        return (null, errors);
+
+      // Цепи теперь разделяются одной '*'
+      var chainSegs = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
+
+      for (int i = 0; i < chainSegs.Length; i++)
       {
-        // Следующий токен - конец диапазона (например, 19)
-        var endToken = tokens[i + 1];
-        if (Regex.IsMatch(endToken, @"^\d+$"))
-        {
-          string prefix = rangeMatch.Groups["prefix"].Value;
-          int start = int.Parse(rangeMatch.Groups["start"].Value);
-          int end = int.Parse(endToken);
-
-          // Добавляем все точки диапазона
-          for (int n = start; n <= end; n++)
-          {
-            points.Add($"{prefix}{n}");
-          }
-          i++; // Пропускаем следующий токен, он уже обработан
+        string chainSegOriginal = chainSegs[i];
+        if (string.IsNullOrWhiteSpace(chainSegOriginal))
           continue;
-        }
-      }
-      else if ((token.Length == 1 || token.Length > 1 && !token.Any(c => new[] { '\\', '-', '/', '.', ',' }.Contains(c)))&&mnemonic=="КС")
-      {
-        errors.Add(new Utilities.Models.ErrorItem 
+
+        // Части внутри цепи по '#'
+        var partTokens = chainSegOriginal.Split(new[] { '#' }, StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(CleanToken)
+                                         .Where(t => !string.IsNullOrEmpty(t))
+                                         .ToList();
+
+        // === Спец-кейс: одна часть, один токен, который заканчивается '-' и конец диапазона в СЛЕДУЮЩЕМ сегменте цепи ===
+        if (partTokens.Count == 1)
         {
-          Description = $"Нельзя указывать одиночную точку (точка: {token}).", 
-          Code = Utilities.Errors.ErrorCode.Gen_InvalidOnePointUse,
-        });
-        continue;
+          var rawTokensSingle = partTokens[0].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                             .Select(CleanToken)
+                                             .Where(t => !string.IsNullOrEmpty(t))
+                                             .ToList();
+
+          if (rawTokensSingle.Count == 1 && rawTokensSingle[0].EndsWith("-") && (i + 1) < chainSegs.Length)
+          {
+            string leftWithDash = rawTokensSingle[0];                  // напр. "Х51/51-"
+            string rightSeg = CleanToken(chainSegs[i + 1]);            // напр. "60"
+            // правый сегмент не должен содержать '#', ',' — иначе это не продолжение диапазона
+            if (!string.IsNullOrEmpty(rightSeg)
+                && !rightSeg.Contains('#')
+                && !rightSeg.Contains(','))
+            {
+              string combinedRange = leftWithDash + rightSeg;          // "Х51/51-60"
+              var expanded = ExpandRangeToken(combinedRange, errors);
+              if (expanded.Count > 0)
+              {
+                // Каждая точка -> отдельная цепь
+                foreach (var one in expanded)
+                {
+                  var (ok1, pts1) = CommandPostAnalyzer.GetPointsModel(new List<string> { one }, rmCommandModel.PointsMap);
+                  var part = new PartChainModel(new List<PointModel>(pts1 ?? new List<PointModel>()));
+                  chainModels.Add(new ChainModel(new List<PartChainModel> { part }));
+                }
+                i++; // съедаем следующий сегмент, т.к. он использован как конец диапазона
+                continue; // переходим к следующей исходной "цепи"
+              }
+            }
+          }
+        }
+        // === конец спец-кейса ===
+
+        // Обычная обработка: каждая часть -> PartChainModel (после раскрытия диапазонов)
+        var currentChainParts = new List<PartChainModel>();
+
+        foreach (var part in partTokens)
+        {
+          // Токены в части по запятым
+          var rawTokens = part.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                              .Select(CleanToken)
+                              .Where(t => !string.IsNullOrEmpty(t))
+                              .ToList();
+
+          // Раскрываем диапазоны
+          var expandedTokens = new List<string>();
+          for (int k = 0; k < rawTokens.Count; k++)
+          {
+            var tok = rawTokens[k];
+            if (tok.Contains('-'))
+              expandedTokens.AddRange(ExpandRangeToken(tok, errors));
+            else
+              expandedTokens.Add(tok);
+          }
+
+          // Проверка "одиночной точки" для КС: только если исходно был один токен без '-'
+          bool isSingleOriginalToken = rawTokens.Count == 1 && !rawTokens[0].Contains('-');
+          if (string.Equals(mnemonic, "КС", StringComparison.OrdinalIgnoreCase)
+              && isSingleOriginalToken
+              && expandedTokens.Count == 1)
+          {
+            errors.Add(new ErrorItem
+            {
+              Description = $"Нельзя указывать одиночную точку (часть цепи содержит только: {expandedTokens[0]}).",
+              Code = Utilities.Errors.ErrorCode.Gen_InvalidOnePointUse
+            });
+          }
+
+          // Преобразуем строки-точки в PointModel через карту РМ
+          var (ok2, pts2) = CommandPostAnalyzer.GetPointsModel(expandedTokens, rmCommandModel.PointsMap);
+          currentChainParts.Add(new PartChainModel(new List<PointModel>(pts2 ?? new List<PointModel>())));
+        }
+
+        chainModels.Add(new ChainModel(new List<PartChainModel>(currentChainParts)));
       }
 
-      // Просто точка (например, K/1)
-      points.Add(token);
+      return (new SchemeModel(chainModels), errors);
     }
 
-    return (points, errors);
+    /// <summary>
+    /// Раскрывает диапазон: "87-90", "1.2.7-10", "1.2.7-1.2.10", "Х51/51-60".
+    /// </summary>
+    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors)
+    {
+      var result = new List<string>();
+
+      token = CleanToken(token);  // убрать возможные '*'
+
+      int dashIndex = token.IndexOf('-');
+      if (dashIndex < 0)
+        return result;
+
+      string left = CleanToken(token.Substring(0, dashIndex));
+      string right = CleanToken(token.Substring(dashIndex + 1));
+
+      if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+      {
+        errors.Add(new ErrorItem
+        {
+          Description = $"Неверный диапазон точек: {token}.",
+          Code = Utilities.Errors.ErrorCode.Gen_InvalidRange
+        });
+        return result;
+      }
+
+      // Выделяем префикс + старт (префикс заканчивается на '.' или '/')
+      if (!TrySplitPrefixAndNumber(left, out string leftPrefix, out int startNum))
+      {
+        errors.Add(new ErrorItem
+        {
+          Description = $"Неверное начало диапазона: {left} (в {token}).",
+          Code = Utilities.Errors.ErrorCode.Gen_InvalidRange
+        });
+        return result;
+      }
+
+      // Определяем конец диапазона
+      int endNum;
+      if (TrySplitPrefixAndNumber(right, out string rightPrefix, out int rightNum))
+      {
+        if (!string.IsNullOrEmpty(rightPrefix) && rightPrefix != leftPrefix)
+        {
+          errors.Add(new ErrorItem
+          {
+            Description = $"Несовместимые префиксы в диапазоне: {token} (\"{leftPrefix}\" vs \"{rightPrefix}\").",
+            Code = Utilities.Errors.ErrorCode.Gen_InvalidRange
+          });
+          return result;
+        }
+        endNum = rightNum;
+      }
+      else
+      {
+        if (!int.TryParse(right, out endNum))
+        {
+          errors.Add(new ErrorItem
+          {
+            Description = $"Неверный конец диапазона: {right} (в {token}).",
+            Code = Utilities.Errors.ErrorCode.Gen_InvalidRange
+          });
+          return result;
+        }
+      }
+
+      if (endNum < startNum)
+      {
+        errors.Add(new ErrorItem
+        {
+          Description = $"Неверный диапазон точек (конец меньше начала): {token}.",
+          Code = Utilities.Errors.ErrorCode.Gen_InvalidRange
+        });
+        return result;
+      }
+
+      for (int n = startNum; n <= endNum; n++)
+        result.Add($"{leftPrefix}{n}");
+
+      return result;
+    }
+
+    /// <summary>
+    /// "префикс" + число. Префикс = всё до последнего '.' или '/' включительно.
+    /// </summary>
+    private static bool TrySplitPrefixAndNumber(string token, out string prefix, out int number)
+    {
+      prefix = "";
+      number = 0;
+
+      int dot = token.LastIndexOf('.');
+      int slash = token.LastIndexOf('/');
+
+      int sep = Math.Max(dot, slash);
+
+      if (sep >= 0)
+      {
+        prefix = token.Substring(0, sep + 1);
+        var tail = token.Substring(sep + 1);
+        return int.TryParse(tail, out number);
+      }
+      else
+      {
+        return int.TryParse(token, out number);
+      }
+    }
+
+    private static string CleanToken(string t)
+    {
+      return string.IsNullOrEmpty(t) ? string.Empty : t.Replace("*", "").Trim();
+    }
   }
 }

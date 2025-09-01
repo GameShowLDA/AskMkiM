@@ -42,7 +42,7 @@ namespace ControlCommandAnalyser.Parser
       catch
       { }
 
-      CheckPointExistence(models, pointsMap);
+      //CheckPointExistence(models, pointsMap);
     }
 
     private static void CheckPointLinks(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
@@ -62,43 +62,69 @@ namespace ControlCommandAnalyser.Parser
       }
     }
 
-    private static void CheckPointExistence(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
+    public static (bool, List<PointModel>) GetPointsModel(List<string> points, Dictionary<string, string> pointsMap)
     {
-      var pointModels = models.OfType<IHasPoints>();
+      List<PointModel> pointModels = new List<PointModel>();
+      bool error = false;
 
-      foreach (var model in pointModels)
+      foreach (var point in points)
       {
-        bool errorPoints = false;
-
-        var baseModel = model as BaseCommandModel;
-        for (int i = 0; i < model.Points.Count; i++)
-        {
-          var point = model.Points[i];
-          if (pointsMap == null)
-          {
-            if (!errorPoints)
-            {
-              errorPoints = true;
-              baseModel?.Errors.Add(GeneralErrors.MissingPointsMap(baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
-            }
-
-            model.Points[i] = $"Нераспознанная точка: {point}!";
-            continue; // пропускаем остальную логику
-          }
-
-          if (!pointsMap.ContainsKey(point) && !pointsMap.ContainsValue(point))
-          {
-            baseModel?.Errors.Add(GeneralErrors.UnknownPoint(point, baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
-            model.Points[i] = $"Нераспознанная точка: {point}!";
-          }
-          else
-          {
-            pointsMap.TryGetValue(point, out var mappedPoint);
-            model.Points[i] = mappedPoint ?? point;
-          }
+        string pointPart = pointsMap.GetValueOrDefault(point, string.Empty);
+        if (string.IsNullOrEmpty(pointPart))
+        { 
+          error = true;
+          continue;
         }
+
+        var pointModel = PointModel.ParsePointString(pointPart);
+        pointModels.Add(pointModel);
       }
+
+      return (error, pointModels);
     }
+
+    //private static void CheckPointExistence(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
+    //{
+    //  var pointModels = models.OfType<IHasPoints>();
+
+    //  foreach (var model in pointModels)
+    //  {
+    //    bool errorPoints = false;
+
+    //    var baseModel = model as BaseCommandModel;
+    //    for (int i = 0; i < model.Points.Count; i++)
+    //    {
+    //      for (int j = 0; j < model.Points[i].Points.Count; j++)
+    //      {
+
+    //        var point = model.Points[i].Points[j];
+    //        if (pointsMap == null)
+    //        {
+    //          if (!errorPoints)
+    //          {
+    //            errorPoints = true;
+    //            baseModel?.Errors.Add(GeneralErrors.MissingPointsMap(baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
+    //          }
+
+    //          model.Points[i].Points[j] = $"Нераспознанная точка: {point}!";
+    //          continue; // пропускаем остальную логику
+    //        }
+
+    //        if (!pointsMap.ContainsKey(point) && !pointsMap.ContainsValue(point))
+    //        {
+    //          baseModel?.Errors.Add(GeneralErrors.UnknownPoint(point, baseModel.StartLineNumber, $"{baseModel.CommandNumber} {baseModel.Mnemonic}"));
+    //          model.Points[i].Points[j] = $"Нераспознанная точка: {point}!";
+    //        }
+    //        else
+    //        {
+    //          pointsMap.TryGetValue(point, out var mappedPoint);
+    //          model.Points[i] = mappedPoint ?? point;
+    //        }
+    //      }
+    //    }
+    //  }
+    //}
+
 
 
     /// <summary>

@@ -6,7 +6,8 @@ using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Parser.Common;
 using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model.Ok;
-using Utilities; // Для LoggerUtility
+using Utilities;
+using ControlCommandAnalyser.Model.Chains; // Для LoggerUtility
 
 namespace ControlCommandAnalyser.Parser.Kc
 {
@@ -19,7 +20,7 @@ namespace ControlCommandAnalyser.Parser.Kc
     public bool CanParse(string mnemonic) => mnemonic == "КС";
 
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
@@ -49,26 +50,30 @@ namespace ControlCommandAnalyser.Parser.Kc
         }
       }
 
-      for (int i = 0; i < model.SourceLines.ToList().Count; i++)
-      {
-        if (string.IsNullOrEmpty(model.SourceLines[i]) || string.IsNullOrWhiteSpace(model.SourceLines[i]))
-        {
-          model.SourceLines.Remove(model.SourceLines[i]);
-          i--;
-        }
-      }
+      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
+      model.SourceLines = model.SourceLines
+        .Where(l => !string.IsNullOrWhiteSpace(l))
+        .ToList();
 
-      var firstLine = lines[0];
-      LoggerUtility.LogDebug($"Исходная первая строка: \"{firstLine}\"");
+      // Склеиваем всё в одну строку и удаляем \r \n \t
+      var body = string.Concat(model.SourceLines)
+        .Replace("\r", "")
+        .Replace("\n", "")
+        .Replace("\t", "");
 
-      var match = Regex.Match(firstLine, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+      // Для логов
+      LoggerUtility.LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
+
+      // Дальше работаем ТОЛЬКО с body:
+      var remainder = body;
+
+      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
       if (match.Success)
-        firstLine = match.Groups[1].Value.Trim();
+        remainder = match.Groups[1].Value.Trim();
 
-      string remainder = firstLine;
       string? lowerLimitResistance = null, higherLimitResistance = null, unit = null, time = null;
 
-      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(firstLine);
+      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(remainder);
 
       foreach (var (key, hasError) in result)
       {
@@ -123,59 +128,63 @@ namespace ControlCommandAnalyser.Parser.Kc
         model.HigherLimitResistance += " " + unit;
       }
 
-      if (HasInvalidParameterOrder(firstLine, model.AlgorithmKey, lowerLimitResistance ?? higherLimitResistance, time, out string err))
+      if (HasInvalidParameterOrder(body, model.AlgorithmKey, lowerLimitResistance ?? higherLimitResistance, time, out string err))
       {
         model.Errors.Add(GeneralErrors.InvalidParameterOrder(mnemonic, numberLine, $"{commandNumber} {mnemonic}", err));
         LoggerUtility.LogWarning($"Ошибка порядка параметров (строка {numberLine}): {err}");
         return model;
       }
 
-      var allPoints = new List<string>();
-      int starIdx = remainder.IndexOf('*');
-      if (starIdx >= 0)
+      string bodyNoWs = string.Concat(lines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
+
+      // Ищем первую и последнюю '*'
+      int firstStar = bodyNoWs.IndexOf('*');
+      int lastStar = bodyNoWs.LastIndexOf('*');
+
+      if (firstStar >= 0 && lastStar > firstStar)
       {
-        string pointsPart = remainder.Substring(starIdx);
-        LoggerUtility.LogDebug($"Парсинг точек из pointsPart: '{pointsPart}'");
-        var pointsAndErrors = PointParser.ParsePoints(pointsPart, mnemonic);
-        allPoints.AddRange(pointsAndErrors.Item1);
-        if (pointsAndErrors.Item2.Count > 0)
+        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
+        string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
+        LoggerUtility.LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
+
+        var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, mnemonic, rmCommandModel);
+
+        // Поднимем ошибки парсера точек
+        if (pointErrors?.Count > 0)
         {
-          foreach (var error in pointsAndErrors.Item2)
+          foreach (var error in pointErrors)
           {
             error.SourceLineNumber = numberLine;
             error.Command = $"{commandNumber} {mnemonic}";
             model.Errors.Add(error);
-            LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
+            LoggerUtility.LogError(
+              $"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
           }
         }
-        LoggerUtility.LogInformation($"Найдено точек в pointsPart: {allPoints.Count}");
 
-        remainder = remainder.Substring(0, starIdx).Trim();
-      }
-
-      for (int i = 1; i < lines.Count; i++)
-      {
-        var pointLine = lines[i].Trim();
-        if (!string.IsNullOrWhiteSpace(pointLine))
+        // Проверим, что схема непуста (есть хотя бы одна точка)
+        if (scheme == null || scheme.IsEmpty())
         {
-          LoggerUtility.LogDebug($"Парсинг точек из строки {numberLine + i}: '{pointLine}'");
-          var pointsBefore = allPoints.Count;
-          var pointsAndErrors = PointParser.ParsePoints(pointLine, mnemonic);
-          allPoints.AddRange(pointsAndErrors.Item1);
-          if (pointsAndErrors.Item2.Count > 0)
-          {
-            foreach (var error in pointsAndErrors.Item2)
-            {
-              error.SourceLineNumber = numberLine;
-              error.Command = $"{commandNumber} {mnemonic}";
-              model.Errors.Add(error);
-              LoggerUtility.LogError($"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
-            }
-          }
-          LoggerUtility.LogDebug($"Добавлено точек: {allPoints.Count - pointsBefore}");
+          LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
+          model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
         }
+        else
+        {
+          model.Scheme = scheme; // ← просто присваиваем схему в модель
+          LoggerUtility.LogInformation(
+            $"Схема распознана: цепей={scheme.ChainModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+        }
+
+        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
+        int idxStarInFirstLine = remainder.IndexOf('*');
+        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
       }
-      model.Points = allPoints;
+      else
+      {
+        // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
+        LoggerUtility.LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
+        model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
+      }
 
       if (!string.IsNullOrEmpty(remainder))
       {
@@ -187,18 +196,8 @@ namespace ControlCommandAnalyser.Parser.Kc
       // Валидация
       if (string.IsNullOrWhiteSpace(lowerLimitResistance) && string.IsNullOrWhiteSpace(higherLimitResistance) && string.IsNullOrWhiteSpace(time))
       {
-        LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{firstLine}' (строка {numberLine})");
-        model.Errors.Add(KsErrors.CannotParseParameters(firstLine, numberLine, $"{commandNumber} {mnemonic}"));
-      }
-
-      if (model.Points.Count == 0)
-      {
-        LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(KsErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
-      }
-      else
-      {
-        LoggerUtility.LogInformation($"Итого найдено точек: {model.Points.Count}");
+        LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(KsErrors.CannotParseParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
 
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);

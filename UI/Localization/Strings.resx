@@ -163,7 +163,7 @@
     <value>Сохранить</value>
   </data>
   <data name="menu.file.saveas" xml:space="preserve">
-    <value>Сохранить как...</value>
+    <value>Сохранить как</value>
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Поиск</value>

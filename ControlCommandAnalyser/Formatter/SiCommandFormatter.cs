@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 
 namespace ControlCommandAnalyser.Formatter
 {
@@ -62,17 +63,34 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\tСопротивление не задано!";
       }
 
-      if (si.Points.Count > 0)
+      if (si.Scheme == null || si.Scheme.IsEmpty())
       {
-        // Точки
-        yield return $"\tЗаданные точки:";
-
-        foreach (var point in si.Points)
-          yield return $"\t\t{point}";
+        yield return "\tТочки не заданы!";
+        yield break;
       }
-      else
+
+      yield return "\tЗаданные точки:";
+
+      for (int ci = 0; ci < si.Scheme.ChainModels.Count; ci++)
       {
-        yield return $"\tТочки не заданы!";
+        var chain = si.Scheme.ChainModels[ci];
+        if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
+        else
+        {
+          yield return $"\t\tЦепь номер {ci + 1}:";
+        }
+
+        for (int pi = 0; pi < chain.ChainModels.Count; pi++)
+        {
+          var part = chain.ChainModels[pi];
+          if (part?.PointModels == null || part.PointModels.Count == 0) continue;
+
+          // первая часть цепи — отметим как начало (*), последующие части считаем "сообщёнными" (#)
+          var status = (pi == 0) ? "*" : "#";
+
+          foreach (var point in part.PointModels)
+            yield return $"\t\t{status} {point}";
+        }
       }
 
       yield return string.Empty;

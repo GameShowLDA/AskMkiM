@@ -7,7 +7,7 @@ namespace ControlCommandAnalyser.Parser.Rm
   {
     public bool CanParse(string mnemonic) => mnemonic == "РМ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       var model = new RmCommandModel
       {
@@ -36,7 +36,7 @@ namespace ControlCommandAnalyser.Parser.Rm
 
       foreach (var pair in pairs)
         model.PointsMap[pair.OkPoint] = pair.AskInput;
-
+      rmCommandModel = model;
       return model;
     }
   }

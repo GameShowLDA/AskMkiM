@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlCommandAnalyser.Model.Chains;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public List<string> Points { get; set; } = new();
+    public SchemeModel Scheme { get; set; }
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

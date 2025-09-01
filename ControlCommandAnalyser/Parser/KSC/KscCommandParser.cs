@@ -12,7 +12,7 @@ namespace ControlCommandAnalyser.Parser.KSC
   {
     public bool CanParse(string mnemonic) => mnemonic == "КЦ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
       var model = new KscCommandModel
       {
