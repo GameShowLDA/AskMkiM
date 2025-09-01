@@ -10,14 +10,14 @@ namespace ControlCommandAnalyser.Model
   public class PiCommandModel : BaseCommandModel
   {
     /// <summary>
+    /// Модль команды СИ.
+    /// </summary>
+    public SiCommandModel SiCommand { get; set; }
+
+    /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").
     /// </summary>
     public string? Voltage { get; set; }
-
-    /// <summary>
-    /// Пороговое сопротивление (например, "R>100МОм").
-    /// </summary>
-    public string? ThresholdResistance { get; set; }
 
     /// <summary>
     /// Значение времени (например, "1c").
