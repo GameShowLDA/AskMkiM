@@ -57,10 +57,6 @@ namespace ControlCommandAnalyser.Formatter
       {
         var chain = pi.Scheme.ChainModels[ci];
         if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
-        else
-        {
-          yield return $"\t\tЦепь номер {ci + 1}:";
-        }
 
         for (int i = 0; i < chain.ChainModels.Count; i++)
         {
@@ -71,7 +67,24 @@ namespace ControlCommandAnalyser.Formatter
           var status = (i == 0) ? "*" : "#";
 
           foreach (var point in part.PointModels)
-            yield return $"\t\t{status} {point}";
+          {
+            if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count > 1)
+            {
+              yield return $"\t\t{status} {point},";
+            }
+            else if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count == 1)
+            {
+              yield return $"\t\t{status} {point}";
+            }
+            else if (part.PointModels.IndexOf(point) != part.PointModels.Count - 1)
+            {
+              yield return $"\t\t  {point},";
+            }
+            else
+            {
+              yield return $"\t\t  {point}";
+            }
+          }
         }
       }
 
