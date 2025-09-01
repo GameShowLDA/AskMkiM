@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Parser.Common;
 
 namespace ControlCommandAnalyser.Model
@@ -32,7 +33,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public List<PointsModel> Points { get; set; } = new();
+    public SchemeModel Scheme {get; set; }
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandExecutor.Execution;
 using NewCore.Base.Interface.Main;
 using Utilities;
@@ -46,7 +47,13 @@ namespace ControlCommandExecutor.Executors
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1 }, IsBlockStart: true);
 
 
-      var points = (List<PointModel>)(command.Points.Select(x => PointModel.ConvertToPointModels(x.Points)).Where(x => x != null));
+      //var points = (List<PointModel>)(command.Points.Select(x => PointModel.ConvertToPointModels(x.Points)).Where(x => x != null));
+      var points = command.Scheme?.ChainModels?
+                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<PartChainModel>())
+                  .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
+                  .ToList()
+                  ?? new List<PointModel>();
+
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
 

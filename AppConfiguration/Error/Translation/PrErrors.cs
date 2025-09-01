@@ -36,5 +36,39 @@ namespace AppConfiguration.Error.Translation
       Code = ErrorCode.Pr_NodeExecutePointError,
       Description = $"Ошибка при проверке точки {point}  при методе полного узла."
     };
+
+    /// <summary>
+    /// Ошибка: команда ПР не содержит ни одного параметра.
+    /// </summary>
+    public static ErrorItem EmptyCommandBody(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Pr_EmptyCommandBody,
+      Description = "Команда ПР должна содержать хотя бы один параметр. Тело команды не может быть пустым."
+    };
+
+    /// <summary>
+    /// Ошибка: не указаны точки для измерения.
+    /// </summary>
+    public static ErrorItem EmptyPoints(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Pr_EmptyPoints,
+      Description = "Не указаны точки для измерения."
+    };
+
+    /// <summary>
+    /// Ошибка: не указано сопротивление.
+    /// </summary>
+    public static ErrorItem EmptyResistance(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Pr_EmptyResistance,
+      Description = "Не указано сопротивление."
+    };
+
   }
 }

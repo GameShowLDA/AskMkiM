@@ -1,4 +1,5 @@
 ﻿using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,29 +65,34 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\tВремя выполнения не задано.";
       }
 
-      if (ks.Points.Count > 0)
+      if (ks.Scheme == null || ks.Scheme.IsEmpty())
       {
-        yield return $"\tЗаданные точки:";
-        foreach (var pointModel in ks.Points)
-        {
-          foreach (var point in pointModel.Points)
-          {
-            var status = string.Empty;
-            if (pointModel.Status == true)
-            {
-              status = "#";
-            }
-            else
-            {
-              status = "*";
-            }
-            yield return $"\t\t{status} {point}";
-          }
-        }
+        yield return "\tТочки не заданы!";
+        yield break;
       }
-      else
+
+      yield return "\tЗаданные точки:";
+
+      for (int ci = 0; ci < ks.Scheme.ChainModels.Count; ci++)
       {
-        yield return $"\tТочки не заданы!";
+        var chain = ks.Scheme.ChainModels[ci];
+        if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
+        else
+        {
+          yield return $"\t\tЦепь номер {ci + 1}:";
+        }
+
+        for (int pi = 0; pi < chain.ChainModels.Count; pi++)
+        {
+          var part = chain.ChainModels[pi];
+          if (part?.PointModels == null || part.PointModels.Count == 0) continue;
+
+          // первая часть цепи — отметим как начало (*), последующие части считаем "сообщёнными" (#)
+          var status = (pi == 0) ? "*" : "#";
+
+          foreach (var point in part.PointModels)
+            yield return $"\t\t{status} {point}";
+        }
       }
 
       yield return string.Empty;

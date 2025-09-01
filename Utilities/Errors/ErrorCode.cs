@@ -71,6 +71,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("GEN014")]
     Gen_InvalidOnePointUse,
 
+    /// <summary> Неверне использование диапазона точек точки. </summary>
+    [ErrorCodeTag("GEN015")]
+    Gen_InvalidRange,
+
     /// <summary> В команде УП отсутствует или некорректно указана метка перехода. </summary>
     [ErrorCodeTag("UP001")]
     Up_MissingOrInvalidUpLabel,
@@ -263,6 +267,19 @@ namespace Utilities.Errors
     /// <summary> В команде ПР замкнутые точки. </summary>
     [ErrorCodeTag("PR008")]
     Pr_PairError,
+
+    /// <summary> Тело команды ПР отсутствует или пустое. </summary>
+    [ErrorCodeTag("PR009")]
+    Pr_EmptyCommandBody,
+
+
+    /// <summary> В команде ПР отсутствует список точек. </summary>
+    [ErrorCodeTag("PR0010")]
+    Pr_EmptyPoints,
+
+    /// <summary> В команде ПР отсутствует список точек. </summary>
+    [ErrorCodeTag("PR0011")]
+    Pr_EmptyResistance,
 
   }
 

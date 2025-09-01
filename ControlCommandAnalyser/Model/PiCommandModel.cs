@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ControlCommandAnalyser.Model
 {
-  public class PiCommandModel : BaseCommandModel, IHasPoints
+  public class PiCommandModel : BaseCommandModel
   {
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").
@@ -27,7 +27,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public ShemeModel Sheme { get; set; }
+    public SchemeModel Scheme { get; set; }
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

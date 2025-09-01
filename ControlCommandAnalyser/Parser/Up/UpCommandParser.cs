@@ -16,10 +16,10 @@ namespace ControlCommandAnalyser.Parser.Up
 
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
-      if (rmCommandModel == null)
-      {
-        throw new Exception("РМ не сущесвует...");
-      }
+      //if (rmCommandModel == null)
+      //{
+      //  throw new Exception("РМ не сущесвует...");
+      //}
 
       var firstLine = lines[0].Trim();
 

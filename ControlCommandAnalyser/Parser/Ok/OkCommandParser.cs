@@ -16,11 +16,6 @@ namespace ControlCommandAnalyser.Parser.Ok
 
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
     {
-      if (rmCommandModel == null)
-      {
-        throw new Exception("РМ не сущесвует...");
-      }
-
       var model = new OkCommandModel
       {
         CommandNumber = commandNumber,

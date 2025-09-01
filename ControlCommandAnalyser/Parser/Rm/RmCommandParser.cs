@@ -36,7 +36,7 @@ namespace ControlCommandAnalyser.Parser.Rm
 
       foreach (var pair in pairs)
         model.PointsMap[pair.OkPoint] = pair.AskInput;
-
+      rmCommandModel = model;
       return model;
     }
   }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using Utilities.Models;
 
 namespace ControlCommandAnalyser.Formatter
@@ -51,36 +52,34 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\tВерхний порог сопротивления не задан.";
       }
 
-      if (pr.Points.Count > 0)
+      if (pr.Scheme == null || pr.Scheme.IsEmpty())
       {
-        yield return $"\tЗаданные точки:";
-        foreach (var pointModel in pr.Points)
-        {
-          foreach (var point in pointModel.Points)
-          {
-            if (PointModel.ParsePointString(point) == null)
-            {
-              yield return string.Empty;// TODO: выводить ошибку преобразования точки
-            }
-            else
-            {
-              var status = string.Empty;
-              if (pointModel.Status == true)
-              {
-                status = "#";
-              }
-              else
-              {
-                status = "*";
-              }
-              yield return $"\t\t{status} {point}";
-            }
-          }
-        }
+        yield return "\tТочки не заданы!";
+        yield break;
       }
-      else
+
+      yield return "\tЗаданные точки:";
+
+      for (int ci = 0; ci < pr.Scheme.ChainModels.Count; ci++)
       {
-        yield return $"\tТочки не заданы!";
+        var chain = pr.Scheme.ChainModels[ci];
+        if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
+        else
+        {
+          yield return $"\t\tЦепь номер {ci + 1}:";
+        }
+
+        for (int pi = 0; pi < chain.ChainModels.Count; pi++)
+        {
+          var part = chain.ChainModels[pi];
+          if (part?.PointModels == null || part.PointModels.Count == 0) continue;
+
+          // первая часть цепи — отметим как начало (*), последующие части считаем "сообщёнными" (#)
+          var status = (pi == 0) ? "*" : "#";
+
+          foreach (var point in part.PointModels)
+            yield return $"\t\t{status} {point}";
+        }
       }
 
       yield return string.Empty;

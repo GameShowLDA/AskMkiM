@@ -31,7 +31,7 @@ namespace ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public ShemeModel Sheme { get; set; }
+    public SchemeModel Scheme { get; set; }
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

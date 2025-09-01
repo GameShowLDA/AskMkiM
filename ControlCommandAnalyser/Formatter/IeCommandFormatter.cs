@@ -1,4 +1,5 @@
 ﻿using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\tКлючи команды не указаны.";
       }
 
-      if(string.IsNullOrWhiteSpace(ie.LowerLimitCapacity)&& string.IsNullOrWhiteSpace(ie.HigherLimitCapacity))
+      if (string.IsNullOrWhiteSpace(ie.LowerLimitCapacity) && string.IsNullOrWhiteSpace(ie.HigherLimitCapacity))
       {
         yield return $"\tЭлектрическая емкость не задана!";
       }
@@ -43,35 +44,41 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\tНижний порог электрической емкости: {ie.LowerLimitCapacity}";
       }
       // Верхний порог электрической емкости
-      else if(!string.IsNullOrWhiteSpace(ie.HigherLimitCapacity))
+      else if (!string.IsNullOrWhiteSpace(ie.HigherLimitCapacity))
       {
         yield return $"\tВерхний порог электрической емкости: {ie.HigherLimitCapacity}";
       }
 
-      if (ie.Points.Count > 0)
+      if (ie.Scheme == null || ie.Scheme.IsEmpty())
       {
-        yield return $"\tЗаданные точки:";
-        foreach (var pointModel in ie.Points)
+        yield return "\tТочки не заданы!";
+        yield break;
+      }
+
+      yield return "\tЗаданные точки:";
+
+      for (int ci = 0; ci < ie.Scheme.ChainModels.Count; ci++)
+      {
+        var chain = ie.Scheme.ChainModels[ci];
+        if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
+        else
         {
-          foreach (var point in pointModel.Points)
-          {
-            var status = string.Empty;
-            if (pointModel.Status == true)
-            {
-              status = "#";
-            }
-            else
-            {
-              status = "*";
-            }
+          yield return $"\t\tЦепь номер {ci + 1}:";
+        }
+
+        for (int pi = 0; pi < chain.ChainModels.Count; pi++)
+        {
+          var part = chain.ChainModels[pi];
+          if (part?.PointModels == null || part.PointModels.Count == 0) continue;
+
+          // первая часть цепи — отметим как начало (*), последующие части считаем "сообщёнными" (#)
+          var status = (pi == 0) ? "*" : "#";
+
+          foreach (var point in part.PointModels)
             yield return $"\t\t{status} {point}";
-          }
         }
       }
-      else
-      {
-        yield return $"\tТочки не заданы!";
-      }
+
 
       yield return string.Empty;
     }

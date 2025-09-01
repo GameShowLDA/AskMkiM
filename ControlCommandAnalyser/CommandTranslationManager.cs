@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Formatter;
 using ControlCommandAnalyser.Model;
@@ -213,8 +214,12 @@ namespace ControlCommandAnalyser
           if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
           {
             var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines, rmCommand);
-            model.StartLineNumber = currentStartLine + 1; 
+            model.StartLineNumber = currentStartLine + 1;
             commands.Add(model);
+            if (model is RmCommandModel || mnemonic == "РМ")
+            {
+              rmCommand = model as RmCommandModel;
+            }
           }
 
           lineNumer = currentStartLine + 1;
@@ -234,11 +239,6 @@ namespace ControlCommandAnalyser
         var model = ParseSingle(commandNumber, mnemonic, lineNumer, commandLines, rmCommand);
         model.StartLineNumber = currentStartLine + 1;
         commands.Add(model);
-
-        if (model is RmCommandModel RmCommand )
-        {
-          rmCommand = RmCommand;
-        }
       }
 
       return commands;
@@ -248,7 +248,9 @@ namespace ControlCommandAnalyser
     {
       foreach (var parser in _parsers)
         if (parser.CanParse(mnemonic))
+        {
           return parser.Parse(commandNumber, mnemonic, lineNumber, lines, rmCommandModel);
+        }
 
       var unknownCommandModel = new UnknownCommandModel
       {

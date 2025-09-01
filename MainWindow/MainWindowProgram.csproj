@@ -71,7 +71,7 @@
 			<PublishFiles Include="$(PublishDir)**\*" />
 		</ItemGroup>
 
-		<Move SourceFiles="@(PublishFiles)" DestinationFolder="D:\AskMkiM\Bin\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<Move SourceFiles="@(PublishFiles)" DestinationFolder="C:\AskMkiM\Bin\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
 		<RemoveDir Directories="$(PublishDir)" />
 	</Target>
