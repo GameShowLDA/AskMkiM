@@ -7,6 +7,7 @@
              xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox"
              xmlns:TextEditor="clr-namespace:UI.Components.ProtocolListBox"
              xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
@@ -78,42 +79,63 @@
 
         </Grid>
 
-        <Border Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}">
+        <Border  Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border  Padding="0,10" Margin="5" CornerRadius="20" Name="MenuButton" Width="300" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}">
+                <Border  Padding="0,0" Margin="5" CornerRadius="20" Name="MenuButton" Height="Auto" Width="Auto" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="{StaticResource IsCheckedColor}" Offset="1"/>
                         </LinearGradientBrush>
                     </Border.Background>
 
-                    <Grid >
+                    <Grid Height="Auto">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Name="header" 
+                        <Border Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="20,20,0,0">
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Icons:ArrowButton x:Name="ArrowButton" Margin="10" RenderTransformOrigin="0.5,0.5" ArrowBrush="{StaticResource ForegroundSolidColorBrush}" Click="ArrowButton_Click">
+                                    <Icons:ArrowButton.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform Angle="90"/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Icons:ArrowButton.RenderTransform>
+                                </Icons:ArrowButton>
+
+                                <TextBlock Name="header"  Grid.Column="1"
                                Text="{Binding Source={StaticResource LS_Protocol_Header_Title}, Path=Value}" 
                                Foreground="{StaticResource ForegroundSolidColorBrush}" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Left"
                                TextAlignment="Center"
-                               Padding="30,10,10,10" 
+                               Padding="10,10,10,10" 
                                FontSize="25"
                                TextWrapping="Wrap" TextTrimming="None"
                                FontFamily="{DynamicResource WinstonBold}"
                                />
 
-                        <ContentControl Content="{Binding ContentView}" Grid.Row="1" Margin="20,10,20,10"/>
+                            </Grid>
+                        </Border>
 
-                        <StackPanel Grid.Row="2" Margin="20,0,20,20">
+                        <ContentControl  x:Name="ContentPanel" Content="{Binding ContentView}" Grid.Row="1" Margin="20,10,20,10"/>
+
+                        <StackPanel x:Name="BigButtonsPanel" Grid.Row="2" Margin="20,0,20,20">
 
                             <Button x:Name="StartButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Start}, Path=Value}" 
@@ -287,13 +309,43 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Column="1" Margin="5">
-                    <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox"/>
-                </Grid>
+                <Grid Grid.Column="1" Margin="5" xmlns:conv="clr-namespace:UI.Converter">
+                    <Grid.Resources>
+                        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+                    </Grid.Resources>
 
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" MinHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
+                                                                 Path=ActualHeight,
+                                                                 Converter={StaticResource MultiplyConverter},
+                                                                 ConverterParameter=0.5}"/>
+                        <RowDefinition Height="Auto"/>
+
+                        <RowDefinition Height="Auto" MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
+                                                                 Path=ActualHeight,
+                                                                 Converter={StaticResource MultiplyConverter},
+                                                                 ConverterParameter=0.5}"/>
+                    </Grid.RowDefinitions>
+
+                    <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />
+
+                    <GridSplitter  
+                        Grid.Row="1" 
+                        Height="5"
+                        Background="{StaticResource RedColorSolidColorBrush}"
+                        HorizontalAlignment="Stretch"
+                        ResizeDirection="Rows"/>
+
+                    <ErrorList:ErrorListControl Grid.Row="2"
+                              x:Name="ErrorListBoxVertical"
+                              StringsNumberVisible="Collapsed"
+                              MeasureResultVisible="Collapsed"
+                              />
+                </Grid>
 
             </Grid>
         </Border>
 
     </Grid>
+
 </UserControl>

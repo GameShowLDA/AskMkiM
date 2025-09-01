@@ -31,5 +31,12 @@ namespace MainWindowProgram.Services
     public async Task AddSelfTestModuleAsync() =>
       await _multiWindow.AddControlAsync("Самоконтроль модуля", new ModuleSelfControl(), TypeWindow.DeviceControl);
 
+
+    /// <summary>
+    /// Добавляет элемент управления для теста методом узла СИ в multiEditors.
+    /// </summary>
+    public async Task AddSelfTestSystemAsync() =>
+      await _multiWindow.AddControlAsync("Самоконтроль системы", new SystemSelfControl(), TypeWindow.DeviceControl);
+
   }
 }

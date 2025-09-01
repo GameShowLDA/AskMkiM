@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Input;
 
 namespace UI.Icon
 {
@@ -81,12 +82,64 @@ namespace UI.Icon
       var ctrl = (ArrowButton)d;
     }
 
-    /// <summary>
-    /// Обрабатывает событие клика, переключая состояние IsArrowUp и инициируя анимацию поворота.
-    /// </summary>
     private void Button_Click(object sender, RoutedEventArgs e)
     {
-      IsArrowUp = !IsArrowUp;
+      // 1) Сначала пробрасываем наружу "глобальный" Click
+      RaiseEvent(new RoutedEventArgs(ClickEvent, this));
+
+      // 2) Выполняем команду (если задана)
+      if (Command?.CanExecute(CommandParameter) == true)
+        Command.Execute(CommandParameter);
+
+      // 3) Переключаем визуальное состояние (если включено)
+      if (ToggleOnClick)
+        IsArrowUp = !IsArrowUp;
+    }
+
+    // ======= ICommand поддержка =======
+    public static readonly DependencyProperty CommandProperty =
+      DependencyProperty.Register(nameof(Command), typeof(ICommand), typeof(ArrowButton), new PropertyMetadata(null));
+
+    public ICommand? Command
+    {
+      get => (ICommand?)GetValue(CommandProperty);
+      set => SetValue(CommandProperty, value);
+    }
+
+    public static readonly DependencyProperty CommandParameterProperty =
+      DependencyProperty.Register(nameof(CommandParameter), typeof(object), typeof(ArrowButton), new PropertyMetadata(null));
+
+    public object? CommandParameter
+    {
+      get => GetValue(CommandParameterProperty);
+      set => SetValue(CommandParameterProperty, value);
+    }
+
+    // ======= Поведение клика =======
+    public static readonly DependencyProperty ToggleOnClickProperty =
+      DependencyProperty.Register(nameof(ToggleOnClick), typeof(bool), typeof(ArrowButton),
+        new PropertyMetadata(true));
+
+    /// <summary>Авто-переключать IsArrowUp при клике.</summary>
+    public bool ToggleOnClick
+    {
+      get => (bool)GetValue(ToggleOnClickProperty);
+      set => SetValue(ToggleOnClickProperty, value);
+    }
+
+    // ======= Маршрутизируемое событие Click =======
+    public static readonly RoutedEvent ClickEvent =
+      EventManager.RegisterRoutedEvent(
+        nameof(Click),
+        RoutingStrategy.Bubble,
+        typeof(RoutedEventHandler),
+        typeof(ArrowButton));
+
+    /// <summary>Событие клика, всплывающее вверх по дереву.</summary>
+    public event RoutedEventHandler Click
+    {
+      add => AddHandler(ClickEvent, value);
+      remove => RemoveHandler(ClickEvent, value);
     }
   }
 }

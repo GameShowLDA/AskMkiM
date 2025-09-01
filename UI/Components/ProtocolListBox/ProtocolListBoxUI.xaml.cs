@@ -152,17 +152,17 @@ namespace UI.Components.ProtocolListBox
 
     public void RegisterRetryAction(Func<Task> retryAction)
     {
-      throw new NotImplementedException();
+      return;
     }
 
-    public Task TryInvokeRetryAsync()
+    public async Task TryInvokeRetryAsync()
     {
-      throw new NotImplementedException();
+      return;
     }
 
     public void ClearRetryAction()
     {
-      throw new NotImplementedException();
+      return;
     }
 
     public Task<IUserMessageService.UserAction> WaitUserActionAsync()
@@ -173,6 +173,37 @@ namespace UI.Components.ProtocolListBox
     public CancellationToken GetCancellationToken()
     {
       throw new NotImplementedException();
+    }
+
+    public void AddError(ErrorItem errorItem)
+    {
+      return;
+    }
+
+    public int GetLastLineNumberAsync()
+    {
+      if (Messages.Count > 0)
+      {
+        return Messages.Count-1;
+      }
+      else
+      {
+        return -1;
+      }
+    }
+
+    public async Task MoveToLineAsync(int lineNumber)
+    {
+      // Проверьте, что Messages не пустая и lineNumber в пределах доступных индексов
+      if (Messages.Count > 0 && lineNumber >= 0 && lineNumber < Messages.Count)
+      {
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+          ProtocolListBox.SelectedItem = Messages[lineNumber];
+          var item = ProtocolListBox.Items.GetItemAt(lineNumber);
+          ProtocolListBox.ScrollIntoView(item);
+        });
+      }
     }
   }
 }

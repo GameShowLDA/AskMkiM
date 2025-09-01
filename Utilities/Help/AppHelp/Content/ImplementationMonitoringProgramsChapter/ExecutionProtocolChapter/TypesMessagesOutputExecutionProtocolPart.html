@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>4.1 Виды сообщений, выводимых в протокол выполнения</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../../../content.css">
+</head>
+<body>
+    <main class="page-content">
+
+        <h2>4.1 Виды сообщений, выводимых в протокол выполнения</h2>
+
+        <p>Во время выполнения ПК в протокол попадают:</p>
+        <ul>
+            <li>документирующие сообщения;</li>
+            <li>сообщения, формируемые командой <strong>ЦУ</strong>;</li>
+            <li>сообщения об ошибках, найденных в <strong>ОК</strong>;</li>
+            <li>сообщения о сбоях аппаратуры АСК;</li>
+            <li>дополнительные сообщения — если их вывод разрешён в опциях.</li>
+        </ul>
+
+        <p>Каждое сообщение начинается с префикса — это метка его типа.</p>
+
+        <!--‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑‑ -->
+        <h3>Основные префиксы</h3>
+        <ul>
+            <li><strong>$ALG</strong> — наименование алгоритма (<em>УП/БП</em>).</li>
+            <li><strong>$CMD</strong> — текст исполняемой команды ПК.</li>
+            <li><strong>$DOC</strong> — идентификационные параметры и резюме ПК (ключ «Д»).</li>
+            <li><strong>$TST</strong> — наименование текущего теста.</li>
+            <li><strong>$WRN</strong> — указания оператору (команда <strong>ЦУ</strong>).</li>
+        </ul>
+
+        <h3>Результаты измерений и контроля</h3>
+        <ul>
+            <li><strong>$VAL</strong> — результат «норма».</li>
+            <li><strong>?VAL</strong> — результат «брак».</li>
+            <li><strong>?ERR</strong> — ошибка в <strong>ОК</strong>.</li>
+            <li><strong>$LOC</strong> — локализация ошибки <strong>?ERR</strong>.</li>
+            <li><strong>?LOC</strong> — подтверждённая ошибка после доп. измерения.</li>
+            <li><strong>?MOD</strong> — нарушение режимов контроля.</li>
+            <li><strong>?FAT</strong> — фатальный сбой аппаратуры (ПК остановлен).</li>
+        </ul>
+
+        <h3>Обмен с аппаратурой</h3>
+        <ul>
+            <li><strong>$COM</strong> — последовательный обмен (COM/USB).</li>
+            <li><strong>?COM</strong> — ошибка последовательного обмена.</li>
+            <li><strong>$DEV</strong> — уровень «Устройство АСК».</li>
+            <li><strong>?DEV</strong> — ошибка на уровне «Устройство АСК».</li>
+            <li><strong>$HRD</strong> — физический обмен.</li>
+            <li><strong>$REG</strong> — доступ к аппаратным регистрам СКУ / измерителей.</li>
+            <li><strong>?KOP</strong> — ошибка обмена с вольтметром по КОП.</li>
+        </ul>
+
+        <h3>Отладочная информация</h3>
+        <ul>
+            <li><strong>?JMP</strong> — нештатный переход <em>Run/Goto</em> или прерывание.</li>
+            <li><strong>$TIM</strong> — сообщения о задержках/ожиданиях.</li>
+            <li><strong>$LST</strong> — вывод исходного/результирующего списка точек.</li>
+        </ul>
+
+        <p>
+            Какие именно префиксы выводить и сохранять, можно настроить в меню
+            <strong>Options → Report</strong> (см. п. 5.2).
+        </p>
+
+    </main>
+</body>
+</html>

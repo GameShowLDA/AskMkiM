@@ -12,6 +12,7 @@ using Mode.Metrology.PI;
 using NewCore.Base.Interface.Main;
 using UI.Controls.ProtocolNew;
 using Utilities;
+using Utilities.Help;
 using Utilities.Interface;
 using Utilities.Models;
 using static NewCore.Enum.MetrologyEnum;
@@ -32,6 +33,13 @@ namespace Mode.Metrology.KN
     {
       InitializeComponent();
       InitializeSettings();
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "UtilityModeKN");
+      };
     }
 
     /// <summary>

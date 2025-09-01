@@ -9,12 +9,14 @@
              Width="32" Height="32">
 
     <Button x:Name="PART_Button"
-            Cursor="Hand"
+          Cursor="Hand"
           Padding="0"
           Background="Transparent"
           BorderThickness="0"
           Click="Button_Click"
-          FocusVisualStyle="{x:Null}">
+          FocusVisualStyle="{x:Null}"
+          Command="{Binding RelativeSource={RelativeSource AncestorType=local:ArrowButton}, Path=Command}"
+          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=local:ArrowButton}, Path=CommandParameter}">
         <Button.Template>
             <ControlTemplate TargetType="Button">
                 <Grid>

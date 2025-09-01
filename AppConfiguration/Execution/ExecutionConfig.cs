@@ -117,13 +117,10 @@ namespace AppConfiguration.Execution
 
     public static async Task SaveProtocolModel(ExecutionModel protocolModel)
     {
-      await Task.Run(() =>
-      {
-        ExecutionModel.IdleModeExecution = protocolModel.IdleModeExecution;
-        ExecutionModel.IsErrorSimulationMode = protocolModel.IsErrorSimulationMode;
-        ExecutionModel.StepByStepMode = protocolModel.StepByStepMode;
-        ExecutionModel.StopOnError = protocolModel.StopOnError;
-      });
+      await SetIdleMode(protocolModel.IdleModeExecution);
+      await SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
+      await SetStepByStepMode(protocolModel.StepByStepMode);
+      await SetStopOnError(protocolModel.StopOnError);
 
       await RewriteExecutionConfigAsync();
     }

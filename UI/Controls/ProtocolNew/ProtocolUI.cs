@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -54,6 +55,8 @@ namespace UI.Controls.ProtocolNew
 
     private TaskCompletionSource<IUserMessageService.UserAction> _userActionTcs;
 
+    public ErrorManager Errors;
+
     #region Делегаты выполнения.
 
     /// <summary>
@@ -98,6 +101,7 @@ namespace UI.Controls.ProtocolNew
       PreActionDelegate preActionDelegate = null,
       bool checkPower = true)
     {
+      Errors = new ErrorManager(ErrorListBoxVertical);
       try
       {
         _mainWindow = MainWindow;
@@ -268,6 +272,16 @@ namespace UI.Controls.ProtocolNew
       await protocolTextBox.AppendEmptyLineAsync();
     }
 
+    public int GetLastLineNumberAsync()
+    {
+      return protocolTextBox.GetLastLineNumberAsync();
+    }
+
+    public async Task MoveToLineAsync(int lineNumber)
+    {
+      await protocolTextBox.MoveToLineAsync(lineNumber);
+    }
+
     /// <summary>
     /// Проверяет, необходимо ли начать новый блок. Если да — завершает предыдущий и начинает новый.
     /// </summary>
@@ -280,6 +294,11 @@ namespace UI.Controls.ProtocolNew
         StepControlManager.EnterBlock();
       }
     }
+    private async void ErrorListBoxVertical_ErrorItemDoubleClicked(ErrorItem error)
+    {
+      await MoveToLineAsync(error.SourceLineNumber);
+    }
+
 
     /// <summary>
     /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
@@ -345,6 +364,7 @@ namespace UI.Controls.ProtocolNew
         await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
       }
 
+      Errors.ErrorClear();
       return ActionExecutor.StepMode;
     }
 
@@ -455,5 +475,12 @@ namespace UI.Controls.ProtocolNew
 
       return IUserMessageService.UserAction.None;
     }
+
+    public void AddError(ErrorItem errorItem)
+    {
+      Errors.AddError(errorItem);
+    }
+
+
   }
 }

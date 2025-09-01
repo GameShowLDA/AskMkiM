@@ -1,21 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Packaging;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using AppConfiguration.Enums;
-using AppConfiguration.Error.Translation;
-using AppConfiguration.MeasurementError;
+﻿using System.Text.RegularExpressions;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
-using ControlCommandExecutor.IrStrategies;
-using Message;
 using NewCore.Base.Interface.Main;
 using Utilities;
 using Utilities.Interface;
@@ -67,6 +54,7 @@ namespace ControlCommandExecutor.Executors
           .Where(m => m != null)
           .DistinctBy(m => (m.NumberChassis, m.Number))
           .ToList();
+
       await SettingModuleRelayControl(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
@@ -84,11 +72,15 @@ namespace ControlCommandExecutor.Executors
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
-        await MethodExecutor.CheckSequenceAsync(context.CommandExecutionManager, command,  points, context.Console, resistance.Value);
+        BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
+        await BaseStrategies.MethodExecutor.CheckSequenceAsync(measure, context.CommandExecutionManager, command, points, context.Console, resistance.Value);
+        // await MethodExecutor.CheckSequenceAsync(context.CommandExecutionManager, command,  points, context.Console, resistance.Value);
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
-        await PairwiseFirstPointChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
+        BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
+        await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(measure, context.CommandExecutionManager, command, points, context.Console, resistance.Value);
+        //await PairwiseFirstPointChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
       }
       else
       {
@@ -111,7 +103,7 @@ namespace ControlCommandExecutor.Executors
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserMessageService userMessageService)
     {
-     await dbc.ConnectableManager.ResetAsync(userMessageService);
+      await dbc.ConnectableManager.ResetAsync(userMessageService);
 
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(), userMessageService))
       {
@@ -218,7 +210,6 @@ namespace ControlCommandExecutor.Executors
         await messageService.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
 
         answer = await breadDown.IrManger.MeasureResistanceAsync(value, value, 60000);
-        var pause = false;
         var type = ShowMessageModel.MessageType.Success;
         if (answer < value)
         {
@@ -228,7 +219,7 @@ namespace ControlCommandExecutor.Executors
         return type == ShowMessageModel.MessageType.Success ? true : false;
       }, messageService);
 
-      return(result, answer);
+      return (result, answer);
     }
   }
 }

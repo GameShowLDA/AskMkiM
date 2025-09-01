@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>8. Конфигурирование ПОАСК</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../../content.css">
+</head>
+<body>
+    <main class="page-content">
+
+        <h2>8. Конфигурирование ПОАСК</h2>
+
+        <h3>8.1 Меню Options – Опции</h3>
+        <p>Для управления параметрами ПОАСК используется иерархическое меню <strong>Options – Опции</strong> (вызывается <kbd>Alt + O</kbd>), см. рис. 1:</p>
+        <div class="figure">
+            <img src="drex_part1.8_custom.png" alt="Рисунок 8.1 – Меню Options – Опции">
+            <p class="figcaption">Рисунок 1 – Меню <em>Options – Опции</em></p>
+        </div>
+        <p>Ключевые подпункты:</p>
+        <ul>
+            <li><strong>Options/Password</strong> – смена пароля (см. п. 6).</li>
+            <li><strong>Options/Key</strong> – настройки клавиатуры и мыши ([11, п. 8.2]).</li>
+            <li><strong>Options/eDitor</strong> – параметры текстового редактора ([11, п. 8.3]).</li>
+            <li><strong>Options/Syntax</strong> – подсветка синтаксиса ([11, п. 8.4]).</li>
+        </ul>
+        <p>Чтобы получить справку по любому пункту меню, выберите его стрелками и нажмите <kbd>F1</kbd>.</p>
+
+        <h3>8.2 Конфигурационные файлы</h3>
+        <p>ПОАСК хранит свои настройки в двух файлах (в стартовой директории ПОАСК):</p>
+        <ul>
+            <li><code>mkf_ide.cfg</code> – состояние интегрированной среды;</li>
+            <li><code>mkf_hrd.cfg</code> – конфигурация аппаратуры АСК.</li>
+        </ul>
+        <p>Если <code>mkf_hrd.cfg</code> отсутствует, ПОАСК предложит установить «конфигурацию по умолчанию», что может привести к неверной работе. Восстановите файл с дистрибутива или вручную задайте параметры в <strong>Options / Config – Конфигурация аппаратуры</strong>, после чего новый <code>mkf_hrd.cfg</code> будет автоматически сохранён.</p>
+        <p><strong>Замечание.</strong> Команда <strong>Options / Listing</strong> внутри «Конфигурации аппаратуры» позволяет сохранить все текущие настройки в текстовый файл (по умолчанию <code>mkf_hrd.txt</code>), распечатать его и затем использовать для ручного восстановления параметров.</p>
+
+    </main>
+</body>
+</html>

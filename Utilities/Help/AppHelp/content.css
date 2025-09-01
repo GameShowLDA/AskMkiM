@@ -1,0 +1,84 @@
+﻿/* ---------- КОНТЕНТНЫЕ СТРАНИЦЫ ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+
+/* Базовая типографика */
+body {
+    background: #fff;
+    color: #212529;
+    line-height: 1.6;
+    padding: 0;
+}
+
+.page-title {
+    color: #1a3a8f;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.page-content p {
+    margin-bottom: 15px;
+}
+
+.page-content h1 {
+    color: #1a3a8f;
+    margin: 30px 0 20px;
+}
+
+.page-content h2 {
+    color: #1a3a8f;
+    margin: 25px 0 15px;
+}
+
+.page-content h3 {
+    color: #2c5cc5;
+    margin: 20px 0 10px;
+}
+
+.page-content ul {
+    margin: 10px 0 20px 20px;
+}
+
+.page-content li {
+    margin-bottom: 8px;
+}
+
+/* TOC‑ссылки внутри текста */
+.page-content ul li[data-id] {
+    list-style: none;
+    cursor: pointer;
+    color: #1a3a8f;
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: background .2s,color .2s;
+}
+
+.page-content ul li[data-id]:hover {
+    background: #e1ebff;
+    text-decoration: underline;
+}
+
+/* ---------- ОФОРМЛЕНИЕ ВСЕХ ТАБЛИЦ ---------- */
+.page-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.2em 0; /* равномерные отступы сверху/снизу */
+}
+
+.page-content table th,
+.page-content table td {
+    border: 1px solid #333; /* тонкая видимая рамка вокруг ячеек */
+    padding: .35em .6em;
+    text-align: left;
+}
+
+.page-content table thead th {
+    border-bottom: 4px solid #000; /* ЖИРНАЯ линия под заголовком */
+    background: #f3f3f3; /* лёгкая заливка для выделения */
+    font-weight: 700;
+}

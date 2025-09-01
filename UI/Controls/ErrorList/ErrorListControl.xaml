@@ -5,6 +5,8 @@
              xmlns:components="clr-namespace:UI.Components"
              xmlns:Icon="clr-namespace:UI.Icon"
              xmlns:ErrorConv ="clr-namespace:Utilities.Errors;assembly=Utilities"
+             MinHeight="28"
+             xmlns:help="clr-namespace:Utilities.Help;assembly=Utilities"
              x:Name="root">
     <UserControl.Resources>
         <SolidColorBrush x:Key="ErrorListBackground" Color="#1E1E1E"/>
@@ -15,22 +17,30 @@
         <ErrorConv:ErrorCodeToTagConverter x:Key="ErrorCodeToTagConverter"/>
         <local:ErrorLinePairConverter x:Key="ErrorLinePairConverter"/>
     </UserControl.Resources>
+
+
     <Grid Background="{StaticResource ErrorListBackground}">
         <DataGrid ItemsSource="{Binding Errors, ElementName=root}"
-                  AutoGenerateColumns="False"
-                  HeadersVisibility="Column"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  IsReadOnly="True"
-                  Background="{StaticResource ErrorListBackground}"
-                  Foreground="{StaticResource ErrorListForeground}"
-                  RowBackground="{StaticResource ErrorListBackground}"
-                  AlternatingRowBackground="{StaticResource ErrorListBackground}"
-                  GridLinesVisibility="None"
-                  BorderThickness="0"
-                  ColumnHeaderHeight="28"
-                  MouseDoubleClick="DataGrid_MouseDoubleClick">
+                AutoGenerateColumns="False"
+                HeadersVisibility="Column"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                IsReadOnly="True"
+                Background="{StaticResource ErrorListBackground}"
+                Foreground="{StaticResource ErrorListForeground}"
+                RowBackground="{StaticResource ErrorListBackground}"
+                AlternatingRowBackground="{StaticResource ErrorListBackground}"
+                GridLinesVisibility="None"
+                BorderThickness="0"
+                ColumnHeaderHeight="28"
+                MouseDoubleClick="DataGrid_MouseDoubleClick"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                >
             <DataGrid.Resources>
+                <Style x:Key="CellTextTrim" TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Setter Property="TextWrapping" Value="NoWrap"/>
+                </Style>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Background" Value="{StaticResource ErrorListHeaderBackground}"/>
                     <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
@@ -42,12 +52,15 @@
                     <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
                     <Setter Property="Background" Value="{StaticResource ErrorListBackground}"/>
                     <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Margin" Value="5,0"/>
                 </Style>
                 <Style TargetType="DataGridRow">
                     <Setter Property="Background" Value="{StaticResource ErrorListBackground}"/>
                     <Setter Property="Foreground" Value="{StaticResource ErrorListForeground}"/>
                     <Setter Property="BorderThickness" Value="0"/>
                     <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="help:HelpProvider.HelpKey" 
+                            Value="{Binding Code, Converter={StaticResource ErrorCodeToTagConverter}}"/>
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="#264F78"/>
@@ -56,6 +69,7 @@
                     </Style.Triggers>
                 </Style>
             </DataGrid.Resources>
+
             <DataGrid.Columns>
                 <!-- Крестик -->
                 <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
@@ -80,12 +94,21 @@
                 <!-- Номер строки -->
                 <DataGridTextColumn Header="Строка" x:Name="StringsNumber" Binding="{Binding ., Converter={StaticResource ErrorLinePairConverter}}"  Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
                 <!-- Номер команды -->
-                <DataGridTextColumn Header="Команда" Width="80" Binding="{Binding Command}" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <DataGridTextColumn Header="Команда" Width="Auto"
+                    Binding="{Binding Command}"
+                    ElementStyle="{StaticResource CellTextTrim}"
+                    FontFamily="{DynamicResource WinstonLight}" 
+                    FontSize="14"/>
                 <!--Результат измерения-->
                 <DataGridTextColumn x:Name="MeasureResult" Header="Результат измерения" Binding="{Binding MeasureResult}" Width="150" FontFamily="{DynamicResource WinstonLight}" FontSize="14" Visibility="Collapsed"/>
                 <!-- Описание ошибки -->
-                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                <DataGridTextColumn Header="Описание" Width="*"
+                    Binding="{Binding Description}"
+                    ElementStyle="{StaticResource CellTextTrim}"
+                    FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
             </DataGrid.Columns>
+
         </DataGrid>
     </Grid>
+
 </UserControl>

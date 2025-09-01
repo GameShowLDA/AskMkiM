@@ -13,6 +13,7 @@ using Mode.Settings.DeviceConfig.ModuleRelayControl;
 using Mode.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
+using Utilities.Help;
 
 namespace Mode.Settings.DeviceConfig
 {
@@ -39,6 +40,13 @@ namespace Mode.Settings.DeviceConfig
       {
         return;
       }
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "SettingsConfiguration");
+      };
     }
 
     /// <summary>

@@ -15,6 +15,7 @@ using static NewCore.Enum.MetrologyEnum;
 using Utilities;
 using Utilities.Interface;
 using AppConfiguration.Error.Device.Multimeter;
+using Utilities.Help;
 
 namespace Mode.Metrology.KC
 {
@@ -36,6 +37,13 @@ namespace Mode.Metrology.KC
     {
       InitializeComponent();
       InitializeSettings();
+
+      // Регистрируем обработчик движения мыши
+      MouseMove += (s, e) =>
+      {
+        // Обновляем последний элемент под курсором
+        HelpProvider.SetHelpKey(this, "UtilityModeKC");
+      };
     }
 
     /// <summary>

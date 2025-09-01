@@ -2,43 +2,2378 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Справка</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Справочное руководство - ПО АСК-МКИ</title>
+    <link rel="stylesheet" href="shell.css">
+    <link rel="stylesheet" href="content.css">
 </head>
 <body>
-    <header>
-        <h1>Справочная система</h1>
-    </header>
-
-    <div class="container">
-        <nav class="sidebar">
-            <ul>
-                <li>
-                    <details open>
-                        <summary>✎ Редактор</summary>
-                        <ul>
-                            <li><a href="?section=hotkeys">✦ Горячие клавиши</a></li>
-                            <li><a href="?section=description">✦ Описание работы</a></li>
-                        </ul>
-                    </details>
-                </li>
-            </ul>
-        </nav>
-
-        <main class="content">
-            <iframe id="content-frame" name="content-frame" frameborder="0"></iframe>
-        </main>
+    <!-- Header -->
+    <div class="header">
+        <h1>Справочное руководство</h1>
+        <p>Программное обеспечение АСК-МКИ</p>
     </div>
 
-    <footer>
-        <p>© 2025 Справочная система | Версия 1.0</p>
-    </footer>
+    <!-- Main layout -->
+    <div class="main-content">
+        <!-- Левая панель -->
+        <div class="primary-area">
+            <!-- Вкладки -->
+            <div class="tabs">
+                <div class="tab active" data-tab="menu">Меню</div>
+                <div class="tab" data-tab="search">Поиск</div>
+                <div class="tab" data-tab="bookmarks">Закладки</div>
+            </div>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const section = params.get('section') || 'hotkeys';
-        const frame = document.getElementById("content-frame");
-        frame.src = `TextEditor/${section}.html`;
-    </script>
+            <!-- Содержимое вкладок -->
+            <div class="tab-content active" id="menu-content">
+                <!-- Дерево навигации -->
+                <ul class="tree" id="nav-tree">
+                    <li>
+                        <div class="tree-item folder"
+                             id="GeneralInformation"
+                             data-src="Content/GeneralInformationPart.html">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Общие сведения</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item page"
+                                     id="BriefCharacteristicsPOASK"
+                                     data-src="Content/GeneralInformationChapter/BriefCharacteristicsPOASKPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>1. Краткие характеристики ПОАСК</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="ComputerRequirements"
+                                     data-src="Content/GeneralInformationChapter/ComputerRequirementsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>2. Требования к компьютеру</span>
+                                </div>
+                            </li>
+                            <!--НЕ ПОНРАВИЛИСЬ ШИРОБОКОВУ; ПРИКАЗ: УДАЛИТЬ-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="InformationAboutSoftwareDelivery"
+                                     data-src="Content/GeneralInformationChapter/InformationAboutSoftwareDeliveryPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>3. Сведения о поставке программного обеспечения</span>
+                                </div>
+                            </li>-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="SoftwareInstallation"
+                                     data-src="Content/GeneralInformationChapter/SoftwareInstallationPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>4. Установка программного обеспечения</span>
+                                </div>
+                            </li>-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="SoftwareLaunch"
+                                     data-src="Content/GeneralInformationChapter/SoftwareLaunchPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>5. Запуск программного обеспечения</span>
+                                </div>
+                            </li>-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="PasswordsByPOASK"
+                                     data-src="Content/GeneralInformationChapter/PasswordsByPOASKPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>6. Пароли ПОАСК</span>
+                                </div>
+                            </li>-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="UserReactionToFatalErrorInPOASK"
+                                     data-src="Content/GeneralInformationChapter/UserReactionToFatalErrorInPOASKPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>7. Реакция пользователя на фатальную ошибку в ПОАСК</span>
+                                </div>
+                            </li>-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="ConfiguringPOASK"
+                                     data-src="Content/GeneralInformationChapter/ConfiguringPOASKPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>8. Конфигурирование ПОАСК</span>
+                                </div>
+                            </li>-->
+                            <!--<li>
+                                <div class="tree-item page"
+                                     id="CommandLineKeys"
+                                     data-src="Content/GeneralInformationChapter/CommandLineKeysPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>9. Ключи командной строки</span>
+                                </div>
+                            </li>-->
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="tree-item folder"
+                             id="LanguageControlPrograms"
+                             data-src="Content/LanguageControlProgramsPart.html">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Язык программ контроля</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item page"
+                                     id="LanguageControlProgramsBasicConcepts"
+                                     data-src="Content/LanguageControlProgramsChapter/LanguageControlProgramsBasicConceptsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>1. Основные понятия языка программ контроля (ЯПК)</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="LanguageControlProgramsElements"
+                                     data-src="Content/LanguageControlProgramsChapter/LanguageControlProgramsElementsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>2. Элементы языка программ контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="AbbreviatedRecordSequenceIdentifiers"
+                                     data-src="Content/LanguageControlProgramsChapter/AbbreviatedRecordSequenceIdentifiersPart.html">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>3. Сокращенная запись последовательности идентификаторов</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="RangeRecordingSequenceIdentifiers"
+                                             data-src="Content/LanguageControlProgramsChapter/AbbreviatedRecordSequenceIdentifiersChapter/RangeRecordingSequenceIdentifiersPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.1 Диапазонная запись последовательности идентификаторов</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="AbbreviatedRecordEnumerationIdentifier"
+                                             data-src="Content/LanguageControlProgramsChapter/AbbreviatedRecordSequenceIdentifiersChapter/AbbreviatedRecordEnumerationIdentifierPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.2 Сокращенная запись идентификаторов "перечисление"</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="StructureYAPKCommands"
+                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsPart.html">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>4. Структура команд ЯПК</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="LabelCommand"
+                                             data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/LabelCommandPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.1 Метка команды</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="DesignationCommand"
+                                             data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/DesignationCommandPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.2 Обозначение команды</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="ArgumentsCommand"
+                                             data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandPart.html">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>4.3 Аргументы команды</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RangeValuesControlledParameter"
+                                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandChapter/RangeValuesControlledParameterPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>4.3.1 Диапазон значений контролируемого параметра</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ControlVoltage"
+                                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandChapter/ControlVoltagePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>4.3.2 Напряжение контроля</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FlowCurrent"
+                                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandChapter/FlowCurrentPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>4.3.3 Ток  обтекания</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ExposureTime"
+                                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandChapter/ExposureTimePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>4.3.4 Время выдержки</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ControlTime"
+                                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandChapter/ControlTimePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>4.3.5 Время контроля</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="VerificationAlgorithmKeys"
+                                                     data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/ArgumentsCommandChapter/VerificationAlgorithmKeysPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>4.3.6 Ключи алгоритма проверки</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="AddressesCommand"
+                                             data-src="Content/LanguageControlProgramsChapter/StructureYAPKCommandsChapter/AddressesCommandPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.4 Адреса команды</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="ASK_MKIControlProgramLanguage"
+                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguagePart.html">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>5. Язык программ контроля АСК-МКИ</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="CommandsOrganizingControlProcess"
+                                             data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessPart.html">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>5.1 Команды организации процесса контроля</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ОК"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandOK_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.1 Команда ОК (Объект Контроля)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="СП"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandSP_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.2 Команда СП (Схема Подключения)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="РМ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandRM_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.3 Команда РМ (Рабочее Место)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ЦУ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandTsU_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.4 Команда ЦУ (сообщение оператору)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ЦП"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandTsP_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.5 Команда ЦП (Цикл Повторения)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="БП"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandBP_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.6 Команда БП (Безусловный Переход)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="УП"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandUP_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.7 Команда УП (Условный Переход)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="КЦ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandKTs_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.1.8 Команда КЦ (Конец программы контроля)</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="MeasurementCommands"
+                                             data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsPart.html">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>5.2 Измерительные команды</span>
+                                        </div>
+                                        <ul>
+                                            <!--НЕ ПОНРАВИЛИСЬ ШИРОБОКОВУ; ПРИКАЗ: УДАЛИТЬ-->
+                                            <!--<li>
+                                                <div class="tree-item page"
+                                                     id="ПЭ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandPE_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.1 Команда ПЭ (Проверка Электронная)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ПР"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandPR_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.2 Команда ПР (Проверка Релейная)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ЭТ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandET_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.3 Команда ЭТ (проверка в режиме Электронной 4-х-Точки)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="РТ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandRT_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.4 Команда РТ (проверка в режиме Релейной 4-х-Точки)</span>
+                                                </div>
+                                            </li>-->
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="СИ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandSI_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.5 Команда СИ (проверка Сопротивления Изоляции)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ПИ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandPI_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.6 Команда ПИ (проверка Прочности Изоляции)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="КН"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKN_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.7 Команда КН (Контроль Напряжения)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="КС"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKC_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.8 Команда КС (Контроль Сопротивлений)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="НЭ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandNE_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.9 Команда НЭ (контроль Нелинейных Элементов)</span>
+                                                </div>
+                                            </li>
+                                            <!--НЕ ПОНРАВИЛИСЬ ШИРОБОКОВУ; ПРИКАЗ: УДАЛИТЬ-->
+                                            <!--<li>
+                                                <div class="tree-item page"
+                                                     id="КИ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKI_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.10 Команда КИ (Контроль Интервалов времени)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="КУ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKU_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.11 Команда КУ (Контроль тока Утечки)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="РД"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandRD_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.12 Команда РД (Регистр данных)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ЦГ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandTsG_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.13 Команда ЦГ (ЦиклоГрамма)</span>
+                                                </div>
+                                            </li>-->
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ИЕ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandIE_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.14 Команда ИЕ (Измерение Емкости)</span>
+                                                </div>
+                                            </li>
+                                            <!--НЕ ПОНРАВИЛИСЬ ШИРОБОКОВУ; ПРИКАЗ: УДАЛИТЬ-->
+                                            <!--<li>
+                                                <div class="tree-item page"
+                                                     id="ИИ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandII_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.15 Команда ИИ (Измерение Индуктивности)</span>
+                                                </div>
+                                            </li>-->
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="КЩ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKSh_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.2.16 Команда КЩ (Контроль Щупом)</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="ASCDeviceManagementCommands"
+                                             data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsPart.html">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>5.3 Команды управления устройствами АСК</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ВШ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandVSh_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.1 Команда ВШ (Включение Шин коммутатора)</span>
+                                                </div>
+                                            </li>
+                                            <!--НЕ ПОНРАВИЛИСЬ ШИРОБОКОВУ; ПРИКАЗ: УДАЛИТЬ-->
+                                            <!--<li>
+                                                <div class="tree-item page"
+                                                     id="ВИ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandVI_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.2 Команда ВИ (Включение источника)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ПТ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandPT_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.3 Команда ПТ (Подключение Точек к шинам)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ОТ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandOT_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.4 Команда ОТ (Отключение Точек от шин)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="СК"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandSK_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.5 Команда СК (Сброс Коммутатора)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ОС"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandOS_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.6 Команда ОС (Общий Сброс)</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="ГИ"
+                                                     data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandGI_Part.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>5.3.7 Команда ГИ (Генератор Импульсов)</span>
+                                                </div>
+                                            </li>-->
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="IdleExecutionControlPrograms"
+                                     data-src="Content/LanguageControlProgramsChapter/IdleExecutionControlProgramsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>6. Холостое выполнение программ контроля</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="tree-item folder"
+                             id="ProgramComposition"
+                             data-src="Content/ProgramCompositionPart.html">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Состав программы</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="MainComponentsOfProgram">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>Основные компоненты</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="TabFile">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>Меню "Файл"</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncArchive"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncArchivePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Архив"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncOpen"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncOpenPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Открыть"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncCreate"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncCreatePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Создать"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncCompare"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncComparePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Сравнить"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncExit"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncExitPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Выход"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncSave"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncSavePart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Сохранить"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncSaveAs"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncSaveAsPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Сохранить как"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncOpenFolderInExplorer"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncOpenFolderInExplorerPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Открыть папку в проводнике"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncPrint"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncPrintPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Печать"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="FuncSearch"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabFileChapter/FuncSearchPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Функция "Поиск"</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="TabMetrology">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>Меню "Метрология"</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="UtilityModeKC"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabMetrologyChapter/UtilityModeKCPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Утилита "Режим КС"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="UtilityModeIE"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabMetrologyChapter/UtilityModeIEPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Утилита "Режим ИЕ"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="UtilityModeSI"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabMetrologyChapter/UtilityModeSIPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Утилита "Режим СИ"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="UtilityModePR"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabMetrologyChapter/UtilityModePRPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Утилита "Режим ПР"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="UtilityModePI"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabMetrologyChapter/UtilityModePIPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Утилита "Режим ПИ"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="UtilityModeKN"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabMetrologyChapter/UtilityModeKNPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Утилита "Режим КН"</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="TabTests">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>Меню "Тесты"</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="TabTestSI">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Вкладка "Тест СИ"</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="TestSINodeMethod"
+                                                             data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabTestsChapter/TabTestSIChapter/TestSINodeMethodPart.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>Метод узла</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="TestSIGroupMethod"
+                                                             data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabTestsChapter/TabTestSIChapter/TestSIGroupMethodPart.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>Групповой метод</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="TabTestPI">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Вкладка "Тест ПИ"</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="TestPINodeMethod"
+                                                             data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabTestsChapter/TabTestPIChapter/TestPINodeMethodPart.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>Метод узла</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="TestPIGroupMethod"
+                                                             data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabTestsChapter/TabTestPIChapter/TestPIGroupMethodPart.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>Групповой метод</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="CrossTestMkr"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabTestsChapter/CrossTestMkrPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Перекрёстный тест</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="TabSettings">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>Меню "Настройки"</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="SettingsConfiguration"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabSettingsChapter/SettingsConfigurationPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Раздел "Конфигурация"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="SettingsExecution"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabSettingsChapter/SettingsExecutionPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Раздел "Выполнение"</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="SettingsProtocol"
+                                                     data-src="Content/ProgramCompositionChapter/MainComponentsOfProgramChapter/TabSettingsChapter/SettingsProtocolPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>Раздел "Протокол"</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!--Сделать следующую структуру
+                                1. в основные компоненты добавить ВСЕ кнопки
+                                2. сделать раздел или документ для текстового редактора и архива
+                                -->
+                            <li>
+                                <div class="tree-item folder"
+                                     id="TextEditor">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>Текстовый редактор</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="DescriptionWorkTextEditor"
+                                             data-src="Content/ProgramCompositionChapter/TextEditorChapter/DescriptionWorkTextEditorPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>Описание работы</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="HotKeysTextEditor"
+                                             data-src="Content/ProgramCompositionChapter/TextEditorChapter/HotKeysTextEditorPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>Горячие клавишы</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SearchWindowTextEditor"
+                                             data-src="Content/ProgramCompositionChapter/TextEditorChapter/SearchWindowTextEditorPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>Окно поиска</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="Translator">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>Транслятор</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="DescriptionWorkTranslator"
+                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/DescriptionWorkTranslatorPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>Описание работы</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="ErrorList">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>Список ошибок</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="GeneralErrors">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Общие ошибки</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN004</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN005"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN005_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN005</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN006"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN006_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN006</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN007"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN007_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN007</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN008"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN008_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN008</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN009"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN009_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN009</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN010"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN010_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN010</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN011"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN011_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN011</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN012"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN012_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN012</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN013"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN013_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN013</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="GEN014"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/GeneralErrorsChapter/ErrorGEN014_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>GEN014</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="ErrorsUP">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки условного перехода</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="UP001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsUPChapter/ErrorUP001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>UP001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="UP002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsUPChapter/ErrorUP002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>UP002</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="ErrorsOK">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки объекта контроля</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK004</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK005"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK005_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK005</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK006"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK006_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK006</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK007"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK007_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK007</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK008"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK008_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK008</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK009"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK009_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK009</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="OK010"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsOKChapter/ErrorOK010_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>OK010</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="ErrorsRM">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки рабочего места</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM004</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM005"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM005_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM005</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM006"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM006_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM006</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM007"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM007_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM007</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM008"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM008_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM008</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="RM009"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsRMChapter/ErrorRM009_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>RM009</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="ErrorsSI">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки сопротивления изоляции</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="SI001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsSIChapter/ErrorSI001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>SI001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="SI002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsSIChapter/ErrorSI002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>SI002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="SI003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsSIChapter/ErrorSI003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>SI003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="SI004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsSIChapter/ErrorSI004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>SI004</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="ErrorsPI">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки прочности изоляции</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="PI001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsPIChapter/ErrorPI001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>PI001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="PI002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsPIChapter/ErrorPI002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>PI002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="PI003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsPIChapter/ErrorPI003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>PI003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="PI004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsPIChapter/ErrorPI004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>PI004</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="KeyErrors">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки ключей команд</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KEY001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/KeyErrorsChapter/ErrorKEY001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KEY001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KEY002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/KeyErrorsChapter/ErrorKEY002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KEY002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KEY003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/KeyErrorsChapter/ErrorKEY003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KEY003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KEY004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/KeyErrorsChapter/ErrorKEY004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KEY004</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item folder"
+                                                     id="ErrorsKS">
+                                                    <span class="toggle"></span><span class="icon">📁</span><span>Ошибки контроля сопротивления</span>
+                                                </div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KS001"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsKSChapter/ErrorKS001_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KS001</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KS002"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsKSChapter/ErrorKS002_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KS002</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KS003"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsKSChapter/ErrorKS003_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KS003</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KS004"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsKSChapter/ErrorKS004_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KS004</span>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="tree-item page"
+                                                             id="KS005"
+                                                             data-src="Content/ProgramCompositionChapter/TranslatorChapter/ErrorListChapter/ErrorsKSChapter/ErrorKS005_Part.html">
+                                                            <span class="toggle"></span><span class="icon">📄</span><span>KS005</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--ВРЕМЕННАЯ КОНСЕРВАЦИЯ ВСЕХ РАЗДЕЛОВ НИЖЕ-->
+                    <!--<li>
+                        <div class="tree-item folder"
+                             id="DevelopmentControlPrograms">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Разработка программ контроля</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item page"
+                                     id="ConnectingControlObjectASK"
+                                     data-src="Content/DevelopmentControlProgramsChapter/ConnectingControlObjectASKPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>1. Подключение объекта контроля к АСК</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="CableInspectionProgram">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>2. Программа проверки кабеля</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="DiagramCableBeingTested"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/DiagramCableBeingTestedPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.1 Схема проверяемого кабеля</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ConnectingDevice"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/ConnectingDevicePart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.2 Соединительное устройство</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CommandOK"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CommandOKPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.3 Команда ОК</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CommandRM"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CommandRMPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.4 Команда РМ</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CommandVSh"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CommandVShPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.5 Команда ВШ</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CommandTsU"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CommandTsUPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.6 Команда ЦУ</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CommandsCheckingIntegrityCircuitsOK"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CommandsCheckingIntegrityCircuitsOKPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.7 Команды проверки целостности цепей ОК</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CheckingCircuitsSpecifiedFlowCurrent"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CheckingCircuitsSpecifiedFlowCurrentPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.8 Проверка цепей с заданием тока обтекания</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CheckingInsulationBetweenCircuits"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CableInspectionProgramChapter/CheckingInsulationBetweenCircuitsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.9 Проверка изоляции между цепями</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="CheckingControlObjectAttachments">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>3. Проверка объекта контроля с навесными элементами</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="OhmicResistanceControlCommandKC"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CheckingControlObjectAttachmentsChapter/OhmicResistanceControlCommandKCPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.1 Контроль омических сопротивлений. Команда КС</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ControlNon_LinearElementsCommandNE"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CheckingControlObjectAttachmentsChapter/ControlNon_LinearElementsCommandNEPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.2 Контроль нелинейных элементов. Команда НЭ</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ControlCapacitancesAndInductorsManualControl"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CheckingControlObjectAttachmentsChapter/ControlCapacitancesAndInductorsManualControlPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.3 Контроль емкостей и индуктивностей. Ручной контроль</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CombinationFunctionalControl"
+                                             data-src="Content/DevelopmentControlProgramsChapter/CheckingControlObjectAttachmentsChapter/CombinationFunctionalControlPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.4 Совмещение с контролем функционирования</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="ControlFunctioning">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>4. Контроль функционирования</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="GeneralInformationControlFunctioning"
+                                             data-src="Content/DevelopmentControlProgramsChapter/ControlFunctioningChapter/GeneralInformationControlFunctioningPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.1 Общие сведения</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CombiningSwitchingBlocksByInputs"
+                                             data-src="Content/DevelopmentControlProgramsChapter/ControlFunctioningChapter/CombiningSwitchingBlocksByInputsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.2 Объединение блоков коммутации по входам</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="MeasurementCommandsInPCWithFunctionControl"
+                                             data-src="Content/DevelopmentControlProgramsChapter/ControlFunctioningChapter/MeasurementCommandsInPCWithFunctionControlPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.3 Измерительные команды в ПК с контролем функционирования</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ControlSwitchingElementsOK"
+                                             data-src="Content/DevelopmentControlProgramsChapter/ControlFunctioningChapter/ControlSwitchingElementsOKPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.4 Контроль переключающих элементов ОК</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ControlResponseTimeSwitchingElementsOK"
+                                             data-src="Content/DevelopmentControlProgramsChapter/ControlFunctioningChapter/ControlResponseTimeSwitchingElementsOKPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.5 Контроль времени срабатывания переключающих элементов ОК</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="UsingPreprocessorInPCDevelopment">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>5. Использование препроцессора при разработке ПК</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="FORMacroAbbreviatedCommandWriting"
+                                             data-src="Content/DevelopmentControlProgramsChapter/UsingPreprocessorInPCDevelopmentChapter/FORMacroAbbreviatedCommandWritingPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.1 Макрос for для сокращенной записи команд</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="MACROMacroDevelopmentStandardVerificationAlgorithms"
+                                             data-src="Content/DevelopmentControlProgramsChapter/UsingPreprocessorInPCDevelopmentChapter/MACROMacroDevelopmentStandardVerificationAlgorithmsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.2 Макрос macro. Разработка типовых алгоритмов проверок</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="AutomatedDevelopmentControlPrograms"
+                                     data-src="Content/DevelopmentControlProgramsChapter/AutomatedDevelopmentControlProgramsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>6. Автоматизированная разработка программ контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="ConclusionsDevelopmentControlPrograms"
+                                     data-src="Content/DevelopmentControlProgramsChapter/ConclusionsDevelopmentControlProgramsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>7. Выводы</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="tree-item folder"
+                             id="BroadcastControlProgramsChapter"
+                             data-src="Content/BroadcastControlProgramsPart.html">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Трансляция программ контроля</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item page"
+                                     id="ControlProgramFormats"
+                                     data-src="Content/BroadcastControlProgramsChapter/ControlProgramFormatsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>1. Форматы программ контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="DevelopmentSourceTextsControlPrograms"
+                                     data-src="Content/BroadcastControlProgramsChapter/DevelopmentSourceTextsControlProgramsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>2. Разработка исходных текстов программ контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="BroadcastControlPrograms">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>3. Трансляция программ контроля</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="PreparingForBroadcast"
+                                             data-src="Content/BroadcastControlProgramsChapter/BroadcastControlProgramsChapter/PreparingForBroadcastPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.1 Подготовка к трансляции</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CompileMenu_Broadcast__BroadcastControlPrograms"
+                                             data-src="Content/BroadcastControlProgramsChapter/BroadcastControlProgramsChapter/CompileMenu_BroadcastPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.2 Меню Compile-Трансляция</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CompileMakeCommandIPKBroadcast"
+                                             data-src="Content/BroadcastControlProgramsChapter/BroadcastControlProgramsChapter/CompileMakeCommandIPKBroadcastPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.3 Команда Compile/Make. Трансляция ИПК</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="PCBroadcastProcess"
+                                             data-src="Content/BroadcastControlProgramsChapter/BroadcastControlProgramsChapter/PCBroadcastProcessPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.4 Процесс трансляции ПК</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="CorrectionErrorsInControlProgram"
+                                     data-src="Content/BroadcastControlProgramsChapter/CorrectionErrorsInControlProgramPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>4. Исправление ошибок в программе контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="RenumberingLabelsInMonitoringProgram"
+                                     data-src="Content/BroadcastControlProgramsChapter/RenumberingLabelsInMonitoringProgramPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>5. Перенумерация меток в программе контроля</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="tree-item folder"
+                             id="ArchiveControlPrograms">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Архив программ контроля</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item page"
+                                     id="OrganizationArchiveControlPrograms"
+                                     data-src="Content/ArchiveControlProgramsChapter/OrganizationArchiveControlProgramsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>1. Организация архива программ контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="CompileMenu_Broadcast__ArchiveControlPrograms">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>2. Меню Compile-Трансляция</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CompileBuildCommandCreatingNewPCArchive"
+                                             data-src="Content/ArchiveControlProgramsChapter/CompileMenu_BroadcastChapter/CompileBuildCommandCreatingNewPCArchivePart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.1 Команда Compile/Build. Создание нового архива ПК</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CompileArchiveCommandOpenExistingPCArchive"
+                                             data-src="Content/ArchiveControlProgramsChapter/CompileMenu_BroadcastChapter/CompileArchiveCommandOpenExistingPCArchivePart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.2 Команда Compile/Archiv. Открыть существующий архив ПК</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="EditingArchiveControlPrograms"
+                                     data-src="Content/ArchiveControlProgramsChapter/EditingArchiveControlProgramsPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>3. Редактирование архива программ контроля</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="BlockMenuPCArchiveWindow"
+                                     data-src="Content/ArchiveControlProgramsChapter/BlockMenuPCArchiveWindowPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>4. Меню Block окна архива ПК</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item page"
+                                     id="SearchMenuPCArchiveWindow"
+                                     data-src="Content/ArchiveControlProgramsChapter/SearchMenuPCArchiveWindowPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>5. Меню Search (поиск) окна архива ПК</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="tree-item folder"
+                             id="ImplementationMonitoringProgramsChapter">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Выполнение программ контроля</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="PreparationForImplementationControlPrograms">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>1. Подготовка к выполнению программ контроля</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="BroadcastControlPrograms__PreparationForImplementationControlPrograms"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/PreparationForImplementationControlProgramsChapter/BroadcastControlProgramsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>1.1 Трансляция программ контроля</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="OptionsForExecutingMonitoringPrograms"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/PreparationForImplementationControlProgramsChapter/OptionsForExecutingMonitoringProgramsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>1.2 Опции выполнения программ контроля</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="ImplementationMonitoringPrograms">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>2. Выполнение программ контроля</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item folder"
+                                             id="RunMenu_Start">
+                                            <span class="toggle"></span><span class="icon">📁</span><span>2.1 Меню Run-Пуск</span>
+                                        </div>
+                                        <ul>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunBreakCommandAbortExecution"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunBreakCommandAbortExecutionPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.1 Команда Run/Break. Прервать выполнение</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunRunCommandRunToEnd"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunRunCommandRunToEndPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.2 Команда Run/Run. Выполнить до конца</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunCommandCommandExecuteCommands"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunCommandCommandExecuteCommandsPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.3 Команда Run/Command. Выполнить команду</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunDoubleCommandRepeatCommand"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunDoubleCommandRepeatCommandPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.4 Команда Run/Double. Повторить команду</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunGotoCommandTransferControlCommand"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunGotoCommandTransferControlCommandPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.5 Команда Run/Goto. Передача управления на команду</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunToggleCommandSettingResettingStop"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunToggleCommandSettingResettingStopPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.6 Команда Run/Toggle. Установка/сброс останова</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunHaltCommandWorkingWithStopList"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunHaltCommandWorkingWithStopListPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.7 Команда Run/Halt. Работа со списком остановов</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunNumberCommandFindCommandByTag"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunNumberCommandFindCommandByTagPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.8 Команда Run/Number. Найти команду по метке</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunPrintCommandPrintingExecutionProtocol"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunPrintCommandPrintingExecutionProtocolPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.9 Команда Run/Print. Печать протокола выполнения</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunLoadCommandLoadingExecutionProtocol"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunLoadCommandLoadingExecutionProtocolPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.10 Команда Run/Load. Загрузка протокола выполнения</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="tree-item page"
+                                                     id="RunEraseCommandRemovingOldExecutionProtocols"
+                                                     data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/RunMenu_StartChapter/RunEraseCommandRemovingOldExecutionProtocolsPart.html">
+                                                    <span class="toggle"></span><span class="icon">📄</span><span>2.1.11 Команда  Run/Erase. Удаление старых протоколов выполнения</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ProcessExecutingControlPrograms"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/ProcessExecutingControlProgramsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.2 Процесс выполнения программ контроля</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="StoppingExecutionMonitoringProgram"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/StoppingExecutionMonitoringProgramPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.3 Останов выполнения программы контроля</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CompletionMonitoringProgram"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ImplementationMonitoringProgramsChapter/CompletionMonitoringProgramPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.4 Завершение выполнения программы контроля</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="ExecutionMessagesIssuedByYAPKCommands">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>3. Сообщения выполнения, выдаваемые командами ЯПК</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="MessageStructure"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/MessageStructurePart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.1 Структура сообщений</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="GeneralMessages"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/GeneralMessagesPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.2 Общие сообщения</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsBP"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsBPPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.3 БП (Безусловный Переход)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsVI"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsVIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.4 ВИ (Включение Источников)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsVSh"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsVShPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.5 ВШ (Включение Шин)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsGI"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsGIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.6 ГИ (Генератор Импульсов)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsKI"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsKIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.7 КИ (Контроль Интервалов)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsKN"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsKNPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.8 КН (Контроль Напряжения)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsKP"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsKPPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.9 КП (Конец Проверки)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsKC"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsKCPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.10 КС (Контроль Сопротивлений)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsKU"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsKUPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.11 КУ (Контроль тока Утечки)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsKTs"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsKTsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.12 КЦ (Конец программы)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsNE"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsNEPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.13 НЭ (Нелинейный Элемент)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsOK"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsOKPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.14 ОК (Объект контроля)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsOC"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsOCPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.15 ОС (Общий Сброс)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsOT"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsOTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.16 ОТ (Отключение Точек)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsPI"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsPIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.17 ПИ (Прочность Изоляции)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsPR"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsPRPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.18 ПР (Проверка Релейная)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsPT"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsPTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.19 ПТ (Подключение Точек)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsPE"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsPEPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.20 ПЭ (Проверка Электронная)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsRM"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsRMPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.21 РМ (Рабочее Место)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsRT"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsRTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.22 РТ (Релейная 4-х-Точка)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsSI"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsSIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.23 СИ (Сопротивление Изоляции)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsSK"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsSKPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.24 СК (Сброс Коммутатора)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsSP"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsSPPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.25 СП (Схема Подключения)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsUP"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsUPPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.26 УП (Условный Переход)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsTsG"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsTsGPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.27 ЦГ (ЦиклоГрамма)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsTsP"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsTsPPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.28 ЦП (Цикл Повторения)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsTsU"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsTsUPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.29 ЦУ (сообщение оператору)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionMessagesCommandsET"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionMessagesIssuedByYAPKCommandsChapter/ExecutionMessagesCommandsETPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.30 ЭТ (Электронная 4-х-Точка)</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="ExecutionProtocol">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>4. Протокол выполнения</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="TypesMessagesOutputExecutionProtocol"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionProtocolChapter/TypesMessagesOutputExecutionProtocolPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.1 Виды сообщений, выводимых в протокол выполнения</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="CommandsForWorkingWithExecutionProtocol"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionProtocolChapter/CommandsForWorkingWithExecutionProtocolPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.2 Команды для работы с протоколом выполнения</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="AutoSaveExecutionProtocols"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/ExecutionProtocolChapter/AutoSaveExecutionProtocolsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.3 Автосохранение протоколов выполнения</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="OptionsMenu_POASKOptions">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>5. Меню Options - опции ПОАСК</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="OptionsExecuteMenuRunningProgramsAndTests"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/OptionsMenu_POASKOptionsChapter/OptionsExecuteMenuRunningProgramsAndTestsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.1 Меню Options/Execute "Выполнение программ и тестов"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="OptionsReportMenuExecutionProtocol"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/OptionsMenu_POASKOptionsChapter/OptionsReportMenuExecutionProtocolPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.2 Меню Options/Report "Протокол выполнения"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="OptionsMessageMenuMessageColors"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/OptionsMenu_POASKOptionsChapter/OptionsMessageMenuMessageColorsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.3 Меню Options/Message "Цвета сообщений"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SetDefaultOptions"
+                                             data-src="Content/ImplementationMonitoringProgramsChapter/OptionsMenu_POASKOptionsChapter/SetDefaultOptionsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.4 Установить по умолчанию опции</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="tree-item folder"
+                             id="TestsAndUtilities">
+                            <span class="toggle"></span><span class="icon">📁</span><span>Тесты и утилиты</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="tree-item page"
+                                     id="Test_TestsMenu"
+                                     data-src="Content/TestsAndUtilitiesChapter/Test_TestsMenuPart.html">
+                                    <span class="toggle"></span><span class="icon">📄</span><span>1. Меню Test-Тесты</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="SelfControlTests">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>2. Тесты самоконтроля</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestDigitalVoltmeter"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestDigitalVoltmeterPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.1 Тест самоконтроля "Цифровой вольтметр"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestADC"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestADCPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.2 Тест самоконтроля "АЦП"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestSwitchingDevices"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestSwitchingDevicesPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.3 Тест самоконтроля "Коммутация устройств"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestPINT"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestPINTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.4 Тест самоконтроля "ПИНТ"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestSwitch"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestSwitchPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.5 Тест самоконтроля "Коммутатор"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestPPU"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestPPUPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.6 Тест самоконтроля "ППУ"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SelfControlTestPKI"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/SelfControlTestPKIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.7 Тест самоконтроля "ПКИ"</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ExecutionSelfControlTest"
+                                             data-src="Content/TestsAndUtilitiesChapter/SelfControlTestsChapter/ExecutionSelfControlTestPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>2.8 Выполнение тестов самоконтроля</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="AdditionalTestsAndUtilities">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>3. Дополнительные тесты и утилиты</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="OnOffSwitchingStandVKLST"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/OnOffSwitchingStandVKLSTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.1 Включение/выключение стоек коммутации (VKLST)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="RegistersCheckPORTS"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/RegistersCheckPORTSPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.2 Проверка регистров (PORTS)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="InsulationStrengthSwitchboardByGroupMethodPRKOMG"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/InsulationStrengthSwitchboardByGroupMethodPRKOMGPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.3 Прочность изоляции коммутатора групповым методом (PRKOMG)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="InsulationStrengthSwitchByNodeMethodPRKOMU"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/InsulationStrengthSwitchByNodeMethodPRKOMUPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.4 Прочность изоляции коммутатора методом узла (PRKOMU)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ConnectingPointToPKBusRK1TR"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/ConnectingPointToPKBusRK1TRPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.5 Подключение точек к шинам РК (RK1TR)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ConnectPointsToPKGroupMethodRKRGVR"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/ConnectPointsToPKGroupMethodRKRGVRPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.6 RKRGVR. Подключение точек к РК групповым методом</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="IsolationResistanceSwitchByGroupMethodSIKOMG"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/IsolationResistanceSwitchByGroupMethodSIKOMGPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.7 Сопротивление изоляции коммутатора групповым методом (SIKOMG)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="IsolationResistanceSwitchByNodeMethodSIKOMG"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/IsolationResistanceSwitchByNodeMethodSIKOMGPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.8 Сопротивление изоляции коммутатора методом узла (SIKOMU)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="ControlNonlinearElementsTSTNLN"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/ControlNonlinearElementsTSTNLNPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.9 Контроль нелинейных элементов (TSTNLN)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="RemovingStaticFromSwitchInputsSTATICA"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/RemovingStaticFromSwitchInputsSTATICAPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.10 Снятие статики со входов коммутатора (STATICA)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SwitchInsulationResistanceCorrectionRIZCOMT"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/SwitchInsulationResistanceCorrectionRIZCOMTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.11 Коррекция сопротивления изоляции коммутатора (RIZCOMT)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SwitchRelayResistanceControlRKOMM"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/SwitchRelayResistanceControlRKOMMPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.12 RKOMM. Контроль сопротивления контактов реле коммутатора</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SwitchboardCrossTest"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/SwitchboardCrossTestPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.13 CROSS. Перекрестный тест коммутатора</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SystemDevicesTests"
+                                             data-src="Content/TestsAndUtilitiesChapter/AdditionalTestsAndUtilitiesChapter/SystemDevicesTestsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>3.14 Тесты системных устройств</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="MeasurementErrorDetectionUtilities">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>4. Утилиты определения погрешностей измерений</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="R4TPGRMeasurementResistanceRelay4PointRT"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/R4TPGRMeasurementResistanceRelay4PointRTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.1 R4TPGR. Измерение R релейная 4-х точка (РТ)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="R2TPGRMeasuringResistance2WireCircuitPRT"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/R2TPGRMeasuringResistance2WireCircuitPRTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.2 R2TPGR. Измерение R. 2-х проводная схема (ПР Т)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="RETPGRMeasuringResistance2WireCircuitET"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/RETPGRMeasuringResistance2WireCircuitETPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.3 RETPGR. Измерение R. 2-х проводная схема (ЭТ)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="RV7PGRMeasuringResistanceInOhmmeterModeCS"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/RV7PGRMeasuringResistanceInOhmmeterModeCSPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.4 RV7PGR. Измерение R в режиме омметра (КС)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="PKIPGRMeasuringResistanceUsingRCT_SI"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/PKIPGRMeasuringResistanceUsingRCT_SIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.5 PKIPGR. Измерение R с помощью ПКИ (СИ)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="UV7PGRMeasurementConstantVoltageKN_T"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/UV7PGRMeasurementConstantVoltageKN_TPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.6 UV7PGR. Измерение U постоянного (КН Т)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="UACPPGRMeasurementConstantVoltageKN"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/UACPPGRMeasurementConstantVoltageKNPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.7 UACPPGR. Измерение U постоянного (КН)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="RACPPGRResistanceMeasurementUsingADC_PR"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/RACPPGRResistanceMeasurementUsingADC_PRPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.8 RACPPGR. Измерение R с помощью АЦП (ПР)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="UPPUPGRMeasurementUppuPI"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/UPPUPGRMeasurementUppuPIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.9 UPPUPGR. Измерение Uппу (ПИ)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="VV7PGRMeasurementACVoltageKNT"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/VV7PGRMeasurementACVoltageKNTPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.10 VV7PGR. Измерение U переменного (КН Т)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="TIMEPGRMeasurementIntervalsCI"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/TIMEPGRMeasurementIntervalsCIPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.11 TIMEPGR. Измерение интервалов (КИ)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="MeasurementLeakageCurrentUsingRCT_KUPGR"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/MeasurementLeakageCurrentUsingRCT_KUPGRPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.12 Измерение тока утечки с помощью ПКИ (KUPGR)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="IEPGRCapacityMeasurementIE"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/IEPGRCapacityMeasurementIEPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.13 IEPGR. Измерение емкости (ИЕ)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="UPKIPGR_PKIVoltageMeasurement"
+                                             data-src="Content/TestsAndUtilitiesChapter/MeasurementErrorDetectionUtilitiesChapter/UPKIPGR_PKIVoltageMeasurementPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>4.14 UPKIPGR. Измерение Uпки</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="DeviceTriggerTimeDetectionUtilities">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>5. Утилиты определения времени срабатывания устройств</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="PointToBusSwitchingTime"
+                                             data-src="Content/TestsAndUtilitiesChapter/DeviceTriggerTimeDetectionUtilitiesChapter/PointToBusSwitchingTimePart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.1 Время коммутации точки к шинам</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SwitchingTimeKZSHRelay"
+                                             data-src="Content/TestsAndUtilitiesChapter/DeviceTriggerTimeDetectionUtilitiesChapter/SwitchingTimeKZSHRelayPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.2 Время коммутации реле КЗШ</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SwitchingTimeVoltmeterBusbars"
+                                             data-src="Content/TestsAndUtilitiesChapter/DeviceTriggerTimeDetectionUtilitiesChapter/SwitchingTimeVoltmeterBusbarsPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.3 Время коммутации вольтметра к шинам</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="SwitchingTimeADCToBuses"
+                                             data-src="Content/TestsAndUtilitiesChapter/DeviceTriggerTimeDetectionUtilitiesChapter/SwitchingTimeADCToBusesPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>5.4 Время коммутации АЦП к шинам</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item folder"
+                                     id="ExecutionTestsAndUtilities">
+                                    <span class="toggle"></span><span class="icon">📁</span><span>6. Выполнение тестов и утилит</span>
+                                </div>
+                                <ul>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="Menu_ReactionToEscButton"
+                                             data-src="Content/TestsAndUtilitiesChapter/ExecutionTestsAndUtilitiesChapter/Menu_ReactionToEscButtonPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>6.1 Меню - реакция на команду < Esc ></span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="Menu_ReactionOnError"
+                                             data-src="Content/TestsAndUtilitiesChapter/ExecutionTestsAndUtilitiesChapter/Menu_ReactionOnErrorPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>6.2 Меню - реакция на ошибку (сбой)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="tree-item page"
+                                             id="TestContinuationMenu"
+                                             data-src="Content/TestsAndUtilitiesChapter/ExecutionTestsAndUtilitiesChapter/TestContinuationMenuPart.html">
+                                            <span class="toggle"></span><span class="icon">📄</span><span>6.3 Меню продолжения теста</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>-->
+                    <!-- одиночная страница вне глав -->
+                    <li>
+                        <div class="tree-item page"
+                             id="AboutProgram"
+                             data-src="Content/AboutProgramPart.html">
+                            <span class="toggle"></span><span class="icon">📄</span><span>О программе</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content" id="search-content">
+                <div class="search-container">
+                    <input type="text" class="search-box" placeholder="Введите поисковый запрос…">
+                    <span class="clear-btn" id="clear-btn">✖</span>
+                </div>
+                <div class="search-results" id="search-results"></div>
+            </div>
+
+            <div class="tab-content" id="bookmarks-content">
+                <div id="bookmarks-list"></div>
+            </div>
+        </div>
+
+        <!-- Ползунок -->
+        <div class="resizer" id="resizer"></div>
+
+        <!-- Правая панель -->
+        <div class="secondary-area">
+            <!-- Панель навигации -->
+            <div class="nav-bar">
+                <div class="breadcrumb" id="breadcrumb"></div>
+                <div class="nav-buttons">
+                    <button class="nav-btn bookmark-btn" id="bookmark-btn" title="Добавить в закладки">🔖</button>
+                    <button class="nav-btn" id="prev-btn" disabled>← Предыдущий</button>
+                    <button class="nav-btn" id="next-btn">Следующий →</button>
+                </div>
+            </div>
+
+            <!-- Сама страница справки -->
+            <div class="content-area">
+                <iframe id="content-frame" name="content-frame" frameborder="0"
+                        style="width:100%;height:100%;border:0;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">(c) Ижевский Мотозавод «Аксион-Холдинг», 2025</div>
+    <script src="scripts.js"></script>
 </body>
 </html>

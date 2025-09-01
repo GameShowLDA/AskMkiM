@@ -127,6 +127,7 @@ namespace UI.Controls.ProtocolNew
 
       this.Loaded += (s, e) =>
       {
+        ErrorListBoxVertical.ErrorItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
         _attachedWindow = Application.Current?.MainWindow;
         if (_attachedWindow != null)
         {
@@ -212,7 +213,7 @@ namespace UI.Controls.ProtocolNew
           }
           e.Handled = true;
           break;
-          // TODO: закрытие обычных вкладок через alt+x
+        // TODO: закрытие обычных вкладок через alt+x
         default:
           var focus = Keyboard.FocusedElement;
           if (key == Key.LeftAlt || key == Key.RightAlt)
@@ -282,5 +283,15 @@ namespace UI.Controls.ProtocolNew
     {
       MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void ArrowButton_Click(object sender, RoutedEventArgs e)
+    {
+      var vis = ArrowButton.IsArrowUp ? Visibility.Visible : Visibility.Collapsed;
+
+      header.Visibility = vis;
+      ContentPanel.Visibility = vis;
+      BigButtonsPanel.Visibility = vis;
+    }
+
   }
 }

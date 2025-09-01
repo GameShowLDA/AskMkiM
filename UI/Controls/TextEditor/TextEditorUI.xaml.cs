@@ -12,6 +12,7 @@ using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
 using Message;
 using UI.Components;
+using Utilities.Help;
 using Utilities.TextEditor;
 using static Utilities.LoggerUtility;
 
@@ -175,6 +176,14 @@ namespace UI.Controls.TextEditor
 
       };
 
+      HelpProvider.SetHelpKeyProvider(textEditor, () =>
+      {
+        // Берём текущий выделенный текст
+        var sel = textEditor.SelectedText?.Trim();
+
+        // Если ничего не выделено – отдаём «Текстовый редактор»
+        return string.IsNullOrWhiteSpace(sel) ? "DescriptionWorkTextEditor" : sel;
+      });
     }
 
     /// <summary>

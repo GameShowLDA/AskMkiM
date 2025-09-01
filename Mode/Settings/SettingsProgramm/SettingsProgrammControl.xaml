@@ -17,6 +17,46 @@
             <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
         </Style>
 
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Track Name="PART_Track" IsDirectionReversed="true">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineUpCommand" 
+                                                  Background="Transparent" 
+                                                  BorderThickness="0" 
+                                                  Height="10"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Name="Thumb" 
+                                           Background="{StaticResource SecondarySolidColorBrush}" 
+                                           BorderThickness="0"
+                                           Cursor="ScrollNS">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                        BorderBrush="Transparent" 
+                                                        BorderThickness="0"
+                                                        CornerRadius="10"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineDownCommand" 
+                                                  Background="Transparent" 
+                                                  BorderThickness="0" 
+                                                  Height="10"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
 
@@ -26,9 +66,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <TextBlock 
@@ -40,12 +78,22 @@
                 VerticalAlignment="Center"  
                 Grid.Row="0"/>
 
-            <Execution:ExecutionControl Grid.Row="1" x:Name="ExecutionManager"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Execution:ExecutionControl Grid.Row="1" x:Name="ExecutionManager"/>
 
-            <!--Протокол-->
-            <Procol:ProtocolControl Grid.Row="2" x:Name="ProtocolManager"/>
-            
-            <UiSetting:UiSettingsControl Grid.Row="3" x:Name="InterfaceManager"/>
+                    <Procol:ProtocolControl Grid.Row="2" x:Name="ProtocolManager"/>
+
+                    <UiSetting:UiSettingsControl Grid.Row="3" x:Name="InterfaceManager"/>
+
+                </Grid>
+            </ScrollViewer>
 
         </Grid>
 
