@@ -26,11 +26,12 @@ namespace TestConsole
         Console.WriteLine("7. ППУ");
         Console.WriteLine("8. МИНТ колибровка");
         Console.WriteLine("9. Тест вентиляторов");
+        Console.WriteLine("10. Тест списка точек");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 9)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 10)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -80,6 +81,11 @@ namespace TestConsole
 
           case 9:
             await TestAirSpeed.RunAsync();
+            break;
+
+
+          case 10:
+            await DictonaryManager.RunAsync();
             break;
 
           case 0:

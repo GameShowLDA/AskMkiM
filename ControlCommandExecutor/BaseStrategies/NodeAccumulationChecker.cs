@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
 using Utilities;
@@ -30,13 +31,50 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, List<PointModel> points, IUserMessageService messageService, double resistance, CancellationToken cancellationToken)
+    static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, double resistance, CancellationToken cancellationToken)
     {
+      List<PointModel> points = schemeModel.GetAllPoints();
       foreach (var point in points)
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
-        await ConnectToBusAAsync(point, messageService);
+
+        List<PointModel> pairsPoint = null;
+
+        if (schemeModel.TryPairPointAllChain(point, out List<PointModel> result))
+        {
+          pairsPoint = result;
+          if (result[0] != point)
+          {
+            continue;
+          }
+
+          string pointStr = string.Empty;
+          foreach (var item in pairsPoint)
+          {
+            pointStr += $"{(EquipmentService.GetPointKey(item))} ";
+          }
+
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {pointStr}"), IsBlockStart: true);
+          foreach (var pointPair in result)
+          {
+            if (pointPair.PointNumber < point.PointNumber)
+            {
+              await DisconnectFromBusBAsync(pointPair, messageService);
+            }
+          }
+
+          foreach (var pointPair in result)
+          {
+            await ConnectToBusAAsync(pointPair, messageService);
+          }
+        }
+        else
+        {
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
+          await ConnectToBusAAsync(point, messageService);
+        }
+
+
         if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
         {
           step = 0;
@@ -44,27 +82,10 @@ namespace ControlCommandExecutor.BaseStrategies
 
           if (localized != null)
           {
-            //switch (baseCommandModel.Mnemonic)
-            //{
-            //  case "ПР":
-            //    var modelPr = (PrCommandModel)baseCommandModel;
-            //    if (modelPr.PointErrors != null)
-            //    {
-            //      manager.AddErrorMethod(modelPr.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
-            //    }
-            //    break;
-            //  case "СИ":
-            //    var modelSi = (SiCommandModel)baseCommandModel;
-            //    if (baseCommandModel.PointErrors != null)
-            //    {
-            //      manager.AddErrorMethod(modelSi.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
-            //    }
-            //    break;
-            //}
 
             if (baseCommandModel.PointErrors != null)
-            { 
-             manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
+            {
+              manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
             }
 
             await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание точки {EquipmentService.GetPointKey(point)} c точкой {EquipmentService.GetPointKey(localized)}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
@@ -74,8 +95,20 @@ namespace ControlCommandExecutor.BaseStrategies
             await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную точку", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
           }
         }
-        await DisconnectFromBusAAsync(point, messageService);
-        await ConnectToBusBAsync(point, messageService);
+
+        if (pairsPoint != null)
+        {
+          foreach (var item in pairsPoint)
+          {
+            await DisconnectFromBusAAsync(item, messageService);
+            await ConnectToBusBAsync(item, messageService);
+          }
+        }
+        else
+        {
+          await DisconnectFromBusAAsync(point, messageService);
+          await ConnectToBusBAsync(point, messageService);
+        }
       }
 
       foreach (var point in points)

@@ -39,6 +39,7 @@ namespace UI.Controls.Runner
     {
       InitializeComponent();
       ProtocolUI = new ProtocolUI(true);
+      ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
 
       Loaded += RunControl_Loaded;

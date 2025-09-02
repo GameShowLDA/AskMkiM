@@ -82,6 +82,16 @@ namespace UI.Controls.ProtocolNew
       set => SetValue(IsTopMenuVisibleProperty, value);
     }
 
+    public Visibility ErrorListBoxVerticalVisibility
+    {
+      get => ErrorListBoxVertical.Visibility;
+      set
+      {
+        ErrorListBoxVertical.Visibility = value;
+        SeparatorError.Visibility = value;
+      }
+    }
+
     /// <summary>
     /// Команда для установки динамического контента из XAML.
     /// </summary>

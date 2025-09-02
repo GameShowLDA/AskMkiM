@@ -39,7 +39,6 @@ namespace ControlCommandExecutor.Executors
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1 }, IsBlockStart: true);
 
-
       //var points = (List<PointModel>)(command.Points.Select(x => PointModel.ConvertToPointModels(x.Points)).Where(x => x != null));
       var points = command.Scheme?.ChainModels?
                   .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<PartChainModel>())
@@ -72,22 +71,22 @@ namespace ControlCommandExecutor.Executors
         if (command.AlgorithmKey.Contains("К"))
         {
           BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(measure, context.CommandExecutionManager, command, points, context.Console, resistance);
+          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
         }
         else if (command.AlgorithmKey.Contains("Г"))
         {
           BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-          await BaseStrategies.MethodExecutor.CheckSequenceAsync(measure, context.CommandExecutionManager, command, points, context.Console, resistance);
+          await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
         }
         else if (command.AlgorithmKey.Contains("Т1"))
         {
           BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-          await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(measure, context.CommandExecutionManager, command, points, context.Console, resistance);
+          await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
         }
         else
         {
           BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-          await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(context.CommandExecutionManager, command, measure, points, context.Console, resistance, context.Console.GetCancellationToken());
+          await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure,  context.Console, resistance, context.Console.GetCancellationToken());
         }
       }
     }

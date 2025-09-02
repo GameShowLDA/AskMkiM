@@ -330,6 +330,7 @@
                     <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />
 
                     <GridSplitter  
+                        x:Name="SeparatorError"
                         Grid.Row="1" 
                         Height="5"
                         Background="{StaticResource RedColorSolidColorBrush}"

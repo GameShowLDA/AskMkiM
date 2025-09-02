@@ -1,4 +1,6 @@
-﻿using ControlCommandAnalyser.Model;
+﻿using AppConfiguration.Theme;
+using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandExecutor.Execution;
 using Utilities;
 using Utilities.Interface;
@@ -22,8 +24,9 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, IUserMessageService messageService, double resistance)
     {
+      List<PointModel> points = schemeModel.GetAllPoints();
       ResultMessages = new List<ShowMessageModel>();
       HighestBitCount = GetHighestPointBinaryDigits(points);
       var binaryPoints = ConvertToReversedBinaryRange(points, HighestBitCount);
@@ -31,18 +34,18 @@ namespace ControlCommandExecutor.BaseStrategies
       for (int step = 0; step < HighestBitCount; step++)
       {
         await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
-        await ConnectPointsToBusAsync(binaryPoints, step, messageService);
+        await ConnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
         if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
         {
-          await DisconnectPointsToBusAsync(binaryPoints, step, messageService);
+          await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
           await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при проверке разряда {step} ({HighestBitCount})", type: ShowMessageModel.MessageType.Error), IsBlockStart: true);
 
           await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
-          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(performMeasurementAsync, manager, siCommandModel, points, messageService, resistance);
+          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(schemeModel, performMeasurementAsync, manager, siCommandModel, messageService, resistance);
 
           return;
         }
-        await DisconnectPointsToBusAsync(binaryPoints, step, messageService);
+        await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel("Результаты проверки") { IndentLevel = 1 });
@@ -180,36 +183,99 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Подключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task ConnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, int step, IUserMessageService messageService)
+    static private async Task ConnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
         if (point.reversedBinary[step] == '1')
         {
-          await ConnectToBusAAsync(point.point, messageService);
+          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          {
+            if (point.point.PointNumber != result[0].PointNumber)
+            {
+              continue;
+            }
+
+            foreach (var pointPair in result)
+            {
+              await ConnectToBusAAsync(pointPair, messageService);
+            }
+          }
+          else
+          {
+            await ConnectToBusAAsync(point.point, messageService);
+          }
+
         }
         else
         {
-          await ConnectToBusBAsync(point.point, messageService);
+          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          {
+            if (point.point.PointNumber != result[0].PointNumber)
+            {
+              continue;
+            }
+
+            foreach (var pointPair in result)
+            {
+              await ConnectToBusBAsync(pointPair, messageService);
+            }
+          }
+          else
+          {
+            await ConnectToBusBAsync(point.point, messageService);
+          }
         }
+
       }
     }
 
 
     /// <summary>
-    /// Подключает все точки группы к соответствующей шине в зависимости от текущего разряда.
+    /// Отключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task DisconnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, int step, IUserMessageService messageService)
+    static private async Task DisconnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
         if (point.reversedBinary[step] == '1')
         {
-          await DisconnectFromBusAAsync(point.point, messageService);
+          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          {
+            if (point.point.PointNumber != result[0].PointNumber)
+            {
+              return;
+            }
+
+            foreach (var pointPair in result)
+            {
+              await DisconnectFromBusAAsync(pointPair, messageService);
+            }
+          }
+          else
+          {
+            await DisconnectFromBusAAsync(point.point, messageService);
+          }
         }
         else
         {
-          await DisconnectFromBusBAsync(point.point, messageService);
+
+          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          {
+            if (point.point.PointNumber != result[0].PointNumber)
+            {
+              return;
+            }
+
+            foreach (var pointPair in result)
+            {
+              await DisconnectFromBusBAsync(pointPair, messageService);
+            }
+          }
+          else
+          {
+            await DisconnectFromBusBAsync(point.point, messageService);
+          }
         }
       }
     }

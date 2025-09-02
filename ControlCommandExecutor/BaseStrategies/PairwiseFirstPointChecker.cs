@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandExecutor.Execution;
 using Utilities;
 using Utilities.Interface;
@@ -21,8 +22,9 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(NodeAccumulationChecker.PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(SchemeModel schemeModel, NodeAccumulationChecker.PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
     {
+      List<PointModel> points = schemeModel.GetAllPoints();
       if (points == null || points.Count <= 0)
       {
         return;
@@ -30,22 +32,77 @@ namespace ControlCommandExecutor.BaseStrategies
 
       _basePoint = points.FirstOrDefault();
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
-      await ConnectToBusBAsync(_basePoint, messageService);
-      points.Remove(_basePoint);
+      if (schemeModel.TryPairPointAllChain(_basePoint, out List<PointModel> result))
+      {
+        foreach (var pointPair in result)
+        {
+          await ConnectToBusBAsync(pointPair, messageService);
+          points.Remove(pointPair);
+        }
+      }
+      else
+      {
+        await ConnectToBusBAsync(_basePoint, messageService);
+        points.Remove(_basePoint);
+      }
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
 
       foreach (var point in points)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка пары {_basePoint.ToString()} и {point.ToString()}") { IndentLevel = 1 }, IsBlockStart: true);
-        await ConnectToBusAAsync(point, messageService);
+        List<PointModel> pairsPoint = null;
+
+        if (schemeModel.TryPairPointAllChain(point, out List<PointModel> result2))
+        {
+          if (result2[0] != point)
+          {
+            continue;
+          }
+          pairsPoint = result2;
+
+          string pointStr = string.Empty;
+          foreach (var item in pairsPoint)
+          {
+            pointStr += $"{EquipmentService.GetPointKey(item)} ";
+          }
+
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка {(EquipmentService.GetPointKey(_basePoint))} и {pointStr}") { IndentLevel = 1 }, IsBlockStart: true);
+
+          foreach (var pointPair in result2)
+          {
+            await ConnectToBusAAsync(pointPair, messageService);
+          }
+        }
+        else
+        {
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка пары {_basePoint.ToString()} и {EquipmentService.GetPointKey(point)}") { IndentLevel = 1 }, IsBlockStart: true);
+          await ConnectToBusAAsync(point, messageService);
+        }
+
         if (!await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken()))
         {
           await messageService.ShowMessageAsync(new ShowMessageModel("Обнаружено замыкание между", message: $"{_basePoint.ToString()}, {point.ToString()}", type: ShowMessageModel.MessageType.Error)
           { IndentLevel = 3 });
           manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", _basePoint.ToString(), point.ToString()));
         }
-        await DisconnectFromBusAAsync(point, messageService);
+
+        if (pairsPoint != null)
+        {
+          if (pairsPoint[0] != point)
+          {
+            continue;
+          }
+
+          foreach (var pointPair in pairsPoint)
+          {
+            await DisconnectFromBusAAsync(pointPair, messageService);
+          }
+        }
+        else
+        {
+          await DisconnectFromBusAAsync(point, messageService);
+        }
+
       }
     }
 

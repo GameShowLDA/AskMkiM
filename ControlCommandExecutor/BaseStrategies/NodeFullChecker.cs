@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppConfiguration.Error.Translation;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
 using Utilities;
@@ -25,9 +26,10 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, List<PointModel> points, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
     {
       ErrorsPoints = new List<PointModel>();
+      List<PointModel> points = schemeModel.GetAllPoints();
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 
@@ -40,10 +42,37 @@ namespace ControlCommandExecutor.BaseStrategies
       foreach (var point in points)
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
+        List<PointModel> pairsPoint = null;
 
-        await DisconnectFromBusBAsync(point, messageService);
-        await ConnectToBusAAsync(point, messageService);
+
+        if (schemeModel.TryPairPointAllChain(point, out List<PointModel> result))
+        {
+          if (result[0] != point)
+          {
+            continue;
+          }
+
+          pairsPoint = result;
+
+          string pointStr = string.Empty;
+          foreach (var item in pairsPoint)
+          {
+            pointStr += $"{(EquipmentService.GetPointKey(item))} ";
+          }
+
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {pointStr}"), IsBlockStart: true);
+          foreach (var pointPair in result)
+          {
+            await DisconnectFromBusBAsync(pointPair, messageService);
+            await ConnectToBusAAsync(pointPair, messageService);
+          }
+        }
+        else
+        {
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
+          await DisconnectFromBusBAsync(point, messageService);
+          await ConnectToBusAAsync(point, messageService);
+        }
 
         var answer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken());
 
@@ -53,8 +82,19 @@ namespace ControlCommandExecutor.BaseStrategies
           ErrorsPoints.Add(point);
         }
 
-        await DisconnectFromBusAAsync(point, messageService);
-        await ConnectToBusBAsync(point, messageService);
+        if (pairsPoint != null)
+        {
+          foreach (var item in pairsPoint)
+          {
+            await DisconnectFromBusAAsync(item, messageService);
+            await ConnectToBusBAsync(item, messageService);
+          }
+        }
+        else
+        {
+          await DisconnectFromBusAAsync(point, messageService);
+          await ConnectToBusBAsync(point, messageService);
+        }
       }
 
       if (ErrorsPoints.Count > 0)
