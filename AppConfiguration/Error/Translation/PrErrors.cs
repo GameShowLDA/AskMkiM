@@ -19,6 +19,30 @@ namespace AppConfiguration.Error.Translation
       Description = $"Замкнутая пара точек: {pointFirst}, {pointLast}"
     };
 
+    /// <inheritdoc />
+    public ErrorItem ChainPairError(string command, List<PointModel> pointFirst, List<PointModel> pointLast)
+    {
+      var eroror = new ErrorItem()
+      {
+        Command = command,
+        Code = ErrorCode.Pr_PairError,
+      };
+
+      var firstChain = string.Empty;
+      foreach (var point in pointFirst)
+      {
+        firstChain += $"#{point.ToString()}";
+      }
+
+      var secondChain = string.Empty;
+      foreach (var point in pointLast)
+      {
+        secondChain += $"#{point.ToString()}";
+      }
+
+      eroror.Description = $"Замкнутая пара цепей: {firstChain} и {secondChain}";
+      return eroror;
+    }
 
     /// <inheritdoc />
     public ErrorItem ChainError(string command, string chain) => new()
@@ -29,13 +53,24 @@ namespace AppConfiguration.Error.Translation
     };
 
     /// <inheritdoc />
-    public ErrorItem NodeExecutePointError(string command, string point, string resultMeasure) => new()
+    public ErrorItem NodeExecutePointError(string command, List<PointModel> point, string resultMeasure)
     {
-      MeasureResult = resultMeasure,
-      Command = command,
-      Code = ErrorCode.Pr_NodeExecutePointError,
-      Description = $"Ошибка при проверке точки {point}  при методе полного узла."
-    };
+      var error = new ErrorItem()
+      {
+        MeasureResult = resultMeasure,
+        Command = command,
+        Code = ErrorCode.Pr_NodeExecutePointError,
+      };
+
+      var str = string.Empty;
+      foreach (var item in point)
+      {
+        str += $"#{item}";
+      }
+
+      error.Description = $"Ошибка при проверке цепи {str} при методе полного узла.";
+      return error;
+    }
 
     /// <summary>
     /// Ошибка: команда ПР не содержит ни одного параметра.
@@ -69,6 +104,7 @@ namespace AppConfiguration.Error.Translation
       Code = ErrorCode.Pr_EmptyResistance,
       Description = "Не указано сопротивление."
     };
+
 
   }
 }

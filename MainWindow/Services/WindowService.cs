@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using DataBaseConfiguration.Services.Device;
 
 namespace MainWindowProgram.Services
 {
@@ -135,6 +136,19 @@ namespace MainWindowProgram.Services
       }
       else
       {
+        var breakDowns = new BreakdownTesterServices().GetAll();
+        foreach (var item in breakDowns)
+        {
+          try
+          {
+            await item.ConnectableManager.DisconnectAsync();
+          }
+          catch (Exception ex)
+          {
+            Utilities.LoggerUtility.LogException(ex);
+          }
+        }
+
         Application.Current.Shutdown();
         // TODO : Раскомментировать, когда будет готово
         // await Core.Communication.CommunicationManager.ResetAllSystem();

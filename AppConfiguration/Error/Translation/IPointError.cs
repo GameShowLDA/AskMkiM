@@ -22,6 +22,15 @@ namespace AppConfiguration.Error.Translation
     /// Ошибка: Ошибка замкнутой цепи.
     /// </summary>
     /// <param name="command">Номер команды и мнемоника.</param>
+    /// <param name="pointFirst">Первая точка.</param>
+    /// <param name="pointLast">Вторая точка.</param>
+    /// <returns></returns>
+    public ErrorItem ChainPairError(string command, List<PointModel> pointFirst, List<PointModel> pointLast);
+
+    /// <summary>
+    /// Ошибка: Ошибка замкнутой цепи.
+    /// </summary>
+    /// <param name="command">Номер команды и мнемоника.</param>
     /// <param name="step">Номер разряда.</param>
     /// <param name="countStep">Кол-во разрядов.</param>
     /// <param name="resultMeasure">Результат измерения.</param>
@@ -36,7 +45,7 @@ namespace AppConfiguration.Error.Translation
     /// <param name="countStep">Кол-во разрядов.</param>
     /// <param name="resultMeasure">Результат измерения.</param>
     /// <returns></returns>
-    public ErrorItem NodeExecutePointError(string command, string point, string resultMeasure);
+    public ErrorItem NodeExecutePointError(string command, List<PointModel> point, string resultMeasure);
 
   }
 }

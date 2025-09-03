@@ -61,7 +61,7 @@ namespace ControlCommandExecutor.Executors
 
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
-      var breakDown = EquipmentService.GetBreakdownTesterOrThrow(context.Console);
+      var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, resistance.Value, voltage.Value);
 
       if (command.AlgorithmKey.Contains("К"))
@@ -92,7 +92,6 @@ namespace ControlCommandExecutor.Executors
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс устройств") { IndentLevel = 1 });
-
         await dbc.ConnectableManager.ResetAsync();
         foreach (var item in modules)
         {
@@ -104,7 +103,6 @@ namespace ControlCommandExecutor.Executors
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserMessageService userMessageService)
     {
       await dbc.ConnectableManager.ResetAsync(userMessageService);
-
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(), userMessageService))
       {
         throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
@@ -180,7 +178,7 @@ namespace ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
     {
-      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
+      var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -201,7 +199,7 @@ namespace ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
     {
-      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
+      var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
       double answer = -1;
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {

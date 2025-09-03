@@ -18,7 +18,7 @@ namespace ControlCommandExecutor.BaseStrategies
   {
     internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserMessageService userMessageService, CancellationToken cancellationToken);
 
-    static private List<PointModel> ErrorsPoints = new List<PointModel>();
+    static private List<ChainModel> ErrorsPoints = new List<ChainModel>();
 
     /// <summary>
     /// Выполняет последовательную проверку точек с накоплением на одной из них (узел).
@@ -28,6 +28,73 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
     {
+      var pointsList = schemeModel.GetPointsDisconnected();
+      if (pointsList.Count == 0)
+      {
+        return;
+      }
+      ErrorsPoints = new List<ChainModel>();
+
+      foreach (var point in pointsList)
+      {
+        var chainModels = new ChainModel(point);
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+        await ConnectToBusBAsync(chainModels, messageService);
+      }
+
+      foreach (var point in pointsList)
+      {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+        var chainModels = new ChainModel(point);
+
+
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка {chainModels.ToString()}"), IsBlockStart: true);
+        await DisconnectFromBusBAsync(chainModels, messageService);
+        await ConnectToBusAAsync(chainModels, messageService);
+
+        var answer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken());
+
+        if (!answer.Result)
+        {
+          manager.AddErrorMethod(baseCommandModel.PointErrors.NodeExecutePointError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainModels.PointModels, ($"{answer.Value} МОм (>{resistance} МОм)")));
+          ErrorsPoints.Add(chainModels);
+        }
+
+        await DisconnectFromBusAAsync(chainModels, messageService);
+        await ConnectToBusBAsync(chainModels, messageService);
+      }
+
+      if (ErrorsPoints.Count > 0)
+      {
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Бракованные точки"), IsBlockStart: true);
+        foreach (var point in ErrorsPoints)
+        {
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Найден брак в цепи", message: point.ToString(), type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, IsBlockStart: true);
+        }
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Анализ на наличие короткого замыкания между точками"), IsBlockStart: true);
+
+        var chains = await FindAllShortCircuitChainsAsync(performMeasurementAsync, ErrorsPoints, resistance, messageService);
+
+        foreach (var chain in chains)
+        {
+          var chainStr = string.Empty;
+
+          foreach (var item in chain)
+          {
+            chainStr += "#" + string.Join("#", item.PointModels.Select(p => EquipmentService.GetPointKey(p))) + "#";
+          }
+
+          await messageService.ShowMessageAsync(
+              new ShowMessageModel("Обнаружено замыкание",
+                  message: $"{chainStr}",
+                  type: ShowMessageModel.MessageType.Error)
+              { IndentLevel = 3 });
+
+          manager.AddErrorMethod(baseCommandModel.PointErrors.ChainError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainStr));
+        }
+      }
+
       // ErrorsPoints = new List<PointModel>();
       // List<PointModel> points = schemeModel.GetAllPoints();
       // 
@@ -124,72 +191,6 @@ namespace ControlCommandExecutor.BaseStrategies
     }
 
     /// <summary>
-    /// Локализует неисправную точку методом половинного деления.
-    /// Одна точка остаётся на шине A (известная как бракованная), остальные проверяются на шине B.
-    /// </summary>
-    /// <param name="knownFaultPoint">Известная точка, оставляемая на шине A.</param>
-    /// <param name="candidates">Кандидаты на локализацию на шине B.</param>
-    /// <param name="resistance">Пороговое сопротивление для проверки.</param>
-    /// <param name="messageService">Сервис сообщений.</param>
-    /// <returns>Локализованная точка или null, если локализация не удалась.</returns>
-    public static async Task<PointModel?> LocalizeFaultyPointAsync(
-      PerformMeasurementAsync performMeasurementAsync,
-        List<PointModel> candidates,
-        double resistance,
-        IUserMessageService messageService)
-    {
-      PointModel errorPoint = null;
-
-      var (leftPart, rightPart) = SplitInHalf(candidates);
-
-      await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
-      await DisconnectAllFromBusBAsync(leftPart, messageService);
-
-      if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
-      {
-        if (rightPart.Count > 1)
-        {
-          errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService);
-        }
-        else
-        {
-          errorPoint = PointModel.ParsePointString($"{rightPart[0].DeviceNumber}.{rightPart[0].ModuleNumber}.{rightPart[0].PointNumber}");
-          return errorPoint;
-        }
-      }
-      else
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Отключение правой части группы точек"));
-        await DisconnectAllFromBusBAsync(rightPart, messageService);
-
-        await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
-        await ConnectAllFromBusBAsync(leftPart, messageService);
-
-        if (leftPart.Count > 1)
-        {
-
-          errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService);
-        }
-        else
-        {
-          if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
-          {
-            errorPoint = PointModel.ParsePointString($"{leftPart[0].DeviceNumber}.{leftPart[0].ModuleNumber}.{leftPart[0].PointNumber}");
-            return errorPoint;
-          }
-          else
-          {
-            return errorPoint;
-          }
-        }
-      }
-
-      await ConnectAllFromBusBAsync(candidates, messageService);
-      return errorPoint;
-    }
-
-
-    /// <summary>
     /// Делит список точек пополам.
     /// Если количество нечётное — первая часть будет на один элемент больше.
     /// </summary>
@@ -202,7 +203,7 @@ namespace ControlCommandExecutor.BaseStrategies
       var right = points.Skip(middle).ToList();
       return (left, right);
     }
-    private static async Task DisconnectAllFromBusBAsync(List<PointModel> points, IUserMessageService messageService)
+    private static async Task DisconnectAllFromBusBAsync(List<ChainModel> points, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
@@ -211,7 +212,7 @@ namespace ControlCommandExecutor.BaseStrategies
     }
 
 
-    private static async Task ConnectAllFromBusBAsync(List<PointModel> points, IUserMessageService messageService)
+    private static async Task ConnectAllFromBusBAsync(List<ChainModel> points, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
@@ -226,14 +227,14 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="resistance">Порог сопротивления для определения КЗ.</param>
     /// <param name="messageService">Сервис сообщений.</param>
     /// <returns>Список цепей (каждая цепь — список связанных точек).</returns>
-    public static async Task<List<List<PointModel>>> FindAllShortCircuitChainsAsync(
+    public static async Task<List<List<ChainModel>>> FindAllShortCircuitChainsAsync(
       PerformMeasurementAsync performMeasurementAsync,
-        List<PointModel> faultyPoints,
+        List<ChainModel> faultyPoints,
         double resistance,
         IUserMessageService messageService)
     {
-      var chains = new List<List<PointModel>>();
-      var visited = new HashSet<PointModel>();
+      var chains = new List<List<ChainModel>>();
+      var visited = new HashSet<ChainModel>();
 
       foreach (var point in faultyPoints)
       {
@@ -259,16 +260,16 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="messageService">Сервис сообщений.</param>
     /// <param name="visited">Множество уже посещённых точек (будет обновлено).</param>
     /// <returns>Список всех точек, связанных с данной через КЗ.</returns>
-    private static async Task<List<PointModel>> FindChainAsync(
+    private static async Task<List<ChainModel>> FindChainAsync(
       PerformMeasurementAsync performMeasurementAsync,
-        PointModel start,
-        List<PointModel> allPoints,
+        ChainModel start,
+        List<ChainModel> allPoints,
         double resistance,
         IUserMessageService messageService,
-        HashSet<PointModel> visited)
+        HashSet<ChainModel> visited)
     {
-      var queue = new Queue<PointModel>();
-      var chain = new List<PointModel>();
+      var queue = new Queue<ChainModel>();
+      var chain = new List<ChainModel>();
 
       queue.Enqueue(start);
       visited.Add(start);
@@ -299,7 +300,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Проверяет, замкнуты ли две точки между собой.
     /// </summary>
-    private static async Task<bool> IsShortCircuitedAsync(PerformMeasurementAsync performMeasurementAsync, PointModel a, PointModel b, double resistance, IUserMessageService messageService)
+    private static async Task<bool> IsShortCircuitedAsync(PerformMeasurementAsync performMeasurementAsync, ChainModel a, ChainModel b, double resistance, IUserMessageService messageService)
     {
       var allPoints = ErrorsPoints;
       await DisconnectAllFromBusAAsync(allPoints, messageService);
@@ -316,7 +317,7 @@ namespace ControlCommandExecutor.BaseStrategies
       return result;
     }
 
-    private static async Task DisconnectAllFromBusAAsync(List<PointModel> points, IUserMessageService messageService)
+    private static async Task DisconnectAllFromBusAAsync(List<ChainModel> points, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
@@ -333,12 +334,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности подключения точки после всех попыток.
     /// </exception>
-    private static async Task ConnectToBusAAsync(PointModel point, IUserMessageService messageService)
+    private static async Task ConnectToBusAAsync(ChainModel chain, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+      foreach (var point in chain.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -351,12 +355,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности подключения точки после всех попыток.
     /// </exception>
-    private static async Task ConnectToBusBAsync(PointModel point, IUserMessageService messageService)
+    private static async Task ConnectToBusBAsync(ChainModel chain, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+      foreach (var point in chain.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -369,12 +376,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности отключить точку после всех попыток.
     /// </exception>
-    private static async Task DisconnectFromBusAAsync(PointModel point, IUserMessageService messageService)
+    private static async Task DisconnectFromBusAAsync(ChainModel chain, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+      foreach (var point in chain.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -387,12 +397,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности отключить точку после всех попыток.
     /// </exception>
-    private static async Task DisconnectFromBusBAsync(PointModel point, IUserMessageService messageService)
+    private static async Task DisconnectFromBusBAsync(ChainModel chain, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+      foreach (var point in chain.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
   }

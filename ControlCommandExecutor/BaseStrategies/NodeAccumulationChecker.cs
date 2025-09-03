@@ -37,6 +37,10 @@ namespace ControlCommandExecutor.BaseStrategies
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, double resistance, CancellationToken cancellationToken)
     {
       var pointsList = schemeModel.GetPointsDisconnected();
+      if (pointsList.Count == 0)
+      {
+        return;
+      }
 
       foreach (var points in pointsList)
       {
@@ -58,29 +62,35 @@ namespace ControlCommandExecutor.BaseStrategies
         if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
         {
           step = 0;
-          //var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
-        }
+          var chains = EquipmentService.GetDisconnectChainsBefore(schemeModel, points);
+          var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, chains, resistance, messageService, cancellationToken);
+          if (localized != null)
+          {
 
-        // if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
-        // {
-        //   //step = 0;
-        //   //var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
-        //   //
-        //   //if (localized != null)
-        //   //{
-        //   //
-        //   //  if (baseCommandModel.PointErrors != null)
-        //   //  {
-        //   //    manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
-        //   //  }
-        //   //
-        //   //  await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание точки {EquipmentService.GetPointKey(point)} c точкой {EquipmentService.GetPointKey(localized)}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-        //   //}
-        //   //else
-        //   //{
-        //   //  await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную точку", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-        //   //}
-        // }
+            if (baseCommandModel.PointErrors != null)
+            {
+              manager.AddErrorMethod(baseCommandModel.PointErrors.ChainPairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", points, localized));
+            }
+
+            var firstChain = string.Empty;
+            foreach (var item in points)
+            {
+              firstChain += $"#{item.ToString()}";
+            }
+
+            var secondChain = string.Empty;
+            foreach (var item in localized)
+            {
+              secondChain += $"#{item.ToString()}";
+            }
+
+            await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание {firstChain} c {secondChain}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+          }
+          else
+          {
+            await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную цепь", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+          }
+        }
 
         foreach (var point in points)
         {
@@ -96,92 +106,6 @@ namespace ControlCommandExecutor.BaseStrategies
           await DisconnectFromBusBAsync(point, messageService);
         }
       }
-
-
-      // TODO : РАскоменттить!
-
-      // List<PointModel> points = schemeModel.GetAllPoints();
-      // foreach (var point in points)
-      // {
-      //   messageService.GetCancellationToken().ThrowIfCancellationRequested();
-      // 
-      //   List<PointModel> pairsPoint = null;
-      // 
-      //   if (schemeModel.TryCommunicatedPointAllChain(point, out List<PointModel> result))
-      //   {
-      //     pairsPoint = result;
-      //     if (result[0] != point)
-      //     {
-      //       continue;
-      //     }
-      // 
-      //     string pointStr = string.Empty;
-      //     foreach (var item in pairsPoint)
-      //     {
-      //       pointStr += $"{(EquipmentService.GetPointKey(item))} ";
-      //     }
-      // 
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {pointStr}"), IsBlockStart: true);
-      //     foreach (var pointPair in result)
-      //     {
-      //       if (pointPair.PointNumber < point.PointNumber)
-      //       {
-      //         await DisconnectFromBusBAsync(pointPair, messageService);
-      //       }
-      //     }
-      // 
-      //     foreach (var pointPair in result)
-      //     {
-      //       await ConnectToBusAAsync(pointPair, messageService);
-      //     }
-      //   }
-      //   else
-      //   {
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
-      //     await ConnectToBusAAsync(point, messageService);
-      //   }
-      // 
-      // 
-      //   if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
-      //   {
-      //     step = 0;
-      //     var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
-      // 
-      //     if (localized != null)
-      //     {
-      // 
-      //       if (baseCommandModel.PointErrors != null)
-      //       {
-      //         manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
-      //       }
-      // 
-      //       await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание точки {EquipmentService.GetPointKey(point)} c точкой {EquipmentService.GetPointKey(localized)}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-      //     }
-      //     else
-      //     {
-      //       await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную точку", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-      //     }
-      //   }
-      // 
-      //   if (pairsPoint != null)
-      //   {
-      //     foreach (var item in pairsPoint)
-      //     {
-      //       await DisconnectFromBusAAsync(item, messageService);
-      //       await ConnectToBusBAsync(item, messageService);
-      //     }
-      //   }
-      //   else
-      //   {
-      //     await DisconnectFromBusAAsync(point, messageService);
-      //     await ConnectToBusBAsync(point, messageService);
-      //   }
-      // }
-      // 
-      // foreach (var point in points)
-      // {
-      //   await DisconnectFromBusBAsync(point, messageService);
-      // }
     }
 
     /// <summary>
@@ -193,15 +117,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="resistance">Пороговое сопротивление для проверки.</param>
     /// <param name="messageService">Сервис сообщений.</param>
     /// <returns>Локализованная точка или null, если локализация не удалась.</returns>
-    public static async Task<PointModel?> LocalizeFaultyPointAsync(
-      PerformMeasurementAsync performMeasurementAsync,
-        List<PointModel> candidates,
+    public static async Task<List<PointModel>?> LocalizeFaultyPointAsync(
+        PerformMeasurementAsync performMeasurementAsync,
+        List<List<PointModel>> candidates,
         double resistance,
         IUserMessageService messageService,
         CancellationToken cancellationToken
         )
     {
-      PointModel errorPoint = null;
+      List<PointModel> errorPoint = null;
       step++;
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Выполенение шага {step}"));
@@ -218,7 +142,7 @@ namespace ControlCommandExecutor.BaseStrategies
         }
         else
         {
-          errorPoint = PointModel.ParsePointString($"{rightPart[0].DeviceNumber}.{rightPart[0].ModuleNumber}.{rightPart[0].PointNumber}");
+          errorPoint = rightPart[0];
           return errorPoint;
         }
       }
@@ -238,7 +162,7 @@ namespace ControlCommandExecutor.BaseStrategies
         {
           if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
           {
-            errorPoint = PointModel.ParsePointString($"{leftPart[0].DeviceNumber}.{leftPart[0].ModuleNumber}.{leftPart[0].PointNumber}");
+            errorPoint = leftPart[0];
             return errorPoint;
           }
           else
@@ -259,7 +183,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// </summary>
     /// <param name="points">Список точек.</param>
     /// <returns>Кортеж из двух списков: левая и правая половины.</returns>
-    public static (List<PointModel> Left, List<PointModel> Right) SplitInHalf(List<PointModel> points)
+    public static (List<List<PointModel>> Left, List<List<PointModel>> Right) SplitInHalf(List<List<PointModel>> points)
     {
       int middle = (points.Count + 1) / 2; // первая половина длиннее, если нечётно
       var left = points.Take(middle).ToList();
@@ -339,19 +263,25 @@ namespace ControlCommandExecutor.BaseStrategies
       }
     }
 
-    private static async Task DisconnectAllFromBusBAsync(List<PointModel> points, IUserMessageService messageService)
+    private static async Task DisconnectAllFromBusBAsync(List<List<PointModel>> points, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
-        await DisconnectFromBusBAsync(point, messageService);
+        foreach (var item in point)
+        {
+          await DisconnectFromBusBAsync(item, messageService);
+        }
       }
     }
 
-    private static async Task ConnectAllFromBusBAsync(List<PointModel> points, IUserMessageService messageService)
+    private static async Task ConnectAllFromBusBAsync(List<List<PointModel>> points, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
-        await ConnectToBusBAsync(point, messageService);
+        foreach (var item in point)
+        {
+          await ConnectToBusBAsync(item, messageService);
+        }
       }
     }
   }

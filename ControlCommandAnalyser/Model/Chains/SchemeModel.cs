@@ -122,6 +122,22 @@ namespace ControlCommandAnalyser.Model.Chains
     {
       return ChainDisconnectedPointsMap.Values.ToList();
     }
+
+    public List<PointModel> GetAllPointsDisconnected()
+    {
+      var listPoints = ChainDisconnectedPointsMap.Values.ToList();
+      var result = new List<PointModel>();
+
+      foreach (var points in listPoints)
+      {
+        foreach (var point in points)
+        {
+          result.Add(point);
+        }
+      }
+
+      return result;
+    }
     #endregion
   }
 }
