@@ -21,7 +21,7 @@ namespace ControlCommandAnalyser.Parser
     public static (SchemeModel, List<ErrorItem>) ParsePoints(string expr, string mnemonic, RmCommandModel rmCommandModel)
     {
       var errors = new List<ErrorItem>();
-      var chainModels = new List<ChainModel>();
+      var chainModels = new List<GroupModel>();
 
       // Убираем все пробелы/табы/переводы строк и внешние '*'
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
@@ -69,8 +69,8 @@ namespace ControlCommandAnalyser.Parser
                 foreach (var one in expanded)
                 {
                   var (ok1, pts1) = CommandPostAnalyzer.GetPointsModel(new List<string> { one }, rmCommandModel.PointsMap);
-                  var part = new PartChainModel(new List<PointModel>(pts1 ?? new List<PointModel>()));
-                  chainModels.Add(new ChainModel(new List<PartChainModel> { part }));
+                  var part = new ChainModel(new List<PointModel>(pts1 ?? new List<PointModel>()));
+                  chainModels.Add(new GroupModel(new List<ChainModel> { part }));
                 }
                 i++; // съедаем следующий сегмент, т.к. он использован как конец диапазона
                 continue; // переходим к следующей исходной "цепи"
@@ -81,7 +81,7 @@ namespace ControlCommandAnalyser.Parser
         // === конец спец-кейса ===
 
         // Обычная обработка: каждая часть -> PartChainModel (после раскрытия диапазонов)
-        var currentChainParts = new List<PartChainModel>();
+        var currentChainParts = new List<ChainModel>();
 
         foreach (var part in partTokens)
         {
@@ -117,10 +117,33 @@ namespace ControlCommandAnalyser.Parser
 
           // Преобразуем строки-точки в PointModel через карту РМ
           var (ok2, pts2) = CommandPostAnalyzer.GetPointsModel(expandedTokens, rmCommandModel.PointsMap);
-          currentChainParts.Add(new PartChainModel(new List<PointModel>(pts2 ?? new List<PointModel>())));
+          currentChainParts.Add(new ChainModel(new List<PointModel>(pts2 ?? new List<PointModel>())));
         }
+        if (currentChainParts.Count > 0)
+        {
+          for (int cp = 0; cp < currentChainParts.Count; cp++)
+          {
+            var chain = currentChainParts[cp];
+            for (int pm = 0; pm < chain.PointModels.Count; pm++)
+            {
+              if (pm == 0 && cp == 0)
+              {
+                chain.PointModels[pm].PointType = PointType.Type.Star;
+              }
+              else if (pm == 0 && cp > 0)
+              {
+                chain.PointModels[pm].PointType = PointType.Type.Hash;
+              }
+              else
+              {
+                chain.PointModels[pm].PointType = PointType.Type.Comma;
+              }
+              chain.PointModels[pm].Mnemonic = mnemonic;
+            }
+          }
 
-        chainModels.Add(new ChainModel(new List<PartChainModel>(currentChainParts)));
+        }
+          chainModels.Add(new GroupModel(new List<ChainModel>(currentChainParts)));
       }
 
       return (new SchemeModel(chainModels), errors);

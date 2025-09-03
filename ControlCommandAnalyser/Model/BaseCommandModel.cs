@@ -14,16 +14,6 @@ namespace ControlCommandAnalyser.Model
   /// </summary>
   public abstract class BaseCommandModel : IError
   {
-    /// <summary>
-    /// Номер команды.
-    /// </summary>
-    public string CommandNumber { get; set; }
-
-    /// <summary>
-    /// Мнемоника (тип команды).
-    /// </summary>
-    public string Mnemonic { get; set; }
-
     public List<string> SourceLines { get; set; } = new List<string>();
 
     public List<ErrorItem> Errors { get; set; } = new List<ErrorItem>();
@@ -45,5 +35,13 @@ namespace ControlCommandAnalyser.Model
     public List<string> AlgorithmKey { get; set; } = new();
 
     public virtual IPointError PointErrors => null;
+
+    public string CommandNumber { get; set; }
+    public virtual string Mnemonic { get; set; }
+
+    public virtual T GetModel<T>(BaseCommandModel baseCommandModel) where T : class
+    {
+      return baseCommandModel as T;
+    }
   }
 }

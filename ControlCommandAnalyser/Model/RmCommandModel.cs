@@ -11,6 +11,8 @@ namespace ControlCommandAnalyser.Model
   /// </summary>
   public class RmCommandModel : BaseCommandModel
   {
+    public override string Mnemonic => "РМ";
+
     /// <summary>
     /// Словарь: "точка источника" → "точка назначения".
     /// </summary>

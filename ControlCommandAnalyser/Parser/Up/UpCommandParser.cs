@@ -14,13 +14,8 @@ namespace ControlCommandAnalyser.Parser.Up
   {
     public bool CanParse(string mnemonic) => mnemonic == "УП";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
-      //if (rmCommandModel == null)
-      //{
-      //  throw new Exception("РМ не сущесвует...");
-      //}
-
       var firstLine = lines[0].Trim();
 
       // После мнемоники сразу идёт номер перехода (метка)
@@ -41,7 +36,6 @@ namespace ControlCommandAnalyser.Parser.Up
       var model = new UpCommandModel
       {
         CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
         StartLineNumber = numberLine,
         SourceLines = new List<string>(lines),
         TargetLabel = targetLabel

@@ -11,8 +11,11 @@ namespace ControlCommandAnalyser.Model
   /// Модель для команды ИЕ (измерение емкости).
   /// </summary>
   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Д)]
-  public class IeCommandModel:BaseCommandModel
+  public class IeCommandModel : BaseCommandModel, IHasScheme
   {
+
+    public override string Mnemonic => "ИЕ";
+
     /// <summary>
     /// Нижняя граница значеня элктрической ёмкости (например, "100<МОм")
     /// </summary>

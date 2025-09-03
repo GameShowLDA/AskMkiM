@@ -195,7 +195,6 @@ namespace ControlCommandAnalyser
       text = PreprocessText(text);
       var lines = text.Replace("\r\n", "\n").Split('\n');
       var commands = new List<BaseCommandModel>();
-      RmCommandModel rmCommand = null;
 
       string commandNumber = null;
       string mnemonic = null;
@@ -213,13 +212,10 @@ namespace ControlCommandAnalyser
         {
           if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
           {
-            var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines, rmCommand);
+            var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines);
             model.StartLineNumber = currentStartLine + 1;
             commands.Add(model);
-            if (model is RmCommandModel || mnemonic == "РМ")
-            {
-              rmCommand = model as RmCommandModel;
-            }
+            CommandsModel.CommandModels.Add(model);
           }
 
           lineNumer = currentStartLine + 1;
@@ -236,7 +232,7 @@ namespace ControlCommandAnalyser
 
       if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
       {
-        var model = ParseSingle(commandNumber, mnemonic, lineNumer, commandLines, rmCommand);
+        var model = ParseSingle(commandNumber, mnemonic, lineNumer, commandLines);
         model.StartLineNumber = currentStartLine + 1;
         commands.Add(model);
       }
@@ -244,12 +240,12 @@ namespace ControlCommandAnalyser
       return commands;
     }
 
-    private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, int lineNumber, List<string> lines, RmCommandModel rmCommandModel)
+    private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, int lineNumber, List<string> lines)
     {
       foreach (var parser in _parsers)
         if (parser.CanParse(mnemonic))
         {
-          return parser.Parse(commandNumber, mnemonic, lineNumber, lines, rmCommandModel);
+          return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
         }
 
       var unknownCommandModel = new UnknownCommandModel

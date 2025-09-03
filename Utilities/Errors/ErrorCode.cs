@@ -231,6 +231,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("PI004")]
     Pi_EmptyCommandBody,
 
+    /// <summary> Команда ПИ не может содержать ключ Г, если для команды СИ присвоен ключ Т1. </summary>
+    [ErrorCodeTag("PI005")]
+    Pi_KeysConflict,
+
     #endregion
 
     #region Режим КС

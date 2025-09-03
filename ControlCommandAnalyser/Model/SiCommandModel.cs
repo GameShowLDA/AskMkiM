@@ -12,8 +12,10 @@ namespace ControlCommandAnalyser.Model
   /// </summary>
   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, /*ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,*/
     ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
-  public class SiCommandModel : BaseCommandModel
+  public class SiCommandModel : BaseCommandModel, IHasScheme
   {
+    public override string Mnemonic => "СИ";
+
 
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").

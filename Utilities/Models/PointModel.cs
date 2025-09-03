@@ -26,6 +26,12 @@ namespace Utilities.Models
     /// </summary>
     public int PointNumber { get; set; }
 
+    public PointType.Type PointType { get; set; } 
+
+    public string Mnemonic { get; set; }
+
+    
+
     /// <summary>
     /// Метод для поиска строки формата "x.x.x" и возвращения объекта PointModel.
     /// </summary>

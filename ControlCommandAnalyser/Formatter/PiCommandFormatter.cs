@@ -27,17 +27,78 @@ namespace ControlCommandAnalyser.Formatter
       if (!string.IsNullOrWhiteSpace(pi.UnparsedParameters))
         yield return $"\t{pi.UnparsedParameters}";
 
+      var si = pi.SiCommand;
+      // Ключи команды СИ
+      if (si.AlgorithmKey.Count > 0)
+      {
+        yield return $"\tКлючи команды СИ: {string.Join(", ", si.AlgorithmKey)}";
+      }
+      else
+      {
+        yield return $"\tКлючи команды СИ не указаны.";
+      }
+
+      // Напряжение
+      if (!string.IsNullOrWhiteSpace(si.Voltage))
+      {
+        yield return $"\tНапряжение СИ: {si.Voltage}";
+      }
+      else
+      {
+        yield return $"\tНапряжение СИ не задано!";
+      }
+
+      // Время
+      if (!string.IsNullOrWhiteSpace(si.Time))
+      {
+        yield return $"\tВремя выполнения СИ: {si.Time}";
+      }
+      else
+      {
+        yield return $"\tВремя выполнения СИ не задано!";
+      }
+
+      // Сопротивление
+      if (!string.IsNullOrWhiteSpace(si.Resistance))
+      {
+        yield return $"\tСопротивление СИ: {si.Resistance}";
+      }
+      else
+      {
+        yield return $"\tСопротивление СИ не задано!";
+      }
+
+      // Ключи команды ПИ
+      if (pi.AlgorithmKey.Count > 0)
+      {
+        yield return $"\tКлючи команды ПИ: {string.Join(", ", pi.AlgorithmKey)}";
+      }
+      else
+      {
+        yield return $"\tКлючи команды ПИ не указаны.";
+      }
+
       // Напряжение
       if (!string.IsNullOrWhiteSpace(pi.Voltage))
-        yield return $"\tНапряжение: {pi.Voltage}";
+        yield return $"\tНапряжение ПИ: {pi.Voltage}";
       else
-        yield return $"\tНапряжение не задано!";
+        yield return $"\tНапряжение ПИ не задано!";
 
-      // Пороговое сопротивление
-      if (!string.IsNullOrWhiteSpace(pi.ThresholdResistance))
-        yield return $"\tПороговое сопротивление: {pi.ThresholdResistance}";
+      //  Тип тока
+      if (pi.VoltageType != null)
+      {
+
+        if (pi.VoltageType == VoltageEnum.Type.ACW)
+        {
+          yield return $"\tТип тока: переменный";
+        }
+        else
+        {
+          yield return $"\tТип тока: постоянный";
+        }
+      }
       else
-        yield return $"\tПороговое сопротивление не задано!";
+        yield return $"\tТип тока не задан!";
 
       // Время
       if (!string.IsNullOrWhiteSpace(pi.Time))
@@ -53,9 +114,9 @@ namespace ControlCommandAnalyser.Formatter
 
       yield return "\tЗаданные точки:";
 
-      for (int ci = 0; ci < pi.Scheme.ChainModels.Count; ci++)
+      for (int ci = 0; ci < pi.Scheme.GroupModels.Count; ci++)
       {
-        var chain = pi.Scheme.ChainModels[ci];
+        var chain = pi.Scheme.GroupModels[ci];
         if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
 
         for (int i = 0; i < chain.ChainModels.Count; i++)

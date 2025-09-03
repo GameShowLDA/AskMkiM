@@ -71,7 +71,7 @@ namespace ControlCommandAnalyser.Parser
       {
         string pointPart = pointsMap.GetValueOrDefault(point, string.Empty);
         if (string.IsNullOrEmpty(pointPart))
-        { 
+        {
           error = true;
           continue;
         }

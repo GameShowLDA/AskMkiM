@@ -56,5 +56,16 @@ namespace AppConfiguration.Error.Translation
       Code = ErrorCode.Pi_EmptyCommandBody,
       Description = "Команда ПИ должна содержать хотя бы один параметр. Тело команды не может быть пустым."
     };
+
+    /// <summary>
+    /// Ошибка: команда ПИ не может содержать ключ Г, если для команды СИ присвоен ключ Т1.
+    /// </summary>
+    public static ErrorItem KeysConflict(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Pi_KeysConflict,
+      Description = "Команда ПИ не может содержать ключ Г, если для команды СИ присвоен ключ Т1."
+    };
   }
 }

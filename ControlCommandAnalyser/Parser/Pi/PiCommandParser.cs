@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Formatter;
 using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Parser.Common;
-using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Parser.Si; // Для LoggerUtility
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Utilities;
-using ControlCommandAnalyser.Model.Chains; // Для LoggerUtility
 
 namespace ControlCommandAnalyser.Parser.Pi
 {
@@ -16,19 +19,40 @@ namespace ControlCommandAnalyser.Parser.Pi
   {
     public bool CanParse(string mnemonic) => mnemonic == "ПИ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
+
+
+
+
+
+
+
+
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
-      if (rmCommandModel == null)
+      var rmCommandModel = new RmCommandModel();
+      var commandModel = CommandsModel.GetByMnemonic("РМ").Last();
+
+      if (commandModel == null)
       {
         throw new Exception("РМ не сущесвует...");
+      }
+      else
+      {
+        if (commandModel is RmCommandModel)
+        {
+          rmCommandModel = commandModel as RmCommandModel;
+        }
+        else
+        {
+          throw new Exception("РМ не сущесвует...");
+        }
       }
 
       var model = new PiCommandModel
       {
         CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
         SourceLines = new List<string>(lines),
         StartLineNumber = numberLine,
       };
@@ -56,37 +80,78 @@ namespace ControlCommandAnalyser.Parser.Pi
 
       // Дальше работаем ТОЛЬКО с body:
       var remainder = body;
+      var splitReminder = remainder.Split("  ");
+      remainder = splitReminder[2];
+
+      var modelSi = new SiCommandModel();
+      var lastString = SiCommandParser.ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, splitReminder[1]);
+      CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, lastString);
+      model.SiCommand = modelSi;
 
       var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
       if (match.Success)
         remainder = match.Groups[1].Value.Trim();
 
-      string? voltage = null, thresholdResistance = null, time = null;
+      string? voltage = null, time = null;
+
+      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(remainder);
+
+      foreach (var (key, hasError) in result)
+      {
+        if (hasError)
+        {
+          LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+          model.Errors.Add(PiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        }
+        else
+        {
+          var t1 = AlgorithmKey.Т1.ToString();
+          if (!modelSi.AlgorithmKey.Contains(t1) && !string.IsNullOrEmpty(key))
+          {
+            model.AlgorithmKey.Add(key);
+            LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
+          }
+          else
+          {
+            model.Errors.Add(PiErrors.KeysConflict(numberLine, $"{commandNumber} {mnemonic}"));
+            LoggerUtility.LogWarning($"Команда ПИ не может содержать ключ Г, если для команды СИ присвоен ключ Т1: " +
+              $"{commandNumber} {mnemonic} (строка {numberLine})");
+          }
+        }
+      }
+
+      // затем удаляем их из строки
+      foreach (var key in model.AlgorithmKey)
+      {
+        remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
+      }
 
       // Парсим параметры
       (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
       LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
 
-      (thresholdResistance, remainder) = CommonParameterParser.ParseResistance(remainder);
-      LoggerUtility.LogDebug($"После парсинга порогового сопротивления: threshold='{thresholdResistance}', remainder='{remainder}'");
-
       (time, remainder) = CommonParameterParser.ParseTime(remainder);
       LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
 
+      if (remainder.Contains('+'))
+      {
+        model.VoltageType = VoltageEnum.Type.DCW;
+        remainder = remainder.Replace("+", string.Empty);
+      }
+
       model.Voltage = voltage;
-      model.ThresholdResistance = thresholdResistance;
+
+      if (string.IsNullOrEmpty(time))
+      {
+        time = "1 c";
+      }
+
       model.Time = time;
 
       if (string.IsNullOrWhiteSpace(voltage))
       {
         model.Errors.Add(PiErrors.CannotParseParameters("Не указано напряжение", numberLine, $"{commandNumber} {mnemonic}"));
         LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
-      }
-
-      if (string.IsNullOrWhiteSpace(thresholdResistance))
-      {
-        model.Errors.Add(PiErrors.CannotParseParameters("Не указано пороговое сопротивление", numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано пороговое сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
       }
 
       if (string.IsNullOrWhiteSpace(time))
@@ -132,12 +197,65 @@ namespace ControlCommandAnalyser.Parser.Pi
         {
           model.Scheme = scheme; // ← просто присваиваем схему в модель
           LoggerUtility.LogInformation(
-            $"Схема распознана: цепей={scheme.ChainModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
         }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+      }
+      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      {
+        // находим цепи точек из предыдущей команды проверки
+        var lastCommand = CommandsModel.GetLastFromCheckCommands();
+        if (lastCommand != null)
+        {
+          var foundCommandMnemonic = lastCommand.Mnemonic;
+          var newCommand = CreateSameType(lastCommand);
+          newCommand = lastCommand;
+
+          if (newCommand is IHasScheme hasScheme)
+          {
+            var scheme = hasScheme.Scheme;
+            model.Scheme = scheme;
+            // работаем со схемой
+          }
+          else
+          {
+            // у этой команды схемы нет — просто пропускаем/логируем
+            LoggerUtility.LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
+          }
+
+
+          if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+          {
+
+
+            // добавляем просто точки из РМ, которые еще не были записаны
+            lastCommand = CommandsModel.GetByMnemonic("РМ").Last();
+            if (lastCommand is RmCommandModel)
+            {
+              var rmCommand = lastCommand as RmCommandModel;
+              foreach (var chain in model.Scheme.GroupModels)
+              {
+                foreach (var part in chain.ChainModels)
+                {
+                  foreach (var point in part.PointModels)
+                  {
+                    //if (!rmCommand.PointsMap.ContainsKey(point.))
+                    //{
+                    //  //newCommand.Scheme
+                    //}
+                  }
+                }
+              }
+            }
+            //model.Scheme = rmCommand.Scheme;
+            LoggerUtility.LogInformation(
+              $"Схема распознана из РМ: цепей={model.Scheme.GroupModels?.Count ?? 0}, частей={model.Scheme.CountParts()}, точек={model.Scheme.CountPoints()}");
+
+          }
+        }
       }
       else
       {
@@ -146,23 +264,41 @@ namespace ControlCommandAnalyser.Parser.Pi
         model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
       }
 
+      CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, remainder);
+
+      LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
+
+      return model;
+    }
+
+    private static void CheckUnparsedParameters(string commandNumber, string mnemonic, int numberLine, PiCommandModel model, string remainder)
+    {
       if (!string.IsNullOrEmpty(remainder))
       {
         model.UnparsedParameters = "! Не распознанные параметры: ";
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
+    }
 
-      // Валидация
-      if (string.IsNullOrWhiteSpace(voltage) && string.IsNullOrWhiteSpace(thresholdResistance) && string.IsNullOrWhiteSpace(time))
-      {
-        LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
-        model.Errors.Add(PiErrors.CannotParseParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
-      }
+    /// <summary>
+    /// Создаёт новый экземпляр команды того же типа, что и lastCommand.
+    /// </summary>
+    /// <typeparam name="T">Тип команды, наследник BaseCommandModel.</typeparam>
+    /// <param name="lastCommand">Экземпляр команды, по которому определяется тип.</param>
+    /// <returns>Новый экземпляр команды указанного типа.</returns>
+    public static T CreateSameType<T>(T lastCommand) where T : BaseCommandModel
+    {
+      if (lastCommand == null)
+        throw new ArgumentNullException(nameof(lastCommand));
 
-      LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
+      // Получаем реальный runtime-тип объекта
+      Type commandType = lastCommand.GetType();
 
-      return model;
+      // Создаём новый экземпляр того же типа
+      var newCommand = Activator.CreateInstance(commandType);
+
+      return (T)newCommand;
     }
   }
 }

@@ -12,11 +12,11 @@ namespace ControlCommandAnalyser.Model.Chains
   /// </summary>
   public class SchemeModel
   {
-    public List<ChainModel> ChainModels;
+    public List<GroupModel> GroupModels;
 
-    public SchemeModel(List<ChainModel> chainModel)
+    public SchemeModel(List<GroupModel> chainModel)
     {
-      this.ChainModels  = chainModel;
+      this.GroupModels  = chainModel;
     }
   }
 }

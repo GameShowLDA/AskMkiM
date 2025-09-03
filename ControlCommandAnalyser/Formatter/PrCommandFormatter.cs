@@ -60,9 +60,9 @@ namespace ControlCommandAnalyser.Formatter
 
       yield return "\tЗаданные точки:";
 
-      for (int ci = 0; ci < pr.Scheme.ChainModels.Count; ci++)
+      for (int ci = 0; ci < pr.Scheme.GroupModels.Count; ci++)
       {
-        var chain = pr.Scheme.ChainModels[ci];
+        var chain = pr.Scheme.GroupModels[ci];
         if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
 
         for (int pi = 0; pi < chain.ChainModels.Count; pi++)

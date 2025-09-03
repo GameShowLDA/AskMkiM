@@ -11,8 +11,10 @@ namespace ControlCommandAnalyser.Model
 {
    [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, /*ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,*/
     ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
-  public class PrCommandModel : BaseCommandModel, IError
+  public class PrCommandModel : BaseCommandModel, IError, IHasScheme
   {
+    public override string Mnemonic => "ПР";
+
     /// <summary>
     /// Нижняя граница значеня сопротивления (например, "100<МОм")
     /// </summary>
