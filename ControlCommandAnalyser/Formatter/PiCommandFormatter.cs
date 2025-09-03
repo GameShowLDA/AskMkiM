@@ -114,6 +114,7 @@ namespace ControlCommandAnalyser.Formatter
 
       yield return "\tЗаданные точки:";
 
+      
       for (int ci = 0; ci < pi.Scheme.GroupModels.Count; ci++)
       {
         var chain = pi.Scheme.GroupModels[ci];

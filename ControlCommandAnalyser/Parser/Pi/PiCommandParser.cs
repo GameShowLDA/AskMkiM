@@ -200,7 +200,7 @@ namespace ControlCommandAnalyser.Parser.Pi
           || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
         {
           // находим цепи точек из предыдущей команды проверки
-          CommandsModel.CheckKeyP(model.SiCommand, model.Scheme);
+          CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
         }
         else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
           || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))

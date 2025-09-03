@@ -2,6 +2,7 @@
 using ControlCommandAnalyser.Model.Chains;
 using Utilities;
 using Utilities.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ControlCommandAnalyser.Model
 {
@@ -68,27 +69,7 @@ namespace ControlCommandAnalyser.Model
 
         var rmCommand = lastCommand as RmCommandModel;
 
-        foreach (var point in rmCommand.PointsMap)
-        {
-          //var point = rmCommand.PointsMap.ToArray()[i];
-          var parsedPoint = PointModel.ParsePointString(point.Value);
-          bool next = false;
-          foreach (var pointModel in allPoints)
-          {
-            if (pointModel.ToString() == parsedPoint.ToString())
-            {
-              next = true;
-              break;
-            }
-          }
-          if (next == false)
-          {
-            var chainModel = new ChainModel(new List<PointModel> { parsedPoint });
-            var groupModel = new GroupModel(new List<ChainModel> { chainModel });
-            allPoints.Add(parsedPoint);
-            model.GroupModels.Add(groupModel);
-          }
-        }
+
       }
       LoggerUtility.LogInformation(
         $"Схема распознана из РМ: цепей={model.GroupModels?.Count ?? 0}, частей={model.CountParts()}, точек={model.CountPoints()}");
@@ -129,15 +110,18 @@ namespace ControlCommandAnalyser.Model
     public static bool CompareSchemes(SchemeModel modelScheme, SchemeModel addedScheme)
     {
       List<PointModel> allPoints = GetAllPoints(addedScheme);
-      foreach (var groupModel in modelScheme.GroupModels)
+      foreach (var point in allPoints)
       {
-        foreach (var chainModel in groupModel.ChainModels)
+        foreach (var groupModel in modelScheme.GroupModels)
         {
-          foreach (var pointModel in chainModel.PointModels)
+          foreach (var chainModel in groupModel.ChainModels)
           {
-            if (allPoints.Contains(pointModel))
+            foreach (var pointModel in chainModel.PointModels)
             {
-              return true;
+              if (pointModel.ToString() == point.ToString())
+              {
+                return true;
+              }
             }
           }
         }
@@ -184,16 +168,26 @@ namespace ControlCommandAnalyser.Model
       GetPointsFromPM(scheme);
     }
 
-    public static void CheckKeyP(BaseCommandModel model, SchemeModel scheme)
+    public static void CheckKeyP(BaseCommandModel model, SchemeModel scheme, BaseCommandModel modelSi = null)
     {
       var lastCommand = GetLastFromCheckCommands();
       if (lastCommand != null)
       {
         GetShemeFromLastCommand(model, scheme, lastCommand);
 
-        if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        if (modelSi != null)
         {
-          GetPointsFromPM(scheme);
+          if (modelSi.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+          {
+            GetPointsFromPM(scheme);
+          }
+        }
+        else
+        {
+          if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+          {
+            GetPointsFromPM(scheme);
+          }
         }
       }
     }
