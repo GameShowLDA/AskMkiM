@@ -49,16 +49,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Winston-Bold.ttf">
+    <Resource Include="Resources\Font\Winston-Bold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\Winston-Light.ttf">
+    <Resource Include="Resources\Font\Winston-Light.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\Winston-Medium.ttf">
+    <Resource Include="Resources\Font\Winston-Medium.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\Winston-Regular.ttf">
+    <Resource Include="Resources\Font\Winston-Regular.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -114,6 +114,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Resources\Localization\Menu.File.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
     <Page Update="Windows\WpfDocking\Themes\Generic.xaml">
       <Generator>XamlIntelliSenseFileGenerator
 

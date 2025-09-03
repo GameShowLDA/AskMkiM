@@ -32,7 +32,7 @@ namespace ControlCommandExecutor.BaseStrategies
 
       _basePoint = points.FirstOrDefault();
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
-      if (schemeModel.TryPairPointAllChain(_basePoint, out List<PointModel> result))
+      if (schemeModel.TryCommunicatedPointAllChain(_basePoint, out List<PointModel> result))
       {
         foreach (var pointPair in result)
         {
@@ -52,7 +52,7 @@ namespace ControlCommandExecutor.BaseStrategies
       {
         List<PointModel> pairsPoint = null;
 
-        if (schemeModel.TryPairPointAllChain(point, out List<PointModel> result2))
+        if (schemeModel.TryCommunicatedPointAllChain(point, out List<PointModel> result2))
         {
           if (result2[0] != point)
           {

@@ -40,7 +40,7 @@ namespace ControlCommandExecutor.BaseStrategies
 
         List<PointModel> pairsPoint = null;
 
-        if (schemeModel.TryPairPointAllChain(point, out List<PointModel> result))
+        if (schemeModel.TryCommunicatedPointAllChain(point, out List<PointModel> result))
         {
           pairsPoint = result;
           if (result[0] != point)

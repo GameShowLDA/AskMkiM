@@ -189,7 +189,7 @@ namespace ControlCommandExecutor.BaseStrategies
       {
         if (point.reversedBinary[step] == '1')
         {
-          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
           {
             if (point.point.PointNumber != result[0].PointNumber)
             {
@@ -209,7 +209,7 @@ namespace ControlCommandExecutor.BaseStrategies
         }
         else
         {
-          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
           {
             if (point.point.PointNumber != result[0].PointNumber)
             {
@@ -240,7 +240,7 @@ namespace ControlCommandExecutor.BaseStrategies
       {
         if (point.reversedBinary[step] == '1')
         {
-          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
           {
             if (point.point.PointNumber != result[0].PointNumber)
             {
@@ -260,7 +260,7 @@ namespace ControlCommandExecutor.BaseStrategies
         else
         {
 
-          if (schemeModel.TryPairPointAllChain(point.point, out List<PointModel> result))
+          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
           {
             if (point.point.PointNumber != result[0].PointNumber)
             {

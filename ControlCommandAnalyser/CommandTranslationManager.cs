@@ -29,6 +29,7 @@ namespace ControlCommandAnalyser
     private static List<ICommandParser> GetAllParsers()
     {
       var iface = typeof(ICommandParser);
+
       return Assembly.GetExecutingAssembly()
         .GetTypes()
         .Where(t => !t.IsAbstract && iface.IsAssignableFrom(t))

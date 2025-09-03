@@ -313,7 +313,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Общие сведенья.
+        ///   Ищет локализованную строку, похожую на Общие сведения.
         /// </summary>
         internal static string menu_help_generalInformation {
             get {

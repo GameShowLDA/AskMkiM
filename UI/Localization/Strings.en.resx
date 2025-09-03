@@ -180,6 +180,24 @@
   <data name="menu.settings.protocol" xml:space="preserve">
     <value>Protocol</value>
   </data>
+  <data name="menu.help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="menu.help.generalInformation" xml:space="preserve">
+    <value>General information</value>
+  </data>
+  <data name="menu.help.languageControlPrograms" xml:space="preserve">
+    <value>Control program language</value>
+  </data>
+  <data name="menu.help.programComposition" xml:space="preserve">
+    <value>Program structure</value>
+  </data>
+  <data name="menu.help.aboutProgram" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="menu.help.fastMenuCommand" xml:space="preserve">
+    <value>Command list</value>
+  </data>
   <data name="menu.test" xml:space="preserve">
     <value>Test</value>
   </data>
@@ -311,8 +329,5 @@
   </data>
   <data name="protocol.button.exit" xml:space="preserve">
     <value>EXIT (Esc)</value>
-  </data>
-  <data name="menu.help" xml:space="preserve">
-    <value>Help</value>
   </data>
 </root>

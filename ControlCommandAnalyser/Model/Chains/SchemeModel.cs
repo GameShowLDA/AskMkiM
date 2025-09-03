@@ -13,33 +13,92 @@ namespace ControlCommandAnalyser.Model.Chains
   /// </summary>
   public class SchemeModel
   {
+    /// <summary>
+    /// Список цепей.
+    /// </summary>
     public List<ChainModel> ChainModels;
 
-    private List<List<PointModel>> PairPoint;
+    /// <summary>
+    /// Словарь цепей и списков связанных точек.
+    /// </summary>
+    private Dictionary<ChainModel, List<PointModel>> ChainConnectedPointsMap = new();
 
-    private Dictionary<ChainModel, List<PointModel>> keyValuePairs;
+    /// <summary>
+    /// Словарь цепей и списков разобщенных точек.
+    /// </summary>
+    private Dictionary<ChainModel, List<PointModel>> ChainDisconnectedPointsMap = new();
 
+    /// <summary>
+    /// Словарь цепей и списков сообщенных точек.
+    /// </summary>
+    private Dictionary<ChainModel, List<List<PointModel>>> ChainCommunicatedPointsMap = new();
+
+
+    /// <summary>
+    /// Список всех точек в схеме.
+    /// </summary>
     private List<PointModel> AllPoint;
 
     public SchemeModel(List<ChainModel> chainModel)
     {
       this.ChainModels = chainModel;
-      PairPoint = new();
-      InitializePairPoint(chainModel);
+      InitializePoints();
     }
 
-    private void InitializePairPoint(List<ChainModel> chainModel)
+    #region Инициализация точек.
+    private void InitializePoints()
     {
-      keyValuePairs = new();
-      foreach (var chain in chainModel)
+      InitializeAllPoint();
+      InitializeDisconnectedPoint();
+      InitializeConnectedPoints();
+      InitializeCommunnicatedPoints();
+    }
+
+    /// <summary>
+    /// Инициализация всех точек схемы.
+    /// </summary>
+    private void InitializeAllPoint()
+    {
+      AllPoint = new List<PointModel>();
+      foreach (var pair in ChainModels)
+      {
+        foreach (var part in pair.ChainModels)
+        {
+          AllPoint.AddRange(part.PointModels);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Инициализация разобщенных точек.
+    /// </summary>
+    private void InitializeDisconnectedPoint()
+    {
+      foreach (var chain in ChainModels)
+      {
+        var disconnectedPoint = new List<PointModel>();
+        foreach (var parts in chain.ChainModels)
+        {
+          disconnectedPoint.Add(parts.PointModels[0]);
+        }
+
+        ChainDisconnectedPointsMap.Add(chain, disconnectedPoint);
+      }
+    }
+
+    /// <summary>
+    /// Инициализация сообщенных точек.
+    /// </summary>
+    private void InitializeConnectedPoints()
+    {
+      foreach (var chain in ChainModels)
       {
         if (chain.ChainModels.Count <= 1)
         {
           continue;
         }
 
-        PairPoint.Add(new List<PointModel>());
-        var pairPoint = PairPoint.Last();
+        var pairPoint = new List<PointModel>();
 
         for (int i = 0; i < chain.ChainModels.Count; i++)
         {
@@ -50,18 +109,34 @@ namespace ControlCommandAnalyser.Model.Chains
 
           AddPairPoint(pairPoint, chain.ChainModels[i].PointModels.LastOrDefault(), chain.ChainModels[i + 1].PointModels.FirstOrDefault());
         }
-        keyValuePairs.Add(chain, pairPoint);
-      }
-
-      AllPoint = new List<PointModel>();
-      foreach (var pair in ChainModels)
-      {
-        foreach (var part in pair.ChainModels)
-        {
-          AllPoint.AddRange(part.PointModels);
-        }
+        ChainConnectedPointsMap.Add(chain, pairPoint);
       }
     }
+
+    private void InitializeCommunnicatedPoints()
+    {
+      foreach (var chain in ChainModels)
+      {
+        var disconnectedPoint = new List<List<PointModel>>();
+        foreach (var parts in chain.ChainModels)
+        {
+          if (parts.PointModels.Count > 1)
+          {
+            var list = new List<PointModel>();
+            list.AddRange(parts.PointModels);
+            disconnectedPoint.Add(list);
+          }
+        }
+
+        if (disconnectedPoint.Count > 0)
+        {
+          ChainCommunicatedPointsMap.Add(chain, disconnectedPoint);
+        }
+
+      }
+    }
+    #endregion
+
     private void AddPairPoint(List<PointModel> pairPoint, PointModel? a, PointModel? b)
     {
       if (a == null || b == null)
@@ -80,13 +155,13 @@ namespace ControlCommandAnalyser.Model.Chains
       }
     }
 
-    public bool TryPairPointAllChain(PointModel pointModel, out List<PointModel>? result)
+    public bool TryCommunicatedPointAllChain(PointModel pointModel, out List<PointModel>? result)
     {
       result = new List<PointModel>();
 
       foreach (var item in ChainModels)
       {
-        if (TryPairPoint(item, pointModel, out List<PointModel> result2))
+        if (TryCommunicatedPoint(item, pointModel, out List<PointModel> result2))
         {
           result = result2;
           return true;
@@ -96,9 +171,9 @@ namespace ControlCommandAnalyser.Model.Chains
       return false;
     }
 
-    public bool TryPairPoint(ChainModel chain, PointModel pointModel, out List<PointModel>? result)
+    private bool TryCommunicatedPoint(ChainModel chain, PointModel pointModel, out List<PointModel>? result)
     {
-      result = keyValuePairs.GetValueOrDefault(chain, null);
+      result = ChainConnectedPointsMap.GetValueOrDefault(chain, null);
 
       if (result == null || !result.Contains(pointModel))
       {

@@ -1,0 +1,115 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:CustomControls="clr-namespace:UI.Components" 
+                    >
+
+    <!--Кнопки заголовков устройств конфигурации-->
+    <Style x:Key="ConfigHeaderButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{StaticResource PrimarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="3,3,3,0"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+       CornerRadius="0" 
+       BorderThickness="{TemplateBinding BorderThickness}" 
+       BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="3,3,3,0"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--Кнопки устройств конфигурации-->
+    <Style x:Key="ConfigAdditionalButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                        CornerRadius="0" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="5,0,0,0"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--Кнопки добавления устройств конфигурации-->
+    <Style x:Key="PlusButtonStyle" TargetType="CustomControls:PlusButtonControl">
+        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+    </Style>
+
+    <!--Заголовок блока при добавлении устройства-->
+    <Style x:Key="ConfigTextBlockHeaderStyle" TargetType="TextBlock">
+        <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+    </Style>
+
+    <!--Границы описания устройства при добавлении устройства-->
+    <Style x:Key="ConfigBorderDescriptionStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="CornerRadius" Value="15"/>
+    </Style>
+
+    <!--Описания устройства при добавлении устройства-->
+    <Style x:Key="ConfigTextDescriptionStyle" TargetType="RichTextBox">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!--Описание предупреждения о блоках при добавлении устройства-->
+    <Style x:Key="ConfigInfoStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <!--Дополнительные блоки при добавлении устройства-->
+    <Style x:Key="ConfigAdditionalBlockStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
+        <Setter Property="CornerRadius" Value="15"/>
+        <Setter Property="Margin" Value="20,5"/>
+    </Style>
+
+
+</ResourceDictionary>
