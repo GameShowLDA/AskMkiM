@@ -26,33 +26,35 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, IUserMessageService messageService, double resistance)
     {
-      List<PointModel> points = schemeModel.GetAllPoints();
-      ResultMessages = new List<ShowMessageModel>();
-      HighestBitCount = GetHighestPointBinaryDigits(points);
-      var binaryPoints = ConvertToReversedBinaryRange(points, HighestBitCount);
+      // TODO : РАскоменттить!
 
-      for (int step = 0; step < HighestBitCount; step++)
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
-        await ConnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
-        if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
-        {
-          await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при проверке разряда {step} ({HighestBitCount})", type: ShowMessageModel.MessageType.Error), IsBlockStart: true);
-
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
-          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(schemeModel, performMeasurementAsync, manager, siCommandModel, messageService, resistance);
-
-          return;
-        }
-        await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
-      }
-
-      await messageService.ShowMessageAsync(new ShowMessageModel("Результаты проверки") { IndentLevel = 1 });
-      foreach (var messgae in ResultMessages)
-      {
-        await messageService.ShowMessageAsync(messgae, skipPause: true);
-      }
+      // List<PointModel> points = schemeModel.GetAllPoints();
+      // ResultMessages = new List<ShowMessageModel>();
+      // HighestBitCount = GetHighestPointBinaryDigits(points);
+      // var binaryPoints = ConvertToReversedBinaryRange(points, HighestBitCount);
+      // 
+      // for (int step = 0; step < HighestBitCount; step++)
+      // {
+      //   await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
+      //   await ConnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+      //   if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
+      //   {
+      //     await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при проверке разряда {step} ({HighestBitCount})", type: ShowMessageModel.MessageType.Error), IsBlockStart: true);
+      // 
+      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
+      //     await BaseStrategies.NodeFullChecker.CheckSequenceAsync(schemeModel, performMeasurementAsync, manager, siCommandModel, messageService, resistance);
+      // 
+      //     return;
+      //   }
+      //   await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+      // }
+      // 
+      // await messageService.ShowMessageAsync(new ShowMessageModel("Результаты проверки") { IndentLevel = 1 });
+      // foreach (var messgae in ResultMessages)
+      // {
+      //   await messageService.ShowMessageAsync(messgae, skipPause: true);
+      // }
     }
 
     /// <summary>
@@ -185,49 +187,50 @@ namespace ControlCommandExecutor.BaseStrategies
     /// </summary>
     static private async Task ConnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
-      foreach (var point in points)
-      {
-        if (point.reversedBinary[step] == '1')
-        {
-          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-          {
-            if (point.point.PointNumber != result[0].PointNumber)
-            {
-              continue;
-            }
-
-            foreach (var pointPair in result)
-            {
-              await ConnectToBusAAsync(pointPair, messageService);
-            }
-          }
-          else
-          {
-            await ConnectToBusAAsync(point.point, messageService);
-          }
-
-        }
-        else
-        {
-          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-          {
-            if (point.point.PointNumber != result[0].PointNumber)
-            {
-              continue;
-            }
-
-            foreach (var pointPair in result)
-            {
-              await ConnectToBusBAsync(pointPair, messageService);
-            }
-          }
-          else
-          {
-            await ConnectToBusBAsync(point.point, messageService);
-          }
-        }
-
-      }
+      // TODO : РАскоменттить!
+      // foreach (var point in points)
+      // {
+      //   if (point.reversedBinary[step] == '1')
+      //   {
+      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
+      //     {
+      //       if (point.point.PointNumber != result[0].PointNumber)
+      //       {
+      //         continue;
+      //       }
+      // 
+      //       foreach (var pointPair in result)
+      //       {
+      //         await ConnectToBusAAsync(pointPair, messageService);
+      //       }
+      //     }
+      //     else
+      //     {
+      //       await ConnectToBusAAsync(point.point, messageService);
+      //     }
+      // 
+      //   }
+      //   else
+      //   {
+      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
+      //     {
+      //       if (point.point.PointNumber != result[0].PointNumber)
+      //       {
+      //         continue;
+      //       }
+      // 
+      //       foreach (var pointPair in result)
+      //       {
+      //         await ConnectToBusBAsync(pointPair, messageService);
+      //       }
+      //     }
+      //     else
+      //     {
+      //       await ConnectToBusBAsync(point.point, messageService);
+      //     }
+      //   }
+      // 
+      // }
     }
 
 
@@ -236,48 +239,50 @@ namespace ControlCommandExecutor.BaseStrategies
     /// </summary>
     static private async Task DisconnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
-      foreach (var point in points)
-      {
-        if (point.reversedBinary[step] == '1')
-        {
-          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-          {
-            if (point.point.PointNumber != result[0].PointNumber)
-            {
-              return;
-            }
+      // TODO : РАскоменттить!
 
-            foreach (var pointPair in result)
-            {
-              await DisconnectFromBusAAsync(pointPair, messageService);
-            }
-          }
-          else
-          {
-            await DisconnectFromBusAAsync(point.point, messageService);
-          }
-        }
-        else
-        {
-
-          if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-          {
-            if (point.point.PointNumber != result[0].PointNumber)
-            {
-              return;
-            }
-
-            foreach (var pointPair in result)
-            {
-              await DisconnectFromBusBAsync(pointPair, messageService);
-            }
-          }
-          else
-          {
-            await DisconnectFromBusBAsync(point.point, messageService);
-          }
-        }
-      }
+      // foreach (var point in points)
+      // {
+      //   if (point.reversedBinary[step] == '1')
+      //   {
+      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
+      //     {
+      //       if (point.point.PointNumber != result[0].PointNumber)
+      //       {
+      //         return;
+      //       }
+      // 
+      //       foreach (var pointPair in result)
+      //       {
+      //         await DisconnectFromBusAAsync(pointPair, messageService);
+      //       }
+      //     }
+      //     else
+      //     {
+      //       await DisconnectFromBusAAsync(point.point, messageService);
+      //     }
+      //   }
+      //   else
+      //   {
+      // 
+      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
+      //     {
+      //       if (point.point.PointNumber != result[0].PointNumber)
+      //       {
+      //         return;
+      //       }
+      // 
+      //       foreach (var pointPair in result)
+      //       {
+      //         await DisconnectFromBusBAsync(pointPair, messageService);
+      //       }
+      //     }
+      //     else
+      //     {
+      //       await DisconnectFromBusBAsync(point.point, messageService);
+      //     }
+      //   }
+      // }
     }
 
     /// <summary>

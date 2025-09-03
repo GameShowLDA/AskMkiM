@@ -121,24 +121,37 @@ namespace ControlCommandAnalyser.Parser
         }
         if (currentChainParts.Count > 0)
         {
-          for (int cp = 0; cp < currentChainParts.Count; cp++)
+          var foundCommand = CommandsModel.GetByMnemonic("РМ").FirstOrDefault();
+          var rmCommand = new RmCommandModel();
+          if (foundCommand != null && foundCommand is RmCommandModel)
           {
-            var chain = currentChainParts[cp];
-            for (int pm = 0; pm < chain.PointModels.Count; pm++)
+            rmCommandModel = foundCommand as RmCommandModel;
+          }
+          if (rmCommandModel != null)
+          {
+            for (int cp = 0; cp < currentChainParts.Count; cp++)
             {
-              if (pm == 0 && cp == 0)
+              var chain = currentChainParts[cp];
+              for (int pm = 0; pm < chain.PointModels.Count; pm++)
               {
-                chain.PointModels[pm].PointType = PointType.Type.Star;
+                if (pm == 0 && cp == 0)
+                {
+                  chain.PointModels[pm].PointType = PointType.Type.Star;
+                }
+                else if (pm == 0 && cp > 0)
+                {
+                  chain.PointModels[pm].PointType = PointType.Type.Hash;
+                }
+                else
+                {
+                  chain.PointModels[pm].PointType = PointType.Type.Comma;
+                }
+
+                if (rmCommandModel.TryGetKeyByValue(chain.PointModels[pm].ToString(), out string key))
+                {
+                  chain.PointModels[pm].Mnemonic = key;
+                }
               }
-              else if (pm == 0 && cp > 0)
-              {
-                chain.PointModels[pm].PointType = PointType.Type.Hash;
-              }
-              else
-              {
-                chain.PointModels[pm].PointType = PointType.Type.Comma;
-              }
-              chain.PointModels[pm].Mnemonic = mnemonic;
             }
           }
 

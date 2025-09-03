@@ -33,88 +33,90 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, double resistance, CancellationToken cancellationToken)
     {
-      List<PointModel> points = schemeModel.GetAllPoints();
-      foreach (var point in points)
-      {
-        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+      // TODO : РАскоменттить!
 
-        List<PointModel> pairsPoint = null;
-
-        if (schemeModel.TryCommunicatedPointAllChain(point, out List<PointModel> result))
-        {
-          pairsPoint = result;
-          if (result[0] != point)
-          {
-            continue;
-          }
-
-          string pointStr = string.Empty;
-          foreach (var item in pairsPoint)
-          {
-            pointStr += $"{(EquipmentService.GetPointKey(item))} ";
-          }
-
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {pointStr}"), IsBlockStart: true);
-          foreach (var pointPair in result)
-          {
-            if (pointPair.PointNumber < point.PointNumber)
-            {
-              await DisconnectFromBusBAsync(pointPair, messageService);
-            }
-          }
-
-          foreach (var pointPair in result)
-          {
-            await ConnectToBusAAsync(pointPair, messageService);
-          }
-        }
-        else
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
-          await ConnectToBusAAsync(point, messageService);
-        }
-
-
-        if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
-        {
-          step = 0;
-          var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
-
-          if (localized != null)
-          {
-
-            if (baseCommandModel.PointErrors != null)
-            {
-              manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
-            }
-
-            await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание точки {EquipmentService.GetPointKey(point)} c точкой {EquipmentService.GetPointKey(localized)}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-          }
-          else
-          {
-            await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную точку", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-          }
-        }
-
-        if (pairsPoint != null)
-        {
-          foreach (var item in pairsPoint)
-          {
-            await DisconnectFromBusAAsync(item, messageService);
-            await ConnectToBusBAsync(item, messageService);
-          }
-        }
-        else
-        {
-          await DisconnectFromBusAAsync(point, messageService);
-          await ConnectToBusBAsync(point, messageService);
-        }
-      }
-
-      foreach (var point in points)
-      {
-        await DisconnectFromBusBAsync(point, messageService);
-      }
+      // List<PointModel> points = schemeModel.GetAllPoints();
+      // foreach (var point in points)
+      // {
+      //   messageService.GetCancellationToken().ThrowIfCancellationRequested();
+      // 
+      //   List<PointModel> pairsPoint = null;
+      // 
+      //   if (schemeModel.TryCommunicatedPointAllChain(point, out List<PointModel> result))
+      //   {
+      //     pairsPoint = result;
+      //     if (result[0] != point)
+      //     {
+      //       continue;
+      //     }
+      // 
+      //     string pointStr = string.Empty;
+      //     foreach (var item in pairsPoint)
+      //     {
+      //       pointStr += $"{(EquipmentService.GetPointKey(item))} ";
+      //     }
+      // 
+      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {pointStr}"), IsBlockStart: true);
+      //     foreach (var pointPair in result)
+      //     {
+      //       if (pointPair.PointNumber < point.PointNumber)
+      //       {
+      //         await DisconnectFromBusBAsync(pointPair, messageService);
+      //       }
+      //     }
+      // 
+      //     foreach (var pointPair in result)
+      //     {
+      //       await ConnectToBusAAsync(pointPair, messageService);
+      //     }
+      //   }
+      //   else
+      //   {
+      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
+      //     await ConnectToBusAAsync(point, messageService);
+      //   }
+      // 
+      // 
+      //   if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
+      //   {
+      //     step = 0;
+      //     var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
+      // 
+      //     if (localized != null)
+      //     {
+      // 
+      //       if (baseCommandModel.PointErrors != null)
+      //       {
+      //         manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
+      //       }
+      // 
+      //       await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание точки {EquipmentService.GetPointKey(point)} c точкой {EquipmentService.GetPointKey(localized)}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+      //     }
+      //     else
+      //     {
+      //       await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную точку", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+      //     }
+      //   }
+      // 
+      //   if (pairsPoint != null)
+      //   {
+      //     foreach (var item in pairsPoint)
+      //     {
+      //       await DisconnectFromBusAAsync(item, messageService);
+      //       await ConnectToBusBAsync(item, messageService);
+      //     }
+      //   }
+      //   else
+      //   {
+      //     await DisconnectFromBusAAsync(point, messageService);
+      //     await ConnectToBusBAsync(point, messageService);
+      //   }
+      // }
+      // 
+      // foreach (var point in points)
+      // {
+      //   await DisconnectFromBusBAsync(point, messageService);
+      // }
     }
 
     /// <summary>

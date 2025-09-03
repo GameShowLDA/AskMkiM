@@ -69,42 +69,43 @@ namespace ControlCommandAnalyser.Formatter
         yield break;
       }
 
-      yield return "\tЗаданные точки:";
-
-      for (int ci = 0; ci < si.Scheme.GroupModels.Count; ci++)
+      yield return "\tСообщенные точки:";
+      foreach (var item in si.Scheme.GroupModels)
       {
-        var chain = si.Scheme.GroupModels[ci];
-        if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
-
-        for (int pi = 0; pi < chain.ChainModels.Count; pi++)
+        var points = si.Scheme.GetPointsConnected(item);
+        if (points != null)
         {
-          var part = chain.ChainModels[pi];
-          if (part?.PointModels == null || part.PointModels.Count == 0) continue;
-
-          // первая часть цепи — отметим как начало (*), последующие части считаем "сообщёнными" (#)
-          var status = (pi == 0) ? "*" : "#";
-
-          foreach (var point in part.PointModels)
+          for (int i = 0; i < points.Count; i++)
           {
-            if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count > 1)
+            string str = string.Empty;
+            str += $"\t\t{i + 1}. ";
+            foreach (var point in points[i])
             {
-              yield return $"\t\t{status} {point},";
+              str += $"{point.Mnemonic}({point}), ";
             }
-            else if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count == 1)
-            {
-              yield return $"\t\t{status} {point}";
-            }
-            else if (part.PointModels.IndexOf(point) != part.PointModels.Count - 1)
-            {
-              yield return $"\t\t  {point},";
-            }
-            else
-            {
-              yield return $"\t\t  {point}";
-            }
+
+            yield return str.Remove(str.Length - 2);
           }
         }
       }
+
+      yield return "\tРазобщенные точки:";
+      for (int i = 0; i < si.Scheme.GroupModels.Count; i++)
+      {
+        var points = si.Scheme.GetPointsDisconnected(si.Scheme.GroupModels[i]);
+        if (points != null)
+        {
+          string str = string.Empty;
+          str += $"\t\t{i+1}. #";
+
+          foreach (var point in points)
+          {
+            str += $"{point.Mnemonic}({point})#";
+          }
+          yield return str.Remove(str.Length - 1);
+        }
+      }
+
 
       yield return string.Empty;
     }
