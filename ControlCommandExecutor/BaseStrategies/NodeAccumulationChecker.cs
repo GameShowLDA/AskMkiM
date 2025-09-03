@@ -14,6 +14,9 @@ using Utilities.Models;
 
 namespace ControlCommandExecutor.BaseStrategies
 {
+  /// <summary>
+  /// Класс для управления методом накапливающего узла.
+  /// </summary>
   static internal class NodeAccumulationChecker
   {
     /// <summary>
@@ -33,6 +36,68 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, double resistance, CancellationToken cancellationToken)
     {
+      var pointsList = schemeModel.GetPointsDisconnected();
+
+      foreach (var points in pointsList)
+      {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+
+        var str = string.Empty;
+        foreach (var point in points)
+        {
+          str += $"{(EquipmentService.GetPointKey(point))},";
+        }
+        str = str.Remove(str.Length - 1);
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {str}"), IsBlockStart: true);
+
+        foreach (var point in points)
+        {
+          await ConnectToBusAAsync(point, messageService);
+        }
+
+        if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
+        {
+          step = 0;
+          //var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
+        }
+
+        // if (!await performMeasurementAsync(resistance, messageService, cancellationToken))
+        // {
+        //   //step = 0;
+        //   //var localized = await LocalizeFaultyPointAsync(performMeasurementAsync, EquipmentService.GetPointsBefore(points, point), resistance, messageService, cancellationToken);
+        //   //
+        //   //if (localized != null)
+        //   //{
+        //   //
+        //   //  if (baseCommandModel.PointErrors != null)
+        //   //  {
+        //   //    manager.AddErrorMethod(baseCommandModel.PointErrors.PairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", EquipmentService.GetPointKey(point), EquipmentService.GetPointKey(localized)));
+        //   //  }
+        //   //
+        //   //  await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание точки {EquipmentService.GetPointKey(point)} c точкой {EquipmentService.GetPointKey(localized)}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+        //   //}
+        //   //else
+        //   //{
+        //   //  await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную точку", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+        //   //}
+        // }
+
+        foreach (var point in points)
+        {
+          await DisconnectFromBusAAsync(point, messageService);
+          await ConnectToBusBAsync(point, messageService);
+        }
+      }
+
+      foreach (var points in pointsList)
+      {
+        foreach (var point in points)
+        {
+          await DisconnectFromBusBAsync(point, messageService);
+        }
+      }
+
+
       // TODO : РАскоменттить!
 
       // List<PointModel> points = schemeModel.GetAllPoints();
@@ -186,6 +251,7 @@ namespace ControlCommandExecutor.BaseStrategies
       await ConnectAllFromBusBAsync(candidates, messageService);
       return errorPoint;
     }
+
 
     /// <summary>
     /// Делит список точек пополам.

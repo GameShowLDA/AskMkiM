@@ -8,5 +8,6 @@ namespace ControlCommandAnalyser.Model
 {
   public class KscCommandModel : BaseCommandModel
   {
+    public override string Mnemonic => "КЦ";
   }
 }

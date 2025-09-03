@@ -117,6 +117,11 @@ namespace ControlCommandAnalyser.Model.Chains
     {
       return ChainDisconnectedPointsMap.GetValueOrDefault(groupModel);
     }
+
+    public List<List<PointModel>> GetPointsDisconnected()
+    {
+      return ChainDisconnectedPointsMap.Values.ToList();
+    }
     #endregion
   }
 }
