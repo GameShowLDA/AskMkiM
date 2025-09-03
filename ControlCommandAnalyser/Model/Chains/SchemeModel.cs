@@ -21,17 +21,17 @@ namespace ControlCommandAnalyser.Model.Chains
     /// <summary>
     /// Словарь цепей и списков связанных точек.
     /// </summary>
-    private Dictionary<ChainModel, List<PointModel>> ChainConnectedPointsMap = new();
+    private Dictionary<GroupModel, List<PointModel>> ChainConnectedPointsMap = new();
 
     /// <summary>
     /// Словарь цепей и списков разобщенных точек.
     /// </summary>
-    private Dictionary<ChainModel, List<PointModel>> ChainDisconnectedPointsMap = new();
+    private Dictionary<GroupModel, List<PointModel>> ChainDisconnectedPointsMap = new();
 
     /// <summary>
     /// Словарь цепей и списков сообщенных точек.
     /// </summary>
-    private Dictionary<ChainModel, List<List<PointModel>>> ChainCommunicatedPointsMap = new();
+    private Dictionary<GroupModel, List<List<PointModel>>> ChainCommunicatedPointsMap = new();
 
 
     /// <summary>
@@ -39,9 +39,9 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     private List<PointModel> AllPoint;
 
-    public SchemeModel(List<ChainModel> chainModel)
+    public SchemeModel(List<GroupModel> groupModels)
     {
-      this.GroupModels  = chainModel;
+      this.GroupModels  = groupModels;
       InitializePoints();
     }
 
@@ -60,7 +60,7 @@ namespace ControlCommandAnalyser.Model.Chains
     private void InitializeAllPoint()
     {
       AllPoint = new List<PointModel>();
-      foreach (var pair in ChainModels)
+      foreach (var pair in GroupModels)
       {
         foreach (var part in pair.ChainModels)
         {
@@ -74,7 +74,7 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     private void InitializeDisconnectedPoint()
     {
-      foreach (var chain in ChainModels)
+      foreach (var chain in GroupModels)
       {
         var disconnectedPoint = new List<PointModel>();
         foreach (var parts in chain.ChainModels)
@@ -91,7 +91,7 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     private void InitializeConnectedPoints()
     {
-      foreach (var chain in ChainModels)
+      foreach (var chain in GroupModels)
       {
         if (chain.ChainModels.Count <= 1)
         {
@@ -115,7 +115,7 @@ namespace ControlCommandAnalyser.Model.Chains
 
     private void InitializeCommunnicatedPoints()
     {
-      foreach (var chain in ChainModels)
+      foreach (var chain in GroupModels)
       {
         var disconnectedPoint = new List<List<PointModel>>();
         foreach (var parts in chain.ChainModels)
@@ -159,7 +159,7 @@ namespace ControlCommandAnalyser.Model.Chains
     {
       result = new List<PointModel>();
 
-      foreach (var item in ChainModels)
+      foreach (var item in GroupModels)
       {
         if (TryCommunicatedPoint(item, pointModel, out List<PointModel> result2))
         {
@@ -171,7 +171,7 @@ namespace ControlCommandAnalyser.Model.Chains
       return false;
     }
 
-    private bool TryCommunicatedPoint(ChainModel chain, PointModel pointModel, out List<PointModel>? result)
+    private bool TryCommunicatedPoint(GroupModel chain, PointModel pointModel, out List<PointModel>? result)
     {
       result = ChainConnectedPointsMap.GetValueOrDefault(chain, null);
 
