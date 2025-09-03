@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Utilities;
+using Utilities.Models;
 
 namespace ControlCommandAnalyser.Parser.Pi
 {
@@ -21,14 +22,6 @@ namespace ControlCommandAnalyser.Parser.Pi
 
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
-
-
-
-
-
-
-
-
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
       var rmCommandModel = new RmCommandModel();
@@ -143,7 +136,7 @@ namespace ControlCommandAnalyser.Parser.Pi
 
       if (string.IsNullOrEmpty(time))
       {
-        time = "1 c";
+        time = "1c";
       }
 
       model.Time = time;
@@ -210,51 +203,20 @@ namespace ControlCommandAnalyser.Parser.Pi
         var lastCommand = CommandsModel.GetLastFromCheckCommands();
         if (lastCommand != null)
         {
-          var foundCommandMnemonic = lastCommand.Mnemonic;
-          var newCommand = CreateSameType(lastCommand);
-          newCommand = lastCommand;
-
-          if (newCommand is IHasScheme hasScheme)
-          {
-            var scheme = hasScheme.Scheme;
-            model.Scheme = scheme;
-            // работаем со схемой
-          }
-          else
-          {
-            // у этой команды схемы нет — просто пропускаем/логируем
-            LoggerUtility.LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
-          }
-
+          GetShemeFromLastCommand(model, lastCommand);
 
           if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
           {
-
-
-            // добавляем просто точки из РМ, которые еще не были записаны
-            lastCommand = CommandsModel.GetByMnemonic("РМ").Last();
-            if (lastCommand is RmCommandModel)
-            {
-              var rmCommand = lastCommand as RmCommandModel;
-              foreach (var chain in model.Scheme.GroupModels)
-              {
-                foreach (var part in chain.ChainModels)
-                {
-                  foreach (var point in part.PointModels)
-                  {
-                    //if (!rmCommand.PointsMap.ContainsKey(point.))
-                    //{
-                    //  //newCommand.Scheme
-                    //}
-                  }
-                }
-              }
-            }
-            //model.Scheme = rmCommand.Scheme;
-            LoggerUtility.LogInformation(
-              $"Схема распознана из РМ: цепей={model.Scheme.GroupModels?.Count ?? 0}, частей={model.Scheme.CountParts()}, точек={model.Scheme.CountPoints()}");
-
+            GetPointsFromPM(model);
           }
+        }
+      }
+      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        var lastCommand = CommandsModel.GetLastFromCheckCommands();
+        if (lastCommand != null)
+        {
+          GetPointsFromPM(model);
         }
       }
       else
@@ -269,6 +231,51 @@ namespace ControlCommandAnalyser.Parser.Pi
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
+    }
+
+    private static void GetPointsFromPM(PiCommandModel model)
+    {
+      // добавляем просто точки из РМ, которые еще не были записаны
+      BaseCommandModel lastCommand = CommandsModel.GetByMnemonic("РМ").Last();
+      if (lastCommand is RmCommandModel)
+      {
+        var rmCommand = lastCommand as RmCommandModel;
+        foreach (var chain in model.Scheme.GroupModels)
+        {
+          foreach (var part in chain.ChainModels)
+          {
+            foreach (var point in part.PointModels)
+            {
+              if (!rmCommand.PointsMap.ContainsValue(point.ToString()))
+              {
+                var chainModel = new ChainModel(new List<PointModel> { point });
+                var groupModel = new GroupModel(new List<ChainModel> { chainModel });
+                model.Scheme.GroupModels.Add(groupModel);
+              }
+            }
+          }
+        }
+      }
+      LoggerUtility.LogInformation(
+        $"Схема распознана из РМ: цепей={model.Scheme.GroupModels?.Count ?? 0}, частей={model.Scheme.CountParts()}, точек={model.Scheme.CountPoints()}");
+    }
+
+    private static void GetShemeFromLastCommand(PiCommandModel model, BaseCommandModel lastCommand)
+    {
+      var foundCommandMnemonic = lastCommand.Mnemonic;
+      var newCommand = CreateSameType(lastCommand);
+      newCommand = lastCommand;
+
+      if (newCommand is IHasScheme hasScheme)
+      {
+        var scheme = hasScheme.Scheme;
+        model.Scheme = scheme;
+      }
+      else
+      {
+        // у этой команды схемы нет — просто пропускаем/логируем
+        LoggerUtility.LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
+      }
     }
 
     private static void CheckUnparsedParameters(string commandNumber, string mnemonic, int numberLine, PiCommandModel model, string remainder)

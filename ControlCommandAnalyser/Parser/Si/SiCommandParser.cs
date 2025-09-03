@@ -164,7 +164,7 @@ namespace ControlCommandAnalyser.Parser.Si
       if (string.IsNullOrEmpty(time))
       {
         LoggerUtility.LogDebug($"Для времени установлено значение по умолчанию 5 с.'");
-        time = "5 с";
+        time = "5с";
       }
       model.Time = time;
       ValidateSiParameters(commandNumber, mnemonic, numberLine, model, voltage, resistance, time);
