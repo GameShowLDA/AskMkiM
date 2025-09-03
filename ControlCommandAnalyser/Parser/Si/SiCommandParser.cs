@@ -69,41 +69,16 @@ namespace ControlCommandAnalyser.Parser.Si
 
       if (firstStar >= 0 && lastStar > firstStar)
       {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
-        string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
-        LoggerUtility.LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
-
-        var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, mnemonic, rmCommandModel);
-
-        // Поднимем ошибки парсера точек
-        if (pointErrors?.Count > 0)
-        {
-          foreach (var error in pointErrors)
-          {
-            error.SourceLineNumber = numberLine;
-            error.Command = $"{commandNumber} {mnemonic}";
-            model.Errors.Add(error);
-            LoggerUtility.LogError(
-              $"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
-          }
-        }
-
-        // Проверим, что схема непуста (есть хотя бы одна точка)
-        if (scheme == null || scheme.IsEmpty())
-        {
-          LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
-          model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
-        }
-        else
-        {
-          model.Scheme = scheme; // ← просто присваиваем схему в модель
-          LoggerUtility.LogInformation(
-            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
-        }
-
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
-        int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        remainder = ParsePoints(commandNumber, mnemonic, numberLine, model, rmCommandModel, remainder, bodyNoWs, firstStar, lastStar);
+      }
+      else if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      {
+        // находим цепи точек из предыдущей команды проверки
+        CommandsModel.CheckKeyP(model, model.Scheme);
+      }
+      else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        CommandsModel.CheckKeyS(model.Scheme);
       }
       else
       {
@@ -124,6 +99,55 @@ namespace ControlCommandAnalyser.Parser.Si
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
+    }
+
+    private static string ParsePoints(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, RmCommandModel rmCommandModel, string remainder, string bodyNoWs, int firstStar, int lastStar)
+    {
+      // Выделяем блок точек (включительно) — PointParser сам Trim('*')
+      string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
+      LoggerUtility.LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
+
+      var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, mnemonic, rmCommandModel);
+
+      // Поднимем ошибки парсера точек
+      if (pointErrors?.Count > 0)
+      {
+        foreach (var error in pointErrors)
+        {
+          error.SourceLineNumber = numberLine;
+          error.Command = $"{commandNumber} {mnemonic}";
+          model.Errors.Add(error);
+          LoggerUtility.LogError(
+            $"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
+        }
+      }
+
+      // Проверим, что схема непуста (есть хотя бы одна точка)
+      if (scheme == null || scheme.IsEmpty())
+      {
+        LoggerUtility.LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
+        model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
+      }
+      else
+      {
+        model.Scheme = scheme; // ← просто присваиваем схему в модель
+        LoggerUtility.LogInformation(
+          $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+      }
+
+      // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
+      int idxStarInFirstLine = remainder.IndexOf('*');
+      remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+      if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      {
+        // находим цепи точек из предыдущей команды проверки
+        CommandsModel.CheckKeyP(model, model.Scheme);
+      }
+      else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        CommandsModel.CheckKeyS(model.Scheme);
+      }
+      return remainder;
     }
 
     public static string ManageSiParametersParse(SiCommandModel model, string commandNumber, string mnemonic, int numberLine, string remainder)

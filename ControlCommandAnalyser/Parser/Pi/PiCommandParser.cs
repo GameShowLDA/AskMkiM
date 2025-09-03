@@ -196,28 +196,28 @@ namespace ControlCommandAnalyser.Parser.Pi
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString()) 
+          || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+        {
+          // находим цепи точек из предыдущей команды проверки
+          CommandsModel.CheckKeyP(model.SiCommand, model.Scheme);
+        }
+        else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+          || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        {
+          CommandsModel.CheckKeyS(model.Scheme);
+        }
       }
-      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+        || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
         // находим цепи точек из предыдущей команды проверки
-        var lastCommand = CommandsModel.GetLastFromCheckCommands();
-        if (lastCommand != null)
-        {
-          GetShemeFromLastCommand(model, lastCommand);
-
-          if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-          {
-            GetPointsFromPM(model);
-          }
-        }
+        CommandsModel.CheckKeyP(model.SiCommand, model.Scheme);
       }
-      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+        || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        var lastCommand = CommandsModel.GetLastFromCheckCommands();
-        if (lastCommand != null)
-        {
-          GetPointsFromPM(model);
-        }
+        CommandsModel.CheckKeyS(model.Scheme);
       }
       else
       {
@@ -232,52 +232,7 @@ namespace ControlCommandAnalyser.Parser.Pi
 
       return model;
     }
-
-    private static void GetPointsFromPM(PiCommandModel model)
-    {
-      // добавляем просто точки из РМ, которые еще не были записаны
-      BaseCommandModel lastCommand = CommandsModel.GetByMnemonic("РМ").Last();
-      if (lastCommand is RmCommandModel)
-      {
-        var rmCommand = lastCommand as RmCommandModel;
-        foreach (var chain in model.Scheme.GroupModels)
-        {
-          foreach (var part in chain.ChainModels)
-          {
-            foreach (var point in part.PointModels)
-            {
-              if (!rmCommand.PointsMap.ContainsValue(point.ToString()))
-              {
-                var chainModel = new ChainModel(new List<PointModel> { point });
-                var groupModel = new GroupModel(new List<ChainModel> { chainModel });
-                model.Scheme.GroupModels.Add(groupModel);
-              }
-            }
-          }
-        }
-      }
-      LoggerUtility.LogInformation(
-        $"Схема распознана из РМ: цепей={model.Scheme.GroupModels?.Count ?? 0}, частей={model.Scheme.CountParts()}, точек={model.Scheme.CountPoints()}");
-    }
-
-    private static void GetShemeFromLastCommand(PiCommandModel model, BaseCommandModel lastCommand)
-    {
-      var foundCommandMnemonic = lastCommand.Mnemonic;
-      var newCommand = CreateSameType(lastCommand);
-      newCommand = lastCommand;
-
-      if (newCommand is IHasScheme hasScheme)
-      {
-        var scheme = hasScheme.Scheme;
-        model.Scheme = scheme;
-      }
-      else
-      {
-        // у этой команды схемы нет — просто пропускаем/логируем
-        LoggerUtility.LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
-      }
-    }
-
+        
     private static void CheckUnparsedParameters(string commandNumber, string mnemonic, int numberLine, PiCommandModel model, string remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -286,26 +241,6 @@ namespace ControlCommandAnalyser.Parser.Pi
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
-    }
-
-    /// <summary>
-    /// Создаёт новый экземпляр команды того же типа, что и lastCommand.
-    /// </summary>
-    /// <typeparam name="T">Тип команды, наследник BaseCommandModel.</typeparam>
-    /// <param name="lastCommand">Экземпляр команды, по которому определяется тип.</param>
-    /// <returns>Новый экземпляр команды указанного типа.</returns>
-    public static T CreateSameType<T>(T lastCommand) where T : BaseCommandModel
-    {
-      if (lastCommand == null)
-        throw new ArgumentNullException(nameof(lastCommand));
-
-      // Получаем реальный runtime-тип объекта
-      Type commandType = lastCommand.GetType();
-
-      // Создаём новый экземпляр того же типа
-      var newCommand = Activator.CreateInstance(commandType);
-
-      return (T)newCommand;
     }
   }
 }

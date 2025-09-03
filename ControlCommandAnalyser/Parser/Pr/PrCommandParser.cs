@@ -180,6 +180,24 @@ namespace ControlCommandAnalyser.Parser.Pr
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+        {
+          // находим цепи точек из предыдущей команды проверки
+          CommandsModel.CheckKeyP(model, model.Scheme);
+        }
+        else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        {
+          CommandsModel.CheckKeyS(model.Scheme);
+        }
+      }
+      else if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      {
+        // находим цепи точек из предыдущей команды проверки
+        CommandsModel.CheckKeyP(model, model.Scheme);
+      }
+      else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        CommandsModel.CheckKeyS(model.Scheme);
       }
       else
       {
