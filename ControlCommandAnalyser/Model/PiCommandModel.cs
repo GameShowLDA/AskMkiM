@@ -2,22 +2,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ControlCommandAnalyser.Model
 {
-  public class PiCommandModel : BaseCommandModel
+  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Г)]
+  public class PiCommandModel : BaseCommandModel, IHasScheme
   {
+    public override string Mnemonic => "ПИ";
+
+    /// <summary>
+    /// Модль команды СИ.
+    /// </summary>
+    public SiCommandModel SiCommand { get; set; }
+
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").
     /// </summary>
     public string? Voltage { get; set; }
 
     /// <summary>
-    /// Пороговое сопротивление (например, "R>100МОм").
+    /// Тип напряжения.
     /// </summary>
-    public string? ThresholdResistance { get; set; }
+    public VoltageEnum.Type VoltageType { get; set; }
 
     /// <summary>
     /// Значение времени (например, "1c").

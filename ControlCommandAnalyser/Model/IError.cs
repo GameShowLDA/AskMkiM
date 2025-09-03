@@ -7,7 +7,7 @@ using AppConfiguration.Error.Translation;
 
 namespace ControlCommandAnalyser.Model
 {
-  internal interface IError
+  public interface IError
   {
     IPointError PointErrors { get; }
   }

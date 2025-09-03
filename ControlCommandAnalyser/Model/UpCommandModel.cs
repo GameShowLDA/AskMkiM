@@ -11,6 +11,8 @@ namespace ControlCommandAnalyser.Model
   /// </summary>
   public class UpCommandModel : BaseCommandModel
   {
+    public override string Mnemonic => "УП";
+
     /// <summary>
     /// Номер перехода (метка, на которую надо перейти).
     /// </summary>

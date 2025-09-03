@@ -8,9 +8,5 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <TextEditor:TextEditorUI Name="textEditorControl" 
-                                 Foreground="White"
-                                 Text="абв абв абв абв абв абв абв абв абв абв абв абв"
-                                 />
     </Grid>
 </UserControl>

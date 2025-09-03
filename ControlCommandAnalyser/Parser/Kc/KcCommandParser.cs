@@ -20,14 +20,32 @@ namespace ControlCommandAnalyser.Parser.Kc
     public bool CanParse(string mnemonic) => mnemonic == "КС";
 
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
+
+      var rmCommandModel = new RmCommandModel();
+      var commandModel = CommandsModel.GetByMnemonic("РМ").Last();
+
+      if (commandModel == null)
+      {
+        throw new Exception("РМ не сущесвует...");
+      }
+      else
+      {
+        if (commandModel is RmCommandModel)
+        {
+          rmCommandModel = commandModel as RmCommandModel;
+        }
+        else
+        {
+          throw new Exception("РМ не сущесвует...");
+        }
+      }
 
       var model = new KsCommandModel
       {
         CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
         SourceLines = new List<string>(lines),
         StartLineNumber = numberLine,
       };
@@ -172,7 +190,7 @@ namespace ControlCommandAnalyser.Parser.Kc
         {
           model.Scheme = scheme; // ← просто присваиваем схему в модель
           LoggerUtility.LogInformation(
-            $"Схема распознана: цепей={scheme.ChainModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
         }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке

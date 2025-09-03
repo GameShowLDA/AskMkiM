@@ -16,19 +16,32 @@ namespace ControlCommandAnalyser.Parser.Pr
   {
     public bool CanParse(string mnemonic) => mnemonic == "ПР";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
-      if (rmCommandModel == null)
+      var rmCommandModel = new RmCommandModel();
+      var commandModel = CommandsModel.GetByMnemonic("РМ").Last();
+
+      if (commandModel == null)
       {
         throw new Exception("РМ не сущесвует...");
+      }
+      else
+      {
+        if (commandModel is RmCommandModel)
+        {
+          rmCommandModel = commandModel as RmCommandModel;
+        }
+        else
+        {
+          throw new Exception("РМ не сущесвует...");
+        }
       }
 
       var model = new PrCommandModel
       {
         CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
         SourceLines = new List<string>(lines),
         StartLineNumber = numberLine,
       };
@@ -101,15 +114,8 @@ namespace ControlCommandAnalyser.Parser.Pr
 
       if (string.IsNullOrEmpty(lowerLimitResistance) && string.IsNullOrEmpty(higherLimitResistance))
       {
-        model.Errors.Add(KsErrors.EmptyResistance(numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
-        if (!string.IsNullOrEmpty(remainder))
-        {
-          model.UnparsedParameters = "! Не распознанные параметры: ";
-          model.UnparsedParameters += remainder;
-          model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
-        }
-        return model;
+        higherLimitResistance = "10";
+        unit = "Ом";
       }
 
       model.LowerLimitResistance = lowerLimitResistance;
@@ -168,7 +174,7 @@ namespace ControlCommandAnalyser.Parser.Pr
         {
           model.Scheme = scheme; // ← просто присваиваем схему в модель
           LoggerUtility.LogInformation(
-            $"Схема распознана: цепей={scheme.ChainModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
         }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке

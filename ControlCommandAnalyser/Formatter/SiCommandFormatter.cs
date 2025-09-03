@@ -71,14 +71,10 @@ namespace ControlCommandAnalyser.Formatter
 
       yield return "\tЗаданные точки:";
 
-      for (int ci = 0; ci < si.Scheme.ChainModels.Count; ci++)
+      for (int ci = 0; ci < si.Scheme.GroupModels.Count; ci++)
       {
-        var chain = si.Scheme.ChainModels[ci];
+        var chain = si.Scheme.GroupModels[ci];
         if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
-        else
-        {
-          yield return $"\t\tЦепь номер {ci + 1}:";
-        }
 
         for (int pi = 0; pi < chain.ChainModels.Count; pi++)
         {
@@ -89,7 +85,24 @@ namespace ControlCommandAnalyser.Formatter
           var status = (pi == 0) ? "*" : "#";
 
           foreach (var point in part.PointModels)
-            yield return $"\t\t{status} {point}";
+          {
+            if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count > 1)
+            {
+              yield return $"\t\t{status} {point},";
+            }
+            else if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count == 1)
+            {
+              yield return $"\t\t{status} {point}";
+            }
+            else if (part.PointModels.IndexOf(point) != part.PointModels.Count - 1)
+            {
+              yield return $"\t\t  {point},";
+            }
+            else
+            {
+              yield return $"\t\t  {point}";
+            }
+          }
         }
       }
 

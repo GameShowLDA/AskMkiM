@@ -40,8 +40,8 @@ namespace ControlCommandExecutor.Executors
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message) { IndentLevel = 1 }, IsBlockStart: true);
 
       //var points = (List<PointModel>)(command.Points.Select(x => PointModel.ConvertToPointModels(x.Points)).Where(x => x != null));
-      var points = command.Scheme?.ChainModels?
-                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<PartChainModel>())
+      var points = command.Scheme?.GroupModels?
+                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
                   .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
                   .ToList()
                   ?? new List<PointModel>();

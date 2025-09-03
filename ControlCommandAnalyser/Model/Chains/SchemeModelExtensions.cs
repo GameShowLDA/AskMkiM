@@ -14,10 +14,10 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     public static bool IsEmpty(this SchemeModel? scheme)
     {
-      if (scheme?.ChainModels == null || scheme.ChainModels.Count == 0)
+      if (scheme?.GroupModels == null || scheme.GroupModels.Count == 0)
         return true;
 
-      foreach (var chain in scheme.ChainModels)
+      foreach (var chain in scheme.GroupModels)
       {
         if (chain?.ChainModels == null || chain.ChainModels.Count == 0)
           continue;
@@ -36,9 +36,9 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     public static int CountParts(this SchemeModel? scheme)
     {
-      if (scheme?.ChainModels == null) return 0;
+      if (scheme?.GroupModels == null) return 0;
       int parts = 0;
-      foreach (var chain in scheme.ChainModels)
+      foreach (var chain in scheme.GroupModels)
         parts += chain?.ChainModels?.Count ?? 0;
       return parts;
     }
@@ -48,10 +48,10 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     public static int CountPoints(this SchemeModel? scheme)
     {
-      if (scheme?.ChainModels == null) return 0;
+      if (scheme?.GroupModels == null) return 0;
       int cnt = 0;
-      foreach (var chain in scheme.ChainModels)
-        foreach (var part in chain?.ChainModels ?? Enumerable.Empty<PartChainModel>())
+      foreach (var chain in scheme.GroupModels)
+        foreach (var part in chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
           cnt += part?.PointModels?.Count ?? 0;
       return cnt;
     }
@@ -62,9 +62,9 @@ namespace ControlCommandAnalyser.Model.Chains
     /// </summary>
     public static IEnumerable<PointModel> EnumeratePoints(this SchemeModel? scheme)
     {
-      if (scheme?.ChainModels == null) yield break;
+      if (scheme?.GroupModels == null) yield break;
 
-      foreach (var chain in scheme.ChainModels)
+      foreach (var chain in scheme.GroupModels)
       {
         if (chain?.ChainModels == null) continue;
 

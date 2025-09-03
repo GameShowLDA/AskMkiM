@@ -23,30 +23,6 @@ namespace TestWPF
     public TestMainText()
     {
       InitializeComponent();
-
-      textEditorControl.InitializeMarkerService();
-      //textEditorControl.HighlightText("а");
-
-      HighlightAllB();
     }
-
-    private void HighlightAllB()
-    {
-      string text = textEditorControl.Text;
-      var ranges = new List<(int, int)>();
-
-      for (int i = 0; i < text.Length; i++)
-      {
-        if (text[i] == 'б' || text[i] == 'Б') // поддержка и заглавной, и строчной
-        {
-          ranges.Add((i, i + 1));
-        }
-      }
-
-      Console.WriteLine($"🔍 Найдено {ranges.Count} вхождений 'б'.");
-
-      textEditorControl.HighlightRanges(ranges);
-    }
-
   }
 }

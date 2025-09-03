@@ -7,6 +7,8 @@ namespace ControlCommandAnalyser.Model.Ok
   /// </summary>
   public class OkCommandModel : BaseCommandModel
   {
+    public override string Mnemonic => "ОК";
+
     /// <summary>
     /// Обозначение объекта контроля (обязательно, до 39 символов).
     /// </summary>

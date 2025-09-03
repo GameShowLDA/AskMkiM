@@ -14,12 +14,11 @@ namespace ControlCommandAnalyser.Parser.Ok
   {
     public bool CanParse(string mnemonic) => mnemonic == "ОК";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       var model = new OkCommandModel
       {
         CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
         SourceLines = new List<string>(lines),
         StartLineNumber = numberLine,
       };

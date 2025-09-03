@@ -27,6 +27,8 @@ namespace ControlCommandAnalyser.Model
   /// </summary>
   public class CuCommandModel : BaseCommandModel
   {
+    public override string Mnemonic => "ЦУ";
+
     /// <summary>
     /// Тип команды ЦУ (информация, вопрос, переход).
     /// </summary>

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using AppConfiguration.Error.Translation;
+using ControlCommandAnalyser.Model;
+using ControlCommandAnalyser.Model.Chains; // Для LoggerUtility
+using ControlCommandAnalyser.Model.Ok;
+using ControlCommandAnalyser.Parser.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ControlCommandAnalyser.Model;
-using ControlCommandAnalyser.Parser.Common;
-using AppConfiguration.Error.Translation;
-using ControlCommandAnalyser.Model.Ok;
 using Utilities;
-using ControlCommandAnalyser.Model.Chains; // Для LoggerUtility
 
 namespace ControlCommandAnalyser.Parser.Si
 {
@@ -18,14 +18,13 @@ namespace ControlCommandAnalyser.Parser.Si
   {
     public bool CanParse(string mnemonic) => mnemonic == "СИ";
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines, RmCommandModel rmCommandModel)
+    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
       var model = new SiCommandModel
       {
         CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
         SourceLines = lines?.ToList() ?? new List<string>(),
         StartLineNumber = numberLine,
       };
@@ -34,94 +33,34 @@ namespace ControlCommandAnalyser.Parser.Si
       {
         LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
         model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
-        return model;
       }
 
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
-      model.SourceLines = model.SourceLines
-        .Where(l => !string.IsNullOrWhiteSpace(l))
-        .ToList();
+      var rmCommandModel = new RmCommandModel();
+      var commandModel = CommandsModel.GetByMnemonic("РМ").Last();
 
-      // Склеиваем всё в одну строку и удаляем \r \n \t
-      var body = string.Concat(model.SourceLines)
-        .Replace("\r", "")
-        .Replace("\n", "")
-        .Replace("\t", "");
+      if (commandModel == null)
+      {
+        throw new Exception("РМ не сущесвует...");
+      }
+      else
+      {
+        if (commandModel is RmCommandModel)
+        {
+          rmCommandModel = commandModel as RmCommandModel;
+        }
+        else
+        {
+          throw new Exception("РМ не сущесвует...");
+        }
+      }
 
-      // Для логов
-      LoggerUtility.LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
+      string body = AllLinesInOne(model);
 
       // Дальше работаем ТОЛЬКО с body:
       var remainder = body;
 
-      // TODO: везде сделать reminder=body вместо remider=firstline
+      remainder = ManageSiParametersParse(model, commandNumber, mnemonic, numberLine, remainder);
 
-      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
-      if (match.Success)
-        remainder = match.Groups[1].Value.Trim();
-
-      //string remainder = firstLine;
-      string? voltage = null, resistance = null, time = null;
-
-      // сначала извлекаем ключи
-      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(body);
-
-      foreach (var (key, hasError) in result)
-      {
-        if (hasError)
-        {
-          LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-          model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
-        }
-        else
-        {
-          model.AlgorithmKey.Add(key);
-          LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
-        }
-      }
-
-
-      // затем удаляем их из строки
-      foreach (var key in model.AlgorithmKey)
-      {
-        remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
-      }
-
-      (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
-      LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
-
-      (resistance, remainder) = CommonParameterParser.ParseResistance(remainder);
-      LoggerUtility.LogDebug($"После парсинга сопротивления: resistance='{resistance}', remainder='{remainder}'");
-
-      (time, remainder) = CommonParameterParser.ParseTime(remainder);
-      LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
-
-      model.Voltage = voltage;
-      model.Resistance = resistance;
-      if (string.IsNullOrEmpty(time))
-      {
-        LoggerUtility.LogDebug($"Для времени установлено значение по умолчанию 5 с.'");
-        time = "5 с";
-      }
-      model.Time = time;
-
-      if (string.IsNullOrWhiteSpace(voltage))
-      {
-        model.Errors.Add(SiErrors.CannotParseParameters("Не указано напряжение", numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
-      }
-
-      if (string.IsNullOrWhiteSpace(resistance))
-      {
-        model.Errors.Add(SiErrors.CannotParseParameters("Не указано сопротивление", numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
-      }
-
-      if (string.IsNullOrWhiteSpace(time))
-      {
-        model.Errors.Add(SiErrors.CannotParseParameters("Не указано время", numberLine, $"{commandNumber} {mnemonic}"));
-        LoggerUtility.LogWarning($"Не указано время (строка {numberLine}): {commandNumber} {mnemonic}");
-      }
       string bodyNoWs = string.Concat(lines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
       // Ищем первую и последнюю '*'
@@ -159,7 +98,7 @@ namespace ControlCommandAnalyser.Parser.Si
         {
           model.Scheme = scheme; // ← просто присваиваем схему в модель
           LoggerUtility.LogInformation(
-            $"Схема распознана: цепей={scheme.ChainModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
         }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
@@ -180,18 +119,123 @@ namespace ControlCommandAnalyser.Parser.Si
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
 
-      // Валидация
-      if (string.IsNullOrWhiteSpace(voltage) && string.IsNullOrWhiteSpace(resistance) && string.IsNullOrWhiteSpace(time))
-      {
-        LoggerUtility.LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
-        model.Errors.Add(SiErrors.CannotParseParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
-      }
-
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
 
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
+    }
+
+    public static string ManageSiParametersParse(SiCommandModel model, string commandNumber, string mnemonic, int numberLine, string remainder)
+    {
+      var body = remainder;
+      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+      if (match.Success)
+        remainder = match.Groups[1].Value.Trim();
+
+      string voltage = string.Empty, resistance = string.Empty, time = string.Empty;
+
+      // сначала извлекаем ключи
+      remainder = ExtractSiKeys(commandNumber, mnemonic, numberLine, model, body, remainder);
+
+      remainder = ExtractSiParameters(commandNumber, mnemonic, numberLine, model, remainder, voltage, resistance, time);
+
+      return remainder;
+    }
+
+
+    private static string ExtractSiParameters(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, string remainder, string voltage, string resistance, string time)
+    {
+      (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
+      LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
+
+      (resistance, remainder) = CommonParameterParser.ParseResistance(remainder);
+      LoggerUtility.LogDebug($"После парсинга сопротивления: resistance='{resistance}', remainder='{remainder}'");
+
+      (time, remainder) = CommonParameterParser.ParseTime(remainder);
+      LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
+
+      model.Voltage = voltage;
+      if (string.IsNullOrEmpty(resistance))
+      {
+        resistance = "100<МОм";
+      }
+      model.Resistance = resistance;
+      if (string.IsNullOrEmpty(time))
+      {
+        LoggerUtility.LogDebug($"Для времени установлено значение по умолчанию 5 с.'");
+        time = "5 с";
+      }
+      model.Time = time;
+      ValidateSiParameters(commandNumber, mnemonic, numberLine, model, voltage, resistance, time);
+
+      return remainder;
+    }
+
+    private static void ValidateSiParameters(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, string? voltage, string? resistance, string time)
+    {
+      if (string.IsNullOrWhiteSpace(voltage))
+      {
+        model.Errors.Add(SiErrors.CannotParseParameters("Не указано напряжение", numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано напряжение (строка {numberLine}): {commandNumber} {mnemonic}");
+      }
+
+      if (string.IsNullOrWhiteSpace(resistance))
+      {
+        model.Errors.Add(SiErrors.CannotParseParameters("Не указано сопротивление", numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано сопротивление (строка {numberLine}): {commandNumber} {mnemonic}");
+      }
+
+      if (string.IsNullOrWhiteSpace(time))
+      {
+        model.Errors.Add(SiErrors.CannotParseParameters("Не указано время", numberLine, $"{commandNumber} {mnemonic}"));
+        LoggerUtility.LogWarning($"Не указано время (строка {numberLine}): {commandNumber} {mnemonic}");
+      }
+    }
+
+    private static string ExtractSiKeys(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, string body, string remainder)
+    {
+      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(body);
+
+      foreach (var (key, hasError) in result)
+      {
+        if (hasError)
+        {
+          LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+          model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
+        }
+        else
+        {
+          model.AlgorithmKey.Add(key);
+          LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
+        }
+      }
+
+      // затем удаляем их из строки
+      foreach (var key in model.AlgorithmKey)
+      {
+        remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
+      }
+
+      return remainder;
+    }
+
+    private static string AllLinesInOne(SiCommandModel model)
+    {
+      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
+      model.SourceLines = model.SourceLines
+        .Where(l => !string.IsNullOrWhiteSpace(l))
+        .ToList();
+
+      // Склеиваем всё в одну строку и удаляем \r \n \t
+      var body = string.Concat(model.SourceLines)
+        .Replace("\r", "")
+        .Replace("\n", "")
+        .Replace("\t", "");
+
+      // Для логов
+      LoggerUtility.LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
+      return body;
     }
   }
 }

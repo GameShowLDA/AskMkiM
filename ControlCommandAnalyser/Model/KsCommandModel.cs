@@ -13,6 +13,9 @@ namespace ControlCommandAnalyser.Model
   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Б, ControlCommandAnalyser.AlgorithmKey.Д)]
   public class KsCommandModel : BaseCommandModel
   {
+
+    public override string Mnemonic => "КС";
+
     /// <summary>
     /// Нижняя граница значеня сопротивления (например, "100<МОм")
     /// </summary>

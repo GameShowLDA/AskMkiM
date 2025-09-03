@@ -16,7 +16,7 @@ namespace ControlCommandAnalyser.Model.Chains
     /// <summary>
     /// Список цепей.
     /// </summary>
-    public List<ChainModel> ChainModels;
+    public List<GroupModel> GroupModels;
 
     /// <summary>
     /// Словарь цепей и списков связанных точек.
@@ -41,7 +41,7 @@ namespace ControlCommandAnalyser.Model.Chains
 
     public SchemeModel(List<ChainModel> chainModel)
     {
-      this.ChainModels = chainModel;
+      this.GroupModels  = chainModel;
       InitializePoints();
     }
 

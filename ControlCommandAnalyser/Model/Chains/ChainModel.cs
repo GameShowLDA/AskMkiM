@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Utilities.Models;
+﻿using Utilities.Models;
 
 namespace ControlCommandAnalyser.Model.Chains
 {
   /// <summary>
-  /// Модель данных, содержащая все части цепей в одной цепи.
+  /// Модель данных, содержащая точки части цепи.
   /// </summary>
   public class ChainModel
   {
-    public List<PartChainModel> ChainModels;
+    public List<PointModel> PointModels;
 
-    public ChainModel(List<PartChainModel> partChainModels)
+    public ChainModel(List<PointModel> pointModels) 
     {
-      this.ChainModels = partChainModels;
+      this.PointModels = pointModels;
     }
   }
 }
