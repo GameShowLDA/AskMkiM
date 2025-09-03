@@ -28,5 +28,32 @@ namespace ControlCommandAnalyser.Model
     {
       return PointsMap.Values.ToList();
     }
+
+    /// <summary>
+    /// Получает ключ по точке.
+    /// </summary>
+    /// <param name="value">Точка.</param>
+    /// <param name="key">Ключ.</param>
+    /// <returns></returns>
+    public bool TryGetKeyByValue(string value, out string key)
+    {
+      key = null;
+
+      if (!PointsMap.ContainsValue(value))
+      { 
+        return false;
+      }
+
+      foreach (var kv in PointsMap)
+      {
+        if (kv.Value.Equals(value))
+        { 
+          key = kv.Key;
+          break;
+        }
+      }
+
+      return true;
+    }
   }
 }
