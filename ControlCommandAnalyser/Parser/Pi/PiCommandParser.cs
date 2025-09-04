@@ -201,11 +201,13 @@ namespace ControlCommandAnalyser.Parser.Pi
         {
           // находим цепи точек из предыдущей команды проверки
           model.Scheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
+          model.SiCommand.Scheme = model.Scheme;
         }
         else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
           || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
         {
           model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+          model.SiCommand.Scheme = model.Scheme;
         }
       }
       else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
@@ -213,11 +215,13 @@ namespace ControlCommandAnalyser.Parser.Pi
       {
         // находим цепи точек из предыдущей команды проверки
         model.Scheme = CommandsModel.CheckKeyP(model.SiCommand, model.Scheme);
+        model.SiCommand.Scheme = model.Scheme;
       }
       else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
         || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
         model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+        model.SiCommand.Scheme = model.Scheme;
       }
       else
       {
