@@ -59,23 +59,49 @@ namespace ControlCommandAnalyser.Model
       CommandModels.Clear();
     }
 
-    public static void GetPointsFromPM(SchemeModel model)
+    public static SchemeModel GetPointsFromPM(SchemeModel scheme)
     {
       // добавляем просто точки из РМ, которые еще не были записаны
       BaseCommandModel lastCommand = GetByMnemonic("РМ").Last();
       if (lastCommand is RmCommandModel)
       {
-        List<PointModel> allPoints = GetAllPoints(model);
-
         var rmCommand = lastCommand as RmCommandModel;
-
-
+        if (scheme != null && scheme.GroupModels.Count > 0)
+        {
+          List<PointModel> allPoints = GetAllPoints(scheme);
+        }
+        else
+        {
+          foreach (var pointDictionary in rmCommand.PointsMap)
+          {
+            var point = pointDictionary.Value;
+            var mnemonic = pointDictionary.Key;
+            var pointModel = PointModel.ParsePointString(point);
+            pointModel.Mnemonic = mnemonic;
+            pointModel.PointType = PointType.Type.Star;
+            var chainModel = new ChainModel(new List<PointModel>() { pointModel });
+            var groupModel = new GroupModel(new List<ChainModel> { chainModel });
+            if (scheme == null)
+            {
+              scheme = new SchemeModel(new List<GroupModel> { groupModel });
+            }
+            else
+            {
+              scheme.GroupModels.Add(groupModel);
+            }
+          }
+          LoggerUtility.LogInformation(
+            $"Схема распознана из РМ: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
+        }
       }
-      LoggerUtility.LogInformation(
-        $"Схема распознана из РМ: цепей={model.GroupModels?.Count ?? 0}, частей={model.CountParts()}, точек={model.CountPoints()}");
+      else
+      {
+        LoggerUtility.LogWarning($"Команда РМ не найдена.");
+      }
+      return scheme;
     }
 
-    public static void GetShemeFromLastCommand(BaseCommandModel model, SchemeModel scheme, BaseCommandModel lastCommand)
+    public static SchemeModel GetShemeFromLastCommand(BaseCommandModel model, SchemeModel scheme, BaseCommandModel lastCommand)
     {
       var foundCommandMnemonic = lastCommand.Mnemonic;
       var newCommand = CreateSameType(lastCommand);
@@ -97,6 +123,7 @@ namespace ControlCommandAnalyser.Model
           else
           {
             model.Errors.Add(GeneralErrors.SchemeConflict(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+            scheme.GroupModels.Clear();
           }
         }
       }
@@ -105,6 +132,7 @@ namespace ControlCommandAnalyser.Model
         // у этой команды схемы нет — просто пропускаем/логируем
         LoggerUtility.LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
       }
+      return scheme;
     }
 
     public static bool CompareSchemes(SchemeModel modelScheme, SchemeModel addedScheme)
@@ -163,33 +191,34 @@ namespace ControlCommandAnalyser.Model
       return (T)newCommand;
     }
 
-    public static void CheckKeyS(SchemeModel scheme)
+    public static SchemeModel CheckKeyS(SchemeModel scheme)
     {
-      GetPointsFromPM(scheme);
+      return GetPointsFromPM(scheme);
     }
 
-    public static void CheckKeyP(BaseCommandModel model, SchemeModel scheme, BaseCommandModel modelSi = null)
+    public static SchemeModel CheckKeyP(BaseCommandModel model, SchemeModel scheme, BaseCommandModel modelSi = null)
     {
       var lastCommand = GetLastFromCheckCommands();
       if (lastCommand != null)
       {
-        GetShemeFromLastCommand(model, scheme, lastCommand);
+        scheme = GetShemeFromLastCommand(model, scheme, lastCommand);
 
         if (modelSi != null)
         {
           if (modelSi.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
           {
-            GetPointsFromPM(scheme);
+            scheme = GetPointsFromPM(scheme);
           }
         }
         else
         {
           if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
           {
-            GetPointsFromPM(scheme);
+            scheme = GetPointsFromPM(scheme);
           }
         }
       }
+      return scheme;
     }
   }
 }

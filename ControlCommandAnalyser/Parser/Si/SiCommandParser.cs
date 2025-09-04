@@ -74,11 +74,11 @@ namespace ControlCommandAnalyser.Parser.Si
       else if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
         // находим цепи точек из предыдущей команды проверки
-        CommandsModel.CheckKeyP(model, model.Scheme);
+        model.Scheme = CommandsModel.CheckKeyP(model, model.Scheme);
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        CommandsModel.CheckKeyS(model.Scheme);
+        model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
       }
       else
       {
@@ -141,11 +141,11 @@ namespace ControlCommandAnalyser.Parser.Si
       if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
         // находим цепи точек из предыдущей команды проверки
-        CommandsModel.CheckKeyP(model, model.Scheme);
+        model.Scheme = CommandsModel.CheckKeyP(model, model.Scheme);
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        CommandsModel.CheckKeyS(model.Scheme);
+        model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
       }
       return remainder;
     }

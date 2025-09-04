@@ -28,54 +28,56 @@ namespace ControlCommandAnalyser.Formatter
         yield return $"\t{pi.UnparsedParameters}";
 
       var si = pi.SiCommand;
+      yield return $"\tПараметры команды СИ:";
       // Ключи команды СИ
       if (si.AlgorithmKey.Count > 0)
       {
-        yield return $"\tКлючи команды СИ: {string.Join(", ", si.AlgorithmKey)}";
+        yield return $"\t\tКлючи команды: {string.Join(", ", si.AlgorithmKey)}";
       }
       else
       {
-        yield return $"\tКлючи команды СИ не указаны.";
+        yield return $"\t\tКлючи команды СИ не указаны.";
       }
 
       // Напряжение
       if (!string.IsNullOrWhiteSpace(si.Voltage))
       {
-        yield return $"\tНапряжение СИ: {si.Voltage}";
+        yield return $"\t\tНапряжение: {si.Voltage}";
       }
       else
       {
-        yield return $"\tНапряжение СИ не задано!";
+        yield return $"\t\tНапряжение не задано!";
       }
 
       // Время
       if (!string.IsNullOrWhiteSpace(si.Time))
       {
-        yield return $"\tВремя выполнения СИ: {si.Time}";
+        yield return $"\t\tВремя выполнения: {si.Time}";
       }
       else
       {
-        yield return $"\tВремя выполнения СИ не задано!";
+        yield return $"\t\tВремя выполнения не задано!";
       }
 
       // Сопротивление
       if (!string.IsNullOrWhiteSpace(si.Resistance))
       {
-        yield return $"\tСопротивление СИ: {si.Resistance}";
+        yield return $"\t\tСопротивление: {si.Resistance}";
       }
       else
       {
-        yield return $"\tСопротивление СИ не задано!";
+        yield return $"\t\tСопротивление не задано!";
       }
 
+      yield return $"\tПараметры команды ПИ:";
       // Ключи команды ПИ
       if (pi.AlgorithmKey.Count > 0)
       {
-        yield return $"\tКлючи команды ПИ: {string.Join(", ", pi.AlgorithmKey)}";
+        yield return $"\tКлючи команды: {string.Join(", ", pi.AlgorithmKey)}";
       }
       else
       {
-        yield return $"\tКлючи команды ПИ не указаны.";
+        yield return $"\tКлючи команды не указаны.";
       }
 
       // Напряжение
