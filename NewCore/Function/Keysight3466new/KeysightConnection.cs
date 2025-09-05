@@ -18,6 +18,8 @@ namespace NewCore.Function.Keysight3466new
     /// </summary>
     private readonly KeysightDevice _device;
 
+    public event Action DeviceDisponce;
+
     /// <summary>
     /// Возвращает состояние подключения к прибору.
     /// </summary>

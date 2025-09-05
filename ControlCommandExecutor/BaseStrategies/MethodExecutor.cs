@@ -16,8 +16,6 @@ namespace ControlCommandExecutor.BaseStrategies
     /// </summary>
     static int HighestBitCount { get; set; }
 
-    static List<ShowMessageModel> ResultMessages { get; set; }
-
     /// <summary>
     /// Выполняет последовательную проверку точек групповым методом.
     /// </summary>
@@ -26,35 +24,42 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, IUserMessageService messageService, double resistance)
     {
-      // TODO : РАскоменттить!
 
-      // List<PointModel> points = schemeModel.GetAllPoints();
-      // ResultMessages = new List<ShowMessageModel>();
-      // HighestBitCount = GetHighestPointBinaryDigits(points);
-      // var binaryPoints = ConvertToReversedBinaryRange(points, HighestBitCount);
-      // 
-      // for (int step = 0; step < HighestBitCount; step++)
-      // {
-      //   await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
-      //   await ConnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
-      //   if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
-      //   {
-      //     await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при проверке разряда {step} ({HighestBitCount})", type: ShowMessageModel.MessageType.Error), IsBlockStart: true);
-      // 
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
-      //     await BaseStrategies.NodeFullChecker.CheckSequenceAsync(schemeModel, performMeasurementAsync, manager, siCommandModel, messageService, resistance);
-      // 
-      //     return;
-      //   }
-      //   await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
-      // }
-      // 
-      // await messageService.ShowMessageAsync(new ShowMessageModel("Результаты проверки") { IndentLevel = 1 });
-      // foreach (var messgae in ResultMessages)
-      // {
-      //   await messageService.ShowMessageAsync(messgae, skipPause: true);
-      // }
+      var pointsList = schemeModel.GetPointsDisconnected();
+      if (pointsList.Count == 0)
+      {
+        return;
+      }
+
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разобщённых точек"));
+
+
+      List<ChainModel> chains = new List<ChainModel>();
+      foreach (var point in pointsList)
+      {
+        chains.Add(new ChainModel(point));
+      }
+
+      HighestBitCount = GetHighestPointBinaryDigits(chains);
+      var binaryPoints = ConvertToReversedBinaryRange(chains, HighestBitCount);
+
+
+      for (int step = 0; step < HighestBitCount; step++)
+      {
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
+        await ConnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+        if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
+        {
+          await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при проверке разряда {step} ({HighestBitCount})", type: ShowMessageModel.MessageType.Error), IsBlockStart: true);
+
+          await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
+          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(schemeModel, performMeasurementAsync, manager, siCommandModel, messageService, resistance);
+
+          return;
+        }
+        await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+      }
     }
 
     /// <summary>
@@ -66,12 +71,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности подключения точки после всех попыток.
     /// </exception>
-    private static async Task ConnectToBusBAsync(PointModel point, IUserMessageService messageService)
+    private static async Task ConnectToBusBAsync(ChainModel points, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+      foreach (var point in points.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -84,12 +92,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности отключить точку после всех попыток.
     /// </exception>
-    private static async Task DisconnectFromBusBAsync(PointModel point, IUserMessageService messageService)
+    private static async Task DisconnectFromBusBAsync(ChainModel points, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+      foreach (var point in points.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.B, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -102,12 +113,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности подключения точки после всех попыток.
     /// </exception>
-    private static async Task ConnectToBusAAsync(PointModel point, IUserMessageService messageService)
+    private static async Task ConnectToBusAAsync(ChainModel points, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+      foreach (var point in points.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -120,12 +134,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности отключить точку после всех попыток.
     /// </exception>
-    private static async Task DisconnectFromBusAAsync(PointModel point, IUserMessageService messageService)
+    private static async Task DisconnectFromBusAAsync(ChainModel points, IUserMessageService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+      foreach (var point in points.PointModels)
       {
-        throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        var module = EquipmentService.GetModuleByPoint(point);
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: NewCore.Enum.DeviceEnum.BusPoint.A, point.PointNumber), messageService))
+        {
+          throw AppConfiguration.Error.Device.ModuleRelayControl.RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
+        }
       }
     }
 
@@ -135,9 +152,10 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="startPoint">Начальная точка диапазона.</param>
     /// <param name="endPoint">Конечная точка диапазона.</param>
     /// <returns>Количество битов в представлении наибольшего номера точки.</returns>
-    static public int GetHighestPointBinaryDigits(List<PointModel> points)
+    static public int GetHighestPointBinaryDigits(List<ChainModel> points)
     {
-      var maxPoints = points.Select(p => (p.PointNumber)).Max();
+
+      var maxPoints = points.Select(p => (p.PointModels).Select(x => x.PointNumber).Max()).Max();
       return Convert.ToString(maxPoints, 2).Length;
     }
 
@@ -149,8 +167,8 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="second">Вторая точка диапазона.</param>
     /// <param name="bitLength">Желаемая длина двоичной строки.</param>
     /// <returns>Список точек и соответствующих перевёрнутых бинарных строк.</returns>
-    static public List<(PointModel point, string reversedBinary)> ConvertToReversedBinaryRange(
-        List<PointModel> points,
+    static public List<(ChainModel point, List<string> reversedBinary)> ConvertToReversedBinaryRange(
+        List<ChainModel> points,
         int bitLength)
     {
       if (bitLength <= 0)
@@ -158,11 +176,17 @@ namespace ControlCommandExecutor.BaseStrategies
         throw new ArgumentOutOfRangeException(nameof(bitLength), "Длина двоичной строки должна быть больше 0.");
       }
 
-      var result = new List<(PointModel, string)>();
+      var result = new List<(ChainModel point, List<string> reversedBinary)>();
 
       foreach (var point in points)
       {
-        result.Add((point, ConvertToReversedBinary(point.PointNumber, bitLength)));
+        List<string> reversPoint = new List<string>();
+        foreach (var item in point.PointModels)
+        {
+          reversPoint.Add(ConvertToReversedBinary(item.PointNumber, bitLength));
+        }
+
+        result.Add((point, reversPoint));
       }
 
       return result;
@@ -185,104 +209,40 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Подключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task ConnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
+    static private async Task ConnectPointsToBusAsync(List<(ChainModel point, List<string> reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
-      // TODO : РАскоменттить!
-      // foreach (var point in points)
-      // {
-      //   if (point.reversedBinary[step] == '1')
-      //   {
-      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-      //     {
-      //       if (point.point.PointNumber != result[0].PointNumber)
-      //       {
-      //         continue;
-      //       }
-      // 
-      //       foreach (var pointPair in result)
-      //       {
-      //         await ConnectToBusAAsync(pointPair, messageService);
-      //       }
-      //     }
-      //     else
-      //     {
-      //       await ConnectToBusAAsync(point.point, messageService);
-      //     }
-      // 
-      //   }
-      //   else
-      //   {
-      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-      //     {
-      //       if (point.point.PointNumber != result[0].PointNumber)
-      //       {
-      //         continue;
-      //       }
-      // 
-      //       foreach (var pointPair in result)
-      //       {
-      //         await ConnectToBusBAsync(pointPair, messageService);
-      //       }
-      //     }
-      //     else
-      //     {
-      //       await ConnectToBusBAsync(point.point, messageService);
-      //     }
-      //   }
-      // 
-      // }
+      foreach (var point in points)
+      {
+        if (point.reversedBinary[0][step] == '1')
+        {
+          await ConnectToBusAAsync(point.point, messageService);
+        }
+        else
+        {
+          await ConnectToBusBAsync(point.point, messageService);
+        }
+
+      }
     }
 
 
     /// <summary>
     /// Отключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task DisconnectPointsToBusAsync(List<(PointModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
+    static private async Task DisconnectPointsToBusAsync(List<(ChainModel point, List<string> reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
-      // TODO : РАскоменттить!
 
-      // foreach (var point in points)
-      // {
-      //   if (point.reversedBinary[step] == '1')
-      //   {
-      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-      //     {
-      //       if (point.point.PointNumber != result[0].PointNumber)
-      //       {
-      //         return;
-      //       }
-      // 
-      //       foreach (var pointPair in result)
-      //       {
-      //         await DisconnectFromBusAAsync(pointPair, messageService);
-      //       }
-      //     }
-      //     else
-      //     {
-      //       await DisconnectFromBusAAsync(point.point, messageService);
-      //     }
-      //   }
-      //   else
-      //   {
-      // 
-      //     if (schemeModel.TryCommunicatedPointAllChain(point.point, out List<PointModel> result))
-      //     {
-      //       if (point.point.PointNumber != result[0].PointNumber)
-      //       {
-      //         return;
-      //       }
-      // 
-      //       foreach (var pointPair in result)
-      //       {
-      //         await DisconnectFromBusBAsync(pointPair, messageService);
-      //       }
-      //     }
-      //     else
-      //     {
-      //       await DisconnectFromBusBAsync(point.point, messageService);
-      //     }
-      //   }
-      // }
+      foreach (var point in points)
+      {
+        if (point.reversedBinary[0][step] == '1')
+        {
+          await DisconnectFromBusAAsync(point.point, messageService);
+        }
+        else
+        {
+          await DisconnectFromBusBAsync(point.point, messageService);
+        }
+      }
     }
 
     /// <summary>

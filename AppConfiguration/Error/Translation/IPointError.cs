@@ -38,6 +38,16 @@ namespace AppConfiguration.Error.Translation
     public ErrorItem ChainError(string command, string chain);
 
     /// <summary>
+    /// Ошибка: Ошибка разрыва цепи.
+    /// </summary>
+    /// <param name="command">Номер команды и мнемоника.</param>
+    /// <param name="step">Номер разряда.</param>
+    /// <param name="countStep">Кол-во разрядов.</param>
+    /// <param name="resultMeasure">Результат измерения.</param>
+    /// <returns></returns>
+    public ErrorItem DisconnectChainError(string command, string chain);
+
+    /// <summary>
     /// Ошибка: Ошибка при проверке одно из разряда в групповом методе.
     /// </summary>
     /// <param name="command">Номер команды и мнемоника.</param>

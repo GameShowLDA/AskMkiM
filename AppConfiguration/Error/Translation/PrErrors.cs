@@ -45,6 +45,14 @@ namespace AppConfiguration.Error.Translation
     }
 
     /// <inheritdoc />
+    public ErrorItem DisconnectChainError(string command, string chain) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Pr_ChainError,
+      Description = $"Разрыв в цепи {chain}"
+    };
+
+    /// <inheritdoc />
     public ErrorItem ChainError(string command, string chain) => new()
     {
       Command = command,

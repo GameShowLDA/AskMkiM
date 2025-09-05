@@ -42,6 +42,9 @@ namespace ControlCommandExecutor.BaseStrategies
         return;
       }
 
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разобщённых точек"));
+
+
       foreach (var points in pointsList)
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
@@ -52,7 +55,7 @@ namespace ControlCommandExecutor.BaseStrategies
           str += $"{(EquipmentService.GetPointKey(point))},";
         }
         str = str.Remove(str.Length - 1);
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {str}"), IsBlockStart: true);
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка {str}"), IsBlockStart: true);
 
         foreach (var point in points)
         {

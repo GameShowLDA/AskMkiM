@@ -19,6 +19,8 @@ namespace NewCore.Function.ManagerChassis
     /// </summary>
     private readonly Device.ManagerChassis _chassisModel;
 
+    public event Action DeviceDisponce;
+
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="StateManager"/>.
     /// </summary>

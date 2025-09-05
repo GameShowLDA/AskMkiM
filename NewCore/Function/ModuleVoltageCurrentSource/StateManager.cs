@@ -17,6 +17,8 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
   {
     private readonly IPowerSourceModule _moduleVoltageCurrentSource;
 
+    public event Action DeviceDisponce;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateManager"/>.
     /// </summary>

@@ -16,6 +16,8 @@ namespace ControlCommandExecutor.Executors
     {
       var command = context.Command as KscCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
+      await breakDown.ConnectableManager.DisconnectAsync();
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {

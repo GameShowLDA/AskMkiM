@@ -20,6 +20,8 @@ namespace NewCore.Function.ModuleRelayControl
     /// </summary>
     private readonly Device.ModuleRelayControl _moduleRelayControl;
 
+    public event Action DeviceDisponce;
+
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="StateManager"/>.
     /// </summary>

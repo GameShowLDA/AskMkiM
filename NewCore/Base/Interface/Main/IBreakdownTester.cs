@@ -27,5 +27,7 @@ namespace NewCore.Base.Interface.Main
     /// Управление системными настройками пробойной установки.
     /// </summary>
     public ISystemSettingsBreakdown SystemManger { get; set; }
+
+    static public event Action Disconnect;
   }
 }

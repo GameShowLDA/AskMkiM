@@ -31,5 +31,7 @@ namespace NewCore.Base.Device
     /// </summary>
     /// <returns></returns>
     Task<bool> ResetAsync(IUserMessageService userMessageService = null);
+
+    event Action DeviceDisponce;
   }
 }

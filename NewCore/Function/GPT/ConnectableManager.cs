@@ -16,6 +16,7 @@ namespace NewCore.Function.GPT
   /// </summary>
   public class ConnectableManager : IConnectable
   {
+
     /// <summary>
     /// Создает новый экземпляр класса <see cref="AcwMode"/>.
     /// </summary>
@@ -26,6 +27,8 @@ namespace NewCore.Function.GPT
     /// Модель устройства GPT-79904.
     /// </summary>
     private GPT79904 _gptModel { get; set; }
+
+    public event Action DeviceDisponce;
 
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
@@ -115,6 +118,7 @@ namespace NewCore.Function.GPT
       try
       {
         _gptModel.Dispose();
+        DeviceDisponce?.Invoke();
       }
       catch (Exception ex)
       {

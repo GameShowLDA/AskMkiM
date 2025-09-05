@@ -97,6 +97,13 @@ namespace AppConfiguration.Error.Translation
       Description = $"Замкнутая цепь {chain}"
     };
 
+    /// <inheritdoc />
+    public ErrorItem DisconnectChainError(string command, string chain) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Pr_ChainError,
+      Description = $"Разрыв в цепи {chain}"
+    };
 
     /// <inheritdoc />
     public ErrorItem PairError(string command, string pointFirst, string pointLast) => new()

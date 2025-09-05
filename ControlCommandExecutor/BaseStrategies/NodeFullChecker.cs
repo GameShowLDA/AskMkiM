@@ -35,6 +35,8 @@ namespace ControlCommandExecutor.BaseStrategies
       }
       ErrorsPoints = new List<ChainModel>();
 
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разобщённых точек"));
+
       foreach (var point in pointsList)
       {
         var chainModels = new ChainModel(point);
@@ -76,118 +78,57 @@ namespace ControlCommandExecutor.BaseStrategies
 
         var chains = await FindAllShortCircuitChainsAsync(performMeasurementAsync, ErrorsPoints, resistance, messageService);
 
+
+        await messageService.ShowMessageAsync(
+           new ShowMessageModel($"Результаты проверки")
+           { IndentLevel = 1 });
+
         foreach (var chain in chains)
         {
           var chainStr = string.Empty;
+          for (int itemIndex = 0; itemIndex < chain.Count; itemIndex++)
+          { 
+            var item = chain[itemIndex];
+            for (int i = 0; i < item.PointModels.Count; i++)
+            {
+              var point = item.PointModels[i].Mnemonic;
 
-          foreach (var item in chain)
-          {
-            chainStr += "#" + string.Join("#", item.PointModels.Select(p => EquipmentService.GetPointKey(p))) + "#";
+              if (itemIndex > 0 && i == 0)
+              { 
+                chainStr += $" ## ";
+              }
+
+              if (item.PointModels.Count == 1)
+              {
+                chainStr += $"*{point}*";
+                continue;
+              }
+
+              if (i == 0)
+              {
+                chainStr += $"*{point}";
+              }
+              else if (i + 1 == item.PointModels.Count)
+              {
+                chainStr += $"#{point}*";
+              }
+              else
+              { 
+                chainStr += $"#{point}";
+              }
+            }
           }
 
+
           await messageService.ShowMessageAsync(
-              new ShowMessageModel("Обнаружено замыкание",
-                  message: $"{chainStr}",
-                  type: ShowMessageModel.MessageType.Error)
-              { IndentLevel = 3 });
+             new ShowMessageModel($"{chainStr}",
+                 message: "Обнаружено замыкание",
+                 type: ShowMessageModel.MessageType.Error)
+             { IndentLevel = 3 });
 
           manager.AddErrorMethod(baseCommandModel.PointErrors.ChainError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainStr));
         }
       }
-
-      // ErrorsPoints = new List<PointModel>();
-      // List<PointModel> points = schemeModel.GetAllPoints();
-      // 
-      // await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
-      // 
-      // foreach (var point in points)
-      // {
-      //   messageService.GetCancellationToken().ThrowIfCancellationRequested();
-      //   await ConnectToBusBAsync(point, messageService);
-      // }
-      // 
-      // foreach (var point in points)
-      // {
-      //   messageService.GetCancellationToken().ThrowIfCancellationRequested();
-      //   List<PointModel> pairsPoint = null;
-      // 
-      // 
-      //   if (schemeModel.TryCommunicatedPointAllChain(point, out List<PointModel> result))
-      //   {
-      //     if (result[0] != point)
-      //     {
-      //       continue;
-      //     }
-      // 
-      //     pairsPoint = result;
-      // 
-      //     string pointStr = string.Empty;
-      //     foreach (var item in pairsPoint)
-      //     {
-      //       pointStr += $"{(EquipmentService.GetPointKey(item))} ";
-      //     }
-      // 
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точек {pointStr}"), IsBlockStart: true);
-      //     foreach (var pointPair in result)
-      //     {
-      //       await DisconnectFromBusBAsync(pointPair, messageService);
-      //       await ConnectToBusAAsync(pointPair, messageService);
-      //     }
-      //   }
-      //   else
-      //   {
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка точки {(EquipmentService.GetPointKey(point))}"), IsBlockStart: true);
-      //     await DisconnectFromBusBAsync(point, messageService);
-      //     await ConnectToBusAAsync(point, messageService);
-      //   }
-      // 
-      //   var answer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken());
-      // 
-      //   if (!answer.Result)
-      //   {
-      //     manager.AddErrorMethod(baseCommandModel.PointErrors.NodeExecutePointError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", point.ToString(), ($"{answer.Value} МОм (>{resistance} МОм)")));
-      //     ErrorsPoints.Add(point);
-      //   }
-      // 
-      //   if (pairsPoint != null)
-      //   {
-      //     foreach (var item in pairsPoint)
-      //     {
-      //       await DisconnectFromBusAAsync(item, messageService);
-      //       await ConnectToBusBAsync(item, messageService);
-      //     }
-      //   }
-      //   else
-      //   {
-      //     await DisconnectFromBusAAsync(point, messageService);
-      //     await ConnectToBusBAsync(point, messageService);
-      //   }
-      // }
-      // 
-      // if (ErrorsPoints.Count > 0)
-      // {
-      //   await messageService.ShowMessageAsync(new ShowMessageModel($"Бракованные точки"), IsBlockStart: true);
-      //   foreach (var point in ErrorsPoints)
-      //   {
-      //     await messageService.ShowMessageAsync(new ShowMessageModel($"Найден брак в точке", message: point.ToString(), type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, IsBlockStart: true);
-      //   }
-      // 
-      //   await messageService.ShowMessageAsync(new ShowMessageModel("Анализ на наличие короткого замыкания между точками"), IsBlockStart: true);
-      // 
-      //   var chains = await FindAllShortCircuitChainsAsync(performMeasurementAsync, ErrorsPoints, resistance, messageService);
-      // 
-      //   foreach (var chain in chains)
-      //   {
-      //     var chainStr = string.Join(", ", chain.Select(p => EquipmentService.GetPointKey(p)));
-      //     await messageService.ShowMessageAsync(
-      //         new ShowMessageModel("Цепь короткого замыкания найдена",
-      //             message: $"Обнаружена замкнутая цепь: {chainStr}",
-      //             type: ShowMessageModel.MessageType.Error)
-      //         { IndentLevel = 3 });
-      // 
-      //     manager.AddErrorMethod(baseCommandModel.PointErrors.ChainError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainStr));
-      //   }
-      // }
     }
 
     /// <summary>

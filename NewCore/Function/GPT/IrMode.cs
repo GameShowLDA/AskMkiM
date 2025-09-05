@@ -270,18 +270,25 @@ namespace NewCore.Function.GPT
 
          await Task.Delay(100);
          response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.MEASURE)} ?", timeout: 500, delayBeforeCall: delayBeforeCall);
+         try
+         {
 
-         model = ParseMeasurement(response);
-         if (model.Status.ToLower().Contains("fail"))
-         {
-           await _gptModel.DeviceProtocol.QueryAsync(testCommand);
+           model = ParseMeasurement(response);
+           if (model.Status.ToLower().Contains("fail"))
+           {
+             await _gptModel.DeviceProtocol.QueryAsync(testCommand);
+           }
+           else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > param)
+           {
+             await _gptModel.IrManger.StopMeasure();
+             tickCount = totalTicks + 1;
+             timer.Stop();
+             return;
+           }
          }
-         else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > param)
+         catch
          {
-           await _gptModel.IrManger.StopMeasure();
-           tickCount = totalTicks + 1;
-           timer.Stop();
-           return;
+
          }
 
          model = null;

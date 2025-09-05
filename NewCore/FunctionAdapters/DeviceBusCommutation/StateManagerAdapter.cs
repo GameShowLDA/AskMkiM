@@ -28,6 +28,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       _stateManager = new StateManager(deviceBusCommutation);
     }
 
+    public event Action DeviceDisponce;
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService userMessageService = null)
     {

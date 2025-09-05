@@ -24,6 +24,8 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrentSource
       _stateManager = new StateManager(device);
     }
 
+    public event Action DeviceDisponce;
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {

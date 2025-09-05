@@ -298,6 +298,8 @@ namespace ControlCommandExecutor.Execution
         if (tester != null)
         {
           ValidBreakdownTester = tester;
+          ValidBreakdownTester.ConnectableManager.DeviceDisponce += () => ValidBreakdownTester = null;
+
           return tester;
         }
       }

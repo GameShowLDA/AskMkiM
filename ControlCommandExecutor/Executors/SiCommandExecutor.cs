@@ -2,6 +2,7 @@
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Model.Ok;
+using ControlCommandExecutor.BaseStrategies;
 using ControlCommandExecutor.Execution;
 using NewCore.Base.Interface.Main;
 using Utilities;
@@ -63,6 +64,9 @@ namespace ControlCommandExecutor.Executors
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, resistance.Value, voltage.Value);
+
+      BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measureConnectedPoint = NodeAccumulationPerformMeasurementAsync;
+      await ConnectedPointChecker.CheckSequenceAsync(command.Scheme, measureConnectedPoint, context.CommandExecutionManager, command, context.Console, resistance.Value);
 
       if (command.AlgorithmKey.Contains("К"))
       {
