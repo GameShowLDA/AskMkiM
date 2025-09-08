@@ -231,6 +231,10 @@ namespace ControlCommandAnalyser.Parser.Pi
       }
 
       CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, remainderPi);
+      if(model.AlgorithmKey.Count == 0)
+      {
+        model.AlgorithmKey = model.SiCommand.AlgorithmKey;
+      }
 
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
