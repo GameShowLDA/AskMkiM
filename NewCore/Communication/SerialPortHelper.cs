@@ -29,11 +29,9 @@ namespace NewCore.Communication
         {
           try
           {
-            if (existing.IsOpen)
-            {
-              existing.Close();
-              LogInformation($"Закрыт старый порт {existing.PortName} перед заменой.", isDeviceLog: true);
-            }
+            existing.Close();
+            existing.Dispose();
+            LogInformation($"Закрыт старый порт {existing.PortName} перед заменой.", isDeviceLog: true);
           }
           catch (Exception ex)
           {

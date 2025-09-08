@@ -45,46 +45,25 @@ namespace NewCore.Function.GPT
 
       try
       {
-        if (_gptModel.COMPort.BaudRate == 0)
-        {
-          _gptModel.COMPort.BaudRate = 9600; // Скорость передачи данных
-        }
-
-        if (_gptModel.COMPort.Parity == Parity.None)
-        {
-          _gptModel.COMPort.Parity = Parity.None; // Четность
-        }
-
-        if (_gptModel.COMPort.DataBits == 0)
-        {
-          _gptModel.COMPort.DataBits = 8; // Количество бит данных
-        }
-
-        if (_gptModel.COMPort.StopBits == StopBits.None)
-        {
-          _gptModel.COMPort.StopBits = StopBits.One; // Стоповые биты
-        }
-
         if (!_gptModel.COMPort.IsOpen)
         {
+          _gptModel.COMPort.DtrEnable = true;
+          _gptModel.COMPort.RtsEnable = true;
+          _gptModel.COMPort.NewLine = "\r\n";
+          _gptModel.COMPort.ReadTimeout = 2000;
+          _gptModel.COMPort.WriteTimeout = 2000;
+
           _gptModel.COMPort.Open();
+          LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт.", isDeviceLog: true);
         }
 
-        LogInformation($"Успешно подключено к устройству {_gptModel.Name} через COM-порт {_gptModel.COMPort.PortName}", isDeviceLog: true);
-      }
-      catch (UnauthorizedAccessException ex)
-      {
-        LogException($"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}", ex, isDeviceLog: true);
-        return (false, $"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}: {ex.Message}");
+        return (true, string.Empty);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при подключении к устройству {_gptModel.Name}", ex, isDeviceLog: true);
-        return (false, $"Ошибка при подключении к устройству {_gptModel.Name}: {ex.Message}");
-        throw;
+        LogException($"Ошибка при открытии порта {_gptModel.COMPort.PortName}", ex, isDeviceLog: true);
+        return (false, ex.Message);
       }
-
-      return (true, string.Empty);
     }
 
     /// <inheritdoc />
@@ -95,38 +74,17 @@ namespace NewCore.Function.GPT
         return true;
       }
 
-      if (_gptModel == null)
-      {
-        return true;
-      }
-
       try
       {
-        await _gptModel.DeviceProtocol.OperationLock.WaitAsync();
-
         if (_gptModel.COMPort != null && _gptModel.COMPort.IsOpen)
         {
-          LogInformation($"[{_gptModel.Name}] Закрываю порт {_gptModel.COMPort.PortName} в DisconnectAsync()", isDeviceLog: true);
           _gptModel.COMPort.Close();
+          LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} закрыт.", isDeviceLog: true);
         }
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при отключении от устройства {_gptModel.Name}", ex, isDeviceLog: true);
-      }
-
-      try
-      {
-        _gptModel.Dispose();
-        DeviceDisponce?.Invoke();
-      }
-      catch (Exception ex)
-      {
-        LogException($"Ошибка при вызове Dispose() для устройства {_gptModel.Name}", ex, isDeviceLog: true);
-      }
-      finally
-      {
-        _gptModel = null;
+        LogException($"Ошибка при закрытии порта {_gptModel.Name}", ex, isDeviceLog: true);
       }
 
       return true;
@@ -141,49 +99,7 @@ namespace NewCore.Function.GPT
         return (true, "Включен холостой режим");
       }
 
-      try
-      {
-        LogInformation("Открываем порт...", isDeviceLog: true);
-        if (_gptModel.COMPort != null)
-        {
-          using (var port = _gptModel.COMPort)
-          {
-            await Task.Run(() => port.Open());
-            LogInformation("Порт открыт", isDeviceLog: true);
-
-            string query = $"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%({_gptModel.COMPort})%'";
-            using (var searcher = new ManagementObjectSearcher(query))
-            {
-              var results = await Task.Run(() => searcher.Get().Cast<ManagementObject>().ToList());
-
-              foreach (var obj in results)
-              {
-                string deviceID = obj["DeviceID"]?.ToString() ?? string.Empty;
-                if (deviceID.Contains(_gptModel.VID) && deviceID.Contains(_gptModel.PID))
-                {
-                  LogInformation($"Устройство найдено по VID/PID: {_gptModel.VID}, {_gptModel.PID}", isDeviceLog: true);
-                  return (true, string.Empty);
-                }
-              }
-            }
-
-            LogError("Устройство не найдено по VID/PID", isDeviceLog: true);
-            return (false, "Устройство не найдено по VID/PID");
-          }
-        }
-
-        return (false, "COM порт не инициализирован");
-      }
-      catch (UnauthorizedAccessException ex)
-      {
-        LogException($"Ошибка доступа к порту", ex, isDeviceLog: true);
-        return (false, $"Ошибка доступа к порту: {ex.Message}");
-      }
-      catch (Exception ex)
-      {
-        LogException($"Ошибка при проверке соединения", ex, isDeviceLog: true);
-        return (false, $"Ошибка при проверке соединения: {ex.Message}");
-      }
+      return (true, "Включен холостой режим");
     }
 
     /// <inheritdoc />

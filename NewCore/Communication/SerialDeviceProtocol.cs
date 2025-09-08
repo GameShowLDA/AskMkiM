@@ -51,11 +51,6 @@ namespace NewCore.Communication
 
         try
         {
-          if (!EnsurePortOpen())
-          {
-            return HandlePortOpenFailure();
-          }
-
           await PreparePortForCommand(command, cancellationToken, timeout);
 
           if (responseDelay > 0)
@@ -174,44 +169,6 @@ namespace NewCore.Communication
       }
 
       return response;
-    }
-
-    /// <summary>
-    /// Безопасно открывает COM-порт, если он ещё не открыт.
-    /// </summary>
-    /// <returns>True, если порт успешно открыт или уже был открыт.</returns>
-    private bool EnsurePortOpen()
-    {
-      try
-      {
-        if (!_serialPort.IsOpen)
-        {
-          _serialPort.Open();
-          LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} успешно открыт.", isDeviceLog: true);
-        }
-
-        return true;
-      }
-      catch (UnauthorizedAccessException ex)
-      {
-        LogException($"[{_device.Name}] Доступ к порту запрещен", ex, isDeviceLog: true);
-        return false;
-      }
-      catch (IOException ex)
-      {
-        LogException($"[{_device.Name}] Ошибка ввода-вывода при открытии порта", ex, isDeviceLog: true);
-        return false;
-      }
-      catch (InvalidOperationException ex)
-      {
-        LogException($"[{_device.Name}] Порт уже используется другим процессом", ex, isDeviceLog: true);
-        return false;
-      }
-      catch (Exception ex)
-      {
-        LogException($"[{_device.Name}] Неизвестная ошибка при открытии порта", ex, isDeviceLog: true);
-        return false;
-      }
     }
   }
 }

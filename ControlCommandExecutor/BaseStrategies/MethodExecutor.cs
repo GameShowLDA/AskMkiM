@@ -58,7 +58,7 @@ namespace ControlCommandExecutor.BaseStrategies
 
           return;
         }
-        await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+      await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
       }
     }
 
@@ -155,7 +155,7 @@ namespace ControlCommandExecutor.BaseStrategies
     static public int GetHighestPointBinaryDigits(List<ChainModel> points)
     {
 
-      var maxPoints = points.Select(p => (p.PointModels).Select(x => x.PointNumber).Max()).Max();
+      var maxPoints = points.Count;
       return Convert.ToString(maxPoints, 2).Length;
     }
 
@@ -167,7 +167,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="second">Вторая точка диапазона.</param>
     /// <param name="bitLength">Желаемая длина двоичной строки.</param>
     /// <returns>Список точек и соответствующих перевёрнутых бинарных строк.</returns>
-    static public List<(ChainModel point, List<string> reversedBinary)> ConvertToReversedBinaryRange(
+    static public List<(ChainModel point, string reversedBinary)> ConvertToReversedBinaryRange(
         List<ChainModel> points,
         int bitLength)
     {
@@ -175,18 +175,25 @@ namespace ControlCommandExecutor.BaseStrategies
       {
         throw new ArgumentOutOfRangeException(nameof(bitLength), "Длина двоичной строки должна быть больше 0.");
       }
+      
+      var result = new List<(ChainModel point, string reversedBinary)>();
+      string reversPoint = string.Empty;
 
-      var result = new List<(ChainModel point, List<string> reversedBinary)>();
+      //foreach (var point in points)
+      //{
+      //  foreach (var item in point.PointModels)
+      //  {
+      //    reversPoint.Add(ConvertToReversedBinary(item.PointNumber, bitLength));
+      //  }
 
-      foreach (var point in points)
+      //  result.Add((point, reversPoint));
+      //}
+
+      for (int i = 1; i <= points.Count; i++)
       {
-        List<string> reversPoint = new List<string>();
-        foreach (var item in point.PointModels)
-        {
-          reversPoint.Add(ConvertToReversedBinary(item.PointNumber, bitLength));
-        }
-
-        result.Add((point, reversPoint));
+        var chain = points[i-1];
+        reversPoint = ConvertToReversedBinary(i, bitLength);
+        result.Add((chain, reversPoint));
       }
 
       return result;
@@ -209,11 +216,11 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Подключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task ConnectPointsToBusAsync(List<(ChainModel point, List<string> reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
+    static private async Task ConnectPointsToBusAsync(List<(ChainModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
       foreach (var point in points)
       {
-        if (point.reversedBinary[0][step] == '1')
+        if (point.reversedBinary[step] == '1')
         {
           await ConnectToBusAAsync(point.point, messageService);
         }
@@ -229,12 +236,12 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Отключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task DisconnectPointsToBusAsync(List<(ChainModel point, List<string> reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
+    static private async Task DisconnectPointsToBusAsync(List<(ChainModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserMessageService messageService)
     {
 
       foreach (var point in points)
       {
-        if (point.reversedBinary[0][step] == '1')
+        if (point.reversedBinary[step] == '1')
         {
           await DisconnectFromBusAAsync(point.point, messageService);
         }

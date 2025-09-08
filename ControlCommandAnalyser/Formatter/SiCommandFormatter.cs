@@ -69,26 +69,6 @@ namespace ControlCommandAnalyser.Formatter
         yield break;
       }
 
-      yield return "\tСообщенные точки:";
-      foreach (var item in si.Scheme.GroupModels)
-      {
-        var points = si.Scheme.GetPointsConnected(item);
-        if (points != null)
-        {
-          for (int i = 0; i < points.Count; i++)
-          {
-            string str = string.Empty;
-            str += $"\t\t{i + 1}. ";
-            foreach (var point in points[i])
-            {
-              str += $"{point.Mnemonic}({point}), ";
-            }
-
-            yield return str.Remove(str.Length - 2);
-          }
-        }
-      }
-
       yield return "\tРазобщенные точки:";
       for (int i = 0; i < si.Scheme.GroupModels.Count; i++)
       {

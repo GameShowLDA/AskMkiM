@@ -16,6 +16,8 @@ namespace ControlCommandExecutor.BaseStrategies
 {
   internal static class ConnectedPointChecker
   {
+    internal delegate Task<bool> PerformMeasurementAsync(double value, IUserMessageService userMessageService, CancellationToken cancellationToken);
+
     /// <summary>
     /// Выполняет последовательную проверку точек с накоплением на одной из них (узел).
     /// </summary>
@@ -52,7 +54,7 @@ namespace ControlCommandExecutor.BaseStrategies
             await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка {point.Mnemonic}"), IsBlockStart: true);
             await ConnectToBusAAsync(point, messageService);
 
-            if (await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken()))
+            if (!await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken()))
             {
               errorChain.Add(new List<PointModel>() { _basePoint, point });
             }

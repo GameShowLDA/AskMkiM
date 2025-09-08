@@ -65,9 +65,6 @@ namespace ControlCommandExecutor.Executors
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, resistance.Value, voltage.Value);
 
-      BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measureConnectedPoint = NodeAccumulationPerformMeasurementAsync;
-      await ConnectedPointChecker.CheckSequenceAsync(command.Scheme, measureConnectedPoint, context.CommandExecutionManager, command, context.Console, resistance.Value);
-
       if (command.AlgorithmKey.Contains("К"))
       {
         // await NodeFullChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
@@ -135,7 +132,7 @@ namespace ControlCommandExecutor.Executors
       int number = breakDown.Number;
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка пробойной установки"));
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync()).Connect, userMessageService))
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync()).Connect, userMessageService))
       {
         throw AppConfiguration.Error.Device.ConnectionExceptionFactory.ConnectFailed(name, numberChassis, number);
       }
@@ -223,5 +220,27 @@ namespace ControlCommandExecutor.Executors
 
       return (result, answer);
     }
+
+    ///// <summary>
+    ///// Выполняет измерение между уже подключёнными точками.
+    ///// Предполагается, что коммутация завершена заранее.
+    ///// </summary>
+    ///// <returns>Задача, представляющая измерение.</returns>
+    //private static async Task<bool> ConnectedPointCheckerMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    //{
+    //  var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
+
+    //  var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+    //  {
+    //    var answer = await breadDown.IrManger.MeasureResistanceAsync(0);
+    //    var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= value : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
+    //    result = !result;
+
+    //    await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{answer} МОм", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+    //    return result;
+    //  }, messageService);
+
+    //  return result;
+    //}
   }
 }

@@ -26,7 +26,7 @@ namespace ControlCommandExecutor.Executors
       await EquipmentService.AnalyzePoints(pointsModel, command.PointsMap, context.Console);
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-      await breakDown.ConnectableManager.DisconnectAsync();
+      await breakDown.ConnectableManager.ConnectAsync();
     }
   }
 }
