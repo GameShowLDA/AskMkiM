@@ -47,5 +47,13 @@ namespace NewCore.Base.Function.ModuleRelayControl
     /// <param name="numberPoint">Номер точки.</param>
     /// <returns>Ответ от устройства.</returns>
     Task<string> CheckPoint(int numberPoint);
+
+    /// <summary>
+    /// Переподключение точки к другой шине.
+    /// </summary>
+    /// <param name="bus">Подключаемая шина.</param>
+    /// <param name="numberPoint">Номер точки.</param>
+    /// <returns>True, если успешно.</returns>
+    Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint);
   }
 }

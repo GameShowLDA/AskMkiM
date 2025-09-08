@@ -120,5 +120,25 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       // TODO : Обработка команды
       return await _pointManager.CheckPoint(numberPoint);
     }
+
+    public async Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint)
+    {
+      var result = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
+      var description = $"{nubmerPoint} к шине [{bus}]";
+
+      if (!result)
+        result = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
+
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        _moduleRelayControl,
+        $"Переподключение точки {description}",
+        result,
+        1);
+
+      if (!result)
+        throw RelayExceptionFactory.ConnectingPointToNewBusFailed(description);
+
+      return result;
+    }
   }
 }
