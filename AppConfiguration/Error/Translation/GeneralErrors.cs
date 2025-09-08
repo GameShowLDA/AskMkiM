@@ -130,6 +130,22 @@ namespace AppConfiguration.Error.Translation
     };
 
     /// <summary>
+    /// Возвращает ошибку, если совершена попытка добавить схему с дублирующими точками.
+    /// </summary>
+    /// <param name="lineNumber">Номер строки, где обнаружен повтор.</param>
+    /// <param name="command">Текст команды, в которой повторяется точка назначения.</param>
+    /// <returns>
+    /// Объект <see cref="ErrorItem"/>, описывающий ошибку дублирования точки(-ек) в схеме назначения.
+    /// </returns>
+    public static ErrorItem SchemeConflict(int lineNumber, string command) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Code = ErrorCode.Gen_SchemeConflict,
+      Description = $"Попытка добавить схему из предыдущей команды проверки, в которой дублируются уже указанные точки."
+    };
+
+    /// <summary>
     /// Возвращает ошибку, если команда не распознана (неизвестная мнемоника).
     /// </summary>
     /// <param name="mnemonic">Мнемоника неизвестной команды.</param>

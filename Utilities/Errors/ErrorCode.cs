@@ -79,6 +79,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("GEN015")]
     Gen_InvalidRange,
 
+    /// <summary> Попытка добавить схему с дублирующими точками. </summary>
+    [ErrorCodeTag("GEN016")]
+    Gen_SchemeConflict,
+
     #endregion
 
     #region Режим УМ

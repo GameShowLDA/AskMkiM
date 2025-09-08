@@ -11,6 +11,7 @@ using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
 using Path = System.IO.Path;
 using Microsoft.Win32.SafeHandles;
+using UI.Controls;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -57,18 +58,29 @@ namespace UI.Components.MultiEditorMethods
       if (control != null)
       {
         var fileName = control.Title;
-        if (fileManager.FilePaths[fileName] == string.Empty)
+        if (fileManager.FilePaths.ContainsKey(fileName))
         {
-          // TODO: сохранение файла
-          return SaveFileAs();
+          if (fileManager.FilePaths[fileName] == string.Empty)
+          {
+            // TODO: сохранение файла
+            return SaveFileAs();
+          }
+          else
+          {
+            var filePath = fileManager.FilePaths[fileName];
+            if (control.Content is TextEditorUI)
+            {
+              var textEditor = control.Content as TextEditorUI;
+              return SaveDataFromTextEditor(textEditor, filePath);
+            }
+          }
         }
         else
         {
-          var filePath = fileManager.FilePaths[fileName];
-          if (control.Content is TextEditorUI)
+          if (control.Content is TranslatorItem translator)
           {
-            var textEditor = control.Content as TextEditorUI;
-            return SaveDataFromTextEditor(textEditor, filePath);
+            var textEditor = translator.GetLeftEditor();
+            return SaveDataFromTextEditor(textEditor, textEditor.TextEditorModel.FilePath);
           }
         }
       }
@@ -87,19 +99,29 @@ namespace UI.Components.MultiEditorMethods
       if (saveFileDialog.ShowDialog() == DialogResult.OK)
       {
         string filePath = saveFileDialog.FileName;
-        var activeTab = GetTextEditorContainerTab();
+        var activeTab = GetActiveTab();
         int index = fileManager.OpenPages.IndexOf(activeTab);
-        if (fileManager.UserControls[index] is TextEditorContainer)
+        if (fileManager.UserControls[index] is TextEditorContainer control)
         {
-          var control = fileManager.UserControls[index] as TextEditorContainer;
           if (control != null)
           {
             var activeDockItem = control.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
             if (activeDockItem != null)
             {
-              var activeTextEditor = activeDockItem as DockItem;
-              SaveDataFromTextEditor(activeTextEditor.Content as TextEditorUI, filePath);
-              RenamePage(activeTextEditor, filePath);
+              var textEditor = new TextEditorUI();
+              if (activeDockItem.Content is TranslatorItem translatorItem)
+              {
+                textEditor = translatorItem.GetLeftEditor();
+              }
+              if (activeDockItem.Content is TextEditorUI activeTextEditor)
+              {
+                textEditor = activeTextEditor;
+              }
+              if (textEditor != null)
+              {
+                SaveDataFromTextEditor(textEditor, filePath);
+                RenamePage(activeDockItem, filePath);
+              }
             }
           }
           UpdateFilePaths(filePath);
@@ -131,9 +153,9 @@ namespace UI.Components.MultiEditorMethods
     /// Получает активную вкладку, которая будет использоваться для сохранения.
     /// </summary>
     /// <returns>Активная вкладка типа <see cref="OpenFileButton"/>.</returns>
-    private OpenFileButton GetTextEditorContainerTab()
+    private OpenFileButton GetActiveTab()
     {
-      return fileManager.OpenPages.FirstOrDefault(page => page.Text == "Текстовый редактор");
+      return fileManager.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
     }
 
     /// <summary>
@@ -142,13 +164,23 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Имя активной вкладки.</returns>
     private string GetActiveTabName()
     {
-      var activeTextEditorContainerTab = GetTextEditorContainerTab();
-      int index = fileManager.OpenPages.IndexOf(activeTextEditorContainerTab);
+      var activeTab = GetActiveTab();
+
+      int index = fileManager.OpenPages.IndexOf(activeTab);
       if (fileManager.UserControls[index] is TextEditorContainer activeTextEditorContainer)
       {
-        var activeTab = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
-        return activeTab != null ? Path.GetFileNameWithoutExtension(activeTab.Title) : string.Empty;
+        var activeTextEditorTab = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
+        if (activeTextEditorTab.Content is TextEditorUI textEditor)
+        {
+          return activeTextEditorTab != null ? Path.GetFileNameWithoutExtension(textEditor.TextEditorModel.FileName) : string.Empty;
+        }
+        if (activeTextEditorTab.Content is TranslatorItem translatorTab)
+        {
+          var translatorName = translatorTab.GetLeftEditorName();
+          return activeTextEditorTab != null ? Path.GetFileNameWithoutExtension(translatorName) : string.Empty;
+        }
       }
+
       return string.Empty;
     }
 
