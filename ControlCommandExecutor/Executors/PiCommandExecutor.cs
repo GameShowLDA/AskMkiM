@@ -73,11 +73,30 @@ namespace ControlCommandExecutor.Executors
         await siCommandExecutor.ExecuteAsync(commandExecutionContext);
       }
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor) { IndentLevel = 1 }, IsBlockStart: true);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor) { IndentLevel = 0 });
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
+      if (command.AlgorithmKey.Contains("К"))
+      {
+        BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
+        await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, 80);
+      }
+      else if (command.AlgorithmKey.Contains("Г"))
+      {
+        BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
+        await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, 80);
+      }
+      else if (command.AlgorithmKey.Contains("Т1"))
+      {
+        BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
+        await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, 80);
+      }
+      else
+      {
+        BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
+        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, context.Console.GetCancellationToken(), 80);
+      }
 
       //Второй тест СИ
       if (command.SiCommand != null)
@@ -180,6 +199,79 @@ namespace ControlCommandExecutor.Executors
         return result;
 
       return null;
+    }
+
+    /// <summary>
+    /// Выполняет измерение между уже подключёнными точками.
+    /// Предполагается, что коммутация завершена заранее.
+    /// </summary>
+    /// <returns>Задача, представляющая измерение.</returns>
+    private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.ACW)
+    {
+      var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        if (type == VoltageEnum.Type.ACW)
+        {
+          var answer = await breadDown.AcwManger.MeasureCurrentAsync(value);
+          var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= value : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
+          await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения прочности изоляции", message: $"{answer} мА", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+          return result;
+        }
+        else
+        {
+          var answer = await breadDown.DcwManger.MeasureCurrentAsync(value);
+          var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= value : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
+          await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения прочности изоляции", message: $"{answer} мА", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+          return result;
+        }
+
+      }, messageService);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Выполняет измерение между уже подключёнными точками.
+    /// Предполагается, что коммутация завершена заранее.
+    /// </summary>
+    /// <returns>Задача, представляющая измерение.</returns>
+    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
+    {
+      var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
+      double answer = -1;
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
+
+        if (typeVoltage == VoltageEnum.Type.ACW)
+        {
+          answer = await breadDown.AcwManger.MeasureCurrentAsync(value);
+          var type = ShowMessageModel.MessageType.Success;
+          if (answer < value)
+          {
+            type = ShowMessageModel.MessageType.Error;
+          }
+
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+        }
+        else
+        {
+          answer = await breadDown.DcwManger.MeasureCurrentAsync(value);
+          var type = ShowMessageModel.MessageType.Success;
+          if (answer < value)
+          {
+            type = ShowMessageModel.MessageType.Error;
+          }
+
+          return type == ShowMessageModel.MessageType.Success ? true : false;
+        }
+      }, messageService);
+
+      return (result, answer);
     }
   }
 }

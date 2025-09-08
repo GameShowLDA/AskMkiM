@@ -50,7 +50,7 @@ namespace AppConfiguration.Error.Device.ModuleRelayControl
     /// <summary>
     /// Ошибка отключения диапазона точек.
     /// </summary>
-    public static DeviceException DisconnectRangeFailed(string description) =>
+    public static DeviceException ConnectingPointToNewBusFailed(string description) =>
         new($"Ошибка переподключения точки {description}");
   }
 }

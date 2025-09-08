@@ -16,7 +16,7 @@ namespace ControlCommandExecutor.BaseStrategies
 {
   internal static class NodeFullChecker
   {
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserMessageService userMessageService, CancellationToken cancellationToken);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserMessageService userMessageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW);
 
     static private List<ChainModel> ErrorsPoints = new List<ChainModel>();
 
