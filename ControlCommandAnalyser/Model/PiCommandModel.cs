@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ControlCommandAnalyser.Model
 {
-  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Г)]
+  [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.К, ControlCommandAnalyser.AlgorithmKey.Т1)]
   public class PiCommandModel : BaseCommandModel, IHasScheme
   {
     public override string Mnemonic => "ПИ";
