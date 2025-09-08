@@ -1,12 +1,8 @@
 ﻿using AppConfiguration.Error.Translation;
-using ControlCommandAnalyser.Formatter;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Parser.Common;
 using ControlCommandAnalyser.Parser.Si; // Для LoggerUtility
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Utilities;
 
@@ -21,14 +17,6 @@ namespace ControlCommandAnalyser.Parser.Pi
 
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
-
-
-
-
-
-
-
-
       LoggerUtility.LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
       var rmCommandModel = new RmCommandModel();
@@ -72,35 +60,46 @@ namespace ControlCommandAnalyser.Parser.Pi
       // Склеиваем всё в одну строку и удаляем \r \n \t
       var body = string.Concat(model.SourceLines)
         .Replace("\r", "")
-        .Replace("\n", "")
-        .Replace("\t", "");
+        .Replace("\n", "");
 
-      // Для логов
-      LoggerUtility.LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
+      // Приведи ввод к «чистому» виду (NBSP, латиница->кириллица и т.п.)
+      body = PiSiSplitter.PreNormalize(body);
 
-      // Дальше работаем ТОЛЬКО с body:
-      var remainder = body;
-      var splitReminder = remainder.Split("  ");
-      remainder = splitReminder[2];
+      // Вырезаем номер + "ПИ" заранее, чтобы в сплит не летел заголовок
+      var head = Regex.Match(body, @"^\s*\d+\s+ПИ\s*(.*)$", RegexOptions.IgnoreCase);
+      var remainder = head.Success ? head.Groups[1].Value : body;
+
+      LoggerUtility.LogDebug($"Хвост после ПИ: \"{remainder}\"");
+      var (siPart, piPart, errs) = PiSiSplitter.SplitSiFromPiStrict(remainder);
+      if (errs.Count > 0)
+      {
+        LoggerUtility.LogWarning($"Strict WS issues: {string.Join(" | ", errs)}");
+      }
 
       var modelSi = new SiCommandModel();
-      var lastString = SiCommandParser.ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, splitReminder[1]);
-      CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, lastString);
+      var siRemainder = SiCommandParser.ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, siPart);
+
+      // Если СИ что-то не допарсила, логни отдельно (в модель СИ, не ПИ)
+      if (!string.IsNullOrWhiteSpace(siRemainder))
+      {
+        LoggerUtility.LogWarning($"Не распознано в СИ: '{siRemainder}'");
+      }
       model.SiCommand = modelSi;
 
-      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
-      if (match.Success)
-        remainder = match.Groups[1].Value.Trim();
+      var remainderPi = piPart;
 
+      // Если у тебя в ПИ могут ещё раз встречаться номер+мнемоника (на всякий), можно безопасно срезать:
+      var match2 = Regex.Match(remainderPi, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+      if (match2.Success) remainderPi = match2.Groups[1].Value.Trim();
+
+      // --- парсим ПИ только из remainderPi ---
       string? voltage = null, time = null;
 
-      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(remainder);
-
+      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(remainderPi);
       foreach (var (key, hasError) in result)
       {
         if (hasError)
         {
-          LoggerUtility.LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
           model.Errors.Add(PiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
         }
         else
@@ -120,33 +119,25 @@ namespace ControlCommandAnalyser.Parser.Pi
         }
       }
 
-      // затем удаляем их из строки
+      // удаляем найденные ключи ТОЛЬКО из ПИ-остатка
       foreach (var key in model.AlgorithmKey)
-      {
-        remainder = remainder.Replace(key, "", StringComparison.OrdinalIgnoreCase);
-      }
+        remainderPi = remainderPi.Replace(key, "", StringComparison.OrdinalIgnoreCase);
 
       // Парсим параметры
-      (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
-      LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
+      (voltage, remainderPi) = CommonParameterParser.ParseVoltage(remainderPi);
+      LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainderPi}'");
 
-      (time, remainder) = CommonParameterParser.ParseTime(remainder);
-      LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
+      (time, remainderPi) = CommonParameterParser.ParseTime(remainderPi);
+      LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainderPi}'");
 
-      if (remainder.Contains('+'))
+      if (remainderPi.Contains('+'))
       {
         model.VoltageType = VoltageEnum.Type.DCW;
-        remainder = remainder.Replace("+", string.Empty);
+        remainderPi = remainderPi.Replace("+", string.Empty);
       }
 
       model.Voltage = voltage;
-
-      if (string.IsNullOrEmpty(time))
-      {
-        time = "1 c";
-      }
-
-      model.Time = time;
+      model.Time = string.IsNullOrEmpty(time) ? "1c" : time;
 
       if (string.IsNullOrWhiteSpace(voltage))
       {
@@ -201,61 +192,34 @@ namespace ControlCommandAnalyser.Parser.Pi
         }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
-        int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        int idxStarInFirstLine = remainderPi.IndexOf('*');
+        remainderPi = idxStarInFirstLine >= 0 ? remainderPi[..idxStarInFirstLine].Trim() : remainderPi.Trim();
+        if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+          || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+        {
+          // находим цепи точек из предыдущей команды проверки
+          model.Scheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
+          model.SiCommand.Scheme = model.Scheme;
+        }
+        else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+          || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        {
+          model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+          model.SiCommand.Scheme = model.Scheme;
+        }
       }
-      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+        || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
         // находим цепи точек из предыдущей команды проверки
-        var lastCommand = CommandsModel.GetLastFromCheckCommands();
-        if (lastCommand != null)
-        {
-          var foundCommandMnemonic = lastCommand.Mnemonic;
-          var newCommand = CreateSameType(lastCommand);
-          newCommand = lastCommand;
-
-          if (newCommand is IHasScheme hasScheme)
-          {
-            var scheme = hasScheme.Scheme;
-            model.Scheme = scheme;
-            // работаем со схемой
-          }
-          else
-          {
-            // у этой команды схемы нет — просто пропускаем/логируем
-            LoggerUtility.LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
-          }
-
-
-          if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-          {
-
-
-            // добавляем просто точки из РМ, которые еще не были записаны
-            lastCommand = CommandsModel.GetByMnemonic("РМ").Last();
-            if (lastCommand is RmCommandModel)
-            {
-              var rmCommand = lastCommand as RmCommandModel;
-              foreach (var chain in model.Scheme.GroupModels)
-              {
-                foreach (var part in chain.ChainModels)
-                {
-                  foreach (var point in part.PointModels)
-                  {
-                    //if (!rmCommand.PointsMap.ContainsKey(point.))
-                    //{
-                    //  //newCommand.Scheme
-                    //}
-                  }
-                }
-              }
-            }
-            //model.Scheme = rmCommand.Scheme;
-            LoggerUtility.LogInformation(
-              $"Схема распознана из РМ: цепей={model.Scheme.GroupModels?.Count ?? 0}, частей={model.Scheme.CountParts()}, точек={model.Scheme.CountPoints()}");
-
-          }
-        }
+        model.Scheme = CommandsModel.CheckKeyP(model.SiCommand, model.Scheme);
+        model.SiCommand.Scheme = model.Scheme;
+      }
+      else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+        || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+        model.SiCommand.Scheme = model.Scheme;
       }
       else
       {
@@ -264,41 +228,21 @@ namespace ControlCommandAnalyser.Parser.Pi
         model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
       }
 
-      CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, remainder);
+      CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, remainderPi);
 
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
     }
 
-    private static void CheckUnparsedParameters(string commandNumber, string mnemonic, int numberLine, PiCommandModel model, string remainder)
+    private static void CheckUnparsedParameters(string commandNumber, string mnemonic, int numberLine, PiCommandModel model, string remainderPi)
     {
-      if (!string.IsNullOrEmpty(remainder))
+      if (!string.IsNullOrEmpty(remainderPi))
       {
         model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
+        model.UnparsedParameters += remainderPi;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainderPi, numberLine, $"{commandNumber} {mnemonic}"));
       }
-    }
-
-    /// <summary>
-    /// Создаёт новый экземпляр команды того же типа, что и lastCommand.
-    /// </summary>
-    /// <typeparam name="T">Тип команды, наследник BaseCommandModel.</typeparam>
-    /// <param name="lastCommand">Экземпляр команды, по которому определяется тип.</param>
-    /// <returns>Новый экземпляр команды указанного типа.</returns>
-    public static T CreateSameType<T>(T lastCommand) where T : BaseCommandModel
-    {
-      if (lastCommand == null)
-        throw new ArgumentNullException(nameof(lastCommand));
-
-      // Получаем реальный runtime-тип объекта
-      Type commandType = lastCommand.GetType();
-
-      // Создаём новый экземпляр того же типа
-      var newCommand = Activator.CreateInstance(commandType);
-
-      return (T)newCommand;
     }
   }
 }

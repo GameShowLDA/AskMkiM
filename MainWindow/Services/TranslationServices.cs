@@ -216,6 +216,7 @@ namespace MainWindowProgram.Services
       var translateEditor = _fileService.CreateTranslationFileAsync();
       if (translateEditor != null)
       {
+        translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
         var manager = new CommandTranslationManager();
         var models = manager.ParseAllAndDisplay(text, translateEditor);
 
