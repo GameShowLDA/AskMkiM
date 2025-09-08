@@ -66,26 +66,27 @@ namespace ControlCommandAnalyser.Model
       if (lastCommand is RmCommandModel)
       {
         var rmCommand = lastCommand as RmCommandModel;
+        List<PointModel> allPoints = new();
         if (scheme != null && scheme.GroupModels.Count > 0)
         {
-          List<PointModel> allPoints = GetAllPoints(scheme);
+          allPoints = GetAllPoints(scheme);
         }
-        else
+        foreach (var pointDictionary in rmCommand.PointsMap)
         {
-          foreach (var pointDictionary in rmCommand.PointsMap)
+          var point = pointDictionary.Value;
+          var mnemonic = pointDictionary.Key;
+          var pointModel = PointModel.ParsePointString(point);
+          pointModel.Mnemonic = mnemonic;
+          pointModel.PointType = PointType.Type.Star;
+          var chainModel = new ChainModel(new List<PointModel>() { pointModel });
+          var groupModel = new GroupModel(new List<ChainModel> { chainModel });
+          if (scheme == null)
           {
-            var point = pointDictionary.Value;
-            var mnemonic = pointDictionary.Key;
-            var pointModel = PointModel.ParsePointString(point);
-            pointModel.Mnemonic = mnemonic;
-            pointModel.PointType = PointType.Type.Star;
-            var chainModel = new ChainModel(new List<PointModel>() { pointModel });
-            var groupModel = new GroupModel(new List<ChainModel> { chainModel });
-            if (scheme == null)
-            {
-              scheme = new SchemeModel(new List<GroupModel> { groupModel });
-            }
-            else
+            scheme = new SchemeModel(new List<GroupModel> { groupModel });
+          }
+          else
+          {
+            if(ComparePoints(scheme, allPoints, pointModel, groupModel)==false)
             {
               scheme.GroupModels.Add(groupModel);
             }
@@ -99,6 +100,21 @@ namespace ControlCommandAnalyser.Model
         LoggerUtility.LogWarning($"Команда РМ не найдена.");
       }
       return scheme;
+    }
+
+    private static bool ComparePoints(SchemeModel scheme, List<PointModel> allPoints, PointModel pointModel, GroupModel groupModel)
+    {
+      if (allPoints.Count > 0)
+      {
+        foreach (var pointElement in allPoints)
+        {
+          if (pointModel.ToString() == pointElement.ToString())
+          {
+            return true; 
+          }
+        }
+      }
+      return false;
     }
 
     public static SchemeModel GetShemeFromLastCommand(BaseCommandModel model, SchemeModel scheme, BaseCommandModel lastCommand)

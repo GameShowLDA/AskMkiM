@@ -185,7 +185,7 @@ namespace ControlCommandAnalyser.Parser.Pr
           // находим цепи точек из предыдущей команды проверки
           model.Scheme = CommandsModel.CheckKeyP(model, model.Scheme);
         }
-        else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
         {
           model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
         }
@@ -194,6 +194,11 @@ namespace ControlCommandAnalyser.Parser.Pr
       {
         // находим цепи точек из предыдущей команды проверки
         model.Scheme = CommandsModel.CheckKeyP(model, model.Scheme);
+
+        if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        {
+          model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+        }
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
