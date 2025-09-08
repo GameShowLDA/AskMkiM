@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using AppConfiguration.Base;
+using Message;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -6,8 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfiguration.Base;
-using Message;
+using System.Windows.Shapes;
 using Ude;
 using UI.Components.ArchiveControls;
 using UI.Components.ArchiveManager.Models;
@@ -643,6 +644,9 @@ namespace UI.Components.MultiEditorMethods
       }
 
       var textEditor = new TextEditorUI();
+
+      var textEditorModel = new TextEditorModel(controlName);
+      textEditor.TextEditorModel = textEditorModel;
       ShowNewDockItem(controlName, textEditorContainer, textEditor);
       FilePaths.Add(controlName, string.Empty);
     }
