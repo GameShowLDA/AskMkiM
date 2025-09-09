@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
+using ControlCommandExecutor.BaseStrategies;
 using ControlCommandExecutor.Execution;
 using NewCore.Base.Interface.Main;
 using Utilities;
@@ -64,30 +65,31 @@ namespace ControlCommandExecutor.Executors
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
 
-      if (command.LowerLimitResistance != null && command.HigherLimitResistance == null)
-      {
-        double resistance = ExtractNumberFrimString(command.LowerLimitResistance);
 
-        if (command.AlgorithmKey.Contains("К"))
-        {
-          BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-          await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
-        }
-        else if (command.AlgorithmKey.Contains("Г"))
-        {
-          BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-          await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
-        }
-        else if (command.AlgorithmKey.Contains("Т1"))
-        {
-          BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-          await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
-        }
-        else
-        {
-          BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-          await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure,  context.Console, context.Console.GetCancellationToken(), resistance);
-        }
+      double resistance = ExtractNumberFrimString(command.LowerLimitResistance);
+
+      BaseStrategies.ConnectedPointChecker.PerformMeasurementAsync measurePointConnected = ConnectedPointCheckerMeasurementAsync;
+      await ConnectedPointChecker.CheckSequenceAsync(command.Scheme, measurePointConnected, context.CommandExecutionManager, command, context.Console, resistance);
+
+      if (command.AlgorithmKey.Contains("К"))
+      {
+        BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
+        await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+      }
+      else if (command.AlgorithmKey.Contains("Г"))
+      {
+        BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
+        await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+      }
+      else if (command.AlgorithmKey.Contains("Т1"))
+      {
+        BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
+        await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+      }
+      else
+      {
+        BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
+        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, context.Console.GetCancellationToken(), resistance);
       }
     }
 
@@ -196,6 +198,29 @@ namespace ControlCommandExecutor.Executors
 
       return (result, answer);
     }
+
+    /// <summary>
+    /// Выполняет измерение между уже подключёнными точками методом первой точки.
+    /// Предполагается, что коммутация завершена заранее.
+    /// </summary>
+    /// <returns>Задача, представляющая измерение.</returns>
+    private static async Task<bool> ConnectedPointCheckerMeasurementAsync(double resistance, IUserMessageService messageService, CancellationToken cancellationToken)
+    {
+      var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
+      double answer = -1;
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance);
+        var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer < resistance : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{(answer < 1000 ? ">" : "")}{answer} Ом", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 2 }, skipPause: true);
+        return result;
+
+      }, messageService);
+
+      return (result);
+    }
+
 
     private static double ExtractNumberFrimString(string input)
     {

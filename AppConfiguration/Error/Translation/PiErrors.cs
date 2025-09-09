@@ -11,7 +11,7 @@ namespace AppConfiguration.Error.Translation
   /// <summary>
   /// Содержит шаблоны ошибок, возникающих при парсинге выражений ПИ-команд.
   /// </summary>
-  public static class PiErrors
+  public class PiErrors : IPointError
   {
     /// <summary>
     /// Ошибка: выражение не распознано.
@@ -67,5 +67,69 @@ namespace AppConfiguration.Error.Translation
       Code = ErrorCode.Pi_KeysConflict,
       Description = "Команда ПИ не может содержать ключ Г, если для команды СИ присвоен ключ Т1."
     };
+
+    public ErrorItem PairError(string command, string pointFirst, string pointLast) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Pi_PairError,
+      Description = $"Замыкание точек: {pointFirst}, {pointLast}"
+    };
+
+    public ErrorItem ChainPairError(string command, List<PointModel> pointFirst, List<PointModel> pointLast)
+    {
+      var eroror = new ErrorItem()
+      {
+        Command = command,
+        Code = ErrorCode.Si_PairError,
+      };
+
+      var firstChain = string.Empty;
+      foreach (var point in pointFirst)
+      {
+        firstChain += $"#{point.ToString()}";
+      }
+
+      var secondChain = string.Empty;
+      foreach (var point in pointLast)
+      {
+        secondChain += $"#{point.ToString()}";
+      }
+
+      eroror.Description = $"Замыкание цепей: {firstChain} и {secondChain}";
+      return eroror;
+    }
+
+    public ErrorItem ChainError(string command, string chain) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Pi_ChainError,
+      Description = $"Замыкание цепи {chain}"
+    };
+
+    public ErrorItem DisconnectChainError(string command, string chain) => new()
+    {
+      Command = command,
+      Code = ErrorCode.Pi_ChainError,
+      Description = $"Замыкание в цепи {chain}"
+    };
+
+    public ErrorItem NodeExecutePointError(string command, List<PointModel> point, string resultMeasure)
+    {
+      var error = new ErrorItem()
+      {
+        MeasureResult = resultMeasure,
+        Command = command,
+        Code = ErrorCode.Pi_NodeExecutePointError,
+      };
+
+      var str = string.Empty;
+      foreach (var item in point)
+      {
+        str += $"#{item}";
+      }
+
+      error.Description = $"Ошибка при проверке цепи {str} при методе полного узла.";
+      return error;
+    }
   }
 }
