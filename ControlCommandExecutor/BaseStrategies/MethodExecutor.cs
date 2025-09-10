@@ -1,4 +1,5 @@
-﻿using AppConfiguration.Theme;
+﻿using System.Net.Http.Headers;
+using AppConfiguration.Theme;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
 using ControlCommandExecutor.Execution;
@@ -46,7 +47,7 @@ namespace ControlCommandExecutor.BaseStrategies
 
       for (int step = 0; step < HighestBitCount; step++)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({HighestBitCount})"), IsBlockStart: true);
+        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {ConvertIntToString(step + 1)} ({HighestBitCount})"), IsBlockStart: true);
         await ConnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
         if (!(await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken())).Result)
         {
@@ -58,7 +59,7 @@ namespace ControlCommandExecutor.BaseStrategies
 
           return;
         }
-      await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
+        await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
       }
     }
 
@@ -175,7 +176,7 @@ namespace ControlCommandExecutor.BaseStrategies
       {
         throw new ArgumentOutOfRangeException(nameof(bitLength), "Длина двоичной строки должна быть больше 0.");
       }
-      
+
       var result = new List<(ChainModel point, string reversedBinary)>();
       string reversPoint = string.Empty;
 
@@ -191,7 +192,7 @@ namespace ControlCommandExecutor.BaseStrategies
 
       for (int i = 1; i <= points.Count; i++)
       {
-        var chain = points[i-1];
+        var chain = points[i - 1];
         reversPoint = ConvertToReversedBinary(i, bitLength);
         result.Add((chain, reversPoint));
       }
@@ -262,6 +263,24 @@ namespace ControlCommandExecutor.BaseStrategies
       var chars = Enumerable.Repeat('0', HighestBitCount).ToArray();
       chars[HighestBitCount - 1 - step] = '1';
       return new string(chars);
+    }
+
+    static private string ConvertIntToString(int number)
+    {
+      var str = string.Empty;
+      for (int i = 0; i < HighestBitCount; i++)
+      {
+        if (HighestBitCount + 1 - number == i+1)
+        {
+          str += '1';
+        }
+        else
+        {
+          str += '0';
+        }
+      }
+
+      return str;
     }
   }
 }

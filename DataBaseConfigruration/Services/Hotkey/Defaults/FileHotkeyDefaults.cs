@@ -28,6 +28,9 @@
         { "Build", "F9" },
         { "Run", "Ctrl+F5" },
 
+        // Включение питания
+        { "Power", "Ctrl+Shift+P" },
+
         // Выход
         { "ExitApplication", "Alt+F4" }
       };
