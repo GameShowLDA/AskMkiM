@@ -36,6 +36,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, CancellationToken cancellationToken, double resistance = 0)
     {
+      List<ShowMessageModel> ErrorMessgae = new List<ShowMessageModel>();
       var pointsList = schemeModel.GetPointsDisconnected();
       if (pointsList.Count == 0)
       {
@@ -78,20 +79,49 @@ namespace ControlCommandExecutor.BaseStrategies
             var firstChain = string.Empty;
             foreach (var item in points)
             {
-              firstChain += $"#{item.ToString()}";
+              if (item == points[0])
+              {
+                firstChain += $"*{item.ToString()}";
+              }
+              else
+              { 
+                firstChain += $"#{item.ToString()}";
+              }
             }
+
+            firstChain += "*";
 
             var secondChain = string.Empty;
             foreach (var item in localized)
             {
-              secondChain += $"#{item.ToString()}";
+              if (item == localized[0])
+              {
+                secondChain += $"*{item.ToString()}";
+              }
+              else
+              {
+                secondChain += $"#{item.ToString()}";
+              }
             }
+            secondChain += "*";
 
             await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание {firstChain} c {secondChain}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+            ErrorMessgae.Add(new ShowMessageModel(
+              $"{firstChain} ** {secondChain}",
+              message: "Обнаружено замыкание",
+              type: ShowMessageModel.MessageType.Error)
+            { IndentLevel = 3 });
           }
           else
           {
             await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную цепь", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+
+            ErrorMessgae.Add(new ShowMessageModel(
+              $"Ошибка локализации",
+              message: $"Не удалось точно определить замыкание цепей",
+              type: ShowMessageModel.MessageType.Error)
+            { IndentLevel = 3 });
+
           }
         }
 
@@ -108,6 +138,18 @@ namespace ControlCommandExecutor.BaseStrategies
         {
           await DisconnectFromBusBAsync(point, messageService);
         }
+      }
+
+      if (ErrorMessgae.Count > 0)
+      {
+        await messageService.ShowMessageAsync(
+        new ShowMessageModel($"Результаты проверки")
+        { IndentLevel = 1 });
+      }
+
+      foreach (var item in ErrorMessgae)
+      {
+        await messageService.ShowMessageAsync(item);
       }
     }
 
