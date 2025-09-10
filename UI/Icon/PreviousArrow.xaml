@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="UI.Icon.PreviousArrow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root"      
+             Width="{Binding Size, ElementName=root}"
+             Height="{Binding Size, ElementName=root}"
+             Cursor="Hand"
+             PreviewMouseDown="root_PreviewMouseDown"
+             >
+    <Viewbox Stretch="Uniform">
+        <Canvas Width="100" Height="39">
+
+            <!-- Дуга (сместили немного для баланса) -->
+            <Path Stroke="#3d7dab"
+              StrokeThickness="10"
+              StrokeStartLineCap="Round"
+              StrokeEndLineCap="Round"
+              Fill="Transparent"
+                          
+
+              Data="M 20 10 L 2 10 M 6 6 L 2 10 L 6 14" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Fill" Width="94" Height="34" Canvas.Left="5.75"/>
+
+        </Canvas>
+    </Viewbox>
+</UserControl>

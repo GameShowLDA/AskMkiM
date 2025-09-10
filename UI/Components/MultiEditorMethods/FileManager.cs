@@ -893,6 +893,17 @@ namespace UI.Components.MultiEditorMethods
       ShowControl(archiveContainer, EditorType.Archive);
     }
 
+    internal async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    {
+      var controlManager = new ControlManager(this, multiEditorControl);
+      TextEditorContainer runContainer = GetContainer(editorType);
+      var foundTab = OpenPages.FirstOrDefault(tab => tab.Text == editorType.ToString());
+      if (foundTab != null)
+      {
+        await controlManager.RemoveControl(foundTab, runControl);
+      }
+    }
+
     /// <summary>
     /// Конструктор для инициализации файлового менеджера.
     /// </summary>

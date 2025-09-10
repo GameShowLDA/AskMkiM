@@ -440,5 +440,10 @@ namespace UI.Components
     {
       await fileManager.OpenArchiveAsync();
     }
+
+    internal async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    {
+      await fileManager.CloseRunItem(runControl, editorType);
+    }
   }
 }

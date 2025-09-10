@@ -196,5 +196,10 @@ namespace MainWindowProgram.Services
     {
       await _multiWindowControl.OpenArchiveAsync();
     }
+
+    internal async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    {
+      await _multiWindowControl.CloseRunItem(runControl, editorType);
+    }
   }
 }

@@ -141,6 +141,13 @@ namespace AppConfiguration.Base
     public static event Action<string, string> CompareFiles;
 
     /// <summary>
+    /// Событие, которое вызывается при нажатии на кнопку возврата к редактирванию файла в текстовом редакторе.
+    /// </summary>
+    public static event Action<string> OpenFileInEditorAgain;
+
+    public static event Action <UserControl> CloseRunItem;
+
+    /// <summary>
     /// Событие, которое вызывается при изменении статуса прав администратора.
     /// </summary>
     static internal bool AdminRightsFlag
@@ -374,6 +381,20 @@ namespace AppConfiguration.Base
     public static void RaiseCompareFiles(string firstFilePath, string secondFilePath)
     {
       CompareFiles?.Invoke(firstFilePath, secondFilePath);
+    }
+
+    /// <summary>
+    /// Метод для вызова события при нажатии на кнопку возврата к редактирванию файла в текстовом редакторе.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    public static void RaiseOpenFileInEditorAgain(string filePath)
+    {
+      OpenFileInEditorAgain?.Invoke(filePath);
+    }
+
+    public static void RaiseCloseRunItem(UserControl runControl)
+    {
+      CloseRunItem?.Invoke(runControl);
     }
   }
 }

@@ -13,6 +13,7 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_StepOver"       Key="protocol.button.stepover" />
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_StepInto"       Key="protocol.button.stepinto" />
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Continue"       Key="protocol.button.continue" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Previous_Arrow" Key="protocol.button.previous.arrow" />
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Exit"           Key="protocol.button.exit" />
 
 </ResourceDictionary>

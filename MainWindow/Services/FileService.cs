@@ -1,6 +1,7 @@
 ﻿using AppConfiguration.Base;
 using ICSharpCode.AvalonEdit;
 using Microsoft.Win32;
+using System.IO.Packaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -77,6 +78,21 @@ namespace MainWindowProgram.Services
           string filePath = openFileDialog.FileName;
           await _multiWindow.OpenFileInEditor(filePath);
         }
+      }
+    }
+
+    /// <summary>
+    /// Открывает диалог выбора файла и загружает его в редактор.
+    /// </summary>
+    public async Task OpenFileAsync(string filePath)
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+      }
+      else
+      {
+        await _multiWindow.OpenFileInEditor(filePath);
       }
     }
 

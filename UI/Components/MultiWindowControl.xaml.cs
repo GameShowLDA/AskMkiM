@@ -2,6 +2,7 @@
 using Message;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using UI.Components.Invoke;
@@ -707,6 +708,11 @@ namespace UI.Components
     public async Task OpenArchiveAsync()
     {
       await MultiEditor.OpenArchiveAsync();
+    }
+
+    public async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    {
+      await MultiEditor.CloseRunItem(runControl, editorType);
     }
   }
 }
