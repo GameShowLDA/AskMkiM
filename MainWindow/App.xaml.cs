@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using NewCore.Base.Interface.Main;
 using NewCore.Device;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using static Utilities.LoggerUtility;
 
@@ -90,6 +91,14 @@ namespace MainWindowProgram
         Message.MessageBoxCustom.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         Application.Current.Shutdown();
       }
+    }
+
+    protected override async void OnExit(ExitEventArgs e)
+    {
+      base.OnExit(e);
+
+      var svc = AppConfiguration.ServiceLocator.GetRequired<IBreakdownTester>();
+      await svc.ConnectableManager.DisconnectAsync();
     }
   }
 }

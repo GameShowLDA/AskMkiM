@@ -152,8 +152,17 @@ namespace NewCore.Function.GPT
         // Пробуем открыть порт, если он ещё не открыт
         if (!_gptModel.COMPort.IsOpen)
         {
-          _gptModel.COMPort.Open();
-          LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт в InitializeAsync()", isDeviceLog: true);
+          try
+          {
+            _gptModel.COMPort.Open();
+            LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт в InitializeAsync()", isDeviceLog: true);
+          }
+          catch (Exception)
+          {
+            await _gptModel.ConnectableManager.DisconnectAsync();
+            _gptModel.COMPort.Open();
+            LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт в InitializeAsync()", isDeviceLog: true);
+          }
         }
         else
         {
@@ -177,7 +186,7 @@ namespace NewCore.Function.GPT
         var answer = await _gptModel.DeviceProtocol.QueryAsync("*IDN?", timeout: 1000);
         if (answer.Contains("GPT"))
           return (true, string.Empty);
-        else 
+        else
           return (false, answer);
       }
       catch (UnauthorizedAccessException ex)
