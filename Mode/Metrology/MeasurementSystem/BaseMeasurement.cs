@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Services.Device;
+﻿using AppConfiguration;
+using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
@@ -90,8 +91,8 @@ namespace Mode.Metrology.MeasurementSystem
       }
       else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
-        var breakdownRepo = new BreakdownTesterServices();
-        var breakdown = breakdownRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
+        var breakdown = svc.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
         AddUniqueDevice(mode, breakdown);
       }
       else

@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
+﻿using AppConfiguration;
 using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
 using NewCore.Base.Interface.Main;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace Mode.Settings.DeviceConfig.Controls
 {
@@ -117,7 +118,7 @@ namespace Mode.Settings.DeviceConfig.Controls
           break;
 
         case IBreakdownTester:
-          new BreakdownTesterServices().Delete((IBreakdownTester)device);
+          ServiceLocator.GetRequired<BreakdownTesterServices>().Delete((IBreakdownTester)device);
           Utilities.LoggerUtility.LogInformation("Удаляем устройство из BreakdownTesterTable");
           break;
 

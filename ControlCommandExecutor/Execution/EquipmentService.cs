@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AppConfiguration;
 using ControlCommandAnalyser.Model.Chains;
 using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Interface.Main;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Utilities;
 using Utilities.Interface;
 using Utilities.Models;
@@ -294,12 +295,10 @@ namespace ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var tester = new BreakdownTesterServices().GetDevicesByNumberChassis(number).FirstOrDefault();
+        var tester = ServiceLocator.GetRequired<BreakdownTesterServices>().GetDevicesByNumberChassis(number).FirstOrDefault();
         if (tester != null)
         {
           ValidBreakdownTester = tester;
-          ValidBreakdownTester.ConnectableManager.DeviceDisponce += () => ValidBreakdownTester = null;
-
           return tester;
         }
       }

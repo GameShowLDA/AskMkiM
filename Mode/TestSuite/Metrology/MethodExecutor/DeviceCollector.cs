@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Services;
+﻿using AppConfiguration;
+using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
 using Mode.Models;
 using NewCore.Base.Device;
@@ -27,7 +28,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor
       Devices.Clear();
 
       var deviceBusCommutationRepo = new SwitchingDeviceServices();
-      var breakdownRepo = new BreakdownTesterServices();
+      var breakdownRepo = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
       var relayModules = RelayModuleHelper.GetModulesByRange(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber);
 

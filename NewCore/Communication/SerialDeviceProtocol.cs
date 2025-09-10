@@ -40,7 +40,13 @@ namespace NewCore.Communication
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
     {
       LogDebug($"[{_device.Name}] Захват _portLock", isDeviceLog: true);
-      await OperationLock.WaitAsync();
+      await OperationLock.WaitAsync(1000);
+
+      if (!_serialPort.IsOpen)
+      {
+        LogWarning($"[{_device.Name}] Попытка отправки при закрытом порте {_serialPort.PortName}", isDeviceLog: true);
+        return string.Empty;
+      }
 
       try
       {
@@ -87,16 +93,6 @@ namespace NewCore.Communication
     {
       LogDebug($"Задержка перед вызовом: {delayBeforeCall} мс", isDeviceLog: true);
       await Task.Delay(delayBeforeCall, cancellationToken);
-    }
-
-    /// <summary>
-    /// Обрабатывает ситуацию, когда COM-порт не удалось открыть.
-    /// Логирует предупреждение и возвращает пустую строку.
-    /// </summary>
-    private string HandlePortOpenFailure()
-    {
-      LogWarning($"COM-порт не удалось открыть: {_serialPort.PortName}", isDeviceLog: true);
-      return string.Empty;
     }
 
     /// <summary>

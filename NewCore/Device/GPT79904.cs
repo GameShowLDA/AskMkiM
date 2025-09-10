@@ -25,7 +25,7 @@ namespace NewCore.Device
       Parity = Parity.None;
       DeviceClass = GetType().FullName;
 
-      DeviceType = DeviceEnum.DeviceType.BreakdownTester;
+      DeviceType = DeviceEnum.DeviceType.BreakdownTester; 
 
       AcwManger = new AcwModeAdapter(this);
       DcwManger = new DcwModeAdapter(this);

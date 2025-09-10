@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Services.Device;
+﻿using AppConfiguration;
+using DataBaseConfiguration.Services.Device;
 using Mode.Base;
 using Mode.Models;
 using NewCore.Base.Device;
@@ -53,7 +54,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
     {
       Devices.Clear();
       var ukshRepo = new SwitchingDeviceServices();
-      var breakdownRepo = new BreakdownTesterServices();
+      var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
       var relayModules = RelayModuleHelper.GetModulesByRange(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber);
       foreach (var module in relayModules)
@@ -64,7 +65,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod
       var uksh = ukshRepo.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
       Devices.Add(uksh);
 
-      var breakdown = breakdownRepo.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
+      var breakdown = svc.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
       Devices.Add(breakdown);
     }
 

@@ -1,10 +1,11 @@
-﻿using NewCore.Base.Function.Breakdown;
+﻿using System.Windows;
+using NewCore.Base.Function.Breakdown;
 using NewCore.Device;
 using NewCore.Function.GPT.Data;
+using static AppConfiguration.Execution.ExecutionConfig;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static NewCore.Function.GPT.Command.SystemCommandManager;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -179,5 +180,16 @@ namespace NewCore.Function.GPT
 
       return systemData;
     }
+
+    public async Task<bool> TestReset()
+    {
+      if (await GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      return ComPortResetNative.Restart(_gptModel.COMPort.PortName);
+    }
+
   }
 }
