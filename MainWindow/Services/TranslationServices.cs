@@ -2,6 +2,7 @@
 using ControlCommandAnalyser;
 using ControlCommandAnalyser.Model.Ok;
 using Message;
+using System.IO;
 using System.Windows;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -123,7 +124,8 @@ namespace MainWindowProgram.Services
       var models = translator.TranslationModels;
 
       await _multiWindow.DeleteTranslatorItem(translator, EditorType.Translator);
-
+      
+      
       RunControl runControl = new RunControl();
       runControl.SetLeftEditor(editor);
       var foundItem = models.FirstOrDefault(item => item.GetType() == typeof(OkCommandModel));
@@ -131,6 +133,8 @@ namespace MainWindowProgram.Services
       {
         runControl.FileName = okCommandModel.ObjectCode;
       }
+      runControl.HeaderFile = string.IsNullOrEmpty(editor.TextEditorModel.FileName) ? 
+        Path.GetFileName(editor.TextEditorModel.FilePath) : editor.TextEditorModel.FileName;
 
       await _multiWindow.AddRunItem(runControl, EditorType.Run);
 

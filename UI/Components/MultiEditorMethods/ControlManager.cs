@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static UI.Components.Invoke.OpenFileButton;
@@ -30,8 +31,11 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="control">Элемент управления для удаления.</param>
     public async Task RemoveControl(OpenFileButton tabButton, UserControl control, bool isTranslation = false)
     {
-      if (fileManager.OpenPages.Contains(tabButton) && fileManager.UserControls.Contains(control)
-        || control is TextEditorUI && isTranslation == false)
+      var contains = fileManager.OpenPages.Contains(tabButton);
+      if (contains
+        && fileManager.UserControls.Contains(control)
+        || control is TextEditorUI && isTranslation == false
+        || control is RunControl)
       {
         int index = -1;
         EditorType editorType = null;
@@ -51,6 +55,28 @@ namespace UI.Components.MultiEditorMethods
                 ShowSaveDialogForControl(foundDockItem);
                 return;
               }
+            }
+          }
+          
+        }
+        else if (control is RunControl runControl)
+        {
+          editorType = EditorType.Run;
+          var container = fileManager.OpenPages.FirstOrDefault(textEditorContainer
+            => textEditorContainer.Text == editorType.ToString());
+          var containerIndex = fileManager.OpenPages.IndexOf(container);
+          if (fileManager.UserControls[containerIndex] is TextEditorContainer foundContainer)
+          {
+            var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
+            if (foundDockItem != null)
+            {
+              foundDockItem.Close();
+              if (foundContainer.DockManager.DockItems.Count == 0)
+              {
+                RemoveControl(tabButton, foundContainer);
+                return;
+              }
+              return;
             }
           }
         }

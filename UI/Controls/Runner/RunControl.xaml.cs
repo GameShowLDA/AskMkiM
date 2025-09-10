@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using ControlCommandAnalyser;
+﻿using AppConfiguration.Base;
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandExecutor.Execution;
-using ICSharpCode.AvalonEdit;
+using Message;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using UI.Components;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
-using Utilities;
 using Utilities.Models;
 using static Utilities.LoggerUtility;
 
@@ -33,7 +23,19 @@ namespace UI.Controls.Runner
     List<BaseCommandModel> ControlProgram = null;
     public int ErrorCount { get; private set; } = 0;
     private ProtocolUI ProtocolUI { get; set; }
-    public string FileName {  get; set; }
+    public string FileName { get; set; }
+    public string HeaderFile
+    {
+      get
+      {
+        return headerFile.Text;
+      }
+      set
+      {
+        headerFile.Text = value;
+      }
+    }
+
     bool task = false;
     public RunControl()
     {
@@ -151,5 +153,24 @@ namespace UI.Controls.Runner
       });
     }
 
+    private void PreviousArrow_ClickMouse(MouseButtonEventArgs obj)
+    {
+      //нужно получить активный текстовый редактор и открыть файл который расположен по пути в texteditormodel
+      var test = this.LeftBox.Children[0];
+      if (test != null && test is TextEditorUI textEditor)
+      {
+        if (textEditor.TextEditorModel != null 
+          && !string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath) 
+          && File.Exists(textEditor.TextEditorModel.FilePath))
+        {
+          EventAggregator.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);
+          EventAggregator.RaiseCloseRunItem(this);
+        }
+      }
+      else
+      {
+        MessageBoxCustom.Show("Ошибка обнаружения исходного файла", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
+      }
+    }
   }
 }
