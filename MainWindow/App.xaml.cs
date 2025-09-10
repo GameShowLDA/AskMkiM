@@ -1,9 +1,15 @@
-﻿using System.Runtime.InteropServices;
-using System.Windows;
+﻿using AppConfiguration;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
-using static Utilities.LoggerUtility;
+using DataBaseConfiguration.Services.Device;
+using Microsoft.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NewCore.Base.Interface.Main;
+using NewCore.Device;
 using System.Runtime.InteropServices;
+using System.Windows;
+using static Utilities.LoggerUtility;
 
 
 namespace MainWindowProgram
@@ -14,6 +20,7 @@ namespace MainWindowProgram
   /// </summary>
   public partial class App : Application
   {
+    public static IHost AppHost { get; private set; }
     [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     private const int SW_HIDE = 0;
@@ -56,6 +63,16 @@ namespace MainWindowProgram
         };
 
         await mainWindow.InitializeAsync();
+
+        AppHost = Host.CreateDefaultBuilder()
+          .ConfigureServices(svc =>
+          {
+            svc.AddSingleton<IBreakdownTester, GPT79904>();
+            svc.AddSingleton<BreakdownTesterServices>();
+          }).Build();
+
+        ServiceLocator.Initialize(AppHost);
+
         await splashWindow.WaitForCloseAsync();
 
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);

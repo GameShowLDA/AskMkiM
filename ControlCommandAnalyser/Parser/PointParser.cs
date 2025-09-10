@@ -69,6 +69,13 @@ namespace ControlCommandAnalyser.Parser
                 foreach (var one in expanded)
                 {
                   var (ok1, pts1) = CommandPostAnalyzer.GetPointsModel(new List<string> { one }, rmCommandModel.PointsMap);
+                  foreach(var pts2 in pts1)
+                  {
+                    var pointMnemonic = rmCommandModel.PointsMap.Where(x => x.Value == pts2.ToString()).FirstOrDefault().Key;
+
+                    pts2.PointType = PointType.Type.Star;
+                    pts2.Mnemonic = pointMnemonic;
+                  }
                   var part = new ChainModel(new List<PointModel>(pts1 ?? new List<PointModel>()));
                   chainModels.Add(new GroupModel(new List<ChainModel> { part }));
                 }

@@ -1,7 +1,8 @@
-﻿using System.ComponentModel;
+﻿using AppConfiguration;
+using DataBaseConfiguration.Services.Device;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using DataBaseConfiguration.Services.Device;
 
 namespace MainWindowProgram.Services
 {
@@ -136,7 +137,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        var breakDowns = new BreakdownTesterServices().GetAll();
+        var breakDowns = ServiceLocator.GetRequired<BreakdownTesterServices>().GetAll();
         foreach (var item in breakDowns)
         {
           try

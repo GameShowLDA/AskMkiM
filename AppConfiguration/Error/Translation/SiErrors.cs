@@ -101,7 +101,7 @@ namespace AppConfiguration.Error.Translation
     public ErrorItem DisconnectChainError(string command, string chain) => new()
     {
       Command = command,
-      Code = ErrorCode.Pr_ChainError,
+      Code = ErrorCode.Si_ChainError,
       Description = $"Разрыв в цепи {chain}"
     };
 

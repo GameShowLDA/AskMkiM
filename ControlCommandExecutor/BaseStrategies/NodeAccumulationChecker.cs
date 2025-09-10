@@ -25,7 +25,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="value">Ожидаемое значение.</param>
     /// <param name="userMessageService">Элемент управления для вывода сообщений.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
-    internal delegate Task<bool> PerformMeasurementAsync(double value, IUserMessageService userMessageService, CancellationToken cancellationToken);
+    internal delegate Task<bool> PerformMeasurementAsync(double value, IUserMessageService userMessageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.ACW);
     static private int step = 0;
 
     /// <summary>
@@ -34,7 +34,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, double resistance, CancellationToken cancellationToken)
+    static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, CancellationToken cancellationToken, double resistance = 0)
     {
       var pointsList = schemeModel.GetPointsDisconnected();
       if (pointsList.Count == 0)

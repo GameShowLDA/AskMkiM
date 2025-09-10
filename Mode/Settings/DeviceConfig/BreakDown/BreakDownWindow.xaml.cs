@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using AppConfiguration;
 using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
 using DataBaseConfiguration.Services.Device;
@@ -71,7 +72,8 @@ namespace Mode.Settings.DeviceConfig.BreakDown
 
         if (deviceEntity != null)
         {
-          new BreakdownTesterServices().Create(deviceEntity);
+          var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
+          svc.Create(deviceEntity);
         }
 
         RequestSave?.Invoke(s, deviceEntity);

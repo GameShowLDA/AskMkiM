@@ -48,5 +48,7 @@ namespace NewCore.Base.Function.Breakdown
     /// </summary>
     /// <param name="model">Модель устройства.</param>
     Task<SystemDataModel> ReadConfigurationAsync();
+
+    Task<bool> TestReset();
   }
 }

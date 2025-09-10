@@ -84,7 +84,9 @@ namespace ControlCommandAnalyser.Parser.Pi
       {
         LoggerUtility.LogWarning($"Не распознано в СИ: '{siRemainder}'");
       }
+
       model.SiCommand = modelSi;
+
 
       var remainderPi = piPart;
 
@@ -104,18 +106,8 @@ namespace ControlCommandAnalyser.Parser.Pi
         }
         else
         {
-          var t1 = AlgorithmKey.Т1.ToString();
-          if (!modelSi.AlgorithmKey.Contains(t1) && !string.IsNullOrEmpty(key))
-          {
-            model.AlgorithmKey.Add(key);
-            LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
-          }
-          else
-          {
-            model.Errors.Add(PiErrors.KeysConflict(numberLine, $"{commandNumber} {mnemonic}"));
-            LoggerUtility.LogWarning($"Команда ПИ не может содержать ключ Г, если для команды СИ присвоен ключ Т1: " +
-              $"{commandNumber} {mnemonic} (строка {numberLine})");
-          }
+          model.AlgorithmKey.Add(key);
+          LoggerUtility.LogDebug($"Найден ключ алгоритма: {key}");
         }
       }
 
@@ -229,8 +221,20 @@ namespace ControlCommandAnalyser.Parser.Pi
       }
 
       CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, remainderPi);
+      if (model.AlgorithmKey.Count == 0
+        && model.SiCommand.AlgorithmKey.Count != 0
+        && model.AlgorithmKey != null
+        && model.SiCommand.AlgorithmKey != null)
+      {
+        model.AlgorithmKey = model.SiCommand.AlgorithmKey;
+      }
 
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
+
+      model.SiCommand.CommandNumber = model.CommandNumber;
+      model.SiCommand.FormattedStartLineNumber = model.FormattedStartLineNumber;
+      model.SiCommand.Scheme = model.Scheme;
+      model.SiCommand.StartLineNumber = model.StartLineNumber;
 
       return model;
     }

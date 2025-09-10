@@ -67,7 +67,6 @@ namespace ControlCommandExecutor.Executors
 
       if (command.AlgorithmKey.Contains("К"))
       {
-        // await NodeFullChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
         BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
         await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance.Value);
       }
@@ -75,19 +74,16 @@ namespace ControlCommandExecutor.Executors
       {
         BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
         await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance.Value);
-        // await MethodExecutor.CheckSequenceAsync(context.CommandExecutionManager, command,  points, context.Console, resistance.Value);
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
         await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance.Value);
-        //await PairwiseFirstPointChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
       }
       else
       {
-        // await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
         BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, resistance.Value, context.Console.GetCancellationToken());
+        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, context.Console.GetCancellationToken(), resistance.Value);
       }
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
@@ -177,7 +173,7 @@ namespace ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
@@ -198,7 +194,7 @@ namespace ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
       double answer = -1;

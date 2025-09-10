@@ -23,7 +23,7 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(SchemeModel schemeModel, NodeAccumulationChecker.PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
+    static public async Task CheckSequenceAsync(SchemeModel schemeModel, NodeAccumulationChecker.PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance = 0)
     {
       List<List<ChainModel>> errorChain = new();
       var pointsList = schemeModel.GetPointsDisconnected();

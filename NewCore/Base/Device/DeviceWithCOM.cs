@@ -52,8 +52,13 @@ namespace NewCore.Base.Device
       set
       {
         _connectionDetails = value;
-
+        if (COMPort?.IsOpen == true)
+        {
+          LogWarning($"[{Name}] ConnectionDetails изменён при открытом порте — игнор.", isDeviceLog: true);
+          return;
+        }
         var port = SerialPortCustom.ToObject(value);
+
         if (port != null)
         {
           COMPort = port;

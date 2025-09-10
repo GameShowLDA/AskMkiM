@@ -9,7 +9,7 @@ using Utilities.Models;
 
 namespace ControlCommandAnalyser.Model
 {
-   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,
+   [AllowedKeys(ControlCommandAnalyser.AlgorithmKey.К, /*ControlCommandAnalyser.AlgorithmKey.С, ControlCommandAnalyser.AlgorithmKey.П, ControlCommandAnalyser.AlgorithmKey.И,*/
     ControlCommandAnalyser.AlgorithmKey.Г, ControlCommandAnalyser.AlgorithmKey.Т1)]
   public class PrCommandModel : BaseCommandModel, IError, IHasScheme
   {

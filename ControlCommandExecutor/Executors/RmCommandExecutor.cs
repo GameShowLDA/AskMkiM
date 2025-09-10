@@ -25,8 +25,6 @@ namespace ControlCommandExecutor.Executors
       List<PointModel> pointsModel = PointModel.ConvertToPointModels(points);
       await EquipmentService.AnalyzePoints(pointsModel, command.PointsMap, context.Console);
 
-      var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-      await breakDown.ConnectableManager.ConnectAsync();
     }
   }
 }
