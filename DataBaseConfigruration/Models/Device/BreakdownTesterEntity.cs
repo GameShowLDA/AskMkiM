@@ -34,6 +34,10 @@ namespace DataBaseConfiguration.Models.Device
     public string DeviceClass { get; set; }
 
     /// <inheritdoc />
+    public int MaxVoltage { get; set; }
+
+
+    /// <inheritdoc />
     public DeviceEnum.DeviceType DeviceType => DeviceEnum.DeviceType.BreakdownTester;
 
     /// <inheritdoc />

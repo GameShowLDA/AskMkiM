@@ -9,6 +9,11 @@ namespace NewCore.Base.Interface.Main
   public interface IBreakdownTester : IAttachableDevice
   {
     /// <summary>
+    /// Макссимально выдаваемое напряжение.
+    /// </summary>
+    public int MaxVoltage { get; set; }
+
+    /// <summary>
     /// Управление режимом переменного тока (ACW) в пробойной установке.
     /// </summary>
     public IAcwModeBreakdown AcwManger { get; set; }
@@ -27,7 +32,5 @@ namespace NewCore.Base.Interface.Main
     /// Управление системными настройками пробойной установки.
     /// </summary>
     public ISystemSettingsBreakdown SystemManger { get; set; }
-
-    static public event Action Disconnect;
   }
 }

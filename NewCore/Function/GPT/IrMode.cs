@@ -71,6 +71,11 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Устанавливаем напряжение IR: {value} В", isDeviceLog: true);
 
+      if (value > _gptModel.MaxVoltage)
+      {
+        return (false, $"Максимальное напряжение для {_gptModel.Name} = {_gptModel.MaxVoltage}");
+      }
+
       if (await GetIsIdleModeEnabled())
         return (true, string.Empty);
 

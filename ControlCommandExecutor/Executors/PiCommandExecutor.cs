@@ -166,6 +166,21 @@ namespace ControlCommandExecutor.Executors
         {
           throw AppConfiguration.Error.Device.Breakdown.IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
         }
+
+        if (time == 60)
+        {
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetRampTimeAsync(voltage / 100)).Success, userMessageService))
+          {
+            throw AppConfiguration.Error.Device.Breakdown.IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
+          }
+        }
+        else
+        {
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetRampTimeAsync(0.1)).Success, userMessageService))
+          {
+            throw AppConfiguration.Error.Device.Breakdown.IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
+          }
+        }
       }
       else if (voltageType == VoltageEnum.Type.DCW)
       {
@@ -192,6 +207,21 @@ namespace ControlCommandExecutor.Executors
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetHighCurrentLimitAsync(80)).Success, userMessageService))
         {
           throw AppConfiguration.Error.Device.Breakdown.IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
+        }
+
+        if (time == 60)
+        {
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetRampTimeAsync(voltage / 100)).Success, userMessageService))
+          {
+            throw AppConfiguration.Error.Device.Breakdown.IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
+          }
+        }
+        else
+        {
+          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.SetRampTimeAsync(0.1)).Success, userMessageService))
+          {
+            throw AppConfiguration.Error.Device.Breakdown.IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
+          }
         }
       }
     }

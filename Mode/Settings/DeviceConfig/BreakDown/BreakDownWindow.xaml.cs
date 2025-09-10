@@ -72,6 +72,7 @@ namespace Mode.Settings.DeviceConfig.BreakDown
 
         if (deviceEntity != null)
         {
+          deviceEntity.MaxVoltage = (baseDevice as IBreakdownTester).MaxVoltage;
           var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
           svc.Create(deviceEntity);
         }

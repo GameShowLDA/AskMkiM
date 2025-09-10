@@ -114,41 +114,20 @@ namespace ControlCommandAnalyser.Formatter
         yield break;
       }
 
-      yield return "\tЗаданные точки:";
-
-      
-      for (int ci = 0; ci < pi.Scheme.GroupModels.Count; ci++)
+      yield return "\tРазобщенные точки:";
+      for (int i = 0; i < pi.Scheme.GroupModels.Count; i++)
       {
-        var chain = pi.Scheme.GroupModels[ci];
-        if (chain?.ChainModels == null || chain.ChainModels.Count == 0) continue;
-
-        for (int i = 0; i < chain.ChainModels.Count; i++)
+        var points = pi.Scheme.GetPointsDisconnected(pi.Scheme.GroupModels[i]);
+        if (points != null)
         {
-          var part = chain.ChainModels[i];
-          if (part?.PointModels == null || part.PointModels.Count == 0) continue;
+          string str = string.Empty;
+          str += $"\t\t{i + 1}. #";
 
-          // первая часть цепи — отметим как начало (*), последующие части считаем "сообщёнными" (#)
-          var status = (i == 0) ? "*" : "#";
-
-          foreach (var point in part.PointModels)
+          foreach (var point in points)
           {
-            if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count > 1)
-            {
-              yield return $"\t\t{status} {point},";
-            }
-            else if (part.PointModels.IndexOf(point) == 0 && part.PointModels.Count == 1)
-            {
-              yield return $"\t\t{status} {point}";
-            }
-            else if (part.PointModels.IndexOf(point) != part.PointModels.Count - 1)
-            {
-              yield return $"\t\t  {point},";
-            }
-            else
-            {
-              yield return $"\t\t  {point}";
-            }
+            str += $"{point.Mnemonic}({point})#";
           }
+          yield return str.Remove(str.Length - 1);
         }
       }
 
