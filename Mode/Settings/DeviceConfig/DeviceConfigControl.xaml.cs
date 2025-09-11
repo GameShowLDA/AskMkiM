@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using AppConfiguration;
 using DataBaseConfiguration.Models;
 using DataBaseConfiguration.Models.Device;
 using DataBaseConfiguration.Services;
@@ -13,6 +12,8 @@ using Mode.Settings.DeviceConfig.ModuleRelayControl;
 using Mode.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using NewCore.Base.Interface.Additionally;
 using NewCore.Base.Interface.Main;
+using System.Windows;
+using System.Windows.Controls;
 using Utilities.Help;
 
 namespace Mode.Settings.DeviceConfig
@@ -187,8 +188,7 @@ namespace Mode.Settings.DeviceConfig
     {
       devicesControl.ClearDevice<BreakdownTesterEntity>(new BreakdownTesterEntity());
 
-      var breakdownTesters = new BreakdownTesterServices().GetEntitiesByNumberChassis(chassis.Number);
-
+      var breakdownTesters = ServiceLocator.GetRequired<BreakdownTesterServices>().GetEntitiesByNumberChassis(chassis.Number);
       foreach (var device in breakdownTesters)
       {
         devicesControl.AddDevice(device);

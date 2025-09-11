@@ -25,7 +25,7 @@
         { "PrintFile", "Ctrl+P" },
         { "SearchFile", "Ctrl+F" },
         { "CompareFile", "Ctrl+K" },
-        { "Build", "Ctrl+F9" },
+        { "Build", "F9" },
         { "Run", "Ctrl+F5" },
 
         // Выход

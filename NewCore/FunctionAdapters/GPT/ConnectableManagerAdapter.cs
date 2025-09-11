@@ -17,12 +17,14 @@ namespace NewCore.FunctionAdapters.GPT
   {
     private readonly GPT79904 _device;
     private readonly ConnectableManager _manager;
+    public event Action DeviceDisponce;
 
     public ConnectableManagerAdapter(GPT79904 device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _manager = new ConnectableManager(device);
     }
+
 
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {
@@ -59,6 +61,7 @@ namespace NewCore.FunctionAdapters.GPT
         throw ConnectionExceptionFactory.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 
+      DeviceDisponce?.Invoke();
       return result;
     }
 

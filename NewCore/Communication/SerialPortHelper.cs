@@ -19,29 +19,35 @@ namespace NewCore.Communication
     /// <param name="port">SerialPort для регистрации.</param>
     public static void RegisterSerialPort(SerialPort port)
     {
-      if (port == null)
-        return;
+      if (port == null) return;
 
       lock (_ports)
       {
-        var existing = _ports.FirstOrDefault(p => string.Equals(p.PortName, port.PortName, StringComparison.OrdinalIgnoreCase));
+        var existing = _ports.FirstOrDefault(p =>
+          string.Equals(p.PortName, port.PortName, StringComparison.OrdinalIgnoreCase));
+
+        if (ReferenceEquals(existing, port))
+        {
+          // Уже зарегистрирован этот же экземпляр — выходим.
+          return;
+        }
+
         if (existing != null)
         {
           try
           {
             if (existing.IsOpen)
             {
+              LogInformation($"[{existing.PortName}] Закрываю старый экземпляр при регистрации нового.", isDeviceLog: true);
               existing.Close();
-              LogInformation($"Закрыт старый порт {existing.PortName} перед заменой.", isDeviceLog: true);
             }
+            existing.Dispose();
           }
           catch (Exception ex)
           {
-            LogException(ex, $"Ошибка при закрытии порта {existing.PortName}", isDeviceLog: true);
+            LogException(ex, $"Ошибка при закрытии старого порта {existing.PortName}", isDeviceLog: true);
           }
-
           _ports.Remove(existing);
-          LogInformation($"Старый порт {existing.PortName} удалён из списка.", isDeviceLog: true);
         }
 
         _ports.Add(port);

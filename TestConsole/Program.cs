@@ -1,6 +1,10 @@
-﻿using DataBaseConfiguration;
+﻿using AppConfiguration;
+using DataBaseConfiguration;
+using Microsoft.Extensions.Hosting;
 using TestConsole.GPT;
 using TestConsole.MINT;
+using Microsoft.Extensions.Hosting;
+
 
 namespace TestConsole
 {

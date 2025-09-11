@@ -23,6 +23,8 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
+    public event Action DeviceDisponce;
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {

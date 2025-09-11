@@ -113,10 +113,10 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="editorType">Тип вкладок.</param>
     /// <returns>Контейнер для вкладок заданного типа.</returns>
-    public TextEditorContainer CreateContainer(EditorType editorType)
+    public TextEditorContainer CreateContainer(EditorType editorType, OpenFileButton.TypeWindow fileType = OpenFileButton.TypeWindow.Files)
     {
       var textEditorContainer = new TextEditorContainer();
-      AddFileToControlManager(editorType.ToString(), textEditorContainer);
+      AddFileToControlManager(editorType.ToString(), textEditorContainer, fileType);
       return textEditorContainer;
     }
 
@@ -590,10 +590,10 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     /// <param name="nameFile">Имя добавляемого файла.</param>
     /// <param name="container">Экземпляр класса <see cref="UserControl"/>, представляющий собой контейнер.</param>
-    private void AddFileToControlManager(string nameFile, UserControl container)
+    private void AddFileToControlManager(string nameFile, UserControl container, OpenFileButton.TypeWindow fileType)
     {
       var controlManager = new ControlManager(OpenPages, UserControls, FilePaths, multiEditorControl);
-      controlManager.AddControl(nameFile, container, OpenFileButton.TypeWindow.Files);
+      controlManager.AddControl(nameFile, container, fileType);
     }
 
     /// <summary>
@@ -754,7 +754,7 @@ namespace UI.Components.MultiEditorMethods
         TextEditorContainer textEditorContainer = GetContainer(editorType);
         if (textEditorContainer == null)
         {
-          textEditorContainer = CreateContainer(editorType);
+          textEditorContainer = CreateContainer(editorType, OpenFileButton.TypeWindow.DeviceControl);
         }
         ShowNewDockItem($"{runControl.FileName}", textEditorContainer, runControl, editorType);
 

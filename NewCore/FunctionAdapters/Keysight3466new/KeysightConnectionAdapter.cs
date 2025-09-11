@@ -19,6 +19,8 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     private readonly KeysightDevice _device;
     private readonly KeysightConnection _connection;
 
+    public event Action DeviceDisponce;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KeysightConnectionAdapter"/>.
     /// </summary>

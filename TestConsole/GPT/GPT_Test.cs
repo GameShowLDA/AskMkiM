@@ -60,7 +60,15 @@ namespace TestConsole.GPT
     {
       var device = SelectBreakdownTester();
       if (device != null)
-        await device.IrManger.SetModeAsync();
+      {
+        await device.ConnectableManager.ConnectAsync();
+        await device.SystemManger.TestReset();
+        await device.ConnectableManager.DisconnectAsync();
+      }
+      //for (int i = 0; i < 100; i++)
+      //{ 
+      //  //await device.ConnectableManager.InitializeAsync();
+      //}
     }
 
     private static async Task CheckTimeRamp()

@@ -62,5 +62,16 @@ namespace NewCore.FunctionAdapters.GPT
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Чтение конфигурации системных настроек", "Конфигурация считана", true, 1);
       return config;
     }
+
+    public async Task<bool> TestReset()
+    {
+      if (await _systemSettings.TestReset())
+      {
+        var result = await _device.ConnectableManager.ConnectAsync();
+        return result.Connect;
+      }
+
+      return false;
+    }
   }
 }

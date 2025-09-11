@@ -239,6 +239,18 @@ namespace Utilities.Errors
     [ErrorCodeTag("PI005")]
     Pi_KeysConflict,
 
+    /// <summary> Ошибка при проверке точки про методе полного узла. </summary>
+    [ErrorCodeTag("SI006")]
+    Pi_NodeExecutePointError,
+
+    /// <summary> Ошибка при замкнутной цепи. </summary>
+    [ErrorCodeTag("SI007")]
+    Pi_ChainError,
+
+    /// <summary> Ошибка при замкнутной паре. </summary>
+    [ErrorCodeTag("SI008")]
+    Pi_PairError,
+
     #endregion
 
     #region Режим КС

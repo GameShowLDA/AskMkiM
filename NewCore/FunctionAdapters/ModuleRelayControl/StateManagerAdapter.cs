@@ -25,6 +25,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       _stateManager = new StateManager(moduleRelayControl);
     }
 
+    public event Action DeviceDisponce;
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserMessageService messageService = null)
     {

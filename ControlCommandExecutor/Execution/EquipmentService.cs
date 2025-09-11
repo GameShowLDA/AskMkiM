@@ -1,9 +1,11 @@
-﻿using System;
+﻿using AppConfiguration;
+using ControlCommandAnalyser.Model.Chains;
+using DataBaseConfiguration.Services.Device;
+using NewCore.Base.Interface.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DataBaseConfiguration.Services.Device;
-using NewCore.Base.Interface.Main;
 using Utilities;
 using Utilities.Interface;
 using Utilities.Models;
@@ -278,7 +280,7 @@ namespace ControlCommandExecutor.Execution
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
     /// <returns>Экземпляр <see cref="IBreakdownTester"/>.</returns>
     /// <exception cref="Exception">Если устройство не найдено или <see cref="ValidRelayModules"/> ещё не проинициализировано.</exception>
-    public static IBreakdownTester GetBreakdownTesterOrThrow(IUserMessageService messageService)
+    public static async Task<IBreakdownTester> GetBreakdownTesterOrThrow(IUserMessageService messageService)
     {
       if (ValidBreakdownTester != null)
         return ValidBreakdownTester;
@@ -293,7 +295,7 @@ namespace ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var tester = new BreakdownTesterServices().GetDevicesByNumberChassis(number).FirstOrDefault();
+        var tester = ServiceLocator.GetRequired<BreakdownTesterServices>().GetDevicesByNumberChassis(number).FirstOrDefault();
         if (tester != null)
         {
           ValidBreakdownTester = tester;
@@ -419,20 +421,22 @@ namespace ControlCommandExecutor.Execution
     /// </summary>
     /// <param name="currentPoint">Текущая точка, относительно которой выбираются предыдущие.</param>
     /// <returns>Список точек, предшествующих указанной точке в AnalyzePoints.</returns>
-    public static List<PointModel> GetPointsBefore(PointModel currentPoint)
+    public static List<List<PointModel>> GetDisconnectChainsBefore(SchemeModel schemeModel, List<PointModel> currentPoint)
     {
-      if (AnalyzedPoints == null)
-        throw new Exception("Список точек не инициализирован. Необходимо вызвать AnalyzePoints.");
+      List<List<PointModel>> result = new();
+      foreach (var chain in schemeModel.GetPointsDisconnected())
+      {
+        if (chain == currentPoint)
+        {
+          return result;
+        }
+        else
+        {
+          result.Add(chain);
+        }
+      }
 
-      var index = AnalyzedPoints.FindIndex(p =>
-        p.DeviceNumber == currentPoint.DeviceNumber &&
-        p.ModuleNumber == currentPoint.ModuleNumber &&
-        p.PointNumber == currentPoint.PointNumber);
-
-      if (index < 0)
-        throw new Exception($"Указанная точка [{currentPoint.DeviceNumber}.{currentPoint.ModuleNumber}.{currentPoint.PointNumber}] не найдена в AnalyzePoints.");
-
-      return AnalyzedPoints.Take(index).ToList();
+      return result;
     }
 
     /// <summary>

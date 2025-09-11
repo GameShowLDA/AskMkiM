@@ -84,7 +84,9 @@ namespace ControlCommandAnalyser.Parser.Pi
       {
         LoggerUtility.LogWarning($"Не распознано в СИ: '{siRemainder}'");
       }
+
       model.SiCommand = modelSi;
+
 
       var remainderPi = piPart;
 
@@ -228,6 +230,11 @@ namespace ControlCommandAnalyser.Parser.Pi
       }
 
       LoggerUtility.LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
+
+      model.SiCommand.CommandNumber = model.CommandNumber;
+      model.SiCommand.FormattedStartLineNumber = model.FormattedStartLineNumber;
+      model.SiCommand.Scheme = model.Scheme;
+      model.SiCommand.StartLineNumber = model.StartLineNumber;
 
       return model;
     }

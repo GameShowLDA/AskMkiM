@@ -13,6 +13,7 @@ namespace NewCore.Device
   /// </summary>
   public class GPT79904 : DeviceWithCOM, IBreakdownTester
   {
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="GPT79904"/>.
     /// </summary>
@@ -24,7 +25,7 @@ namespace NewCore.Device
       Parity = Parity.None;
       DeviceClass = GetType().FullName;
 
-      DeviceType = DeviceEnum.DeviceType.BreakdownTester;
+      DeviceType = DeviceEnum.DeviceType.BreakdownTester; 
 
       AcwManger = new AcwModeAdapter(this);
       DcwManger = new DcwModeAdapter(this);

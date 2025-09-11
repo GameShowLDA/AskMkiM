@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using AppConfiguration;
+using DataBaseConfiguration.Services.Device;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -135,6 +137,19 @@ namespace MainWindowProgram.Services
       }
       else
       {
+        var breakDowns = ServiceLocator.GetRequired<BreakdownTesterServices>().GetAll();
+        foreach (var item in breakDowns)
+        {
+          try
+          {
+            await item.ConnectableManager.DisconnectAsync();
+          }
+          catch (Exception ex)
+          {
+            Utilities.LoggerUtility.LogException(ex);
+          }
+        }
+
         Application.Current.Shutdown();
         // TODO : Раскомментировать, когда будет готово
         // await Core.Communication.CommunicationManager.ResetAllSystem();

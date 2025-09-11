@@ -2,6 +2,7 @@
 using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Model.Ok;
+using ControlCommandExecutor.BaseStrategies;
 using ControlCommandExecutor.Execution;
 using NewCore.Base.Interface.Main;
 using Utilities;
@@ -61,12 +62,11 @@ namespace ControlCommandExecutor.Executors
 
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
-      var breakDown = EquipmentService.GetBreakdownTesterOrThrow(context.Console);
+      var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, resistance.Value, voltage.Value);
 
       if (command.AlgorithmKey.Contains("К"))
       {
-        // await NodeFullChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
         BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
         await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance.Value);
       }
@@ -74,25 +74,21 @@ namespace ControlCommandExecutor.Executors
       {
         BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
         await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance.Value);
-        // await MethodExecutor.CheckSequenceAsync(context.CommandExecutionManager, command,  points, context.Console, resistance.Value);
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
         await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance.Value);
-        //await PairwiseFirstPointChecker.CheckSequenceAsync(context.CommandExecutionManager, command, points, context.Console, resistance.Value);
       }
       else
       {
-        // await NodeAccumulationChecker.CheckSequenceAsync(points, context.Console, resistance.Value);
         BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, resistance.Value, context.Console.GetCancellationToken());
+        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, context.Console.GetCancellationToken(), resistance.Value);
       }
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс устройств") { IndentLevel = 1 });
-
         await dbc.ConnectableManager.ResetAsync();
         foreach (var item in modules)
         {
@@ -104,7 +100,6 @@ namespace ControlCommandExecutor.Executors
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserMessageService userMessageService)
     {
       await dbc.ConnectableManager.ResetAsync(userMessageService);
-
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(), userMessageService))
       {
         throw AppConfiguration.Error.Device.DeviceBusCommutation.ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
@@ -133,7 +128,7 @@ namespace ControlCommandExecutor.Executors
       int number = breakDown.Number;
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка пробойной установки"));
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync()).Connect, userMessageService))
+      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync()).Connect, userMessageService))
       {
         throw AppConfiguration.Error.Device.ConnectionExceptionFactory.ConnectFailed(name, numberChassis, number);
       }
@@ -178,9 +173,9 @@ namespace ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    private static async Task<bool> NodeAccumulationPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
     {
-      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
+      var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -199,9 +194,9 @@ namespace ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
     {
-      var breadDown = EquipmentService.GetBreakdownTesterOrThrow(messageService);
+      var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
       double answer = -1;
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -221,5 +216,27 @@ namespace ControlCommandExecutor.Executors
 
       return (result, answer);
     }
+
+    ///// <summary>
+    ///// Выполняет измерение между уже подключёнными точками.
+    ///// Предполагается, что коммутация завершена заранее.
+    ///// </summary>
+    ///// <returns>Задача, представляющая измерение.</returns>
+    //private static async Task<bool> ConnectedPointCheckerMeasurementAsync(double value, IUserMessageService messageService, CancellationToken cancellationToken)
+    //{
+    //  var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
+
+    //  var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+    //  {
+    //    var answer = await breadDown.IrManger.MeasureResistanceAsync(0);
+    //    var result = !await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled() ? answer >= value : !await AppConfiguration.Execution.ExecutionConfig.GetIsErrorSimulationEnabled();
+    //    result = !result;
+
+    //    await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: $"{answer} МОм", type: (result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)) { IndentLevel = 1 }, skipPause: true);
+    //    return result;
+    //  }, messageService);
+
+    //  return result;
+    //}
   }
 }

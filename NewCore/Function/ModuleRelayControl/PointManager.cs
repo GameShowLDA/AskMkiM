@@ -180,5 +180,16 @@ namespace NewCore.Function.ModuleRelayControl
       string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return response;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint)
+    {
+      if (await GetIsIdleModeEnabled())
+        return true;
+
+      var cmd = new DeviceCommand(81, (int)bus, nubmerPoint);
+      string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      return response.Contains(cmd.ToString());
+    }
   }
 }
