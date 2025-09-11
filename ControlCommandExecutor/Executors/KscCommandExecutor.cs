@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Execution;
+using NewCore.Base.Interface.Main;
 
 namespace ControlCommandExecutor.Executors
 {
@@ -16,6 +17,7 @@ namespace ControlCommandExecutor.Executors
     {
       var command = context.Command as KscCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      await AppConfiguration.ServiceLocator.GetRequired<IBreakdownTester>().ConnectableManager.DisconnectAsync();
 
       if (!await AppConfiguration.Execution.ExecutionConfig.GetIsIdleModeEnabled())
       {

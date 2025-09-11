@@ -315,10 +315,7 @@
                     </Grid.Resources>
 
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*" MinHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
-                                                                 Path=ActualHeight,
-                                                                 Converter={StaticResource MultiplyConverter},
-                                                                 ConverterParameter=0.5}"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
 
                         <RowDefinition Height="Auto" MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
