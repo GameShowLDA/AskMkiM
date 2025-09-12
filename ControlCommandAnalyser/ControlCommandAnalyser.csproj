@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppConfiguration\AppConfiguration.csproj" />
+    <ProjectReference Include="..\NewCore\NewCore.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 

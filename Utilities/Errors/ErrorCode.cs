@@ -83,6 +83,10 @@ namespace Utilities.Errors
     [ErrorCodeTag("GEN016")]
     Gen_SchemeConflict,
 
+    /// <summary> Указанный в команде вольтаж выше максимально допустимого вольтажа пробойной установки. </summary>
+    [ErrorCodeTag("GEN017")]
+    Gen_VoltageConflict,
+
     #endregion
 
     #region Режим УМ

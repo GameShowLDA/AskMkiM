@@ -3,6 +3,7 @@ using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains; // Для LoggerUtility
 using ControlCommandAnalyser.Model.Ok;
 using ControlCommandAnalyser.Parser.Common;
+using NewCore.Base.Interface.Main;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,12 +55,15 @@ namespace ControlCommandAnalyser.Parser.Si
         }
       }
 
+      var breakDown = AppConfiguration.ServiceLocator.GetRequired<IBreakdownTester>();
+      var maxVoltage = breakDown.MaxVoltage;
+
       string body = AllLinesInOne(model);
 
       // Дальше работаем ТОЛЬКО с body:
       var remainder = body;
 
-      remainder = ManageSiParametersParse(model, commandNumber, mnemonic, numberLine, remainder);
+      remainder = ManageSiParametersParse(model, commandNumber, mnemonic, numberLine, remainder, maxVoltage);
 
       string bodyNoWs = string.Concat(lines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
@@ -150,7 +154,7 @@ namespace ControlCommandAnalyser.Parser.Si
       return remainder;
     }
 
-    public static string ManageSiParametersParse(SiCommandModel model, string commandNumber, string mnemonic, int numberLine, string remainder)
+    public static string ManageSiParametersParse(SiCommandModel model, string commandNumber, string mnemonic, int numberLine, string remainder, int maxVoltrage)
     {
       var body = remainder;
       var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
@@ -162,13 +166,14 @@ namespace ControlCommandAnalyser.Parser.Si
       // сначала извлекаем ключи
       remainder = ExtractSiKeys(commandNumber, mnemonic, numberLine, model, body, remainder);
 
-      remainder = ExtractSiParameters(commandNumber, mnemonic, numberLine, model, remainder, voltage, resistance, time);
+      remainder = ExtractSiParameters(commandNumber, mnemonic, numberLine, model, remainder, voltage, resistance, time, maxVoltrage);
 
       return remainder;
     }
 
 
-    private static string ExtractSiParameters(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, string remainder, string voltage, string resistance, string time)
+    private static string ExtractSiParameters(string commandNumber, string mnemonic, int numberLine, SiCommandModel model,
+      string remainder, string voltage, string resistance, string time, int maxVoltage)
     {
       (voltage, remainder) = CommonParameterParser.ParseVoltage(remainder);
       LoggerUtility.LogDebug($"После парсинга напряжения: voltage='{voltage}', remainder='{remainder}'");
@@ -179,7 +184,19 @@ namespace ControlCommandAnalyser.Parser.Si
       (time, remainder) = CommonParameterParser.ParseTime(remainder);
       LoggerUtility.LogDebug($"После парсинга времени: time='{time}', remainder='{remainder}'");
 
-      model.Voltage = voltage;
+      if (int.TryParse(voltage.Remove(voltage.Length - 1), out int voltageRes))
+      {
+        if (voltageRes > maxVoltage)
+        {
+          LoggerUtility.LogError($"В команде СИ указан вольтаж, превышающий максимально допустимый вольтаж пробойной установки.");
+          model.Errors.Add(GeneralErrors.VoltageConflict(numberLine, $"{commandNumber} {mnemonic}", voltageRes, maxVoltage));
+        }
+        else
+        {
+          model.Voltage = voltage;
+        }
+      }
+      
       if (string.IsNullOrEmpty(resistance))
       {
         resistance = "100<МОм";

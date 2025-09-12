@@ -3,6 +3,7 @@ using ControlCommandAnalyser.Model;
 using ControlCommandAnalyser.Model.Chains;
 using ControlCommandAnalyser.Parser.Common;
 using ControlCommandAnalyser.Parser.Si; // Для LoggerUtility
+using NewCore.Base.Interface.Main;
 using System.Text.RegularExpressions;
 using Utilities;
 
@@ -37,6 +38,9 @@ namespace ControlCommandAnalyser.Parser.Pi
           throw new Exception("РМ не сущесвует...");
         }
       }
+
+      var breakDown = AppConfiguration.ServiceLocator.GetRequired<IBreakdownTester>();
+      var maxVoltage = breakDown.MaxVoltage;
 
       var model = new PiCommandModel
       {
@@ -77,7 +81,7 @@ namespace ControlCommandAnalyser.Parser.Pi
       }
 
       var modelSi = new SiCommandModel();
-      var siRemainder = SiCommandParser.ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, siPart);
+      var siRemainder = SiCommandParser.ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, siPart, maxVoltage);
 
       // Если СИ что-то не допарсила, логни отдельно (в модель СИ, не ПИ)
       if (!string.IsNullOrWhiteSpace(siRemainder))
@@ -127,8 +131,18 @@ namespace ControlCommandAnalyser.Parser.Pi
         model.VoltageType = VoltageEnum.Type.DCW;
         remainderPi = remainderPi.Replace("+", string.Empty);
       }
-
-      model.Voltage = voltage;
+      if (int.TryParse(voltage.Remove(voltage.Length - 1), out int voltageRes))
+      {
+        if (voltageRes > maxVoltage)
+        {
+          LoggerUtility.LogError($"В команде ПИ указан вольтаж, превышающий максимально допустимый вольтаж пробойной установки.");
+          model.Errors.Add(GeneralErrors.VoltageConflict(numberLine, $"{commandNumber} {mnemonic}", voltageRes, maxVoltage));
+        }
+        else
+        {
+          model.Voltage = voltage;
+        }
+      }
       model.Time = string.IsNullOrEmpty(time) ? "1c" : time;
 
       if (string.IsNullOrWhiteSpace(voltage))
