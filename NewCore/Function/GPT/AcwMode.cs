@@ -119,6 +119,11 @@ namespace NewCore.Function.GPT
     {
       LogInformation($"Начало {nameof(SetVoltageAsync)}: value={value:F3}", isDeviceLog: true);
 
+      if (value > _gptModel.MaxVoltage)
+      {
+        return (false, $"Максимальное напряжение для {_gptModel.Name} = {_gptModel.MaxVoltage}");
+      }
+
       try
       {
         if (await GetIsIdleModeEnabled())
@@ -127,7 +132,7 @@ namespace NewCore.Function.GPT
           return (true, string.Empty);
         }
 
-        double kvValue = value/1000;
+        double kvValue = value / 1000;
         string command = $"{GetCommandSyntax(ManualCommand.MANU_ACW_VOLTAGE)} {kvValue:F3}".Replace(',', '.');
 
         await _gptModel.DeviceProtocol.QueryAsync(command);

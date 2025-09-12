@@ -402,6 +402,7 @@
                 Grid.Column="4" 
                 Width="200"
                 Name="PowerButton"
+                Tag="Power"
                 />
         </Grid>
     </Grid>

@@ -81,7 +81,7 @@ namespace MainWindowProgram.HotkeyBindings
         }
       }
 
-      // Добавляем глобальную обработку Ctrl+Shift+N и Ctrl+N
+      // Добавляем глобальную обработку Ctrl+Shift+№ и Ctrl+№
       ComponentDispatcher.ThreadPreprocessMessage += (ref MSG msg, ref bool handled) =>
       {
         ProcessHierarchyKeyCombination(menuItems, msg, ref handled);

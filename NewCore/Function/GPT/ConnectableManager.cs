@@ -36,7 +36,7 @@ namespace NewCore.Function.GPT
       if (_gptModel?.DeviceProtocol?.OperationLock == null)
         return (false, "DeviceProtocol не инициализирован");
 
-      await _gptModel.DeviceProtocol.OperationLock.WaitAsync();
+      // await _gptModel.DeviceProtocol.OperationLock.WaitAsync();
       try
       {
         if (_gptModel.COMPort == null)
@@ -68,7 +68,7 @@ namespace NewCore.Function.GPT
       }
       finally
       {
-        _gptModel.DeviceProtocol.OperationLock.Release();
+        // _gptModel.DeviceProtocol.OperationLock.Release(5);
 
       }
     }
@@ -79,7 +79,7 @@ namespace NewCore.Function.GPT
       if (_gptModel?.DeviceProtocol?.OperationLock == null)
         return true;
 
-      await _gptModel.DeviceProtocol.OperationLock.WaitAsync();
+     // await _gptModel.DeviceProtocol.OperationLock.WaitAsync();
       try
       {
         if (_gptModel?.COMPort?.IsOpen == true)
@@ -98,7 +98,7 @@ namespace NewCore.Function.GPT
       }
       finally
       {
-        _gptModel.DeviceProtocol.OperationLock.Release();
+       // _gptModel.DeviceProtocol.OperationLock.Release();
       }
     }
 
@@ -131,29 +131,19 @@ namespace NewCore.Function.GPT
           return (false, "COM-порт не инициализирован");
         }
 
-        // Если протокол ещё не создан → создаём
-        if (_gptModel.DeviceProtocol == null)
-        {
-          _gptModel.DeviceProtocol = new SerialDeviceProtocol(_gptModel, _gptModel.COMPort);
-        }
-
-        // Настраиваем параметры COM-порта (если не были заданы)
-        if (_gptModel.COMPort.BaudRate <= 0) _gptModel.COMPort.BaudRate = 115200;
-        if (_gptModel.COMPort.DataBits <= 0) _gptModel.COMPort.DataBits = 8;
-        if (_gptModel.COMPort.Parity == Parity.None) _gptModel.COMPort.Parity = Parity.None;
-        if (_gptModel.COMPort.StopBits == StopBits.None) _gptModel.COMPort.StopBits = StopBits.One;
-
-        _gptModel.COMPort.DtrEnable = true;
-        _gptModel.COMPort.RtsEnable = true;
-        _gptModel.COMPort.NewLine = "\r\n";
-        _gptModel.COMPort.ReadTimeout = 2000;
-        _gptModel.COMPort.WriteTimeout = 2000;
-
-        // Пробуем открыть порт, если он ещё не открыт
         if (!_gptModel.COMPort.IsOpen)
         {
-          _gptModel.COMPort.Open();
-          LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт в InitializeAsync()", isDeviceLog: true);
+          try
+          {
+            _gptModel.COMPort.Open();
+            LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт в InitializeAsync()", isDeviceLog: true);
+          }
+          catch (Exception)
+          {
+            await _gptModel.ConnectableManager.DisconnectAsync();
+            _gptModel.COMPort.Open();
+            LogInformation($"[{_gptModel.Name}] Порт {_gptModel.COMPort.PortName} успешно открыт в InitializeAsync()", isDeviceLog: true);
+          }
         }
         else
         {
@@ -177,7 +167,7 @@ namespace NewCore.Function.GPT
         var answer = await _gptModel.DeviceProtocol.QueryAsync("*IDN?", timeout: 1000);
         if (answer.Contains("GPT"))
           return (true, string.Empty);
-        else 
+        else
           return (false, answer);
       }
       catch (UnauthorizedAccessException ex)

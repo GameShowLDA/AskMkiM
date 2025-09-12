@@ -76,7 +76,7 @@ namespace ControlCommandAnalyser.Formatter
         if (points != null)
         {
           string str = string.Empty;
-          str += $"\t\t{i+1}. #";
+          str += $"\t\t{i+1}. *";
 
           foreach (var point in points)
           {

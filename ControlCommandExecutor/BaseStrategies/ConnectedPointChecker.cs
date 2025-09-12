@@ -24,13 +24,14 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
+    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
     {
+      List<ShowMessageModel> errorsMessage = new List<ShowMessageModel>();
       List<List<PointModel>> errorChain = new();
       var pointsList = schemeModel.GetPointsConnected();
       if (pointsList.Count == 0)
       {
-        return;
+        return errorsMessage;
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка сообщенных точек"));
@@ -73,25 +74,18 @@ namespace ControlCommandExecutor.BaseStrategies
 
         for (int itemIndex = 0; itemIndex < errorChain.Count; itemIndex++)
         {
-          var chainStr = string.Empty;
-          var chain = errorChain[itemIndex];
+          var chain = new ChainModel(errorChain[itemIndex]);
+          var chainStr = PointFormater.GetFormatConnectPoint(chain);
 
-          for (int i = 0; i < chain.Count; i++)
-          {
-            var point = chain[i].Mnemonic;
-            chainStr += $"*{point}*";
-          }
+          var error = new ShowMessageModel($"{chainStr}", message: "Обнаружен разрыв цепи", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
 
-
-          await messageService.ShowMessageAsync(
-            new ShowMessageModel($"{chainStr}",
-                message: "Обнаружен разрыв цепи",
-                type: ShowMessageModel.MessageType.Error)
-            { IndentLevel = 3 });
-
+          await messageService.ShowMessageAsync(error);
           manager.AddErrorMethod(baseCommandModel.PointErrors.DisconnectChainError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainStr));
+          errorsMessage.Add(error);
         }
       }
+
+      return errorsMessage;
     }
 
     /// <summary>

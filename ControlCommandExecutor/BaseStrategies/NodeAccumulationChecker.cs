@@ -34,12 +34,13 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, CancellationToken cancellationToken, double resistance = 0)
+    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(SchemeModel schemeModel, CommandExecutionManager manager, BaseCommandModel baseCommandModel, PerformMeasurementAsync performMeasurementAsync, IUserMessageService messageService, CancellationToken cancellationToken, double resistance = 0)
     {
+      List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
       var pointsList = schemeModel.GetPointsDisconnected();
       if (pointsList.Count == 0)
       {
-        return;
+        return ErrorMessage;
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разобщённых точек"));
@@ -75,23 +76,27 @@ namespace ControlCommandExecutor.BaseStrategies
               manager.AddErrorMethod(baseCommandModel.PointErrors.ChainPairError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", points, localized));
             }
 
-            var firstChain = string.Empty;
-            foreach (var item in points)
-            {
-              firstChain += $"#{item.ToString()}";
-            }
+            var strError = PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { new ChainModel(points), new ChainModel(localized) });
+            await messageService.ShowMessageAsync(new ShowMessageModel(strError,
+              message: "Обнаружено замыкание",
+              type: ShowMessageModel.MessageType.Error)
+            { IndentLevel = 3 });
 
-            var secondChain = string.Empty;
-            foreach (var item in localized)
-            {
-              secondChain += $"#{item.ToString()}";
-            }
-
-            await messageService.ShowMessageAsync(new ShowMessageModel("Локализация завершена", message: $"Обнаружено замыкание {firstChain} c {secondChain}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+            ErrorMessage.Add(new ShowMessageModel(strError,
+              message: "Обнаружено замыкание",
+              type: ShowMessageModel.MessageType.Error)
+            { IndentLevel = 3 });
           }
           else
           {
             await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную цепь", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+
+            ErrorMessage.Add(new ShowMessageModel(
+              $"Ошибка локализации",
+              message: $"Не удалось точно определить замыкание цепей",
+              type: ShowMessageModel.MessageType.Error)
+            { IndentLevel = 3 });
+
           }
         }
 
@@ -109,6 +114,8 @@ namespace ControlCommandExecutor.BaseStrategies
           await DisconnectFromBusBAsync(point, messageService);
         }
       }
+
+      return ErrorMessage;
     }
 
     /// <summary>

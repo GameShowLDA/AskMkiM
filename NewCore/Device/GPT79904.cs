@@ -25,13 +25,14 @@ namespace NewCore.Device
       Parity = Parity.None;
       DeviceClass = GetType().FullName;
 
-      DeviceType = DeviceEnum.DeviceType.BreakdownTester; 
+      DeviceType = DeviceEnum.DeviceType.BreakdownTester;
 
       AcwManger = new AcwModeAdapter(this);
       DcwManger = new DcwModeAdapter(this);
       IrManger = new IrModeAdapter(this);
       SystemManger = new SystemSettingsAdapter(this);
       ConnectableManager = new ConnectableManagerAdapter(this);
+      MaxVoltage = 600;
     }
 
     /// <inheritdoc />
@@ -54,5 +55,8 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public ISystemSettingsBreakdown SystemManger { get; set; }
+
+    /// <inheritdoc />
+    public int MaxVoltage { get; set; }
   }
 }
