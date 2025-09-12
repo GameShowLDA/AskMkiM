@@ -22,6 +22,49 @@ namespace ControlCommandAnalyser.Model.Ok
     /// <summary>
     /// Словарь параметров. Ключ — идентификатор параметра (ПРИМ/ПРИМЕЧ/ПРИМЕЧАНИЕ = "ПРИМ").
     /// </summary>
-    public Dictionary<string, List<string>> Parameters { get; set; } = new();
+    //public Dictionary<string, List<string>> Parameters { get; set; } = new();
+
+    /// <summary>
+    /// Обозначение объекта контроля.
+    /// </summary>
+    public string ControlObjectTitle { get; set; }
+    /// <summary>
+    /// Наименование объекта контроля.
+    /// </summary>
+    public string? ControlObjectName { get; set; }
+    /// <summary>
+    /// Обозначение бумажного документа таблицы программы испытаний при его наличии (ОПК).
+    /// </summary>
+    public string? TestProgramTableDesignation { get; set; }
+    /// <summary>
+    /// Номер последнего проведенного измерения в ОПК.
+    /// </summary>
+    public string? LastMeasurment { get; set; }
+    /// <summary>
+    /// Тип системы контроля.
+    /// </summary>
+    public string ContolSystemType { get; set; }
+    /// <summary>
+    /// Обозначение документа, на основании которого написана программа контроля (КД).
+    /// </summary>
+    public List<string?>? ControlProgramDocument { get; set; }
+    /// <summary>
+    /// Номер последнего проведенного в КД извещения.
+    /// </summary>
+    public List<Tuple<string, string?>?>?  LastNotificationNumber { get; set; }
+    /// <summary>
+    /// Номер заказа.
+    /// </summary>
+    public string? OrderNumber { get; set; }
+    /// <summary>
+    /// Номер потребителя программы (ЦЕХ).
+    /// </summary>
+    public string? DepartmentNumber { get; set; }
+    /// <summary>
+    /// Примечания.
+    /// </summary>
+    public string? Comments { get; set; }
+
+
   }
 }
