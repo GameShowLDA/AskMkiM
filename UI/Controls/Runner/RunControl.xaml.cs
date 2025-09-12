@@ -44,6 +44,7 @@ namespace UI.Controls.Runner
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
 
+
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
     }
@@ -153,14 +154,13 @@ namespace UI.Controls.Runner
       });
     }
 
-    private void PreviousArrow_ClickMouse(MouseButtonEventArgs obj)
+    private void ArrowButton_Click(object sender, RoutedEventArgs e)
     {
-      //нужно получить активный текстовый редактор и открыть файл который расположен по пути в texteditormodel
       var test = this.LeftBox.Children[0];
       if (test != null && test is TextEditorUI textEditor)
       {
-        if (textEditor.TextEditorModel != null 
-          && !string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath) 
+        if (textEditor.TextEditorModel != null
+          && !string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath)
           && File.Exists(textEditor.TextEditorModel.FilePath))
         {
           EventAggregator.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);

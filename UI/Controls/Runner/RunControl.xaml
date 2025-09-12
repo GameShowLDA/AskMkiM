@@ -40,13 +40,27 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
 
-                        <Icons:PreviousArrow Background="{StaticResource IsCheckedColorSolidColorBrush}" ClickMouse="PreviousArrow_ClickMouse" Cursor="Hand"/>
+                        <Icons:ArrowButton ButtonBackground="Transparent" 
+                                           Cursor="Hand" Height="15" Width="15" 
+                                           RenderTransformOrigin="0.5,0.5" Click="ArrowButton_Click" 
+                                           Margin="5,0" 
+                                           ButtonBorder="Transparent" ArrowBrush="{StaticResource ForegroundSolidColorBrush}"
+                                           ArrowHoverBrush="{StaticResource ActiveForegroundSolidColorBrush}">
+                            <Icons:ArrowButton.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Icons:ArrowButton.RenderTransform>
+                        </Icons:ArrowButton>
                         <TextBlock Name="headerFile" 
                Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
 
                     </Grid>
                 </Grid>
-                
+
                 <Grid x:Name="LeftBox" Grid.Row="1">
                     <Controls:TextEditorUI/>
                 </Grid>
