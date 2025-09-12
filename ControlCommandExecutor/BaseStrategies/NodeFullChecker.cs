@@ -26,12 +26,15 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
+    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserMessageService messageService, double resistance)
     {
+      List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
+
+
       var pointsList = schemeModel.GetPointsDisconnected();
       if (pointsList.Count == 0)
       {
-        return;
+        return ErrorMessage;
       }
       ErrorsPoints = new List<ChainModel>();
 
@@ -85,50 +88,15 @@ namespace ControlCommandExecutor.BaseStrategies
 
         foreach (var chain in chains)
         {
-          var chainStr = string.Empty;
-          for (int itemIndex = 0; itemIndex < chain.Count; itemIndex++)
-          { 
-            var item = chain[itemIndex];
-            for (int i = 0; i < item.PointModels.Count; i++)
-            {
-              var point = item.PointModels[i].Mnemonic;
+          var chainStr = PointFormater.GetFormatDisconnectPoint(chain);
 
-              if (itemIndex > 0 && i == 0)
-              { 
-                chainStr += $" ## ";
-              }
-
-              if (item.PointModels.Count == 1)
-              {
-                chainStr += $"*{point}*";
-                continue;
-              }
-
-              if (i == 0)
-              {
-                chainStr += $"*{point}";
-              }
-              else if (i + 1 == item.PointModels.Count)
-              {
-                chainStr += $"#{point}*";
-              }
-              else
-              { 
-                chainStr += $"#{point}";
-              }
-            }
-          }
-
-
-          await messageService.ShowMessageAsync(
-             new ShowMessageModel($"{chainStr}",
-                 message: "Обнаружено замыкание",
-                 type: ShowMessageModel.MessageType.Error)
-             { IndentLevel = 3 });
+          ErrorMessage.Add(new ShowMessageModel($"{chainStr}", message: "Обнаружено замыкание", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
 
           manager.AddErrorMethod(baseCommandModel.PointErrors.ChainError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainStr));
         }
       }
+
+      return ErrorMessage;
     }
 
     /// <summary>

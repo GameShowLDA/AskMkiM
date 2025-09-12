@@ -46,7 +46,7 @@ namespace ConsoleUI.ConsoleUI
         if (e.Key == Key.F4 && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
         {
           e.Handled = true;
-          Close();   // нормальное закрытие → поток завершится
+          Close();
         }
       };
     }

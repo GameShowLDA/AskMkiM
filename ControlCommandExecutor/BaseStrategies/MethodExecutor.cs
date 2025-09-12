@@ -23,13 +23,14 @@ namespace ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, IUserMessageService messageService, double resistance)
+    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(SchemeModel schemeModel, PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel siCommandModel, IUserMessageService messageService, double resistance)
     {
+      List<ShowMessageModel> showMessageModels = new List<ShowMessageModel>();
 
       var pointsList = schemeModel.GetPointsDisconnected();
       if (pointsList.Count == 0)
       {
-        return;
+        return showMessageModels;
       }
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка разобщённых точек"));
@@ -57,10 +58,12 @@ namespace ControlCommandExecutor.BaseStrategies
           await messageService.ShowMessageAsync(new ShowMessageModel($"Выполение измерения методом полного узла"), IsBlockStart: true);
           await BaseStrategies.NodeFullChecker.CheckSequenceAsync(schemeModel, performMeasurementAsync, manager, siCommandModel, messageService, resistance);
 
-          return;
+          return showMessageModels;
         }
         await DisconnectPointsToBusAsync(binaryPoints, schemeModel, step, messageService);
       }
+
+      return showMessageModels;
     }
 
     /// <summary>

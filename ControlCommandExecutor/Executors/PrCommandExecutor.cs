@@ -68,29 +68,38 @@ namespace ControlCommandExecutor.Executors
 
       double resistance = ExtractNumberFrimString(command.LowerLimitResistance);
 
+      List<ShowMessageModel> errorMessage = new();
       BaseStrategies.ConnectedPointChecker.PerformMeasurementAsync measurePointConnected = ConnectedPointCheckerMeasurementAsync;
-      await ConnectedPointChecker.CheckSequenceAsync(command.Scheme, measurePointConnected, context.CommandExecutionManager, command, context.Console, resistance);
+      var connectErrMes =  await ConnectedPointChecker.CheckSequenceAsync(command.Scheme, measurePointConnected, context.CommandExecutionManager, command, context.Console, resistance);
+      errorMessage.AddRange(connectErrMes);
 
       if (command.AlgorithmKey.Contains("К"))
       {
         BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-        await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+        var errMes = await BaseStrategies.NodeFullChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+        errorMessage.AddRange(errMes);
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
         BaseStrategies.NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-        await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+        var errMes = await BaseStrategies.MethodExecutor.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+        errorMessage.AddRange(errMes);
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+        var errMes = await BaseStrategies.PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+        errorMessage.AddRange(errMes);
       }
       else
       {
         BaseStrategies.NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, context.Console.GetCancellationToken(), resistance);
+        var errMes = await BaseStrategies.NodeAccumulationChecker.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, measure, context.Console, context.Console.GetCancellationToken(), resistance);
+        errorMessage.AddRange(errMes);
       }
+
+      await PointFormater.MessageResult(errorMessage, context.Console);
+
     }
 
     /// <summary>
