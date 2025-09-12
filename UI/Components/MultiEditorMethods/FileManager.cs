@@ -61,51 +61,54 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="path">Путь к файлу.</param>
     public void OpenFile(string path)
     {
-      var nameFile = GetNameFile(path);
-      if (string.IsNullOrEmpty(nameFile))
+      Application.Current.Dispatcher.BeginInvoke(() =>
       {
-        MessageBoxCustom.Show("Ошибка при открытии файла", $"Ошибка при открытии файла {path}", image: MessageBoxImage.Error);
-        return;
-      }
-
-      try
-      {
-        string fileContent = string.Empty;
-        var fileData = GetFileContent(path).ToTuple();
-        fileContent = fileData.Item1;
-        var encoding = fileData.Item2;
-        TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
-        if (textEditorContainer == null)
+        var nameFile = GetNameFile(path);
+        if (string.IsNullOrEmpty(nameFile))
         {
-          textEditorContainer = CreateContainer(EditorType.TextEditor);
+          MessageBoxCustom.Show("Ошибка при открытии файла", $"Ошибка при открытии файла {path}", image: MessageBoxImage.Error);
+          return;
         }
 
-        var fileType = GetFileType(nameFile);
-        if (FilePaths.ContainsValue(path))
+        try
         {
-          var existingItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.TabText == nameFile);
-          if (existingItem != null)
+          string fileContent = string.Empty;
+          var fileData = GetFileContent(path).ToTuple();
+          fileContent = fileData.Item1;
+          var encoding = fileData.Item2;
+          TextEditorContainer textEditorContainer = GetContainer(EditorType.TextEditor);
+          if (textEditorContainer == null)
           {
-            ShowDockItem(textEditorContainer, existingItem);
-            ShowControl(textEditorContainer, EditorType.TextEditor);
-            return;
+            textEditorContainer = CreateContainer(EditorType.TextEditor);
           }
+
+          var fileType = GetFileType(nameFile);
+          if (FilePaths.ContainsValue(path))
+          {
+            var existingItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.TabText == nameFile);
+            if (existingItem != null)
+            {
+              ShowDockItem(textEditorContainer, existingItem);
+              ShowControl(textEditorContainer, EditorType.TextEditor);
+              return;
+            }
+          }
+          var newFileName = ManageFilename(path, nameFile);
+
+          var textEditorModel = new TextEditorModel(path, newFileName, encoding);
+          var textEditor = CreateTextEditor(textEditorModel, fileContent, fileType);
+          EventAggregator.RaiseTextEditorActivated(textEditor);
+
+          ShowNewDockItem(newFileName, textEditorContainer, textEditor);
+
+          ShowControl(textEditorContainer, EditorType.TextEditor);
         }
-        var newFileName = ManageFilename(path, nameFile);
-
-        var textEditorModel = new TextEditorModel(path, newFileName, encoding);
-        var textEditor = CreateTextEditor(textEditorModel, fileContent, fileType);
-        EventAggregator.RaiseTextEditorActivated(textEditor);
-
-        ShowNewDockItem(newFileName, textEditorContainer, textEditor);
-
-        ShowControl(textEditorContainer, EditorType.TextEditor);
-      }
-      catch (Exception ex)
-      {
-        MessageBoxCustom.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", image: MessageBoxImage.Error);
-        LogException($"Ошибка при чтении файла", ex);
-      }
+        catch (Exception ex)
+        {
+          MessageBoxCustom.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", image: MessageBoxImage.Error);
+          LogException($"Ошибка при чтении файла", ex);
+        }
+      });
     }
 
     /// <summary>

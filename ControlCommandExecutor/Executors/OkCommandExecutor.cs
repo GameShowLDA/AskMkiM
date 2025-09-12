@@ -29,6 +29,7 @@ namespace ControlCommandExecutor.Executors
       var command = context.Command as OkCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
       command.ProtocolModel = new Utilities.ResultProtocol.ProtocolModel();
+      command.ProtocolModel.Program = command.ObjectName;
 
       await context.Console.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Выполнение программы контроля для \"{command.ObjectName}({command.ObjectCode})\""), IsBlockStart: true);
     }

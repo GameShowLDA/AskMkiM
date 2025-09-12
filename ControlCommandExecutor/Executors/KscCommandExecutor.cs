@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfiguration.Base;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Execution;
 using NewCore.Base.Interface.Main;
@@ -27,9 +28,8 @@ namespace ControlCommandExecutor.Executors
       }
 
       command.OkCommandModel.ProtocolModel.EndTime = DateTime.Now;
-      var protocol = ProtocolModel.SetProtocol(command.OkCommandModel.ProtocolModel);
-      Console.WriteLine(protocol);
-
+      var fullFilePath = ProtocolModel.GetPathProtocol(command.OkCommandModel.ProtocolModel);
+      EventAggregator.RaiseOpenFileInEditorAgain(fullFilePath);
     }
   }
 }
