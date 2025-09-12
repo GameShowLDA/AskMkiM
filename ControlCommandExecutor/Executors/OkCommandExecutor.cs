@@ -23,6 +23,8 @@ namespace ControlCommandExecutor.Executors
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       }
 
+      Utilities.ResultProtocol.ProtocolModel protocolModel = new Utilities.ResultProtocol.ProtocolModel();
+
       context.CommandExecutionManager.ClearErrorsMethod();
 
       var command = context.Command as OkCommandModel;

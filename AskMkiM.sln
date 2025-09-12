@@ -37,6 +37,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		xresume.txt = xresume.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCommandExecutor", "ControlCommandExecutor\ControlCommandExecutor.csproj", "{B6B92F03-4789-4087-A239-C3486DC17BA7}"
@@ -97,10 +98,6 @@ Global
 		{61E67CB2-5372-4128-B9D7-35D459B1D940}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61E67CB2-5372-4128-B9D7-35D459B1D940}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61E67CB2-5372-4128-B9D7-35D459B1D940}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9675F84A-4146-4E52-A6A3-8C8FD24B10FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9675F84A-4146-4E52-A6A3-8C8FD24B10FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9675F84A-4146-4E52-A6A3-8C8FD24B10FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9675F84A-4146-4E52-A6A3-8C8FD24B10FC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6B92F03-4789-4087-A239-C3486DC17BA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6B92F03-4789-4087-A239-C3486DC17BA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6B92F03-4789-4087-A239-C3486DC17BA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
