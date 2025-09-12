@@ -23,5 +23,7 @@ namespace ControlCommandAnalyser.Model.Ok
     /// Словарь параметров. Ключ — идентификатор параметра (ПРИМ/ПРИМЕЧ/ПРИМЕЧАНИЕ = "ПРИМ").
     /// </summary>
     public Dictionary<string, List<string>> Parameters { get; set; } = new();
+
+    public Utilities.ResultProtocol.ProtocolModel ProtocolModel { get; set; } = new();
   }
 }

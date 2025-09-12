@@ -39,7 +39,11 @@ namespace Utilities.ResultProtocol
     /// <summary>
     /// Время конца исполнения.
     /// </summary>
-    public DateTime EndTime { get; set; }
+    public DateTime EndTime 
+    { 
+      get; 
+      set; 
+    }
 
     /// <summary>
     /// Общее время выполнения.
@@ -121,9 +125,9 @@ namespace Utilities.ResultProtocol
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
           .Replace("$НОМЕР", protocolModel.Number.ToString())
           .Replace("$ПРОГРАММА", protocolModel.Program)
-          .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss"))
-          .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss"))
-          .Replace("$ВРЕМЯ", protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss"));
+          .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss:ff"))
+          .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss:ff"))
+          .Replace("$ВРЕМЯ", protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss\:ff"));
 
       return formattedText;
     }

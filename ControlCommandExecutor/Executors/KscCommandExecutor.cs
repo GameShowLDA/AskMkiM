@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using ControlCommandAnalyser.Model;
 using ControlCommandExecutor.Execution;
 using NewCore.Base.Interface.Main;
+using Utilities.ResultProtocol;
 
 namespace ControlCommandExecutor.Executors
 {
   internal class KscCommandExecutor : ICommandExecutor
   {
     public string Mnemonic => "КЦ";
+
 
     public async Task ExecuteAsync(CommandExecutionContext context)
     {
@@ -23,6 +25,11 @@ namespace ControlCommandExecutor.Executors
       {
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       }
+
+      command.OkCommandModel.ProtocolModel.EndTime = DateTime.Now;
+      var protocol = ProtocolModel.SetProtocol(command.OkCommandModel.ProtocolModel);
+      Console.WriteLine(protocol);
+
     }
   }
 }

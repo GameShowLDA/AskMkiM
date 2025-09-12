@@ -23,12 +23,12 @@ namespace ControlCommandExecutor.Executors
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       }
 
-      Utilities.ResultProtocol.ProtocolModel protocolModel = new Utilities.ResultProtocol.ProtocolModel();
 
       context.CommandExecutionManager.ClearErrorsMethod();
 
       var command = context.Command as OkCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      command.ProtocolModel = new Utilities.ResultProtocol.ProtocolModel();
 
       await context.Console.ShowMessageAsync(new Utilities.Models.ShowMessageModel($"Выполнение программы контроля для \"{command.ObjectName}({command.ObjectCode})\""), IsBlockStart: true);
     }
