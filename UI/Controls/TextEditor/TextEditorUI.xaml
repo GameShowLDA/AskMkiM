@@ -22,7 +22,8 @@
         Drop="textEditor_Drop"
         DragEnter="textEditor_DragEnter"  
         Tag="hotkeys" 
-        DragLeave="textEditor_DragLeave">
+        DragLeave="textEditor_DragLeave"
+        PreviewMouseWheel="TextEditor_PreviewMouseWheel">
 
             <avalonEdit:TextEditor.Resources>
                 <Style TargetType="ScrollBar">
