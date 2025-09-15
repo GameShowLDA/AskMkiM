@@ -230,6 +230,15 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Открывает диалоговое окно для открытия файла.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
+    public void ViewProtocol(string path)
+    {
+      fileManager.ViewProtocol(path);
+    }
+
+    /// <summary>
     /// Создаёт новый файл.
     /// </summary>
     public void CreateNewFile()

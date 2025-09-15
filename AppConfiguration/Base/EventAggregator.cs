@@ -145,6 +145,11 @@ namespace AppConfiguration.Base
     /// </summary>
     public static event Action<string> OpenFileInEditorAgain;
 
+    /// <summary>
+    /// Событие, которое вызывается при нажатии на кнопку возврата к редактирванию файла в текстовом редакторе.
+    /// </summary>
+    public static event Action<string> ViewProtocol;
+
     public static event Action <UserControl> CloseRunItem;
 
     /// <summary>
@@ -390,6 +395,15 @@ namespace AppConfiguration.Base
     public static void RaiseOpenFileInEditorAgain(string filePath)
     {
       OpenFileInEditorAgain?.Invoke(filePath);
+    }
+
+    /// <summary>
+    /// Метод для вызова события для просмотра файла протокола в новом текстовом редакторе.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    public static void RaiseViewProtocol(string filePath)
+    {
+      ViewProtocol?.Invoke(filePath);
     }
 
     public static void RaiseCloseRunItem(UserControl runControl)

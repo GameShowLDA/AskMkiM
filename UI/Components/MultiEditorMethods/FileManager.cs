@@ -112,6 +112,64 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Открывает файл, который находится по заданному пути, в текстовом редакторе.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
+    public void ViewProtocol(string path)
+    {
+      Application.Current.Dispatcher.BeginInvoke(() =>
+      {
+        var nameFile = GetNameFile(path);
+        if (string.IsNullOrEmpty(nameFile))
+        {
+          MessageBoxCustom.Show("Ошибка при открытии файла", $"Ошибка при открытии файла {path}", image: MessageBoxImage.Error);
+          return;
+        }
+
+        try
+        {
+          string fileContent = string.Empty;
+          var fileData = GetFileContent(path).ToTuple();
+          fileContent = fileData.Item1;
+          var encoding = fileData.Item2;
+          var containerType = EditorType.Protocol;
+          TextEditorContainer protocolContainer = GetContainer(containerType);
+          if (protocolContainer == null)
+          {
+            protocolContainer = CreateContainer(containerType);
+          }
+
+          var fileType = GetFileType(nameFile);
+          if (FilePaths.ContainsValue(path))
+          {
+            var existingItem = protocolContainer.DockManager.DockItems.FirstOrDefault(item => item.TabText == nameFile);
+            if (existingItem != null)
+            {
+              ShowDockItem(protocolContainer, existingItem);
+              ShowControl(protocolContainer, containerType);
+              return;
+            }
+          }
+          var newFileName = ManageFilename(path, nameFile);
+
+          var textEditorModel = new TextEditorModel(path, newFileName, encoding);
+          var textEditor = CreateTextEditor(textEditorModel, fileContent, fileType);
+          textEditor.IsReadOnly = true;
+          //EventAggregator.RaiseTextEditorActivated(textEditor);
+
+          ShowNewDockItem(newFileName, protocolContainer, textEditor, containerType);
+
+          ShowControl(protocolContainer, containerType);
+        }
+        catch (Exception ex)
+        {
+          MessageBoxCustom.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", image: MessageBoxImage.Error);
+          LogException($"Ошибка при чтении файла", ex);
+        }
+      });
+    }
+
+    /// <summary>
     /// Создает контейнер для вкладок заданного типа.
     /// </summary>
     /// <param name="editorType">Тип вкладок.</param>
@@ -329,7 +387,10 @@ namespace UI.Components.MultiEditorMethods
       }
       else if (dockItem.Content is TextEditorUI || dockItem.Content is FileCompareControl)
       {
-        editorType = EditorType.TextEditor;
+        if (editorType != EditorType.Protocol)
+        {
+          editorType = EditorType.TextEditor;
+        }
         InitializeItemNeedSave(nameFile, textEditorContainer, textEditor, editorType, dockItem);
       }
       else if (dockItem.Content is TableAllArchivesControl || dockItem.Content is TableApkArchiveControl)

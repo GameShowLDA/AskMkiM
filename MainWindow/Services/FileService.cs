@@ -48,7 +48,10 @@ namespace MainWindowProgram.Services
       _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
       EventAggregator.SearchWindowClosing += OnSearchWindowClosing;
+      EventAggregator.ViewProtocol -= ViewProtocol;
+      EventAggregator.ViewProtocol += ViewProtocol;
     }
+
 
     private void OnSearchWindowClosing(bool closing)
     {
@@ -78,6 +81,18 @@ namespace MainWindowProgram.Services
           string filePath = openFileDialog.FileName;
           await _multiWindow.OpenFileInEditor(filePath);
         }
+      }
+    }
+
+    public async void ViewProtocol(string filePath)
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+      }
+      else
+      {
+          await _multiWindow.ViewProtocol(filePath);
       }
     }
 

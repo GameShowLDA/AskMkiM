@@ -54,6 +54,16 @@ namespace MainWindowProgram.Services
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
+    public Task ViewProtocol(string filePath)
+    {
+      _multiWindowControl.ViewProtocol(filePath);
+      return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Добавляет новый MultiEditorControl в контейнер.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
     public Task OpenFileFromEvent(string filePath)
     {
       _multiWindowControl.OpenFileInEditor(filePath);

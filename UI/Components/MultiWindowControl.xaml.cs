@@ -105,6 +105,22 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Добавляет новый MultiEditorControl в контейнер.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    public void ViewProtocol(string filePath)
+    {
+      if (MultiEditor == null)
+      {
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+        return;
+      }
+
+      MultiEditor.ViewProtocol(filePath);
+    }
+
+    /// <summary>
     /// Обрабатывает перемещение разделителя GridSplitter для изменения размера области результатов поиска.
     /// </summary>
     private void GridSplitter_DragDelta(object sender, DragDeltaEventArgs e)
