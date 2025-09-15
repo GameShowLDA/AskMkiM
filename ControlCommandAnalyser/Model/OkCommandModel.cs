@@ -20,11 +20,6 @@ namespace ControlCommandAnalyser.Model.Ok
     public string? ObjectName { get; set; }
 
     /// <summary>
-    /// Словарь параметров. Ключ — идентификатор параметра (ПРИМ/ПРИМЕЧ/ПРИМЕЧАНИЕ = "ПРИМ").
-    /// </summary>
-    //public Dictionary<string, List<string>> Parameters { get; set; } = new();
-
-    /// <summary>
     /// Обозначение объекта контроля.
     /// </summary>
     public string ControlObjectTitle { get; set; }
