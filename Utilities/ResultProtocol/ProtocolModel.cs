@@ -39,7 +39,11 @@ namespace Utilities.ResultProtocol
     /// <summary>
     /// Время конца исполнения.
     /// </summary>
-    public DateTime EndTime { get; set; }
+    public DateTime EndTime
+    {
+      get;
+      set;
+    }
 
     /// <summary>
     /// Общее время выполнения.
@@ -98,7 +102,7 @@ namespace Utilities.ResultProtocol
     }
 
 
-    static public string SetProtocol(ProtocolModel protocolModel)
+    static public string GetPathProtocol(ProtocolModel protocolModel)
     {
       string path = ".\\Resources\\xresume.txt";
       string template;
@@ -121,11 +125,55 @@ namespace Utilities.ResultProtocol
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
           .Replace("$НОМЕР", protocolModel.Number.ToString())
           .Replace("$ПРОГРАММА", protocolModel.Program)
-          .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss"))
-          .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss"))
-          .Replace("$ВРЕМЯ", protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss"));
+          .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss:ff"))
+          .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss:ff"))
+          .Replace("$ВРЕМЯ", protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss\:ff"));
 
-      return formattedText;
+      try
+      {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        var parent1 = directory.Parent;
+        var parent2 = parent1?.Parent;
+
+        if (parent2 != null)
+        {
+          var historyPath = Path.Combine(parent2.FullName, "History");
+          if (!Directory.Exists(historyPath))
+          {
+            Directory.CreateDirectory(historyPath);
+          }
+
+          var dateFolderName = DateTime.Now.ToString("yyyy-MM-dd");
+          var datePath = Path.Combine(historyPath, dateFolderName);
+
+          if (!Directory.Exists(datePath))
+          {
+            Directory.CreateDirectory(datePath);
+          }
+
+          var fileName = $"test_{DateTime.Now.ToString("HHmmss")}.txt";
+          var fullFilePath = Path.Combine(datePath, fileName);
+          
+          using (StreamWriter writer = new StreamWriter(fullFilePath))
+          {
+            writer.WriteLine(formattedText);
+          }
+
+
+          return fullFilePath;
+        }
+        else
+        {
+          Console.WriteLine("Не удалось получить родительскую директорию");
+          return null;
+        }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Произошла ошибка: {ex.Message}");
+        return null;
+      }
+
     }
   }
 }

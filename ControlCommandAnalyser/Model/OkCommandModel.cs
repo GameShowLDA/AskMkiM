@@ -65,6 +65,6 @@ namespace ControlCommandAnalyser.Model.Ok
     /// </summary>
     public string? Comments { get; set; }
 
-
+    public Utilities.ResultProtocol.ProtocolModel ProtocolModel { get; set; } = new();
   }
 }
