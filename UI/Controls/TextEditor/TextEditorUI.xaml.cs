@@ -32,6 +32,12 @@ namespace UI.Controls.TextEditor
       OPKW
     }
 
+    private const double MinFontSize = 12.0;
+    private const double MaxFontSize = 48.0;
+    private const double ZoomStep = 1.0; // шаг изменения шрифта
+
+    private double _defaultFontSize;
+
     private ExecutionGlyphMargin _executionMargin;
     private FileType FileTypeDock { get; set; }
     public TextEditorModel TextEditorModel { get; set; }
@@ -128,6 +134,7 @@ namespace UI.Controls.TextEditor
       InitializeComponent();
       FileTypeDock = fileType;
       TextEditorModel = textEditorModel;
+      _defaultFontSize = textEditor.FontSize;
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
 
@@ -194,6 +201,46 @@ namespace UI.Controls.TextEditor
       _executionMargin.SetActiveLine(lineNumber);
     }
 
+    private void TextEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+      if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+      {
+        // e.Delta кратно 120: >0 — вверх (увеличение), <0 — вниз (уменьшение)
+        if (e.Delta > 0)
+          ZoomIn();
+        else if (e.Delta < 0)
+          ZoomOut();
+
+        // Чтобы колесо не скроллило содержимое
+        e.Handled = true;
+      }
+    }
+
+    private void ZoomIn()
+    {
+      SetFontSize(Clamp(textEditor.FontSize + ZoomStep, MinFontSize, MaxFontSize));
+    }
+
+    private void ZoomOut()
+    {
+      SetFontSize(Clamp(textEditor.FontSize - ZoomStep, MinFontSize, MaxFontSize));
+    }
+
+    private void ResetZoom()
+    {
+      SetFontSize(_defaultFontSize);
+    }
+
+    private void SetFontSize(double size)
+    {
+      textEditor.FontSize = size;
+      // Если используешь собственные вычисления высоты/интерлиньяжа — обнови здесь
+      // textEditor.TextArea.TextView.Redraw(); // обычно не требуется
+    }
+
+    private static double Clamp(double value, double min, double max)
+      => Math.Max(min, Math.Min(max, value));
+
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.M && Keyboard.Modifiers == ModifierKeys.Control)
@@ -217,6 +264,40 @@ namespace UI.Controls.TextEditor
       if (e.Key != Key.M)
       {
         _ctrlMPressed = false;
+      }
+
+      if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+      {
+        // Ctrl + '+' (на основной клаве)
+        if (e.Key == Key.OemPlus)
+        {
+          ZoomIn();
+          e.Handled = true;
+        }
+        // Ctrl + '-' (на основной клаве)
+        else if (e.Key == Key.OemMinus)
+        {
+          ZoomOut();
+          e.Handled = true;
+        }
+        // Ctrl + '+' (на NumPad)
+        else if (e.Key == Key.Add)
+        {
+          ZoomIn();
+          e.Handled = true;
+        }
+        // Ctrl + '-' (на NumPad)
+        else if (e.Key == Key.Subtract)
+        {
+          ZoomOut();
+          e.Handled = true;
+        }
+        // Ctrl + 0 — сброс масштаба к дефолту
+        else if (e.Key == Key.D0 || e.Key == Key.NumPad0)
+        {
+          ResetZoom();
+          e.Handled = true;
+        }
       }
     }
 
@@ -536,5 +617,7 @@ namespace UI.Controls.TextEditor
       Text = text;
       ApplyHighlighting(highlights);
     }
+
+
   }
 }

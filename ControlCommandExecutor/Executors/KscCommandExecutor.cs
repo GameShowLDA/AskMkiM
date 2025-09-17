@@ -28,7 +28,7 @@ namespace ControlCommandExecutor.Executors
 
       command.OkCommandModel.ProtocolModel.EndTime = DateTime.Now;
       var fullFilePath = ProtocolModel.GetPathProtocol(command.OkCommandModel.ProtocolModel);
-      EventAggregator.RaiseOpenFileInEditorAgain(fullFilePath);
+      EventAggregator.RaiseViewProtocol(fullFilePath);
     }
   }
 }
