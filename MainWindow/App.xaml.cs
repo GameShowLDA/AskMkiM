@@ -99,7 +99,7 @@ namespace MainWindowProgram
 
       var svc = AppConfiguration.ServiceLocator.GetRequired<IBreakdownTester>();
      
-      await svc?.ConnectableManager.DisconnectAsync();
+      await svc?.ConnectableManager?.DisconnectAsync();
     }
   }
 }

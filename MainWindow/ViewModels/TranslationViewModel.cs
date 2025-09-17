@@ -1,40 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
 {
-  public class TranslationViewModel
+  /// <summary>
+  /// ViewModel для работы с переводом (сборкой и запуском программ контроля).
+  /// </summary>
+  public partial class TranslationViewModel : ObservableObject
   {
-    /// <summary>
-    /// Команда запуска сборки программы контроля.
-    /// </summary>
-    public ICommand BuildCommand { get; }
-
-    /// <summary>
-    /// Команда запуска исполнителя команды контроля.
-    /// </summary>
-    public ICommand RunCommand { get; }
-
-    /// <summary>
-    /// Сервис административных функций.
-    /// </summary>
     private readonly TranslationServices _service;
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="TranslationViewModel"/>.
+    /// Создаёт новый экземпляр <see cref="TranslationViewModel"/>.
     /// </summary>
-    /// <param name="service">Сервис административных функций.</param>
     public TranslationViewModel(TranslationServices service)
     {
       _service = service;
-      BuildCommand = new AsyncRelayCommand(_service.BuildAsync);
-      RunCommand = new AsyncRelayCommand(_service.RunAsync);
     }
+
+    /// <summary>
+    /// Команда запуска сборки программы контроля.
+    /// </summary>
+    [RelayCommand]
+    private async Task BuildAsync() => await _service.BuildAsync();
+
+    /// <summary>
+    /// Команда запуска исполнителя программы контроля.
+    /// </summary>
+    [RelayCommand]
+    private async Task RunAsync() => await _service.RunAsync();
   }
 }

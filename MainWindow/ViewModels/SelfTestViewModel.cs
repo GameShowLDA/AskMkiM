@@ -1,34 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
+using System.Threading.Tasks;
 
 namespace MainWindowProgram.ViewModels
 {
-  public class SelfTestViewModel
+  /// <summary>
+  /// ViewModel для самотестирования системы и модулей.
+  /// </summary>
+  public partial class SelfTestViewModel
   {
     private readonly SelfTestServices _selfTestServices;
 
     /// <summary>
-    /// Команда отображения метода узла СИ.
+    /// Инициализирует новый экземпляр класса <see cref="SelfTestViewModel"/>.
     /// </summary>
-    public ICommand SelfTestModuleCommand { get; }
-    public ICommand SelfTestSystemCommand { get; }
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="TestViewModel"/>.
-    /// </summary>
-    /// <param name="testService">Сервис для работы с тестами.</param>
+    /// <param name="testService">Сервис для работы с самотестированием.</param>
     public SelfTestViewModel(SelfTestServices testService)
     {
       _selfTestServices = testService;
-
-      SelfTestModuleCommand = new AsyncRelayCommand(_selfTestServices.AddSelfTestModuleAsync);
-      SelfTestSystemCommand = new AsyncRelayCommand(_selfTestServices.AddSelfTestSystemAsync);
     }
+
+    /// <summary>Команда самотеста модуля СИ.</summary>
+    [RelayCommand]
+    private async Task SelfTestModule() => await _selfTestServices.AddSelfTestModuleAsync();
+
+    /// <summary>Команда самотеста всей системы.</summary>
+    [RelayCommand]
+    private async Task SelfTestSystem() => await _selfTestServices.AddSelfTestSystemAsync();
   }
 }

@@ -75,19 +75,6 @@ namespace Mode.TestSuite.CrossTestMkr
     }
 
     /// <summary>
-    /// Отключает БК и отображает сообщение об отключении.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <returns>Возвращает <c>true</c>, если отключение прошло успешно; иначе — <c>false</c>.</returns>
-    private async Task<bool> DisconnectModule(IUserMessageService messageService, IRelaySwitchModule module)
-    {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.DisconnectAsync(messageService), ProtocolSelfCheckControl))
-        throw AppConfiguration.Error.Device.ConnectionExceptionFactory.DisconnectFailed(module.Name, module.NumberChassis, module.Number);
-
-      return true;
-    }
-
-    /// <summary>
     /// Выполняет сброс указанного БК.
     /// </summary>
     /// <param name="module">Блок коммутации</param>

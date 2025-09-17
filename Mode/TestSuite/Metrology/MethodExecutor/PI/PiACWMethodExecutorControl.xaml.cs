@@ -92,7 +92,7 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
         var chassis = breakDown.NumberChassis;
         var number = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw ConnectionExceptionFactory.ConnectFailed(name, chassis, number);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.SetVoltageAsync(dataModel.Voltage)).Success, messageService))
@@ -136,8 +136,6 @@ namespace Mode.TestSuite.Metrology.MethodExecutor.PI
       public override async Task FinalizeAsync(IUserMessageService messageService)
       {
         await base.FinalizeAsync(messageService);
-        var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

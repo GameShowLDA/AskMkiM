@@ -106,7 +106,7 @@ namespace Mode.Metrology.CI
         int chassis = breakDown.NumberChassis;
         int numer = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
@@ -139,7 +139,6 @@ namespace Mode.Metrology.CI
       {
         await base.FinalizeMeasurement(messageService);
         var breakDown = Devices.TryGetValue(MetrologicalModeRole.CI, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

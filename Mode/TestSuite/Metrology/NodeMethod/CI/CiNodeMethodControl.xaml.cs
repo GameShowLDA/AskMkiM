@@ -87,7 +87,7 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
         int chassis = breakDown.NumberChassis;
         int numer = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.ConnectAsync(messageService)).Connect, messageService))
+        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw ConnectionExceptionFactory.ConnectFailed(name, chassis, numer);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.SetModeAsync()).Success, messageService))
@@ -144,8 +144,6 @@ namespace Mode.TestSuite.Metrology.NodeMethod.CI
       public override async Task FinalizeAsync(IUserMessageService messageService)
       {
         await base.FinalizeAsync(messageService);
-        var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-        await breakDown.ConnectableManager.DisconnectAsync(messageService);
       }
     }
   }

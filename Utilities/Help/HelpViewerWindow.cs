@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 
 namespace Utilities.Help
@@ -31,21 +33,45 @@ namespace Utilities.Help
     {
       try
       {
-        await webView.EnsureCoreWebView2Async();
+        string runtimePath = @"Help\WebView2Runtime";
+        string fullRuntimePath = Path.GetFullPath(runtimePath);
+        LoggerUtility.LogInformation("📂 Инициализация WebView2. Путь к runtime: " + fullRuntimePath);
+        LoggerUtility.LogInformation("📄 Существует msedgewebview2.exe: " +
+            File.Exists(Path.Combine(fullRuntimePath, "msedgewebview2.exe")));
+
+        var env = await CoreWebView2Environment.CreateAsync(
+            browserExecutableFolder: fullRuntimePath
+        );
+
+        // Убедимся, что инициализация идёт строго через Environment
+        await webView.EnsureCoreWebView2Async(env);
+
         webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка инициализации Help Viewer: {ex.Message}");
+        LoggerUtility.LogException(ex);
+        MessageBox.Show("Ошибка инициализации справки: " + ex.Message, "Ошибка WebView2",
+            MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
     public async void Navigate(string url)
     {
-      if (webView.CoreWebView2 == null)
-        await webView.EnsureCoreWebView2Async();
+      try
+      {
+        if (webView.CoreWebView2 == null)
+        {
+          LoggerUtility.LogWarning("Попытка навигации до инициализации WebView2");
+          return;
+        }
 
-      webView.CoreWebView2.Navigate(url);
+        webView.Source = new Uri(url);
+      }
+      catch (Exception ex)
+      {
+        LoggerUtility.LogException(ex);
+      }
     }
   }
 }

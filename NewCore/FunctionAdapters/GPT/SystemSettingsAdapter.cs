@@ -67,7 +67,7 @@ namespace NewCore.FunctionAdapters.GPT
     {
       if (await _systemSettings.TestReset())
       {
-        var result = await _device.ConnectableManager.ConnectAsync();
+        var result = await _device.ConnectableManager.InitializeAsync();
         return result.Connect;
       }
 

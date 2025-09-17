@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
-using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
+using System.ComponentModel;
 
 namespace MainWindowProgram.ViewModels
 {
@@ -9,65 +9,56 @@ namespace MainWindowProgram.ViewModels
   /// ViewModel для управления окном приложения.
   /// Содержит команды для изменения состояния окна, его закрытия, перетаскивания и адаптации интерфейса.
   /// </summary>
-  public class WindowViewModel
+  public partial class WindowViewModel : ObservableObject
   {
-    /// <summary>
-    /// Сервис управления состоянием окна.
-    /// </summary>
     private readonly WindowService _service;
+
+    /// <summary>
+    /// Создаёт новый экземпляр <see cref="WindowViewModel"/>.
+    /// </summary>
+    public WindowViewModel(WindowService service)
+    {
+      _service = service;
+    }
 
     /// <summary>
     /// Команда для сворачивания окна.
     /// </summary>
-    public ICommand MinimizeCommand { get; }
+    [RelayCommand]
+    private async Task MinimizeAsync() => await _service.MinimizeAsync();
 
     /// <summary>
     /// Команда для переключения состояния между обычным и развёрнутым.
     /// </summary>
-    public ICommand MaximizeCommand { get; }
+    [RelayCommand]
+    private async Task MaximizeAsync() => await _service.ToggleMaximizeAsync();
 
     /// <summary>
     /// Команда для перетаскивания окна по экрану.
     /// </summary>
-    public ICommand DragMoveCommand { get; }
+    [RelayCommand]
+    private async Task DragMoveAsync() => await _service.DragMoveAsync();
 
     /// <summary>
     /// Команда для завершения работы приложения.
     /// </summary>
-    public ICommand CloseCommand { get; }
+    [RelayCommand]
+    private async Task CloseAsync() => await _service.CloseApplicationAsync();
 
     /// <summary>
     /// Команда для адаптации размера шрифта главного меню в зависимости от размеров окна.
     /// </summary>
-    public ICommand AdjustCommand { get; }
+    [RelayCommand]
+    private async Task AdjustAsync() => await _service.AdjustMainMenuFontAsync();
 
     /// <summary>
-    /// Команда, вызываемая при закрытии окна.
+    /// Команда, вызываемая при закрытии окна (с CancelEventArgs).
     /// </summary>
-    public ICommand ClosingCommand { get; }
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="WindowViewModel"/>.
-    /// </summary>
-    /// <param name="service">Сервис управления окном.</param>
-    public WindowViewModel(WindowService service)
+    [RelayCommand]
+    private async Task ClosingAsync(CancelEventArgs args)
     {
-      _service = service;
-
-      MinimizeCommand = new AsyncRelayCommand(_service.MinimizeAsync);
-      MaximizeCommand = new AsyncRelayCommand(_service.ToggleMaximizeAsync);
-      DragMoveCommand = new AsyncRelayCommand(_service.DragMoveAsync);
-      CloseCommand = new AsyncRelayCommand(_service.CloseApplicationAsync);
-      AdjustCommand = new AsyncRelayCommand(_service.AdjustMainMenuFontAsync);
-
-      // Обработка события Closing с передачей CancelEventArgs
-      ClosingCommand = new AsyncRelayCommand(param =>
-      {
-        if (param is CancelEventArgs args)
-          return _service.HandleWindowClosingAsync(args);
-
-        return Task.CompletedTask;
-      });
+      if (args != null)
+        await _service.HandleWindowClosingAsync(args);
     }
   }
 }

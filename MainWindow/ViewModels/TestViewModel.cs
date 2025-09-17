@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
+using System.Threading.Tasks;
 
 namespace MainWindowProgram.ViewModels
 {
@@ -8,47 +8,9 @@ namespace MainWindowProgram.ViewModels
   /// ViewModel для управления тестами.
   /// Содержит команды для отображения элементов управления различных типов тестов в редакторе.
   /// </summary>
-  public class TestViewModel
+  public partial class TestViewModel
   {
-    /// <summary>
-    /// Сервис для работы с тестами.
-    /// </summary>
     private readonly TestService _testService;
-
-    /// <summary>
-    /// Команда отображения метода узла СИ.
-    /// </summary>
-    public ICommand CiNodeMethodCommand { get; }
-
-    /// <summary>
-    /// Команда отображения метода узла ПИ (DCW).
-    /// </summary>
-    public ICommand PiDCWNodeMethodCommand { get; }
-
-    /// <summary>
-    /// Команда отображения метода узла ПИ (ACW).
-    /// </summary>
-    public ICommand PiACWNodeMethodCommand { get; }
-
-    /// <summary>
-    /// Команда отображения группового метода СИ.
-    /// </summary>
-    public ICommand CiMethodExecutorCommand { get; }
-
-    /// <summary>
-    /// Команда отображения группового метода ПИ (ACW).
-    /// </summary>
-    public ICommand PiACWMethodExecutorCommand { get; }
-
-    /// <summary>
-    /// Команда отображения группового метода ПИ (DCW).
-    /// </summary>
-    public ICommand PiDCWMethodExecutorCommand { get; }
-
-    /// <summary>
-    /// Команда отображения перекрёстного теста МКР.
-    /// </summary>
-    public ICommand CrossTestMkrExecutorCommand { get; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TestViewModel"/>.
@@ -57,16 +19,34 @@ namespace MainWindowProgram.ViewModels
     public TestViewModel(TestService testService)
     {
       _testService = testService;
-
-      CiNodeMethodCommand = new AsyncRelayCommand(_testService.AddCiNodeMethodControlAsync);
-      PiDCWNodeMethodCommand = new AsyncRelayCommand(_testService.AddPiDCWNodeMethodControlAsync);
-      PiACWNodeMethodCommand = new AsyncRelayCommand(_testService.AddPiACWNodeMethodControlAsync);
-
-      CiMethodExecutorCommand = new AsyncRelayCommand(_testService.AddCiMethodExecutorControlAsync);
-      PiACWMethodExecutorCommand = new AsyncRelayCommand(_testService.AddPiACWMethodExecutorControlAsync);
-      PiDCWMethodExecutorCommand = new AsyncRelayCommand(_testService.AddPiDCWMethodExecutorControlAsync);
-
-      CrossTestMkrExecutorCommand = new AsyncRelayCommand(_testService.AddCrossTestMkrExecutorControlAsync);
     }
+
+    /// <summary>Метод узла СИ.</summary>
+    [RelayCommand]
+    private async Task CiNodeMethod() => await _testService.AddCiNodeMethodControlAsync();
+
+    /// <summary>Метод узла ПИ (DCW).</summary>
+    [RelayCommand]
+    private async Task PiDCWNodeMethod() => await _testService.AddPiDCWNodeMethodControlAsync();
+
+    /// <summary>Метод узла ПИ (ACW).</summary>
+    [RelayCommand]
+    private async Task PiACWNodeMethod() => await _testService.AddPiACWNodeMethodControlAsync();
+
+    /// <summary>Групповой метод СИ.</summary>
+    [RelayCommand]
+    private async Task CiMethodExecutor() => await _testService.AddCiMethodExecutorControlAsync();
+
+    /// <summary>Групповой метод ПИ (ACW).</summary>
+    [RelayCommand]
+    private async Task PiACWMethodExecutor() => await _testService.AddPiACWMethodExecutorControlAsync();
+
+    /// <summary>Групповой метод ПИ (DCW).</summary>
+    [RelayCommand]
+    private async Task PiDCWMethodExecutor() => await _testService.AddPiDCWMethodExecutorControlAsync();
+
+    /// <summary>Перекрёстный тест МКР.</summary>
+    [RelayCommand]
+    private async Task CrossTestMkrExecutor() => await _testService.AddCrossTestMkrExecutorControlAsync();
   }
 }

@@ -29,6 +29,7 @@ namespace MainWindowProgram.HotkeyBindings
       }
 
       MenuHotkeyBinder.Attach(window, dataContext, DataBaseConfig.Context);
+      UniversalHotkeyBinder.Attach(window, DataBaseConfig.Context);
 
       window.PreviewKeyDown += (s, e) =>
       {

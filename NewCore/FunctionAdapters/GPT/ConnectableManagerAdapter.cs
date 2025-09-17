@@ -56,6 +56,8 @@ namespace NewCore.FunctionAdapters.GPT
           result,
           1);
 
+      await Task.Delay(1000);
+
       if (!result)
       {
         throw ConnectionExceptionFactory.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);

@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
+using System.Threading.Tasks;
 
 namespace MainWindowProgram.ViewModels
 {
@@ -8,81 +8,56 @@ namespace MainWindowProgram.ViewModels
   /// ViewModel для работы с файлами.
   /// Содержит команды для открытия, создания, сохранения, печати, поиска, сравнения и выхода из приложения.
   /// </summary>
-  public class FileViewModel
+  public partial class FileViewModel
   {
-    /// <summary>
-    /// Сервис для работы с файлами.
-    /// </summary>
     private readonly FileService _fileService;
-
-    /// <summary>
-    /// Команда открытия файла.
-    /// </summary>
-    public ICommand OpenFileCommand { get; }
-
-    /// <summary>
-    /// Команда открытия архива.
-    /// </summary>
-    public ICommand OpenArchiveCommand { get; }
-
-    /// <summary>
-    /// Команда сохранения файла.
-    /// </summary>
-    public ICommand SaveFileCommand { get; }
-
-    /// <summary>
-    /// Команда сохранения файла под другим именем.
-    /// </summary>
-    public ICommand SaveFileAsCommand { get; }
-
-    /// <summary>
-    /// Команда сохранения файла под другим именем.
-    /// </summary>
-    public ICommand OpenFolderCommand { get; }
-
-    /// <summary>
-    /// Команда отправки файла на печать.
-    /// </summary>
-    public ICommand PrintFileCommand { get; }
-
-    /// <summary>
-    /// Команда завершения работы приложения.
-    /// </summary>
-    public ICommand ExitApplicationCommand { get; }
-
-    /// <summary>
-    /// Команда поиска по содержимому файла.
-    /// </summary>
-    public ICommand SearchFileCommand { get; }
-
-    /// <summary>
-    /// Команда сравнения файлов.
-    /// </summary>
-    public ICommand CompareFileCommand { get; }
-
-    /// <summary>
-    /// Команда создания нового файла.
-    /// </summary>
-    public ICommand CreateNewFileCommand { get; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileViewModel"/>.
     /// </summary>
-    /// <param name="fileService">Сервис для работы с файлами.</param>
     public FileViewModel(FileService fileService)
     {
       _fileService = fileService;
-
-      OpenFileCommand = new AsyncRelayCommand(_fileService.OpenFileAsync);
-      SaveFileCommand = new AsyncRelayCommand(_fileService.SaveFileAsync);
-      SaveFileAsCommand = new AsyncRelayCommand(_fileService.SaveFileAsAsync);
-      OpenFolderCommand = new AsyncRelayCommand(_fileService.OpenFolder);
-      PrintFileCommand = new AsyncRelayCommand(_fileService.PrintFileAsync);
-      ExitApplicationCommand = new AsyncRelayCommand(_fileService.ExitApplicationAsync);
-      SearchFileCommand = new AsyncRelayCommand(_fileService.SearchFileAsync);
-      CompareFileCommand = new AsyncRelayCommand(_fileService.CompareFileAsync);
-      OpenArchiveCommand = new AsyncRelayCommand(_fileService.OpenArchiveAsync);
-      CreateNewFileCommand = new AsyncRelayCommand(_fileService.CreateNewFileAsync);
     }
+
+    /// <summary>Команда открытия файла.</summary>
+    [RelayCommand]
+    private async Task OpenFile() => await _fileService.OpenFileAsync();
+
+    /// <summary>Команда сохранения файла.</summary>
+    [RelayCommand]
+    private async Task SaveFile() => await _fileService.SaveFileAsync();
+
+    /// <summary>Команда сохранения файла под другим именем.</summary>
+    [RelayCommand]
+    private async Task SaveFileAs() => await _fileService.SaveFileAsAsync();
+
+    /// <summary>Команда открытия папки.</summary>
+    [RelayCommand]
+    private async Task OpenFolder() => await _fileService.OpenFolder();
+
+    /// <summary>Команда печати файла.</summary>
+    [RelayCommand]
+    private async Task PrintFile() => await _fileService.PrintFileAsync();
+
+    /// <summary>Команда завершения работы приложения.</summary>
+    [RelayCommand]
+    private async Task ExitApplication() => await _fileService.ExitApplicationAsync();
+
+    /// <summary>Команда поиска по файлу.</summary>
+    [RelayCommand]
+    private async Task SearchFile() => await _fileService.SearchFileAsync();
+
+    /// <summary>Команда сравнения файлов.</summary>
+    [RelayCommand]
+    private async Task CompareFile() => await _fileService.CompareFileAsync();
+
+    /// <summary>Команда открытия архива.</summary>
+    [RelayCommand]
+    private async Task OpenArchive() => await _fileService.OpenArchiveAsync();
+
+    /// <summary>Команда создания нового файла.</summary>
+    [RelayCommand]
+    private async Task CreateNewFile() => await _fileService.CreateNewFileAsync();
   }
 }

@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
-using MainWindowProgram.Infrastructure;
+﻿using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
+using System.Threading.Tasks;
 
 namespace MainWindowProgram.ViewModels
 {
@@ -8,75 +8,52 @@ namespace MainWindowProgram.ViewModels
   /// ViewModel для управления режимами метрологии.
   /// Содержит команды для открытия интерфейсов всех доступных режимов.
   /// </summary>
-  public class MetrologyViewModel
+  public partial class MetrologyViewModel
   {
-    /// <summary>
-    /// Команда открытия режима КС.
-    /// </summary>
-    public ICommand KCCommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима ИЕ.
-    /// </summary>
-    public ICommand IECommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима СИ.
-    /// </summary>
-    public ICommand CICommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима ПР T.
-    /// </summary>
-    public ICommand PR_TCommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима ПР.
-    /// </summary>
-    public ICommand PRCommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима ПИ в режиме DCW.
-    /// </summary>
-    public ICommand PIDCWCommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима ПИ в режиме ACW.
-    /// </summary>
-    public ICommand PIACWCommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима КН в режиме ACW.
-    /// </summary>
-    public ICommand KNACWCommand { get; }
-
-    /// <summary>
-    /// Команда открытия режима КН в режиме DCW.
-    /// </summary>
-    public ICommand KNDCWCommand { get; }
-
-    /// <summary>
-    /// Сервис для работы с режимами метрологии.
-    /// </summary>
     private readonly MetrologyService _service;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MetrologyViewModel"/>.
     /// </summary>
-    /// <param name="service">Сервис для управления метрологическими режимами.</param>
     public MetrologyViewModel(MetrologyService service)
     {
       _service = service;
-
-      KCCommand = new AsyncRelayCommand(_service.OpenKCModeAsync);
-      IECommand = new AsyncRelayCommand(_service.OpenIEModeAsync);
-      CICommand = new AsyncRelayCommand(_service.OpenCIModeAsync);
-      PR_TCommand = new AsyncRelayCommand(_service.OpenPR_TModeAsync);
-      PIDCWCommand = new AsyncRelayCommand(_service.OpenPIDCWModeAsync);
-      PIACWCommand = new AsyncRelayCommand(_service.OpenPIACWModeAsync);
-      KNACWCommand = new AsyncRelayCommand(_service.OpenKNACWModeAsync);
-      KNDCWCommand = new AsyncRelayCommand(_service.OpenKNDCWModeAsync);
-      PRCommand = new AsyncRelayCommand(_service.OpenPRModeAsync);
     }
+
+    /// <summary>Открыть режим КС.</summary>
+    [RelayCommand]
+    private async Task KC() => await _service.OpenKCModeAsync();
+
+    /// <summary>Открыть режим ИЕ.</summary>
+    [RelayCommand]
+    private async Task IE() => await _service.OpenIEModeAsync();
+
+    /// <summary>Открыть режим СИ.</summary>
+    [RelayCommand]
+    private async Task CI() => await _service.OpenCIModeAsync();
+
+    /// <summary>Открыть режим ПР T.</summary>
+    [RelayCommand]
+    private async Task PR_T() => await _service.OpenPR_TModeAsync();
+
+    /// <summary>Открыть режим ПР.</summary>
+    [RelayCommand]
+    private async Task PR() => await _service.OpenPRModeAsync();
+
+    /// <summary>Открыть режим ПИ (DCW).</summary>
+    [RelayCommand]
+    private async Task PIDCW() => await _service.OpenPIDCWModeAsync();
+
+    /// <summary>Открыть режим ПИ (ACW).</summary>
+    [RelayCommand]
+    private async Task PIACW() => await _service.OpenPIACWModeAsync();
+
+    /// <summary>Открыть режим КН (ACW).</summary>
+    [RelayCommand]
+    private async Task KNACW() => await _service.OpenKNACWModeAsync();
+
+    /// <summary>Открыть режим КН (DCW).</summary>
+    [RelayCommand]
+    private async Task KNDCW() => await _service.OpenKNDCWModeAsync();
   }
 }
