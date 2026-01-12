@@ -1,5 +1,7 @@
-﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -8,6 +10,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
@@ -44,7 +47,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             .ToList()
             ?? new List<PointModel>();
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+      }
+
       var modules = points
          .Select(EquipmentService.GetModuleByPoint)
          .Where(m => m != null)
@@ -119,14 +126,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ResistanceManager.SetResistanceModeAsync(userMessageService), userMessageService))
         {
-          throw Ask.Core.Services.Errors.Device.Multimeter.ResistanceExceptionFactory.SetModeFailed(name, numberChassis, number);
+          throw ResistanceExceptionFactory.SetModeFailed(name, numberChassis, number);
         }
       }
       else
       {
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ContinuityManager.SetContinuityModeAsync(userMessageService), userMessageService))
         {
-          throw Ask.Core.Services.Errors.Device.Multimeter.ContinuityExceptionFactory.SetModeFailed(name, numberChassis, number);
+          throw ContinuityExceptionFactory.SetModeFailed(name, numberChassis, number);
         }
       }
     }

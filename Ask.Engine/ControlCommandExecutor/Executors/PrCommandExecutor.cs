@@ -56,7 +56,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
                   ?? new List<PointModel>();
 
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+      }
 
       var modules = points
       .Select(EquipmentService.GetModuleByPoint)
@@ -96,8 +100,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       await SettingMeter(meter, context.Console);
-
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
 
       MethodExecutionContext methodExecutionContext = new MethodExecutionContext();
       methodExecutionContext.SchemeModel = command.Scheme;
@@ -202,7 +204,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = meter.NumberChassis;
       int number = meter.Number;
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка мультиметра"));
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage());
+      }
 
       if (continuityManager)
       {

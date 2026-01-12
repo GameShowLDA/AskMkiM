@@ -58,7 +58,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         string stepStr = new string(bits);
 
-        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckHeader(ConvertIntToString(step + 1), HighestBitCount), IsBlockStart: true);
+        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
+
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
         var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken());
         if (!result.Result)
