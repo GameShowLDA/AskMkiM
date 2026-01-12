@@ -664,6 +664,15 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Контроль сопротивления контактов реле коммутатора.
+        /// </summary>
+        internal static string menu_test_tests_relay_contact_resist_rkomm {
+            get {
+                return ResourceManager.GetString("menu.test.tests.relay.contact.resist.rkomm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на ПРОДОЛЖИТЬ(P).
         /// </summary>
         internal static string protocol_button_continue {

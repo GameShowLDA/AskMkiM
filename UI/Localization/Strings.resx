@@ -354,4 +354,7 @@
   <data name="input.bus.group.ab4" xml:space="preserve">
     <value>Шины AB4</value>
   </data>
+  <data name="menu.test.tests.relay.contact.resist.rkomm" xml:space="preserve">
+    <value>Контроль сопротивления контактов реле коммутатора</value>
+  </data>
 </root>

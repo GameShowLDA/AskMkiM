@@ -67,5 +67,11 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void AddCrossTestMkrExecutorControlAsync() =>
        _multiWindow.AddControl("Перекрёстный тест МКР", new CrossConnectionControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для контроля сопротивления контактов реле коммутатора в multiEditors.
+    /// </summary>
+    public async Task AddRelayContactResistExecutorControlAsync() =>
+      _multiWindow.AddControl("Контроль сопротивления контактов реле коммутатора", new RkommConnectionControl(), TypeWindow.DeviceControl);
   }
 }
