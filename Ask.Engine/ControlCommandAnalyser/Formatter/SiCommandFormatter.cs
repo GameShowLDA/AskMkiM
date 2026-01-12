@@ -45,11 +45,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       // Время
       if (!string.IsNullOrWhiteSpace(si.TimeSource))
       {
-        yield return $"\tВремя выполнения: {si.TimeSource}";
+        yield return $"\tВремя ожидания НОРМЫ: {si.TimeSource}";
       }
       else
       {
-        yield return $"\tВремя выполнения не задано!";
+        yield return $"\tВремя ожидания НОРМЫ не задано!";
       }
 
       // Сопротивление
