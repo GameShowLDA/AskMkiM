@@ -1,0 +1,153 @@
+﻿<UserControl x:Class="UI.Controls.Settings.DeviceConfig.ChassisManager.ChassisManagerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.Settings.DeviceConfig.ChassisManager"
+             xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="300" MinWidth="250">
+    <UserControl.Resources>
+        <DropShadowEffect x:Key="ShadowEffect" 
+                  BlurRadius="20" 
+                  ShadowDepth="0" 
+                  Opacity="0.5" 
+                  Color="Black"/>
+    </UserControl.Resources>
+
+    <Border Margin="10" Background="{DynamicResource BackgroundBrushes}" CornerRadius="15" Effect="{DynamicResource ShadowEffect}" Padding="5,10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock
+                Text="Список устройств"
+                Foreground="{DynamicResource ForegrounfBrushes}"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                FontSize="20"
+                FontWeight="Bold"
+                Margin="10"
+                />
+
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border 
+                        x:Name="addChassisButton"
+                        Background="{DynamicResource SettingsInfoTabloBackgroundSolidColorBrush}" 
+                        BorderBrush="{DynamicResource SettingsCongifButtonBorderSolidColorBrush}"
+                        BorderThickness="1"
+                        PreviewMouseDown="addChassisButton_PreviewMouseDown"
+                        CornerRadius="5"
+                        Height="40"
+                >
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SettingsCongifButtonHoverBackgroundSolidColorBrush}"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    
+                    <TextBlock 
+                               Text="Добавить тестер АСКМ"
+                               Foreground="{DynamicResource ForegrounfBrushes}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontSize="18"
+                               />
+                </Border>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{DynamicResource BackgroundBrushes}">
+                    <ItemsControl ItemsSource="{Binding SystemsChassis}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnSystemSelected">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <Separator Grid.Row="2" Margin="20,10">
+                <Separator.Style>
+                    <Style TargetType="Separator">
+                        <Setter Property="Background" Value="{StaticResource ForegrounfBrushes}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource ForegrounfBrushes}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                </Separator.Style>
+            </Separator>
+
+            <Grid Grid.Row="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border
+                    Background="{DynamicResource SettingsInfoTabloBackgroundSolidColorBrush}" 
+                    BorderBrush="{DynamicResource SettingsCongifButtonBorderSolidColorBrush}"
+                    BorderThickness="1" 
+                    x:Name="addRackButton"
+                    PreviewMouseDown="addRackButton_PreviewMouseDown"
+                    CornerRadius="5"
+                    Height="40">
+                    
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SettingsCongifButtonHoverBackgroundSolidColorBrush}"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <TextBlock 
+                        Text="Добавить стойку СКМ"
+                        Foreground="{DynamicResource ForegrounfBrushes}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        FontSize="18"
+                        />
+                </Border>
+
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource SecondarySolidColorBrush}">
+                    <ItemsControl ItemsSource="{Binding SystemsRack}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnRackSelected">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>
+    

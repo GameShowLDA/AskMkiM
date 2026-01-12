@@ -11,10 +11,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Menu FontSize="20" BorderThickness="0" Background="{StaticResource IsCheckedColorSolidColorBrush}" >
-            <MenuItem x:Name="ConnectMenuItem" Header="Соединить" IsEnabled="True" PreviewMouseDown="ConnectMenuItem_PreviewMouseDown"/>
-            <MenuItem x:Name="DisconnectMenuItem" Header="Разорвать" Visibility="Collapsed" PreviewMouseDown="DisconnectMenuItem_PreviewMouseDown"/>
-        </Menu>
         <Border Background="{StaticResource PrimarySolidColorBrush}" Grid.Row="1">
             <local:GPTController x:Name="Controller" Visibility="Collapsed"/>
         </Border>

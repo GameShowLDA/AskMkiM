@@ -1,10 +1,11 @@
-﻿using NewCore.Base.Function.Breakdown;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
-using NewCore.Function.GPT.Data;
 using static NewCore.Function.GPT.Command.FunctionCommandManager;
 using static NewCore.Function.GPT.Command.ManualCommandManager;
 using static NewCore.Function.GPT.Command.SystemCommandManager;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.GPT
 {
@@ -23,15 +24,15 @@ namespace NewCore.Function.GPT
     /// <summary>
     /// Экземпляр устройства GPT-79904.
     /// </summary>
-    GPT79904 _gptModel { get; set; }
+    private GPT79904 _gptModel { get; set; }
 
     /// <summary>
     /// Устанавливает контрастность дисплея (от 1 до 8).
     /// </summary>
     /// <param name="value">Значение контрастности (1-8).</param>
-    public async Task SetLcdContrastAsync(double value)
+    public async Task SetLcdContrastAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -44,9 +45,9 @@ namespace NewCore.Function.GPT
     /// Устанавливает яркость дисплея (1 - темный, 2 - яркий).
     /// </summary>
     /// <param name="value">Значение яркости (1 или 2).</param>
-    public async Task SetLcdBrightnessAsync(double value)
+    public async Task SetLcdBrightnessAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -59,9 +60,9 @@ namespace NewCore.Function.GPT
     /// Включает/выключает звук успешного теста.
     /// </summary>
     /// <param name="state">Состояние (ON или OFF).</param>
-    public async Task SetBuzzerPrimarySound(bool state)
+    public async Task SetBuzzerPrimarySound(bool state, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -75,9 +76,9 @@ namespace NewCore.Function.GPT
     /// Включает/выключает звук ошибочного теста.
     /// </summary>
     /// <param name="state">Состояние (ON или OFF).</param>
-    public async Task SetBuzzerFeedbackSound(bool state)
+    public async Task SetBuzzerFeedbackSound(bool state, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -91,9 +92,9 @@ namespace NewCore.Function.GPT
     /// Устанавливает продолжительность звука успешного теста (0.2 - 999.9 секунд).
     /// </summary>
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
-    public async Task SetBuzzerPrimaryTime(double duration)
+    public async Task SetBuzzerPrimaryTime(double duration, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -106,9 +107,9 @@ namespace NewCore.Function.GPT
     /// Устанавливает продолжительность звука ошибочного теста (0.2 - 999.9 секунд).
     /// </summary>
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
-    public async Task SetBuzzerFeedbackTime(double duration)
+    public async Task SetBuzzerFeedbackTime(double duration, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -125,7 +126,7 @@ namespace NewCore.Function.GPT
     {
       var systemData = new SystemDataModel();
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return systemData;
       }
@@ -179,5 +180,16 @@ namespace NewCore.Function.GPT
 
       return systemData;
     }
+
+    public async Task<bool> TestReset()
+    {
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      return ComPortResetNative.Restart(_gptModel.COMPort.PortName);
+    }
+
   }
 }

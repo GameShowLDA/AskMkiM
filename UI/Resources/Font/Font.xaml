@@ -1,0 +1,9 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <FontFamily x:Key="WinstonBold">pack://application:,,,/UI;component/Resources/Font/#Winston Bold</FontFamily>
+    <FontFamily x:Key="WinstonLight">pack://application:,,,/UI;component/Resources/Font/#Winston Light</FontFamily>
+    <FontFamily x:Key="WinstonMedium">pack://application:,,,/UI;component/Resources/Font/#Winston Medium</FontFamily>
+    <FontFamily x:Key="WinstonRegular">pack://application:,,,/UI;component/Resources/Font/#Winston Regular</FontFamily>
+
+</ResourceDictionary>

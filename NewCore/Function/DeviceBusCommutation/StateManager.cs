@@ -1,8 +1,8 @@
-﻿using NewCore.Base.Device;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Base.DeviceResponses;
-using NewCore.Base.Function.DBC;
 using NewCore.Communication;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -22,24 +22,27 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
     public StateManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
 
+    public event Action DeviceDisponce;
+    public event Action IsReset;
+
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
       return await InitializeAsync();
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
       return await ResetAsync();
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, "Включен холостой режим");
+        return (true, string.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(1, 1, 1, 1);
@@ -75,16 +78,17 @@ namespace NewCore.Function.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
 
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
-      return result == "2.0.1";
+      DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
+      string result = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      IsReset?.Invoke();
+      return result.Contains("2.0.1");
     }
   }
 }

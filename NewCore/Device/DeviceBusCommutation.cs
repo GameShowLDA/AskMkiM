@@ -1,8 +1,8 @@
-﻿using NewCore.Base.Device;
-using NewCore.Base.Function.DBC;
-using NewCore.Base.Interface.Main;
-using NewCore.Enum;
-using NewCore.Function.DeviceBusCommutation;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+using NewCore.Base.Device;
+using NewCore.Function.DeviceBusCommutation.SelfCheck;
+using NewCore.FunctionAdapters.DeviceBusCommutation;
 
 namespace NewCore.Device
 {
@@ -16,16 +16,16 @@ namespace NewCore.Device
     /// </summary>
     public DeviceBusCommutation()
     {
-      Name = "Устройство коммутации шин";
+      Name = "Устройство УКШ";
       Description = "Реализовать описание в NewCore.Device.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
-      DeviceType = DeviceEnum.DeviceType.SwitchingDevice;
+      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.SwitchingDevice;
 
-      CapacitorManager = new CapacitorManager(this);
-      ConnectorManager = new ConnectorManager(this);
-      RelayManager = new RelayManager(this);
-      ResistorManager = new ResistorManager(this);
-      ConnectableManager = new StateManager(this);
+      ConnectableManager = new StateManagerAdapter(this);
+      ConnectorManager = new ConnectorManagerAdapter(this);
+      CapacitorManager = new CapacitorManagerAdapter(this);
+      RelayManager = new RelayManagerAdapter(this);
+      ResistorManager = new ResistorManagerAdapter(this);
       SelfTestManager = new SelfTestManager(this);
     }
 
@@ -42,7 +42,7 @@ namespace NewCore.Device
     public IResistorDeviceBusCommutation ResistorManager { get; set; }
 
     /// <inheritdoc />
-    public ISelfTestChecker SelfTestManager { get; set; }
+    public ISelfTestCheckerDeviceBusCommutation SelfTestManager { get; set; }
 
     /// <summary>
     /// Устанавливает или возвращает номер шасси.

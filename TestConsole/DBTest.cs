@@ -1,6 +1,6 @@
-﻿using AppConfiguration.Base;
+﻿using Ask.Core.Shared.Entity.Devices;
 using DataBaseConfiguration;
-using DataBaseConfiguration.Models;
+using DataBaseConfiguration.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace TestConsole
@@ -62,13 +62,12 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      using var dbContext = DataBaseConfiguration.Configurations.DataBaseConfig.Context;
+      using var dbContext = DataBaseConfig.Context;
 
       var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
       var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();
       var powerSourceModules = await dbContext.PowerSourceModules.ToListAsync();
       var switchingDevices = await dbContext.SwitchingDevices.ToListAsync();
-      var precisionMeters = await dbContext.PrecisionMeters.ToListAsync();
       var fastMeters = await dbContext.FastMeters.ToListAsync();
       var breakdownTesters = await dbContext.BreakdownTesters.ToListAsync();
 
@@ -77,7 +76,6 @@ namespace TestConsole
       Console.WriteLine($"Модули коммутации реле: {relaySwitchModules.Count}");
       Console.WriteLine($"Модули источников питания: {powerSourceModules.Count}");
       Console.WriteLine($"Устройства коммутации: {switchingDevices.Count}");
-      Console.WriteLine($"Точные измерители: {precisionMeters.Count}");
       Console.WriteLine($"Быстрые измерители: {fastMeters.Count}");
       Console.WriteLine($"Пробойные установки: {breakdownTesters.Count}");
     }
@@ -88,7 +86,7 @@ namespace TestConsole
     private static async Task DeleteAllDataAsync()
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={DataBaseConfiguration.Configurations.DataBaseConfig.ConfigFilePath}");
+        .UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
 
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Удаление всех данных...");
@@ -97,7 +95,6 @@ namespace TestConsole
       dbContext.RelaySwitchModules.RemoveRange(dbContext.RelaySwitchModules);
       dbContext.PowerSourceModules.RemoveRange(dbContext.PowerSourceModules);
       dbContext.SwitchingDevices.RemoveRange(dbContext.SwitchingDevices);
-      dbContext.PrecisionMeters.RemoveRange(dbContext.PrecisionMeters);
       dbContext.FastMeters.RemoveRange(dbContext.FastMeters);
       dbContext.BreakdownTesters.RemoveRange(dbContext.BreakdownTesters);
 
@@ -111,7 +108,7 @@ namespace TestConsole
     private static async Task AddRandomDataAsync()
     {
       DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={DataBaseConfiguration.Configurations.DataBaseConfig.ConfigFilePath}");
+        .UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
 
       using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Добавление тестовых данных...");
@@ -122,7 +119,6 @@ namespace TestConsole
       dbContext.RelaySwitchModules.Add(new RelaySwitchModuleEntity { Name = "Модуль реле 1", Description = "Тестовый модуль реле", Number = random.Next(1, 100), NumberChassis = 1, PointCount = 16 });
       dbContext.PowerSourceModules.Add(new PowerSourceModuleEntity { Name = "Источник питания 1", Description = "Тестовый источник", Number = random.Next(1, 100) });
       dbContext.SwitchingDevices.Add(new SwitchingDeviceEntity { Name = "Коммутационное устройство 1", Description = "Тестовое устройство", Number = random.Next(1, 100), NumberChassis = 1 });
-      dbContext.PrecisionMeters.Add(new PrecisionMeterEntity { Name = "Точный измеритель 1", Description = "Тестовый измеритель", Number = random.Next(1, 100) });
       dbContext.FastMeters.Add(new FastMeterEntity { Name = "Быстрый измеритель 1", Description = "Тестовый измеритель", Number = random.Next(1, 100) });
       dbContext.BreakdownTesters.Add(new BreakdownTesterEntity { Name = "Пробойная установка 1", Description = "Тестовая установка", Number = random.Next(1, 100), NumberChassis = 1 });
 

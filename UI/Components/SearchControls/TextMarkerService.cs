@@ -1,8 +1,8 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using ICSharpCode.AvalonEdit;
+﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
+using System.Windows;
+using System.Windows.Media;
 
 namespace UI.Components.SearchControls
 {

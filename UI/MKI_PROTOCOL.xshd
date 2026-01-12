@@ -1,0 +1,54 @@
+﻿<?xml version="1.0"?>
+
+<SyntaxDefinition name="MKI" extensions=".lst;.lstw" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+	<Color name="PKData" foreground="#4CAF50"/>
+	<Color name="ProtocolMain" foreground="#90EE90" fontWeight="bold"/>
+	<Color name="PurposeAndResults" foreground="#90EE90" />
+	<Color name="Voltage" foreground="#FFD700" />
+	<Color name="Time" foreground="#FFD700" />
+	<Color name="Error" foreground="#f1301b" />
+	<Color name="Mnemonic" foreground="#90EE90" />
+	<Color name="CommandNumber" foreground="#00BFFF" />
+
+	<RuleSet ignoreCase="true">
+
+		<!-- первая строка может начинаться с BOM -->
+		<Rule color="ProtocolMain">^\uFEFF?\s*Протокол\s*\([^)]*режим[^)]*\)\s*от</Rule>
+
+
+		<Rule color="PurposeAndResults">^\s*Цель\s+проверки:</Rule>
+		<Rule color="PurposeAndResults">^\s*Оборудование:</Rule>
+		<Rule color="PurposeAndResults">^\s*Программа\s+проверки:?</Rule>
+		<Rule color="Time">^\s*Время\s+начала\s+измерений:</Rule>
+		<Rule color="Time">^\s*Время\s+окончания\s+измерений:</Rule>
+		<Rule color="Time">^\s*Время\s+выполнения:</Rule>
+
+		<Rule color="PurposeAndResults">^\s*Обрывов:</Rule>
+		<Rule color="PurposeAndResults">^\s*Замыканий:</Rule>
+		<Rule color="PurposeAndResults">^\s*Нарушений\s+изоляции:</Rule>
+		<Rule color="ProtocolMain">^\s*Заключение:</Rule>
+		<Rule color="PKData">^\s*Исполнитель:</Rule>
+		<Rule color="PKData">^\s*Представитель\s+ОК:</Rule>
+		<Rule color="PKData">^\s*Представитель\s+ОТК:</Rule>
+		<Rule color="PKData">^\s*Представитель\s+заказчика\s*\(ВП\):</Rule>
+
+		<Rule color="Error">^\s*Ошибки\s+программы.*:</Rule>
+		<Rule color="Error">^\s*Ошибки\s+команды:</Rule>
+
+		<!-- Номер команды (вместе с номером строки, чтобы не перекрывало) -->
+		<Rule color="CommandNumber">^ERR\d+\s*\d+</Rule>
+
+		<!-- Мнемоника -->
+		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ)\b</Rule>
+
+		<!-- Между двоеточиями -->
+		<Rule>:\s*[^:]+:</Rule>
+
+		<Rule color="Error">\[БРАК\]</Rule>
+
+
+	</RuleSet>
+
+
+</SyntaxDefinition>
+

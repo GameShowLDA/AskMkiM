@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using NewCore.Base.Device;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using NewCore.Base.Device;
-using static Utilities.LoggerUtility;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Communication
 {
@@ -31,27 +30,27 @@ namespace NewCore.Communication
     public UdpDeviceProtocol(DeviceWithIP device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
+      OperationLock = new SemaphoreSlim(1, 1);
     }
 
+    public SemaphoreSlim OperationLock { get; set; }
+
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
     {
       try
       {
         int lastOctet = GetLastOctet(_device.IPAddress);
-
         int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
         int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
 
         IPEndPoint deviceEndpoint = new IPEndPoint(_device.IPAddress, outputPort);
         using UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort));
 
-        // Гарантированно слушаем ДО отправки
-        Task<UdpReceiveResult> receiveTask = udpClient.ReceiveAsync();
-
         byte[] buffer = Encoding.UTF8.GetBytes(command);
+
         await udpClient.SendAsync(buffer, buffer.Length, deviceEndpoint);
-        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}");
+        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}", isDeviceLog: true);
 
         if (responseDelay > 0)
         {
@@ -61,16 +60,31 @@ namespace NewCore.Communication
 
         if (timeout > 0)
         {
-          Task timeoutTask = Task.Delay(timeout);
-          if (await Task.WhenAny(receiveTask, timeoutTask) == receiveTask)
+          using var cts = new CancellationTokenSource(timeout);
+
+          try
           {
-            string response = Encoding.UTF8.GetString((await receiveTask).Buffer);
-            LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
-            return response;
+            var receiveTask = udpClient.ReceiveAsync();
+            var delayTask = Task.Delay(Timeout.Infinite, cts.Token);
+
+            var completedTask = await Task.WhenAny(receiveTask, delayTask);
+
+            if (completedTask == receiveTask)
+            {
+              UdpReceiveResult result = await receiveTask;
+              string response = Encoding.UTF8.GetString(result.Buffer);
+              LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
+              return response;
+            }
+            else
+            {
+              return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).", isDeviceLog: true);
+            }
           }
-          else
+          catch (Exception ex)
           {
-            return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
+            LogException($"[{_device.Name}] Исключение при получении ответа", ex, isDeviceLog: true);
+            return $"[{_device.Name}] Ошибка при получении ответа: {ex.Message}";
           }
         }
 
@@ -78,43 +92,11 @@ namespace NewCore.Communication
       }
       catch (Exception ex)
       {
-        return LogError($"[{_device.Name}] Ошибка при отправке/приёме: {ex.Message}");
+        LogException($"[{_device.Name}] Общая ошибка QueryAsync", ex, isDeviceLog: true);
+        return $"[{_device.Name}] Общая ошибка QueryAsync: {ex.Message}";
       }
-    }
-
-    /// <summary>
-    /// Получает ответ от устройства по UDP.
-    /// </summary>
-    /// <param name="lastOctet">Последний октет IP-адреса, используется для вычисления порта.</param>
-    /// <param name="timeout">Таймаут ожидания, мс.</param>
-    /// <returns>Ответ от устройства.</returns>
-    private async Task<string> ReceiveResponseAsync(int lastOctet, int timeout, string command)
-    {
-      int inputPort = BaseInputPort + lastOctet;
-      LogInformation($"[{_device.Name}] Чтение ответа команды \"{command}\" с порта {inputPort}");
-
-      using (UdpClient receiver = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort)))
+      finally
       {
-        try
-        {
-          var receiveTask = receiver.ReceiveAsync();
-          var timeoutTask = Task.Delay(timeout);
-
-          if (await Task.WhenAny(receiveTask, timeoutTask) == receiveTask)
-          {
-            string response = Encoding.UTF8.GetString((await receiveTask).Buffer);
-            LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
-            return response;
-          }
-          else
-          {
-            return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).");
-          }
-        }
-        catch (Exception ex)
-        {
-          return LogError($"[{_device.Name}] Ошибка при получении ответа: {ex.Message}");
-        }
       }
     }
 

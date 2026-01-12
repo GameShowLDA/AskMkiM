@@ -1,0 +1,25 @@
+﻿using System.Windows;
+
+namespace UI.Windows.WpfDocking.Windows.Docking
+{
+  public partial class DockItem
+  {
+    private sealed class ShowAsFloatingEventArgs : ShowActionEventArgs<ShowAsFloatingAction>
+    {
+      public ShowAsFloatingEventArgs(DockItem dockItem, DockControl dockControl, Rect floatingWindowBounds, DockItemShowMethod showMethod)
+          : base(dockItem, dockControl, showMethod)
+      {
+        ShowAsFloatingAction showAction = StrongTypeShowAction;
+        showAction.Left = floatingWindowBounds.Left;
+        showAction.Top = floatingWindowBounds.Top;
+        showAction.Width = floatingWindowBounds.Width;
+        showAction.Height = floatingWindowBounds.Height;
+      }
+
+      public override DockItemStateChangeMethod StateChangeMethod
+      {
+        get { return DockItemStateChangeMethod.ShowAsFloating; }
+      }
+    }
+  }
+}

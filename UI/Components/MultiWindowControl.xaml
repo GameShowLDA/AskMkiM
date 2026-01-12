@@ -7,9 +7,11 @@
              xmlns:SearchControls="clr-namespace:UI.Components.SearchControls"
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
+             xmlns:WinPlaceholder="clr-namespace:UI.Controls.EmptyWorkspace"
              mc:Ignorable="d" 
              Background="{StaticResource PrimarySolidColorBrush}"
              d:DesignHeight="450" d:DesignWidth="800">
+
     <Grid>
         <Grid.RowDefinitions>
             <!-- Верхняя панель -->
@@ -25,8 +27,38 @@
         <!-- Верхняя панель -->
         <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Transparent" Orientation="Horizontal"/>
 
-        <!-- Контейнер для редакторов -->
-        <local:MultiEditorControl x:Name="MultiEditor" Grid.Row="1"/>
+        <Grid Grid.Row="1">
+            <!-- Редактор -->
+            <local:MultiEditorControl x:Name="MultiEditor">
+                <local:MultiEditorControl.Style>
+                    <Style TargetType="{x:Type local:MultiEditorControl}">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Counts, RelativeSource={RelativeSource Self}}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </local:MultiEditorControl.Style>
+            </local:MultiEditorControl>
+
+            <!-- Заглушка -->
+            <WinPlaceholder:EmptyWorkspaceView
+                 x:Name="EmptyView"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch">
+                <WinPlaceholder:EmptyWorkspaceView.Style>
+                    <Style TargetType="{x:Type WinPlaceholder:EmptyWorkspaceView}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=MultiEditor, Path=Counts}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </WinPlaceholder:EmptyWorkspaceView.Style>
+            </WinPlaceholder:EmptyWorkspaceView>
+        </Grid>
 
         <!-- Разделитель -->
         <GridSplitter x:Name="MultiWindowSplitter" Grid.Row="2" Height="5" Background="{StaticResource IsCheckedColorSolidColorBrush}"
@@ -97,6 +129,8 @@
                                 Background="{StaticResource SecondarySolidColorBrush}"  
                                 Orientation="Horizontal"/>
                     <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
+                
+                
                 </Grid>
 
             </Grid>

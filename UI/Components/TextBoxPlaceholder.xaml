@@ -11,31 +11,30 @@
         <local:MarginConverter x:Key="MarginConverter"/>
     </UserControl.Resources>
 
-    <Border Background="{StaticResource LightPrimarySolidColorBrush}" Height="50" CornerRadius="10" Name="BorderData">
+    <Border Background="{DynamicResource TestsInputBackgroundInputPanelBrush}" CornerRadius="0,0,10,10" Name="BorderData">
         <Grid>
             <!-- Определяем колонки -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <!-- Первая колонка для TextBox -->
                 <ColumnDefinition Width="Auto" />
-                <!-- Вторая колонка для параметра (Unit) -->
             </Grid.ColumnDefinitions>
 
             <!-- TextBox в первой колонке -->
-            <TextBox x:Name="InputBox" MinWidth="100"
+            <TextBox x:Name="InputBox" MinWidth="100" Margin="5"
                  Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Background="Transparent" 
                  BorderThickness="0" 
                  VerticalAlignment="Center" 
-                 FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}"
+                 FontSize="20" 
+                 Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
                  PreviewTextInput="InputBox_PreviewTextInput"
                  GotFocus="InputBox_GotFocus"
-                 CaretBrush="{StaticResource ForegroundSolidColorBrush}"
+                 CaretBrush="{DynamicResource  TestsInputHeaderSolidColorBrush}"
                  LostFocus="InputBox_LostFocus"/>
 
             <TextBlock Text="{Binding Unit, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='', TargetNullValue=''}" 
                    Grid.Column="1" VerticalAlignment="Center" FontSize="20" 
-                   Foreground="{StaticResource ForegroundSolidColorBrush}" 
+                   Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" 
                    Margin="{Binding Unit, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource MarginConverter}}" />
         </Grid>
     </Border>

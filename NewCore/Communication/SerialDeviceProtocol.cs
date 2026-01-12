@@ -1,8 +1,9 @@
-﻿using System;
-using System.IO.Ports;
-using System.Threading.Tasks;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using NewCore.Base.Device;
-using static Utilities.LoggerUtility;
+using System.Diagnostics;
+using System.IO.Ports;
+using System.Text;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Communication
 {
@@ -14,6 +15,9 @@ namespace NewCore.Communication
     private readonly SerialPort _serialPort;
     private readonly DeviceWithCOM _device;
 
+    public SemaphoreSlim OperationLock { get; set; }
+
+
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="SerialDeviceProtocol"/>.
     /// </summary>
@@ -23,122 +27,122 @@ namespace NewCore.Communication
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _serialPort = serialPort ?? throw new ArgumentNullException(nameof(serialPort));
+      OperationLock = new SemaphoreSlim(1, 1);
     }
 
     /// <inheritdoc />
-    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0)
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
     {
-      if (delayBeforeCall > 0)
+      using (await OperationLock.LockAsync(cancellationToken))
       {
-        LogDebug($"Задержка перед вызовом: {delayBeforeCall} мс");
-        await Task.Delay(delayBeforeCall);
-      }
-
-      try
-      {
-        if (!EnsurePortOpen())
+        using (await _serialPort.UsePort())
         {
-          LogWarning($"COM-порт не удалось открыть: {_serialPort.PortName}");
-          return string.Empty;
-        }
-
-        LogDebug($"COM-порт открыт: {_serialPort.IsOpen}, Скорость: {_serialPort.BaudRate}, Handshake: {_serialPort.Handshake}");
-        LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}");
-
-        _serialPort.DiscardInBuffer();  // очистка входного буфера перед отправкой
-        _serialPort.DiscardOutBuffer(); // очистка выходного буфера
-
-        _serialPort.WriteLine(command);
-
-        LogDebug($"Команда отправлена. BytesToRead до задержки: {_serialPort.BytesToRead}");
-
-        if (responseDelay > 0)
-        {
-          int roundedDelay = (int)Math.Ceiling(responseDelay) + 300;
-          LogDebug($"Задержка перед чтением ответа: {roundedDelay} мс");
-          await Task.Delay(roundedDelay);
-        }
-
-        if (timeout > 0)
-        {
-          _serialPort.ReadTimeout = timeout;
-
-          return await Task.Run(() =>
+          try
           {
-            try
-            {
-              LogDebug("Ожидание ответа от устройства...");
-              string response = _serialPort.ReadLine();
-              LogInformation($"[{_device.Name}] Ответ от устройства: {response}");
-              return response;
-            }
-            catch (TimeoutException)
-            {
-              LogWarning($"[{_device.Name}] Время ожидания ответа истекло ({timeout} мс)");
-              return string.Empty;
-            }
-            catch (Exception ex)
-            {
-              LogError($"[{_device.Name}] Ошибка при чтении из порта: {ex.Message}");
-              return string.Empty;
-            }
-          });
-        }
+            CheckComPort();
 
-        LogDebug("Таймаут чтения не задан, возвращается пустой ответ.");
-        return string.Empty;
-      }
-      catch (Exception ex)
-      {
-        LogError($"[{_device.Name}] Ошибка при работе с COM-портом: {ex.Message}");
-        return string.Empty;
-      }
-      finally
-      {
-        if (_serialPort.IsOpen)
-        {
-          LogDebug("Закрытие COM-порта.");
-          _serialPort.Close();
+            await WaitAsync(delayBeforeCall, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            SendCommand(command);
+
+            await WaitAsync((int)Math.Ceiling(responseDelay), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var answer = await ReadResponseAsync(timeout, cancellationToken);
+            return answer;
+          }
+          catch (Exception ex)
+          {
+            LogException(ex, $"[{_device.Name}] Ошибка при работе с COM-портом", isDeviceLog: true);
+            return string.Empty;
+          }
         }
       }
     }
 
     /// <summary>
-    /// Безопасно открывает COM-порт, если он ещё не открыт.
+    /// Логирует текущее состояние COM-порта.
     /// </summary>
-    /// <returns>True, если порт успешно открыт или уже был открыт.</returns>
-    private bool EnsurePortOpen()
+    private void CheckComPort()
     {
-      try
+      if (_serialPort == null)
       {
-        if (!_serialPort.IsOpen)
-        {
-          _serialPort.Open();
-          LogInformation($"[{_device.Name}] Порт {_serialPort.PortName} успешно открыт.");
-        }
+        LogError($"[{_device.Name}] COM-порт не инициализирован.", isDeviceLog: true);
+        return;
+      }
 
-        return true;
-      }
-      catch (UnauthorizedAccessException ex)
+      if (_serialPort.IsOpen)
       {
-        LogError($"[{_device.Name}] Доступ к порту запрещен: {ex.Message}");
-        return false;
+        LogInformation($"[{_device.Name}] COM-порт {_serialPort.PortName} открыт и доступен.", isDeviceLog: true);
       }
-      catch (IOException ex)
+      else
       {
-        LogError($"[{_device.Name}] Ошибка ввода-вывода при открытии порта: {ex.Message}");
-        return false;
-      }
-      catch (InvalidOperationException ex)
-      {
-        LogError($"[{_device.Name}] Порт уже используется другим процессом: {ex.Message}");
-        return false;
-      }
-      catch (Exception ex)
-      {
-        LogError($"[{_device.Name}] Неизвестная ошибка при открытии порта: {ex.Message}");
-        return false;
+        LogWarning($"[{_device.Name}] COM-порт {_serialPort.PortName} закрыт, будет открыт автоматически.", isDeviceLog: true);
       }
     }
+
+    /// <summary>
+    /// Асинхронное ожидание указанной задержки.
+    /// </summary>
+    /// <param name="milliseconds">Время задержки в миллисекундах.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    private async Task WaitAsync(int delay, CancellationToken cancellationToken)
+    {
+      await Task.Delay(delay, cancellationToken);
+    }
+
+    /// <summary>
+    /// Отправка команды.
+    /// </summary>
+    /// <param name="cmd">Строка команды.</param>
+    private void SendCommand(string cmd)
+    {
+      LogInformation($"[{_device.Name}] Отправка команды: \"{cmd}\" в порт {_serialPort.PortName}", isDeviceLog: true);
+      _serialPort.DiscardInBuffer();
+      _serialPort.DiscardOutBuffer();
+      _serialPort.Write(cmd + "\n");
+    }
+
+    /// <summary>
+    /// Асинхронно ожидает ответ от устройства в течение указанного таймаута.
+    /// Проверка входящего буфера выполняется каждые 100 мс.
+    /// Как только получен ответ — метод немедленно возвращает его.
+    /// </summary>
+    /// <param name="timeout">Максимальное время ожидания (мс).</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <returns>Ответ устройства или пустая строка при таймауте.</returns>
+    private async Task<string> ReadResponseAsync(int timeout, CancellationToken cancellationToken)
+    {
+      var responseBuilder = new StringBuilder();
+      var stopwatch = Stopwatch.StartNew();
+
+      while (stopwatch.ElapsedMilliseconds < timeout)
+      {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (_serialPort.BytesToRead > 0)
+        {
+          string chunk = _serialPort.ReadExisting();
+          responseBuilder.Append(chunk);
+
+          if (responseBuilder.ToString().Contains("\n"))
+            break;
+        }
+
+        await Task.Delay(20, cancellationToken);
+      }
+
+      string response = responseBuilder.ToString().Trim();
+
+      if (string.IsNullOrWhiteSpace(response))
+        LogWarning($"[{_device.Name}] Таймаут: данных от устройства нет за {timeout} мс", isDeviceLog: true);
+      else
+        LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
+
+      return response;
+    }
+
+
   }
 }

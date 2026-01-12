@@ -4,10 +4,11 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -16,14 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppConfiguration\AppConfiguration.csproj" />
-    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Keysight.CommandExpert.InstrumentAbstraction">
-      <HintPath>..\Dll\Keysight.CommandExpert.InstrumentAbstraction.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

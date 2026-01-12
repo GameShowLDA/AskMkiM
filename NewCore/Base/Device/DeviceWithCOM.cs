@@ -1,8 +1,8 @@
-﻿using NewCore.Communication;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Communication;
 using System.IO.Ports;
-using System.Management;
-using static NewCore.Enum.DeviceEnum;
-using static Utilities.LoggerUtility;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Base.Device
 {
@@ -26,7 +26,28 @@ namespace NewCore.Base.Device
     /// Получает или задает COM-порт, используемый для подключения устройства.
     /// </summary>
     /// <value>Экземпляр класса <see cref="SerialPort"/>, представляющий COM-порт.</value>
-    public SerialPort COMPort { get; set; }
+    public SerialPort COMPort
+    {
+      get => _comPort;
+      set
+      {
+        if (_comPort != null)
+        {
+          DeviceManager.DisableDevice(_comPort.PortName);
+        }
+        if (value != null)
+        {
+          DeviceManager.DisableDevice(value.PortName);
+          DeviceManager.EnableDevice(value.PortName);
+        }
+
+        LogWarning($"[{Name}] COMPort меняется: {_comPort?.PortName ?? "null"} → {value?.PortName ?? "null"}", isDeviceLog: true);
+        _comPort = value;
+
+      }
+    }
+
+    private SerialPort _comPort;
 
     /// <summary>
     /// Получает или задает идентификатор производителя устройства (Vendor ID).
@@ -52,17 +73,22 @@ namespace NewCore.Base.Device
       set
       {
         _connectionDetails = value;
-
+        if (COMPort?.IsOpen == true)
+        {
+          LogWarning($"[{Name}] ConnectionDetails изменён при открытом порте — игнор.", isDeviceLog: true);
+          return;
+        }
         var port = SerialPortCustom.ToObject(value);
+
         if (port != null)
         {
           COMPort = port;
           DeviceProtocol = new SerialDeviceProtocol(this, COMPort);
-          LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.");
+          LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.", isDeviceLog: true);
         }
         else
         {
-          LogWarning($"[{Name}] Не удалось сконфигурировать COM-порт из ConnectionDetails.");
+          LogWarning($"[{Name}] ConnectionDetails={value} → COM-порт будет сброшен в null", isDeviceLog: true);
           COMPort = null;
           DeviceProtocol = null;
         }
@@ -118,40 +144,5 @@ namespace NewCore.Base.Device
 
     /// <inheritdoc />
     public IDeviceProtocol DeviceProtocol { get; set; }
-
-    /// <summary>
-    /// Выполняет поиск COM-порта устройства на основе указанных идентификаторов производителя (VID) и продукта (PID).
-    /// </summary>
-    /// <param name="vid">Идентификатор производителя устройства (VID) в формате строки.</param>
-    /// <param name="pid">Идентификатор продукта устройства (PID) в формате строки.</param>
-    /// <returns>Строка с именем COM-порта (например, "COM3") или null, если устройство не найдено.</returns>
-    public virtual string FindComPort(string vid, string pid)
-    {
-      try
-      {
-        using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE DeviceID LIKE 'USB\\\\VID_" + vid + "&PID_" + pid + "%'"))
-        {
-          foreach (ManagementObject device in searcher.Get())
-          {
-            string caption = device["Caption"]?.ToString() ?? "";
-            if (caption.Contains("COM"))
-            {
-              int start = caption.IndexOf("COM");
-              int end = caption.IndexOf(")", start);
-              if (start >= 0 && end >= 0)
-              {
-                return caption.Substring(start, end - start);
-              }
-            }
-          }
-        }
-      }
-      catch (Exception)
-      {
-        return null;
-      }
-
-      return null;
-    }
   }
 }

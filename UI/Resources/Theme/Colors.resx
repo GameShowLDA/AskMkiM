@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActiveColor" xml:space="preserve">
+    <value>#1ca3e9</value>
+  </data>
+  <data name="ActiveColor80" xml:space="preserve">
+    <value>#801ca3e9</value>
+  </data>
+  <data name="FadedRed" xml:space="preserve">
+    <value>#b23a48</value>
+  </data>
+  <data name="ForegroundColor" xml:space="preserve">
+    <value>#f3f0f9</value>
+  </data>
+  <data name="ForegroundColor60" xml:space="preserve">
+    <value>#60f3f0f9</value>
+  </data>
+  <data name="ForegroundColor80" xml:space="preserve">
+    <value>#80f3f0f9</value>
+  </data>
+  <data name="GreenColor" xml:space="preserve">
+    <value>#4b7765</value>
+  </data>
+  <data name="IsCheckedColor" xml:space="preserve">
+    <value>#1f242b</value>
+  </data>
+  <data name="IsCheckedColor80" xml:space="preserve">
+    <value>#801f242b</value>
+  </data>
+  <data name="LightBlueColor" xml:space="preserve">
+    <value>#5DADE2</value>
+  </data>
+  <data name="LightPrimaryColor" xml:space="preserve">
+    <value>#6a7689</value>
+  </data>
+  <data name="main.active.menu.backround" xml:space="preserve">
+    <value>#1ca3e9</value>
+  </data>
+  <data name="main.background.bottomPanel" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="main.background.breath.firstColor" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="main.background.breath.secondColor" xml:space="preserve">
+    <value>#3a4655</value>
+  </data>
+  <data name="main.background.empty.firstColor" xml:space="preserve">
+    <value>#00E6EDF7</value>
+  </data>
+  <data name="main.background.empty.secondColor" xml:space="preserve">
+    <value>#1AE6EDF7</value>
+  </data>
+  <data name="main.background.greeting" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="main.background.menu" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="main.borderColor.greeting" xml:space="preserve">
+    <value>#f3f0f9</value>
+  </data>
+  <data name="main.empty.vignette.firstColor" xml:space="preserve">
+    <value>#00000000</value>
+  </data>
+  <data name="main.empty.vignette.secondColor" xml:space="preserve">
+    <value>#26000000</value>
+  </data>
+  <data name="main.empty.vignette.thirdColor" xml:space="preserve">
+    <value>#66000000</value>
+  </data>
+  <data name="main.text.title.color" xml:space="preserve">
+    <value>#f3f0f9</value>
+  </data>
+  <data name="PrimaryColor" xml:space="preserve">
+    <value>#3a4655</value>
+  </data>
+  <data name="RedColor" xml:space="preserve">
+    <value>#b23a48</value>
+  </data>
+  <data name="SecondaryColor" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="settings.active.interactive" xml:space="preserve">
+    <value>#1CA3E9</value>
+  </data>
+  <data name="settings.background.card" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="settings.background.config.button" xml:space="preserve">
+    <value>#1CA3E9</value>
+  </data>
+  <data name="settings.background.config.dataInputTablo" xml:space="preserve">
+    <value>#6A7689</value>
+  </data>
+  <data name="settings.background.config.infoTablo" xml:space="preserve">
+    <value>#1CA3E9</value>
+  </data>
+  <data name="settings.background.interactive" xml:space="preserve">
+    <value>#1F242B</value>
+  </data>
+  <data name="settings.background.main" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="settings.background.panel" xml:space="preserve">
+    <value>#282E37</value>
+  </data>
+  <data name="settings.background.selector" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="settings.background.slider" xml:space="preserve">
+    <value>#303843</value>
+  </data>
+  <data name="settings.border.card" xml:space="preserve">
+    <value>#415163</value>
+  </data>
+  <data name="settings.border.config.button" xml:space="preserve">
+    <value>#000000</value>
+  </data>
+  <data name="settings.border.interactive" xml:space="preserve">
+    <value>#415163</value>
+  </data>
+  <data name="settings.border.panel" xml:space="preserve">
+    <value>#282E37</value>
+  </data>
+  <data name="settings.border.slider" xml:space="preserve">
+    <value>#415163</value>
+  </data>
+  <data name="settings.hover.config.button.background" xml:space="preserve">
+    <value>#93D2F4</value>
+  </data>
+  <data name="settings.hover.interactive.background" xml:space="preserve">
+    <value>#1CA3E9</value>
+  </data>
+  <data name="settings.hover.selector.background" xml:space="preserve">
+    <value>#93D2F4</value>
+  </data>
+  <data name="settings.pressed.interactive" xml:space="preserve">
+    <value>#93D2F4</value>
+  </data>
+  <data name="settings.selected.selector" xml:space="preserve">
+    <value>#1CA3E9</value>
+  </data>
+  <data name="settings.text.description.color" xml:space="preserve">
+    <value>#A9B5C3</value>
+  </data>
+  <data name="settings.text.header.color" xml:space="preserve">
+    <value>#FFFFFF</value>
+  </data>
+  <data name="settings.text.title.color" xml:space="preserve">
+    <value>#FFFFFF</value>
+  </data>
+  <data name="YellowColor" xml:space="preserve">
+    <value>#e69138</value>
+  </data>
+</root>

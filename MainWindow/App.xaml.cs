@@ -1,5 +1,12 @@
-﻿using System.Windows;
-using static Utilities.LoggerUtility;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using ConsoleUI.ConsoleLogic;
+using MainWindowProgram.Init;
+using System.Runtime.InteropServices;
+using System.Windows;
+using UI.Theme;
+using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram
 {
@@ -9,33 +16,33 @@ namespace MainWindowProgram
   /// </summary>
   public partial class App : Application
   {
-    /// <summary>
-    /// Обрабатывает необработанные исключения домена приложения.
-    /// </summary>
-    /// <param name="sender">Источник исключения.</param>
-    /// <param name="e">Аргументы события с информацией об исключении.</param>
-    static internal void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [Flags]
+    public enum EXECUTION_STATE : uint
     {
-      Exception ex = (Exception)e.ExceptionObject;
-      LogError("Необработанное исключение в AppDomain: " + ex.Message);
+      ES_CONTINUOUS = 0x80000000,
+      ES_DISPLAY_REQUIRED = 0x00000002,
+      ES_SYSTEM_REQUIRED = 0x00000001,
     }
 
-    /// <summary>
-    /// Обрабатывает необработанные исключения в главном потоке (UI).
-    /// </summary>
-    /// <param name="sender">Источник исключения.</param>
-    /// <param name="e">Аргументы события с информацией об исключении.</param>
-    static internal new void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
-    {
-      Exception ex = e.Exception;
-      LogError("Необработанное исключение в Dispatcher: " + ex.Message);
-      e.Handled = true;
-    }
+    [DllImport("kernel32.dll")]
+    public static extern EXECUTION_STATE SetThreadExecutionState(EXECUTION_STATE esFlags);
 
     /// <summary>
     /// Содержит аргументы командной строки, переданные при запуске приложения.
     /// </summary>
     public static string[] CommandLineArgs { get; private set; }
+    static App()
+    {
+      if (!SingleInstanceManager.CheckOrSignal())
+      {
+        Environment.Exit(0);
+      }
+    }
+
+    public App() { }
 
     /// <summary>
     /// Запускает приложение.
@@ -43,32 +50,90 @@ namespace MainWindowProgram
     /// <param name="e"></param>
     protected override async void OnStartup(StartupEventArgs e)
     {
+      // Новая реализация загрузки окна
+      SplashScreenManager.ShowSplash();
+
+      await Task.Run(async () =>
+      {
+        await PreStartupInitializer.Initialize();
+        await InitializeTheme();
+      });
+
       base.OnStartup(e);
-      CommandLineArgs = e.Args; // Сохраняем аргументы
 
-      SplashWindow loadWindow = new SplashWindow();
-      loadWindow.Show();
+      CommandLineArgs = e.Args;
+      Console.SetOut(new ConsoleRedirector());
 
-      MainWindow mainWindow = null;
-
-      // 2. Создаем MainWindow в UI-потоке
-      Dispatcher.Invoke(() =>
+      try
       {
-        mainWindow = new MainWindow();
-        mainWindow.Visibility = Visibility.Hidden; // Делаем его невидимым до закрытия SplashWindow
-      });
+        var mainWindow = new MainWindow
+        {
+          Visibility = Visibility.Hidden
+        };
 
-      // 3. Инициализируем MainWindow (в фоне)
-      await mainWindow.InitializeAsync();
+        await mainWindow.InitializeAsync();
 
-      // 4. Ждём завершения анимации SplashWindow
-      await loadWindow.WaitForCloseAsync(); // Ждёт плавное исчезновение
+        await SplashScreenManager.CloseSplashAsync();
 
-      // 5. Только теперь показываем основное окно
-      await Dispatcher.InvokeAsync(() =>
-      {
+
+        SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
         mainWindow.Visibility = Visibility.Visible;
-      });
+
+
+        Application.Current.MainWindow = mainWindow;
+
+        mainWindow.Topmost = true;
+
+
+        await mainWindow.Dispatcher.BeginInvoke(new Action(() =>
+        {
+          mainWindow.Topmost = false;
+        }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+
+        // отслеживаем закрытие
+        mainWindow.Closed += (s, _) =>
+        {
+          SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+        };
+
+        mainWindow.Activate();
+        mainWindow.Focus();
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, "Произошла ошибка запуска приложения.");
+        Message.MessageBoxCustom.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        Application.Current.Shutdown();
+      }
+    }
+
+    protected override async void OnExit(ExitEventArgs e)
+    {
+      base.OnExit(e);
+
+      try
+      {
+        var svc = ServiceLocator.GetRequired<IBreakdownTester>();
+        LogInformation($"OnExit: IBreakdownTester instance = {svc.GetHashCode()} | {svc.GetType().FullName}");
+
+        svc?.ConnectableManager?.DisconnectAsync().GetAwaiter().GetResult();
+      }
+      catch { }
+
+      GC.Collect();
+      GC.WaitForPendingFinalizers();
+
+      // TODO : Раскомментировать, когда будет готово
+      // await Core.Communication.CommunicationManager.ResetAllSystem();
+      // await Task.Delay(1000);
+      // await Core.ManagerShassy.Function.StopPowerAsync(ConfigCollector.GetManagerShassyIp());
+    }
+
+    private async Task InitializeTheme()
+    {
+      ThemeManager.Initialize();
+      await LanguageSettings.InitializeAsync();
+      await ThemeSettings.InitializeAsync();
     }
   }
 }

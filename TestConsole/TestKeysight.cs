@@ -1,7 +1,6 @@
-﻿using System.Net;
-using DataBaseConfiguration.Services;
-using NewCore.Base.Interface.Main;
-using NewCore.Device;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using DataBaseConfiguration.Services.Device;
+using System.Net;
 
 namespace TestConsole
 {
@@ -36,7 +35,7 @@ namespace TestConsole
     static private async Task Continuity(IFastMeter keysight3466)
     {
       await keysight3466.ContinuityManager.SetContinuityModeAsync();
-      var data = await keysight3466.ContinuityManager.CheckContinuityAsync();
+      var data = await keysight3466.ContinuityManager.CheckContinuityAsync(true);
       Console.WriteLine($"Результат прозвонки: {data}");
     }
 

@@ -1,0 +1,93 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Базовые цвета -->
+    <Color x:Key="ActiveColor">#1ca3e9</Color>
+    <Color x:Key="ActiveColor80">#801ca3e9</Color>
+    <Color x:Key="FadedRed">#b23a48</Color>
+    <Color x:Key="ForegroundColor">#f3f0f9</Color>
+    <Color x:Key="ForegroundColor60">#60f3f0f9</Color>
+    <Color x:Key="ForegroundColor80">#80f3f0f9</Color>
+    <Color x:Key="GreenColor">#4b7765</Color>
+    <Color x:Key="IsCheckedColor">#1f242b</Color>
+    <Color x:Key="IsCheckedColor80">#801f242b</Color>
+    <Color x:Key="LightBlueColor">#5dade2</Color>
+    <Color x:Key="LightPrimaryColor">#6a7689</Color>
+
+    <!-- Основные фоны -->
+    <Color x:Key="main.active.menu.background">#1ca3e9</Color>
+    <Color x:Key="main.background.bottomPanel">#303843</Color>
+    <Color x:Key="main.background.breath.firstColor">#303843</Color>
+    <Color x:Key="main.background.breath.secondColor">#3a4655</Color>
+    <Color x:Key="main.background.empty.firstColor">#00e6edf7</Color>
+    <Color x:Key="main.background.empty.secondColor">#1ae6edf7</Color>
+    <Color x:Key="main.background.greeting">#303843</Color>
+    <Color x:Key="main.background.menu">#303843</Color>
+    <Color x:Key="main.borderColor.greeting">#f3f0f9</Color>
+    <Color x:Key="main.empty.vignette.firstColor">#00000000</Color>
+    <Color x:Key="main.empty.vignette.secondColor">#26000000</Color>
+    <Color x:Key="main.empty.vignette.thirdColor">#66000000</Color>
+    <Color x:Key="main.text.title.color">#f3f0f9</Color>
+
+    <!-- Основные цвета -->
+    <Color x:Key="PrimaryColor">#3a4655</Color>
+    <Color x:Key="RedColor">#b23a48</Color>
+    <Color x:Key="SecondaryColor">#303843</Color>
+
+    <!-- Настройки -->
+    <Color x:Key="settings.active.interactive">#1ca3e9</Color>
+    <Color x:Key="settings.background.card">#303843</Color>
+    <Color x:Key="settings.background.config.button">#1ca3e9</Color>
+    <Color x:Key="settings.background.config.dataInputTablo">#6a7689</Color>
+    <Color x:Key="settings.background.config.infoTablo">#1ca3e9</Color>
+    <Color x:Key="settings.background.interactive">#1f242b</Color>
+    <Color x:Key="settings.background.main">#303843</Color>
+    <Color x:Key="settings.background.panel">#282e37</Color>
+    <Color x:Key="settings.background.selector">#303843</Color>
+    <Color x:Key="settings.background.slider">#303843</Color>
+
+    <!-- Бордеры -->
+    <Color x:Key="settings.border.card">#415163</Color>
+    <Color x:Key="settings.border.config.button">#000000</Color>
+    <Color x:Key="settings.border.interactive">#415163</Color>
+    <Color x:Key="settings.border.panel">#282e37</Color>
+    <Color x:Key="settings.border.slider">#415163</Color>
+
+    <!-- Состояния -->
+    <Color x:Key="settings.hover.config.button.background">#93d2f4</Color>
+    <Color x:Key="settings.hover.interactive.background">#1ca3e9</Color>
+    <Color x:Key="settings.hover.selector.background">#93d2f4</Color>
+    <Color x:Key="settings.pressed.interactive">#93d2f4</Color>
+    <Color x:Key="settings.selected.selector">#1ca3e9</Color>
+
+    <!-- Текст -->
+    <Color x:Key="settings.text.description.color">#a9b5c3</Color>
+    <Color x:Key="settings.text.header.color">#ffffff</Color>
+    <Color x:Key="settings.text.title.color">#ffffff</Color>
+
+    <!-- 🔥 ДОБАВЛЕННЫЕ ЦВЕТА (временно красные) -->
+    <Color x:Key="tests.input.background.header.panel">#303843</Color>
+    <Color x:Key="tests.input.text.header.color">#f3f0f9</Color>
+    <Color x:Key="tests.main.panel.background">#1f242b</Color>
+    <Color x:Key="tests.main.button.orange.end">#f47842</Color>
+    <Color x:Key="tests.main.button.orange.start">#fcaa3f</Color>
+    <Color x:Key="tests.main.button.green.end">#459c3c</Color>
+    <Color x:Key="tests.main.button.green.start">#67c66e</Color>
+    <Color x:Key="tests.protocol.background">#3a4655</Color>
+    <Color x:Key="tests.protocol.message.time.foreground">YellowGreen</Color>
+    <Color x:Key="tests.protocol.message.message.foreground">#FFFFFF</Color>
+    <Color x:Key="tests.protocol.message.header.foreground">#FFFFFF</Color>
+    <Color x:Key="tests.protocol.message.succes.foreground">#2FA84F</Color>
+    <Color x:Key="tests.protocol.message.error.foreground">#F1301B</Color>
+    <Color x:Key="tests.input.text.description.color">#f3f0f9</Color>
+
+    <Color x:Key="tests.main.background.interactive">#1f242b</Color>
+    <Color x:Key="tests.main.border.interactive">#415163</Color>
+    <Color x:Key="tests.main.button.background">#1ca3e9</Color>
+    <Color x:Key="tests.main.pressed.interactive">#93d2f4</Color>
+
+    <Color x:Key="tests.input.background.input.panel">#6a7689</Color>
+    <!-- Прочее -->
+    <Color x:Key="YellowColor">#e69138</Color>
+
+</ResourceDictionary>

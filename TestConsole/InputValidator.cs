@@ -1,8 +1,4 @@
-﻿using Mode.Metrology.MeasurementSystem;
-using System;
-using System.Collections.Generic;
-
-namespace TestConsole
+﻿namespace TestConsole
 {
   /// <summary>
   /// Класс для проверки входных данных перед измерением.

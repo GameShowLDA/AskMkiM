@@ -1,5 +1,6 @@
-﻿using DataBaseConfiguration.Services;
-using NewCore.Base.Interface.Main;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using DataBaseConfiguration.Services.Device;
+using System.Diagnostics;
 
 namespace TestConsole.GPT
 {
@@ -13,6 +14,8 @@ namespace TestConsole.GPT
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("1. Проверка подлючения");
         Console.WriteLine("2. Проверка времени нарастания");
+        Console.WriteLine("3. Проверка скорости изменений параметров");
+        Console.WriteLine("4. Тест завершения измерения");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
@@ -32,6 +35,13 @@ namespace TestConsole.GPT
             await CheckTimeRamp();
             break;
 
+          case 3:
+            await CheckTime();
+            break;
+
+          case 4:
+            await TestStop();
+            break;
 
           case 0:
             return;
@@ -46,8 +56,15 @@ namespace TestConsole.GPT
     private static async Task CheckConnection()
     {
       var device = SelectBreakdownTester();
-      if (device != null)
-        await device.IrManger.SetModeAsync();
+      for (int i = 0; i < 1000; i++)
+      {
+        await device.ConnectableManager.ConnectAsync();
+        for (int j = 0; j < 1000; j++)
+        {
+          await device.ConnectableManager.InitializeAsync();
+        }
+        await device.ConnectableManager.DisconnectAsync();
+      }
     }
 
     private static async Task CheckTimeRamp()
@@ -55,10 +72,30 @@ namespace TestConsole.GPT
       var device = SelectBreakdownTester();
       if (device != null)
       {
-        await device.DcwManger.SetModeAsync();
-        await device.DcwManger.SetRampTimeAsync(0.1);
+        await device.DcwManger.Mode.SetModeAsync();
+        await device.DcwManger.Time.SetRampTimeAsync(0.1);
       }
 
+    }
+
+    private static async Task CheckTime()
+    {
+      var breakDown = SelectBreakdownTester();
+      Stopwatch stopwatch = new Stopwatch();
+      stopwatch.Start();
+      await breakDown.ConnectableManager.ConnectAsync();
+      await breakDown.AcwManger.Mode.SetModeAsync();
+      await breakDown.AcwManger.Time.SetTestTimeAsync(1);
+      await breakDown.AcwManger.Time.SetRampTimeAsync(1);
+      await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50);
+      await breakDown.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(0);
+      await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10);
+      await breakDown.AcwManger.Voltage.SetVoltageAsync(100);
+      stopwatch.Stop();
+
+      Console.WriteLine($"Ticks: {stopwatch.ElapsedTicks}");
+      Console.WriteLine($"Milliseconds: {stopwatch.ElapsedMilliseconds}");
+      Console.WriteLine($"Seconds: {stopwatch.Elapsed.TotalSeconds:F3}");
     }
 
     private static IBreakdownTester SelectBreakdownTester()
@@ -93,6 +130,15 @@ namespace TestConsole.GPT
       }
 
       return null;
+    }
+
+    private static async Task TestStop()
+    {
+      var tester = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
+      if (tester != null)
+      {
+        await tester.IrManger.Measure.StopMeasure();
+      }
     }
   }
 }

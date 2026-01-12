@@ -1,12 +1,13 @@
-﻿using System.Globalization;
-using System.Printing;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Protocol;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using Utilities.Models;
 
 namespace UI.Components
 {
@@ -55,6 +56,20 @@ namespace UI.Components
             typeof(TextBoxPlaceholder),
             new PropertyMetadata(string.Empty));
 
+    public static readonly DependencyProperty AllowRangeProperty =
+        DependencyProperty.Register(
+            nameof(AllowRange),
+            typeof(bool),
+            typeof(TextBoxPlaceholder),
+            new PropertyMetadata(false));
+
+    public bool AllowRange
+    {
+      get => (bool)GetValue(AllowRangeProperty);
+      set => SetValue(AllowRangeProperty, value);
+    }
+
+
     /// <summary>
     /// Текст, отображаемый как Placeholder.
     /// </summary>
@@ -92,6 +107,27 @@ namespace UI.Components
       set => SetValue(IsNumberInputEnabledProperty, value);
     }
 
+    public static readonly new DependencyProperty BackgroundProperty = DependencyProperty.Register(
+        nameof(Background),
+        typeof(Brush),
+        typeof(TextBoxPlaceholder),
+        new PropertyMetadata(Brushes.Transparent, OnBackgroundChanged));
+
+    private static void OnBackgroundChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is TextBoxPlaceholder control && control.BorderData != null)
+      {
+        control.BorderData.Background = (Brush)e.NewValue;
+      }
+    }
+
+    public new Brush Background
+    {
+      get => (Brush)GetValue(BackgroundProperty);
+      set => SetValue(BackgroundProperty, value);
+    }
+
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextBoxPlaceholder"/>.
     /// </summary>
@@ -99,6 +135,7 @@ namespace UI.Components
     {
       InitializeComponent();
       Loaded += (_, _) => InitPlaceholder();
+      EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
     }
 
     private void InitPlaceholder()
@@ -106,11 +143,27 @@ namespace UI.Components
       if (string.IsNullOrWhiteSpace(Text))
       {
         InputBox.Text = Placeholder;
-        InputBox.Foreground = (Brush)FindResource("ForegroundSolidColorBrush");
+        InputBox.Foreground = (Brush)FindResource("TestsInputDescriptionSolidColorBrush");
       }
       else
       {
-        InputBox.Foreground = (Brush)FindResource("ForegroundSolidColorBrush");
+        InputBox.Foreground = (Brush)FindResource("TestsInputHeaderSolidColorBrush");
+      }
+    }
+
+    /// <summary>
+    /// Обработчик события смены темы. Вызывается, когда тема меняется глобально.
+    /// </summary>
+    private async void OnThemeChanged(ThemeEvent.Change e)
+    {
+      if (string.IsNullOrWhiteSpace(Text))
+      {
+        InputBox.Text = Placeholder;
+        InputBox.Foreground = (Brush)FindResource("TestsInputDescriptionSolidColorBrush");
+      }
+      else
+      {
+        InputBox.Foreground = (Brush)FindResource("TestsInputHeaderSolidColorBrush");
       }
     }
 
@@ -121,7 +174,6 @@ namespace UI.Components
         InputBox.Text = "";
       }
 
-      BorderData.Background = (Brush)FindResource("LightPrimarySolidColorBrush");
     }
 
     private void InputBox_LostFocus(object sender, RoutedEventArgs e)
@@ -129,12 +181,13 @@ namespace UI.Components
       if (string.IsNullOrWhiteSpace(InputBox.Text) || InputBox.Text == Placeholder)
       {
         InputBox.Text = Placeholder;
-        InputBox.Foreground = (Brush)FindResource("ForegroundSolidColorBrush");
+        InputBox.Foreground = (Brush)FindResource("TestsInputDescriptionSolidColorBrush");
       }
       else
       {
         Text = InputBox.Text;
       }
+
     }
 
     /// <summary>
@@ -145,11 +198,6 @@ namespace UI.Components
     /// <param name="e">Аргументы события ввода текста.</param>
     private void InputBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-      if (BorderData.Background != (Brush)FindResource("LightPrimarySolidColorBrush"))
-      {
-        BorderData.Background = (Brush)FindResource("LightPrimarySolidColorBrush");
-      }
-
       if (!IsNumberInputEnabled)
       {
         e.Handled = false;
@@ -159,12 +207,29 @@ namespace UI.Components
       string currentText = InputBox.Text;
       int caretPos = InputBox.CaretIndex;
 
-      // Если вводится запятая – заменяем на точку
+      if (e.Text == "-")
+      {
+        if (!AllowRange)
+        {
+          e.Handled = true;
+          return;
+        }
+
+        string current = InputBox.Text;
+        int caret = InputBox.CaretIndex;
+
+        bool alreadyHasDash = current.Contains("-");
+        bool isFirst = caret == 0;
+        bool isPrevDash = caret > 0 && current[caret - 1] == '-';
+
+        e.Handled = alreadyHasDash || isFirst || isPrevDash;
+        return;
+      }
+
       if (e.Text == ",")
       {
         e.Handled = true;
 
-        // Проверка: не вставлять точку после точки
         if (caretPos > 0 && currentText[caretPos - 1] == '.')
         {
           return;
@@ -179,14 +244,12 @@ namespace UI.Components
         return;
       }
 
-      // Запрет на две точки подряд
       if (e.Text == "." && caretPos > 0 && currentText[caretPos - 1] == '.')
       {
         e.Handled = true;
         return;
       }
 
-      // Разрешаем ввод только цифр и точки
       e.Handled = !Regex.IsMatch(e.Text, "^[0-9.]$");
     }
 
@@ -195,7 +258,7 @@ namespace UI.Components
     /// </summary>
     public void DataError()
     {
-      BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.Item2);
+      BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.TitleColor);
       Keyboard.ClearFocus();
     }
   }

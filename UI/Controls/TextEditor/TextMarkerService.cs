@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Media;
-using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Rendering;
 
 namespace UI.Controls.TextEditor
 {
@@ -51,6 +48,7 @@ namespace UI.Controls.TextEditor
     {
       this.editor = editor ?? throw new ArgumentNullException(nameof(editor));
       markers = new TextSegmentCollection<TextMarker>(editor.Document);
+      editor.TextArea.TextView.LineTransformers.Add(new TextMarkerColorizer(markers));
     }
 
     /// <summary>
@@ -71,11 +69,11 @@ namespace UI.Controls.TextEditor
         return;
       }
 
-      Console.WriteLine("🖌 Draw: Отрисовка маркеров...");
-
       foreach (var marker in markers)
       {
-        Console.WriteLine($"➡ Маркер: offset={marker.StartOffset}, length={marker.Length}");
+        if (!marker.IsBackground)
+          continue;
+
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
         {
           var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
@@ -112,6 +110,20 @@ namespace UI.Controls.TextEditor
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
+    public void AddStyledMarker(int startOffset, int length, Color? foreground, FontWeight? weight = null)
+    {
+      var marker = new TextMarker(startOffset, length)
+      {
+        ForegroundColor = foreground,
+        FontWeight = weight,
+        IsBackground = false
+      };
+
+      markers.Add(marker);
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+
     /// <summary>
     /// Реализация текстового маркера.
     /// </summary>
@@ -127,6 +139,7 @@ namespace UI.Controls.TextEditor
         StartOffset = startOffset;
         Length = length;
       }
+      public bool IsBackground { get; set; } = true;
 
       /// <inheritdoc/>
       public object Tag { get; set; }
@@ -144,6 +157,40 @@ namespace UI.Controls.TextEditor
       public void Delete()
       {
         Length = 0;
+      }
+    }
+
+    private sealed class TextMarkerColorizer : DocumentColorizingTransformer
+    {
+      private readonly TextSegmentCollection<TextMarker> _markers;
+
+      public TextMarkerColorizer(TextSegmentCollection<TextMarker> markers)
+      {
+        _markers = markers;
+      }
+
+      protected override void ColorizeLine(DocumentLine line)
+      {
+        foreach (var marker in _markers.FindOverlappingSegments(line.Offset, line.Length))
+        {
+          ChangeLinePart(marker.StartOffset, marker.EndOffset, element =>
+          {
+            if (marker.ForegroundColor.HasValue)
+            {
+              element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor.Value));
+            }
+
+            if (marker.FontWeight.HasValue)
+            {
+              var tf = element.TextRunProperties.Typeface;
+              element.TextRunProperties.SetTypeface(new Typeface(
+                tf.FontFamily,
+                tf.Style,
+                marker.FontWeight.Value,
+                tf.Stretch));
+            }
+          });
+        }
       }
     }
   }

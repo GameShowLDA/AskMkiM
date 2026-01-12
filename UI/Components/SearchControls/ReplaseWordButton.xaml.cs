@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using Ask.Core.Services.EventCore.Adapters;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace UI.Components.SearchControls
@@ -25,6 +26,11 @@ namespace UI.Components.SearchControls
     private void Border_MouseLeave(object sender, MouseEventArgs e)
     {
       replaceWord.Opacity = 0.7;
+    }
+
+    private void replaceWord_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      SearchEventAdapter.RaiseReplaceWordButtonPressed();
     }
   }
 }

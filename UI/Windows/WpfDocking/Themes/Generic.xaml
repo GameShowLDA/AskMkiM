@@ -1,0 +1,56 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:UI.Windows.WpfDocking.Windows"
+    xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
+    xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/ToolWindowCaption.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/PreviewOverlay.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockTreeControl.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockTreeClientOverlay.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockPaneControl.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockPaneControlOverlay.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/SplitContainer.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockControl.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockItem.TabContextMenu.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockItem.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/AutoHideStrip.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/AutoHideTab.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/AutoHideClient.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/AutoHideWindow.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/WpfFloatingWindowClient.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/WpfFloatingWindow.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockTreeClient.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockTreeSplit.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockTreeSplitter.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockTree.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockPaneSplit.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DockPane.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/ToolWindow.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/ToolWindowTabStrip.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/ToolWindowTab.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DocumentWindow.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DocumentTabStrip.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/DocumentTab.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/WindowSwitcher.xaml" />
+        <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/InertButton.xaml" />
+
+        <!--
+            Visual Studio bug, must use property element syntax:
+            http://www.hardcodet.net/2008/04/nested-markup-extension-bug
+        -->
+        <ResourceDictionary>
+            <ResourceDictionary.Source>
+                <local:ConditionalUriExtension
+                    Condition="{x:Static docking:FloatingWindow.CanBeNative}"
+                    
+                    True="pack://application:,,,/UI;component/Windows/WpfDocking/Themes/Generic/NativeFloatingWindow.xaml"
+                    False="pack://application:,,,/UI;component/Windows/WpfDocking/Themes/Generic/Empty.xaml"/>
+
+            </ResourceDictionary.Source>
+        </ResourceDictionary>
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

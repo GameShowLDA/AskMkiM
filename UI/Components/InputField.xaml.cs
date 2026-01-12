@@ -1,27 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using UI.Controls.Protocol;
-using Utilities.Events;
-using static NewCore.Enum.DeviceEnum;
+using UI.Controls.ProtocolNew;
 
 namespace UI.Components
 {
   /// <summary>
   /// Логика взаимодействия для InputField.xaml.
   /// </summary>
-  public partial class InputField : UserControl
+  public partial class InputField : UserControl, IInputFieldAccessor, IInputHighlightService
   {
     #region Свойства отображения элементов.
 
@@ -54,6 +43,19 @@ namespace UI.Components
     /// </summary>
     public static readonly DependencyProperty UnitElectricalProperty =
         DependencyProperty.Register(nameof(UnitElectrical), typeof(string), typeof(InputField), new PropertyMetadata(string.Empty));
+
+    public static readonly DependencyProperty IsModuleInputModeProperty =
+    DependencyProperty.Register(
+        nameof(IsModuleInputMode),
+        typeof(bool),
+        typeof(InputField),
+        new PropertyMetadata(false, OnModeChanged));
+
+    public bool IsModuleInputMode
+    {
+      get => (bool)GetValue(IsModuleInputModeProperty);
+      set => SetValue(IsModuleInputModeProperty, value);
+    }
 
     /// <summary>
     /// Показывает или скрывает поле времени.
@@ -159,6 +161,34 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Получает или задаёт номер проверяемого устройства в формате a.b.
+    /// </summary>
+    public string TestedNumber
+    {
+      get => TestedNumberBox.Text;
+      set => TestedNumberBox.Text = value;
+    }
+
+    /// <summary>
+    /// Получает или задаёт номер проверяющего устройства в формате a.b.
+    /// </summary>
+    public string TesterNumber
+    {
+      get => TesterNumberBox.Text;
+      set => TesterNumberBox.Text = value;
+    }
+
+    /// <summary>
+    /// Получает или задаёт диапазон проверки в формате списка чисел и диапазонов (например, "1-3,5").
+    /// </summary>
+    public string TestRange
+    {
+      get => TestRangeBox.Text;
+      set => TestRangeBox.Text = value;
+    }
+
+
+    /// <summary>
     /// Только геттер для получения активной шины.
     /// </summary>
     public BusPoint ActiveBus { get; private set; }
@@ -216,7 +246,7 @@ namespace UI.Components
         headerVoltageData.Text = $"{voltageBaseText}: {VoltageTextBox.Text} {VoltageTextBox.Unit}";
         headerBusData.Text = $"{BusBaseText}: {ActiveBus}";
       }
-      else 
+      else
       {
         headerFirstData.Text = $"{firstBaseText}: вида a.b.c";
         headerSecondData.Text = $"{secondBaseText}: вида a.b.c";
@@ -303,5 +333,51 @@ namespace UI.Components
         ActiveBus = BusPoint.A;
       }
     }
+
+    private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      var control = (InputField)d;
+
+      bool isModuleInput = (bool)e.NewValue;
+
+      control.TestInputGrid.Visibility = isModuleInput
+          ? Visibility.Visible
+          : Visibility.Collapsed;
+
+      control.TestStepParametersGrid.Visibility = isModuleInput
+          ? Visibility.Collapsed
+          : Visibility.Visible;
+    }
+
+    public (string First, string Second, string Parameter) GetValues()
+    {
+      return InvokeSafe(() =>
+          !IsModuleInputMode
+              ? (FirstPoint, SecondPoint, ElectricalParameter)
+              : (TestedNumber, TesterNumber, TestRange)
+      );
+    }
+
+    public string GetTime() => InvokeSafe(() => Time);
+
+    public string GetTimeRamp() => InvokeSafe(() => TimeRamp.Replace('.', ','));
+
+    public string GetVoltage() => InvokeSafe(() => Voltage);
+
+    public BusPoint GetBus() => InvokeSafe(() => ActiveBus);
+
+    private T InvokeSafe<T>(Func<T> func)
+    {
+      if (Dispatcher.CheckAccess())
+        return func();
+
+      return Dispatcher.Invoke(func);
+    }
+
+    public void HighlightTestedNumber() => TestedNumberBox.DataError();
+
+    public void HighlightTesterNumber() => TesterNumberBox.DataError();
+
+    public void HighlightTestRange() => TestRangeBox.DataError();
   }
 }

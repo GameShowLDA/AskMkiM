@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="UI.Controls.ExecutorControls.MetrologyControls.PrMetrologyControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.ExecutorControls.MetrologyControls"
+             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
+             xmlns:Custom="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Protocol:ProtocolUI x:Name="ProtocolUI" Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}">
+        <Protocol:ProtocolUI.ContentView>
+            <Custom:InputField Height="Auto" UnitElectrical=",Ом"/>
+        </Protocol:ProtocolUI.ContentView>
+    </Protocol:ProtocolUI>
+</UserControl>

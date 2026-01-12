@@ -1,7 +1,7 @@
-﻿using AppConfiguration.Base;
+﻿using Ask.Core.Services.EventCore.Adapters;
 using System.Windows;
 using System.Windows.Controls;
-using static Utilities.LoggerUtility;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Components.SearchControls
 {
@@ -26,10 +26,10 @@ namespace UI.Components.SearchControls
       {
         var fileName = row.FileName;
         var lineNumber = row.LineNumber;
-        var startOffset = row.StartOffset; 
+        var startOffset = row.StartOffset;
         var lineText = row.SubstringFromWord;
 
-        EventAggregator.RaiseFoundTextSelectRow(fileName, lineNumber, startOffset, lineText, row.SearchText);
+        SearchEventAdapter.RaiseFoundTextSelectRow(fileName, lineNumber, startOffset, lineText, row.SearchText);
         LogInformation("Сработало событие нажатия на строку dataGrid с результатами поиска");
       }
     }

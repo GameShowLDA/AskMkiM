@@ -1,0 +1,79 @@
+﻿<?xml version="1.0"?>
+
+<SyntaxDefinition name="MKI" extensions=".pk;.pkw;" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+	<Color name="Comment" foreground="#4CAF50" />
+	<Color name="Mnemonic" foreground="#90EE90" />
+	<Color name="CommandNumber" foreground="#00BFFF" />
+	<Color name="Resistance" foreground="#FFD700" />
+	<Color name="Voltage" foreground="#FFD700" />
+	<Color name="Time" foreground="#FFD700" />
+	<Color name="Wire" foreground="#F44336"/>
+	<Color name="OkParam" foreground="#FFB300" />
+	<Color name="RmPoint" foreground="#00BCD4" />
+	<Color name="RmAddress" foreground="#FF6F00" />
+	<Color name="OkValue" foreground="#00FFFF" />
+	<Color name="ErrorLine" foreground="#FF2D2D" />
+
+	<RuleSet ignoreCase="false">
+
+
+		<!-- Вся строка с ! красная -->
+		<Rule color="ErrorLine">^.*!.*$</Rule>
+		
+		<!--Время-->
+		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
+
+		<!--Напряжение-->
+		<Rule color="Voltage">\s\+?\d+\s*[ВVv]\b</Rule>
+
+		<!--Сопротивление-->
+
+		<!-- Диапазон типа 94<кОм<106 -->
+		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?&lt;(?:Ом|кОм|МОм|ГОм|нф|мкф|пф)&lt;\d+(?:[.,]\d+)?</Rule>
+
+		<!-- Случаи с R> -->
+		<Rule color="Resistance">(?i)R&gt;\d+(?:[.,]\d+)?(Ом|кОм|МОм|ГОм|нф|мкф|пф)</Rule>
+
+		<!-- Универсальное правило -->
+		<Rule color="Resistance">(?i)(Ом|кОм|МОм|ГОм|нф|мкф|пф)&lt;\d+(?:[.,]\d+)?</Rule>
+
+		<!-- Универсальное правило — только с < -->
+		<Rule color="Resistance">(?i)\d+(?:[.,]\d+)?\s?&lt;\s?(Ом|кОм|МОм|ГОм|нф|мкф|пф)</Rule>
+
+		<!-- Данные РМ -->
+		<Rule color="OkParam">^\s*[\w/:А-Яа-я]+(?=\s*=>)</Rule>
+		<Rule color="RmAddress">(?&lt;=&gt;\s*)[\d\.]+</Rule>
+		<Rule color="OkValue">^\s*\d+\.\d+\.\d+\s*$</Rule>
+
+
+		<!-- Номер команды -->
+		<Rule color="CommandNumber">^\s*\d+\b</Rule>
+
+		<!--Мнемоника-->
+		<Rule color="Mnemonic">\bСИ\b</Rule>
+		<Rule color="Mnemonic">\bОК\b</Rule>
+		<Rule color="Mnemonic">\bСП\b</Rule>
+		<Rule color="Mnemonic">\bРМ\b</Rule>
+		<Rule color="Mnemonic">\bЦУ\b</Rule>
+		<Rule color="Mnemonic">\bПР\b</Rule>
+		<Rule color="Mnemonic">\bПИ\b</Rule>
+		<Rule color="Mnemonic">\bКЦ\b</Rule>
+		<Rule color="Mnemonic">\bУП\b</Rule>
+		<Rule color="Mnemonic">\bКС\b</Rule>
+		<Rule color="Mnemonic">\bИЕ\b</Rule>
+		<Rule color="Mnemonic">\bЭТ\b</Rule>
+
+		<!--Комментарии-->
+		<Span color="Comment" begin="{" end="}" multiline="true"/>
+		<Span color="Comment" begin="//" end="\n" />
+		<Span color="Comment" begin="/\*" end="\*/" multiline="true" />
+		<Span color="OkParam" begin="\[" end="\]" />
+		
+		<!--Обозначения-->
+		<Rule color="OkParam">^[ \t]*[А-Яа-яA-Za-z_0-9]+(?=\s*=)</Rule>
+		<Rule color="OkValue">(?&lt;=\=)[^\r\n]+</Rule>
+
+
+	</RuleSet>
+</SyntaxDefinition>
+

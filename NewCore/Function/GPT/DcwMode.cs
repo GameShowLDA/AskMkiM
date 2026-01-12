@@ -1,306 +1,84 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
-using NewCore.Base.Function.Breakdown;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
-using NewCore.Function.GPT.Command;
-using NewCore.Function.GPT.Data;
-using static NewCore.Function.GPT.Command.FunctionCommandManager;
-using static NewCore.Function.GPT.Command.ManualCommandManager;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using NewCore.Function.GPT.Managment;
 
 namespace NewCore.Function.GPT
 {
   /// <summary>
-  /// Класс для управления режимом DCW (Direct Current Withstand).
+  /// Класс для управления режимом DCW.
   /// </summary>
   public class DcwMode : IDcwModeBreakdown
   {
     /// <summary>
-    /// Экземпляр устройства GPT79904.
+    /// Экземпляр модели устройства <see cref="GPT79904"/>, 
+    /// через который выполняются команды и осуществляется обмен данными с прибором.
     /// </summary>
     private GPT79904 _gptModel { get; set; }
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="DcwMode"/>.
+    /// Задержка (в миллисекундах), выполняемая перед отправкой управляющих команд на устройство.
+    /// Используется для обеспечения корректного ответа прибора на последовательные запросы.
     /// </summary>
-    /// <param name="gpt79904">Объект <see cref="GPT79904"/> для управления устройством.</param>
-    public DcwMode(GPT79904 gpt79904) => _gptModel = gpt79904;
-
-    static private int delayBeforeCall = 100;
+    private static int delayBeforeCall = 100;
 
     /// <summary>
-    /// Устанавливает режим DCW на устройстве.
+    /// Текущая конфигурация режима DCW (постоянный ток высокого напряжения),
+    /// содержащая параметры, считанные с устройства или установленные пользователем.
     /// </summary>
-    public async Task SetModeAsync()
-    {
-      LogInformation("Устанавливаем режим DCW на GPT-79904");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} DCW";
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
+    private DcwConfiguration _config;
 
     /// <summary>
-    /// Устанавливает напряжение DCW.
+    /// Базовое значение задержки (в миллисекундах), используемое между командами
+    /// при взаимодействии с устройством.
     /// </summary>
-    /// <param name="value">Значение напряжения (в В).</param>
-    public async Task SetVoltageAsync(double value)
-    {
-      LogInformation($"Устанавливаем напряжение DCW: {value:F3} кВ");
+    private int delay = 50;
 
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
+    /// <inheritdoc />
+    public IModeConfigurable Mode { get; set; }
 
-      value /= 1000;
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_VOLTAGE)} {value:F3}".Replace(',', '.');
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
+    /// <inheritdoc />
+    public IVoltageConfigurable Voltage { get; set; }
+
+    /// <inheritdoc />
+    public ICurrentLimitsConfigurable CurrentLimits { get; set; }
+
+    /// <inheritdoc />
+    public ITimeConfigurable Time { get; set; }
+
+    /// <inheritdoc />
+    public IOffsetConfigurable Offset { get; set; }
+
+    /// <inheritdoc />
+    public IArcCurrentConfigurable ArcCurrent { get; set; }
+
+    /// <inheritdoc />
+    public IMeasurable Measure { get; set; }
+    /// <inheritdoc />
+    public IConfigurationProvider<DcwConfiguration> Config { get; set; }
 
     /// <summary>
-    /// Устанавливает высокий предел тока DCW.
+    /// Создаёт новый экземпляр класса <see cref="DcwMode"/>.
     /// </summary>
-    /// <param name="value">Значение предела (в мА).</param>
-    public async Task SetHighCurrentLimitAsync(double value)
+    /// <param name="gpt79904">
+    /// Экземпляр модели устройства <see cref="GPT79904"/>, 
+    /// который будет использоваться для управления режимом DCW.
+    /// </param>
+    public DcwMode(GPT79904 gpt79904)
     {
-      LogInformation($"Устанавливаем высокий предел тока DCW: {value:F3} мА");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CHISET)} {value:F3}";
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
-
-    /// <summary>
-    /// Устанавливает низкий предел тока DCW.
-    /// </summary>
-    /// <param name="value">Значение предела (в мА).</param>
-    public async Task SetLowCurrentLimitAsync(double value)
-    {
-      LogInformation($"Устанавливаем низкий предел тока DCW: {value:F3} мА");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query1 = $"{GetCommandSyntax(ManualCommand.MANU_DCW_CLOSET)} {value:F3}".Replace(',', '.');
-      await _gptModel.DeviceProtocol.QueryAsync(query1);
-    }
-
-    /// <summary>
-    /// Устанавливает время теста DCW.
-    /// </summary>
-    /// <param name="value">Значение времени (в секундах).</param>
-    public async Task SetTestTimeAsync(double value)
-    {
-      LogInformation($"Устанавливаем время теста DCW: {value:F1} сек");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_TTIME)} {value:F1}";
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
-
-    /// <summary>
-    /// Устанавливает время нарастания напряжения (Ramp Time) для текущего теста.
-    /// </summary>
-    /// <param name="value">Значение времени нарастания в секундах (0.1 – 999.9).</param>
-    public async Task SetRampTimeAsync(double value)
-    {
-      var rampTime = Convert.ToInt32(value);
-      LogInformation($"Устанавливаем время нарастания напряжения: {value:F1} сек");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
-
-    /// <summary>
-    /// Устанавливает смещение DCW.
-    /// </summary>
-    /// <param name="value">Значение смещения (в мА).</param>
-    public async Task SetOffsetAsync(double value)
-    {
-      LogInformation($"Устанавливаем смещение DCW: {value:F3} мА");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_REF)} {value:F3}";
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
-
-    /// <summary>
-    /// Устанавливает значение тока дуги DCW.
-    /// </summary>
-    /// <param name="value">Значение тока дуги (в мА).</param>
-    public async Task SetArcCurrentAsync(double value)
-    {
-      LogInformation($"Устанавливаем текущее значение тока DCW: {value:F3} мА");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
-      var query = $"{GetCommandSyntax(ManualCommand.MANU_DCW_ARCCURRENT)} {value:F3}";
-      await _gptModel.DeviceProtocol.QueryAsync(query);
-    }
-
-    /// <summary>
-    /// Считывает текущую конфигурацию DCW.
-    /// </summary>
-    /// <returns>Объект <see cref="DcwConfiguration"/> с текущими параметрами.</returns>
-    public async Task<DcwConfiguration> ReadConfigurationAsync()
-    {
-      LogInformation("Считываем конфигурацию DCW...");
-      if (await GetIsIdleModeEnabled())
-      {
-        return new DcwConfiguration();
-      }
-
-      var voltage = await ReadDoubleAsync(ManualCommand.MANU_DCW_VOLTAGE);
-      var highCurrentLimit = await ReadDoubleAsync(ManualCommand.MANU_DCW_CHISET);
-      var lowCurrentLimit = await ReadDoubleAsync(ManualCommand.MANU_DCW_CLOSET);
-      var testTime = await ReadDoubleAsync(ManualCommand.MANU_DCW_TTIME);
-      var offset = await ReadDoubleAsync(ManualCommand.MANU_DCW_REF);
-      var arcCurrent = await ReadDoubleAsync(ManualCommand.MANU_DCW_ARCCURRENT);
-
-      return new DcwConfiguration
-      {
-        Voltage = voltage,
-        HighCurrentLimit = highCurrentLimit,
-        LowCurrentLimit = lowCurrentLimit,
-        TestTime = testTime,
-        Offset = offset,
-        ArcCurrent = arcCurrent,
-      };
-    }
-
-    /// <summary>
-    /// Читает значение из устройства и преобразует его в double.
-    /// </summary>
-    /// <param name="command">Команда для запроса.</param>
-    /// <returns>Преобразованное значение.</returns>
-    private async Task<double> ReadDoubleAsync(ManualCommand command)
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return 0;
-      }
-
-      var query = $"{GetCommandSyntax(command)} ?";
-      var response = await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: 100);
-      return double.TryParse(response.Replace("kV", "").Replace("mA", "").Replace("S", "").Trim().Replace(".", ","), out var result) ? result : 0.0;
-    }
-
-    /// <summary>
-    /// Запускает тест DCW и возвращает результат измерения тока.
-    /// </summary>
-    /// <returns>Измеренный ток (в мА).</returns>
-    public async Task<double> MeasureCurrentAsync()
-    {
-      LogInformation("Запуск измерений режима ПИ DCW");
-
-      if (await GetIsIdleModeEnabled())
-      {
-        return 0;
-      }
-
-      var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      var timeDelay = Convert.ToInt32(await GetRampTimeAsync() + await GetTestTimeAsync());
-
-      await _gptModel.DeviceProtocol.QueryAsync(query, responseDelay: timeDelay * 1000, delayBeforeCall: delayBeforeCall);
-      query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
-      var answerDevice = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
-
-      var result = answerDevice.Split(',');
-      var measureResulte = result[3];
-
-      LogInformation($"Результат измерения режима ПИ(DCW): {measureResulte}");
-
-      Match match = Regex.Match(measureResulte, @"\d+(\.\d+)?");
-
-      if (match.Success)
-      {
-        return double.Parse(match.Value, CultureInfo.InvariantCulture);
-      }
-
-      throw new FormatException("Число не найдено в строке.");
-    }
-
-    /// <summary>
-    /// Получает текущее время нарастания напряжения (Ramp Time) для текущего теста.
-    /// </summary>
-    /// <returns>Значение времени нарастания в секундах.</returns>
-    public async Task<double> GetRampTimeAsync()
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return 0;
-      }
-
-      var query = GetCommandSyntax(ManualCommand.MANU_RTIME) + "?";
-      LogInformation("Запрашиваем текущее время нарастания напряжения (Ramp Time)...");
-
-      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-      LogDebug($"Ответ на запрос Ramp Time: \"{response}\"");
-
-      // Ищем число с точкой: 005.0, 12.3 и т.д.
-      var match = Regex.Match(response, @"\d+(\.\d+)?");
-      if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var rampTime))
-      {
-        return rampTime;
-      }
-
-      LogWarning("Не удалось разобрать значение Ramp Time. Возвращаем 0.0.");
-      return 0.0;
-    }
-
-    /// <summary>
-    /// Получает текущее время теста DCW.
-    /// </summary>
-    /// <returns>Значение времени в секундах.</returns>
-    public async Task<double> GetTestTimeAsync()
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return 0;
-      }
-
-      var query = GetCommandSyntax(ManualCommand.MANU_DCW_TTIME) + "?";
-      LogInformation("Запрашиваем время теста DCW...");
-
-      string response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
-      LogDebug($"Ответ на запрос DCW Test Time: \"{response}\"");
-
-      var match = Regex.Match(response, @"\d+(\.\d+)?");
-      if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var testTime))
-      {
-        return testTime;
-      }
-
-      LogWarning("Не удалось разобрать значение времени теста DCW. Возвращаем 0.0.");
-      return 0.0;
+      _gptModel = gpt79904;
+      _config = new DcwConfiguration();
+      Voltage = new VoltageManagment(_gptModel, BreakdownTypeMode.DCW, delay, getConfigVoltage: () => _config.Voltage, setConfigVoltage: v => _config.Voltage = v);
+      CurrentLimits = new CurrentLimitManagment(_gptModel, BreakdownTypeMode.DCW, delay, getHighLimit: () => _config.HighCurrentLimit, setHighLimit: v => _config.HighCurrentLimit = v, getLowLimit: () => _config.LowCurrentLimit, setLowLimit: v => _config.LowCurrentLimit = v);
+      Time = new TimeManagment(_gptModel, BreakdownTypeMode.DCW, delay, getTestTime: () => _config.TestTime, setTestTime: v => _config.TestTime = v, getRampTime: () => _config.RampTime, setRampTime: v => _config.RampTime = v);
+      Offset = new OffsetManagment(_gptModel, BreakdownTypeMode.DCW, delay, getOffset: () => _config.Offset, setOffset: v => _config.Offset = v);
+      ArcCurrent = new ArcCurrentManagment(_gptModel, BreakdownTypeMode.DCW, delay, getArcCurrent: () => _config.ArcCurrent, setArcCurrent: v => _config.ArcCurrent = v);
+      Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: async () => await ExecutionConfig.GetIsIdleModeEnabled());
+      Config = new DcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent);
+      Mode = new ModeManagment(_gptModel, BreakdownTypeMode.DCW, delay, async () => _config = await Config.ReadConfigurationAsync());
     }
   }
 }

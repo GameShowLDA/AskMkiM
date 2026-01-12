@@ -1,47 +1,83 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-    <SignAssembly>False</SignAssembly>
-    <ApplicationIcon>Resources\АСКМ.ico</ApplicationIcon>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<SignAssembly>False</SignAssembly>
+		<ApplicationIcon>Resources\АСКМ.ico</ApplicationIcon>
+		<PackageOutputPath>$(OutputPath)</PackageOutputPath>
+		<OutputPath>D:\AskMkiM\Bin\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishSingleFile>true</PublishSingleFile>
+		<PublishTrimmed>false</PublishTrimmed>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<GenerateApplicationDefinition>false</GenerateApplicationDefinition>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Resources\loading.mp4" />
-    <None Remove="Resources\logo.png" />
-  </ItemGroup>
+	<Target Name="CreateEmptyFolder" AfterTargets="Build">
+		<MakeDir Directories="D:\AskMkiM\Тесты ПК" />
+	</Target>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AppConfiguration\AppConfiguration.csproj" />
-    <ProjectReference Include="..\ConsoleUtilities\ConsoleUtilities.csproj" />
-    <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
-    <ProjectReference Include="..\Mode\Mode.csproj" />
-    <ProjectReference Include="..\UI\UI.csproj" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>9999</WarningLevel>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="NLog" Version="5.4.0" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<WarningLevel>9999</WarningLevel>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="Resources\logo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\АСКМ.ico" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Resources\logo.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
+		<ProjectReference Include="..\ConsoleUI\ConsoleUI.csproj" />
+		<ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
+		<ProjectReference Include="..\Message\Message.csproj" />
+		<ProjectReference Include="..\UI\UI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Resources\logo.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\АСКМ.ico" />
+	</ItemGroup>
+
+	<Target Name="FixPublishOutput" AfterTargets="Publish">
+		<ItemGroup>
+			<PublishFiles Include="$(PublishDir)**\*" />
+		</ItemGroup>
+
+		<Move SourceFiles="@(PublishFiles)" DestinationFolder="C:\AskMkiM\Bin\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+
+		<RemoveDir Directories="$(PublishDir)" />
+	</Target>
+
 
 </Project>

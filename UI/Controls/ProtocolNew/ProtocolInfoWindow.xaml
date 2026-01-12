@@ -1,0 +1,112 @@
+﻿<Window x:Class="UI.Controls.ProtocolNew.ProtocolInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI.Controls.ProtocolNew"
+        mc:Ignorable="d"
+        Title="ProtocolInfoWindow" 
+        
+        Height="600" 
+        Width="400"
+        MaxHeight="700"
+        MaxWidth="400"
+        WindowStyle="None" 
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Topmost="True" 
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent">
+    <Border Background="{DynamicResource IsCheckedColorSolidColorBrush}" CornerRadius="30">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="Введите данные для протокола" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+                       FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Row="1" Text="Заводской номер" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+                       FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
+            <Border Grid.Row="2" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+                <TextBox 
+                 Background="Transparent" 
+                 BorderThickness="0" 
+                 VerticalAlignment="Center" 
+                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 KeyDown="Input_KeyDown"
+                Name="NumberInput"
+                 />
+            </Border>
+            <TextBlock Grid.Row="3" Text="Исполнитель" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+                       FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,0"/>
+            <Border Grid.Row="4" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+                <TextBox 
+                 Background="Transparent" 
+                 BorderThickness="0" 
+                 VerticalAlignment="Center" 
+                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 KeyDown="Input_KeyDown"
+                 Name="ExecutorInput"
+                 />
+            </Border>
+            <TextBlock Grid.Row="5" Text="Представитель ОК" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+                       FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
+            <Border Grid.Row="6" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+                <TextBox 
+                 Background="Transparent" 
+                 BorderThickness="0" 
+                 VerticalAlignment="Center" 
+                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 KeyDown="Input_KeyDown"
+
+                Name="AgentInput"
+                 />
+            </Border>
+
+            <TextBlock Grid.Row="7" Text="Представитель заказчика (ОК)" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+                       FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
+            <Border Grid.Row="8" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+                <TextBox 
+                 Background="Transparent" 
+                 BorderThickness="0" 
+                 VerticalAlignment="Center" 
+                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 KeyDown="Input_KeyDown"
+                Name="CustomerAgentInput"
+                 />
+            </Border>
+            <Grid Grid.Row="9">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button 
+                    Grid.Column="1"
+                    Content="Сохранить" 
+                    Style="{StaticResource ConfigButtonStyle}" 
+                    HorizontalAlignment="Center"
+                    Width="150"
+                    PreviewMouseDown="SaveButton_Click"/>
+                <Button 
+                    Grid.Column="0"
+                    Content="Отмена" 
+                    Style="{StaticResource ConfigButtonStyle}" 
+                    HorizontalAlignment="Center"
+                    Width="150"
+                    PreviewMouseDown="CancelButton_Click"/>
+            </Grid>
+
+
+        </Grid>
+
+    </Border>
+</Window>

@@ -1,4 +1,0 @@
-# LAN agent config file for desktop Linux and Windows
-autoDiscover: true     # Auto discovery enabled/disabled for TCPIP0
-autoPoll: false        # Auto poll devices for TCPIP interfaces
-lxiXmlTimeoutMs: 5000 # Timeout setting in milliseconds when accessing Lxi XML identification page, can enlarge the value in slow env.

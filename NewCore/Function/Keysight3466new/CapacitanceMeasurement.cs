@@ -1,7 +1,8 @@
-﻿using NewCore.Base.Function.FastMeter;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -26,11 +27,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetCapacitanceModeAsync()
+    public async Task<bool> SetCapacitanceModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -39,12 +40,14 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:CAP");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+      return answer.Contains("CAP");
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureCapacitanceAsync(double param = 0)
+    public async Task<double> MeasureCapacitanceAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return param;
       }
@@ -60,11 +63,10 @@ namespace NewCore.Function.Keysight3466new
       if (double.TryParse(response, System.Globalization.NumberStyles.Float,
                           System.Globalization.CultureInfo.InvariantCulture, out double capacitance))
       {
-        // Переводим значение в нанофарады (если прибор работает в Фарадах)
         return capacitance * 1e9;
       }
 
-      throw new InvalidOperationException(LogError($"Не удалось обработать значение ёмкости: {response}"));
+      throw new InvalidOperationException(LogError($"Не удалось обработать значение ёмкости: {response}", isDeviceLog: true));
     }
   }
 }

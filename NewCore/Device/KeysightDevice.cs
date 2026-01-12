@@ -1,12 +1,10 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using NewCore.Base.Device;
-using NewCore.Base.Function.FastMeter;
-using NewCore.Base.Interface.Additionally;
-using NewCore.Base.Interface.Main;
 using NewCore.Communication;
-using NewCore.Enum;
-using NewCore.Function.Keysight3466new;
+using NewCore.FunctionAdapters.Keysight3466new;
+using System.Net;
+using System.Net.Sockets;
 
 namespace NewCore.Device
 {
@@ -59,6 +57,9 @@ namespace NewCore.Device
     /// <inheritdoc />
     public IResistanceMeasurement ResistanceManager { get; set; }
 
+    /// <inheritdoc />
+    public int MaxContinuityResistance { get; set; }
+
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
     /// Работает через сетевое подключение (TCP/IP).
@@ -75,16 +76,17 @@ namespace NewCore.Device
       Name = "Keysight 3466 new";
       Description = "Реализовать описание в NewCore.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
-      DeviceType = DeviceEnum.DeviceType.FastMeter;
+      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.FastMeter;
       IsConnected = false;
 
-      CapacitanceManager = new CapacitanceMeasurement(this);
-      ConnectableManager = new KeysightConnection(this);
-      ContinuityManager = new ContinuityMeasurement(this);
-      ResistanceManager = new ResistanceMeasurement(this);
-      AcVoltageManager = new AcVoltageMeasurement(this);
-      DcVoltageManager = new DcVoltageMeasurement(this);
+      CapacitanceManager = new CapacitanceMeasurementAdapter(this);
+      ConnectableManager = new KeysightConnectionAdapter(this);
+      ContinuityManager = new ContinuityMeasurementAdapter(this);
+      ResistanceManager = new ResistanceMeasurementAdapter(this);
+      AcVoltageManager = new AcVoltageMeasurementAdapter(this);
+      DcVoltageManager = new DcVoltageMeasurementAdapter(this);
       DeviceProtocol = new KeysightDeviceProtocol(this, Port);
+      MaxContinuityResistance = 100000;
     }
   }
 }

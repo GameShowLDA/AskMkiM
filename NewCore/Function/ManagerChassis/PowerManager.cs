@@ -1,8 +1,8 @@
-﻿using System.Net;
-using NewCore.Base.Function.ManagerChassis;
-using NewCore.Base.Interface.Main;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Communication;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ManagerChassis
 {
@@ -23,9 +23,9 @@ namespace NewCore.Function.ManagerChassis
     public PowerManager(IChassisManager managerChassis) => _chassisModel = managerChassis;
 
     /// <inheritdoc />
-    public async Task StartPowerAsync()
+    public async Task StartPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -35,9 +35,9 @@ namespace NewCore.Function.ManagerChassis
     }
 
     /// <inheritdoc />
-    public async Task StopPowerAsync()
+    public async Task StopPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }

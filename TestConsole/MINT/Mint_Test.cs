@@ -1,7 +1,10 @@
-﻿using DataBaseConfiguration.Services;
-using NewCore.Base.Interface.Main;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Communication;
-using static NewCore.Enum.DeviceEnum;
 
 
 namespace TestConsole.MINT

@@ -1,7 +1,8 @@
-﻿using NewCore.Base.Function.DBC;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Communication;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -27,11 +28,11 @@ namespace NewCore.Function.DeviceBusCommutation
     /// </summary>
     /// <param name="number">Номер резистора.</param>
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
-    public async Task<bool> ConnectResistor(string number)
+    public async Task<bool> ConnectResistor(string number, IUserInteractionService? userMessageService = null)
     {
       if (int.TryParse(number, out int num))
       {
-        if (await GetIsIdleModeEnabled())
+        if (await ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }
@@ -42,7 +43,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Неверный номер резистора!");
+      LogError("Неверный номер резистора!", isDeviceLog: true);
       return false;
     }
 
@@ -51,11 +52,11 @@ namespace NewCore.Function.DeviceBusCommutation
     /// </summary>
     /// <param name="number">Номер резистора.</param>
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
-    public async Task<bool> DisconnectResistor(string number)
+    public async Task<bool> DisconnectResistor(string number, IUserInteractionService? userMessageService = null)
     {
       if (int.TryParse(number, out int num))
       {
-        if (await GetIsIdleModeEnabled())
+        if (await ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }
@@ -66,7 +67,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return true;
       }
 
-      LogError("Неверный номер резистора!");
+      LogError("Неверный номер резистора!", isDeviceLog: true);
       return false;
     }
   }

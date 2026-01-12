@@ -1,6 +1,7 @@
-﻿using NewCore.Base.Function.FastMeter;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -25,11 +26,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetDCVoltageModeAsync()
+    public async Task<bool> SetDCVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -38,12 +39,14 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:DC");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+      return answer.Contains("VOLT");
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureDCVoltageAsync(double param = 0)
+    public async Task<double> MeasureDCVoltageAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return param;
       }

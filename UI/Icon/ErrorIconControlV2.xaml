@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="UI.Icon.ErrorIconControlV2"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:UI.Icon"
+             mc:Ignorable="d"
+             d:DesignWidth="28" d:DesignHeight="28"
+             Width="28" Height="28"
+             Cursor="Hand"
+             >
+    <Grid>
+        <!-- Круг -->
+        <Border x:Name="Circle"
+            Background="{Binding CircleBackground, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+            BorderBrush="{Binding CircleBorder, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+            BorderThickness="{Binding CircleBorderThickness, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+            CornerRadius="999"
+            SnapsToDevicePixels="True"/>
+
+        <!-- Крестик в икон-боксе 50×50 для идеального центрирования -->
+        <Viewbox Stretch="Uniform" Margin="6"
+             HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Canvas Width="50" Height="50">
+                <!-- диагональ ↘ -->
+                <Path x:Name="Cross1"
+              Data="M10,10 L40,40"
+              Stroke="{Binding CrossBrush, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+              StrokeThickness="{Binding CrossThickness, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              StrokeLineJoin="Round" Fill="Transparent"
+              StrokeDashArray="100 200" StrokeDashOffset="200"/>
+                <!-- диагональ ↗ -->
+                <Path x:Name="Cross2"
+              Data="M40,10 L10,40"
+              Stroke="{Binding CrossBrush, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+              StrokeThickness="{Binding CrossThickness, RelativeSource={RelativeSource AncestorType=local:ErrorIconControlV2}}"
+              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              StrokeLineJoin="Round" Fill="Transparent"
+              StrokeDashArray="100 200" StrokeDashOffset="200"/>
+            </Canvas>
+        </Viewbox>
+    </Grid>
+</UserControl>

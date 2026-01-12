@@ -2,7 +2,7 @@
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using static Utilities.LoggerUtility;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Communication
 {
@@ -11,10 +11,6 @@ namespace NewCore.Communication
   /// </summary>
   static public class DeviceCommandSender
   {
-    /// <summary>
-    /// Порт для входящих сообщений.
-    /// </summary>
-    private static readonly int _portInput = 8800;
 
     /// <summary>
     /// Порт для отправки сообщений.
@@ -46,7 +42,7 @@ namespace NewCore.Communication
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка пинга: {ex.Message}");
+        LogException($"Ошибка пинга", ex);
         return false;
       }
     }
@@ -81,23 +77,23 @@ namespace NewCore.Communication
         // Отправляем широковещательное сообщение
         await socket.SendToAsync(new ArraySegment<byte>(sendBuf), SocketFlags.None, ep).ConfigureAwait(false);
 
-        LogInformation("Команда отправлена широковещательно.");
+        LogInformation("Команда отправлена широковещательно.", isDeviceLog: true);
       }
       catch (SocketException ex)
       {
-        LogError($"Ошибка соединения: {ex.Message}");
+        LogException($"Ошибка соединения", ex, isDeviceLog: true);
       }
       catch (TimeoutException ex)
       {
-        LogError($"Превышено время ожидания: {ex.Message}");
+        LogException($"Превышено время ожидания", ex, isDeviceLog: true);
       }
       catch (ArgumentException ex)
       {
-        LogError($"Неверные аргументы: {ex.Message}");
+        LogException($"Неверные аргументы", ex, isDeviceLog: true);
       }
       catch (Exception ex)
       {
-        LogError($"Непредвиденная ошибка: {ex.Message}");
+        LogException($"Непредвиденная ошибка", ex, isDeviceLog: true);
         throw;
       }
     }

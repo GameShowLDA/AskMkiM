@@ -1,7 +1,8 @@
 {
   "profiles": {
     "MainWindowProgram": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "debug\r\n"
     }
   }
 }

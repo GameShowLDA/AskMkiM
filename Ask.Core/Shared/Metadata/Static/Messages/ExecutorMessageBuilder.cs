@@ -1,0 +1,157 @@
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Atributes;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using System.Reflection;
+
+namespace Ask.Core.Shared.Metadata.Static.Messages
+{
+  /// <summary>
+  /// Формирует сообщения, используемые в процессе выполнения программ контроля.
+  /// </summary>
+  public static class ExecutorMessageBuilder
+  {
+    /// <summary>
+    /// Создаёт заголовок блока проверки по алгоритму контроля.
+    /// </summary>
+    public static ShowMessageModel BuildCheckBlockHeader(ControlCheckAlgorithm algorithm)
+    {
+      return new ShowMessageModel
+      {
+        Header = algorithm.GetDescription(),
+        Status = ShowMessageModel.MessageType.CommandBlock
+      };
+    }
+
+    /// <summary>
+    /// Формирует сообщение-заголовок для выполнения команды.
+    /// </summary>
+    public static ShowMessageModel BuildCommandExecutionMessage(
+        string commandName,
+        string? message = null)
+    {
+      return new ShowMessageModel
+      (
+          header: $"\r\nВыполнение команды {commandName}",
+          headerColor: ShowMessageModel.SuccessMessage.TitleColor,
+          message: message,
+          type: ShowMessageModel.MessageType.Command
+      )
+      {
+        IndentLevel = 1
+      };
+    }
+
+    /// <summary>
+    /// Формирует информационное сообщение о подготовке устройств.
+    /// </summary>
+    public static ShowMessageModel BuildDevicesPreparationMessage()
+    {
+      return new ShowMessageModel
+      (
+          header: "Подготовка устройств",
+          type: ShowMessageModel.MessageType.Info
+      );
+    }
+
+    /// <summary>
+    /// Формирует сообщение-заголовок блока проверки цепей.
+    /// </summary>
+    public static ShowMessageModel BuildChainCheckBlock(string chains)
+    {
+      return new ShowMessageModel
+      (
+          header: "Проверка цепи",
+          message: chains,
+          type: ShowMessageModel.MessageType.CommandBlock
+      )
+      {
+        IndentLevel = 1
+      };
+    }
+
+    /// <summary>
+    /// Формирует заголовок блока проверки между двумя точками.
+    /// </summary>
+    public static async Task<ShowMessageModel> BuildPointsCheckHeaderAsync(PointModel firstPoint, PointModel secondPoint, CircuitFaultType circuitFaultType)
+    {
+      bool showAddress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync();
+
+      string firstAddress = showAddress ? $"({firstPoint})" : string.Empty;
+      string secondAddress = showAddress ? $"({secondPoint})" : string.Empty;
+      char symbol = circuitFaultType == CircuitFaultType.OpenCircuit ? '*' : ',';
+
+      return new ShowMessageModel
+      (
+          header: $"Проверка",
+          message: $"{firstPoint.Mnemonic}{firstAddress}{symbol}{secondPoint.Mnemonic}{secondAddress}",
+          type: ShowMessageModel.MessageType.CommandBlock
+      )
+      {
+        IndentLevel = 1
+      };
+    }
+
+    /// <summary>
+    /// Формирует заголовок блока проверки разряда.
+    /// </summary>
+    public static ShowMessageModel BuildDischargeCheckHeader(
+        string dischargeName,
+        int highestBitCount)
+    {
+      return new ShowMessageModel
+      (
+          header: $"Проверка разряда {dischargeName} ({highestBitCount})",
+          type: ShowMessageModel.MessageType.CommandBlock
+      )
+      {
+        IndentLevel = 1
+      };
+    }
+
+
+    /// <summary>
+    /// Формирует сообщение об ошибке при проверке разряда.
+    /// </summary>
+    public static ShowMessageModel BuildDischargeCheckError(string dischargeName)
+    {
+      return new ShowMessageModel
+      (
+          header: $"Ошибка при проверке разряда {dischargeName}",
+          type: ShowMessageModel.MessageType.Error
+      )
+      {
+        IndentLevel = 1
+      };
+    }
+
+    public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null)
+    {
+      var type = typeof(MeasurementTypeCommand);
+
+      var member = type
+          .GetMember(measurementTypeCommand.ToString())
+          .FirstOrDefault();
+
+      var attr = member?
+          .GetCustomAttribute<CommandDisplayInfoAttribute>();
+
+      if (chains == null)
+      {
+        chains = string.Empty;
+      }
+
+        if (higherLimit != -1)
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
+        }
+        else
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
+        }
+      }
+    }
+  }

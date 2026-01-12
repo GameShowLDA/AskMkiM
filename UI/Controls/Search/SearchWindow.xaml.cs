@@ -1,18 +1,18 @@
-﻿using System.Drawing;
+﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
-using AppConfiguration.Base;
+using System.Windows.Media.Animation;
 using UI.Components.SearchControls;
-using UI.Controls.TextEditor;
+using static Ask.LogLib.LoggerUtility;
 using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
 using ComboBox = System.Windows.Controls.ComboBox;
-using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using TextBox = System.Windows.Controls.TextBox;
@@ -36,8 +36,13 @@ namespace UI.Controls.Search
 
     public event Action ClearHighlights;
 
-    public event Action SelectFileForSearch;
+    public event Func<Task> SelectFileForSearch;
     public string SearchTextData { get; set; }
+
+    private bool _isDraggingSlider = false;
+    private Point _dragStartScreenPoint;
+    private double _windowStartLeft;
+
 
     /// <summary>
     /// Высота окна при развернутой строке замены.
@@ -51,13 +56,18 @@ namespace UI.Controls.Search
     {
       InitializeComponent();
       this.Loaded += Window_Loaded;
-      EventAggregator.SearchButtonPressed += OnSearchButtonPressed;
-      EventAggregator.CloseSearchWindow += OnCloseSearchWindowRequested;
-      //EventAggregator.ActiveEditorChanged += OnActiveEditorChanged;
-      EventAggregator.SearchTextRequested += OnSearchTextRequested;
+
+      EventAggregator.Subscribe<SearchEvents.SearchButtonPressed>(e => OnSearchButtonPressed(e.SearchParameters));
+      EventAggregator.Subscribe<SearchEvents.ReplaceWordButtonPressed>(_ => OnReplaceWordButtonPressed());
+      EventAggregator.Subscribe<SearchEvents.ReplaceAllWordsButtonPressed>(_ => OnReplaceAllWordsButtonPressed());
+      EventAggregator.Subscribe<SearchEvents.CloseSearchWindow>(_ => OnCloseSearchWindowRequested());
+      EventAggregator.Subscribe<SearchEvents.SearchTextRequested>(e => OnSearchTextRequested(e.SelectedText));
+
       this.Focus();
       SearchTextBox.Focus();
+      LogInformation("Окно поиска инициализировано");
     }
+
 
     /// <summary>
     /// Обработчик события загрузки окна.
@@ -77,6 +87,9 @@ namespace UI.Controls.Search
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
       UpdateWindowHeight(MinWindowHeight);
+      var showAnimation = (Storyboard)Resources["ShowAnimation"];
+      showAnimation.Begin();
+      LogInformation("Окно поиска загружено.");
     }
 
     #region Отслеживание родительского окна
@@ -84,44 +97,63 @@ namespace UI.Controls.Search
     private void ParentWindow_LocationChanged(object sender, EventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменено положение родительского окна");
     }
 
     private void ParentWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменен размер родительского окна");
     }
+
     private void ParentWindow_StateChanged(object sender, EventArgs e)
     {
       UpdatePosition();
+      LogInformation("Изменен статус родительского окна");
     }
+
+    private const double ToolPanelHeight = 50; // Высота панели инструментов, которую нужно учесть сверху
 
     private void UpdatePosition()
     {
       if (_parentWindow == null || !this.IsLoaded)
+      {
         return;
+      }
 
+      // Получаем координаты родительского окна
+      Point parentTopLeft = _parentWindow.PointToScreen(new Point(0, 0));
+      double parentWidth = _parentWindow.ActualWidth;
+      double parentHeight = _parentWindow.ActualHeight;
+
+      // Получаем рабочую область экрана, на котором находится родительское окно
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
       Screen screen = Screen.FromHandle(parentWindowHandle);
       System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
 
-      Point parentRightTop;
-      if (_parentWindow.WindowState == WindowState.Maximized)
-      {
-        parentRightTop = new Point(workingArea.Right, workingArea.Top);
-      }
-      else
-      {
-        parentRightTop = _parentWindow.PointToScreen(new Point(_parentWindow.ActualWidth - 15, 0));
-      }
+      // Располагаем окно поиска по центру сверху относительно родительского окна
+      double newLeft = parentTopLeft.X + ((parentWidth - this.Width) / 2);  // Центрируем по горизонтали относительно родителя
+      double newTop = parentTopLeft.Y + ToolPanelHeight; // Окно поиска привязываем к верхней части родителя
 
-      double newLeft = parentRightTop.X - this.Width; // Правый край совпадает с правым краем родителя
-      double newTop = parentRightTop.Y + 60; // Отступ сверху
+      // Ограничения по горизонтали
+      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
+      // Ограничения по вертикали
+      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height));
 
-      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width)); // Ограничение по горизонтали
-      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height)); // Ограничение по вертикали
+      // Убедитесь, что окно не выходит за пределы экрана
+      if (newLeft < workingArea.Left)
+      {
+        newLeft = workingArea.Left;  // Устанавливаем на левый край экрана
+      }
+      if (newTop < workingArea.Top)
+      {
+        newTop = workingArea.Top;  // Устанавливаем на верхний край экрана
+      }
 
       this.Left = newLeft;
       this.Top = newTop;
+
+      LogInformation($"Координаты левого верхнего угла окна поиска: X:{newLeft} Y:{newTop}");
     }
 
     #endregion
@@ -154,28 +186,26 @@ namespace UI.Controls.Search
     }
     public void ShowWindow()
     {
+      if (this.Top < 0)
+      {
+        this.Top = 50;
+      }
       this.Activate();
       this.Focus();
       this.Show();
+
+      var showAnimation = (Storyboard)Resources["ShowAnimation"];
+      showAnimation.Begin();
     }
+
     public void CloseDialog()
     {
       ClearHighlights?.Invoke();
-      EventAggregator.RaiseSearchWindowClosing(false);
+      SearchEventAdapter.RaiseSearchWindowClosing(false);
       _allowClose = true;
-      this.Hide();
-    }
-
-    /// <summary>
-    /// Обработчик изменения состояния кнопки регистра (чувствительность к регистру).
-    /// </summary>
-    private void OnCaseChanged(object sender, EventArgs e)
-    {
-      var button = sender as CaseToggleButton;
-      if (button != null)
-      {
-        MessageBox.Show($"Кнопка включена: {button.IsChecked}");
-      }
+      var hideAnimation = (Storyboard)Resources["HideAnimation"];
+      hideAnimation.Completed += (s, e) => this.Hide();
+      hideAnimation.Begin();
     }
 
     private async void ToggleArrow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -341,7 +371,37 @@ namespace UI.Controls.Search
         searchAreaParameters.SelectedIndex = 0;
       }
 
-      EventAggregator.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      SearchEventAdapter.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void OnReplaceWordButtonPressed()
+    {
+      var searchText = SearchTextBox.Text;
+      var replaceText = ReplaceTextBox.Text;
+      var searchArea = searchAreaParameters.SelectedIndex;
+      var wholeWord = wholeWordButton.IsChecked;
+      var caseWord = caseButton.IsChecked;
+      if (searchArea == 2)
+      {
+        searchAreaParameters.SelectedIndex = 0;
+      }
+
+      SearchEventAdapter.RaiseReplaceText(replaceText, searchText, wholeWord, caseWord, searchArea, "FindNext");
+    }
+
+    private void OnReplaceAllWordsButtonPressed()
+    {
+      var searchText = SearchTextBox.Text;
+      var replaceText = ReplaceTextBox.Text;
+      var searchArea = searchAreaParameters.SelectedIndex;
+      var wholeWord = wholeWordButton.IsChecked;
+      var caseWord = caseButton.IsChecked;
+      if (searchArea == 2)
+      {
+        searchAreaParameters.SelectedIndex = 0;
+      }
+
+      SearchEventAdapter.RaiseReplaceText(replaceText, searchText, wholeWord, caseWord, searchArea, "FindAll");
     }
 
     private void OnCloseSearchWindowRequested()
@@ -393,6 +453,69 @@ namespace UI.Controls.Search
         SearchPlaceholder.Visibility = Visibility.Collapsed;
         SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
       }
+    }
+
+    private void SearchSlider_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      StopAnimations();
+
+      _isDraggingSlider = true;
+
+      // Получаем координаты мыши в пределах экрана
+      _dragStartScreenPoint = PointToScreen(e.GetPosition(this));
+      _windowStartLeft = this.Left;
+
+      SearchSlider.CaptureMouse();
+    }
+
+    private void SearchSlider_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+      _isDraggingSlider = false;
+      SearchSlider.ReleaseMouseCapture();
+    }
+
+    private void SearchSlider_MouseMove(object sender, MouseEventArgs e)
+    {
+      if (_isDraggingSlider && e.LeftButton == MouseButtonState.Pressed && _parentWindow != null)
+      {
+        Point currentScreenPoint = PointToScreen(e.GetPosition(this));
+        double deltaX = currentScreenPoint.X - _dragStartScreenPoint.X;
+
+        double newLeft = _windowStartLeft + deltaX;
+
+        // Получаем границы окна-родителя
+        var ownerTopLeft = _parentWindow.PointToScreen(new Point(0, 0));
+        double ownerLeft = ownerTopLeft.X;
+        double ownerRight = ownerLeft + _parentWindow.ActualWidth;
+
+        double windowWidth = this.ActualWidth;
+
+        // Ограничение по левому краю
+        if (newLeft < ownerLeft)
+        {
+          newLeft = ownerLeft;
+        }
+
+        // Ограничение по правому краю
+        if (newLeft + windowWidth > ownerRight)
+        {
+          newLeft = ownerRight - windowWidth - 15;
+        }
+
+        this.Left = newLeft;
+      }
+    }
+
+    private void StopAnimations()
+    {
+      if (Resources["ShowAnimation"] is Storyboard showAnimation)
+        showAnimation.Stop();
+
+      if (Resources["HideAnimation"] is Storyboard hideAnimation)
+        hideAnimation.Stop();
+
+      WindowContainer.RenderTransform = new TranslateTransform(0, 0); // Сброс
+      WindowContainer.Opacity = 1;
     }
   }
 }

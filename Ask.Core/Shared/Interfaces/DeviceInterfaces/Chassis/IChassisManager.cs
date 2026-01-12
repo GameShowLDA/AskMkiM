@@ -1,0 +1,15 @@
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
+
+namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
+{
+  /// <summary>
+  /// Интерфейс для менеджера шасси.
+  /// </summary>
+  public interface IChassisManager : IDevice, IHeadUnit
+  {
+    /// <summary>
+    /// Управление питанием шасси.
+    /// </summary>
+    IPowerManagerChassis PowerManager { get; set; }
+  }
+}

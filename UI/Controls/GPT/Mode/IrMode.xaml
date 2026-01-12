@@ -6,77 +6,106 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="{StaticResource PrimarySolidColorBrush}" FontWeight="Bold" FontSize="20">
     <Grid>
-        <!-- Определение строк -->
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!-- Определение столбцов -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <!-- Левая колонка -->
-            <ColumnDefinition Width="*" />
-            <!-- Правая колонка -->
-        </Grid.ColumnDefinitions>
 
-        <!-- MANU_IR_VOLTAGE -->
-        <TextBlock Grid.Row="0" Text="Напряжение IR (0.05 - 1 кВ):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <Slider x:Name="VoltageSlider" Grid.Row="0" Grid.Column="1" Margin="10" Style="{StaticResource CustomSliderStyle}" Minimum="0.05" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="VoltageSlider_ValueChanged" />
-        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Value, ElementName=VoltageSlider, StringFormat='Выбранное напряжение: {0:F3} кВ'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
+        <Grid>
+            <Button Name="ConnectButton" Style="{StaticResource CompareButtonStyle}" Content="Включить режим IR" PreviewMouseDown="Button_PreviewMouseDown"/>
+        </Grid>
 
-        <!-- MANU_IR_RHISET -->
-        <TextBlock Grid.Row="1" Text="Высокий предел сопротивления IR (1G - 50G):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
-            <Slider x:Name="RhiSlider" Minimum="1" Maximum="50" TickFrequency="1"  Style="{StaticResource CustomSliderStyle}" IsSnapToTickEnabled="True" ValueChanged="RhiSlider_ValueChanged" />
-            <TextBlock Text="{Binding Value, ElementName=RhiSlider, StringFormat='Текущее значение: {0} G'}" HorizontalAlignment="Center" Margin="0,5,0,0" />
-        </StackPanel>
+        <Grid Grid.Row="1" Name="PanelManagment" Visibility="Collapsed">
+            <!-- Определение строк -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <!-- Определение столбцов -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <!-- Левая колонка -->
+                <ColumnDefinition Width="*" />
+                <!-- Правая колонка -->
+            </Grid.ColumnDefinitions>
 
-        <!-- MANU_IR_RLOSET -->
-        <TextBlock Grid.Row="2" Text="Низкий предел сопротивления IR (1M - 999M):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="10">
-            <Slider x:Name="RloSlider" Minimum="1" Maximum="999" TickFrequency="1"  Style="{StaticResource CustomSliderStyle}" IsSnapToTickEnabled="True" ValueChanged="RloSlider_ValueChanged" />
-            <TextBlock Text="{Binding Value, ElementName=RloSlider, StringFormat='Текущее значение: {0} M'}" HorizontalAlignment="Center" Margin="0,5,0,0" />
-        </StackPanel>
+            <!-- MANU_IR_VOLTAGE -->
+            <TextBlock Grid.Row="0" Text="Напряжение IR (50 - 1000 В):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
+            <Slider x:Name="VoltageSlider" Grid.Row="0" Grid.Column="1" Margin="10" Style="{StaticResource CustomSliderStyle}" Minimum="50" Maximum="1000" 
+                    TickFrequency="50" IsSnapToTickEnabled="True" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Value, ElementName=VoltageSlider, StringFormat='Выбранное напряжение: {0} В'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
 
-        <!-- MANU_IR_TTIME -->
-        <TextBlock Grid.Row="3" Text="Время теста IR (1.0 - 999.9 сек):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <Slider x:Name="TimeSlider" Grid.Row="3" Grid.Column="1" Margin="10" Style="{StaticResource CustomSliderStyle}" Minimum="1" Maximum="999.9" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="TimeSlider_ValueChanged" />
-        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Value, ElementName=TimeSlider, StringFormat='Выбранное время: {0:F1} сек'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
-
-        <!-- MANU_IR_REF -->
-        <TextBlock Grid.Row="4" Text="Смещение IR (1M - 999M):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
-        <StackPanel Grid.Row="4" Grid.Column="1" Margin="10">
-            <Slider x:Name="RefSlider" Minimum="0" Maximum="999" Style="{StaticResource CustomSliderStyle}" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="RefSlider_ValueChanged" />
-            <TextBlock Text="{Binding Value, ElementName=RefSlider, StringFormat='Текущее значение: {0} M'}" HorizontalAlignment="Center" Margin="0,5,0,0" />
-        </StackPanel>
-
-        <!-- Последняя строка: левая колонка (конфигурация) -->
-        <Border Grid.Row="5" Grid.Column="0" Margin="10" Background="{StaticResource SecondarySolidColorBrush}" Padding="10" CornerRadius="15">
-            <StackPanel >
-                <TextBlock Text="Последнее считывание конфигурации:" FontWeight="Bold" />
-                <TextBlock x:Name="LastReadTimeText" Text="Дата и время: Нет данных" Margin="0,10,0,50" />
-                <TextBlock x:Name="VoltageValueText" Text="Напряжение IR: Нет данных" Margin="0,5,0,0" />
-                <TextBlock x:Name="RhiValueText" Text="Высокий предел сопротивления IR: Нет данных" Margin="0,5,0,0" />
-                <TextBlock x:Name="RloValueText" Text="Низкий предел сопротивления IR: Нет данных" Margin="0,5,0,0" />
-                <TextBlock x:Name="TimeValueText" Text="Время теста IR: Нет данных" Margin="0,5,0,0" />
-                <TextBlock x:Name="RefValueText" Text="Смещение IR: Нет данных" Margin="0,5,0,0" />
-                <Button Content="Считать конфигурацию" Click="ReadConfigurationButton_Click" Width="250" Margin="0,20" Style="{StaticResource CustomButtonStyle}" Background="{StaticResource IsCheckedColorSolidColorBrush}" HorizontalAlignment="Left" />
+            <!-- MANU_IR_RHISET -->
+            <TextBlock Grid.Row="1" Text="Высокий предел сопротивления IR (1G - 50G):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
+                <Slider x:Name="RhiSlider" Minimum="1" Maximum="50" TickFrequency="1"  Style="{StaticResource CustomSliderStyle}" IsSnapToTickEnabled="True" 
+                        />
+                <TextBlock Text="{Binding Value, ElementName=RhiSlider, StringFormat='Текущее значение: {0} G'}" HorizontalAlignment="Center" Margin="0,5,0,0" />
             </StackPanel>
-        </Border>
 
-        <!-- Последняя строка: правая колонка (тесты) -->
-        <Border Grid.Row="5" Grid.Column="1" Margin="10" Background="{StaticResource SecondarySolidColorBrush}" Padding="10" CornerRadius="15">
+            <!-- MANU_IR_RLOSET -->
+            <TextBlock Grid.Row="2" Text="Низкий предел сопротивления IR (1M - 999M):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="10">
+                <Slider x:Name="RloSlider" Minimum="1" Maximum="999" TickFrequency="1"  Style="{StaticResource CustomSliderStyle}" IsSnapToTickEnabled="True" 
+                        />
+                <TextBlock Text="{Binding Value, ElementName=RloSlider, StringFormat='Текущее значение: {0} M'}" HorizontalAlignment="Center" Margin="0,5,0,0" />
+            </StackPanel>
 
+            <!-- MANU_IR_TTIME -->
+            <TextBlock Grid.Row="3" Text="Время теста IR (1.0 - 999.9 сек):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
+            <Slider x:Name="TimeSlider" Grid.Row="3" Grid.Column="1" Margin="10" Style="{StaticResource CustomSliderStyle}" Minimum="1" Maximum="999.9" 
+                    TickFrequency="0.1" IsSnapToTickEnabled="True" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Value, ElementName=TimeSlider, StringFormat='Выбранное время: {0:F1} сек'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
+
+            <TextBlock Grid.Row="4" Text="Время нарастания IR (0.1 - 10 сек):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
+            <Slider x:Name="RampTimeSlider" Grid.Row="4" Grid.Column="1" Margin="10" Style="{StaticResource CustomSliderStyle}" Minimum="0.1" Maximum="10" 
+                    TickFrequency="0.1" IsSnapToTickEnabled="True"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Value, ElementName=RampTimeSlider, StringFormat='Выбранное время: {0:F1} сек'}" HorizontalAlignment="Center" Margin="0,30,0,0" />
+
+            <!-- MANU_IR_REF -->
+            <TextBlock Grid.Row="5" Text="Смещение IR (1M - 999M):" TextAlignment="Right" VerticalAlignment="Center" Margin="10" />
             <StackPanel Grid.Row="5" Grid.Column="1" Margin="10">
-                <TextBlock Text="Управление тестами:" FontWeight="Bold" />
-                <TextBlock x:Name="TestResultText" Text="Результат теста: Нет данных" Margin="0,10,0,0" />
-                <Button Content="Запустить тест" Click="StartTestButton_Click" Width="200" Margin="0,20" Style="{StaticResource CustomButtonStyle}" Background="{StaticResource IsCheckedColorSolidColorBrush}" HorizontalAlignment="Left" />
+                <Slider x:Name="RefSlider" Minimum="0" Maximum="999" Style="{StaticResource CustomSliderStyle}" TickFrequency="1" IsSnapToTickEnabled="True" 
+                        />
+                <TextBlock Text="{Binding Value, ElementName=RefSlider, StringFormat='Текущее значение: {0} M'}" HorizontalAlignment="Center" Margin="0,5,0,0" />
             </StackPanel>
-        </Border>
 
+            <Button Grid.Row="6" Grid.Column="0" 
+                    Style="{StaticResource CompareButtonStyle}" Content="Сохранить" 
+                    Margin="10"
+                    PreviewMouseDown="Button_PreviewMouseDown_1"
+                    >
+            </Button>
+
+            <!-- Последняя строка: левая колонка (конфигурация) -->
+            <Border Grid.Row="7" Grid.Column="0" Margin="10" Background="{StaticResource SecondarySolidColorBrush}" Padding="10" CornerRadius="15">
+                <StackPanel >
+                    <TextBlock Text="Последнее считывание конфигурации:" FontWeight="Bold" />
+                    <TextBlock x:Name="LastReadTimeText" Text="Дата и время: Нет данных" Margin="0,10,0,50" />
+                    <TextBlock x:Name="VoltageValueText" Text="Напряжение IR: Нет данных" Margin="0,5,0,0" />
+                    <TextBlock x:Name="RhiValueText" Text="Высокий предел сопротивления IR: Нет данных" Margin="0,5,0,0" />
+                    <TextBlock x:Name="RloValueText" Text="Низкий предел сопротивления IR: Нет данных" Margin="0,5,0,0" />
+                    <TextBlock x:Name="TimeValueText" Text="Время теста IR: Нет данных" Margin="0,5,0,0" />
+                    <TextBlock x:Name="RefValueText" Text="Смещение IR: Нет данных" Margin="0,5,0,0" />
+                    <Button Content="Считать конфигурацию" Click="ReadConfigurationButton_Click" Width="250" Margin="0,20" Style="{StaticResource CustomButtonStyle}" Background="{StaticResource IsCheckedColorSolidColorBrush}" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+            <!-- Последняя строка: правая колонка (тесты) -->
+            <Border Grid.Row="8" Grid.Column="1" Margin="10" Background="{StaticResource SecondarySolidColorBrush}" Padding="10" CornerRadius="15">
+
+                <StackPanel Grid.Row="8" Grid.Column="1" Margin="10">
+                    <TextBlock Text="Управление тестами:" FontWeight="Bold" />
+                    <TextBlock x:Name="TestResultText" Text="Результат теста: Нет данных" Margin="0,10,0,0" />
+                    <Button Content="Запустить тест" Click="StartTestButton_Click" Width="200" Margin="0,20" Style="{StaticResource CustomButtonStyle}" Background="{StaticResource IsCheckedColorSolidColorBrush}" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

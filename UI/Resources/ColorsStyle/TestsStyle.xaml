@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--<Color x:Key="tests.main.button.background">#FFFFFF</Color>
+    
+    <SolidColorBrush x:Key="TestsInputBackgroundInputPanelBrush" Color="{DynamicResource tests.input.background.input.panel}"/>
+    <SolidColorBrush x:Key="TestsInputBackgroundHeaderPanelBrush" Color="{DynamicResource tests.input.background.header.panel}"/>
+    <SolidColorBrush x:Key="TestsMainPanelBackgroundBrush" Color="{DynamicResource tests.main.panel.background}"/>
+    <SolidColorBrush x:Key="TestsMainButtonBackgroundBrush" Color="{DynamicResource tests.main.button.background}"/>
+
+    <SolidColorBrush x:Key="TestsInputHeaderSolidColorBrush" Color="{DynamicResource tests.input.text.header.color}"/>
+    <SolidColorBrush x:Key="TestsInputDescriptionSolidColorBrush" Color="{DynamicResource tests.input.text.description.color}"/>
+
+    <SolidColorBrush x:Key="TestsMainButtonOrangeStartBrush" Color="{DynamicResource tests.main.button.orange.start}"/>
+    <SolidColorBrush x:Key="TestsMainButtonOrangeEndBrush" Color="{DynamicResource tests.main.button.orange.end}"/>
+    
+    <SolidColorBrush x:Key="TestsMainButtonGreenStartBrush" Color="{DynamicResource tests.main.button.green.start}"/>
+    <SolidColorBrush x:Key="TestsMainButtonGreenEndBrush" Color="{DynamicResource tests.main.button.green.end}"/>
+
+    <SolidColorBrush x:Key="TestsInteractiveBackgroundSolidColorBrush" Color="{DynamicResource tests.main.background.interactive}"/>
+    <SolidColorBrush x:Key="TestsInteractiveBorderSolidColorBrush" Color="{DynamicResource tests.main.border.interactive}"/>
+    <SolidColorBrush x:Key="TestsInteractiveActiveSolidColorBrush" Color="{DynamicResource tests.main.active.interactive}"/>
+    <SolidColorBrush x:Key="TestsInteractivePressedSolidColorBrush" Color="{DynamicResource tests.main.pressed.interactive}"/>
+
+    <SolidColorBrush x:Key="TestsProtocolBackgroundBrush" Color="{DynamicResource tests.protocol.background}"/>
+
+    <SolidColorBrush x:Key="TestsProtocolTimeForeground" Color="{DynamicResource tests.protocol.message.time.foreground}"/>-->
+
+</ResourceDictionary>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<CatapultSkin Version="1" Title="Keysight Truevolt Series DMM Operating and Service Guide" AutoSyncTOC="true" Tabs="TOC,Index,Search,BrowseSequences" Top="0px" Left="250px" Width="1260px" Height="800px" DefaultTab="TOC" EnableAboutBox="false" BrowserSetup="Resizable">
-    <HtmlHelpOptions ShowMenuBar="false" TopmostWindowStyle="false" AutoShowNavigationPane="false" EnableButtonCaptions="false" AdvancedSearch="true" NavigationPaneWidth="0" Buttons="Hide,Back,Forward,Print" HideNavigationOnStartup="false" SaveUserWindowPosition="true" />
-    <Toc LinesBetweenItems="true" LinesFromRoot="true" SingleClick="false" PlusMinusSquares="false" AlwaysShowSelection="false" UseFolderIcons="false" ImageListWidth="16" BinaryStorage="false" Border="None" />
-    <Stylesheet Link="Stylesheet.xml">
-    </Stylesheet>
-    <Toolbar EnableCustomLayout="true" Buttons="SelectGlossary|SelectTOC|SelectIndex|Forward|Back" />
-</CatapultSkin>

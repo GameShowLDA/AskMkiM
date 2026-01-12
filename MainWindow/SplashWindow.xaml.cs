@@ -19,18 +19,35 @@ namespace MainWindowProgram
     /// <summary>
     /// Асинхронно выполняет плавное закрытие окна с анимацией исчезновения.
     /// </summary>
-    /// <returns>Задача, представляющая процесс закрытия окна.</returns>
+    /// <remarks>
+    /// Метод запускает анимацию изменения прозрачности окна от 1 до 0
+    /// и закрывает окно сразу после завершения анимации.  
+    /// Возвращаемая задача завершается, когда окно полностью закрыто.
+    /// </remarks>
     public async Task WaitForCloseAsync()
     {
-      await Dispatcher.InvokeAsync(async () =>
+      var tcs = new TaskCompletionSource<bool>();
+
+      await Dispatcher.InvokeAsync(() =>
       {
-        var fadeOut = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromSeconds(1)));
-        this.BeginAnimation(Window.OpacityProperty, fadeOut);
-        await Task.Delay(1000); // Ждём, пока анимация завершится
-        this.Close();
+        var fadeOut = new DoubleAnimation
+        {
+          From = 1,
+          To = 0,
+          Duration = TimeSpan.FromSeconds(1),
+          FillBehavior = FillBehavior.Stop
+        };
+
+        fadeOut.Completed += (_, _) =>
+        {
+          Close();
+          tcs.TrySetResult(true);
+        };
+
+        BeginAnimation(OpacityProperty, fadeOut);
       });
 
-      await Task.Delay(1000);
+      await tcs.Task;
     }
   }
 }

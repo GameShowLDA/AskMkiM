@@ -1,0 +1,43 @@
+﻿namespace Ask.Core.Services.Errors.Device.ModuleRelayControl
+{
+  /// <summary>
+  /// Фабрика исключений для операций с измерителем модуля МКР.
+  /// </summary>
+  public static class MeterExceptionFactory
+  {
+    /// <summary>
+    /// Исключение при ошибке подключения измерителя.
+    /// </summary>
+    /// <param name="description">Описание устройства или действия.</param>
+    public static DeviceException ConnectFailed(string description) =>
+        new($"Ошибка подключения измерителя {description}");
+
+    /// <summary>
+    /// Исключение при ошибке подключения измерителя.
+    /// </summary>
+    /// <param name="description">Описание устройства или действия.</param>
+    public static DeviceException ConnectFailed(string name, int chassis, int number) =>
+        new($"Ошибка подключения измерителя {name}({chassis}.{number})");
+
+    /// <summary>
+    /// Исключение при ошибке отключения измерителя.
+    /// </summary>
+    /// <param name="description">Описание устройства или действия.</param>
+    public static DeviceException DisconnectFailed(string description) =>
+        new($"Ошибка отключения измерителя {description}");
+
+    /// <summary>
+    /// Исключение при ошибке подключения измерителя.
+    /// </summary>
+    /// <param name="description">Описание устройства или действия.</param>
+    public static DeviceException DisconnectFailed(string name, int chassis, int number) =>
+        new($"Ошибка отключения измерителя {name}({chassis}.{number})");
+
+    /// <summary>
+    /// Исключение при ошибке подключения измерителя.
+    /// </summary>
+    /// <param name="description">Описание устройства или действия.</param>
+    public static DeviceException MeterAnswerFailed(string name, int chassis, int number) =>
+        new($"Ошибка при получении ответа {name}({chassis}.{number})");
+  }
+}

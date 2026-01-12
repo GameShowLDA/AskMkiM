@@ -5,10 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainWindowProgram"
         
+        xmlns:utilities="clr-namespace:Ask.Support;assembly=Ask.Support"
+        
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
+        xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
-        
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+
         mc:Ignorable="d"
         Title="ASK MKI M" 
         Height="600" Width="800"
@@ -17,62 +21,21 @@
         MinWidth="800"
         MinHeight="600"
         WindowState="Maximized"
+        
+        Name="MainWinApp"
         >
-    <Window.Resources>
 
-        <Style TargetType="DefaultGUI:WindowButtons">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="SizeChanged">
+            <i:InvokeCommandAction Command="{Binding Window.AdjustCommand}" />
+        </i:EventTrigger>
 
-        <Style TargetType="{x:Type MenuItem}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type MenuItem}">
-                        <Grid SnapsToDevicePixels="true">
-                            <DockPanel x:Name="ItemDockPanel" Background="Transparent">
-                                <ContentPresenter x:Name="Icon" ContentSource="Icon" Margin="4,0,6,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
-                                <Path x:Name="GlyphPanel" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="7,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="HeaderText" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-                            </DockPanel>
-                            <Popup x:Name="PART_Popup" AllowsTransparency="true" Focusable="false" HorizontalOffset="1" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom" VerticalOffset="-1">
-                                <Border Background="{TemplateBinding Background}">
-                                    <ScrollViewer x:Name="SubMenuScrollViewer" CanContentScroll="true" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
-                                        <Grid RenderOptions.ClearTypeHint="Enabled">
-                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="true" Margin="2" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle"/>
-                                        </Grid>
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush}" TargetName="ItemDockPanel"/>
-                                <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}" TargetName="HeaderText"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter Property="Background" Value="{StaticResource ActiveForegroundSolidColorBrush}" TargetName="ItemDockPanel"/>
-                                <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}" TargetName="HeaderText"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="5,10,10,10"/>
-            <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{StaticResource ForegroundSolidColorBrush}"/>
-        </Style>
-
-    </Window.Resources>
-
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction 
+                Command="{Binding Window.ClosingCommand}" 
+                PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -81,359 +44,199 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}" MouseLeftButtonDown="TopPanel_MouseLeftButtonDown">
+        <Grid 
+            x:Name="TopPanel" Background="{DynamicResource BackgroundBrushes}" Cursor="SizeAll">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeftButtonDown">
+                    <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="50"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Menu 
-                Name="mainMenu" 
-                VerticalAlignment="Top" 
-                VerticalContentAlignment="Center" 
-                Height="40" 
-                FontSize="15" 
-                Background="Transparent" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                Grid.Column="0" BorderThickness="0"
-                Padding="0,0,40,0"
-                >
+            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
+                Foreground="{DynamicResource MainTitleSolidColorBrush}" Grid.Column="0" BorderThickness="0">
 
-                <MenuItem 
-                    Header="Файл" 
-                    Name="File"
-                    Cursor="Hand" 
-                    BorderBrush="#FF303843" 
-                    OpacityMask="#FF303843"
-                    >
-                    <MenuItem 
-               Header="Архив" 
-               PreviewMouseDown="Archive_PreviewMouseDown"
-               />
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_File}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="File" Uid="1" Tag="menuHeader_1">
 
-                    <Separator 
-               Background="{StaticResource ActiveBorderSolidColorBrush}" 
-               Visibility="Collapsed"
-               x:Name="fileActionsSeparator"
-               />
-                    <MenuItem 
-               Header="Сохранить" 
-               x:Name="saveMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="SaveMenuItem_PreviewMouseDown"
-               />
+                    <Separator Style="{DynamicResource SeparatorMenuStyle}" Visibility="Collapsed" x:Name="fileActionsSeparator"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Save}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SaveFile" x:Name="saveMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileCommand}" utilities:HelpProvider.HelpKey="FuncSave"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_SaveAs}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}" utilities:HelpProvider.HelpKey="FuncSaveAs"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_OpenFolder}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}" utilities:HelpProvider.HelpKey="FuncOpenFolderInExplorer"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Print}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" utilities:HelpProvider.HelpKey="FuncPrint"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" utilities:HelpProvider.HelpKey="FuncSearch"/>
 
-                    <MenuItem 
-               Header="Сохранить как" 
-               x:Name="saveAsMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="SaveAsMenuItem_PreviewMouseDown"
-               />
+                    <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" utilities:HelpProvider.HelpKey="FuncCreate"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" utilities:HelpProvider.HelpKey="FuncCompare"/>
 
-                    <MenuItem 
-               
-               Header="Печать" 
-               x:Name="printMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="PrintMenuItem_PreviewMouseDown"
-               />
-
-                    <MenuItem 
-               Header="Поиск" 
-               x:Name="searchMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="SearchMenuItem_PreviewMouseDown"
-               />
-
-                    <MenuItem 
-               Header="Сравнить" 
-               x:Name="compareMenuItem"
-               Visibility="Collapsed"
-               PreviewMouseDown="CompareMenuItem_PreviewMouseDown"
-               />
-
-                    <Separator 
-               Background="{StaticResource ActiveBorderSolidColorBrush}" 
-               />
-
-
-                    <MenuItem 
-                        Header="Открыть" 
-                        Name="OpenMenuItem"
-                        PreviewMouseDown="Open_PreviewMouseDownAsync"
-                        />
-
-                    <MenuItem 
-                        Header="Создать" 
-                        Name="CreateMenuItem"
-                        PreviewMouseDown="Create_PreviewMouseDownAsync"
-                        />
-
-                    <Separator 
-                        Background="{StaticResource ActiveBorderSolidColorBrush}" 
-                        />
-
-                    <MenuItem 
-                        Header="Выход" 
-                        PreviewMouseDown="Exit_Handler" 
-                        />
+                    <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Exit}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ExitApplication" Command="{Binding File.ExitApplicationCommand}" utilities:HelpProvider.HelpKey="FuncExit"/>
 
                 </MenuItem>
 
-                <MenuItem 
-                    Header="Метрология"
-                    Name="Metrology"
-                    >
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" >
 
-                    <MenuItem 
-                        Header="Режим КС" 
-                         Name="ModeKSMenuItem"
-                        PreviewMouseDown="KC_Handler" 
-                        />
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}">
 
-                    <MenuItem 
-                        Header="Режим ИЕ" 
-                        Name="ModeIEMenuItem"
-                        PreviewMouseDown="IE_Handler" 
-                        />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KS}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" utilities:HelpProvider.HelpKey="UtilityModeKC"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_IE}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" utilities:HelpProvider.HelpKey="UtilityModeIE"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_CI}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeCIMenuItem" Command="{Binding Metrology.CICommand}" utilities:HelpProvider.HelpKey="UtilityModeSI"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModePrMenuItem" Command="{Binding Metrology.PRCommand}" utilities:HelpProvider.HelpKey="UtilityModePR"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_EHT}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeEhtMenuItem" Command="{Binding Metrology.EHTCommand}" utilities:HelpProvider.HelpKey="UtilityModeEHT"/>
 
-                    <MenuItem 
-                        Header="Режим СИ" 
-                        Name="ModeCIMenuItem"
-                        PreviewMouseDown="CI_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ПР" 
-                        Name="ModePrMenuItem"
-                        PreviewMouseDown="Pr_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ПИ (постоянный)" 
-                        Name="ModePIDCWMenuItem"
-                        PreviewMouseDown="PIDCW_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Режим ПИ (переменный)" 
-                        Name="ModePIACWMenuItem"
-                        PreviewMouseDown="PIACW_Handler" 
-                        />
-
-                </MenuItem>
-
-                <MenuItem 
-                    Header="Самоконтроль"
-                    Name="SelfControl"
-                    >
-
-                    <MenuItem 
-                        Header="Модуль" 
-                        Name="SelfControlMenuItem"
-                        PreviewMouseDown="Test_Self" 
-                        />
-
-                </MenuItem>
-
-                <MenuItem 
-                    Header="Тесты"
-                    Name="TestControl"
-                    >
-
-                    <MenuItem 
-                        Header="Тест СИ" 
-                        >
-
-                        <MenuItem Header="Метод узла"
-                                  Name="NodeMethodMenuItemCI"
-                                  PreviewMouseDown="CiNodeMethodControl_PreviewMouseDown"
-                                  />
-
-                        <MenuItem Header="Групповой метод"
-                               Name="MethodExecutorMenuItemCI"
-                               PreviewMouseDown="CiMethodExecutorControl_PreviewMouseDown"
-                               />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIDCW}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModePIDCWMenuItem" Command="{Binding Metrology.PIDCWCommand}" utilities:HelpProvider.HelpKey="UtilityModePI"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PIACW}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModePIACWMenuItem" Command="{Binding Metrology.PIACWCommand}" utilities:HelpProvider.HelpKey="UtilityModePI"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNDCW}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeKNDCWMenuItem" Command="{Binding Metrology.KNDCWCommand}" utilities:HelpProvider.HelpKey="UtilityModeKN"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KNACW}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeKNACWMenuItem" Command="{Binding Metrology.KNACWCommand}" utilities:HelpProvider.HelpKey="UtilityModeKN"/>
 
                     </MenuItem>
 
-                    <MenuItem 
-                  Header="Тест ПИ на постоянном токе" 
-                  >
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_SelfControl}, Path=Value}" Name="SelfControl" Tag="menuHeader_3" Style="{StaticResource SideMenuItemStyle}">
 
-                        <MenuItem Header="Метод узла"
-                            Name="NodeMethodMenuItemPiDCW"
-                            PreviewMouseDown="PiDCWNodeMethodControl_PreviewMouseDown"
-                            />
-
-                        <MenuItem Header="Групповой метод"
-                                Name="MethodExecutorMenuItemPiDCW"
-                                PreviewMouseDown="PiDCWMethodExecutorControl_PreviewMouseDown"
-                                />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_SelfControl_Module}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="SelfControlMenuItem" Command="{Binding SelfTest.SelfTestModuleCommand}"/>
+                        <MenuItem Header="Система" Style="{DynamicResource StyleMenuItem}" Name="SelfControlAllMenuItem" Command="{Binding SelfTest.SelfTestSystemCommand}"/>
 
                     </MenuItem>
 
-                    <MenuItem 
-                  Header="Тест ПИ на переменном токе" 
-                  >
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests}, Path=Value}"  Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
 
-                        <MenuItem Header="Метод узла"
-                            Name="NodeMethodMenuItemPiACW"
-                            PreviewMouseDown="PiACWNodeMethodControl_PreviewMouseDown"
-                            />
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI}, Path=Value}"  Style="{StaticResource SideMenuItemStyle}" >
 
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Node}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="NodeMethodMenuItemCI" Command="{Binding Test.CiNodeMethodCommand}" utilities:HelpProvider.HelpKey="TestSINodeMethod"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI_Group}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="MethodExecutorMenuItemCI" Command="{Binding Test.CiMethodExecutorCommand}" utilities:HelpProvider.HelpKey="TestSIGroupMethod"/>
 
-                        <MenuItem Header="Групповой метод"
-                             Name="MethodExecutorMenuItemPiACW"
-                             PreviewMouseDown="PiACWMethodExecutorControl_PreviewMouseDown"
-                             />
-
-                    </MenuItem>
-
-                </MenuItem>
-
-                <MenuItem 
-                    Header="Настройки"
-                    Name="Settings"
-                    >
-
-                    <MenuItem 
-                        Header="Конфигурация" 
-                        Name="ConfigMenuItem"
-                        PreviewMouseDown="Config_Handler" 
-                        />
-
-                    <MenuItem 
-                        Header="Выполнение" 
-                        Name="ExecutionMenuItem"
-                        PreviewMouseDown="Execution_Handler"
-                        />
-
-                    <MenuItem 
-                        Header="Протокол" 
-                        Name="ProtocolMenuItem"
-                        PreviewMouseDown="Protocol_Handler"
-                        />
-
-                    <MenuItem 
-                        Header="Погрешности" 
-                        Name="ErrorMenuItem"
-                        PreviewMouseDown="Error_Handler"
-                        />
-
-                </MenuItem>
-
-                <MenuItem 
-                    Header="Справка"
-                    Name="Help"
-                    >
-
-                    <MenuItem 
-                        Header="О программе" 
-                        />
-
-                    <MenuItem 
-                        Header="Справка" 
-                        />
-
-                </MenuItem>
-
-                <MenuItem 
-    Header="Администрирование"
-    Name="Admin"
-    >
-
-                    <MenuItem 
-        Header="Console" 
-        Name="SendCommandMenuItem"
-        PreviewMouseDown="SendCommand_Handler"
-        />
-
-
-                    <MenuItem 
-        Header="Logger" 
-        Name="LoggerMenuItem"
-        PreviewMouseDown="Logger_Handler"
-        />
-
-                    <MenuItem 
-        Header="USB" 
-        Name="USBMenuItem"
-        PreviewMouseDown="USB_Handler"
-        />
-
-                    <MenuItem 
-                    Header="Управление" 
-                    Name="DeviceManagment"
-                    >
-                        <MenuItem 
-                            Header="GPT" 
-                            Name="GptManagment"
-                            PreviewMouseDown="Gpt_Handler"
-                            >
                         </MenuItem>
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW}, Path=Value}" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Node}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="NodeMethodMenuItemPiDCW" Command="{Binding Test.PiDCWNodeMethodCommand}" utilities:HelpProvider.HelpKey="TestPINodeMethod"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIDCW_Group}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Command="{Binding Test.PiDCWMethodExecutorCommand}" utilities:HelpProvider.HelpKey="TestPIGroupMethod"/>
+
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW}, Path=Value}" Style="{StaticResource SideMenuItemStyle}">
+
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Node}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="NodeMethodMenuItemPiACW" Command="{Binding Test.PiACWNodeMethodCommand}" utilities:HelpProvider.HelpKey="TestPINodeMethod"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_PIACW_Group}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="MethodExecutorMenuItemPiACW" Command="{Binding Test.PiACWMethodExecutorCommand}" utilities:HelpProvider.HelpKey="TestPIGroupMethod"/>
+
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" utilities:HelpProvider.HelpKey="CrossTestMkr"/>
+
                     </MenuItem>
 
                 </MenuItem>
+
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_3" Name="Translation">
+
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Build}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Run}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_RunStepByStepMode}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="RunStepByStepMode" Name="RunStepByStepMode" Command="{Binding Translation.RunStepByStepModeCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
+
+                </MenuItem>
+
+                <MenuItem Command="{Binding Settings.SettingsCommand}" Header="{Binding Source={StaticResource LS_Menu_Settings}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Settings" Tag="menuHeader_4"/>
+
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpText">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_GeneralInformation}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextGeneralInformation" Command="{Binding Settings.HelpOpenGeneralInformationCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_LanguageControlPrograms}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextLanguageControlPrograms" Command="{Binding Settings.HelpOpenLanguageControlProgramsCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_ProgramComposition}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextProgramComposition" Command="{Binding Settings.HelpOpenProgramCompositionCommand}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_AboutProgram}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextAboutProgram" Command="{Binding Settings.HelpOpenAboutProgramCommand}"/>
+                    <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>
+                </MenuItem>
+
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin">
+
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_USB}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
+
+                    <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
+                        <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
+                        <MenuItem Header="МеШ" Style="{DynamicResource StyleMenuItem}" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
+                        <MenuItem Header="МИНТ" Style="{DynamicResource StyleMenuItem}" Name="ModuleMintMenuItem" Command="{Binding Service.ServicesTestMintCommand}" />
+                        <MenuItem Header="МКР" Style="{DynamicResource StyleMenuItem}" Name="ModuleMkrMenuItem" Command="{Binding Service.ServicesTestMkrCommand}" />
+                        <MenuItem Header="УКШ" Style="{DynamicResource StyleMenuItem}" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
+                    </MenuItem>-->
+
+                    <MenuItem Header="Тесты ПО" Style="{DynamicResource StyleMenuItem}">
+                        <MenuItem Header="Протокол" Style="{DynamicResource StyleMenuItem}" Name="ProtocolTest" Command="{Binding Admin.ProtocolCommand}"/>
+                        <MenuItem Header="Протокол текст" Style="{DynamicResource StyleMenuItem}" Name="ProtocolBaseTest" Command="{Binding Admin.ProtocolBaseCommand}"/>
+                        <MenuItem Header="Выбор устройства" Style="{DynamicResource StyleMenuItem}" Name="ChoiceTest" Command="{Binding Admin.ChoiceCommand}"/>
+                        <MenuItem Header="Тест консоли" Style="{DynamicResource StyleMenuItem}" Name="ConsoleTest" Command="{Binding Admin.ConsoleTest}"/>
+                    </MenuItem>
+
+                </MenuItem>
+
             </Menu>
 
             <StackPanel  
                 Background="Transparent" 
-                Grid.Column="2" 
-                MouseLeftButtonDown="mainMenu_MouseLeftButtonDown"
-                />
+                Grid.Column="2">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </StackPanel>
 
-            <StackPanel 
-                Orientation="Horizontal" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Grid.Column="2" 
-                Name="ButtonsPanel"
-                Background="Transparent"
-                >
-
-                <DefaultGUI:WindowButtons 
-                    Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                    Height="{Binding ActualHeight, ElementName=mainMenu}" 
-                    x:Name="minimizeButton" 
-                    ChoiceElement="Minimize"
-                    PreviewMouseDown="minimizeButton_PreviewMouseDown"
-                    />
+            <StackPanel Name="ButtonsPanel"
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" 
+                    Grid.Column="2" 
+                    Background="Transparent"
+                    >
 
                 <DefaultGUI:WindowButtons 
-                    x:Name="maximizeButton" 
-                    ChoiceElement="Maximize" 
-                    Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                    Height="{Binding ActualHeight, ElementName=mainMenu}"
-                    PreviewMouseDown="maximizeButton_PreviewMouseDown"
-                    />
+                        Style="{DynamicResource StyleWindowsButtons}"
+                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Height="{Binding ActualHeight, ElementName=mainMenu}" 
+                        x:Name="minimizeButton" ChoiceElement="Minimize" 
+                        Command="{Binding Window.MinimizeCommand}"
+                        />
 
                 <DefaultGUI:WindowButtons 
-                    x:Name="exitButton"
-                    ChoiceElement="Exit"  
-                    Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                    Height="{Binding ActualHeight, ElementName=mainMenu}"
-                    PreviewMouseDown="exitButton_PreviewMouseDown"
-                    />
+                        Style="{DynamicResource StyleWindowsButtons}"
+                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        x:Name="maximizeButton" ChoiceElement="Maximize" 
+                        Command="{Binding Window.MaximizeCommand}"
+                        />
+
+                <DefaultGUI:WindowButtons 
+                        Style="{DynamicResource StyleWindowsButtons}"
+                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        x:Name="exitButton" ChoiceElement="Exit" 
+                        Command="{Binding Window.CloseCommand}"
+                        />
             </StackPanel>
         </Grid>
 
         <Components:MultiWindowControl 
             x:Name="MultiWindow" 
-            Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"
+            Grid.Row="1" Background="{DynamicResource TestsProtocolBackgroundBrush}"
             />
 
         <Grid 
             Name="BottomPanel"
             Grid.Row="2" 
-            Height="40" 
-            Background="{StaticResource SecondarySolidColorBrush}"
+            Height="30" 
+            Background="{DynamicResource BackgroundBrushes}"
             >
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
@@ -442,14 +245,41 @@
                 VerticalAlignment="Center" 
                 Padding="10,0,0,0" 
                 FontSize="14" 
-                Foreground="{StaticResource ForegroundSolidColorBrush}"
-                >
-                Тут будет информационый текст
-            </TextBlock>
-            <DefaultGUI:PowerButton
+                Foreground="{DynamicResource MainTitleSolidColorBrush}" 
+				/>
+
+
+            <Controls:StatusBarControl
+                Grid.Column="1" 
+                x:Name="StatusBar"
+                HorizontalAlignment="Right"
+                Visibility="Hidden"
+                />
+
+
+            <Controls:DateTimeControl Opacity="0.7"
+                x:Name="TimeBlock" 
+                Margin="0,0,10,0" 
+                FontSize="13" 
+                Foreground="{DynamicResource ForegrounfBrushes}"
+                Grid.Column="3" 
+                Cursor="Hand"
+				/>
+
+            <Components:KeyboardLayoutComponent 
+                Opacity="0.7"
+                x:Name="LanguageBlock" 
+                VerticalAlignment="Center" 
+                FontSize="15" 
+                Foreground="{DynamicResource ForegrounfBrushes}"
                 Grid.Column="2" 
+				/>
+
+            <DefaultGUI:PowerButton
+                Grid.Column="4" 
                 Width="200"
                 Name="PowerButton"
+                Tag="Power"
                 />
         </Grid>
     </Grid>

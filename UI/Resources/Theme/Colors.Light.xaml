@@ -1,0 +1,87 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Базовые цвета -->
+    <Color x:Key="ActiveColor">#90465945</Color>
+    <Color x:Key="ActiveColor80">#80465945</Color>
+    <Color x:Key="FadedRed">#465945</Color>
+    <Color x:Key="ForegroundColor">#000000</Color>
+    <Color x:Key="ForegroundColor60">#60000000</Color>
+    <Color x:Key="ForegroundColor80">#80000000</Color>
+    <Color x:Key="GreenColor">#465945</Color>
+    <Color x:Key="IsCheckedColor">#1f242b</Color>
+    <Color x:Key="IsCheckedColor80">#801f242b</Color>
+    <Color x:Key="LightBlueColor">#5dade2</Color>
+    <Color x:Key="LightPrimaryColor">#465945</Color>
+
+    <!-- Основные фоны -->
+    <Color x:Key="main.active.menu.background">#79e171</Color>
+    <Color x:Key="main.background.bottomPanel">#dedddf</Color>
+    <Color x:Key="main.background.breath.firstColor">#efefe0</Color>
+    <Color x:Key="main.background.breath.secondColor">#303843</Color>
+    <Color x:Key="main.background.empty.firstColor">#00e6edf7</Color>
+    <Color x:Key="main.background.empty.secondColor">#1ae6edf7</Color>
+    <Color x:Key="main.background.greeting">#dedddf</Color>
+    <Color x:Key="main.background.menu">#dedddf</Color>
+    <Color x:Key="main.borderColor.greeting">#000000</Color>
+    <Color x:Key="main.empty.vignette.firstColor">#00000000</Color>
+    <Color x:Key="main.empty.vignette.secondColor">#26000000</Color>
+    <Color x:Key="main.empty.vignette.thirdColor">#66000000</Color>
+    <Color x:Key="main.text.title.color">#000000</Color>
+
+    <!-- Основные цвета -->
+    <Color x:Key="PrimaryColor">#efefe0</Color>
+    <Color x:Key="RedColor">#465945</Color>
+    <Color x:Key="SecondaryColor">#dedddf</Color>
+
+    <!-- Настройки -->
+    <Color x:Key="settings.active.interactive">#a4eb9e</Color>
+    <Color x:Key="settings.background.card">#ffffff</Color>
+    <Color x:Key="settings.background.config.button">#80465945</Color>
+    <Color x:Key="settings.background.config.dataInputTablo">#ffffff</Color>
+    <Color x:Key="settings.background.config.infoTablo">#90465945</Color>
+    <Color x:Key="settings.background.interactive">#ffffff</Color>
+    <Color x:Key="settings.background.main">#dddddd</Color>
+    <Color x:Key="settings.background.panel">#ebebeb</Color>
+    <Color x:Key="settings.background.selector">#ffffff</Color>
+    <Color x:Key="settings.background.slider">#ffffff</Color>
+
+    <!-- Бордеры -->
+    <Color x:Key="settings.border.card">#000000</Color>
+    <Color x:Key="settings.border.config.button">#000000</Color>
+    <Color x:Key="settings.border.interactive">#000000</Color>
+    <Color x:Key="settings.border.panel">#ebebeb</Color>
+    <Color x:Key="settings.border.slider">#000000</Color>
+
+    <!-- Состояния -->
+    <Color x:Key="settings.hover.config.button.background">#90465945</Color>
+    <Color x:Key="settings.hover.interactive.background">#a4eb9e</Color>
+    <Color x:Key="settings.hover.selector.background">#a4eb9e</Color>
+    <Color x:Key="settings.pressed.interactive">#79e171</Color>
+    <Color x:Key="settings.selected.selector">#79e171</Color>
+
+    <!-- Текст -->
+    <Color x:Key="settings.text.description.color">#000000</Color>
+    <Color x:Key="settings.text.header.color">#000000</Color>
+    <Color x:Key="settings.text.title.color">#000000</Color>
+
+    <!-- Тестовые панели -->
+    <Color x:Key="tests.input.background.header.panel">#a4eb9e</Color>
+    <Color x:Key="tests.input.background.input.panel">#ffffff</Color>
+    <Color x:Key="tests.input.text.description.color">#a9b5c3</Color>
+    <Color x:Key="tests.input.text.header.color">#000000</Color>
+    <Color x:Key="tests.main.active.interactive">#a4eb9e</Color>
+    <Color x:Key="tests.main.background.interactive">#ffffff</Color>
+    <Color x:Key="tests.main.border.interactive">#000000</Color>
+    <Color x:Key="tests.main.button.background">#ffffff</Color>
+    <Color x:Key="tests.main.button.green.end">#9067c66e</Color>
+    <Color x:Key="tests.main.button.green.start">#90459c3c</Color>
+    <Color x:Key="tests.main.button.orange.end">#90fcaa3f</Color>
+    <Color x:Key="tests.main.button.orange.start">#90f74842</Color>
+    <Color x:Key="tests.main.panel.background">#dddddd</Color>
+    <Color x:Key="tests.main.pressed.interactive">#79e171</Color>
+
+    <!-- Прочее -->
+    <Color x:Key="YellowColor">#465945</Color>
+
+</ResourceDictionary>

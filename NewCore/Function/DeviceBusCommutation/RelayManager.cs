@@ -1,6 +1,7 @@
-﻿using NewCore.Base.Function.DBC;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Communication;
-using static AppConfiguration.Execution.ExecutionConfig ;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -26,14 +27,14 @@ namespace NewCore.Function.DeviceBusCommutation
     /// </summary>
     /// <param name="numberRelay">Номер реле, которое необходимо замкнуть.</param>
     /// <returns>Результат проверки и выполнения команды.</returns>
-    public async Task<bool> ConnectRelay(int numberRelay)
+    public async Task<bool> ConnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
       if (numberRelay < 0)
       {
         return false;
       }
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -49,14 +50,14 @@ namespace NewCore.Function.DeviceBusCommutation
     /// </summary>
     /// <param name="numberRelay">Номер реле, которое необходимо замкнуть.</param>
     /// <returns>Результат проверки и выполнения команды.</returns>
-    public async Task<bool> DisconnectRelay(int numberRelay)
+    public async Task<bool> DisconnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
       if (numberRelay < 0)
       {
         return false;
       }
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

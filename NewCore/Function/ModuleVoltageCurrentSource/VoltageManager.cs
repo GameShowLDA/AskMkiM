@@ -1,10 +1,10 @@
-﻿using System.Net;
-using NewCore.Base.Function.ModuleVoltageCurrentSource;
-using NewCore.Base.Interface.Main;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Communication;
-using static NewCore.Enum.DeviceEnum;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource
 {
@@ -26,11 +26,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// </summary>
     /// <param name="voltageSources">Источник напряжения (например, 12В или 5В).</param>
     /// <returns>Асинхронная задача, представляющая операцию установки источника напряжения.</returns>
-    public async Task SetSourceVoltageAsync(VoltageSources voltageSources)
+    public async Task SetSourceVoltageAsync(VoltageSources voltageSources, IUserInteractionService? messageService = null)
     {
-      LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}");
+      LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}", isDeviceLog: true);
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -45,11 +45,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <param name="integerPart">Целая часть напряжения.</param>
     /// <param name="decimalPart">Дробная часть напряжения.</param>
     /// <returns>Асинхронная задача, представляющая операцию установки напряжения.</returns>
-    public async Task SetVoltageLevelAsync(int integerPart, int decimalPart)
+    public async Task SetVoltageLevelAsync(int integerPart, int decimalPart, IUserInteractionService? messageService = null)
     {
-      LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})");
+      LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})", isDeviceLog: true);
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }

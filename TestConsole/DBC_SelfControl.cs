@@ -1,9 +1,11 @@
-﻿using System.Reflection;
-using DataBaseConfiguration.Services;
-using NewCore.Base.Device;
-using NewCore.Base.Function.DBC;
-using NewCore.Base.Interface.Main;
-using static Utilities.LoggerUtility;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using DataBaseConfiguration.Services.Device;
+using System.Reflection;
+using static Ask.LogLib.LoggerUtility;
 
 namespace TestConsole
 {
@@ -42,31 +44,31 @@ namespace TestConsole
         switch (choice)
         {
           case 1:
-            await SelfCheckCircuitAsync(TypeConnector.BlockingRelay);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.BlockingRelay);
             break;
 
           case 2:
-            await SelfCheckCircuitAsync(TypeConnector.Multimeter);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.Multimeter);
             break;
 
           case 3:
-            await SelfCheckCircuitAsync(TypeConnector.ADC);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.ADC);
             break;
 
           case 4:
-            await SelfCheckCircuitAsync(TypeConnector.ADCReversed);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.ADCReversed);
             break;
 
           case 5:
-            await SelfCheckCircuitAsync(TypeConnector.PINT);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.PINT);
             break;
 
           case 6:
-            await SelfCheckCircuitAsync(TypeConnector.Shunt);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.Shunt);
             break;
 
           case 7:
-            await SelfCheckCircuitAsync(TypeConnector.BreakdownTester);
+            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.BreakdownTester);
             break;
 
           case 8:
@@ -76,7 +78,7 @@ namespace TestConsole
 
             LogInformation("Начинаем полный самоконтроль всех цепей...");
 
-            foreach (TypeConnector testType in Enum.GetValues(typeof(TypeConnector)))
+            foreach (SwitchingDeviceTypeConnector testType in Enum.GetValues(typeof(SwitchingDeviceTypeConnector)))
             {
               await Task.Delay(20);
               LogInformation($"Запуск проверки: {testType}");
@@ -108,7 +110,7 @@ namespace TestConsole
     /// </summary>
     /// <param name="testType">Тип цепи для проверки.</param>
     /// <returns>True, если проверка успешна, иначе false.</returns>
-    private static async Task<bool> SelfCheckCircuitAsync(TypeConnector testType, ISwitchingDevice device = null, IFastMeter meter = null)
+    private static async Task<bool> SelfCheckCircuitAsync(SwitchingDeviceTypeConnector testType, ISwitchingDevice device = null, IFastMeter meter = null)
     {
       if (device == null)
       {
@@ -187,11 +189,11 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
-    private static async Task<bool> PerformCircuitTestAsync(ISelfTestChecker selfTestChecker, IFastMeter meter, TypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
     {
       LogInformation($"Запуск теста: {circuitName}");
 
-      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 1))
+      if (!await selfTestChecker.ExecuteSelfTestAsync(new CancellationToken(), testType, busContact, 1))
       {
         LogError($"Ошибка при замыкании: {circuitName}.");
         return false;
@@ -204,7 +206,7 @@ namespace TestConsole
       bool continuityResult = false;
       if (meter.ContinuityManager != null)
       {
-        continuityResult = await meter.ContinuityManager.CheckContinuityAsync();
+        continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true);
         if (continuityResult)
         {
           LogDebug($"Цепь {circuitName} прошла проверку!");
@@ -225,7 +227,7 @@ namespace TestConsole
       }
 
       // Размыкаем цепь
-      if (!await selfTestChecker.ExecuteSelfTestAsync(testType, busContact, 2))
+      if (!await selfTestChecker.ExecuteSelfTestAsync(new CancellationToken(), testType, busContact, 2))
       {
         LogError($"Ошибка при размыкании: {circuitName}.");
         return false;
@@ -244,7 +246,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если все реле прошли проверку, иначе false.</returns>
-    private static async Task<bool> PerformRelayCheck(ISelfTestChecker selfTestChecker, TypeConnector testType, string circuitName, int busContact, IFastMeter meter)
+    private static async Task<bool> PerformRelayCheck(ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IFastMeter meter)
     {
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)
@@ -259,7 +261,7 @@ namespace TestConsole
         LogInformation($"Проверка реле {relay} в цепи {circuitName}...");
 
         await Task.Delay(1);
-        if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 2))
+        if (!await selfTestChecker.ControlRelayAsync(new CancellationToken(), testType, relay, busContact, 2))
         {
           LogError($"Ошибка при включении реле {relay} в цепи {circuitName}.");
           return false;
@@ -268,8 +270,8 @@ namespace TestConsole
         LogInformation($"Реле {relay} выключено, проверяем целостность цепи...");
 
         await Task.Delay(25);
-        var result = await meter.ContinuityManager.CheckContinuityAsync();
-        if (!result)
+        var result = await meter.ContinuityManager.CheckContinuityAsync(false);
+        if (result)
         {
           LogDebug($"Реле {relay} успешно протестировано.");
         }
@@ -279,7 +281,7 @@ namespace TestConsole
         }
 
         await Task.Delay(1);
-        if (!await selfTestChecker.ControlRelayAsync(testType, relay, busContact, 1))
+        if (!await selfTestChecker.ControlRelayAsync(new CancellationToken(), testType, relay, busContact, 1))
         {
           LogError($"Ошибка при выключении реле {relay} в цепи {circuitName}.");
           return false;

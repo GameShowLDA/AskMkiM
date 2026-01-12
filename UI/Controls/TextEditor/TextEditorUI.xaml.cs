@@ -1,29 +1,118 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using ICSharpCode.AvalonEdit;
+﻿using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Support;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
-using NLog;
-using UI.Components;
-using UI.Components.SearchControls;
-using static Utilities.LoggerUtility;
+using System.IO;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Xml;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.TextEditor
 {
   /// <summary>
   /// Логика взаимодействия для TextEditorUI.xaml.
   /// </summary>
-  public partial class TextEditorUI : UserControl
+  public partial class TextEditorUI : UserControl, ITextEditorAdapter
   {
+
+    #region Поля.
+
     /// <summary>
-    /// Экземпляр <see cref="MultiEditorControl"/>, используемый для работы с вкладками редактора.
+    /// Отображает визуальные маркеры выполнения (указание активной строки)
+    /// в левой области редактора.
     /// </summary>
-    MultiEditorControl _multiEditorControl;
+    private ExecutionGlyphMargin _executionMargin;
+
+    /// <summary>
+    /// Менеджер управления сворачиваемыми областями текста в редакторе.
+    /// Отвечает за создание, хранение и обновление foldings.
+    /// </summary>
+    private FoldingManager foldingManager;
+
+    /// <summary>
+    /// Стратегия определения областей сворачивания для файлов OPK/OPKW.
+    /// Используется для построения структуры foldings.
+    /// </summary>
+    private OpkwFoldingStrategy foldingStrategy = new OpkwFoldingStrategy();
+
+    /// <summary>
+    /// Сервис управления текстовыми маркерами в редакторе.
+    /// Используется для подсветки диапазонов и отображения ошибок.
+    /// </summary>
     private TextMarkerService _markerService;
+
+    /// <summary>
+    /// Список ожидающих подсветок, которые добавляются до момента
+    /// полной инициализации сервиса маркеров.
+    /// </summary>
     private List<string> _pendingHighlights = new();
+
+    /// <summary>
+    /// Цвет фона для подсвечивания выделенных диапазонов текста.
+    /// Используется сервисом маркеров.
+    /// </summary>
     private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
+
+    #endregion
+
+    #region Св-ва.
+
+    /// <summary>
+    /// Переопределяет фоновую кисть элемента управления,
+    /// перенаправляя получение и установку значения напрямую
+    /// в встроенный экземпляр AvalonEdit. Позволяет внешнему коду
+    /// изменять фон текстового редактора как у стандартного UI-элемента.
+    /// </summary>
+    public new Brush Background
+    {
+      get => textEditor.Background;
+      set => textEditor.Background = value;
+    }
+
+    /// <summary>
+    /// Проксирует событие изменения текста редактора.
+    /// Позволяет внешнему коду подписываться на обновления содержимого,
+    /// передавая обработчики напрямую во внутренний AvalonEdit.
+    /// </summary>
+    public event EventHandler TextChanged
+    {
+      add => textEditor.TextChanged += value;
+      remove => textEditor.TextChanged -= value;
+    }
+
+    /// <summary>
+    /// Определяет тип файла, связанный с данным экземпляром редактора.
+    /// Используется для выбора схемы подсветки синтаксиса и других
+    /// специфичных для формата настроек. Устанавливается при создании
+    /// редактора и доступно только для чтения извне.
+    /// </summary>
+    public FileType FileTypeDock { get; private set; }
+
+    /// <summary>
+    /// Модель данных, описывающая состояние и параметры текущего
+    /// текстового редактора. Может содержать информацию о файле,
+    /// настройках отображения и других связанных данных.
+    /// Свойство доступно для чтения и записи.
+    /// </summary>
+    public TextEditorModel TextEditorModel { get; set; }
+
+    /// <summary>
+    /// Получает документ текстового редактора.
+    /// </summary>
+    /// <value>
+    /// Возвращает объект <see cref="TextDocument"/>, который представляет текст, загруженный в редактор.
+    /// </value>
+    public TextDocument Document => textEditor.Document;
 
     /// <summary>
     /// Получает экземпляр текстового редактора AvalonEdit.
@@ -42,7 +131,24 @@ namespace UI.Controls.TextEditor
     public string Text
     {
       get => textEditor.Text;
-      set => textEditor.Text = value;
+      set
+      {
+        textEditor.Text = value;
+
+        if (FileTypeDock == FileType.OPKW)
+        {
+          InitializeFolding();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает, является ли текстовый редактор доступным только для чтения.
+    /// </summary>
+    public bool IsReadOnly
+    {
+      get => textEditor.IsReadOnly;
+      set => textEditor.IsReadOnly = value;
     }
 
     /// <summary>
@@ -66,36 +172,14 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    #endregion
+
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
+    /// Установить маркер на указанную строку, очищая остальные.
     /// </summary>
-    /// <remarks>
-    /// Этот конструктор вызывается при создании экземпляра класса. Он инициализирует компоненты UI и подготавливает текстовый редактор для работы.
-    /// </remarks>
-    public TextEditorUI()
+    public void SetActiveLine(int lineNumber)
     {
-      InitializeComponent();
-
-      Loaded += (s, e) =>
-      {
-        if (_markerService == null)
-        {
-          _markerService = new TextMarkerService(textEditor);
-          textEditor.TextArea.TextView.BackgroundRenderers.Add(_markerService);
-
-          var services = textEditor.TextArea.TextView.Services;
-          if (services.GetService(typeof(TextMarkerService)) == null)
-          {
-            services.AddService(typeof(TextMarkerService), _markerService);
-          }
-
-          Console.WriteLine("✅ TextMarkerService зарегистрирован.");
-        }
-        else
-        {
-          Console.WriteLine("⚠ TextMarkerService уже инициализирован.");
-        }
-      };
+      _executionMargin.SetActiveLine(lineNumber);
     }
 
     /// <summary>
@@ -121,44 +205,7 @@ namespace UI.Controls.TextEditor
 
       LogInformation("TextMarkerService инициализирован.");
 
-      foreach (var text in _pendingHighlights)
-      {
-        HighlightText(text);
-      }
-
       _pendingHighlights.Clear();
-    }
-
-    /// <summary>
-    /// Подсвечивает указанный текст, если сервис инициализирован. Иначе — откладывает подсветку.
-    /// </summary>
-    /// <param name="textToHighlight">Текст, который необходимо подсветить.</param>
-    public void HighlightText(string textToHighlight)
-    {
-      if (string.IsNullOrEmpty(textToHighlight))
-      {
-        return;
-      }  
-
-      if (_markerService == null)
-      {
-        _pendingHighlights.Add(textToHighlight);
-        LogInformation("Подсветка отложена до инициализации.");
-        return;
-      }
-
-      string fullText = textEditor.Text;
-      LogInformation($"Текст в редакторе: {fullText}");
-
-      int index = 0;
-      while ((index = fullText.IndexOf(textToHighlight, index, StringComparison.OrdinalIgnoreCase)) >= 0)
-      {
-        LogInformation($"Найдено '{textToHighlight}' на позиции: {index}");
-        _markerService.AddMarker(index, textToHighlight.Length, backgroudColor);
-        index += textToHighlight.Length;
-      }
-
-      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
     /// <summary>
@@ -169,7 +216,7 @@ namespace UI.Controls.TextEditor
     {
       if (_markerService == null)
       {
-        Console.WriteLine("❌ MarkerService не инициализирован. Операция отклонена.");
+        Console.WriteLine("MarkerService не инициализирован. Операция отклонена.");
         return;
       }
 
@@ -183,7 +230,7 @@ namespace UI.Controls.TextEditor
         }
         else
         {
-          Console.WriteLine($"⚠ Некорректный диапазон: ({start}, {end})");
+          Console.WriteLine($"Некорректный диапазон: ({start}, {end})");
         }
       }
 
@@ -191,35 +238,21 @@ namespace UI.Controls.TextEditor
     }
 
     /// <summary>
-    /// Устанавливает ссылку на объект <see cref="MultiEditorControl"/> для управления файлами в редакторе.
+    /// Переходит к указанной строке, разворачивает folding при необходимости
+    /// и прокручивает редактор так, чтобы строка была видна.
     /// </summary>
-    /// <param name="multiEditorControl">
-    /// Экземпляр класса <see cref="MultiEditorControl"/>, который будет использоваться для управления редакторами.
-    /// </param>
-    public void SetMultiEditorControl(MultiEditorControl multiEditorControl)
+    /// <param name="lineNumber">Номер строки (1-based).</param>
+    public void GoToLine(int lineNumber)
     {
-      _multiEditorControl = multiEditorControl;
+      if (lineNumber > 0 && lineNumber <= textEditor.Document.LineCount)
+      {
+        var line = textEditor.Document.GetLineByNumber(lineNumber);
+        textEditor.ScrollToLine(lineNumber);
+        textEditor.Select(line.Offset, line.Length);
+        textEditor.Focus();
+      }
     }
 
-    /// <summary>
-    /// Очищает все подсветки в тексте.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает метод <see cref="TextMarkerService.ClearAllMarkers"/> для очистки всех маркеров и подсветки
-    /// в текущем текстовом редакторе.
-    /// </remarks>
-    public void ClearHighlights()
-    {
-      _markerService.ClearAllMarkers();
-    }
-
-    /// <summary>
-    /// Получает документ текстового редактора.
-    /// </summary>
-    /// <value>
-    /// Возвращает объект <see cref="TextDocument"/>, который представляет текст, загруженный в редактор.
-    /// </value>
-    public TextDocument Document => textEditor.Document;
 
     /// <summary>
     /// Получает область текста редактора.
@@ -255,64 +288,162 @@ namespace UI.Controls.TextEditor
       textEditor.Select(startOffset, length);
     }
 
-    private void textEditor_DragEnter(object sender, DragEventArgs e)
-    {
-      if (e.Data.GetDataPresent(DataFormats.FileDrop))
-      {
-        textEditor.Background = (Brush)FindResource("ActiveBorderSolidColorBrush");
-        e.Effects = DragDropEffects.Copy; 
-      }
-      else
-      {
-        e.Effects = DragDropEffects.None; 
-      }
-    }
-
     /// <summary>
-    /// Обработчик события DragLeave. Восстанавливает исходный фон редактора.
+    /// Обрабатывает вращение колеса мыши в текстовом редакторе.
+    /// При удержании клавиши Ctrl выполняет масштабирование текста
+    /// (увеличение при прокрутке вверх и уменьшение при прокрутке вниз)
+    /// вместо стандартной прокрутки содержимого.
+    /// Помечает событие как обработанное.
     /// </summary>
-    private void textEditor_DragLeave(object sender, DragEventArgs e)
+    private void TextEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
-      textEditor.Background = (Brush)FindResource("PrimarySolidColorBrush");
-    }
-
-    /// <summary>
-    /// Обработчик события Drop. Загружает содержимое перетаскиваемого файла в редактор.
-    /// </summary>
-    private void textEditor_Drop(object sender, DragEventArgs e)
-    {
-      textEditor.Background = (Brush)FindResource("PrimarySolidColorBrush");
-
-      if (e.Data.GetDataPresent(DataFormats.FileDrop))
+      if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
       {
-        string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-        if (files.Length > 0)
+
+        if (e.Delta > 0)
         {
-          string filePath = files[0];
-          try
-          {
-            if (_multiEditorControl == null)
-            {
-              string content = System.IO.File.ReadAllText(filePath);
-              textEditor.Text = content;
-            }
-            else
-            {
-              _multiEditorControl.OpenFile(filePath);
-            }
-          }
-          catch (Exception ex)
-          {
-            MessageBox.Show($"Ошибка при открытии файла: {ex.Message}");
-          }
+          Zoom(true);
+        }
+        else if (e.Delta < 0)
+        {
+          Zoom(false);
+        }
+
+        e.Handled = true;
+      }
+    }
+
+    /// <summary>
+    /// Переключает состояние сворачивания блока, в котором находится курсор.
+    /// Если курсор расположен внутри области foldings, текущий блок разворачивается
+    /// или сворачивается. Если folding-менеджер не инициализирован, метод завершает работу.
+    /// </summary>
+    private void ToggleCurrentFolding()
+    {
+      if (foldingManager == null) return;
+      int caretOffset = textEditor.CaretOffset;
+      foreach (var folding in foldingManager.AllFoldings)
+      {
+        if (folding.StartOffset <= caretOffset && caretOffset < folding.EndOffset)
+        {
+          folding.IsFolded = !folding.IsFolded;
+          break;
         }
       }
     }
 
-    private void CloseEditor_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Инициализирует менеджер сворачивания текста при необходимости
+    /// и обновляет коллекцию foldings согласно установленной стратегии.
+    /// Вызывается при загрузке документа или изменении содержимого.
+    /// </summary>
+    private void InitializeFolding()
     {
-      var parent = this.Parent as Panel;
-      parent?.Children.Remove(this);
+      if (foldingManager == null)
+        foldingManager = FoldingManager.Install(textEditor.TextArea);
+
+      foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
     }
+
+    /// <summary>
+    /// Применяет или отключает подсветку синтаксиса в текстовом редакторе.
+    /// При включении выбирает файл схемы XSHD на основе типа файла редактора,
+    /// загружает подсветку и активирует её в AvalonEdit.
+    /// При отключении подсветки снимает схему и фиксирует действие в журнале.
+    /// Обрабатывает возможные ошибки загрузки XSHD-файла.
+    /// </summary>
+    private void ApplySyntaxHighlighting(bool enableHighlighting)
+    {
+      if (!enableHighlighting)
+      {
+        textEditor.SyntaxHighlighting = null;
+        LogDebug("Подсветка отключена пользователем.");
+        return;
+      }
+
+      string xshdFile = FileTypeDock switch
+      {
+        FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
+        FileType.PK or FileType.PKW => "MKI_PK.xshd",
+        FileType.Protocol => "MKI_PROTOCOL.xshd",
+        _ => "MKI.xshd"
+      };
+
+      try
+      {
+        using var stream = File.OpenRead(xshdFile);
+        using var reader = new XmlTextReader(stream);
+        textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
+      }
+      catch (Exception ex)
+      {
+        LogError($"Ошибка загрузки подсветки: {ex.Message}");
+        textEditor.SyntaxHighlighting = null;
+      }
+    }
+
+    #region Конструкторы
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
+    /// </summary>
+    public TextEditorUI() : this(FileType.None) { }
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="TextEditorUI"/>.
+    /// </summary>
+    /// <remarks>
+    /// Этот конструктор вызывается при создании экземпляра класса. Он инициализирует компоненты UI и подготавливает текстовый редактор для работы.
+    /// </remarks>
+    public TextEditorUI(FileType fileType = FileType.None, TextEditorModel textEditorModel = null)
+    {
+      InitializeComponent();
+      FileTypeDock = fileType;
+      TextEditorModel = textEditorModel;
+      _defaultFontSize = textEditor.FontSize;
+
+      textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
+
+      Loaded += (s, e) =>
+      {
+        if (_markerService == null)
+        {
+          _markerService = new TextMarkerService(textEditor);
+          textEditor.TextArea.TextView.BackgroundRenderers.Add(_markerService);
+
+          var services = textEditor.TextArea.TextView.Services;
+          if (services.GetService(typeof(TextMarkerService)) == null)
+          {
+            services.AddService(typeof(TextMarkerService), _markerService);
+          }
+
+          Console.WriteLine("TextMarkerService зарегистрирован.");
+        }
+        else
+        {
+          Console.WriteLine("TextMarkerService уже инициализирован.");
+        }
+
+        ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+
+        if (_executionMargin == null)
+        {
+          _executionMargin = new ExecutionGlyphMargin(textEditor);
+          textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
+        }
+
+      };
+
+      HelpProvider.SetHelpKeyProvider(textEditor, () =>
+      {
+        var sel = textEditor.SelectedText?.Trim();
+        return string.IsNullOrWhiteSpace(sel) ? "DescriptionWorkTextEditor" : sel;
+      });
+
+      EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(e => ApplySyntaxHighlighting(e.IsEnabled));
+    }
+
+    #endregion
   }
 }

@@ -1,15 +1,20 @@
-﻿using System.Windows;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Static;
+using Message;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppConfiguration.Base;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
+using UI.Controls;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
+using static Ask.LogLib.LoggerUtility;
 using static UI.Components.Invoke.OpenFileButton;
-using static Utilities.LoggerUtility;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components
@@ -38,9 +43,14 @@ namespace UI.Components
     public MultiWindowControl()
     {
       InitializeComponent();
-      EventAggregator.TextEditorClosing += OnTextEditorClosig;
+      EventAggregator.Subscribe<EditorEvents.TextEditorContainerClosing>(e => OnTextEditorClosig(e.IsClosing, e.EditorName));
     }
 
+    /// <summary>
+    /// Обрабатывает события, происходящие при закрытии текстового редактора.
+    /// </summary>
+    /// <param name="textEditorClosing">Переменная, отвечающая за то закрывается текстовый редактор или вкладка другого типа.</param>
+    /// <param name="textEditorName">Название файла, открытого в текстовом редакторе.</param>
     private void OnTextEditorClosig(bool textEditorClosing, string textEditorName)
     {
       if (textEditorClosing)
@@ -50,12 +60,14 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Обрабатывает закрытие панеои с результатми поиска по тексту.
+    /// </summary>
     private void CloseSearchResultsActions()
     {
       if (openPages.Count <= 0 && userControls.Count <= 0)
       {
         CloseSearchResults();
-        EventAggregator.RaiseCloseSearchWindow();
       }
     }
 
@@ -84,12 +96,28 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
 
       MultiEditor.OpenFile(filePath);
+    }
+
+    /// <summary>
+    /// Добавляет новый MultiEditorControl в контейнер.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware)
+    {
+      if (MultiEditor == null)
+      {
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+        return;
+      }
+
+      MultiEditor.ViewProtocol(protocol, showInSoftware);
     }
 
     /// <summary>
@@ -157,9 +185,46 @@ namespace UI.Components
     /// <returns>
     /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
     /// </returns>
+    public TextEditorUI GetActiveTextEditor(EditorType editorType)
+    {
+      return MultiEditor.GetActiveTextEditor(editorType);
+    }
+
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>
+    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// </returns>
     public TextEditorUI GetActiveTextEditor()
     {
       return MultiEditor.GetActiveTextEditor();
+    }
+
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>
+    public bool RemoveActiveTextEditor(bool isTranslation)
+    {
+      return MultiEditor.RemoveActiveTextEditor(isTranslation);
+    }
+
+    public void RemoveControl(EditorType editorType)
+    {
+      MultiEditor.RemoveControl(editorType);
+    }
+
+    /// <summary>
+    /// Получает активный текстовый редактор.
+    /// </summary>
+    /// <returns>
+    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// </returns>
+    public TextEditorUI CreateTranslationFileAsync()
+    {
+      return MultiEditor.CreateTranslationFileAsync();
     }
 
     /// <summary>
@@ -187,7 +252,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -206,7 +271,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -225,13 +290,14 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
 
       MultiEditor.SaveFileAs();
     }
+
 
     /// <summary>
     /// Отправляет текущий файл на печать.
@@ -244,7 +310,7 @@ namespace UI.Components
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
         return;
       }
@@ -270,18 +336,51 @@ namespace UI.Components
     /// <param name="searchParameters">
     /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
     /// </param>
-    public void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       if (MultiEditor == null)
       {
-        MessageBox.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
         LogError("Редактор не инициализирован");
 
         return;
       }
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
-      MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    /// <summary>
+    /// Выполняет поиск по тексту в редакторе.
+    /// </summary>
+    /// <param name="searchText">
+    /// Текст, который нужно найти.
+    /// </param>
+    /// <param name="wholeWord">
+    /// Если true - ищем только слово целиком, иначе ищем все вхождения.
+    /// </param>
+    /// <param name="caseWord">
+    /// Если true - учитываем регистр, иначе не учитываем.
+    /// </param>
+    /// <param name="searchArea">
+    /// Параметры поиска: найти далее, найти предыдущее, найти все.
+    /// </param>
+    /// <param name="searchParameters">
+    /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
+    /// </param>
+    public async void ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    {
+      if (MultiEditor == null)
+      {
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+
+        return;
+      }
+
+      LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
+      CloseSearchResults();
+      await MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
 
     /// <summary>
@@ -304,7 +403,7 @@ namespace UI.Components
     public void ShowSearchResults(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results)
     {
       int totalCount = 0;
-      PrepareSearchResultsArea(); 
+      PrepareSearchResultsArea();
 
       foreach (var file in results)
       {
@@ -384,6 +483,9 @@ namespace UI.Components
       searchResultsTextBlock.Text = overallSearchText;
     }
 
+    /// <summary>
+    /// Подготавливает область вывода результатов поиска по тексту.
+    /// </summary>
     private void PrepareSearchResultsArea()
     {
       SearchResultsTopPanel.Children.Clear();
@@ -420,7 +522,7 @@ namespace UI.Components
       if (TryShowExistingControl(description, header))
       {
         return;
-      }  
+      }
 
       tabButton.PreviewMouseDown += (s, e) => ShowControl(control, tabButton);
       tabButton.GetCloseButton().PreviewMouseDown += (s, e) => RemoveControl(tabButton, control);
@@ -478,6 +580,7 @@ namespace UI.Components
           int index = openPages.IndexOf(page);
           var userControl = userControls[index];
           ShowControl(userControl, page);
+
           return true;
         }
       }
@@ -569,6 +672,58 @@ namespace UI.Components
 
         CloseSearchResultsActions();
       }
+    }
+
+    /// <summary>
+    /// Получает активный контейнер с вкладками.
+    /// </summary>
+    /// <param name="editorType">Тип вкладок.</param>
+    /// <returns>Найденный контейнер.</returns>
+    public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
+    {
+      return MultiEditor.GetActiveTextEditorContainer(editorType);
+    }
+
+    /// <summary>
+    /// Добавляет вкладку с транслятором.
+    /// </summary>
+    /// <param name="editor">Текстовый редактор с транслируемым файлом.</param>
+    /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
+    /// <param name="editorType">Тип вкладки.</param>
+    /// <returns>Асинхронная задача, представляющая результат добавления вкладки с <see cref="TranslatorItem"/>.</returns>
+    public Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    {
+      return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
+    }
+
+    public Task AddRunItem(RunControl runControl, EditorType editorType)
+    {
+      return MultiEditor.AddRunItem(runControl, editorType);
+    }
+
+    public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
+    {
+      await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
+    }
+
+    /// <summary>
+    /// Открывает папку, содержащую файл, в проводнике.
+    /// </summary>
+    public void OpenFolder()
+    {
+      if (MultiEditor == null)
+      {
+        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
+        LogError("Редактор не инициализирован");
+        return;
+      }
+
+      MultiEditor.OpenFolder();
+    }
+
+    public async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    {
+      await MultiEditor.CloseRunItem(runControl, editorType);
     }
   }
 }

@@ -1,0 +1,37 @@
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static.Messages;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
+{
+  internal class MessageManager
+  {
+    public static async Task<(bool,double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value)
+    {
+      if (await ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
+      {
+        value = new Random().Next(0, (int)upperLimit * 2);
+      }
+
+      bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
+
+      if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+      {
+        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value);
+        message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
+        message.IndentLevel = 2;
+
+        await messageService.ShowMessageAsync(message, skipPause: true);
+      }
+
+      return (result, value);
+    }
+  }
+}

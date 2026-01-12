@@ -1,7 +1,9 @@
-﻿using System.Reflection;
-using NewCore.Base.Device;
-using NewCore.Base.Interface.Main;
-using static Utilities.LoggerUtility;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using System.Reflection;
+using static Ask.LogLib.LoggerUtility;
 
 namespace TestConsole.MINT
 {
@@ -76,8 +78,8 @@ namespace TestConsole.MINT
     static private async Task MeasureAndCompareVoltage(double voltage, int delay, IFastMeter fastMeter)
     {
       double tolerance = 0.0001;
-      double firstNorm = voltage - (0.01 * voltage + 0.1);
-      double lastNorm = voltage + (0.01 * voltage + 0.1);
+      double firstNorm = voltage - ((0.01 * voltage) + 0.1);
+      double lastNorm = voltage + ((0.01 * voltage) + 0.1);
 
       await Task.Delay(40).ConfigureAwait(true);
       double result = await GetMeasurementResult(voltage, delay, fastMeter);

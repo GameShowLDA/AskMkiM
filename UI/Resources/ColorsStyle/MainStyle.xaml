@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- #region Главное окно -->
+
+    <!-- Виньетка -->
+    <SolidColorBrush x:Key="MainVignetteFirstColor" Color="{DynamicResource main.empty.vignette.firstColor}" />
+    <SolidColorBrush x:Key="MainVignetteSecondColor" Color="{DynamicResource main.empty.vignette.secondColor}" />
+    <SolidColorBrush x:Key="MainVignetteThirdColor" Color="{DynamicResource main.empty.vignette.thirdColor}" />
+
+    <!-- Фоновое "дыхание" -->
+    <SolidColorBrush x:Key="MainBreachFirstColor" Color="{DynamicResource main.background.breath.firstColor}" />
+    <SolidColorBrush x:Key="MainBreachSecondColor" Color="{DynamicResource main.background.breath.secondColor}" />
+
+    <!-- Меню -->
+    <SolidColorBrush x:Key="MainMenuBackgroundBrush" Color="{DynamicResource main.background.menu}" />
+    <SolidColorBrush x:Key="MainMenuActiveBackgroundBrush" Color="{DynamicResource main.active.menu.background}" />
+
+    <!-- Нижняя панель -->
+    <SolidColorBrush x:Key="MainBottomPanelBackgroundBrush" Color="{DynamicResource main.background.bottomPanel}" />
+
+    <!-- #endregion -->
+
+</ResourceDictionary>

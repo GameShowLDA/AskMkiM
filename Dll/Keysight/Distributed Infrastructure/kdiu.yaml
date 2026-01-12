@@ -1,9 +1,0 @@
-client:
-    kdic_scheme: "wss"
-    kdic_host: "localhost:9090"
-    kdic_path: "/svc"
-    installers_dir: ""
-
-server:
-    kdic_root_address: "localhost:9090"
-    kdiu_port: "9990"

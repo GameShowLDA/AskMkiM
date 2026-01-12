@@ -22,8 +22,8 @@ namespace UI.Components
     /// <param name="value">Значение прогресса от 0 до 100.</param>
     public void SetProgress(double value)
     {
-      progressBar.IsIndeterminate = false; 
-      progressBar.Value = value; 
+      progressBar.IsIndeterminate = false;
+      progressBar.Value = value;
     }
   }
 }

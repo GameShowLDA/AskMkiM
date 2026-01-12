@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="MainWindowProgram.Test.Protocol.TestProtocol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MainWindowProgram.Test.Protocol"
+        xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew;assembly=UI"
+        mc:Ignorable="d"
+        MinWidth="800"
+        MinHeight="600"
+        Height="450" Width="800" Background="{StaticResource PrimarySolidColorBrush}">
+    <Protocol:ProtocolUI Header="Привет" x:Name="Test">
+
+    </Protocol:ProtocolUI>
+</UserControl>

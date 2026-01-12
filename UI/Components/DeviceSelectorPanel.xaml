@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="UI.Components.DeviceSelectorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+             xmlns:Custom="clr-namespace:UI.Components"
+             d:DesignHeight="350" d:DesignWidth="250">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Name="ManagerChassisSelectionControl" Margin="5" Grid.Row="0" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Менеджер шасси" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Custom:ChoiceDevice x:Name="ChassisData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите шасси"/>
+            </Grid>
+        </Border>
+
+        <Border Name="SelectedDeviceInfoBlock" Margin="5" Grid.Row="1" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Проверяемое устройство" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Custom:ChoiceDevice x:Name="RelayData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите модуль"/>
+            </Grid>
+        </Border>
+
+        <Border Name="SelfControlPartSelector" Margin="5" Grid.Row="2" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Тип проверки" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Custom:ChoiceDevice x:Name="PartData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите тип проверку"/>
+            </Grid>
+        </Border>
+
+        <Border Name="FastMeterSelectionControl"  Margin="5" Grid.Row="3" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Измеритель" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Custom:ChoiceDevice x:Name="MeterData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите измеритель"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</UserControl>

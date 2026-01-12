@@ -7,21 +7,24 @@
              mc:Ignorable="d" 
          d:DesignHeight="40" d:DesignWidth="180"
          >
-    <Grid Name="GridBlock"  Background="#b23a48" Opacity="0.5">
+    <Grid 
+        Background="{DynamicResource FadedRedSolidColorBrush}" 
+        Name="GridBlock"  
+        Opacity="0.5"
+        Cursor="Hand"
+        >
 
         <TextBlock Name="nameTextBlock"
-               Foreground="{StaticResource ForegroundSolidColorBrush}" 
+               Foreground="{DynamicResource ForegroundSolidColorBrush}" 
                VerticalAlignment="Center"
                HorizontalAlignment="Center"
                Padding="5"
-               
+               Text="Подлючить систему"
                FontSize="15"
                TextWrapping="Wrap"
                TextTrimming="CharacterEllipsis"
                ToolTipService.IsEnabled="True"
                ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
-               >
-        Подключить питание
-        </TextBlock>
+               />
     </Grid>
 </UserControl>

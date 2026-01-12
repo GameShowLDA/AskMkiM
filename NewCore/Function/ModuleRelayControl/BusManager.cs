@@ -1,10 +1,11 @@
-﻿using System.Net;
-using NewCore.Base.Function.ModuleRelayControl;
-using NewCore.Base.Interface.Main;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
-using static NewCore.Enum.DeviceEnum;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -13,7 +14,7 @@ namespace NewCore.Function.ModuleRelayControl
   /// </summary>
   public class BusManager : IBusManager
   {
-    IRelaySwitchModule _moduleRelayControl { get; set; }
+    private IRelaySwitchModule _moduleRelayControl { get; set; }
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="BusManager"/>.
@@ -27,25 +28,41 @@ namespace NewCore.Function.ModuleRelayControl
     /// <param name="bus">Замыкаемая шина.</param>
     /// <param name="lowVoltage">true - низковольтная шина, false - высоковольтная.</param>
     /// <returns>Результат замыкания шины.</returns>
-    public async Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage)
+    public async Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
     {
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
-        LogError("Ошибка данных шины!");
+        LogError("Ошибка данных шины!", isDeviceLog: true);
         return false;
       }
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
 
       int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
+      string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{cmd.ToString()}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return true;
+      LogInformation($"Команда: \"{commandText}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.", isDeviceLog: true);
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
+        {
+          return true;
+        }
+
+        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
+        await Task.Delay(100);
+      }
+
+      LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
+      return false;
     }
 
     /// <summary>
@@ -54,25 +71,41 @@ namespace NewCore.Function.ModuleRelayControl
     /// <param name="bus">Замыкаемая шина.</param>
     /// <param name="lowVoltage">true - низковольтная шина, false - высоковольтная.</param>
     /// <returns>Результат замыкания шины.</returns>
-    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage)
+    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
     {
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
-        LogError("Ошибка данных шины!");
+        LogError("Ошибка данных шины!", isDeviceLog: true);
         return false;
       }
 
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
 
       int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 2);
+      string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{cmd.ToString()}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.");
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(new DeviceCommand(4, typeBus, typeVoltage, 2).ToString());
-      return true;
+      LogInformation($"Команда: \"{commandText}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.", isDeviceLog: true);
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = BaseResponse.FromJson(response);
+
+        if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}.2")
+        {
+          return true;
+        }
+
+        LogWarning($"Ответ не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
+        await Task.Delay(100);
+      }
+
+      LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
+      return false;
     }
 
     /// <summary>
@@ -122,5 +155,6 @@ namespace NewCore.Function.ModuleRelayControl
 
       return busType != -1;
     }
+
   }
 }

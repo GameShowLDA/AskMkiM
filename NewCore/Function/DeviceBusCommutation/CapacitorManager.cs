@@ -1,8 +1,8 @@
-﻿using NewCore.Base.Function.DBC;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Communication;
-using NewCore.Device;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
+using NewCore.Function.Helpers;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -28,22 +28,16 @@ namespace NewCore.Function.DeviceBusCommutation
     /// </summary>
     /// <param name="number">Номер конденсатора.</param>
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
-    public async Task<bool> ConnectCapacitor(string number)
+    public async Task<bool> ConnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      if (int.TryParse(number, out int num))
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (await GetIsIdleModeEnabled())
-        {
-          return true;
-        }
-
-        DeviceCommand command = new DeviceCommand(6, 2, num, 1);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
         return true;
       }
 
-      LogError("Неверный номер конденсатора!");
-      return false;
+      DeviceCommand command = new DeviceCommand(6, 2, number, 1);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+      return true;
     }
 
     /// <summary>
@@ -51,22 +45,18 @@ namespace NewCore.Function.DeviceBusCommutation
     /// </summary>
     /// <param name="number">Номер конденсатора.</param>
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
-    public async Task<bool> DisconnectCapacitor(string number)
+    public async Task<bool> DisconnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      if (int.TryParse(number, out int num))
-      {
-        if (await GetIsIdleModeEnabled())
-        {
-          return true;
-        }
+      var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
 
-        DeviceCommand command = new DeviceCommand(6, 2, num, 2);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      {
         return true;
       }
 
-      LogError("Неверный номер конденсатора!");
-      return false;
+      DeviceCommand command = new DeviceCommand(6, 2, number, 2);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+      return true;
     }
   }
 }

@@ -13,15 +13,13 @@
         <avalonEdit:TextEditor x:Name="textEditor" 
         Grid.Row="0"
         ShowLineNumbers="True"
-        Background="{StaticResource PrimarySolidColorBrush}" 
-        Foreground="{StaticResource ForegroundSolidColorBrush}" 
+        Style="{DynamicResource StyleTextEditor}"
         FontSize="20"
         WordWrap="True"
         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
         AllowDrop="True" 
-        Drop="textEditor_Drop"
-        DragEnter="textEditor_DragEnter"  
-        DragLeave="textEditor_DragLeave">
+        Tag="hotkeys" 
+        PreviewMouseWheel="TextEditor_PreviewMouseWheel">
 
             <avalonEdit:TextEditor.Resources>
                 <Style TargetType="ScrollBar">

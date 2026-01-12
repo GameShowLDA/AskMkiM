@@ -1,8 +1,8 @@
-﻿using NewCore.Communication;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Communication;
 using System.Net;
-using Utilities;
-using static NewCore.Enum.DeviceEnum;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Base.Device
 {
@@ -96,7 +96,7 @@ namespace NewCore.Base.Device
       else
       {
         DeviceProtocol = null;
-        LoggerUtility.LogError("Invalid IP Address format.");
+        LogError("Invalid IP Address format.");
       }
     }
   }

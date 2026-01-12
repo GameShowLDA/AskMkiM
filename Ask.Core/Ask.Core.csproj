@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Shared\Metadata\Enums\DeviceEnums\BreakdownTypeMode.cs~" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\EventCore\Interfaces\" />
+    <Folder Include="Shared\Entity\MeasurementError\" />
+    <Folder Include="Shared\Interfaces\DeviceInterfaces\Rack\Capabilities\" />
+    <Folder Include="Shared\Metadata\Enums\HotkeysEnums\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="System.Management" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ask.LogLib\Ask.LogLib.csproj" />
+  </ItemGroup>
+
+</Project>

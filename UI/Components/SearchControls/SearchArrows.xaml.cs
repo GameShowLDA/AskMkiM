@@ -1,4 +1,4 @@
-﻿using AppConfiguration.Base;
+﻿using Ask.Core.Services.EventCore.Adapters;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,7 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using static Utilities.LoggerUtility;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Components.SearchControls
 {
@@ -29,9 +29,9 @@ namespace UI.Components.SearchControls
     {
       var arrows = new List<ArrowItem>
       {
-        new ArrowItem { Name = "FindNext", Description="Найти далее", GeometryData = Geometry.Parse("M 2 10 L 18 10 M 14 6 L 18 10 L 14 14") },
-        new ArrowItem { Name = "FindPrevious", Description="Найти предыдущий", GeometryData = Geometry.Parse("M 18 10 L 2 10 M 6 6 L 2 10 L 6 14") },
-        new ArrowItem { Name = "FindAll", Description="Найти все", GeometryData = Geometry.Parse("M 6 5 A 5 5 0 1 1 4.99 5.5 Z M 11 12 L 16 16.3") },
+        new ArrowItem { Name = "FindNext", Description = "Найти далее", GeometryData = Geometry.Parse("M 2 10 L 18 10 M 14 6 L 18 10 L 14 14") },
+        new ArrowItem { Name = "FindPrevious", Description = "Найти предыдущий", GeometryData = Geometry.Parse("M 18 10 L 2 10 M 6 6 L 2 10 L 6 14") },
+        new ArrowItem { Name = "FindAll", Description = "Найти все", GeometryData = Geometry.Parse("M 6 5 A 5 5 0 1 1 4.99 5.5 Z M 11 12 L 16 16.3") },
       };
 
       searchArrowsComboBox.ItemsSource = arrows;
@@ -155,7 +155,7 @@ namespace UI.Components.SearchControls
         if (arrowType != null)
         {
           LogInformation($"Запуск поиска для: {selectedArrow.Name}");
-          EventAggregator.RaiseSearchButtonPressed(selectedArrow.Name);
+          SearchEventAdapter.RaiseSearchButtonPressed(selectedArrow.Name);
         }
       }
     }

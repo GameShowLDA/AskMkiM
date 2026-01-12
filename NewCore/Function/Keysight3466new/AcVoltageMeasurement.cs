@@ -1,6 +1,7 @@
-﻿using NewCore.Base.Function.FastMeter;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -22,11 +23,11 @@ namespace NewCore.Function.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task SetACVoltageModeAsync()
+    public async Task<bool> SetACVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return;
+        return true;
       }
 
       if (!_device.IsConnected)
@@ -35,12 +36,14 @@ namespace NewCore.Function.Keysight3466new
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC");
+      var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
+      return answer.Contains("VOLT:AC");
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureACVoltageAsync(double param = 0)
+    public async Task<double> MeasureACVoltageAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return param;
       }
@@ -50,12 +53,11 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC", timeout: 1000);
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:VOLT:AC?", timeout: 1000);
 
       response = response.Trim().Replace("+", "");
 
-      if (double.TryParse(response, System.Globalization.NumberStyles.Float,
-                          System.Globalization.CultureInfo.InvariantCulture, out double voltage))
+      if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))
       {
         return voltage;
       }

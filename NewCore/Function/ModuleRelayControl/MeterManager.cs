@@ -1,8 +1,8 @@
-﻿using System.Net;
-using NewCore.Base.Function.ModuleRelayControl;
-using NewCore.Base.Interface.Main;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Communication;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -29,9 +29,9 @@ namespace NewCore.Function.ModuleRelayControl
     /// <remarks>
     /// Этот метод формирует и отправляет команду на включение измерителя модуля МКР по указанному IP-адресу.
     /// </remarks>
-    public async Task<bool> ConnectMeterAsync()
+    public async Task<bool> ConnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -48,9 +48,9 @@ namespace NewCore.Function.ModuleRelayControl
     /// <remarks>
     /// Этот метод формирует и отправляет команду на отключение измерителя модуля МКР по указанному IP-адресу.
     /// </remarks>
-    public async Task<bool> DisconnectMeterAsync()
+    public async Task<bool> DisconnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -67,15 +67,18 @@ namespace NewCore.Function.ModuleRelayControl
     /// <remarks>
     /// Этот метод отправляет команду на проверку состояния измерителя и анализирует его ответ.
     /// </remarks>
-    public async Task<bool> GetMeterResponseAsync()
+    public async Task<bool> GetMeterResponseAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
 
       DeviceCommand cmd = new DeviceCommand(7);
-      return (await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000)).Contains("105.1");
+      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      // TODO : Нормально распарсить ответ МКР.
+      var result = answer.Contains("7.1");
+      return result;
     }
   }
 }

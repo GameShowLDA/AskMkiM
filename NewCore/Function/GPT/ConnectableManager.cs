@@ -1,173 +1,274 @@
-﻿using NewCore.Base.Device;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Microsoft.Win32.SafeHandles;
+using NewCore.Communication;
 using NewCore.Device;
 using System.IO.Ports;
-using System.Management;
-using System.Security.Cryptography;
-using System.Xml.Linq;
-using static Utilities.LoggerUtility;
-using static AppConfiguration.Execution.ExecutionConfig;
-using NewCore.Function.GPT.Data;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.GPT
+/// <summary>
+/// Класс для управления подключением и состоянием пробойной установки GPT79904.
+/// Реализует интерфейс <see cref="IConnectable"/>.
+/// </summary>
+public class ConnectableManager : IConnectable
 {
+  private GPT79904 _gptModel;
+
+  public event Action IsReset;
+
   /// <summary>
-  /// Класс для управления состоянием пробойной установки.
+  /// Семафор для синхронизации операций подключения/отключения.
   /// </summary>
-  public class ConnectableManager : IConnectable
+  public SemaphoreSlim OperationLock { get; set; } = new SemaphoreSlim(1, 1);
+
+  /// <summary>
+  /// Создаёт новый экземпляр <see cref="ConnectableManager"/>.
+  /// </summary>
+  /// <param name="gpt79904">Модель устройства GPT79904.</param>
+  public ConnectableManager(GPT79904 gpt79904)
   {
-    /// <summary>
-    /// Создает новый экземпляр класса <see cref="AcwMode"/>.
-    /// </summary>
-    /// <param name="gpt79904">Объект устройства GPT-79904.</param>
-    public ConnectableManager(GPT79904 gpt79904) => _gptModel = gpt79904;
+    _gptModel = gpt79904 ?? throw new ArgumentNullException(nameof(gpt79904));
+  }
 
-    /// <summary>
-    /// Модель устройства GPT-79904.
-    /// </summary>
-    private GPT79904 _gptModel { get; set; }
+  /// <summary>
+  /// Асинхронно подключается к устройству GPT79904 через COM-порт.
+  /// </summary>
+  /// <param name="messageService">Опциональный сервис вывода сообщений пользователю.</param>
+  /// <returns>Кортеж: <c>true</c>, если подключение выполнено успешно; строка с текстом ошибки или пустая строка.</returns>
+  public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
+  {
+    return await InitializeAsync(messageService);
+  }
 
-    /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+  /// <summary>
+  /// Асинхронно отключается от устройства GPT79904, освобождает COM-порт и уничтожает модель.
+  /// </summary>
+  public async Task<bool> DisconnectAsync(IUserInteractionService _ = null)
+  {
+    _gptModel.Mode = BreakdownTypeMode.None;
+    if (await ExecutionConfig.GetIsIdleModeEnabled())
     {
-      if (await GetIsIdleModeEnabled())
-      {
-        return (true, "Включен холостой режим");
-      }
+      return true;
+    }
 
-      if (_gptModel.COMPort == null)
-      {
-        return (false, "COM-порт не инициализирован.");
-      }
 
+    using (await OperationLock.LockAsync())
+    {
       try
       {
-        if (_gptModel.COMPort.BaudRate == 0)
+        if (_gptModel?.COMPort != null)
         {
-          _gptModel.COMPort.BaudRate = 9600; // Скорость передачи данных
-        }
+          string portName = _gptModel.COMPort.PortName;
 
-        if (_gptModel.COMPort.Parity == Parity.None)
-        {
-          _gptModel.COMPort.Parity = Parity.None; // Четность
-        }
+          try
+          {
+            if (_gptModel.COMPort.IsOpen)
+            {
+              // Пробуем мягко сбросить
+              try
+              {
+                await _gptModel.DeviceProtocol.QueryAsync("*RST");
+                await _gptModel.DeviceProtocol.QueryAsync("*CLS");
+                LogInformation($"[{_gptModel.Name}] Отправлены команды сброса перед закрытием.", isDeviceLog: true);
+              }
+              catch (Exception ex)
+              {
+                LogWarning($"[{_gptModel.Name}] Ошибка при сбросе перед отключением: {ex.Message}", isDeviceLog: true);
+              }
 
-        if (_gptModel.COMPort.DataBits == 0)
-        {
-          _gptModel.COMPort.DataBits = 8; // Количество бит данных
-        }
+              // Пробуем отменить зависшие операции через WinAPI
+              try
+              {
+                var handle = GetSafeHandle(_gptModel.COMPort);
+                if (handle != null && !handle.IsInvalid)
+                {
+                  CancelIoEx(handle, IntPtr.Zero);
+                  LogInformation($"[{_gptModel.Name}] CancelIoEx вызван для {portName}", isDeviceLog: true);
+                }
+              }
+              catch (Exception ex)
+              {
+                LogWarning($"[{_gptModel.Name}] Ошибка CancelIoEx: {ex.Message}", isDeviceLog: true);
+              }
 
-        if (_gptModel.COMPort.StopBits == StopBits.None)
-        {
-          _gptModel.COMPort.StopBits = StopBits.One; // Стоповые биты
-        }
+              // Закрытие
+              try
+              {
+                _gptModel.COMPort.Close();
+                LogInformation($"[{_gptModel.Name}] COM-порт {portName} закрыт.", isDeviceLog: true);
+              }
+              catch (Exception ex)
+              {
+                LogWarning($"[{_gptModel.Name}] Ошибка при Close(): {ex.Message}", isDeviceLog: true);
+              }
+            }
+          }
+          catch (Exception ex)
+          {
+            LogWarning($"[{_gptModel.Name}] Ошибка при обработке COM-порта: {ex.Message}", isDeviceLog: true);
+          }
 
-        if (!_gptModel.COMPort.IsOpen)
-        {
-          _gptModel.COMPort.Open();
-        }
+          // Dispose
+          try
+          {
+            _gptModel.COMPort.Dispose();
+            LogInformation($"[{_gptModel.Name}] COM-порт {portName} уничтожен (Dispose).", isDeviceLog: true);
+          }
+          catch (Exception ex)
+          {
+            LogWarning($"[{_gptModel.Name}] Ошибка при Dispose(): {ex.Message}", isDeviceLog: true);
+          }
 
-        LogInformation($"Успешно подключено к устройству {_gptModel.Name} через COM-порт {_gptModel.COMPort.PortName}");
-      }
-      catch (UnauthorizedAccessException ex)
-      {
-        LogError($"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}: {ex.Message}");
-        return (false, $"Ошибка доступа к COM-порту {_gptModel.COMPort.PortName}: {ex.Message}");
+
+
+          // Обнуляем ссылки
+          _gptModel.DeviceProtocol = null;
+          _gptModel.COMPort = null;
+        }
       }
       catch (Exception ex)
       {
-        LogError($"Ошибка при подключении к устройству {_gptModel.Name}: {ex.Message}");
-        return (false, $"Ошибка при подключении к устройству {_gptModel.Name}: {ex.Message}");
-        throw;
+        LogException($"Ошибка отключения устройства {_gptModel?.Name}", ex, isDeviceLog: true);
+        return false;
       }
+    }
 
+    // Уничтожаем модель
+    _gptModel = null;
+
+    // Форсируем уборку мусора
+    GC.Collect();
+    GC.WaitForPendingFinalizers();
+
+    // Даем драйверу время освободить хендлы
+    Task.Delay(1000).GetAwaiter().GetResult();
+
+    LogInformation($"[DisconnectAsync] Устройство уничтожено, COM-порт освобожден.", isDeviceLog: true);
+    return true;
+  }
+
+  #region helpers
+  [DllImport("kernel32.dll", SetLastError = true)]
+  private static extern bool CancelIoEx(SafeFileHandle hFile, IntPtr lpOverlapped);
+
+  private SafeFileHandle GetSafeHandle(SerialPort port)
+  {
+    var baseStream = port.BaseStream;
+    var field = baseStream.GetType().GetField("_handle", BindingFlags.NonPublic | BindingFlags.Instance);
+    return field?.GetValue(baseStream) as SafeFileHandle;
+  }
+  #endregion
+
+
+  /// <summary>
+  /// Асинхронно инициализирует устройство GPT79904.
+  /// Выполняет проверку COM-порта и опрос команды *IDN?.
+  /// </summary>
+  public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
+  {
+    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    {
       return (true, string.Empty);
     }
 
-    /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    using (await OperationLock.LockAsync())
     {
-      if (await GetIsIdleModeEnabled())
+      using (await _gptModel.COMPort.UsePort(_gptModel.Name, messageService))
       {
-        return true;
-      }
+        var isValid = CheckData();
+        if (!isValid.Connect)
+          return isValid;
 
-      if (_gptModel.COMPort == null)
-      {
-        return true;
-      }
-
-      try
-      {
-        if (_gptModel.COMPort.IsOpen)
+        try
         {
-          _gptModel.COMPort.Close();
-        }
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при отключении от устройства {_gptModel.Name}: {ex.Message}");
-      }
-
-      return true;
-    }
-
-    /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
-    {
-      if (await GetIsIdleModeEnabled())
-      {
-        return (true, "Включен холостой режим");
-      }
-
-      try
-      {
-        LogInformation("Открываем порт...");
-        if (_gptModel.COMPort != null)
-        {
-          using (var port = _gptModel.COMPort)
+          string idn = string.Empty;
+          for (int i = 0; i < 2; i++)
           {
-            await Task.Run(() => port.Open());
-            LogInformation("Порт открыт");
-
-            string query = $"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%({_gptModel.COMPort})%'";
-            using (var searcher = new ManagementObjectSearcher(query))
+            idn = await _gptModel.DeviceProtocol.QueryAsync("*IDN?", responseDelay: 50, timeout: 1000);
+            if (!string.IsNullOrWhiteSpace(idn))
             {
-              var results = await Task.Run(() => searcher.Get().Cast<ManagementObject>().ToList());
-
-              foreach (var obj in results)
-              {
-                string deviceID = obj["DeviceID"]?.ToString() ?? string.Empty;
-                if (deviceID.Contains(_gptModel.VID) && deviceID.Contains(_gptModel.PID))
-                {
-                  LogInformation($"Устройство найдено по VID/PID: {_gptModel.VID}, {_gptModel.PID}");
-                  return (true, string.Empty);
-                }
-              }
+              LogInformation($"[{_gptModel.Name}] Ответ на *IDN?: {idn}", isDeviceLog: true);
             }
 
-            LogError("Устройство не найдено по VID/PID");
-            return (false, "Устройство не найдено по VID/PID");
+            if (idn.Contains("GPT"))
+              return (true, string.Empty);
+          }
+
+          if (string.IsNullOrEmpty(idn))
+          {
+            return (false, $"Устройство не ответило на команду инициализации.");
+          }
+          else
+          {
+            return (false, $"Неожиданный ответ от устройства: {idn}");
           }
         }
-
-        return (false, "COM порт не иинициализирован");
-      }
-      catch (UnauthorizedAccessException ex)
-      {
-        LogError($"Ошибка доступа к порту: {ex.Message}");
-        return (false, $"Ошибка доступа к порту: {ex.Message}");
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка при проверке соединения: {ex.Message}");
-        return (false, $"Ошибка при проверке соединения: {ex.Message}");
+        catch (Exception ex)
+        {
+          LogWarning($"[{_gptModel.Name}] Ошибка при опросе *IDN?: {ex.Message}", isDeviceLog: true);
+          return (false, ex.Message);
+        }
       }
     }
+  }
 
-    /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+
+
+  /// <summary>
+  /// Асинхронно выполняет сброс устройства GPT79904 (*RST, *CLS).
+  /// </summary>
+  public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
+  {
+    if (await ExecutionConfig.GetIsIdleModeEnabled())
     {
       return true;
     }
+
+    using (await OperationLock.LockAsync())
+    {
+      try
+      {
+        await _gptModel.DeviceProtocol.QueryAsync("*RST");
+        await _gptModel.DeviceProtocol.QueryAsync("*CLS");
+        IsReset?.Invoke();
+
+        return true;
+      }
+      catch (Exception ex)
+      {
+        LogException($"Ошибка сброса устройства {_gptModel?.Name}", ex, isDeviceLog: true);
+        return false;
+      }
+    }
+  }
+
+  /// <summary>
+  /// Проверяет, инициализированы ли COM-порт и протокол устройства.
+  /// </summary>
+  /// <returns>
+  /// Кортеж: <c>true</c>, если COM-порт и протокол устройства заданы; 
+  /// иначе <c>false</c> и сообщение об ошибке.
+  /// </returns>
+  private (bool Connect, string Answer) CheckData()
+  {
+    bool isValid = _gptModel.COMPort != null && _gptModel.DeviceProtocol != null;
+    var msg = string.Empty;
+
+    if (isValid)
+    {
+      msg = $"[{_gptModel.Name}] Данные инициализированы: COM-порт и протокол доступны.";
+      LogInformation(msg, isDeviceLog: true);
+    }
+    else
+    {
+      msg = $"[{_gptModel.Name}] COM-порт или протокол устройства не инициализированы.";
+      LogWarning(msg, isDeviceLog: true);
+    }
+
+    return (isValid, msg);
   }
 }

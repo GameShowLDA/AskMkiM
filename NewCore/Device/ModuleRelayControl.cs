@@ -1,8 +1,8 @@
-﻿using NewCore.Base.Device;
-using NewCore.Base.Function.ModuleRelayControl;
-using NewCore.Base.Interface.Main;
-using NewCore.Enum;
-using NewCore.Function.ModuleRelayControl;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+using NewCore.Base.Device;
+using NewCore.Function.ModuleRelayControl.SelfCheck;
+using NewCore.FunctionAdapters.ModuleRelayControl;
 
 namespace NewCore.Device
 {
@@ -16,12 +16,13 @@ namespace NewCore.Device
     /// </summary>
     public ModuleRelayControl()
     {
-      BusManager = new BusManager(this);
-      MeterManager = new MeterManager(this);
-      PointManager = new PointManager(this);
-      ConnectableManager = new StateManager(this);
+      ConnectableManager = new StateManagerAdapter(this);
+      BusManager = new BusManagerAdapter(this);
+      MeterManager = new MeterManagerAdapter(this);
+      PointManager = new PointManagerAdapter(this);
+      SelfTestManager = new SelfTestManager(this);
 
-      DeviceType = DeviceEnum.DeviceType.RelaySwitchModule;
+      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";
       Description = "Добавить описание сюда";
       PointCount = 350;
@@ -45,5 +46,6 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IPointManager PointManager { get; set; }
+    public ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }
 }

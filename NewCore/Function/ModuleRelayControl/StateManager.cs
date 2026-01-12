@@ -1,11 +1,8 @@
-﻿using System.Net;
-using NewCore.Base.Device;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Base.DeviceResponses;
-using NewCore.Base.Function.ModuleRelayControl;
-using NewCore.Base.Interface.Main;
 using NewCore.Communication;
-using NewCore.Device;
-using static AppConfiguration.Execution.ExecutionConfig;
 
 namespace NewCore.Function.ModuleRelayControl
 {
@@ -19,18 +16,25 @@ namespace NewCore.Function.ModuleRelayControl
     /// </summary>
     private readonly Device.ModuleRelayControl _moduleRelayControl;
 
+    public event Action DeviceDisponce;
+    public event Action IsReset;
+
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="StateManager"/>.
     /// </summary>
     /// <param name="moduleRelayControl">Экземпляр интерфейса модуля реле.</param>
     public StateManager(Device.ModuleRelayControl moduleRelayControl) => _moduleRelayControl = moduleRelayControl;
 
-    /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync()
+    public StateManager()
     {
-      if (await GetIsIdleModeEnabled())
+    }
+
+    /// <inheritdoc />
+    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
+    {
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, "Включен холостой режим");
+        return (true, String.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(1, 0, 0, 0);
@@ -71,26 +75,55 @@ namespace NewCore.Function.ModuleRelayControl
     }
 
     /// <inheritdoc />
-    public async Task<bool> ResetAsync()
+    public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (await GetIsIdleModeEnabled())
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
 
-      DeviceCommand cmd = new DeviceCommand(2, 0, 0, 0);
-      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), 1000);
-      return result == "2.0.1";
+
+      DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
+      string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+
+      BaseResponse baseResponse = BaseResponse.FromJson(result);
+      if (baseResponse != null)
+      {
+        if (baseResponse.NumberChassis == _moduleRelayControl.NumberChassis &&
+      baseResponse.NumberDevice == _moduleRelayControl.Number && baseResponse.Answer.Contains("2.0"))
+        {
+          IsReset?.Invoke();
+          return true;
+        }
+        else
+        {
+          string errorMessage = string.Empty;
+
+          if (baseResponse.NumberChassis != _moduleRelayControl.NumberChassis)
+          {
+            errorMessage += $"Несовпадение по NumberChassis: ожидается {_moduleRelayControl.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+          }
+
+          if (baseResponse.NumberDevice != _moduleRelayControl.Number)
+          {
+            errorMessage += $"Несовпадение по NumberDevice: ожидается {_moduleRelayControl.Number}, получено {baseResponse.NumberDevice}.";
+          }
+
+          return false;
+        }
+      }
+
+      return false;
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> ConnectAsync()
+    public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
       return await InitializeAsync();
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectAsync()
+    public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
       return await ResetAsync();
     }

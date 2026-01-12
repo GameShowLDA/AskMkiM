@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Утилита "Режим ИЕ"</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../../../../../content.css">
+</head>
+
+<body>
+    <main class="page-content">
+
+        <h2>Утилита "Режим ИЕ"</h2>
+
+        <p>
+            Утилита измеряет ёмкость конденсатора.
+        </p>
+        <ul>
+            <li>
+                <strong>"Начальная точка a.b.c"</strong> и
+                <strong>"Конечная точка a.b.c"</strong> - входы АСК для подключения 
+                эталонной емкости;
+            </li>
+            <li>
+                <strong>"Электрический параметр"</strong> - задание нужной эталонной ёмкости (в нФ).
+            </li>
+        </ul>
+        <figure>
+            <img src="drex_part14.2.2_custom.png"
+                 width="256" height="391"
+                 alt="Управление режимом ИЕ">
+            <figcaption>Рисунок 1 - Управление режимом ИЕ</figcaption>
+        </figure>
+        <br>
+        <p>
+            После ввода параметров меню автоматически выполняются следующие действия:
+        </p>
+        <ul>
+            <li>
+                Начальная заданная точка подключается к шине A1;
+            </li>
+            <li>
+                Конечная заданная точка подключается к шине B1;
+            </li>
+            <li>
+                Производится измерение;
+            </li>
+            <li>
+                <u>В протокол выводится сообщения вида</u>:<br>
+                $TST1 Cд.б=1мкФ+-5.00%  Cизм=1.0000мкФ  Погр=+0.00%<br>
+                $TST1  Измерений:1 Все норма  ПОГРmin=0  ПОГРmax=+0.00%
+            </li>
+        </ul>
+    </main>
+</body>
+</html>

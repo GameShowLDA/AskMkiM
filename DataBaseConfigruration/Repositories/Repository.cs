@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DataBaseConfiguration.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration.Repositories
 {

@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="UI.Controls.TranslatorItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.TextEditor"
+             xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
+             xmlns:DefaultGUI="clr-namespace:UI.Components" 
+             xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
+             xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <!-- Вертикальный режим -->
+        <Grid x:Name="VerticalPanel" Grid.Column="1" Visibility="Visible" Grid.Row="2" Cursor="">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" MinHeight="30"/>
+                <!-- Заголовок -->
+                <RowDefinition Height="0.7*" MinHeight="30"/>
+                <!-- Редакторы (split) -->
+                <RowDefinition Height="5"/>
+                <!-- Сплиттер -->
+                <RowDefinition Height="Auto" MinHeight="50"/>
+                <!-- Окно ошибок -->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="30"/>
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="30" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая панель -->
+            <Border Grid.Row="0" Grid.Column="0" 
+                    BorderThickness="0,0,0,1"
+                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
+                <TextBlock 
+                    x:Name="FirstFileName"
+                    Text="Сравнение файлов"
+                    Margin="10,5"
+                    FontWeight="SemiBold"
+                    FontSize="14"
+                    Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" 
+                    TextWrapping="Wrap"/>
+            </Border>
+
+            <Grid Grid.Column="0" Grid.Row="1"  x:Name="LeftBox" >
+                <Controls:TextEditorUI />
+            </Grid>
+
+
+            <GridSplitter Grid.Column="1" Grid.Row="1" Background="{StaticResource RedColorSolidColorBrush}" 
+               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+
+            <Border Grid.Row="0" Grid.Column="2" 
+                 BorderThickness="0,0,0,1"
+                 Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
+
+                <TextBlock 
+                     x:Name="SecondFileName"
+                     Text="Сравнение файлов"
+                     Margin="10,5"
+                     FontWeight="SemiBold"
+                     FontSize="14"
+                     Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Stretch" 
+                     TextWrapping="Wrap"/>
+            </Border>
+
+
+            <Grid Grid.Column="2" Grid.Row="1"  x:Name="RightBox" >
+                <Controls:TextEditorUI />
+            </Grid>
+
+            <GridSplitter  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+               Height="5"
+               Background="{StaticResource RedColorSolidColorBrush}"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               ResizeDirection="Rows"/>
+
+            <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <ErrorList:ErrorListControl Grid.Row="1" x:Name="ErrorListBoxVertical"/>
+            </Grid>
+        </Grid>
+
+
+    </Grid>
+</UserControl>

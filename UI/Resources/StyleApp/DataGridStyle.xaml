@@ -1,0 +1,74 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="DataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="GridLinesVisibility" Value="All"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource SecondarySolidColorBrush}"/>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="Padding" Value="7"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0.5"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="DataGridCell">
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="Background" Value="{DynamicResource PrimarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Padding="{TemplateBinding Padding}" 
+                    BorderBrush="{DynamicResource PrimarySolidColorBrush}"
+                    BorderThickness="0"
+                    Background="{DynamicResource PrimarySolidColorBrush}">
+                        <ContentPresenter VerticalAlignment="Bottom"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#1f242b"/>
+                <Setter Property="Foreground" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
+                <Setter Property="Height" Value="30"/>
+                <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="False">
+                <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="DataGridRow" >
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Trigger>
+
+            <Trigger Property="IsSelected" Value="False">
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

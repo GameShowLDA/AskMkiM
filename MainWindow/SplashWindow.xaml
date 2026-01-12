@@ -9,7 +9,7 @@
         ShowInTaskbar="False"
         Background="Transparent"
         Topmost="True">
-    
+
     <Window.Resources>
         <Storyboard x:Key="LoadingAnimation">
             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
@@ -17,7 +17,7 @@
         </Storyboard>
     </Window.Resources>
 
-    <Border Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="30">
+    <Border Background="#303843" CornerRadius="30">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
 
             <!-- Логотип -->
@@ -27,7 +27,7 @@
                    UseLayoutRounding="True"/>
 
             <!-- Название системы -->
-            <TextBlock Text="АСК-МКИ-М" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ActiveBorderSolidColorBrush}"
+            <TextBlock Text="АСК-МКИ-М" FontSize="28" FontWeight="Bold" Foreground="#1ca3e9"
                        TextAlignment="Center">
                 <TextBlock.Effect>
                     <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="0"/>

@@ -1,9 +1,11 @@
-﻿using System.IO.Ports;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Base.Device;
-using NewCore.Base.Function.Breakdown;
-using NewCore.Base.Interface.Main;
-using NewCore.Enum;
-using NewCore.Function.GPT;
+using NewCore.FunctionAdapters.GPT;
+using System.IO.Ports;
+using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Device
 {
@@ -12,6 +14,7 @@ namespace NewCore.Device
   /// </summary>
   public class GPT79904 : DeviceWithCOM, IBreakdownTester
   {
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="GPT79904"/>.
     /// </summary>
@@ -23,13 +26,19 @@ namespace NewCore.Device
       Parity = Parity.None;
       DeviceClass = GetType().FullName;
 
-      DeviceType = DeviceEnum.DeviceType.BreakdownTester;
+      DeviceType = DeviceType.BreakdownTester;
+      MaxVoltage = 700;
+      IRMinVoltage = 50;
 
-      AcwManger = new AcwMode(this);
-      DcwManger = new DcwMode(this);
-      IrManger = new IrMode(this);
-      SystemManger = new SystemSettings(this);
-      ConnectableManager = new ConnectableManager(this);
+      AcwManger = new AcwModeAdapter(this);
+      DcwManger = new DcwModeAdapter(this);
+      IrManger = new IrModeAdapter(this);
+      SystemManger = new SystemSettingsAdapter(this);
+      ConnectableManager = new ConnectableManagerAdapter(this);
+      SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
+      LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
+
+      Mode = BreakdownTypeMode.None;
     }
 
     /// <inheritdoc />
@@ -52,5 +61,40 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public ISystemSettingsBreakdown SystemManger { get; set; }
+
+    /// <inheritdoc />
+    public int MaxVoltage { get; set; }
+
+    /// <inheritdoc />
+    public int IRMinVoltage { get; set; }
+
+    /// <inheritdoc />
+    public ISelfTestCheckerBreakdownTester SelfTestManager { get; set; }
+
+    /// <summary>
+    /// Активный режим устройства.
+    /// </summary>
+    public BreakdownTypeMode Mode
+    {
+      get => _mode;
+      set
+      {
+        if (_mode == value)
+          return;
+
+        LogInformation($"[{GetType().Name}] Переключение режима: {_mode} → {value}", isDeviceLog: true);
+
+        if (value != BreakdownTypeMode.ACW)
+          AcwManger.Config.ResetConfiguration();
+        if (value != BreakdownTypeMode.DCW)
+          DcwManger.Config.ResetConfiguration();
+        if (value != BreakdownTypeMode.IR)
+          IrManger.Config.ResetConfiguration();
+
+        _mode = value;
+      }
+    }
+
+    private BreakdownTypeMode _mode { get; set; }
   }
 }

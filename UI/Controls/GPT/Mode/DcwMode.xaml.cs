@@ -1,7 +1,6 @@
-﻿using System.Windows;
+﻿using Message;
+using System.Windows;
 using System.Windows.Controls;
-using NewCore.Base.Interface.Main;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace UI.Controls.GPT.Mode
 {
@@ -18,8 +17,6 @@ namespace UI.Controls.GPT.Mode
     public DcwMode()
     {
       InitializeComponent();
-      GPTPunchControl.ModelGPT.DcwManger.SetModeAsync().ConfigureAwait(true);
-      LoadConfigurationAsync().ConfigureAwait(true); // Загружаем конфигурацию при инициализации
     }
 
     /// <summary>
@@ -30,7 +27,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.DcwManger.ReadConfigurationAsync();
+        var systemData = await GPTPunchControl.ModelGPT.DcwManger.Config.ReadConfigurationAsync();
 
         VoltageSlider.Value = systemData.Voltage;
         ChiSlider.Value = systemData.HighCurrentLimit;
@@ -38,6 +35,7 @@ namespace UI.Controls.GPT.Mode
         TimeSlider.Value = systemData.TestTime;
         RefSlider.Value = systemData.Offset;
         ArcCurrentSlider.Value = systemData.ArcCurrent;
+        RampSlider.Value = systemData.RampTime;
 
         LastReadTimeText.Text = $"Дата и время: {DateTime.Now}";
         VoltageValueText.Text = $"Напряжение DCW: {systemData.Voltage:F3} кВ";
@@ -49,82 +47,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-      }
-    }
-
-    /// <summary>
-    /// Обрабатывает изменение значения слайдера для напряжения.
-    /// Округляет значение и отправляет новое значение напряжения на устройство.
-    /// </summary>
-    /// <param name="sender">Источник события (слайдер).</param>
-    /// <param name="e">Данные события изменения значения слайдера.</param>
-    private async void VoltageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-      double voltage = Math.Round(VoltageSlider.Value, 3);
-      await GPTPunchControl.ModelGPT.DcwManger.SetVoltageAsync(voltage);
-    }
-
-    /// <summary>
-    /// Обрабатывает изменение значения слайдера для высокого предела тока.
-    /// Округляет значение и отправляет новое значение высокого предела тока на устройство.
-    /// </summary>
-    /// <param name="sender">Источник события (слайдер).</param>
-    /// <param name="e">Данные события изменения значения слайдера.</param>
-    private async void ChiSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-      double chi = Math.Round(ChiSlider.Value, 3);
-      await GPTPunchControl.ModelGPT.DcwManger.SetHighCurrentLimitAsync(chi);
-    }
-
-    /// <summary>
-    /// Обрабатывает изменение значения слайдера для низкого предела тока.
-    /// Округляет значение и отправляет новое значение низкого предела тока на устройство.
-    /// </summary>
-    /// <param name="sender">Источник события (слайдер).</param>
-    /// <param name="e">Данные события изменения значения слайдера.</param>
-    private async void CloSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-      double clo = Math.Round(CloSlider.Value, 3);
-      await GPTPunchControl.ModelGPT.DcwManger.SetLowCurrentLimitAsync(clo);
-    }
-
-    /// <summary>
-    /// Обрабатывает изменение значения слайдера для времени теста.
-    /// Округляет значение и отправляет новое значение времени теста на устройство.
-    /// </summary>
-    /// <param name="sender">Источник события (слайдер).</param>
-    /// <param name="e">Данные события изменения значения слайдера.</param>
-    private async void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-      double time = Math.Round(TimeSlider.Value, 1);
-      await GPTPunchControl.ModelGPT.DcwManger.SetTestTimeAsync(time);
-    }
-
-    /// <summary>
-    /// Обрабатывает изменение значения слайдера для смещения.
-    /// Округляет значение и отправляет новое значение смещения на устройство.
-    /// </summary>
-    /// <param name="sender">Источник события (слайдер).</param>
-    /// <param name="e">Данные события изменения значения слайдера.</param>
-    private async void RefSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-      double refValue = Math.Round(RefSlider.Value, 3);
-      await GPTPunchControl.ModelGPT.DcwManger.SetOffsetAsync(refValue);
-    }
-
-    /// <summary>
-    /// Обрабатывает изменение значения слайдера для тока дуги.
-    /// Округляет значение и отправляет новое значение тока дуги на устройство.
-    /// </summary>
-    /// <param name="sender">Источник события (слайдер).</param>
-    /// <param name="e">Данные события изменения значения слайдера.</param>
-    private async void ArcCurrentSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-      if (ArcCurrentSlider != null)
-      {
-        double arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
-        await GPTPunchControl.ModelGPT.DcwManger.SetArcCurrentAsync(arcCurrent);
+        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -138,7 +61,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.DcwManger.ReadConfigurationAsync();
+        var systemData = await GPTPunchControl.ModelGPT.DcwManger.Config.ReadConfigurationAsync();
         LastReadTimeText.Text = $"Дата и время: {DateTime.Now}";
         VoltageValueText.Text = $"Напряжение ACW: {systemData.Voltage:F3} кВ";
         ChiValueText.Text = $"Высокий предел тока ACW: {systemData.HighCurrentLimit:F3} мА";
@@ -149,7 +72,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -163,13 +86,61 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        double result = await GPTPunchControl.ModelGPT.DcwManger.MeasureCurrentAsync();
+        double result = (await GPTPunchControl.ModelGPT.DcwManger.Measure.MeasureAsync()).value;
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBoxCustom.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
+    }
+
+    private bool connect = false;
+    private async void Button_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      if (!connect)
+      {
+        var mode = await GPTPunchControl.ModelGPT.DcwManger.Mode.SetModeAsync();
+        if (mode.Success)
+        {
+          PanelManagment.Visibility = Visibility.Visible;
+          await LoadConfigurationAsync();
+          connect = true;
+          ConnectButton.Content = "Отключить режим DCW";
+        }
+      }
+      else
+      {
+        PanelManagment.Visibility = Visibility.Collapsed;
+        ConnectButton.Content = "Включить режим DCW";
+        connect = false;
+      }
+    }
+
+    private async void Button_PreviewMouseDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      // Сначала собираем значения с UI строго в UI-потоке
+      double voltage = 0, chi = 0, clo = 0, time = 0, timeRamp = 0, refValue = 0, arcCurrent = 0;
+
+      Dispatcher.Invoke(() =>
+      {
+        voltage = Math.Round(VoltageSlider.Value, 3);
+        chi = Math.Round(ChiSlider.Value, 3);
+        clo = Math.Round(CloSlider.Value, 3);
+        time = Math.Round(TimeSlider.Value, 1);
+        timeRamp = Math.Round(RampSlider.Value, 1);
+        refValue = Math.Round(RefSlider.Value, 3);
+        arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
+      });
+
+      await GPTPunchControl.ModelGPT.DcwManger.Voltage.SetVoltageAsync(voltage).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.DcwManger.Time.SetTestTimeAsync(time).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.DcwManger.Time.SetRampTimeAsync(timeRamp).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.DcwManger.Offset.SetOffsetAsync(refValue).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.DcwManger.ArcCurrent.SetArcCurrentAsync(arcCurrent).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(clo).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(chi).ConfigureAwait(false);
+
     }
   }
 }
