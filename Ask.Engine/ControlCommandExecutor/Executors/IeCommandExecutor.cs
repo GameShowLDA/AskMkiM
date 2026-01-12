@@ -51,7 +51,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             .ToList()
             ?? new List<PointModel>();
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+      }
+
       var modules = points
          .Select(EquipmentService.GetModuleByPoint)
          .Where(m => m != null)

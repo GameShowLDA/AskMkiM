@@ -57,7 +57,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
                  ?? new List<PointModel>();
       //var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+      }
 
       var modules = points
         .Select(EquipmentService.GetModuleByPoint)
@@ -201,7 +205,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка пробойной установки"));
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
+      }
 
       if (voltageType == VoltageEnum.Type.ACW)
       {

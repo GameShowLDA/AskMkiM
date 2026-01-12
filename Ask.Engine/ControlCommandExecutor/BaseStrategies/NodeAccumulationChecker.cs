@@ -61,7 +61,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
 
-
         foreach (var point in points)
         {
           await DeviceManager.ConnectPointToBusAAsync(point, messageService);
