@@ -62,11 +62,8 @@ namespace Ask.Engine.Tests.NodeMethod.PI
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, numer);
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Mode.SetModeAsync(messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetModeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetVoltageFailed(name, chassis, numer);
+        await breakDown.DcwManger.Mode.SetModeAsync(messageService);
+        await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
           throw DcwExceptionFactory.SetTestTimeFailed(name, chassis, numer);

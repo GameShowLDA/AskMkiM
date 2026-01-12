@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
+using DataBaseConfiguration.Migrations;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.PI
@@ -65,11 +66,8 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, number);
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Mode.SetModeAsync(messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetModeFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetVoltageFailed(name, chassis, number);
+        await breakDown.DcwManger.Mode.SetModeAsync(messageService);
+        await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
           throw DcwExceptionFactory.SetTestTimeFailed(name, chassis, number);
