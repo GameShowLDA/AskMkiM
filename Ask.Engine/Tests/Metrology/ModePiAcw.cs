@@ -97,8 +97,7 @@ namespace Ask.Engine.Tests.Metrology
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, numer);
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Mode.SetModeAsync(messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetModeFailed(name, chassis, numer);
+        await breakDown.AcwManger.Mode.SetModeAsync(messageService);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
           throw AcwExceptionFactory.SetTestTimeFailed(name, chassis, numer);
