@@ -339,4 +339,19 @@
   <data name="menu.admin" xml:space="preserve">
     <value>Администратор</value>
   </data>
+  <data name="input.bus.group.title" xml:space="preserve">
+    <value>Группа шин для проверки</value>
+  </data>
+  <data name="input.bus.group.ab1" xml:space="preserve">
+    <value>Шины AB1</value>
+  </data>
+  <data name="input.bus.group.ab2" xml:space="preserve">
+    <value>Шины AB2</value>
+  </data>
+  <data name="input.bus.group.ab3" xml:space="preserve">
+    <value>Шины AB3</value>
+  </data>
+  <data name="input.bus.group.ab4" xml:space="preserve">
+    <value>Шины AB4</value>
+  </data>
 </root>
