@@ -68,15 +68,9 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
 
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetTestTimeFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetRampTimeFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetHighLimitFailed(name, chassis, number);
+        await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService);
       }
 
       /// <inheritdoc />

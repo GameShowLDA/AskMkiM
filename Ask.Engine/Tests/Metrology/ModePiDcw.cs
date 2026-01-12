@@ -97,23 +97,12 @@ namespace Ask.Engine.Tests.Metrology
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
           throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Mode.SetModeAsync(messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetModeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetTestTimeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetRampTimeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetHighLimitFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetLowLimitFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService)).Success, messageService))
-          throw DcwExceptionFactory.SetVoltageFailed(name, chassis, numer);
+        await breakDown.DcwManger.Mode.SetModeAsync(messageService);
+        await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
+        await breakDown.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);
+        await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
       }
 
       /// <inheritdoc />

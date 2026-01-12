@@ -165,25 +165,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Mode.SetModeAsync(userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetModeFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetTestTimeFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.ResistanceLimits.SetLowResistanceLimitAsync(resistance, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetLowLimitFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Voltage.SetVoltageAsync(voltage, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-      }
+      await breakDown.IrManger.Mode.SetModeAsync(userMessageService);
+      await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService);
+      await breakDown.IrManger.ResistanceLimits.SetLowResistanceLimitAsync(resistance, userMessageService);
+      await breakDown.IrManger.Voltage.SetVoltageAsync(voltage, userMessageService);
     }
 
     /// <summary>
