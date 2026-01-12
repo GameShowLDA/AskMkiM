@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.DeviceBusCommutation;
@@ -27,7 +28,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectResistor(string number, IUserInteractionService? userMessageService = null)
     {
-      var result = await _resistorManager.ConnectResistor(number);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _resistorManager.ConnectResistor(number), userMessageService);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение резистора", $"№{number}", result, 1, userMessageService);
 
@@ -40,7 +41,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectResistor(string number, IUserInteractionService? userMessageService = null)
     {
-      var result = await _resistorManager.DisconnectResistor(number);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _resistorManager.DisconnectResistor(number), userMessageService);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение резистора", $"№{number}", result, 1, userMessageService);
 

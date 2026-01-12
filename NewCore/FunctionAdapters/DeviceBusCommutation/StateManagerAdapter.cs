@@ -54,7 +54,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         }
 
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       if (!connect)
       {
@@ -75,7 +75,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
-      var result = await _stateManager.DisconnectAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _stateManager.DisconnectAsync(), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {

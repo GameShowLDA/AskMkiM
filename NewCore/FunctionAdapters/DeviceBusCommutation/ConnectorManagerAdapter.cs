@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -66,7 +67,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       if (IsBreadownConnect)
         return true;
 
-      var result = await _connectorManager.ConnectBreakdownTester();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.ConnectBreakdownTester(), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -75,7 +76,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
 
       if (!result)
       {
-        throw ConnectorExceptionFactory.ConnectFailed("пробойной установки");
+        throw ConnectorExceptionFactory.ConnectBreakdownFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
       }
       else
       {
@@ -91,7 +92,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       if (!IsBreadownConnect)
         return true;
 
-      var result = await _connectorManager.DisconnectBreakdownTester();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.DisconnectBreakdownTester(), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -115,7 +116,6 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     {
       var description = $"мультиметра к шине [{bus}]";
 
-      // Проверка: подключен ли мультиметр уже к этой шине
       if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && isConnected)
         return true;
 
@@ -128,7 +128,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         deviceBusStatus[(DeviceType.Multimeter, oldBus)] = false;
       }
 
-      var result = await _connectorManager.ConnectMultimeter(bus);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.ConnectMultimeter(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -136,7 +136,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       }
 
       if (!result)
-        throw ConnectorExceptionFactory.ConnectFailed(description);
+        throw ConnectorExceptionFactory.ConnectMultiMeterFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
+
 
       deviceBusStatus[(DeviceType.Multimeter, bus)] = true;
       return result;
@@ -150,7 +151,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         return true;
 
       var description = $"мультиметра с шины [{bus}]";
-      var result = await _connectorManager.DisconnectMultimeter(bus);
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.DisconnectMultimeter(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -180,7 +182,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         deviceBusStatus[(DeviceType.PINT, oldBus)] = false;
       }
 
-      var result = await _connectorManager.ConnectPINT(bus);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.ConnectPINT(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -201,7 +203,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         return true;
 
       var description = $"ПИНТ с шины [{bus}]";
-      var result = await _connectorManager.DisconnectPINT(bus);
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.DisconnectPINT(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -218,7 +221,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> ConnectAllBuses(IUserInteractionService? userMessageService = null)
     {
       var description = $"(AB1, AB2, AB3, AB4)";
-      var result = await _connectorManager.ConnectAllBuses();
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.ConnectAllBuses(), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -235,7 +239,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectAllBuses(IUserInteractionService? userMessageService = null)
     {
       var description = $"(AB1, AB2, AB3, AB4)";
-      var result = await _connectorManager.DisconnectAllBuses();
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.DisconnectAllBuses(), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -250,7 +255,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
 
     public async Task<bool> GetSuccesCurrentMode(SwitchingDeviceTypeConnector mode, IUserInteractionService? userMessageService = null)
     {
-      var result = await _connectorManager.GetSuccesCurrentMode(mode);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.GetSuccesCurrentMode(mode), userMessageService, deviceTask: true);
       return result;
     }
 
@@ -259,7 +264,8 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       if (IsBreakdownTesterAndMultimeter)
         return true;
 
-      var result = await _connectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService), userMessageService, deviceTask: true);
+
       if (result)
       {
         IsBreakdownTesterAndMultimeter = true;
@@ -272,11 +278,13 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       if (!IsBreakdownTesterAndMultimeter)
         return true;
 
-      var result = await _connectorManager.DisconnectBreakdownTesterAndMultimeter(userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.DisconnectBreakdownTesterAndMultimeter(userMessageService), userMessageService, deviceTask: true);
+
       if (result)
       {
         IsBreakdownTesterAndMultimeter = false;
       }
+
       return result;
     }
   }

@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.DeviceBusCommutation;
@@ -27,7 +28,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
-      var result = await _relayManager.ConnectRelay(numberRelay);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.ConnectRelay(numberRelay), userMessageService);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", result, 1, userMessageService);
 
@@ -40,7 +41,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
-      var result = await _relayManager.DisconnectRelay(numberRelay);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.DisconnectRelay(numberRelay), userMessageService);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", result, 1, userMessageService);
 
