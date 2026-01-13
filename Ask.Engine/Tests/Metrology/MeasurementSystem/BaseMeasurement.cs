@@ -416,11 +416,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       {
         if (modeDevice == MetrologicalDeviceType.Mint)
         {
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A1, userMessageService: protocolUI), protocolUI))
-            throw Ask.Core.Services.Errors.Device.ModuleVoltageCurrent.BusExceptionFactory.ConnectPositiveFailed(SwitchingBus.A1.ToString());
-
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => mint.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B1, userMessageService: protocolUI), protocolUI))
-            throw Ask.Core.Services.Errors.Device.ModuleVoltageCurrent.BusExceptionFactory.ConnectNegativeFailed(SwitchingBus.A1.ToString());
+          await mint.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A1, userMessageService: protocolUI);
+          await mint.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B1, userMessageService: protocolUI);
         }
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, protocolUI), protocolUI))
