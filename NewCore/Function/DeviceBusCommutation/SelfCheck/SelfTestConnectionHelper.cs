@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.UI;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 

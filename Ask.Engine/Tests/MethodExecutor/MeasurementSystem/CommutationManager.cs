@@ -1,7 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -40,8 +37,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         throw new InvalidOperationException("Коммутационное устройство или ППУ не найдены в списке устройств.");
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI), protocolUI))
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
+      await busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI);
 
       var relayModules = _devices.OfType<IRelaySwitchModule>().ToList();
 

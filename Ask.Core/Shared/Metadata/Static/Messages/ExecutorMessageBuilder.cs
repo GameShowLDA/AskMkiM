@@ -166,14 +166,14 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
         chains = string.Empty;
       }
 
-        if (higherLimit != -1)
-        {
-          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
-        }
-        else
-        {
-          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
-        }
+      if (higherLimit != -1)
+      {
+        return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
+      }
+      else
+      {
+        return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
       }
     }
   }
+}

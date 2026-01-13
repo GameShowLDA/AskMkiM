@@ -1,7 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -146,9 +143,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
       foreach (var (module, points, _) in groups)
       {
         cancellationToken.ThrowIfCancellationRequested();
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.ResetAsync(_protocolUI), _protocolUI))
-          throw ConnectionExceptionAdapter.ResetFailed(module.Name, module.NumberChassis, module.Number);
-
+        await module.ConnectableManager.ResetAsync(_protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: _protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: _protocolUI);
       }

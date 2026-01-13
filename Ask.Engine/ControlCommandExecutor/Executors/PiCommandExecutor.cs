@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -20,8 +17,6 @@ using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
-using System.Diagnostics.Metrics;
-using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -188,10 +183,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
     }
 
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double voltage, VoltageEnum.Type voltageType)
@@ -300,8 +292,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           {
             type = ShowMessageModel.MessageType.Error;
           }
-
-
 
           return type == ShowMessageModel.MessageType.Success ? true : false;
         }

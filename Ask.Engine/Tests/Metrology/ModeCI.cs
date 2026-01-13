@@ -1,6 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;

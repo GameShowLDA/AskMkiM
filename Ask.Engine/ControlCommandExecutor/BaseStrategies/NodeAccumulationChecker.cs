@@ -1,9 +1,6 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;

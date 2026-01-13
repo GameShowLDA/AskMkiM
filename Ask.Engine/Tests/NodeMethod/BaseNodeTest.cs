@@ -1,6 +1,4 @@
 ﻿using Ask.Core.Services.App;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -90,8 +88,7 @@ namespace Ask.Engine.Tests.NodeMethod
       var busSwitcher = Devices.OfType<ISwitchingDevice>().FirstOrDefault();
       var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI), protocolUI))
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
+      await busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI);
 
       foreach (var module in relayModules)
       {

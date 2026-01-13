@@ -89,7 +89,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _meterManager.GetMeterResponseAsync(), userMessageService, deviceTask: true);
 
       if (!result)
-      { 
+      {
         throw MeterExceptionFactory.MeterAnswerFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
       }
 

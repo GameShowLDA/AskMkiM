@@ -28,7 +28,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     public async Task<bool> ConnectBusToPositiveAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.ConnectBusToPositiveAsync(bus), userMessageService, deviceTask: true);
-      
+
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к +", bus.ToString(), result, 1, userMessageService);

@@ -8,9 +8,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
-using Newtonsoft.Json.Linq;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewCore.FunctionAdapters.GPT
 {

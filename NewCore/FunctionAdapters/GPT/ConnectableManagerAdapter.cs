@@ -5,7 +5,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
 using NewCore.Function.Helpers;
-using Newtonsoft.Json.Linq;
 
 namespace NewCore.FunctionAdapters.GPT
 {

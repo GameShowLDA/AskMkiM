@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Extensions;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
