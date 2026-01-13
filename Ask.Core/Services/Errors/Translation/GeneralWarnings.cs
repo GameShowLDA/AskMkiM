@@ -108,7 +108,7 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = WarningCode.Gen_KeyZR,
-      Description = $"В команде {command} количество разобщенных цепей было меньше одной. Ключ ЗР был добавлен по умолчанию.",
+      Description = $"В команде {command} нет точек для проверки на разобщение. Добавлен ключ ЗР.",
     };
   }
 }
