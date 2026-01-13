@@ -211,17 +211,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (continuityManager)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ContinuityManager.SetContinuityModeAsync(userMessageService), userMessageService))
-        {
-          throw ContinuityExceptionFactory.SetContinuityFailed(name, numberChassis, number);
-        }
+        await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
       }
       else
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ResistanceManager.SetResistanceModeAsync(userMessageService), userMessageService))
-        {
-          throw ResistanceExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
+        await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
       }
     }
 

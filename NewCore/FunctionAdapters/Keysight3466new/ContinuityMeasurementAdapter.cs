@@ -1,9 +1,13 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.Multimeter;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
+using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewCore.FunctionAdapters.Keysight3466new
 {
@@ -28,22 +32,19 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetContinuityModeAsync(IUserInteractionService? userMessageService = null)
     {
-      try
-      {
-        var result = await _measurement.SetContinuityModeAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _measurement.SetContinuityModeAsync(), userMessageService, deviceTask: true);
 
-        if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима прозвонки", string.Empty, true, 1, userMessageService);
-        }
-
-        return result;
-      }
-      catch (Exception ex)
+      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при установке режима прозвонки", ex.Message, false, 1, userMessageService);
-        throw;
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима прозвонки", string.Empty, true, 1, userMessageService);
       }
+
+      if (!result)
+      {
+        throw ContinuityExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
+      }
+
+      return result;
     }
 
     /// <inheritdoc />

@@ -82,10 +82,9 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
+        
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.AcVoltageManager.SetACVoltageModeAsync(messageService), messageService))
-          throw AcExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
+        await fastMeter.AcVoltageManager.SetACVoltageModeAsync(messageService);
       }
 
       /// <inheritdoc />

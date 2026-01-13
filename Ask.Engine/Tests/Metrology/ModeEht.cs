@@ -90,10 +90,7 @@ namespace Ask.Engine.Tests.Metrology
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => fastMeter.ResistanceManager.SetResistanceModeAsync(messageService), messageService))
-        {
-          throw ResistanceExceptionFactory.SetModeFailed(fastMeter.Name, fastMeter.NumberChassis, fastMeter.Number);
-        }
+        await fastMeter.ResistanceManager.SetResistanceModeAsync(messageService);
       }
 
       /// <inheritdoc />

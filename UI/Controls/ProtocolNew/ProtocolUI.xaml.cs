@@ -145,8 +145,6 @@ namespace UI.Controls.ProtocolNew
       loopButton.Visibility = Visibility.Collapsed;
       RepeatButtonElement.Visibility = Visibility.Collapsed;
 
-      UserMessageServiceProvider.Instance = this;
-
       SetupButtons();
 
       this.Loaded += (s, e) =>
