@@ -61,17 +61,10 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
         var chassis = breakDown.NumberChassis;
         var number = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
-          throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Mode.SetModeAsync(messageService)).Success, messageService))
-          throw IrExceptionFactory.SetModeFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService)).Success, messageService))
-          throw IrExceptionFactory.SetVoltageFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
-          throw IrExceptionFactory.SetTestTimeFailed(name, chassis, number);
+        await breakDown.ConnectableManager.InitializeAsync(messageService);
+        await breakDown.IrManger.Mode.SetModeAsync(messageService);
+        await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
+        await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
       }
 
       /// <inheritdoc />

@@ -1,9 +1,11 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
 using NewCore.Function.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace NewCore.FunctionAdapters.GPT
 {
@@ -30,7 +32,7 @@ namespace NewCore.FunctionAdapters.GPT
         return (true, string.Empty);
       }
 
-      var (result, answer) = await _manager.ConnectAsync(messageService);
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.ConnectAsync(messageService), messageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
@@ -52,7 +54,7 @@ namespace NewCore.FunctionAdapters.GPT
         return true;
       }
 
-      var result = await _manager.DisconnectAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.DisconnectAsync(), messageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
@@ -71,7 +73,8 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      var (result, answer) = await _manager.InitializeAsync(messageService);
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.InitializeAsync(messageService), messageService, deviceTask: true);
+
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
@@ -86,7 +89,7 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      var result = await _manager.ResetAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.ResetAsync(), messageService, deviceTask: true);
 
       if (!result)
         throw ConnectionExceptionAdapter.ResetFailed(_device.Name, _device.NumberChassis, _device.Number);

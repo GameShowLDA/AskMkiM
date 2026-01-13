@@ -1,4 +1,5 @@
-﻿using Message;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -141,11 +142,11 @@ namespace UI.Controls.GPT.Mode
         }
       });
 
-      await GPTPunchControl.ModelGPT.AcwManger.Voltage.SetVoltageAsync(voltage).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.AcwManger.Time.SetTestTimeAsync(time).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.AcwManger.Voltage.SetVoltageAsync(voltage);
+      await GPTPunchControl.ModelGPT.AcwManger.Time.SetTestTimeAsync(time);
       await GPTPunchControl.ModelGPT.AcwManger.Time.SetRampTimeAsync(timeRamp).ConfigureAwait(false);
       await GPTPunchControl.ModelGPT.AcwManger.FrequencyConfigurable.SetFrequencyAsync(frequency).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(chi).ConfigureAwait(false);
+      await GPTPunchControl.ModelGPT.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(chi);
       await GPTPunchControl.ModelGPT.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(clo).ConfigureAwait(false);
       await GPTPunchControl.ModelGPT.AcwManger.Offset.SetOffsetAsync(refValue).ConfigureAwait(false);
       await GPTPunchControl.ModelGPT.AcwManger.ArcCurrent.SetArcCurrentAsync(arcCurrent).ConfigureAwait(false);

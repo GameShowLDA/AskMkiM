@@ -28,7 +28,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectResistor(string number, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _resistorManager.ConnectResistor(number), userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _resistorManager.ConnectResistor(number), userMessageService, deviceTask: true);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение резистора", $"№{number}", result, 1, userMessageService);
 
@@ -41,7 +41,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectResistor(string number, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _resistorManager.DisconnectResistor(number), userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _resistorManager.DisconnectResistor(number), userMessageService, deviceTask: true);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение резистора", $"№{number}", result, 1, userMessageService);
 

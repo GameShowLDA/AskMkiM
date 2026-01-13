@@ -91,6 +91,7 @@ namespace TestConsole.GPT
       await breakDown.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(0);
       await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10);
       await breakDown.AcwManger.Voltage.SetVoltageAsync(100);
+
       stopwatch.Stop();
 
       Console.WriteLine($"Ticks: {stopwatch.ElapsedTicks}");

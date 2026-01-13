@@ -83,25 +83,10 @@ namespace NewCore.Function.GPT.SelfCheck
         int number = breakdownTester.Number;
 
         await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка для проверки пременного напряжения"));
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.AcwManger.Mode.SetModeAsync(userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.AcwManger.Time.SetTestTimeAsync(1, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetTestTimeFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetHighLimitFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-        }
+        await breakdownTester.AcwManger.Mode.SetModeAsync(userMessageService);
+        await breakdownTester.AcwManger.Time.SetTestTimeAsync(1, userMessageService);
+        await breakdownTester.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
+        await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService), userMessageService))
         {
@@ -114,10 +99,8 @@ namespace NewCore.Function.GPT.SelfCheck
         {
           await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка напряжения {i}В") { IndentLevel = 1 });
           await Task.Delay(50);
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.AcwManger.Voltage.SetVoltageAsync(i, userMessageService)).Success, userMessageService))
-          {
-            throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-          }
+
+          await breakdownTester.AcwManger.Voltage.SetVoltageAsync(i, userMessageService);
 
           await breakdownTester.AcwManger.Measure.ApplyVoltageAsync(userMessageService);
           await Task.Delay(150);
@@ -153,20 +136,9 @@ namespace NewCore.Function.GPT.SelfCheck
         throw IrExceptionFactory.SetModeFailed(name, numberChassis, number);
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.DcwManger.Time.SetTestTimeAsync(1, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetTestTimeFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetHighLimitFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-      }
+      await breakdownTester.DcwManger.Time.SetTestTimeAsync(1, userMessageService);
+      await breakdownTester.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
+      await breakdownTester.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService), userMessageService))
       {
@@ -179,11 +151,7 @@ namespace NewCore.Function.GPT.SelfCheck
       {
         await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка напряжения {i}В") { IndentLevel = 1 });
         await Task.Delay(50);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.DcwManger.Voltage.SetVoltageAsync(i, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-        }
-
+        await breakdownTester.DcwManger.Voltage.SetVoltageAsync(i, userMessageService);
         await breakdownTester.DcwManger.Measure.ApplyVoltageAsync(userMessageService);
         await Task.Delay(200);
 

@@ -208,10 +208,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.DisconnectBusAsync(bus), _userInteractionService))
-        throw BusExceptionFactory.DisconnectFailed(bus.ToString(), module.Name, module.NumberChassis, module.Number);
-
+      await module.BusManager.DisconnectBusAsync(bus, userMessageService: _userInteractionService);
       return true;
     }
 
@@ -224,13 +221,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> InitializeModule(IUserInteractionService messageService, IRelaySwitchModule module, CancellationToken cancellationToken, string roleName = null)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      var (state, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.InitializeAsync(messageService), _userInteractionService);
-
-      if (!state)
-      {
-        ConnectionExceptionAdapter.InitializeFailed(module.Name, module.NumberChassis, module.Number);
-      }
-
+      await module.ConnectableManager.InitializeAsync(messageService);
       return true;
     }
 
@@ -240,8 +231,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="module">Блок коммутации</param>
     private async Task ResetModule(IUserInteractionService messageService, IRelaySwitchModule module)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.ResetAsync(messageService), _userInteractionService))
-        throw ConnectionExceptionAdapter.ResetFailed(module.Name, module.NumberChassis, module.Number);
+      await module.ConnectableManager.ResetAsync(messageService);
     }
 
     /// <summary>

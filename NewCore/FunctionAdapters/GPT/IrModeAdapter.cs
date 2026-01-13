@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Breakdown;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
@@ -157,20 +158,21 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetModeAsync(IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.Mode.SetModeAsync();
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.Mode.SetModeAsync(), userMessageService, deviceTask: true);
+
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка режима IR",
-          result.Success ? "IR" : result.Message,
-          result.Success,
+          result.Connect ? "IR" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
-          throw IrExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        if (!result.Connect)
+          throw IrExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -241,20 +243,20 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetVoltageAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.Voltage.SetVoltageAsync(value);
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.Voltage.SetVoltageAsync(value), userMessageService, deviceTask: true);
 
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка напряжения IR",
-          result.Success ? $"{value} В" : result.Message,
-          result.Success,
+          result.Connect ? $"{value} В" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
+        if (!result.Connect)
           throw IrExceptionFactory.SetVoltageFailed(_device.Name, _device.NumberChassis, _device.Number);
 
         return result;
@@ -334,21 +336,21 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetHighResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.ResistanceLimits.SetHighResistanceLimitAsync(value);
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.ResistanceLimits.SetHighResistanceLimitAsync(value), userMessageService, deviceTask: true);
 
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка верхнего предела сопротивления IR",
-          result.Success ? $"{value} ГОм" : result.Message,
-          result.Success,
+          result.Connect ? $"{value} ГОм" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
-          throw IrExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        if (!result.Connect)
+          throw IrExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -379,21 +381,21 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetLowResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.ResistanceLimits.SetLowResistanceLimitAsync(value);
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.ResistanceLimits.SetLowResistanceLimitAsync(value), userMessageService, deviceTask: true);
 
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка нижнего предела сопротивления IR",
-          result.Success ? $"{value} МОм" : result.Message,
-          result.Success,
+          result.Connect ? $"{value} МОм" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
-          throw IrExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        if (!result.Connect)
+          throw IrExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -458,21 +460,21 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetTestTimeAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.Time.SetTestTimeAsync(value);
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.Time.SetTestTimeAsync(value), userMessageService, deviceTask: true);
 
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка времени измерения IR",
-          result.Success ? $"{value} сек" : result.Message,
-          result.Success,
+          result.Connect ? $"{value} сек" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
-          throw IrExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        if (!result.Connect)
+          throw IrExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -503,21 +505,21 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool Success, string Message)> SetRampTimeAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.Time.SetRampTimeAsync(value);
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.Time.SetRampTimeAsync(value), userMessageService, deviceTask: true);
 
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка времени нарастания IR",
-          result.Success ? $"{value} сек" : result.Message,
-          result.Success,
+          result.Connect ? $"{value} сек" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
-          throw IrExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        if (!result.Connect)
+          throw IrExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -581,21 +583,21 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetOffsetAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _irMode.Offset.SetOffsetAsync(value);
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _irMode.Offset.SetOffsetAsync(value), userMessageService, deviceTask: true);
 
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Установка смещения IR",
-          result.Success ? $"{value} ГОм" : result.Message,
-          result.Success,
+          result.Connect ? $"{value} ГОм" : result.Answer,
+          result.Connect,
           1,
           userMessageService);
         }
 
-        if (!result.Success)
-          throw IrExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+        if (!result.Connect)
+          throw IrExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }

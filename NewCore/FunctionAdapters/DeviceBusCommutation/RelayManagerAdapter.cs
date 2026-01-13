@@ -28,7 +28,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.ConnectRelay(numberRelay), userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.ConnectRelay(numberRelay), userMessageService, deviceTask: true);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", result, 1, userMessageService);
 
@@ -41,7 +41,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.DisconnectRelay(numberRelay), userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.DisconnectRelay(numberRelay), userMessageService, deviceTask: true);
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", result, 1, userMessageService);
 
