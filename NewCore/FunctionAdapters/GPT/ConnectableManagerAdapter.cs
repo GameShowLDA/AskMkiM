@@ -31,12 +31,17 @@ namespace NewCore.FunctionAdapters.GPT
         return (true, string.Empty);
       }
 
-      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.ConnectAsync(messageService), messageService, deviceTask: true);
-
-      if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(answer) ? "Успешно" : answer, result, 1, messageService);
-      }
+        var succes = await _manager.ConnectAsync(messageService);
+
+        if (!succes.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(succes.Answer) ? "Успешно" : succes.Answer, succes.Connect, 1, messageService);
+        }
+
+        return succes;
+      }, messageService, deviceTask: true);
 
       if (!result)
       {
