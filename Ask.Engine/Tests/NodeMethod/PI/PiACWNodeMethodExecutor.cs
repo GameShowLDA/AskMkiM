@@ -63,9 +63,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
         int chassis = breakDown.NumberChassis;
         int numer = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
-          throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, numer);
-
+        await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.AcwManger.Mode.SetModeAsync(messageService);
         await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);

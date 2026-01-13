@@ -94,9 +94,7 @@ namespace Ask.Engine.Tests.Metrology
         int chassis = breakDown.NumberChassis;
         int numer = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
-          throw new Exception($"Нет подключения к {breakDown.Name}({breakDown.NumberChassis}.{breakDown.Number})");
-
+        await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
         await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);

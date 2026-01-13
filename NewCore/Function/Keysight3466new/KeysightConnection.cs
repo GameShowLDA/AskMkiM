@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
@@ -77,6 +78,7 @@ namespace NewCore.Function.Keysight3466new
       }
 
       using var token = new CancellationTokenSource(2000);
+
       try
       {
         _device.Client = new TcpClient();
@@ -95,6 +97,7 @@ namespace NewCore.Function.Keysight3466new
         _device.IsConnected = false;
         return (false, ex.Message);
       }
+
     }
 
     /// <inheritdoc />

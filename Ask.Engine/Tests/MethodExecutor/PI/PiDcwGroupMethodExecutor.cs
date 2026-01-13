@@ -63,9 +63,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         var chassis = breakDown.NumberChassis;
         var number = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
-          throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, number);
-
+        await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
         await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
