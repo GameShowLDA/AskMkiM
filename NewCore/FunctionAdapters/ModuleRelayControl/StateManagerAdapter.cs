@@ -56,7 +56,6 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return answer;
       }, messageService);
 
-
       if (!result)
       {
         throw ConnectionExceptionAdapter.InitializeFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, answer);

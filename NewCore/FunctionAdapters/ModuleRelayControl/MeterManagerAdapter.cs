@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
@@ -36,13 +37,17 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return true;
 
       const string description = "модуля МКР";
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _meterManager.ConnectMeterAsync(), userMessageService, deviceTask: true);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _meterManager.ConnectMeterAsync();
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _moduleRelayControl,
-          $"Подключение измерителя {description}",
-          result,
-          1, userMessageService);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение измерителя {description}", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
       {
@@ -64,12 +69,18 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       const string description = "модуля МКР";
 
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _meterManager.DisconnectMeterAsync(), userMessageService, deviceTask: true);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _moduleRelayControl,
-          $"Отключение измерителя {description}",
-          result,
-          1, userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _meterManager.DisconnectMeterAsync();
+
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение измерителя {description}", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
 
       if (!result)
       {

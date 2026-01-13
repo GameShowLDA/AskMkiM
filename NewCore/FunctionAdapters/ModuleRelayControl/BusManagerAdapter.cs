@@ -51,11 +51,16 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return true;
       }
 
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.ConnectBusAsync(bus, lowVoltage), userMessageService, deviceTask: true);
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", result, 1, userMessageService);
-      }
+        var succes = await _busManager.ConnectBusAsync(bus, lowVoltage);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (result)
       {
@@ -76,12 +81,16 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       if (!connected)
         return true;
 
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.DisconnectBusAsync(bus, lowVoltage), userMessageService, deviceTask: true);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", result, 1, userMessageService);
-      }
+        var succes = await _busManager.DisconnectBusAsync(bus, lowVoltage);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (result)
       {
