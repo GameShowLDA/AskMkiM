@@ -1,5 +1,7 @@
 ﻿
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -49,23 +51,19 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return true;
       }
 
-      var type = lowVoltage ? "низковольтной" : "высоковольтной";
-      var description = $"{type} шины [{bus}]";
-
-      var result = await _busManager.ConnectBusAsync(bus, lowVoltage);
-
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.ConnectBusAsync(bus, lowVoltage), userMessageService, deviceTask: true);
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _moduleRelayControl,
-            $"Подключение {description}",
-            result,
-            1, userMessageService);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", result, 1, userMessageService);
       }
 
       if (result)
       {
         switchingBuses[bus] = true;
+      }
+      else
+      {
+        throw BusExceptionFactory.ConnectFailed(bus.ToString(), _moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
       }
 
       return result;
@@ -78,19 +76,20 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       if (!connected)
         return true;
 
-      var type = lowVoltage ? "низковольтной" : "высоковольтной";
-      var description = $"{type} шины [{bus}]";
-
-      var result = await _busManager.DisconnectBusAsync(bus, lowVoltage);
-
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.DisconnectBusAsync(bus, lowVoltage), userMessageService, deviceTask: true);
+      
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", result, 1, userMessageService);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", result, 1, userMessageService);
       }
 
       if (result)
       {
         switchingBuses[bus] = false;
+      }
+      else
+      {
+        throw BusExceptionFactory.DisconnectFailed(bus.ToString(), _moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
       }
 
       return result;

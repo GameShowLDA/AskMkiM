@@ -47,11 +47,8 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
 
       foreach (var module in relayModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI);
       }
     }
   }

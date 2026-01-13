@@ -129,7 +129,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         var point = points[i];
         var bus = busAssignments[i];
 
-        await UserActionHelper.RunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus, point.PointNumber, _protocolUI), _protocolUI);
+        await module.PointManager.ConnectRelayAsync(bus, point.PointNumber, _protocolUI);
       }
 
       await Task.Delay(500);
@@ -149,11 +149,8 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.ResetAsync(_protocolUI), _protocolUI))
           throw ConnectionExceptionAdapter.ResetFailed(module.Name, module.NumberChassis, module.Number);
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: _protocolUI), _protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: _protocolUI), _protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: _protocolUI);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: _protocolUI);
       }
     }
 

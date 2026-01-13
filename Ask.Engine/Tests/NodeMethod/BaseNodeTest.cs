@@ -96,12 +96,8 @@ namespace Ask.Engine.Tests.NodeMethod
       foreach (var module in relayModules)
       {
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", message: $"Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info));
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI);
 
         int startPoint;
         int endPoint;
@@ -127,8 +123,7 @@ namespace Ask.Engine.Tests.NodeMethod
           endPoint = module.PointCount;
         }
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint, protocolUI), protocolUI))
-          throw RelayExceptionFactory.ConnectPointFailed($"{startPoint}-{endPoint}", module.Name, module.NumberChassis, module.Number);
+        await module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint, protocolUI);
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", message: $"Подключение точек к шинам", type: ShowMessageModel.MessageType.Info));
         for (int i = startPoint; i <= endPoint; i++)

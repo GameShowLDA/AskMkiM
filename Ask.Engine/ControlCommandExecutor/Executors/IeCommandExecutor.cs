@@ -133,14 +133,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
       }
     }
 
