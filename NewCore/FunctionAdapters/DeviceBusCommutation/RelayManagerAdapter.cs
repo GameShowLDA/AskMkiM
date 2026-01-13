@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -28,9 +29,18 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.ConnectRelay(numberRelay), userMessageService, deviceTask: true);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _relayManager.ConnectRelay(numberRelay);
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", result, 1, userMessageService);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
 
       if (!result)
         throw RelayControlExceptionFactory.ConnectFailed(numberRelay);
@@ -41,9 +51,17 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectRelay(int numberRelay, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _relayManager.DisconnectRelay(numberRelay), userMessageService, deviceTask: true);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _relayManager.DisconnectRelay(numberRelay);
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", result, 1, userMessageService);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
         throw RelayControlExceptionFactory.DisconnectFailed(numberRelay);
