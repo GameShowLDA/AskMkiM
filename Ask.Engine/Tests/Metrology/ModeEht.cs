@@ -136,11 +136,8 @@ namespace Ask.Engine.Tests.Metrology
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+        await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService);
+        await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService);
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
@@ -156,19 +153,14 @@ namespace Ask.Engine.Tests.Metrology
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point1}"), IsBlockStart: true);
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
+        await relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService);
         relayModule = GetRelayModules(metrologicalModeRole).Last();
 
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подлючение точки {point2}"), IsBlockStart: true);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
+        
+        await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
+        await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService);
+        
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
@@ -180,15 +172,13 @@ namespace Ask.Engine.Tests.Metrology
       private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param)
       {
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point2}"), IsBlockStart: true);
+        
         var relayModule = GetRelayModules(metrologicalModeRole).Last();
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+        await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-
         var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ResistanceManager.MeasureResistanceAsync() : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param * 1.5 : new Random().Next((int)param - 100, (int)param + 100);
         return result;
       }
@@ -196,15 +186,12 @@ namespace Ask.Engine.Tests.Metrology
       private async Task StepReset(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param)
       {
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точек"), IsBlockStart: true);
+        
         var relayModule = GetRelayModules(metrologicalModeRole).First();
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+        await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService);
 
         relayModule = GetRelayModules(metrologicalModeRole).Last();
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService), userMessageService))
-          throw RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+        await relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService);
       }
 
       public override async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, IUserInteractionService protocolUI)

@@ -403,11 +403,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
 
       foreach (var relayModule in relayModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+        await relayModule.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI);
+        await relayModule.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI);
       }
 
       if (modeDevice == MetrologicalDeviceType.BreakdownTester)
@@ -444,11 +441,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек"), IsBlockStart: true);
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModules[0].PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, protocolUI), protocolUI))
-        throw RelayExceptionFactory.ConnectPointFailed(point1.PointNumber.ToString(), relayModules[0].Name, relayModules[0].NumberChassis, relayModules[0].Number);
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModules.Last().PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, protocolUI), protocolUI))
-        throw RelayExceptionFactory.ConnectPointFailed(point2.PointNumber.ToString(), relayModules.Last().Name, relayModules.Last().NumberChassis, relayModules.Last().Number);
+      await relayModules[0].PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, protocolUI);
+      await relayModules.Last().PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, protocolUI);
     }
     #endregion
   }

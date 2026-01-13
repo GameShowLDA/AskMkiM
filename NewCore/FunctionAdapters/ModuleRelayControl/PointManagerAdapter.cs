@@ -1,11 +1,13 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
@@ -31,11 +33,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      var result = await _pointManager.ConnectRelayAsync(bus, number);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _pointManager.ConnectRelayAsync(bus, number), userMessageService, deviceTask: true);
       var description = $"{number} к шине [{bus}]";
-
-      if (!result)
-        result = await _pointManager.ConnectRelayAsync(bus, number);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -57,13 +56,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-
-
-      var result = await _pointManager.DisconnectRelayAsync(bus, number);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _pointManager.DisconnectRelayAsync(bus, number), userMessageService, deviceTask: true);
       var description = $"{number} от шины [{bus}]";
-
-      if (!result)
-        result = await _pointManager.DisconnectRelayAsync(bus, number);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -84,11 +78,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      var result = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint), userMessageService, deviceTask: true);
       var description = $"{firstPoint}-{lastPoint} к шине [{bus}]";
-
-      if (!result)
-        result = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -108,11 +99,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      var result = await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint), userMessageService, deviceTask: true);
       var description = $"{firstPoint}-{lastPoint} от шины [{bus}]";
-
-      if (!result)
-        result = await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -162,11 +150,8 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint, IUserInteractionService? userMessageService = null)
     {
-      var result = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _pointManager.ConnectingPointToNewBus(bus, nubmerPoint), userMessageService, deviceTask: true);
       var description = $"{nubmerPoint} к шине [{bus}]";
-
-      if (!result)
-        result = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {

@@ -189,11 +189,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {pointModel.ToString()} к шинам А и В"), IsBlockStart: true);
       var relayModule = EquipmentService.GetModuleByPoint(pointModel);
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.A, pointModel.PointNumber, userMessageService), userMessageService))
-        throw RelayExceptionFactory.ConnectPointFailed(pointModel.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService), userMessageService))
-        throw RelayExceptionFactory.ConnectPointFailed(pointModel.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+      await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, pointModel.PointNumber, userMessageService);
+      await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService);
     }
 
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param)
@@ -209,8 +206,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var modules = EquipmentService.GetUniqueModulesByPoints(points);
       foreach (var module in modules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectingAllPoint(userMessageService), userMessageService))
-          throw RelayExceptionFactory.DisconnectAllPointFailed();
+        await module.PointManager.DisconnectingAllPoint(userMessageService);
       }
     }
   }

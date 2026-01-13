@@ -167,18 +167,9 @@ namespace NewCore.Function.GPT.SelfCheck
       int number = breakdownTester.Number;
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Инициализация устройств"));
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.ConnectableManager.InitializeAsync(userMessageService)).Connect, userMessageService))
-      {
-        throw ConnectionExceptionAdapter.ConnectFailed(name, numberChassis, number);
-      }
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await meter.ConnectableManager.InitializeAsync(userMessageService)).Connect, userMessageService))
-      {
-        throw ConnectionExceptionAdapter.ConnectFailed(name, numberChassis, number);
-      }
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect, userMessageService))
-      {
-        throw ConnectionExceptionAdapter.ConnectFailed(name, numberChassis, number);
-      }
+      await breakdownTester.ConnectableManager.InitializeAsync(userMessageService);
+      await meter.ConnectableManager.InitializeAsync(userMessageService);
+      await switchingDevice.ConnectableManager.InitializeAsync(userMessageService);
     }
   }
 }
