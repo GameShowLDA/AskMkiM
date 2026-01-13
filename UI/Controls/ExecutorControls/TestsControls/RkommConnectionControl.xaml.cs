@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ask.Engine.Tests.RelaySwitchingModule;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,14 @@ namespace UI.Controls.ExecutorControls.TestsControls
   /// </summary>
   public partial class RkommConnectionControl : UserControl
   {
+
+    private RkommConnectionTests relayContactResistConnection = new();
+
     public RkommConnectionControl()
     {
       InitializeComponent();
+
+      _ = relayContactResistConnection.InitializeSettingsAsync(ProtocolSelfCheckControl, ProtocolSelfCheckControl, ProtocolSelfCheckControl);
     }
   }
 }

@@ -28,6 +28,7 @@ namespace Ask.Engine.Tests.Base
     /// <param name="voltageCheck">Флаг проверки напряжения измерения.</param>
     /// <param name="timeRampCheck">Флаг проверки времени нарастания.</param>
     /// <param name="busCheck">Флаг проверки заданной шины.</param>
+    /// <param name="pairBusCheck">Флаг проверки пары шин.</param>
     /// <returns>Объект <see cref="DataModel"/> с проверенными параметрами и точками подключения.</returns>
     /// <exception cref="SystemExceptionBase">
     /// Выбрасывается, если данные пользователя некорректны, отсутствует оборудование,
@@ -39,7 +40,8 @@ namespace Ask.Engine.Tests.Base
         bool timeCheck = false,
         bool voltageCheck = false,
         bool timeRampCheck = false,
-        bool busCheck = false)
+        bool busCheck = false,
+        bool pairBusCheck = false)
     {
       try
       {
@@ -48,7 +50,8 @@ namespace Ask.Engine.Tests.Base
             timeCheck: timeCheck,
             voltageCheck: voltageCheck,
             timeRampCheck: timeRampCheck,
-            busCheck: busCheck);
+            busCheck: busCheck,
+            pairBusCheck: pairBusCheck);
 
         return result;
       }
@@ -72,6 +75,7 @@ namespace Ask.Engine.Tests.Base
     /// <param name="voltageCheck">Указывает, следует ли выполнять проверку параметра напряжения (для режимов ППУ).</param>
     /// <param name="timeRampCheck">Указывает, следует ли выполнять проверку времени нарастания (для режимов ППУ).</param>
     /// <param name="busCheck">Указывает, следует ли проверять корректность заданной шины подключения.</param>
+    /// <param name="pairBusCheck">Указывает, следует ли проверить корректность заданной пары шин.</param>
     /// <returns>
     /// Кортеж, содержащий:
     /// <list type="bullet">
@@ -141,7 +145,8 @@ namespace Ask.Engine.Tests.Base
       bool timeCheck = false,
       bool voltageCheck = false,
       bool timeRampCheck = false,
-      bool busCheck = false)
+      bool busCheck = false,
+      bool pairBusCheck = false)
     {
       var (first, second, parameter) = TryValidateAndParseInput(protocolUI, messageOnSuccess);
 
@@ -162,13 +167,15 @@ namespace Ask.Engine.Tests.Base
       double voltage = voltageCheck ? CheckVoltage() : -1;
       double ramp = timeRampCheck ? TryCheckTimeRamp() : -1;
       BusPoint bus = busCheck ? TryCheckBus() : BusPoint.A;
+      SwitchingBusNew pairBus = pairBusCheck ? TryCheckPairBus() : SwitchingBusNew.AB1;
 
       return new DataModel(first, second, parameter)
       {
         Time = time,
         Voltage = voltage,
         RampTime = ramp,
-        ActiveBus = bus
+        ActiveBus = bus,
+        ActivePairBus = pairBus
       };
     }
 
@@ -522,6 +529,49 @@ namespace Ask.Engine.Tests.Base
     }
 
     /// <summary>
+    /// Проверяет корректность выбора пары шин (pair bus) в элементе <see cref="InputField"/>.
+    /// </summary>
+    /// <returns>
+    /// Значение выбранной пары шин <see cref="SwitchingBusNew"/>, если выбор выполнен корректно.
+    /// </returns>
+    /// <exception cref="SystemExceptionBase">
+    /// Возникает в двух случаях:
+    /// <list type="bullet">
+    ///   <item>
+    ///     Если элемент ввода данных (<see cref="InputField"/>) отсутствует —
+    ///     выбрасывается исключение <see cref="MetrologyValidationErrors.InputFieldNotFound()"/>.
+    ///   </item>
+    ///   <item>
+    ///     Если пара шин подключения не выбрана или указана некорректно —
+    ///     выбрасывается исключение <see cref="MetrologyValidationErrors.InvalidBusSelection()"/>.
+    ///   </item>
+    /// </list>
+    /// </exception>
+    /// <remarks>
+    /// Метод активирует событие <see cref="InputValidationEvents.TriggerInvalidFirstPoint"/>,  
+    /// если элемент <see cref="InputField"/> отсутствует в текущем контексте пользовательского интерфейса.
+    /// </remarks>
+    private static SwitchingBusNew TryCheckPairBus()
+    {
+      if (inputField == null)
+      {
+        InputValidationEvents.TriggerInvalidFirstPoint = true;
+        throw MetrologyValidationErrors.InputFieldNotFound();
+      }
+
+      var bus = inputField.GetPairBus();
+
+      if (bus != default)
+      {
+        return bus;
+      }
+      else
+      {
+        throw MetrologyValidationErrors.InvalidBusSelection();
+      }
+    }
+
+    /// <summary>
     /// Проверяет корректность введённого пользователем значения напряжения
     /// в элементе управления <see cref="InputField"/>.
     /// </summary>
@@ -604,6 +654,11 @@ namespace Ask.Engine.Tests.Base
       /// Заданная шина.
       /// </summary>
       public BusPoint ActiveBus { get; set; }
+
+      /// <summary>
+      /// Заданная пара шин.
+      /// </summary>
+      public SwitchingBusNew ActivePairBus { get; set; }
 
       /// <summary>
       /// Инициализирует новый экземпляр класса <see cref="DataModel"/>.

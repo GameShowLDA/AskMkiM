@@ -393,6 +393,8 @@ namespace UI.Components
 
     public BusPoint GetBus() => InvokeSafe(() => ActiveBus);
 
+    public SwitchingBusNew GetPairBus() => InvokeSafe(() => SelectedBusGroup);
+
     private T InvokeSafe<T>(Func<T> func)
     {
       if (Dispatcher.CheckAccess())
