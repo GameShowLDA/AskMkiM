@@ -166,7 +166,7 @@ namespace Ask.Core.Services.UI
 
       do
       {
-        messageService.GetCancellationToken().ThrowIfCancellationRequested();
+        messageService?.GetCancellationToken().ThrowIfCancellationRequested();
 
         bool success = await operation();
 
@@ -177,6 +177,11 @@ namespace Ask.Core.Services.UI
         {
           error = true;
           next = false;
+        }
+
+        if (messageService == null)
+        {
+          break;
         }
 
         var action = await messageService.WaitUserActionAsync(loop, deviceTask);
