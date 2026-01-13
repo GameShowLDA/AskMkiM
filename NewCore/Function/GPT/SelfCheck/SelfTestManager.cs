@@ -87,11 +87,7 @@ namespace NewCore.Function.GPT.SelfCheck
         await breakdownTester.AcwManger.Time.SetTestTimeAsync(1, userMessageService);
         await breakdownTester.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
         await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService), userMessageService))
-        {
-          throw AcExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
+        await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
 
         await device.ConnectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
 
@@ -140,10 +136,7 @@ namespace NewCore.Function.GPT.SelfCheck
       await breakdownTester.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
       await breakdownTester.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService), userMessageService))
-      {
-        throw AcExceptionFactory.SetModeFailed(name, numberChassis, number);
-      }
+      await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
 
       await device.ConnectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
 

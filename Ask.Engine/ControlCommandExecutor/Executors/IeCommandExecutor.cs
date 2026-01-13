@@ -154,14 +154,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
     {
-      string name = meter.Name;
-      int numberChassis = meter.NumberChassis;
-      int number = meter.Number;
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService), userMessageService))
-      {
-        throw CapacitanceExceptionFactory.SetModeFailed(name, numberChassis, number);
-      }
+      await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
     }
   }
 }

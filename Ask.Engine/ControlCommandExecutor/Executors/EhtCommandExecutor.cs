@@ -124,17 +124,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (!fast)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ResistanceManager.SetResistanceModeAsync(userMessageService), userMessageService))
-        {
-          throw ResistanceExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
+        await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
       }
       else
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ContinuityManager.SetContinuityModeAsync(userMessageService), userMessageService))
-        {
-          throw ContinuityExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
+        await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
       }
     }
   }

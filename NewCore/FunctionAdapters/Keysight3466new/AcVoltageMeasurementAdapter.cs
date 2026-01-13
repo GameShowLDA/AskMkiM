@@ -1,4 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.Multimeter;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
@@ -28,22 +31,19 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetACVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      try
-      {
-        var result = await _measurement.SetACVoltageModeAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _measurement.SetACVoltageModeAsync(), userMessageService, deviceTask: true);
 
-        if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения переменного напряжения", "CONF:VOLT:AC", result, 1, userMessageService);
-        }
-
-        return result;
-      }
-      catch (Exception ex)
+      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при установке режима AC", ex.Message, false, 1, userMessageService);
-        throw;
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения переменного напряжения", result, 1, userMessageService);
       }
+
+      if (!result)
+      {
+        throw AcExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
