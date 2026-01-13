@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -26,8 +27,8 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> ConnectBusToPositiveAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.ConnectBusToPositiveAsync(bus);
-
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.ConnectBusToPositiveAsync(bus), userMessageService, deviceTask: true);
+      
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к +", bus.ToString(), result, 1, userMessageService);
@@ -42,7 +43,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> ConnectBusToNegativeAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.ConnectBusToNegativeAsync(bus);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.ConnectBusToNegativeAsync(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -58,7 +59,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> DisconnectBusToPositiveAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.DisconnectBusToPositiveAsync(bus);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.DisconnectBusToPositiveAsync(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
@@ -74,7 +75,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> DisconnectBusToNegativeAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.DisconnectBusToNegativeAsync(bus);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.DisconnectBusToNegativeAsync(bus), userMessageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {

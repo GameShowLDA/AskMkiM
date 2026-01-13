@@ -1,5 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -28,66 +30,94 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
-      var (success, message) = await _stateManager.ConnectAsync();
-
-      if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Подключение", message, success, 1, messageService);
+        var (success, message) = await _stateManager.ConnectAsync();
+
+        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Подключение", message, success, 1, messageService);
+        }
+
+        return (success, message);
+      }, messageService);
+
+      if (!result)
+      {
+        throw ConnectionExceptionAdapter.ConnectFailed(_device.Name, _device.NumberChassis, _device.Number, answer);
       }
 
-      if (!success)
-        throw ConnectionExceptionAdapter.ConnectFailed(_device.Name, _device.NumberChassis, _device.Number, message);
-
-      return (success, message);
+      return (result, answer);
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
-      bool success = await _stateManager.DisconnectAsync();
-
-      if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение", success, 1);
+        var success = await _stateManager.DisconnectAsync();
+
+        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение", success, 1);
+        }
+
+        return success;
+      }, messageService);
+
+      if (!result)
+      {
+        throw ConnectionExceptionAdapter.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 
-      if (!success)
-        throw ConnectionExceptionAdapter.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
-
-      return success;
+      return result;
     }
 
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      var (success, message) = await _stateManager.InitializeAsync();
-
-      if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация", message, success, 1, messageService);
+        var (success, message) = await _stateManager.InitializeAsync();
+
+        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация", message, success, 1, messageService);
+        }
+
+        return (success, message);
+      }, messageService);
+
+      if (!result)
+      {
+        throw ConnectionExceptionAdapter.InitializeFailed(_device.Name, _device.NumberChassis, _device.Number, answer);
       }
 
-      if (!success)
-        throw ConnectionExceptionAdapter.InitializeFailed(_device.Name, _device.NumberChassis, _device.Number, message);
-
-      return (success, message);
+      return (result, answer);
     }
 
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      bool success = await _stateManager.ResetAsync();
-
-      if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Сброс", success, 1);
+        var success = await _stateManager.ResetAsync();
+
+        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Сброс", success, 1);
+        }
+
+        return success;
+      }, messageService);
+
+      if (!result)
+      {
+        throw ConnectionExceptionAdapter.ResetFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 
-      if (!success)
-        throw ConnectionExceptionAdapter.ResetFailed(_device.Name, _device.NumberChassis, _device.Number);
-
       IsReset?.Invoke();
-      return success;
+      return result;
     }
   }
 }
