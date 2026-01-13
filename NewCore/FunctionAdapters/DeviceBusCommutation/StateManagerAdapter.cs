@@ -57,17 +57,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       }, userMessageService, deviceTask: true);
 
       if (!connect)
-      {
-        var error = ConnectionExceptionAdapter.InitializeFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, answer);
-        if (error != null)
-        {
-          throw error;
-        }
-        else
-        {
-          connect = true;
-        }
-      }
+        throw ConnectionExceptionAdapter.InitializeFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number, answer);
 
       return (connect, answer);
     }
@@ -75,12 +65,20 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _stateManager.DisconnectAsync(), userMessageService, deviceTask: true);
-
-      if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Сброс устройства", result, 1, userMessageService);
-      }
+        var succes = await _stateManager.DisconnectAsync();
+
+        if (!succes || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Сброс устройства", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw ConnectionExceptionAdapter.ResetFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
 
       IsReset?.Invoke();
       return result;

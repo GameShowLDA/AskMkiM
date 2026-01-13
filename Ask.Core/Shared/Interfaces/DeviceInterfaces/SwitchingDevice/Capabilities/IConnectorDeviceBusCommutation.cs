@@ -59,12 +59,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabiliti
     Task<bool> DisconnectAllBuses(IUserInteractionService? userMessageService = null);
 
     /// <summary>
-    /// Возвращает результат проверки замкнутой цепи.
-    /// </summary>
-    /// <param name="mode">Проверяемая цепь.</param>
-    Task<bool> GetSuccesCurrentMode(SwitchingDeviceTypeConnector mode, IUserInteractionService? userMessageService = null);
-
-    /// <summary>
     /// Подлючаект пробойную установку и мультиметр.
     /// </summary>
     /// <param name="userMessageService">Сервис для вывода сообщений.</param>
