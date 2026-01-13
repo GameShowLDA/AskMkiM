@@ -1,6 +1,4 @@
 ﻿using Ask.Core.Services.App;
-using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -212,8 +210,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// <exception cref="Exception">Если инициализация любого модуля завершилась неудачей.</exception>
     private static async Task InitializeModulesAsync(List<IRelaySwitchModule> modules, ISwitchingDevice switchingDevice, IUserInteractionService messageService)
     {
-      bool initialize = false;
-
       foreach (var module in modules)
       {
         await module.ConnectableManager.InitializeAsync(messageService);

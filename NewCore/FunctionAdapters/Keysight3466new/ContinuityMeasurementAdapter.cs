@@ -6,8 +6,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewCore.FunctionAdapters.Keysight3466new
 {

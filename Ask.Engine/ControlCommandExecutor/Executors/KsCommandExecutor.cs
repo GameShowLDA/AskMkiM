@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -178,10 +175,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectMultiMeterFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
     private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)

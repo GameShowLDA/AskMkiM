@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -16,7 +13,6 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -186,10 +182,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectMultiMeterFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
     private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
@@ -309,9 +302,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {firstValue} до {secondValue} Ом") { IndentLevel = 2 }, skipPause: true);
         }
 
-
         return result;
-
       }, messageService);
 
       return (result, answer);

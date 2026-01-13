@@ -1,7 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Errors.Translation;
-using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -105,7 +103,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
 
             await DeviceManager.DisconnectPointFromBusAAsync(point, messageService);
-            
+
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
             var UpperBound = (baseCommandModel as EhtCommandModel).HigherLimitResistance.Value;

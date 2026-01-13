@@ -2,11 +2,8 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors;
 using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Services.Extensions;
-using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -409,8 +406,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
 
       if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI), protocolUI))
-          throw ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
+        await busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI);
       }
       else
       {
@@ -420,8 +416,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
           await mint.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B1, userMessageService: protocolUI);
         }
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, protocolUI), protocolUI))
-          throw ConnectorExceptionFactory.ConnectMultiMeterFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
+        await busSwitcher.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, protocolUI);
       }
     }
 

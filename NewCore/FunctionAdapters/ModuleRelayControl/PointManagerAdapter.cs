@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {

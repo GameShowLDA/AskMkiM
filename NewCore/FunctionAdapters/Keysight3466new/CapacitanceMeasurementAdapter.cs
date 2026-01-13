@@ -38,7 +38,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       }
 
       if (!result)
-      { 
+      {
         throw CapacitanceExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 

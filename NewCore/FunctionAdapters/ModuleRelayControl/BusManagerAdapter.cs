@@ -77,7 +77,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return true;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _busManager.DisconnectBusAsync(bus, lowVoltage), userMessageService, deviceTask: true);
-      
+
       if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", result, 1, userMessageService);

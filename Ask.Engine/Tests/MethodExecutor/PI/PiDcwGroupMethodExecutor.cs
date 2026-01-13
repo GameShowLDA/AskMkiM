@@ -1,12 +1,9 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
-using DataBaseConfiguration.Migrations;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.PI

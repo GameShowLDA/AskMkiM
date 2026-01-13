@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Multimeter;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -82,7 +81,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
-        
+
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
         await fastMeter.AcVoltageManager.SetACVoltageModeAsync(messageService);
       }
