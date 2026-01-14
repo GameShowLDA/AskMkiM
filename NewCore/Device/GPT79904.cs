@@ -27,7 +27,8 @@ namespace NewCore.Device
       DeviceClass = GetType().FullName;
 
       DeviceType = DeviceType.BreakdownTester;
-      MaxVoltage = 700;
+      PiMaxVoltage = 700;
+      SiMaxVoltage = 1000;
       IRMinVoltage = 50;
 
       AcwManger = new AcwModeAdapter(this);
@@ -63,7 +64,10 @@ namespace NewCore.Device
     public ISystemSettingsBreakdown SystemManger { get; set; }
 
     /// <inheritdoc />
-    public int MaxVoltage { get; set; }
+    public int PiMaxVoltage { get; set; }
+
+    /// <inheritdoc />
+    public int SiMaxVoltage { get; set; }
 
     /// <inheritdoc />
     public int IRMinVoltage { get; set; }
