@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       {
         var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI);
 
-        var maxVoltage = breakDown.MaxVoltage;
+        var maxVoltage = breakDown.SiMaxVoltage;
 
         string body = AllLinesInOne(model, lines);
 
@@ -189,7 +189,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI);
 
       var minVoltage = breakDown.IRMinVoltage;
-      var maxVoltage = breakDown.MaxVoltage;
+      var maxVoltage = breakDown.SiMaxVoltage;
       double minResistance = commandInfo.LowerLimit;
       double maxResistance = commandInfo.UpperLimit;
       string defaultResistainceunit = commandInfo.Unit;

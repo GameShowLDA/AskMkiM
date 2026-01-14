@@ -14,9 +14,17 @@ namespace NewCore.Function.GPT.Helper
     {
       LogInformation($"Начало {nameof(SetVoltageAsync)}: value={value:F3}", isDeviceLog: true);
 
-      if (value > breakDown.MaxVoltage)
+      var maxColtage = typeCommand switch
       {
-        return (false, $"Максимальное напряжение для {breakDown.Name} = {breakDown.MaxVoltage}");
+        BreakdownTypeMode.ACW => breakDown.PiMaxVoltage,
+        BreakdownTypeMode.DCW => breakDown.PiMaxVoltage,
+        BreakdownTypeMode.IR => breakDown.SiMaxVoltage,
+        _ => throw new NotSupportedException($"Тип команды {typeCommand} не поддерживается в {nameof(SetVoltageAsync)}"),
+      };
+
+      if (value > maxColtage)
+      {
+        return (false, $"Максимальное напряжение для {breakDown.Name} = {breakDown.PiMaxVoltage}");
       }
 
       if (await ExecutionConfig.GetIsIdleModeEnabled())

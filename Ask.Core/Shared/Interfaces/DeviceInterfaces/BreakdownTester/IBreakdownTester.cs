@@ -15,9 +15,14 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester
     BreakdownTypeMode Mode { get; set; }
 
     /// <summary>
-    /// Макссимально выдаваемое напряжение.
+    /// Макссимально выдаваемое напряжение ПИ.
     /// </summary>
-    int MaxVoltage { get; set; }
+    int PiMaxVoltage { get; set; }
+
+    /// <summary>
+    /// Макссимально выдаваемое напряжение СИ.
+    /// </summary>
+    int SiMaxVoltage { get; set; }
 
     /// <summary>
     /// Минимально выдаваемое напряжение при измерении сопротивления.
