@@ -343,18 +343,18 @@
     <value>Группа шин для проверки</value>
   </data>
   <data name="input.bus.group.ab1" xml:space="preserve">
-    <value>Шины AB1</value>
+    <value>A1B1</value>
   </data>
   <data name="input.bus.group.ab2" xml:space="preserve">
-    <value>Шины AB2</value>
+    <value>A2B2</value>
   </data>
   <data name="input.bus.group.ab3" xml:space="preserve">
-    <value>Шины AB3</value>
+    <value>A3B3</value>
   </data>
   <data name="input.bus.group.ab4" xml:space="preserve">
-    <value>Шины AB4</value>
+    <value>A4B4</value>
   </data>
   <data name="menu.test.tests.relay.contact.resist.rkomm" xml:space="preserve">
-    <value>Контроль сопротивления контактов реле коммутатора</value>
+    <value>Сопротивление коммутатора</value>
   </data>
 </root>

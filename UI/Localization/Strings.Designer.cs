@@ -79,7 +79,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Шины AB1.
+        ///   Ищет локализованную строку, похожую на A1B1.
         /// </summary>
         internal static string input_bus_group_ab1 {
             get {
@@ -88,7 +88,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Шины AB2.
+        ///   Ищет локализованную строку, похожую на A2B2.
         /// </summary>
         internal static string input_bus_group_ab2 {
             get {
@@ -97,7 +97,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Шины AB3.
+        ///   Ищет локализованную строку, похожую на A3B3.
         /// </summary>
         internal static string input_bus_group_ab3 {
             get {
@@ -106,7 +106,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Шины AB4.
+        ///   Ищет локализованную строку, похожую на A4B4.
         /// </summary>
         internal static string input_bus_group_ab4 {
             get {
@@ -664,7 +664,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Контроль сопротивления контактов реле коммутатора.
+        ///   Ищет локализованную строку, похожую на Сопротивление коммутатора.
         /// </summary>
         internal static string menu_test_tests_relay_contact_resist_rkomm {
             get {
