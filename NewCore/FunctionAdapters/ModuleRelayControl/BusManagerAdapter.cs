@@ -43,7 +43,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
-    public async Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
+    public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       switchingBuses.TryGetValue(bus, out bool connected);
       if (connected)
@@ -53,7 +53,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _busManager.ConnectBusAsync(bus, lowVoltage);
+        var succes = await _busManager.ConnectBusAsync(bus);
         if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", succes, 1, userMessageService);
@@ -75,7 +75,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
+    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       switchingBuses.TryGetValue(bus, out bool connected);
       if (!connected)
@@ -83,7 +83,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
       {
-        var succes = await _busManager.DisconnectBusAsync(bus, lowVoltage);
+        var succes = await _busManager.DisconnectBusAsync(bus);
         if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", succes, 1, userMessageService);
