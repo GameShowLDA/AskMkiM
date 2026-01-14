@@ -220,14 +220,6 @@ namespace NewCore.Function.DeviceBusCommutation
       return false;
     }
 
-    public async Task<bool> GetSuccesCurrentMode(SwitchingDeviceTypeConnector mode, IUserInteractionService? userMessageService = null)
-    {
-      var command = new DeviceCommand(51);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      var expectingResult = $"51.{(int)mode}";
-      return answer.Contains(expectingResult);
-    }
-
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {

@@ -1,5 +1,7 @@
 ﻿
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -41,7 +43,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
-    public async Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
+    public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       switchingBuses.TryGetValue(bus, out bool connected);
       if (connected)
@@ -49,48 +51,54 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return true;
       }
 
-      var type = lowVoltage ? "низковольтной" : "высоковольтной";
-      var description = $"{type} шины [{bus}]";
-
-      var result = await _busManager.ConnectBusAsync(bus, lowVoltage);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _moduleRelayControl,
-            $"Подключение {description}",
-            result,
-            1, userMessageService);
-      }
+        var succes = await _busManager.ConnectBusAsync(bus);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (result)
       {
         switchingBuses[bus] = true;
+      }
+      else
+      {
+        throw BusExceptionFactory.ConnectFailed(bus.ToString(), _moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
       }
 
       return result;
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
+    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       switchingBuses.TryGetValue(bus, out bool connected);
       if (!connected)
         return true;
 
-      var type = lowVoltage ? "низковольтной" : "высоковольтной";
-      var description = $"{type} шины [{bus}]";
-
-      var result = await _busManager.DisconnectBusAsync(bus, lowVoltage);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", result, 1, userMessageService);
-      }
+        var succes = await _busManager.DisconnectBusAsync(bus);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (result)
       {
         switchingBuses[bus] = false;
+      }
+      else
+      {
+        throw BusExceptionFactory.DisconnectFailed(bus.ToString(), _moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
       }
 
       return result;

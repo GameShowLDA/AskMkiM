@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
@@ -30,12 +31,17 @@ namespace NewCore.FunctionAdapters.GPT
         return (true, string.Empty);
       }
 
-      var (result, answer) = await _manager.ConnectAsync(messageService);
-
-      if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(answer) ? "Успешно" : answer, result, 1, messageService);
-      }
+        var succes = await _manager.ConnectAsync(messageService);
+
+        if (!succes.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(succes.Answer) ? "Успешно" : succes.Answer, succes.Connect, 1, messageService);
+        }
+
+        return succes;
+      }, messageService, deviceTask: true);
 
       if (!result)
       {
@@ -52,7 +58,7 @@ namespace NewCore.FunctionAdapters.GPT
         return true;
       }
 
-      var result = await _manager.DisconnectAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.DisconnectAsync(), messageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
@@ -71,7 +77,8 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      var (result, answer) = await _manager.InitializeAsync(messageService);
+      var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.InitializeAsync(messageService), messageService, deviceTask: true);
+
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
@@ -86,7 +93,7 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      var result = await _manager.ResetAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.ResetAsync(), messageService, deviceTask: true);
 
       if (!result)
         throw ConnectionExceptionAdapter.ResetFailed(_device.Name, _device.NumberChassis, _device.Number);

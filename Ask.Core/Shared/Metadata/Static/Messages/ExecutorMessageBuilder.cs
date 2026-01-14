@@ -58,6 +58,30 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     }
 
     /// <summary>
+    /// Формирует информационное сообщение о настройке мультиметра.
+    /// </summary>
+    public static ShowMessageModel BuildMultimeterSetupMessage()
+    {
+      return new ShowMessageModel
+      (
+          header: "Настройка мультиметра",
+          type: ShowMessageModel.MessageType.Info
+      );
+    }
+
+    /// <summary>
+    /// Формирует информационное сообщение о настройке пробойной установки.
+    /// </summary>
+    public static ShowMessageModel BuildBreakdownTesterSetupMessage()
+    {
+      return new ShowMessageModel
+      (
+          header: "Настройка пробойной установки",
+          type: ShowMessageModel.MessageType.Info
+      );
+    }
+
+    /// <summary>
     /// Формирует сообщение-заголовок блока проверки цепей.
     /// </summary>
     public static ShowMessageModel BuildChainCheckBlock(string chains)
@@ -96,22 +120,20 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     }
 
     /// <summary>
-    /// Формирует заголовок блока проверки разряда.
+    /// Формирует сообщение-заголовок блока проверки разряда.
     /// </summary>
-    public static ShowMessageModel BuildDischargeCheckHeader(
-        string dischargeName,
-        int highestBitCount)
+    public static ShowMessageModel BuildDischargeCheckBlock(string dischargeView)
     {
       return new ShowMessageModel
       (
-          header: $"Проверка разряда {dischargeName} ({highestBitCount})",
+          header: $"Проверка разряда",
+          message: dischargeView,
           type: ShowMessageModel.MessageType.CommandBlock
       )
       {
         IndentLevel = 1
       };
     }
-
 
     /// <summary>
     /// Формирует сообщение об ошибке при проверке разряда.
@@ -144,14 +166,14 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
         chains = string.Empty;
       }
 
-        if (higherLimit != -1)
-        {
-          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
-        }
-        else
-        {
-          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
-        }
+      if (higherLimit != -1)
+      {
+        return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
+      }
+      else
+      {
+        return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
       }
     }
   }
+}

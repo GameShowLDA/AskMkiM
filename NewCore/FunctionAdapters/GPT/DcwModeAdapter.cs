@@ -147,21 +147,26 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetModeAsync(IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.Mode.SetModeAsync();
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка режима DCW",
-          result.Success ? "DCW" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.Mode.SetModeAsync();
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка режима DCW",
+            succes.Success ? "DCW" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -232,21 +237,26 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetVoltageAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.Voltage.SetVoltageAsync(value);
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка напряжения DCW",
-          result.Success ? $"{value} В" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.Voltage.SetVoltageAsync(value);
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetVoltageFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка напряжения DCW",
+            succes.Success ? $"{value} В" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetVoltageFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -312,21 +322,26 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetHighCurrentLimitAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.CurrentLimits.SetHighCurrentLimitAsync(value);
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка верхнего предела тока DCW",
-          result.Success ? $"{value} мА" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.CurrentLimits.SetHighCurrentLimitAsync(value);
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка верхнего предела тока DCW",
+            succes.Success ? $"{value} мА" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetHighLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -358,21 +373,26 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetLowCurrentLimitAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.CurrentLimits.SetLowCurrentLimitAsync(value);
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка нижнего предела тока DCW",
-          result.Success ? $"{value} мА" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.CurrentLimits.SetLowCurrentLimitAsync(value);
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка нижнего предела тока DCW",
+            succes.Success ? $"{value} мА" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetLowLimitFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -438,21 +458,25 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetTestTimeAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.Time.SetTestTimeAsync(value);
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка времени теста DCW",
-          result.Success ? $"{value} сек" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.Time.SetTestTimeAsync(value);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка времени теста DCW",
+            succes.Success ? $"{value} сек" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetTestTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -484,21 +508,25 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetRampTimeAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.Time.SetRampTimeAsync(value);
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка Ramp Time DCW",
-          result.Success ? $"{value} сек" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.Time.SetRampTimeAsync(value);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка Ramp Time DCW",
+            succes.Success ? $"{value} сек" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetRampTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetRampTimeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }
@@ -564,20 +592,23 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetOffsetAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await UserActionHelper.GetRunWithUserRepeatAsync(
-          () => _dcwMode.Offset.SetOffsetAsync(value, userMessageService),
-          userMessageService);
-
-        if (!result.Connect || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка смещения DCW",
-          result.Connect ? $"{value} мА" : result.Answer,
-          result.Connect,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.Offset.SetOffsetAsync(value, userMessageService);
+
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка смещения DCW",
+            succes.Success ? $"{value} мА" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService);
 
         if (!result.Connect)
           throw DcwExceptionFactory.SetOffsetFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
@@ -646,21 +677,26 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetArcCurrentAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await _dcwMode.ArcCurrent.SetArcCurrentAsync(value);
-
-        if (!result.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _device,
-          "Установка дугового тока DCW",
-          result.Success ? $"{value} мА" : result.Message,
-          result.Success,
-          1,
-          userMessageService);
-        }
+          var succes = await _dcwMode.ArcCurrent.SetArcCurrentAsync(value);
 
-        if (!result.Success)
-          throw DcwExceptionFactory.SetArcCurrentFailed(_device.Name, _device.NumberChassis, _device.Number, result.Message);
+          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка дугового тока DCW",
+            succes.Success ? $"{value} мА" : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetArcCurrentFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
 
         return result;
       }

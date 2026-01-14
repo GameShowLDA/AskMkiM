@@ -34,7 +34,6 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       catch (Exception ex)
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка выбора источника напряжения", ex.Message, false, 1, messageService);
-
         throw VoltageExceptionFactory.SetSourceFailed(label, ex.Message);
       }
     }

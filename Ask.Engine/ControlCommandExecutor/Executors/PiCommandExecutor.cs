@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -20,7 +17,6 @@ using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
-using System.Diagnostics.Metrics;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -57,7 +53,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
                  ?? new List<PointModel>();
       //var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+      }
 
       var modules = points
         .Select(EquipmentService.GetModuleByPoint)
@@ -176,23 +176,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
       }
     }
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
     }
 
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double voltage, VoltageEnum.Type voltageType)
@@ -201,80 +192,41 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка пробойной установки"));
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
+      }
 
       if (voltageType == VoltageEnum.Type.ACW)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Mode.SetModeAsync(userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetTestTimeFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(80, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-        }
+        await breakDown.AcwManger.Mode.SetModeAsync(userMessageService);
+        await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
+        await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(80, userMessageService);
 
         if (time == 60)
         {
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetRampTimeAsync(voltage / 100, userMessageService)).Success, userMessageService))
-          {
-            throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-          }
+          await breakDown.AcwManger.Time.SetRampTimeAsync(voltage / 100, userMessageService);
         }
         else
         {
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService)).Success, userMessageService))
-          {
-            throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-          }
+          await breakDown.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
         }
       }
       else if (voltageType == VoltageEnum.Type.DCW)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Mode.SetModeAsync(userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetTestTimeAsync(time, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetTestTimeFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Voltage.SetVoltageAsync(voltage, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-        }
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(20, userMessageService)).Success, userMessageService))
-        {
-          throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-        }
+        await breakDown.DcwManger.Mode.SetModeAsync(userMessageService);
+        await breakDown.DcwManger.Time.SetTestTimeAsync(time, userMessageService);
+        await breakDown.DcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(20, userMessageService);
 
         if (time == 60)
         {
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetRampTimeAsync(voltage / 100, userMessageService)).Success, userMessageService))
-          {
-            throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-          }
+          await breakDown.DcwManger.Time.SetRampTimeAsync(voltage / 100, userMessageService);
         }
         else
         {
-          if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService)).Success, userMessageService))
-          {
-            throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-          }
+          await breakDown.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
         }
       }
     }
@@ -340,8 +292,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           {
             type = ShowMessageModel.MessageType.Error;
           }
-
-
 
           return type == ShowMessageModel.MessageType.Success ? true : false;
         }

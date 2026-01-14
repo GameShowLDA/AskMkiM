@@ -116,7 +116,7 @@ namespace MainWindowProgram
         var svc = ServiceLocator.GetRequired<IBreakdownTester>();
         LogInformation($"OnExit: IBreakdownTester instance = {svc.GetHashCode()} | {svc.GetType().FullName}");
 
-        svc?.ConnectableManager?.DisconnectAsync().GetAwaiter().GetResult();
+        svc?.ConnectableManager?.DisconnectAsync();
       }
       catch { }
 

@@ -77,6 +77,7 @@ namespace NewCore.Function.Keysight3466new
       }
 
       using var token = new CancellationTokenSource(2000);
+
       try
       {
         _device.Client = new TcpClient();
@@ -95,6 +96,7 @@ namespace NewCore.Function.Keysight3466new
         _device.IsConnected = false;
         return (false, ex.Message);
       }
+
     }
 
     /// <inheritdoc />

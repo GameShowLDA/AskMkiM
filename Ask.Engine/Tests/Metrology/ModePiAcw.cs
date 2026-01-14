@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -94,29 +92,14 @@ namespace Ask.Engine.Tests.Metrology
         int chassis = breakDown.NumberChassis;
         int numer = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
-          throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Mode.SetModeAsync(messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetModeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetTestTimeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetRampTimeFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetFrequencyFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetLowLimitFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetHighLimitFailed(name, chassis, numer);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetVoltageFailed(name, chassis, numer);
+        await breakDown.ConnectableManager.InitializeAsync(messageService);
+        await breakDown.AcwManger.Mode.SetModeAsync(messageService);
+        await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
+        await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);
+        await breakDown.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
+        await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
       }
 
       /// <inheritdoc />

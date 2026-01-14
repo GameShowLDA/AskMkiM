@@ -1,8 +1,5 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -49,13 +46,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         var chain = new ChainModel(points);
 
         string pointStr = string.Empty;
-        var str = string.Empty;
+        var str = _basePoint.ToString();
         foreach (var point in points)
         {
           str += $"{EquipmentService.GetPointKey(point)},";
         }
         str = str.Remove(str.Length - 1);
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка {str}"), IsBlockStart: true);
+        str += "*";
+
+        await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
         await DeviceManager.ConnectChainToBusAAsync(chain, messageService);
 
         var measured = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken());

@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.DeviceBusCommutation;
@@ -42,9 +43,13 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         return true;
       }
 
-      var result = await _capacitorManager.ConnectCapacitor(number);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _capacitorManager.ConnectCapacitor(number);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение конденсатора", number.ToString(), succes, 1, userMessageService);
+        return succes;
+      }, userMessageService, deviceTask: true);
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение конденсатора", number.ToString(), result, 1, userMessageService);
 
       if (!result)
       {
@@ -66,9 +71,14 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
         return true;
       }
 
-      var result = await _capacitorManager.DisconnectCapacitor(number);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _capacitorManager.DisconnectCapacitor(number);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение конденсатора", number.ToString(), succes, 1, userMessageService);
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение конденсатора", number.ToString(), result, 1, userMessageService);
+        return succes;
+      }, userMessageService, deviceTask: true);
+
 
       if (!result)
       {

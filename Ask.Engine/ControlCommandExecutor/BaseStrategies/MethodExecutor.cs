@@ -1,15 +1,9 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
-using Ask.Engine.ControlCommandExecutor.Execution;
-using static Ask.Engine.ControlCommandExecutor.BaseStrategies.NodeFullChecker;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -58,7 +52,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         string stepStr = new string(bits);
 
-        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckHeader(ConvertIntToString(step + 1), HighestBitCount), IsBlockStart: true);
+        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
+
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
         var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken());
         if (!result.Result)

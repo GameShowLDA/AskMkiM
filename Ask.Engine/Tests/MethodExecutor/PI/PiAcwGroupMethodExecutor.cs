@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -61,23 +59,12 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         var chassis = breakDown.NumberChassis;
         var number = breakDown.Number;
 
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(messageService)).Connect, messageService))
-          throw ConnectionExceptionAdapter.ConnectFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetVoltageFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetTestTimeFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetRampTimeFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetHighLimitFailed(name, chassis, number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService)).Success, messageService))
-          throw AcwExceptionFactory.SetFrequencyFailed(name, chassis, number);
+        await breakDown.ConnectableManager.InitializeAsync(messageService);
+        await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
+        await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService);
+        await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);
       }
 
       /// <inheritdoc />

@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
@@ -27,10 +25,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     public static async Task ConnectPointToBusAAsync(PointModel point, IUserInteractionService messageService)
     {
       var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService), messageService))
-      {
-        throw RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-      }
+      await module.PointManager.ConnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService);
     }
 
     /// <summary>
@@ -45,10 +40,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     public static async Task ConnectPointToBusBAsync(PointModel point, IUserInteractionService messageService)
     {
       var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService), messageService))
-      {
-        throw RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-      }
+      await module.PointManager.ConnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService);
     }
 
     #endregion
@@ -69,10 +61,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var point in points.PointModels)
       {
         var module = EquipmentService.GetModuleByPoint(point);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService), messageService))
-        {
-          throw RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.PointManager.ConnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService);
       }
     }
 
@@ -90,10 +79,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var point in points.PointModels)
       {
         var module = EquipmentService.GetModuleByPoint(point);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService), messageService))
-        {
-          throw RelayExceptionFactory.ConnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.PointManager.ConnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService);
       }
     }
 
@@ -156,10 +142,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     public static async Task DisconnectPointFromBusAAsync(PointModel point, IUserInteractionService messageService)
     {
       var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService), messageService))
-      {
-        throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-      }
+      await module.PointManager.DisconnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService);
     }
 
     /// <summary>
@@ -174,10 +157,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     public static async Task DisconnectPointFromBusBAsync(PointModel point, IUserInteractionService messageService)
     {
       var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService), messageService))
-      {
-        throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-      }
+      await module.PointManager.DisconnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService);
     }
 
     /// <summary>
@@ -238,10 +218,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var point in points.PointModels)
       {
         var module = EquipmentService.GetModuleByPoint(point);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService), messageService))
-        {
-          throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.PointManager.DisconnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService);
       }
     }
 
@@ -259,10 +236,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var point in points.PointModels)
       {
         var module = EquipmentService.GetModuleByPoint(point);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService), messageService))
-        {
-          throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.PointManager.DisconnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService);
       }
     }
 
@@ -284,10 +258,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     public static async Task SwitchPointFromBusAToBAsync(PointModel point, IUserInteractionService messageService)
     {
       var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectingPointToNewBus(bus: BusPoint.B, point.PointNumber, messageService), messageService))
-      {
-        throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-      }
+      await module.PointManager.ConnectingPointToNewBus(bus: BusPoint.B, point.PointNumber, messageService);
     }
 
     /// <summary>
@@ -302,10 +273,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     public static async Task SwitchPointFromBusBToAAsync(PointModel point, IUserInteractionService messageService)
     {
       var module = EquipmentService.GetModuleByPoint(point);
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectingPointToNewBus(bus: BusPoint.A, point.PointNumber, messageService), messageService))
-      {
-        throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-      }
+      await module.PointManager.ConnectingPointToNewBus(bus: BusPoint.A, point.PointNumber, messageService);
     }
 
     /// <summary>
@@ -322,10 +290,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var point in chain.PointModels)
       {
         var module = EquipmentService.GetModuleByPoint(point);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectingPointToNewBus(bus: BusPoint.B, point.PointNumber, messageService), messageService))
-        {
-          throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.PointManager.ConnectingPointToNewBus(bus: BusPoint.B, point.PointNumber, messageService);
       }
     }
 
@@ -343,10 +308,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var point in chain.PointModels)
       {
         var module = EquipmentService.GetModuleByPoint(point);
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectingPointToNewBus(bus: BusPoint.A, point.PointNumber, messageService), messageService))
-        {
-          throw RelayExceptionFactory.DisconnectPointFailed(point.PointNumber.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.PointManager.ConnectingPointToNewBus(bus: BusPoint.A, point.PointNumber, messageService);
       }
     }
 

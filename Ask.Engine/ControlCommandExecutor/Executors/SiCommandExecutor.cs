@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -12,6 +9,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
@@ -54,7 +52,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Подготовка устройств"));
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+      }
 
       var modules = points
           .Select(EquipmentService.GetModuleByPoint)
@@ -130,23 +131,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
     }
     private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
     {
       foreach (var module in relaySwitchModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
       }
     }
 
@@ -156,27 +148,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка пробойной установки"));
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Mode.SetModeAsync(userMessageService)).Success, userMessageService))
+      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
-        throw IrExceptionFactory.SetModeFailed(name, numberChassis, number);
+        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetTestTimeFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.ResistanceLimits.SetLowResistanceLimitAsync(resistance, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetLowLimitFailed(name, numberChassis, number);
-      }
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.IrManger.Voltage.SetVoltageAsync(voltage, userMessageService)).Success, userMessageService))
-      {
-        throw IrExceptionFactory.SetVoltageFailed(name, numberChassis, number);
-      }
+      await breakDown.IrManger.Mode.SetModeAsync(userMessageService);
+      await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService);
+      await breakDown.IrManger.ResistanceLimits.SetLowResistanceLimitAsync(resistance, userMessageService);
+      await breakDown.IrManger.Voltage.SetVoltageAsync(voltage, userMessageService);
     }
 
     /// <summary>

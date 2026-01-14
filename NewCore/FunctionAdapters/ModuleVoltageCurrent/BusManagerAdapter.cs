@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -26,12 +27,16 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> ConnectBusToPositiveAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.ConnectBusToPositiveAsync(bus);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к +", bus.ToString(), result, 1, userMessageService);
-      }
+        var succes = await _busManager.ConnectBusToPositiveAsync(bus);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к +", bus.ToString(), succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
         throw BusExceptionFactory.ConnectPositiveFailed(bus.ToString());
@@ -42,12 +47,17 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> ConnectBusToNegativeAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.ConnectBusToNegativeAsync(bus);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к -", bus.ToString(), result, 1, userMessageService);
-      }
+        var succes = await _busManager.ConnectBusToNegativeAsync(bus);
+
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к -", bus.ToString(), succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
         throw BusExceptionFactory.ConnectNegativeFailed(bus.ToString());
@@ -58,12 +68,15 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> DisconnectBusToPositiveAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.DisconnectBusToPositiveAsync(bus);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от +", bus.ToString(), result, 1, userMessageService);
-      }
+        var succes = await _busManager.DisconnectBusToPositiveAsync(bus);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от +", bus.ToString(), succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
         throw BusExceptionFactory.DisconnectPositiveFailed(bus.ToString());
@@ -74,12 +87,16 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
     /// <inheritdoc />
     public async Task<bool> DisconnectBusToNegativeAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      bool result = await _busManager.DisconnectBusToNegativeAsync(bus);
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от -", bus.ToString(), result, 1, userMessageService);
-      }
+        var succes = await _busManager.DisconnectBusToNegativeAsync(bus);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от -", bus.ToString(), succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
         throw BusExceptionFactory.DisconnectNegativeFailed(bus.ToString());

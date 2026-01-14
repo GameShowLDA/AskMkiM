@@ -1,6 +1,4 @@
 ﻿using Ask.Core.Services.App;
-using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -212,41 +210,14 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// <exception cref="Exception">Если инициализация любого модуля завершилась неудачей.</exception>
     private static async Task InitializeModulesAsync(List<IRelaySwitchModule> modules, ISwitchingDevice switchingDevice, IUserInteractionService messageService)
     {
-      bool initialize = false;
       foreach (var module in modules)
       {
-        initialize = await UserActionHelper.GetRunWithUserRepeatAsync(
-          async () => (await module.ConnectableManager.InitializeAsync(messageService)).Connect,
-          messageService);
-
-        if (!initialize)
-        {
-          throw ConnectionExceptionAdapter.InitializeFailed(
-            module.Name, module.NumberChassis, module.Number);
-        }
-        else
-        {
-          await UserActionHelper.GetRunWithUserRepeatAsync(
-          async () => await module.ConnectableManager.ResetAsync(messageService),
-          messageService);
-        }
+        await module.ConnectableManager.InitializeAsync(messageService);
+        await module.ConnectableManager.ResetAsync(messageService);
       }
 
-      initialize = await UserActionHelper.GetRunWithUserRepeatAsync(
-          async () => (await switchingDevice.ConnectableManager.InitializeAsync(messageService)).Connect,
-          messageService);
-
-      if (!initialize)
-      {
-        throw ConnectionExceptionAdapter.InitializeFailed(
-          switchingDevice.Name, switchingDevice.NumberChassis, switchingDevice.Number);
-      }
-      else
-      {
-        await UserActionHelper.GetRunWithUserRepeatAsync(
-           async () => await switchingDevice.ConnectableManager.ResetAsync(messageService),
-           messageService);
-      }
+      await switchingDevice.ConnectableManager.InitializeAsync(messageService);
+      await switchingDevice.ConnectableManager.ResetAsync(messageService);
     }
 
     /// <summary>

@@ -71,7 +71,8 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
 
         if (deviceEntity != null)
         {
-          deviceEntity.MaxVoltage = (baseDevice as IBreakdownTester).MaxVoltage;
+          deviceEntity.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
+          deviceEntity.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
           var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
           try

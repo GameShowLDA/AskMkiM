@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Extensions;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -38,21 +36,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (unique.Contains(MeasurementDevice.Multimeter))
       {
         var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await meter.ConnectableManager.InitializeAsync(context.Console)).Connect, context.Console))
-        {
-          throw ConnectionExceptionAdapter.ConnectFailed(meter.Name, meter.NumberChassis, meter.Number);
-        }
+        await meter.ConnectableManager.InitializeAsync(context.Console);
       }
 
       if (unique.Contains(MeasurementDevice.BreakdownTester))
       {
         var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakDown.ConnectableManager.InitializeAsync(context.Console)).Connect, context.Console))
-        {
-          throw ConnectionExceptionAdapter.ConnectFailed(breakDown.Name, breakDown.NumberChassis, breakDown.Number);
-        }
+        await breakDown.ConnectableManager.InitializeAsync(context.Console);
       }
     }
   }
