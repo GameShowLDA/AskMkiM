@@ -28,7 +28,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <param name="bus">Замыкаемая шина.</param>
     /// <param name="lowVoltage">true - низковольтная шина, false - высоковольтная.</param>
     /// <returns>Результат замыкания шины.</returns>
-    public async Task<bool> ConnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
+    public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
@@ -41,11 +41,11 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
+      int typeVoltage =  numberBus;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
       string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{commandText}\". Замыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.", isDeviceLog: true);
+      LogInformation($"Команда: \"{commandText}\". Замыкаем шину {bus}.", isDeviceLog: true);
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
@@ -71,7 +71,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <param name="bus">Замыкаемая шина.</param>
     /// <param name="lowVoltage">true - низковольтная шина, false - высоковольтная.</param>
     /// <returns>Результат замыкания шины.</returns>
-    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, bool lowVoltage, IUserInteractionService? userMessageService = null)
+    public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
@@ -84,11 +84,11 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      int typeVoltage = lowVoltage ? numberBus : numberBus + 10;
+      int typeVoltage = numberBus;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 2);
       string commandText = cmd.ToString();
 
-      LogInformation($"Команда: \"{commandText}\". Размыкаем {(lowVoltage ? "низковольтную" : "высоковольтную")} шину {bus}.", isDeviceLog: true);
+      LogInformation($"Команда: \"{commandText}\". Размыкаем шину {bus}.", isDeviceLog: true);
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
