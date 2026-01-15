@@ -93,9 +93,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeAccumulationContext.CommandManager = context.CommandExecutionManager;
       nodeAccumulationContext.CommandModel = command;
       nodeAccumulationContext.MessageService = context.Console;
-      nodeAccumulationContext.Value = 80;
+      nodeAccumulationContext.Value = 10;
       nodeAccumulationContext.LowerLimit = 0;
-      nodeAccumulationContext.HigherLimit = 80;
+      nodeAccumulationContext.HigherLimit = 10;
       nodeAccumulationContext.Unit = "мА";
       nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
@@ -139,7 +139,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, 80, command.VoltageType);
+        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, nodeAccumulationContext.HigherLimit, command.VoltageType);
         errorMessage.AddRange(errMes);
       }
       else
@@ -202,7 +202,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.AcwManger.Mode.SetModeAsync(userMessageService);
         await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(80, userMessageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(40, userMessageService);
 
         if (time == 60)
         {
@@ -244,20 +244,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (type == VoltageEnum.Type.ACW)
         {
-          var answer = (await breadDown.AcwManger.Measure.MeasureAsync(value)).value;
-          var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? answer < value : !await ExecutionConfig.GetIsErrorSimulationEnabled();
-          if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
-          {
-            await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения прочности изоляции", message: $"{answer} мА", type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          }
-          return (result, answer);
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, 10, answer.value);
         }
         else
         {
-          var answer = (await breadDown.DcwManger.Measure.MeasureAsync(value)).value;
-          var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? answer < value : !await ExecutionConfig.GetIsErrorSimulationEnabled();
-          await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения прочности изоляции", message: $"{answer} мА", type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          return (result, answer);
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, 10, answer.value);
         }
 
       }, messageService);

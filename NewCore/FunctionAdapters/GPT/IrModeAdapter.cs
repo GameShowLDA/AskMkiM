@@ -348,7 +348,7 @@ namespace NewCore.FunctionAdapters.GPT
       {
         var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          var succes = await _irMode.ResistanceLimits.SetHighResistanceLimitAsync(value);
+          var succes = await _irMode.ResistanceLimits.SetHighResistanceLimitAsync((int)value);
 
           if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
           {
@@ -398,7 +398,7 @@ namespace NewCore.FunctionAdapters.GPT
       {
         var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
-          var succes = await _irMode.ResistanceLimits.SetLowResistanceLimitAsync(value);
+          var succes = await _irMode.ResistanceLimits.SetLowResistanceLimitAsync((int)value);
           if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(

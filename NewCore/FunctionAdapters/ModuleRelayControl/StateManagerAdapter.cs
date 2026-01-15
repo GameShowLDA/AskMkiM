@@ -54,7 +54,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         }
 
         return answer;
-      }, messageService);
+      }, messageService, deviceTask: true);
 
       if (!result)
       {

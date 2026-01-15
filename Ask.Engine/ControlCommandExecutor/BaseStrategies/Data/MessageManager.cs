@@ -12,7 +12,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     {
       if (await ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
-        value = new Random().Next(0, (int)upperLimit * 2);
+        if (upperLimit != -1)
+        {
+          value = new Random().Next(0, (int)upperLimit * 2);
+        }
+        else
+        {
+          value = new Random().Next();
+        }
       }
 
       bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
