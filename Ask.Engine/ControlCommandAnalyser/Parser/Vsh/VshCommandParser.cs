@@ -9,6 +9,7 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Diagnostics.Eventing.Reader;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
+using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
 {
@@ -64,12 +65,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
         if (value == null)
         {
           //var breakDown = ServiceLocator.GetRequired<IBreakdownTester>();
-          var managerShassi = new DataBaseConfiguration.Services.Device.ChassisManagerServices().GetAllEntities().FirstOrDefault();
+          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
           if (managerShassi != null)
           {
             busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary);
           }
-          var managerRack = new DataBaseConfiguration.Services.Device.RackServices().GetAllEntities();
+          var managerRack = new RackServices().GetAllEntities();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
