@@ -108,13 +108,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
-        var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, model, rmCommandModel);
-        if (model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString())
-          && pointErrors.FirstOrDefault(item => item.Code == ErrorCode.Gen_InvalidNumberOfDisconnectedRanges) != null)
-        {
-          pointErrors.Remove(pointErrors.FirstOrDefault(item => item.Code == ErrorCode.Gen_InvalidNumberOfDisconnectedRanges));
-        }
-
+        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel);        
+        
         // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
         {
@@ -134,46 +129,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
-        if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
-        {
-          // находим цепи точек из предыдущей команды проверки
-          var newScheme = CommandsModel.CheckKeyP(model, model.Scheme);
-          if (newScheme != null)
-          {
-            model.Scheme = newScheme;
-          }
-          else
-          {
-            model.Errors.Add(PrErrors.PreviousCommandHasNoPoints(numberLine, $"{commandNumber} {mnemonic}"));
-          }
-        }
-        if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-        {
-          model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-        }
-      }
-      else if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
-      {
-        // находим цепи точек из предыдущей команды проверки
-        var newScheme = CommandsModel.CheckKeyP(model, model.Scheme);
-        if (newScheme != null)
-        {
-          model.Scheme = newScheme;
-        }
-        else
-        {
-          model.Errors.Add(PrErrors.PreviousCommandHasNoPoints(numberLine, $"{commandNumber} {mnemonic}"));
-        }
-
-        if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-        {
-          model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-        }
-      }
-      else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-      {
-        model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-      }
+      }      
       else
       {
         // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет

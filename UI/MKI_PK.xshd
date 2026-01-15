@@ -28,6 +28,7 @@
 		<Rule color="Mnemonic">\bИЕ\b</Rule>
 		<Rule color="Mnemonic">\bЭТ\b</Rule>
 		<Rule color="Mnemonic">\bНЭ\b</Rule>
+		<Rule color="Mnemonic">\bПТ\b</Rule>
 
 		<!--Ключи-->
 		

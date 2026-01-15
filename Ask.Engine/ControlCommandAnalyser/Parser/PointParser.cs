@@ -304,5 +304,92 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     {
       return string.IsNullOrEmpty(t) ? string.Empty : t.Replace("*", "").Trim();
     }
+
+    public static (Dictionary<string, List<string>>, List<ErrorItem>) ParseBusPoints(string expr, RmCommandModel rmCommandModel)
+    {
+      if (rmCommandModel == null || rmCommandModel.PointsMap == null || rmCommandModel.PointsMap.Count == 0)
+        return (null, null);
+
+      var errors = new List<ErrorItem>();
+      var buses = new Dictionary<string, List<string>>();
+
+      // Убираем пробелы/табы/переводы строк
+      expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
+      if (string.IsNullOrEmpty(expr))
+        return (null, errors);
+
+      // 1. Шины разделяются '*'
+      var busSegments = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
+
+      foreach (var busSeg in busSegments)
+      {
+        // 2. Формат: ШИНА:ТОЧКИ
+        var parts = busSeg.Split(':');
+        if (parts.Length != 2)
+        {
+          errors.Add(new ErrorItem
+          {
+            Description = $"Неверный формат описания шины: {busSeg}",
+            Code = ErrorCode.Gen_InvalidRange
+          });
+          continue;
+        }
+
+        string busName = parts[0];
+        string pointsPart = parts[1];
+
+        // 3. Токены точек по запятой
+        var rawTokens = pointsPart
+            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(CleanToken)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .ToList();
+
+        // 4. Раскрываем диапазоны (поддержка сложных диапазонов)
+        var expandedTokens = new List<string>();
+        foreach (var tok in rawTokens)
+        {
+          if (tok.Contains("-"))
+            expandedTokens.AddRange(ExpandRangeToken(tok, errors));
+          else
+            expandedTokens.Add(tok);
+        }
+
+        foreach (var token in expandedTokens)
+        {
+          // Проверяем наличие точки в РМ
+          if (!rmCommandModel.PointsMap.ContainsValue(token))
+          {
+            errors.Add(new ErrorItem
+            {
+              Description = $"Точка {token} отсутствует в РМ (шина {busName}).",
+              Code = ErrorCode.Gen_InvalidPoint
+            });
+            continue; // просто пишем ошибку и идём дальше
+          }
+
+          // Получаем мнемонику (ключ) по значению
+          if (rmCommandModel.TryGetKeyByValue(token, out string key))
+          {
+            if(buses.ContainsKey(busName) == false)
+            {
+              buses.Add(busName, new List<string>());
+            }
+            buses[busName].Add(key);
+          }
+          else
+          {
+            errors.Add(new ErrorItem
+            {
+              Description = $"Не удалось сопоставить точку {token} с мнемоникой РМ.",
+              Code = ErrorCode.Gen_InvalidPoint
+            });
+          }
+        }
+      }
+
+      return (buses, errors);
+    }
+
   }
 }
