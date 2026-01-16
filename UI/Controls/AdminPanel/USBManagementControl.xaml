@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="UI.Controls.AdminPanel.USBManagementControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.AdminPanel"
+             mc:Ignorable="d" 
+            >
+    <Grid>
+        <Border Margin="10" Background="{StaticResource IsCheckedColorSolidColorBrush}" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="10" CornerRadius="10">
+            <StackPanel >
+                <ComboBox x:Name="usbDrivesComboBox" Width="350" Height="50" Margin="0,0,0,10" HorizontalAlignment="Left"
+                   Style="{StaticResource CustomComboBoxStyle}">
+                    <ComboBoxItem Content="Выберите USB-накопитель" IsSelected="True" />
+                </ComboBox>
+                <Button x:Name="createKeyButton" Content="Создать ключ" Width="350" Height="50" Margin="0,0,0,10"  HorizontalAlignment="Left"
+                 Style="{StaticResource MetrologyButtonStyle}" Click="CreateKeyButton_Click"/>
+                <Button x:Name="overwriteKeyButton" Content="Перезаписать ключ" Width="350" Height="50" Margin="0,0,0,10" HorizontalAlignment="Left"
+                 Style="{StaticResource MetrologyButtonStyle}" Click="OverwriteKeyButton_Click"/>
+                <Button x:Name="deleteKeyButton" Content="Удалить ключ" Margin="0,0,0,10" Width="350" Height="50" HorizontalAlignment="Left"
+                 Style="{StaticResource MetrologyButtonStyle}" Click="DeleteKeyButton_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
