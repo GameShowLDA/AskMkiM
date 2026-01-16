@@ -6,27 +6,51 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.Tests.Base;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
 {
   public class RkommConnectionTests
   {
-
+    /// <summary>
+    /// Устанавливает основные настройки выполнения теста.
+    /// </summary>
     private IExecutionController _controller;
 
+    /// <summary>
+    /// Интерфейс для управления UI для взаимодействия с пользователем.
+    /// </summary>
     private IUserInteractionService _userInteractionService;
 
+    /// <summary>
+    /// Отображение сообщений пользователю.
+    /// </summary>
     private IMessageOutputService _messageOutputService;
 
+    /// <summary>
+    /// Интерфейс для управления модулем коммутации реле (МКР).
+    /// </summary>
     private IRelaySwitchModule _module;
 
+    /// <summary>
+    /// Интерфейс для управления устройством коммутации шин (УКШ).
+    /// </summary>
     private ISwitchingDevice _busSwitcher;
 
+    /// <summary>
+    /// Интерфейс для управления мультиметром.
+    /// </summary>
     private IFastMeter _fastMeter;
 
+    /// <summary>
+    /// Коммутационная пара шин.
+    /// </summary>
     private SwitchingBusNew _pairBus;
+
+    /// <summary>
+    /// Флаг необходимости сброса состояния оборудования при остановке теста.
+    /// </summary>
+    private bool needReset = false;
 
     /// <summary>
     /// Асинхронная настройка UI, добавление полей, запуск ProtocolSelfCheckControl.
@@ -76,6 +100,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       // Мультиметр
       _fastMeter = RelayModuleHelper.ResolveFastMeter(data.FirstPoint.DeviceNumber);
 
+      needReset = true; 
+
       await _userInteractionService.ShowMessageAsync(
           new ShowMessageModel("Инициализация оборудования"),
           IsBlockStart: true);
@@ -123,32 +149,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       // Основной цикл теста
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
-
-        // Измеряем сопротивление ДО коммутации точки
-        //result = await RelayModuleHelper.MeasureResistanceAsync(
-        //    _fastMeter,
-        //    _userInteractionService,
-        //    cancellationToken);
-
-        //await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: SuccessMessage.TitleColor, message: $"Overload (невозможно оценить)"));
-        //await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{result} Ом", type: result >= data.Param ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        //if (result >= data.Param)
-        //{
-        //    await _userInteractionService.ShowMessageAsync(
-        //        new ShowMessageModel(
-        //            $"Замыкание точки {i} отсутствует", 
-        //            type: MessageType.Success)
-        //        );
-        //}
-        //else
-        //{
-        //    await _userInteractionService.ShowMessageAsync(
-        //        new ShowMessageModel(
-        //            $"Замыкание точки {i} на шинах {ConvertingInSwitchingBusNewToString(data.ActivePairBus)}", 
-        //            type: MessageType.Error)
-        //        );
-        //}
-
         // Коммутируем точку
         cancellationToken.ThrowIfCancellationRequested();
         await RelayModuleHelper.PointConnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
@@ -163,23 +163,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
         //await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: SuccessMessage.TitleColor, message: $"до {data.Param} Ом"));
         await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"Сопротивление точки {i}", message: $"{result} Ом", type: result <= data.Param ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-
-        //if (result <= data.Param)
-        //{
-        //    await _userInteractionService.ShowMessageAsync(
-        //        new ShowMessageModel(
-        //            $"Сопротивление точки {i} в пределах нормы",
-        //            type: MessageType.Success)
-        //        );
-        //}
-        //else
-        //{
-        //    await _userInteractionService.ShowMessageAsync(
-        //        new ShowMessageModel(
-        //            $"Сопротивление точки {i} выше нормы",
-        //            type: MessageType.Error)
-        //        );
-        //}
 
         // Отключаем точку
         cancellationToken.ThrowIfCancellationRequested();
@@ -198,10 +181,12 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken)
     {
+      if (!needReset) return;
       await RelayModuleHelper.ResetModule(_userInteractionService, _userInteractionService, _module);
       await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
+      needReset = false;
     }
 
     #region Вспомогательные методы
@@ -217,20 +202,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           SwitchingBusNew.AB2 => SwitchingBus.AB2,
           SwitchingBusNew.AB3 => SwitchingBus.AB3,
           SwitchingBusNew.AB4 => SwitchingBus.AB4,
-          _ => throw new ArgumentOutOfRangeException(nameof(pairBus), $"Недопустимое значение для {nameof(SwitchingBusNew)}: {pairBus}"),
-        };
-
-    /// <summary>
-    /// Конвертация из <see cref="SwitchingBusNew"/> в <see cref="string"/>.
-    /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">Если какой-либо конвертации не оказалось здесь.</exception>
-    private string ConvertingInSwitchingBusNewToString(SwitchingBusNew pairBus) =>
-        pairBus switch
-        {
-          SwitchingBusNew.AB1 => "А1В1",
-          SwitchingBusNew.AB2 => "А2В2",
-          SwitchingBusNew.AB3 => "А3В3",
-          SwitchingBusNew.AB4 => "А4В4",
           _ => throw new ArgumentOutOfRangeException(nameof(pairBus), $"Недопустимое значение для {nameof(SwitchingBusNew)}: {pairBus}"),
         };
 
