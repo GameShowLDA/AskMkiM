@@ -1,6 +1,6 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model;
+﻿using Ask.Core.Services.Extensions;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Engine.ControlCommandAnalyser.ComandBody
 {
@@ -21,26 +21,8 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
         commandBody.Append($"*");
         foreach (var item in vsh.BusStructure)
         {
-          if(item.Key == BusStructureEnum.Type.Bus2)
-          {
-            busNumber = "2";
-          }
-          if(item.Key == BusStructureEnum.Type.Bus4)
-          {
-            busNumber = "4";
-          }
-          if(item.Key == BusStructureEnum.Type.Bus6)
-          {
-            busNumber = "6";
-          }
-          if(item.Key == BusStructureEnum.Type.Bus8)
-          {
-            busNumber = "8";
-          }
-          if(item.Key == BusStructureEnum.Type.BusCombined)
-          {
-            busNumber = "К";
-          }
+          busNumber = item.Key.GetDescription();
+
           foreach (var number in item.Value)
           {
             commandBody.Append($"{busNumber}Ш:{number}*");

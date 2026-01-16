@@ -32,26 +32,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       {
         if (item.Value.Count > 0)
         {
-          if (item.Key == BusStructureEnum.Type.Bus2)
+          var text = item.Key switch
           {
-            yield return $"\t\tДвухшинное подключение: {string.Join(", ", item.Value)}";
-          }
-          if (item.Key == BusStructureEnum.Type.Bus4)
-          {
-            yield return $"\t\tЧетырехшинное подключение: {string.Join(", ", item.Value)}";
-          }
-          if (item.Key == BusStructureEnum.Type.Bus6)
-          {
-            yield return $"\t\tШестишинное подключение: {string.Join(", ", item.Value)}";
-          }
-          if (item.Key == BusStructureEnum.Type.Bus8)
-          {
-            yield return $"\t\tВосьмишинное подключение: {string.Join(", ", item.Value)}";
-          }
-          if (item.Key == BusStructureEnum.Type.BusCombined)
-          {
-            yield return $"\t\tКомбинированное подключение: {string.Join(", ", item.Value)}";
-          }
+            BusStructureEnum.Type.Bus2 => "\t\tДвухшинное подключение",
+            BusStructureEnum.Type.Bus4 => "\t\tЧетырехшинное подключение",
+            BusStructureEnum.Type.Bus6 => "\t\tШестишинное подключение",
+            BusStructureEnum.Type.Bus8 => "\t\tВосьмишинное подключение",
+            BusStructureEnum.Type.BusCombined => "\t\tКомбинированное подключение",
+            _ => throw new ArgumentOutOfRangeException(nameof(item.Key))
+          };
+
+          yield return $"{text}: {string.Join(", ", item.Value)}";
         }
       }
 
