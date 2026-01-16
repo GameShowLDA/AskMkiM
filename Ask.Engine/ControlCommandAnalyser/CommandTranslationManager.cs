@@ -1,11 +1,15 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
+using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -63,6 +67,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       MessageEventAdapter.RaiseInfoMessage("Начало трансляции");
       var models = ParseAll(text);
+      CheckVshModel(models);
 
       MessageEventAdapter.RaiseInfoMessage("Формирование данных");
       FormatAndDisplay(models, adapter);
@@ -75,6 +80,49 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       MessageEventAdapter.RaiseInfoMessage("Готово");
       return models;
+    }
+
+    private static void CheckVshModel(List<BaseCommandModel> models)
+    {
+      if (models.FirstOrDefault(model => model is VshCommandModel == true) == null)
+      {
+        var rmIndex = models.FindLastIndex(model => model is RmCommandModel);
+        if (rmIndex >= 0)
+        {
+          var commandNumber = int.Parse(models[rmIndex].CommandNumber) + 1;
+          while (models.Contains(models.FirstOrDefault(m => m.CommandNumber == commandNumber.ToString())))
+          {
+            commandNumber++;
+          }
+          var mnemonic = EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.VSH).DisplayName;
+          var vshModel = new VshCommandModel
+          {
+            CommandNumber = commandNumber.ToString(),
+            Mnemonic = mnemonic,
+            SourceLines = new List<string> { $"{commandNumber} {mnemonic} 2Ш" },
+            StartLineNumber = models[rmIndex].StartLineNumber + 1,
+            BusStructure = new Dictionary<BusStructureEnum.Type, List<int?>>
+            {
+              { BusStructureEnum.Type.Bus2, new List<int?> () },
+            }
+          };
+          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+          if (managerShassi != null)
+          {
+            vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(managerShassi.Number);
+          }
+          var managerRack = new RackServices().GetAllEntities();
+          if (managerRack != null && managerRack.Count > 0)
+          {
+            foreach (var rack in managerRack)
+            {
+              vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(rack.Number);
+            }
+          }
+          vshModel.Warnings.Add(GeneralWarnings.VshCommandAddedAutomatically(vshModel.StartLineNumber, $"{vshModel.CommandNumber} {vshModel.Mnemonic}"));
+          models.Insert(rmIndex + 1, vshModel);
+        }
+      }
     }
 
     /// <summary>

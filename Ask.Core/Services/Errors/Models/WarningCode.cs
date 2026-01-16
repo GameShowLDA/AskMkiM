@@ -21,32 +21,36 @@ namespace Ask.Core.Services.Errors.Models
     #region Общие ошибки
 
     /// <summary> Время выполнения установлено по умолчанию. </summary>
-    [WarningCodeTag("WARNGEN001")]
+    [WarningCodeTag("WRNGEN001")]
     Gen_DefaultTime,
 
     /// <summary> Напряжение установлено по умолчанию. </summary>
-    [WarningCodeTag("WARNGEN002")]
+    [WarningCodeTag("WRNGEN002")]
     Gen_DefaultVoltage,
 
     /// <summary> Нижняя граница сопротивления установлена по умолчанию. </summary>
-    [WarningCodeTag("WARNGEN003")]
+    [WarningCodeTag("WRNGEN003")]
     Gen_DefaultResistainceLowLimit,
 
     /// <summary> Верхняя граница сопротивления установлена по умолчанию. </summary>
-    [WarningCodeTag("WARNGEN004")]
+    [WarningCodeTag("WRNGEN004")]
     Gen_DefaultResistainceHighLimit,
 
     /// <summary> Сопротивление установлено по умолчанию. </summary>
-    [WarningCodeTag("WARNGEN005")]
+    [WarningCodeTag("WRNGEN005")]
     Gen_DefaultResistaince,
 
     /// <summary> Найден и удален дублирующийся ключ. </summary>
-    [WarningCodeTag("WARNGEN006")]
+    [WarningCodeTag("WRNGEN006")]
     Gen_DuplicateKey,
 
     /// <summary> Количество разобщенных цепей было меньше одной. Ключ ЗР был добавлен по умолчанию. </summary>
-    [WarningCodeTag("WARNGEN007")]
+    [WarningCodeTag("WRNGEN007")]
     Gen_KeyZR,
+
+    /// <summary> Команда ВШ не была указана в программе контроля. Команда ВШ была добавлена автоматически. </summary>
+    [WarningCodeTag("WRNGEN008")]
+    Gen_VshCommandAddedAutomatically,
 
     #endregion
 

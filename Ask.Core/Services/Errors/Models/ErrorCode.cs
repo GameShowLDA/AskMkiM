@@ -450,6 +450,14 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
+    #region Режим ВШ
+
+    /// <summary> В команде ВШ указана неверная структура стойки коммутации. </summary>
+    [ErrorCodeTag("VSH001")]
+    Vsh_InvalidVshBusStructure,
+
+    #endregion
+
     #region Ключи команд
 
     /// <summary> Использованный ключ не разрешён для данной команды. </summary>
