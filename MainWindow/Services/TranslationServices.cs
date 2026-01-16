@@ -297,6 +297,8 @@ namespace MainWindowProgram.Services
 
           var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
           item.TranslationModels = models;
+
+          item.GetRightEditor().RightBreakpoint = models.Select(x => x.FormattedStartLineNumber).ToList();
         }
       }
       catch (Exception ex)

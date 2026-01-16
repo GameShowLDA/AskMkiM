@@ -172,6 +172,23 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    /// <summary>
+    /// Установка разрешенных строк, где можно ставить точки остановки, и вытаскивание данных об этом.
+    /// </summary>
+    public List<int> RightBreakpoint
+    {
+      get => _executionMargin.RightBreakpoints;
+      set => _executionMargin.RightBreakpoints = value;
+    }
+
+    /// <summary>
+    /// Лист номеров строк, где установлены точки остановки
+    /// </summary>
+    public List<int> BreakPointLines
+    {
+      get => _executionMargin.BreakpointLines;
+    }
+
     #endregion
 
     /// <summary>
