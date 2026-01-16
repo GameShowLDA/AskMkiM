@@ -33,7 +33,7 @@ namespace Ask.Core.Services.FilesUtility
           paragraph.Inlines.Add(new Run(model.Header)
           {
             Foreground = new SolidColorBrush(Colors.Black),
-            FontSize = 18,
+            FontSize = 10,
             FontWeight = FontWeights.Bold
           });
         }
@@ -45,7 +45,7 @@ namespace Ask.Core.Services.FilesUtility
           paragraph.Inlines.Add(new Run(model.Message)
           {
             Foreground = new SolidColorBrush(Colors.Black),
-            FontSize = 18
+            FontSize = 10
           });
         }
 
@@ -83,8 +83,7 @@ namespace Ask.Core.Services.FilesUtility
             paragraph.Inlines.Add(new Run(str)
             {
               Foreground = new SolidColorBrush(Colors.Black),
-              FontSize = 18,
-
+              FontSize = 10,
             });
           }
 

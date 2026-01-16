@@ -1,4 +1,6 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -35,14 +37,17 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         return true;
 
       const string description = "модуля МКР";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _meterManager.ConnectMeterAsync();
 
-      var result = await _meterManager.ConnectMeterAsync();
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение измерителя {description}", succes, 1, userMessageService);
+        }
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _moduleRelayControl,
-          $"Подключение измерителя {description}",
-          result,
-          1, userMessageService);
+        return succes;
+      }, userMessageService, deviceTask: true);
 
       if (!result)
       {
@@ -64,13 +69,18 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       const string description = "модуля МКР";
 
-      var result = await _meterManager.DisconnectMeterAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _meterManager.DisconnectMeterAsync();
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-          _moduleRelayControl,
-          $"Отключение измерителя {description}",
-          result,
-          1, userMessageService);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение измерителя {description}", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
 
       if (!result)
       {
@@ -87,7 +97,14 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> GetMeterResponseAsync(IUserInteractionService? userMessageService = null)
     {
-      return await _meterManager.GetMeterResponseAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _meterManager.GetMeterResponseAsync(), userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw MeterExceptionFactory.MeterAnswerFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
+      }
+
+      return result;
     }
   }
 }

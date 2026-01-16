@@ -29,6 +29,9 @@ namespace MainWindowProgram.ViewModels
     private async Task Usb() => await _service.OpenUsbServiceAsync();
 
     [RelayCommand]
+    private async Task AdminPanel() => _service.AdminPanel();
+
+    [RelayCommand]
     private void Protocol() => _service.ProtocolTest();
 
     [RelayCommand]

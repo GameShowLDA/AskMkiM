@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.Multimeter;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
@@ -28,22 +30,24 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetDCVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      try
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
       {
-        var result = await _measurement.SetDCVoltageModeAsync();
+        var succes = await _measurement.SetDCVoltageModeAsync();
 
-        if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения постоянного напряжения", "CONF:VOLT:DC", result, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения постоянного напряжения", succes, 1, userMessageService);
         }
 
-        return result;
-      }
-      catch (Exception ex)
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при установке режима DC", ex.Message, false, 1, userMessageService);
-        throw;
+        throw DcExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
+
+      return result;
     }
 
     /// <inheritdoc />

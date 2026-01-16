@@ -1,9 +1,6 @@
-﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -71,7 +68,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           step = 0;
           var chains = EquipmentService.GetDisconnectChainsBefore(context.SchemeModel, points);
-          var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken);
+          var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken, context.VoltageType);
           if (localized != null)
           {
 
@@ -136,7 +133,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         List<List<PointModel>> candidates,
         double resistance,
         IUserInteractionService messageService,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken, 
+        VoltageEnum.Type type
         )
     {
       try
@@ -150,12 +148,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
         await DeviceManager.DisconnectAllPointFromBusBAsync(leftPart, messageService);
 
-        var measured = await performMeasurementAsync(resistance, messageService, cancellationToken);
+        var measured = await performMeasurementAsync(resistance, messageService, cancellationToken, type: type);
         if (!measured.Result)
         {
           if (rightPart.Count > 1)
           {
-            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken);
+            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type);
           }
           else
           {
@@ -173,11 +171,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           if (leftPart.Count > 1)
           {
-            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken);
+            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type);
           }
           else
           {
-            measured = await performMeasurementAsync(resistance, messageService, cancellationToken);
+            measured = await performMeasurementAsync(resistance, messageService, cancellationToken, type: type);
             if (!measured.Result)
             {
               errorPoint = leftPart[0];

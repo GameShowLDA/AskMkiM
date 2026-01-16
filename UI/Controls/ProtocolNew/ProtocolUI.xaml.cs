@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -144,8 +143,6 @@ namespace UI.Controls.ProtocolNew
 
       loopButton.Visibility = Visibility.Collapsed;
       RepeatButtonElement.Visibility = Visibility.Collapsed;
-
-      UserMessageServiceProvider.Instance = this;
 
       SetupButtons();
 

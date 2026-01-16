@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.Errors.Device.Multimeter;
+﻿using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -87,11 +85,7 @@ namespace NewCore.Function.GPT.SelfCheck
         await breakdownTester.AcwManger.Time.SetTestTimeAsync(1, userMessageService);
         await breakdownTester.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
         await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService), userMessageService))
-        {
-          throw AcExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
+        await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
 
         await device.ConnectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
 
@@ -140,10 +134,7 @@ namespace NewCore.Function.GPT.SelfCheck
       await breakdownTester.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
       await breakdownTester.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService), userMessageService))
-      {
-        throw AcExceptionFactory.SetModeFailed(name, numberChassis, number);
-      }
+      await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
 
       await device.ConnectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
 
@@ -174,18 +165,9 @@ namespace NewCore.Function.GPT.SelfCheck
       int number = breakdownTester.Number;
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Инициализация устройств"));
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await breakdownTester.ConnectableManager.InitializeAsync(userMessageService)).Connect, userMessageService))
-      {
-        throw ConnectionExceptionAdapter.ConnectFailed(name, numberChassis, number);
-      }
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await meter.ConnectableManager.InitializeAsync(userMessageService)).Connect, userMessageService))
-      {
-        throw ConnectionExceptionAdapter.ConnectFailed(name, numberChassis, number);
-      }
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => (await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect, userMessageService))
-      {
-        throw ConnectionExceptionAdapter.ConnectFailed(name, numberChassis, number);
-      }
+      await breakdownTester.ConnectableManager.InitializeAsync(userMessageService);
+      await meter.ConnectableManager.InitializeAsync(userMessageService);
+      await switchingDevice.ConnectableManager.InitializeAsync(userMessageService);
     }
   }
 }

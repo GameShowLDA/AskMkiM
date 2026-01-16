@@ -36,7 +36,10 @@ namespace Ask.Core.Shared.Entity.Devices
     public string DeviceClass { get; set; }
 
     /// <inheritdoc />
-    public int MaxVoltage { get; set; }
+    public int PiMaxVoltage { get; set; }
+
+    /// <inheritdoc />
+    public int SiMaxVoltage { get; set; }
 
     /// <inheritdoc />
     public int IRMinVoltage { get; set; }

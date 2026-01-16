@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -16,7 +13,6 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -179,23 +175,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
       }
     }
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectMultiMeterFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
     private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
@@ -211,17 +198,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (continuityManager)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ContinuityManager.SetContinuityModeAsync(userMessageService), userMessageService))
-        {
-          throw ContinuityExceptionFactory.SetContinuityFailed(name, numberChassis, number);
-        }
+        await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
       }
       else
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(async () => await meter.ResistanceManager.SetResistanceModeAsync(userMessageService), userMessageService))
-        {
-          throw ResistanceExceptionFactory.SetModeFailed(name, numberChassis, number);
-        }
+        await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
       }
     }
 
@@ -321,9 +302,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {firstValue} до {secondValue} Ом") { IndentLevel = 2 }, skipPause: true);
         }
 
-
         return result;
-
       }, messageService);
 
       return (result, answer);

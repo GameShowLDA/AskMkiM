@@ -1,7 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -40,18 +37,14 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         throw new InvalidOperationException("Коммутационное устройство или ППУ не найдены в списке устройств.");
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI), protocolUI))
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(busSwitcher.Name, busSwitcher.NumberChassis, busSwitcher.Number);
+      await busSwitcher.ConnectorManager.ConnectBreakdownTester(protocolUI);
 
       var relayModules = _devices.OfType<IRelaySwitchModule>().ToList();
 
       foreach (var module in relayModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI), protocolUI))
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI);
       }
     }
   }

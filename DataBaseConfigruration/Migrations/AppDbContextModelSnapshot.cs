@@ -16,7 +16,53 @@ namespace DataBaseConfiguration.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.BreakdownTesterEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.DTO.Executor.MeasurementError.MeasurementErrorEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Type")
+                        .IsUnique();
+
+                    b.ToTable("MeasurementErrors");
+                });
+
+            modelBuilder.Entity("Ask.Core.Shared.DTO.Executor.MeasurementError.MeasurementErrorRangeEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("MaxValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("MeasurementErrorEntityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("MinValue")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("NumericError")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("PercentageError")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeasurementErrorEntityId", "MinValue", "MaxValue")
+                        .IsUnique();
+
+                    b.ToTable("MeasurementErrorRanges");
+                });
+
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.BreakdownTesterEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,9 +83,6 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<int>("IRMinVoltage")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MaxVoltage")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -50,15 +93,24 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("PiMaxVoltage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SiMaxVoltage")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("BreakdownTesters");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.ChassisManagerEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.ChassisManagerEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BusType")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ConnectionDetails")
@@ -85,7 +137,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("ChassisManagers");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.FastMeterEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.FastMeterEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,7 +173,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("FastMeters");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.PowerSourceModuleEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.PowerSourceModuleEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -157,7 +209,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("PowerSourceModules");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.RackEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.RackEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -190,7 +242,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("Rack");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.RelaySwitchModuleEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.RelaySwitchModuleEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -229,7 +281,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("RelaySwitchModules");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Devices.SwitchingDeviceEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.SwitchingDeviceEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -262,7 +314,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("SwitchingDevices");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Settings.DeviceDisplaySettingsModel", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Settings.DeviceDisplaySettingsModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -285,7 +337,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("DeviceDisplaySettings");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Settings.SettingsExecutionModel", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Settings.SettingsExecutionModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -308,7 +360,7 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("Execution");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Settings.SettingsProtocolModel", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Settings.SettingsProtocolModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -355,7 +407,28 @@ namespace DataBaseConfiguration.Migrations
                     b.ToTable("SettingsProtocol");
                 });
 
-            modelBuilder.Entity("App.Core.Shared.Entity.Settings.UI.FileHotkeyEntity", b =>
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Settings.UserInterfaceModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Theme")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseSyntaxHighlighting")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserInterface");
+                });
+
+            modelBuilder.Entity("Ask.Core.Shared.Entity.UI.FileHotkeyEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -381,73 +454,6 @@ namespace DataBaseConfiguration.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FileHotkeys");
-                });
-
-            modelBuilder.Entity("App.Core.Shared.Entity.Settings.UserInterfaceModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Theme")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("UseSyntaxHighlighting")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserInterface");
-                });
-
-            modelBuilder.Entity("Ask.Core.Shared.DTO.Executor.MeasurementError.MeasurementErrorEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Type")
-                        .IsUnique();
-
-                    b.ToTable("MeasurementErrors");
-                });
-
-            modelBuilder.Entity("Ask.Core.Shared.DTO.Executor.MeasurementError.MeasurementErrorRangeEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double?>("MaxValue")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("MeasurementErrorEntityId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("MinValue")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("NumericError")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("PercentageError")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MeasurementErrorEntityId", "MinValue", "MaxValue")
-                        .IsUnique();
-
-                    b.ToTable("MeasurementErrorRanges");
                 });
 
             modelBuilder.Entity("Ask.Core.Shared.DTO.Executor.MeasurementError.MeasurementErrorRangeEntity", b =>

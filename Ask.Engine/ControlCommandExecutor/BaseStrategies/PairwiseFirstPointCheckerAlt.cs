@@ -1,7 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Errors.Translation;
-using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -105,7 +103,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
 
             await DeviceManager.DisconnectPointFromBusAAsync(point, messageService);
-            
+
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
             var UpperBound = (baseCommandModel as EhtCommandModel).HigherLimitResistance.Value;
@@ -189,11 +187,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {pointModel.ToString()} к шинам А и В"), IsBlockStart: true);
       var relayModule = EquipmentService.GetModuleByPoint(pointModel);
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.A, pointModel.PointNumber, userMessageService), userMessageService))
-        throw RelayExceptionFactory.ConnectPointFailed(pointModel.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService), userMessageService))
-        throw RelayExceptionFactory.ConnectPointFailed(pointModel.PointNumber.ToString(), relayModule.Name, relayModule.NumberChassis, relayModule.Number);
+      await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, pointModel.PointNumber, userMessageService);
+      await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService);
     }
 
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param)
@@ -209,8 +204,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var modules = EquipmentService.GetUniqueModulesByPoints(points);
       foreach (var module in modules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectingAllPoint(userMessageService), userMessageService))
-          throw RelayExceptionFactory.DisconnectAllPointFailed();
+        await module.PointManager.DisconnectingAllPoint(userMessageService);
       }
     }
   }

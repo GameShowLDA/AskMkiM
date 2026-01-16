@@ -7,7 +7,7 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
   /// </summary>
   public enum MeasurementTypeCommand
   {
-    [CommandDisplayInfo("Сопротивления", "КС", UnitEnums.QuantitySymbol.R, "Ом", 1, 10_000_000)]
+    [CommandDisplayInfo("Сопротивления", "КС", UnitEnums.QuantitySymbol.R, "Ом", 0, 10_000_000)]
     /// <summary>
     /// Тип команды KC.
     /// </summary>

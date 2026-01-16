@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -188,9 +186,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(bus, userMessageService: _userInteractionService), _userInteractionService))
-        throw BusExceptionFactory.ConnectFailed(bus.ToString(), module.Name, module.NumberChassis, module.Number);
+      await module.BusManager.ConnectBusAsync(bus, userMessageService: _userInteractionService);
 
       return true;
     }
@@ -244,9 +240,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus, point, _userInteractionService), _userInteractionService))
-        throw RelayExceptionFactory.ConnectPointFailed(point.ToString(), module.Name, module.NumberChassis, module.Number);
-
+      await module.PointManager.ConnectRelayAsync(bus, point, _userInteractionService);
       return true;
     }
 
@@ -260,9 +254,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus, point, _userInteractionService), _userInteractionService))
-        throw RelayExceptionFactory.DisconnectPointFailed(point.ToString(), module.Name, module.NumberChassis, module.Number);
-
+      await module.PointManager.DisconnectRelayAsync(bus, point, _userInteractionService);
       return true;
     }
 
@@ -274,9 +266,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> MeterEnableAsync(IUserInteractionService messageService, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.ConnectMeterAsync(_userInteractionService), _userInteractionService))
-        throw MeterExceptionFactory.ConnectFailed(module.Name, module.NumberChassis, module.Number);
-
+      await module.MeterManager.ConnectMeterAsync(_userInteractionService);
       return true;
     }
 
@@ -287,9 +277,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <returns>Возвращает <c>true</c>, если устройство выключилось; иначе — <c>false</c>.</returns>
     private async Task<bool> MeterDisableAsync(IUserInteractionService messageService, IRelaySwitchModule module)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.DisconnectMeterAsync(_userInteractionService), _userInteractionService))
-        throw MeterExceptionFactory.DisconnectFailed(module.Name, module.NumberChassis, module.Number);
-
+      await module.MeterManager.DisconnectMeterAsync(_userInteractionService);
       return true;
     }
 
@@ -301,9 +289,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     private async Task<bool> GetMeterAnswer(IRelaySwitchModule module, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.GetMeterResponseAsync(_userInteractionService), _userInteractionService))
-        throw MeterExceptionFactory.MeterAnswerFailed(module.Name, module.NumberChassis, module.Number);
-
+      await module.MeterManager.GetMeterResponseAsync(_userInteractionService);
       return true;
     }
 
@@ -575,8 +561,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Подлючение точек"));
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last(), _userInteractionService), _userInteractionService))
-        throw RelayExceptionFactory.ConnectPointFailed($"{rangePoints.First()}-{rangePoints.Last()}", verificat_module.Name, verificat_module.NumberChassis, verificat_module.Number);
+      await verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last(), _userInteractionService);
 
       foreach (int point in rangePoints)
       {

@@ -31,7 +31,7 @@ namespace Ask.Core.Services.FilesUtility
           FlowDocument doc = new FlowDocument(new Paragraph(new Run(text)))
           {
             FontFamily = new FontFamily("Consolas"),
-            FontSize = 14,
+            FontSize = 10,
             PagePadding = new Thickness(50),
             TextAlignment = TextAlignment.Left,
             ColumnWidth = double.PositiveInfinity

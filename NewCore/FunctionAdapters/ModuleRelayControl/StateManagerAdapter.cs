@@ -54,20 +54,11 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
         }
 
         return answer;
-      }, messageService);
-
+      }, messageService, deviceTask: true);
 
       if (!result)
       {
-        var error = ConnectionExceptionAdapter.InitializeFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, answer);
-        if (error != null)
-        {
-          throw error;
-        }
-        else
-        {
-          result = true;
-        }
+        throw ConnectionExceptionAdapter.InitializeFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, answer);
       }
 
       return (result, answer);
@@ -76,7 +67,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      var result = await _stateManager.DisconnectAsync();
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _stateManager.DisconnectAsync(), messageService, deviceTask: true);
 
       if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
       {
@@ -85,15 +76,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       if (!result)
       {
-        var error = ConnectionExceptionAdapter.ResetFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, "Ошибка выполнения команды");
-        if (error != null)
-        {
-          throw error;
-        }
-        else
-        {
-          result = true;
-        }
+        throw ConnectionExceptionAdapter.ResetFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number, "Ошибка выполнения команды"); ;
       }
 
       IsReset?.Invoke();

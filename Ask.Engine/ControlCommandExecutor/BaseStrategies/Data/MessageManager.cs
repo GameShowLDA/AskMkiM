@@ -3,21 +3,23 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
   internal class MessageManager
   {
-    public static async Task<(bool,double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value)
+    public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value)
     {
       if (await ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
-        value = new Random().Next(0, (int)upperLimit * 2);
+        if (upperLimit != -1)
+        {
+          value = new Random().Next(0, (int)upperLimit * 2);
+        }
+        else
+        {
+          value = new Random().Next();
+        }
       }
 
       bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;

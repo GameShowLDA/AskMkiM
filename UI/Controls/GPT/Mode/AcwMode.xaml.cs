@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Message;
+﻿using Message;
 using System.Windows;
 using System.Windows.Controls;
 

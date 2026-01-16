@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.UI;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 
@@ -21,9 +20,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return connect;
       }
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => meter.ContinuityManager.SetContinuityModeAsync(userMessageService), userMessageService))
-      {
-      }
+      await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
       return connect;
     }
     static internal async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter, IUserInteractionService userMessageService)

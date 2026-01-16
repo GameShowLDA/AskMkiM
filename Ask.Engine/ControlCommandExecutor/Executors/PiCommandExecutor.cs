@@ -1,7 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -20,8 +17,6 @@ using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
-using System.Diagnostics.Metrics;
-using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -98,9 +93,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeAccumulationContext.CommandManager = context.CommandExecutionManager;
       nodeAccumulationContext.CommandModel = command;
       nodeAccumulationContext.MessageService = context.Console;
-      nodeAccumulationContext.Value = 80;
+      nodeAccumulationContext.Value = 10;
       nodeAccumulationContext.LowerLimit = 0;
-      nodeAccumulationContext.HigherLimit = 80;
+      nodeAccumulationContext.HigherLimit = 10;
       nodeAccumulationContext.Unit = "мА";
       nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
@@ -144,7 +139,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, 80, command.VoltageType);
+        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, nodeAccumulationContext.HigherLimit, command.VoltageType);
         errorMessage.AddRange(errMes);
       }
       else
@@ -181,23 +176,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.A1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
-        if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService), userMessageService))
-        {
-          throw BusExceptionFactory.ConnectFailed(SwitchingBus.B1.ToString(), module.Name, module.NumberChassis, module.Number);
-        }
+        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
       }
     }
 
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => dbc.ConnectorManager.ConnectBreakdownTester(userMessageService), userMessageService))
-      {
-        throw ConnectorExceptionFactory.ConnectBreakdownFailed(dbc.Name, dbc.NumberChassis, dbc.Number);
-      }
+      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
     }
 
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double voltage, VoltageEnum.Type voltageType)
@@ -216,7 +202,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.AcwManger.Mode.SetModeAsync(userMessageService);
         await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(80, userMessageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(40, userMessageService);
 
         if (time == 60)
         {
@@ -258,20 +244,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (type == VoltageEnum.Type.ACW)
         {
-          var answer = (await breadDown.AcwManger.Measure.MeasureAsync(value)).value;
-          var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? answer < value : !await ExecutionConfig.GetIsErrorSimulationEnabled();
-          if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
-          {
-            await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения прочности изоляции", message: $"{answer} мА", type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          }
-          return (result, answer);
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, 10, answer.value);
         }
         else
         {
-          var answer = (await breadDown.DcwManger.Measure.MeasureAsync(value)).value;
-          var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? answer < value : !await ExecutionConfig.GetIsErrorSimulationEnabled();
-          await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения прочности изоляции", message: $"{answer} мА", type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          return (result, answer);
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, 10, answer.value);
         }
 
       }, messageService);
@@ -306,8 +285,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           {
             type = ShowMessageModel.MessageType.Error;
           }
-
-
 
           return type == ShowMessageModel.MessageType.Success ? true : false;
         }

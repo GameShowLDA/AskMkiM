@@ -1,5 +1,6 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.Multimeter;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
@@ -33,19 +34,21 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetResistanceModeAsync(IUserInteractionService? userMessageService = null)
     {
-      var result = await _resistanceMeasurement.SetResistanceModeAsync();
-
-      if (!result || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        if (UserMessageServiceProvider.Instance != null)
-        {
+        var succes = await _resistanceMeasurement.SetResistanceModeAsync();
 
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _device,
-            "Установка режима измерения сопротивления",
-            result,
-            1);
+        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения сопротивления", succes, 1);
         }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw ResistanceExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 
       return result;

@@ -63,6 +63,7 @@
 		<Rule color="Mnemonic">\bИЕ\b</Rule>
 		<Rule color="Mnemonic">\bЭТ\b</Rule>
 		<Rule color="Mnemonic">\bПТ\b</Rule>
+		<Rule color="Mnemonic">\bВШ\b</Rule>
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" multiline="true"/>

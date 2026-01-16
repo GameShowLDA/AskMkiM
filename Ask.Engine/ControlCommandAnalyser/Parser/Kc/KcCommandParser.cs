@@ -193,7 +193,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           if (lower == null)
           {
             finalLower = minResistance;
-            model.Warnings.Add(GeneralWarnings.DefaultResistainceLowLimit(model.StartLineNumber, $"{commandNumber} {mnemonic}", $"{finalLower} {model.ResistanceUnit}"));
+            //model.Warnings.Add(GeneralWarnings.DefaultResistainceLowLimit(model.StartLineNumber, $"{commandNumber} {mnemonic}", $"{finalLower} {model.ResistanceUnit}"));
           }
           else
           {
