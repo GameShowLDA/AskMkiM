@@ -305,13 +305,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return string.IsNullOrEmpty(t) ? string.Empty : t.Replace("*", "").Trim();
     }
 
-    public static (Dictionary<string, List<string>>, List<ErrorItem>) ParseBusPoints(string expr, RmCommandModel rmCommandModel)
+    public static (Dictionary<string, List<(string, string)>>, List<ErrorItem>) ParseBusPoints(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
     {
       if (rmCommandModel == null || rmCommandModel.PointsMap == null || rmCommandModel.PointsMap.Count == 0)
         return (null, null);
 
       var errors = new List<ErrorItem>();
-      var buses = new Dictionary<string, List<string>>();
+      var buses = new Dictionary<string, List<(string, string)>>();
 
       // Убираем пробелы/табы/переводы строк
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
@@ -358,32 +358,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         foreach (var token in expandedTokens)
         {
           // Проверяем наличие точки в РМ
-          if (!rmCommandModel.PointsMap.ContainsValue(token))
+          if (rmCommandModel.PointsMap.ContainsKey(token) == false)
           {
-            errors.Add(new ErrorItem
-            {
-              Description = $"Точка {token} отсутствует в РМ (шина {busName}).",
-              Code = ErrorCode.Gen_InvalidPoint
-            });
+            errors.Add(GeneralErrors.UnknownPoint(token, lineNumber, command));
             continue; // просто пишем ошибку и идём дальше
           }
 
           // Получаем мнемонику (ключ) по значению
-          if (rmCommandModel.TryGetKeyByValue(token, out string key))
+          if (rmCommandModel.PointsMap.ContainsKey(token))
           {
-            if(buses.ContainsKey(busName) == false)
+            if (buses.ContainsKey(busName) == false)
             {
-              buses.Add(busName, new List<string>());
+              buses.Add(busName, new List<(string, string)>());
             }
-            buses[busName].Add(key);
+            var adress = rmCommandModel.PointsMap[token];
+            buses[busName].Add((token, adress));
           }
           else
           {
-            errors.Add(new ErrorItem
-            {
-              Description = $"Не удалось сопоставить точку {token} с мнемоникой РМ.",
-              Code = ErrorCode.Gen_InvalidPoint
-            });
+            errors.Add(GeneralErrors.UnknownPoint(token, lineNumber, command));
           }
         }
       }

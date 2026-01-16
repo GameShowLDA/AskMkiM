@@ -1,12 +1,9 @@
-﻿using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.Errors.Translation;
+﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
@@ -108,7 +105,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
-        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel);        
+        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");        
         
         // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
@@ -123,8 +120,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
           }
         }
 
-        // Проверим, что схема непуста (есть хотя бы одна точка)
-        ValidateScheme(commandNumber, mnemonic, numberLine, model, scheme);
+        if(busDictionary.Count > 0)
+        {
+          model.BusPointsDictionary = busDictionary;
+        }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
@@ -149,21 +148,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
-    }
-
-    private static void ValidateScheme(string commandNumber, string mnemonic, int numberLine, PtCommandModel model, SchemeModel? scheme)
-    {
-      if (scheme == null || scheme.IsEmpty())
-      {
-        LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
-      }
-      else
-      {
-        model.Scheme = scheme; // ← просто присваиваем схему в модель
-        LogInformation(
-           $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
-      }
-    }
+    }    
   }
 }

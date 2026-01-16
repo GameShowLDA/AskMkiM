@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.П, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.С)]
-  public class PtCommandModel : BaseCommandModel 
+  public class PtCommandModel : BaseCommandModel
   {
     public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.PT).DisplayName;
 
@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public Dictionary<string, List<string>> BusPointsdictionary { get; set; }
+    public Dictionary<string, List<(string, string)>> BusPointsDictionary { get; set; } = new();
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.
