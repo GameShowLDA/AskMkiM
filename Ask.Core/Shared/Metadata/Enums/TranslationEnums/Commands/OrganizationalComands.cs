@@ -40,6 +40,11 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// </summary>
     UP,
 
+    [CommandOrganizationalAttribute("ПТ")]
+    /// <summary>
+    /// Тип команды PT.
+    /// </summary>
+    PT,
     [CommandOrganizationalAttribute("ВШ")]
     /// <summary>
     /// Тип команды VSH.
