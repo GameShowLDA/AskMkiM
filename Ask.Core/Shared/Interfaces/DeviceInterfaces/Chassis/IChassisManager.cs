@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
 {
@@ -7,6 +8,8 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
   /// </summary>
   public interface IChassisManager : IDevice, IHeadUnit
   {
+    BusStructureEnum.Type BusType { get; set; }
+
     /// <summary>
     /// Управление питанием шасси.
     /// </summary>
