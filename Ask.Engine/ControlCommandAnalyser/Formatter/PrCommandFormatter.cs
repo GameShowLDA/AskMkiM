@@ -29,24 +29,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       else
       {
         yield return $"\tКлючи команды не указаны.";
-      }
-
-      // Нижний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(pr.LowerLimitResistanceSource))
-      {
-        yield return $"\tНижний порог сопротивления: {pr.LowerLimitResistanceSource}";
-      }
-
-
-      // Верхний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(pr.HigherLimitResistanceSource))
-      {
-        yield return $"\tВерхний порог сопротивления: {pr.HigherLimitResistanceSource}";
-      }
-      else
-      {
-        yield return $"\tВерхний порог сопротивления не задан.";
-      }
+      }      
 
       if (pr.Comment.Count > 0)
       {
@@ -69,7 +52,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tВремя выполнения не задано.";
       }
 
-      yield return "\tЗаданные точки:";
       if (CommandsModel.GetRMModel() == null)
       {
         yield return "\tМодель РМ не задана!";
@@ -81,30 +63,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield break;
       }
 
-      if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
-      {
-        yield return "\t\tРазобщенные точки:";
-        for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
-        {
-          var points = pr.Scheme.GetPointsDisconnected(pr.Scheme.GroupModels[i]);
-          if (points != null)
-          {
-            string str = string.Empty;
-            str += $"\t\t{i + 1}. *";
-
-            foreach (var point in points)
-            {
-              str += $"{point.Mnemonic}[{point}]#";
-            }
-            yield return str.Remove(str.Length - 1);
-          }
-        }
-      }
-
-
       if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
       {
-        yield return "\tСообщенные точки:";
+        yield return "\tПроверка на сообщение:";
+        yield return "\t\tЗаданные точки:";
 
         var j = 1;
         for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
@@ -124,6 +86,58 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
               yield return str.Remove(str.Length - 1);
             }
           }
+        }
+        // Нижний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
+        {
+          yield return $"\tНижний порог сопротивления: {pr.ConnectedLowerLimitResistanceSource}";
+        }
+
+        // Верхний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
+        {
+          yield return $"\tВерхний порог сопротивления: {pr.ConnectedHigherLimitResistanceSource}";
+        }
+        else
+        {
+          yield return $"\tВерхний порог сопротивления не задан.";
+        }
+      }
+
+      if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      {
+        yield return "\tПроверка на разобщение:";
+        yield return "\t\tЗаданные точки:";
+        for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
+        {
+          var points = pr.Scheme.GetPointsDisconnected(pr.Scheme.GroupModels[i]);
+          if (points != null)
+          {
+            string str = string.Empty;
+            str += $"\t\t{i + 1}. *";
+
+            foreach (var point in points)
+            {
+              str += $"{point.Mnemonic}[{point}]#";
+            }
+            yield return str.Remove(str.Length - 1);
+          }
+        }
+
+        // Нижний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
+        {
+          yield return $"\tНижний порог сопротивления: {pr.DisconnectedLowerLimitResistanceSource}";
+        }
+
+        // Верхний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
+        {
+          yield return $"\tВерхний порог сопротивления: {pr.DisconnectedHigherLimitResistanceSource}";
+        }
+        else
+        {
+          yield return $"\tВерхний порог сопротивления не задан.";
         }
       }
 

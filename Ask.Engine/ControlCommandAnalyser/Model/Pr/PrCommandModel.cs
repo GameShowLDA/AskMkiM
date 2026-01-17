@@ -30,22 +30,42 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
     /// <summary>
     /// Нижняя граница значеня сопротивления (например, "100<МОм")
     /// </summary>
-    public string? LowerLimitResistanceSource { get; set; }
+    public string? DisconnectedLowerLimitResistanceSource { get; set; }
 
     /// <summary>
     /// Нижняя граница значеня сопротивления (например, "100<МОм")
     /// </summary>
-    public double? LowerLimitResistance { get; set; }
+    public double? DisconnectedLowerLimitResistance { get; set; }
 
     /// <summary>
     /// Верхняя граница значения сопротивления (например, "МОм<100").
     /// </summary>
-    public string? HigherLimitResistanceSource { get; set; }
+    public string? DisconnectedHigherLimitResistanceSource { get; set; }
 
     /// <summary>
     /// Верхняя граница значения сопротивления (например, "МОм<100").
     /// </summary>
-    public double? HigherLimitResistance { get; set; }
+    public double? DisconnectedHigherLimitResistance { get; set; }
+
+    /// <summary>
+    /// Нижняя граница значеня сопротивления (например, "100<МОм")
+    /// </summary>
+    public string? ConnectedLowerLimitResistanceSource { get; set; }
+
+    /// <summary>
+    /// Нижняя граница значеня сопротивления (например, "100<МОм")
+    /// </summary>
+    public double? ConnectedLowerLimitResistance { get; set; }
+
+    /// <summary>
+    /// Верхняя граница значения сопротивления (например, "МОм<100").
+    /// </summary>
+    public string? ConnectedHigherLimitResistanceSource { get; set; }
+
+    /// <summary>
+    /// Верхняя граница значения сопротивления (например, "МОм<100").
+    /// </summary>
+    public double? ConnectedHigherLimitResistance { get; set; }
 
     /// <summary>
     /// Список точек измерения.
