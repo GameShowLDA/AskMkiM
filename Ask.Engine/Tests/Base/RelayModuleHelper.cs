@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device;
+﻿using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -7,6 +6,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.Base
@@ -285,14 +286,7 @@ namespace Ask.Engine.Tests.Base
       double upper = 1e12)
     {
       token.ThrowIfCancellationRequested();
-
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
-        return param;
-
-      double result = default;
-
-      await meter.ResistanceManager.MeasureResistanceAsync(param, lower, upper);
-
+      var (_, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, upper, param);
       return result;
     }
 
