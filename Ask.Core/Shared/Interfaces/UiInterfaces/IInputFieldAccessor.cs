@@ -33,5 +33,10 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     /// Возвращает активную шину (bus), выбранную пользователем.
     /// </summary>
     BusPoint GetBus();
+
+    /// <summary>
+    /// Возвращает активную пару шин (SwitchingBusNew), выбранную пользователем.
+    /// </summary>
+    SwitchingBusNew GetPairBus();
   }
 }

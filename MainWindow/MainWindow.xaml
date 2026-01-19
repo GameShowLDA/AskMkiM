@@ -130,6 +130,8 @@
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" utilities:HelpProvider.HelpKey="CrossTestMkr"/>
 
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Relay_Contact_Resist_RKOMM}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="RelayContactResistMenuItem" Command="{Binding Test.RelayContactResistExecutorCommand}"/>
+
                     </MenuItem>
 
                 </MenuItem>

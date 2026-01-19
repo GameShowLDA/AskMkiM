@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components"
              mc:Ignorable="d" 
-             d:DesignHeight="720" d:DesignWidth="250">
+             d:DesignHeight="800" d:DesignWidth="250">
     <!--Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}"-->
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -291,6 +291,13 @@
                     </Border>
                 </Grid>
             </Border>
+
+            <!-- Группа шин (AB1..AB4) -->
+            <local:BusSelector x:Name="BusGroupSelector"
+                   Grid.Row="7"
+                   Visibility="{Binding IsBusGroupVisible,
+                                        RelativeSource={RelativeSource AncestorType=UserControl},
+                                        Converter={StaticResource BoolToVis}}"/>
 
         </Grid>
     </Grid>

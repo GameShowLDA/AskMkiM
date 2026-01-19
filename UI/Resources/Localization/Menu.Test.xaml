@@ -32,4 +32,6 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_PIACW_Group" Key="menu.test.tests.piacw.group" />
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_Cross_MKR" Key="menu.test.tests.cross.mkr" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Relay_Contact_Resist_RKOMM" Key="menu.test.tests.relay.contact.resist.rkomm" />
 </ResourceDictionary>
