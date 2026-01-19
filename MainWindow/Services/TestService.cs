@@ -71,7 +71,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Добавляет элемент управления для контроля сопротивления контактов реле коммутатора в multiEditors.
     /// </summary>
-    public async Task AddRelayContactResistExecutorControlAsync() =>
+    public void AddRelayContactResistExecutorControlAsync() =>
       _multiWindow.AddControl("Сопротивление коммутатора", new RkommConnectionControl(), TypeWindow.DeviceControl);
   }
 }

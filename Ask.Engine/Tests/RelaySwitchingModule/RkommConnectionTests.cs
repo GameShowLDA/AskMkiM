@@ -107,13 +107,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           IsBlockStart: true);
 
       // Подключение к устройствам (МКР + УКШ + мультиметр)
-      cancellationToken.ThrowIfCancellationRequested();
       await RelayModuleHelper.ConnectIfNeededAsync(_module, _userInteractionService, cancellationToken);
 
-      cancellationToken.ThrowIfCancellationRequested();
       await RelayModuleHelper.ConnectIfNeededAsync(_busSwitcher, _userInteractionService, cancellationToken);
 
-      cancellationToken.ThrowIfCancellationRequested();
       await RelayModuleHelper.ConnectIfNeededAsync(_fastMeter, _userInteractionService, cancellationToken);
 
       await _userInteractionService.ShowMessageAsync(
@@ -150,9 +147,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
         // Коммутируем точку
-        cancellationToken.ThrowIfCancellationRequested();
         await RelayModuleHelper.PointConnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
         await RelayModuleHelper.PointConnectAsync(_module, BusPoint.B, i, _userInteractionService, cancellationToken);
 
         // Измеряем сопротивление ПОСЛЕ коммутации точки
@@ -165,9 +160,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"Сопротивление точки {i}", message: $"{result} Ом", type: result <= data.Param ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
 
         // Отключаем точку
-        cancellationToken.ThrowIfCancellationRequested();
         await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
         await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.B, i, _userInteractionService, cancellationToken);
       }
     }

@@ -1,10 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Adapters;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.Errors.Device.Multimeter;
-using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -48,9 +44,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.ConnectBusAsync(bus, userMessageService: _userInteractionService), _userInteractionService))
-        throw BusExceptionFactory.ConnectFailed(bus.ToString(), module.Name, module.NumberChassis, module.Number);
+      await module.BusManager.ConnectBusAsync(bus, userMessageService: _userInteractionService);
 
       return true;
     }
@@ -63,9 +57,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.BusManager.DisconnectBusAsync(bus), _userInteractionService))
-        throw BusExceptionFactory.DisconnectFailed(bus.ToString(), module.Name, module.NumberChassis, module.Number);
+      await module.BusManager.DisconnectBusAsync(bus);
 
       return true;
     }
@@ -79,12 +71,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> InitializeModule(IUserInteractionService messageService, IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken, string roleName = null)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      var (state, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.InitializeAsync(messageService), _userInteractionService);
-
-      if (!state)
-      {
-        ConnectionExceptionAdapter.InitializeFailed(module.Name, module.NumberChassis, module.Number);
-      }
+      await module.ConnectableManager.InitializeAsync(messageService);
 
       return true;
     }
@@ -95,8 +82,7 @@ namespace Ask.Engine.Tests.Base
     /// <param name="module">Блок коммутации</param>
     public static async Task ResetModule(IUserInteractionService messageService, IUserInteractionService _userInteractionService, IRelaySwitchModule module)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.ConnectableManager.ResetAsync(messageService), _userInteractionService))
-        throw ConnectionExceptionAdapter.ResetFailed(module.Name, module.NumberChassis, module.Number);
+      await module.ConnectableManager.ResetAsync(messageService);
     }
 
     /// <summary>
@@ -109,8 +95,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.ConnectRelayAsync(bus, point, _userInteractionService), _userInteractionService))
-        throw RelayExceptionFactory.ConnectPointFailed(point.ToString(), module.Name, module.NumberChassis, module.Number);
+      await module.PointManager.ConnectRelayAsync(bus, point, _userInteractionService);
 
       return true;
     }
@@ -125,8 +110,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.PointManager.DisconnectRelayAsync(bus, point, _userInteractionService), _userInteractionService))
-        throw RelayExceptionFactory.DisconnectPointFailed(point.ToString(), module.Name, module.NumberChassis, module.Number);
+      await module.PointManager.DisconnectRelayAsync(bus, point, _userInteractionService);
 
       return true;
     }
@@ -139,8 +123,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> MeterEnableAsync(IUserInteractionService messageService, IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.ConnectMeterAsync(_userInteractionService), _userInteractionService))
-        throw MeterExceptionFactory.ConnectFailed(module.Name, module.NumberChassis, module.Number);
+      await module.MeterManager.ConnectMeterAsync(_userInteractionService);
 
       return true;
     }
@@ -150,10 +133,10 @@ namespace Ask.Engine.Tests.Base
     /// </summary>
     /// <param name="module">Блок коммутации</param>
     /// <returns>Возвращает <c>true</c>, если устройство выключилось; иначе — <c>false</c>.</returns>
-    public static async Task<bool> MeterDisableAsync(IUserInteractionService messageService, IUserInteractionService _userInteractionService, IRelaySwitchModule module)
+    public static async Task<bool> MeterDisableAsync(IUserInteractionService messageService, IUserInteractionService _userInteractionService, IRelaySwitchModule module, CancellationToken cancellationToken)
     {
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.DisconnectMeterAsync(_userInteractionService), _userInteractionService))
-        throw MeterExceptionFactory.DisconnectFailed(module.Name, module.NumberChassis, module.Number);
+      cancellationToken.ThrowIfCancellationRequested();
+      await module.MeterManager.DisconnectMeterAsync(_userInteractionService);
 
       return true;
     }
@@ -166,8 +149,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> GetMeterAnswer(IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => module.MeterManager.GetMeterResponseAsync(_userInteractionService), _userInteractionService))
-        throw MeterExceptionFactory.MeterAnswerFailed(module.Name, module.NumberChassis, module.Number);
+      await module.MeterManager.GetMeterResponseAsync(_userInteractionService);
 
       return true;
     }
@@ -255,13 +237,7 @@ namespace Ask.Engine.Tests.Base
     {
       token.ThrowIfCancellationRequested();
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(
-            () => uksh.ConnectorManager.ConnectMultimeter(pairBus, ui),
-            ui))
-      {
-        throw ConnectorExceptionFactory.ConnectMultiMeterFailed(
-          uksh.Name, uksh.NumberChassis, uksh.Number);
-      }
+      await uksh.ConnectorManager.ConnectMultimeter(pairBus, ui);
     }
 
     /// <summary>
@@ -281,13 +257,7 @@ namespace Ask.Engine.Tests.Base
     {
       token.ThrowIfCancellationRequested();
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(
-            () => meter.ResistanceManager.SetResistanceModeAsync(ui),
-            ui))
-      {
-        throw ResistanceExceptionFactory.SetModeFailed(
-          meter.Name, meter.NumberChassis, meter.Number);
-      }
+      await meter.ResistanceManager.SetResistanceModeAsync(ui);
     }
 
     /// <summary>
@@ -316,34 +286,14 @@ namespace Ask.Engine.Tests.Base
     {
       token.ThrowIfCancellationRequested();
 
-      try
-      {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
-          return param;
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
+        return param;
 
-        double result = default;
+      double result = default;
 
-        bool ok = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-        {
-          result = await meter.ResistanceManager.MeasureResistanceAsync(param, lower, upper);
-          return true;
-        }, ui);
+      await meter.ResistanceManager.MeasureResistanceAsync(param, lower, upper);
 
-        if (!ok)
-          throw ResistanceExceptionFactory.SetMeasureFailed(
-            meter.Name, meter.NumberChassis, meter.Number);
-
-        return result;
-      }
-      catch (DeviceException)
-      {
-        throw;
-      }
-      catch (Exception ex)
-      {
-        throw ResistanceExceptionFactory.SetMeasureFailed(
-          meter.Name, meter.NumberChassis, meter.Number, ex.Message);
-      }
+      return result;
     }
 
     /// <summary>
@@ -401,13 +351,7 @@ namespace Ask.Engine.Tests.Base
     {
       token.ThrowIfCancellationRequested();
 
-      if (!await UserActionHelper.GetRunWithUserRepeatAsync(
-            () => uksh.ConnectorManager.DisconnectMultimeter(pairBus, ui),
-            ui))
-      {
-        throw ConnectorExceptionFactory.DisconnectMultiMeterFailed(
-          uksh.Name, uksh.NumberChassis, uksh.Number);
-      }
+      await uksh.ConnectorManager.DisconnectMultimeter(pairBus, ui);
     }
 
     /// <summary>
@@ -423,13 +367,7 @@ namespace Ask.Engine.Tests.Base
       CancellationToken token)
     {
       token.ThrowIfCancellationRequested();
-
-      if (meter is not IDevice device)
-        return;
-
-      await UserActionHelper.GetRunWithUserRepeatAsync(
-        () => device.ConnectableManager.DisconnectAsync(ui),
-        ui);
+      await meter.ConnectableManager.DisconnectAsync(ui);
     }
 
     /// <summary>
@@ -444,25 +382,10 @@ namespace Ask.Engine.Tests.Base
       CancellationToken token)
     {
       token.ThrowIfCancellationRequested();
+      await uksh.ConnectorManager.DisconnectAllBuses(ui);
 
-      try
-      {
-        // Если поддерживается — отключаем все шины
-        await UserActionHelper.GetRunWithUserRepeatAsync(
-          () => uksh.ConnectorManager.DisconnectAllBuses(ui),
-          ui);
-      }
-      catch
-      {
-        // Лукашин, добавь отключение всех шин после отключения УКШ)
-      }
-
-      if (uksh is IDevice device)
-      {
-        await UserActionHelper.GetRunWithUserRepeatAsync(
-          () => device.ConnectableManager.DisconnectAsync(ui),
-          ui);
-      }
+      token.ThrowIfCancellationRequested();
+      await uksh.ConnectableManager.DisconnectAsync(ui);
     }
 
     #endregion
