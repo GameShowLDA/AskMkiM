@@ -24,7 +24,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   internal class PrCommandExecutor : ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
-    static private PointModel _basePoint;
     private double firstValue = 0;
     private double secondValue = -1;
     private bool continuityManager = true;
@@ -110,6 +109,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       methodExecutionContext.TypeCommand = MeasurementTypeCommand.PR;
 
       NodeAccumulationContext nodeAccumulationContext = methodExecutionContext.CreateChild<NodeAccumulationContext>();
+      PairwiseFirstPointContext pairwiseFirstPointContext = methodExecutionContext.CreateChild<PairwiseFirstPointContext>();
 
       List<ShowMessageModel> errorMessage = new();
 
@@ -144,8 +144,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
         else if (command.AlgorithmKey.Contains("Т1"))
         {
-          NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-          var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, resistance);
+          pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
+          var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
           errorMessage.AddRange(errMes);
         }
         else

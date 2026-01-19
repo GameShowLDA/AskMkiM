@@ -88,6 +88,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       MethodExecutionContext methodExecutionContext = nodeFullContext.CreateChild<MethodExecutionContext>();
       NodeAccumulationContext nodeAccumulationContext = nodeFullContext.CreateChild<NodeAccumulationContext>();
+      PairwiseFirstPointContext pairwiseFirstPointContext = nodeFullContext.CreateChild<PairwiseFirstPointContext>();
 
       firstValue = nodeFullContext.LowerLimit;
 
@@ -105,8 +106,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
-        NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, command.Resistance.Value);
+        pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
+        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
         errorMessage.AddRange(errMes);
       }
       else

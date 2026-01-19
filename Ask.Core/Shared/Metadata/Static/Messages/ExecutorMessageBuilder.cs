@@ -150,7 +150,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       };
     }
 
-    public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null)
+    public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null, string comparisonSign = "=")
     {
       var type = typeof(MeasurementTypeCommand);
 
@@ -168,11 +168,11 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
 
       if (higherLimit != -1)
       {
-        return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
+        return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
       else
       {
-        return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм= {value} {attr.Unit}");
+        return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
     }
   }

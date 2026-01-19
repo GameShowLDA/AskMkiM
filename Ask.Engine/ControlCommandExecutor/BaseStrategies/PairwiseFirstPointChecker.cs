@@ -1,10 +1,13 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
@@ -19,18 +22,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(SchemeModel schemeModel, NodeAccumulationChecker.PerformMeasurementAsync performMeasurementAsync, CommandExecutionManager manager, BaseCommandModel baseCommandModel, IUserInteractionService messageService, double resistance = 0, VoltageEnum.Type type = VoltageEnum.Type.DCW)
+    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(PairwiseFirstPointContext context)
     {
       List<ShowMessageModel> errorsMessgae = new List<ShowMessageModel>();
 
-      List<List<ChainModel>> errorChain = new();
-      var pointsList = schemeModel.GetPointsDisconnected();
+      var pointsList = context.SchemeModel.GetPointsDisconnected();
       if (pointsList.Count == 0)
       {
         return errorsMessgae;
       }
 
       _basePoint = new ChainModel(pointsList.FirstOrDefault());
+      var messageService = context.MessageService;
 
       await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint));
 
@@ -57,27 +60,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
         await DeviceManager.ConnectChainToBusAAsync(chain, messageService);
 
-        var measured = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken());
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken());
         if (!measured.Result)
         {
-          errorChain.Add(new List<ChainModel>() { _basePoint, chain });
+          var chainStr = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { _basePoint, chain });
+          var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, chainStr, ">");
+          err.Status = ShowMessageModel.MessageType.Error;
+          err.IndentLevel = 2;
+          await messageService.ShowMessageAsync(err);
+         
+          errorsMessgae.Add(err);
+          context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
         }
 
         await DeviceManager.DisconnectChainFromBusAAsync(chain, messageService);
-      }
-
-      if (errorChain.Count > 0)
-      {
-        foreach (var chain in errorChain)
-        {
-          var chainStr = await PointFormater.GetFormatDisconnectPoint(chain);
-          var err = new ShowMessageModel($"{chainStr}", message: "Обнаружено замыкание", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
-
-          errorsMessgae.Add(err);
-
-          manager.AddErrorMethod(baseCommandModel.PointErrors.ChainError($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", chainStr, baseCommandModel.StartLineNumber, baseCommandModel.FormattedStartLineNumber));
-          await messageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {err.ToString()}"));
-        }
       }
 
       return errorsMessgae;
