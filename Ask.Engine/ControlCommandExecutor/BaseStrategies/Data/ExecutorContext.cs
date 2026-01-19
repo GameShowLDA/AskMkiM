@@ -8,7 +8,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
   internal abstract class ExecutorContext
   {
-
     internal MeasurementTypeCommand TypeCommand { get; set; }
 
     /// <summary>
