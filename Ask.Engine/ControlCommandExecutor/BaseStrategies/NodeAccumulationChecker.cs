@@ -92,13 +92,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           else
           {
             await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную цепь", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-
-            ErrorMessage.Add(new ShowMessageModel(
-              $"Ошибка локализации",
-              message: $"Не удалось точно определить замыкание цепей",
-              type: ShowMessageModel.MessageType.Error)
-            { IndentLevel = 3 });
-
+            ErrorMessage.Add(new ShowMessageModel($"Ошибка локализации", message: $"Не удалось точно определить замыкание цепей", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
           }
         }
 

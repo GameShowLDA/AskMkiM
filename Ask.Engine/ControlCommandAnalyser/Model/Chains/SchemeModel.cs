@@ -23,6 +23,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     /// </summary>
     private Dictionary<GroupModel, ChainModel> ChainDisconnectedPointsMap = new();
 
+
+    /// <summary>
+    /// Словарь цепей и списков разобщенных точек.
+    /// </summary>
+    public List<(ChainModel, ChainModel)> ErrorChainDisconnectedPointsMap { get; set; }
+
     /// <summary>
     /// Список всех точек в схеме.
     /// </summary>
@@ -114,7 +120,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
 
     public GroupModel GetPointsDisconnected()
     {
-      return new GroupModel(ChainDisconnectedPointsMap.Values.ToList());
+      var allChains = ChainDisconnectedPointsMap.Values.ToList();
+
+      if (ErrorChainDisconnectedPointsMap == null || ErrorChainDisconnectedPointsMap.Count == 0)
+        return new GroupModel(allChains);
+
+      var graph = BuildGraph(allChains, ErrorChainDisconnectedPointsMap);
+      var components = FindConnectedComponents(allChains, graph);
+
+      // Оборачиваем все найденные цепи в один GroupModel
+      return new GroupModel(components.Select(c => MergeChainModels(c)).ToList());
     }
 
     /// <summary>
@@ -170,5 +185,72 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
       return result;
     }
     #endregion
+
+    private ChainModel MergeChainModels(List<ChainModel> chains)
+    {
+      var merged = new ChainModel();
+
+      foreach (var chain in chains)
+        merged.PointModels.AddRange(chain.PointModels);
+
+      return merged;
+    }
+
+    private Dictionary<ChainModel, HashSet<ChainModel>> BuildGraph(
+    List<ChainModel> points,
+    List<(ChainModel A, ChainModel B)> edges)
+    {
+      var adjacency = new Dictionary<ChainModel, HashSet<ChainModel>>();
+
+      foreach (var p in points)
+        adjacency[p] = new HashSet<ChainModel>();
+
+      foreach (var (a, b) in edges)
+      {
+        adjacency[a].Add(b);
+        adjacency[b].Add(a);
+      }
+
+      return adjacency;
+    }
+
+    private List<List<ChainModel>> FindConnectedComponents(
+    List<ChainModel> points,
+    Dictionary<ChainModel, HashSet<ChainModel>> graph)
+    {
+      var result = new List<List<ChainModel>>();
+      var visited = new HashSet<ChainModel>();
+
+      foreach (var start in points)
+      {
+        if (visited.Contains(start))
+          continue;
+
+        var stack = new Stack<ChainModel>();
+        var component = new List<ChainModel>();
+
+        stack.Push(start);
+        visited.Add(start);
+
+        while (stack.Count > 0)
+        {
+          var node = stack.Pop();
+          component.Add(node);
+
+          foreach (var neighbor in graph[node])
+          {
+            if (!visited.Contains(neighbor))
+            {
+              visited.Add(neighbor);
+              stack.Push(neighbor);
+            }
+          }
+        }
+
+        result.Add(component);
+      }
+
+      return result;
+    }
   }
 }

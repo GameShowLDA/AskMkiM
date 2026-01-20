@@ -168,10 +168,19 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
 
       if (higherLimit != -1)
       {
+        if ((value < lowerLimit || value > higherLimit) && (measurementTypeCommand == MeasurementTypeCommand.PI_ACW || measurementTypeCommand == MeasurementTypeCommand.PI_DCW))
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
+        }
+
         return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
       else
       {
+        if ((value < lowerLimit || value > higherLimit) && (measurementTypeCommand == MeasurementTypeCommand.PI_ACW || measurementTypeCommand == MeasurementTypeCommand.PI_DCW))
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ ИЗОЛЯЦИИ");
+        }
         return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
     }

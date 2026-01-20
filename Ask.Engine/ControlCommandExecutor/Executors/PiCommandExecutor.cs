@@ -23,7 +23,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   internal class PiCommandExecutor : ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
-    double amperhMax = 40;
+    double amperhMaxDCW = 10;
+    double amperhMaxACW = 80;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
 
@@ -94,9 +95,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeAccumulationContext.CommandManager = context.CommandExecutionManager;
       nodeAccumulationContext.CommandModel = command;
       nodeAccumulationContext.MessageService = context.Console;
-      nodeAccumulationContext.Value = amperhMax;
       nodeAccumulationContext.LowerLimit = 0;
-      nodeAccumulationContext.HigherLimit = amperhMax;
       nodeAccumulationContext.Unit = "мА";
       nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
@@ -104,10 +103,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (command.VoltageType == VoltageEnum.Type.DCW)
       {
         nodeAccumulationContext.TypeCommand = MeasurementTypeCommand.PI_DCW;
+        nodeAccumulationContext.Value = amperhMaxDCW;
+        nodeAccumulationContext.HigherLimit = amperhMaxDCW;
       }
       else
       {
         nodeAccumulationContext.TypeCommand = MeasurementTypeCommand.PI_ACW;
+        nodeAccumulationContext.Value = amperhMaxACW;
+        nodeAccumulationContext.HigherLimit = amperhMaxACW;
       }
 
       NodeFullContext nodeFullContext = nodeAccumulationContext.CreateChild<NodeFullContext>();
@@ -201,7 +204,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.AcwManger.Mode.SetModeAsync(userMessageService);
         await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(40, userMessageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxACW, userMessageService);
 
         if (time == 60)
         {
@@ -217,7 +220,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.DcwManger.Mode.SetModeAsync(userMessageService);
         await breakDown.DcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(20, userMessageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxDCW, userMessageService);
 
         if (time == 60)
         {
@@ -244,12 +247,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         if (type == VoltageEnum.Type.ACW)
         {
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(value);
-          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMax, answer.value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
         }
         else
         {
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(value);
-          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMax, answer.value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
         }
 
       }, messageService);
