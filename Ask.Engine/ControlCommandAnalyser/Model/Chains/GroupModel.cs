@@ -11,5 +11,10 @@
     {
       this.ChainModels = chainModels;
     }
+    public GroupModel()
+    {
+      ChainModels = new List<ChainModel>();
+    }
+
   }
 }

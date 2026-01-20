@@ -89,15 +89,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Подключает указанные точки к шине A через соответствующий модуль коммутации.
     /// В случае неудачи предлагает пользователю повторить попытку.
     /// </summary>
-    /// <param name="point">Точка, которую необходимо подключить к шине B.</param>
+    /// <param name="groupChains">Группа цепей, которую необходимо подключить к шине B.</param>
     /// <param name="messageService">Сервис для отображения сообщений и взаимодействия с пользователем.</param>
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности подключения точки после всех попыток.
-    public static async Task ConnectAllFromBusBAsync(List<List<PointModel>> points, IUserInteractionService messageService)
+    public static async Task ConnectAllFromBusBAsync(GroupModel groupChains, IUserInteractionService messageService)
     {
-      foreach (var point in points)
+      foreach (var chain in groupChains.ChainModels)
       {
-        foreach (var item in point)
+        foreach (var item in chain.PointModels)
         {
           await DeviceManager.ConnectPointToBusBAsync(item, messageService);
         }
@@ -109,15 +109,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Подключает указанные точки к шине A через соответствующий модуль коммутации.
     /// В случае неудачи предлагает пользователю повторить попытку.
     /// </summary>
-    /// <param name="point">Точка, которую необходимо подключить к шине B.</param>
+    /// <param name="groupChains">Группа цепей, которую необходимо подключить к шине B.</param>
     /// <param name="messageService">Сервис для отображения сообщений и взаимодействия с пользователем.</param>
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности подключения точки после всех попыток.
-    public static async Task ConnectAllFromBusAAsync(List<List<PointModel>> points, IUserInteractionService messageService)
+    public static async Task ConnectAllFromBusAAsync(GroupModel groupChains, IUserInteractionService messageService)
     {
-      foreach (var point in points)
+      foreach (var chain in groupChains.ChainModels)
       {
-        foreach (var item in point)
+        foreach (var item in chain.PointModels)
         {
           await DeviceManager.ConnectPointToBusAAsync(item, messageService);
         }
@@ -164,16 +164,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Отключает указанные точки от шины A через соответствующий модуль коммутации.
     /// В случае неудачи предлагает пользователю повторить попытку.
     /// </summary>
-    /// <param name="point">Точка, которую необходимо отключить от шины A.</param>
+    /// <param name="groupChains">Группа цепей, которую необходимо отключить от шины A.</param>
     /// <param name="messageService">Сервис для отображения сообщений и взаимодействия с пользователем.</param>
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности отключить точку после всех попыток.
     /// </exception>
-    public static async Task DisconnectAlPointlFromBusAAsync(List<List<PointModel>> points, IUserInteractionService messageService)
+    public static async Task DisconnectAlPointlFromBusAAsync(GroupModel groupChains, IUserInteractionService messageService)
     {
-      foreach (var point in points)
+      foreach (var chain in groupChains.ChainModels)
       {
-        foreach (var item in point)
+        foreach (var item in chain.PointModels)
         {
           await DisconnectPointFromBusAAsync(item, messageService);
         }
@@ -184,16 +184,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Отключает указанные точки от шины B через соответствующий модуль коммутации.
     /// В случае неудачи предлагает пользователю повторить попытку.
     /// </summary>
-    /// <param name="point">Точка, которую необходимо отключить от шины A.</param>
+    /// <param name="groupChains">Группа цепей, которую необходимо отключить от шины A.</param>
     /// <param name="messageService">Сервис для отображения сообщений и взаимодействия с пользователем.</param>
     /// <exception cref="RelayControlException">
     /// Выбрасывается при невозможности отключить точку после всех попыток.
     /// </exception>
-    public static async Task DisconnectAllPointFromBusBAsync(List<List<PointModel>> points, IUserInteractionService messageService)
+    public static async Task DisconnectAllPointFromBusBAsync(GroupModel groupChains, IUserInteractionService messageService)
     {
-      foreach (var point in points)
+      foreach (var chain in groupChains.ChainModels)
       {
-        foreach (var item in point)
+        foreach (var item in chain.PointModels)
         {
           await DisconnectPointFromBusBAsync(item, messageService);
         }

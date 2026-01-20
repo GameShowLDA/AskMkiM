@@ -34,8 +34,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     static public async Task<List<ShowMessageModel>> CheckSequenceAsync(NodeAccumulationContext context)
     {
       List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
-      var pointsList = context.SchemeModel.GetPointsDisconnected();
-      if (pointsList.Count == 0)
+      var groupChains = context.SchemeModel.GetPointsDisconnected();
+      if (groupChains.ChainModels.Count == 0)
       {
         return ErrorMessage;
       }
@@ -45,12 +45,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode));
 
-      foreach (var points in pointsList)
+      foreach (var chain in groupChains.ChainModels)
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
 
         var str = string.Empty;
-        foreach (var point in points)
+        foreach (var point in chain.PointModels)
         {
           str += $"{EquipmentService.GetPointKey(point)},";
         }
@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
 
-        foreach (var point in points)
+        foreach (var point in chain.PointModels)
         {
           await DeviceManager.ConnectPointToBusAAsync(point, messageService);
         }
@@ -67,17 +67,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         if (!measured.Result)
         {
           step = 0;
-          var chains = EquipmentService.GetDisconnectChainsBefore(context.SchemeModel, points);
+          var chains = EquipmentService.GetDisconnectChainsBefore(context.SchemeModel, chain);
           var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken, context.VoltageType);
           if (localized != null)
           {
 
             if (context.CommandModel.PointErrors != null)
             {
-              context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", PointModel.ConvertToPointStrings(points), PointModel.ConvertToPointStrings(localized), measured.Value.ToString(), context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
+              context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", PointModel.ConvertToPointStrings(chain.PointModels), PointModel.ConvertToPointStrings(localized.PointModels), measured.Value.ToString(), context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
             }
 
-            var strError = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { new ChainModel(points), new ChainModel(localized) });
+            var strError = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { chain, localized });
 
             var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, strError);
             err.Status = ShowMessageModel.MessageType.Error;
@@ -102,17 +102,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
         }
 
-        foreach (var point in points)
+        foreach (var point in chain.PointModels)
         {
           await DeviceManager.SwitchPointFromBusAToBAsync(point, messageService);
         }
       }
 
-      foreach (var points in pointsList)
+      foreach (var chains in groupChains.ChainModels)
       {
-        foreach (var point in points)
+        foreach (var points in chains.PointModels)
         {
-          await DeviceManager.DisconnectPointFromBusBAsync(point, messageService);
+          await DeviceManager.DisconnectPointFromBusBAsync(points, messageService);
         }
       }
 
@@ -128,18 +128,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="resistance">Пороговое сопротивление для проверки.</param>
     /// <param name="messageService">Сервис сообщений.</param>
     /// <returns>Локализованная точка или null, если локализация не удалась.</returns>
-    public static async Task<List<PointModel>?> LocalizeFaultyPointAsync(
+    public static async Task<ChainModel?> LocalizeFaultyPointAsync(
         PerformMeasurementAsync performMeasurementAsync,
-        List<List<PointModel>> candidates,
+        GroupModel candidates,
         double resistance,
         IUserInteractionService messageService,
-        CancellationToken cancellationToken, 
+        CancellationToken cancellationToken,
         VoltageEnum.Type type
         )
     {
       try
       {
-        List<PointModel> errorPoint = null;
+        ChainModel errorPoint = null;
         step++;
 
         await messageService.ShowMessageAsync(new ShowMessageModel($"Выполенение шага {step}"));
@@ -151,13 +151,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         var measured = await performMeasurementAsync(resistance, messageService, cancellationToken, type: type);
         if (!measured.Result)
         {
-          if (rightPart.Count > 1)
+          if (rightPart.ChainModels.Count > 1)
           {
             errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type);
           }
           else
           {
-            errorPoint = rightPart[0];
+            errorPoint = rightPart.ChainModels[0];
             return errorPoint;
           }
         }
@@ -169,7 +169,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
           await DeviceManager.ConnectAllFromBusBAsync(leftPart, messageService);
 
-          if (leftPart.Count > 1)
+          if (leftPart.ChainModels.Count > 1)
           {
             errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type);
           }
@@ -178,7 +178,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             measured = await performMeasurementAsync(resistance, messageService, cancellationToken, type: type);
             if (!measured.Result)
             {
-              errorPoint = leftPart[0];
+              errorPoint = leftPart.ChainModels[0];
               return errorPoint;
             }
             else
@@ -204,11 +204,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </summary>
     /// <param name="points">Список точек.</param>
     /// <returns>Кортеж из двух списков: левая и правая половины.</returns>
-    public static (List<List<PointModel>> Left, List<List<PointModel>> Right) SplitInHalf(List<List<PointModel>> points)
+    public static (GroupModel Left, GroupModel Right) SplitInHalf(GroupModel points)
     {
-      int middle = (points.Count + 1) / 2;
-      var left = points.Take(middle).ToList();
-      var right = points.Skip(middle).ToList();
+      int middle = (points.ChainModels.Count + 1) / 2;
+      var left = new GroupModel(points.ChainModels.Take(middle).ToList());
+      var right = new GroupModel(points.ChainModels.Skip(middle).ToList());
       return (left, right);
     }
   }

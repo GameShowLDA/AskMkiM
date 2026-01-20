@@ -26,13 +26,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       List<ShowMessageModel> errorsMessgae = new List<ShowMessageModel>();
 
-      var pointsList = context.SchemeModel.GetPointsDisconnected();
-      if (pointsList.Count == 0)
+      var groupChains = context.SchemeModel.GetPointsDisconnected();
+      if (groupChains.ChainModels.Count == 0)
       {
         return errorsMessgae;
       }
 
-      _basePoint = new ChainModel(pointsList.FirstOrDefault());
+      _basePoint = groupChains.ChainModels.FirstOrDefault();
       var messageService = context.MessageService;
 
       await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint));
@@ -40,17 +40,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 
       await DeviceManager.ConnectChainToBusBAsync(_basePoint, messageService);
-      pointsList.Remove(_basePoint.PointModels);
+      groupChains.ChainModels.Remove(_basePoint);
       await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
 
-      foreach (var points in pointsList)
+      foreach (var chain in groupChains.ChainModels)
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        var chain = new ChainModel(points);
-
+        
         string pointStr = string.Empty;
         var str = _basePoint.ToString();
-        foreach (var point in points)
+        foreach (var point in chain.PointModels)
         {
           str += $"{EquipmentService.GetPointKey(point)},";
         }

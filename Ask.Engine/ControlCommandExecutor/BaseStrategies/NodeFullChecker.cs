@@ -26,8 +26,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
 
-      var pointsList = context.SchemeModel.GetPointsDisconnected();
-      if (pointsList.Count == 0)
+      var groupChains = context.SchemeModel.GetPointsDisconnected();
+      if (groupChains.ChainModels.Count == 0)
       {
         return ErrorMessage;
       }
@@ -35,18 +35,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode));
 
-      foreach (var point in pointsList)
+      foreach (var chainModels in groupChains.ChainModels)
       {
-        var chainModels = new ChainModel(point);
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
         await DeviceManager.ConnectChainToBusBAsync(chainModels, context.MessageService);
       }
 
-      foreach (var point in pointsList)
+      foreach (var chainModels in groupChains.ChainModels)
       {
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
-        var chainModels = new ChainModel(point);
-
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Проверка {chainModels.ToString()}"), IsBlockStart: true);
 

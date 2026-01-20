@@ -64,46 +64,46 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         var chains = pointsList[i];
 
-        for (int j = 0; j < chains.Count; j++)
+        for (int j = 0; j < chains.ChainModels.Count; j++)
         {
-          var points = chains[j];
+          var points = chains.ChainModels[j];
           string chainsStr = "*";
-          for (int z = 0; z < points.Count; z++)
+          for (int z = 0; z < points.PointModels.Count; z++)
           {
-            if ((z + 1) == points.Count)
+            if ((z + 1) == points.PointModels.Count)
             {
               if (await DeviceDisplayConfig.GetMachineAddressVisibilityAsync())
               {
-                chainsStr += $"{points[z].Mnemonic}[{points[z].ToString()}]*";
+                chainsStr += $"{points.PointModels[z].Mnemonic}[{points.PointModels[z].ToString()}]*";
               }
               else
               {
-                chainsStr += $"{points[z].Mnemonic}*";
+                chainsStr += $"{points.PointModels[z].Mnemonic}*";
               }
             }
             else
             {
               if (await DeviceDisplayConfig.GetMachineAddressVisibilityAsync())
               {
-                chainsStr += $"{points[z].Mnemonic}[{points[z].ToString()}],";
+                chainsStr += $"{points.PointModels[z].Mnemonic}[{points.PointModels[z].ToString()}],";
               }
               else
               {
-                chainsStr += $"{points[z].Mnemonic},";
+                chainsStr += $"{points.PointModels[z].Mnemonic},";
               }
             }
           }
 
           await context.MessageService.AppendEmptyLineAsync();
           await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(chainsStr), IsBlockStart: true);
-          var _basePoint = points[0];
-          points.Remove(_basePoint);
+          var _basePoint = points.PointModels[0];
+          points.PointModels.Remove(_basePoint);
 
           await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = 1 }, IsBlockStart: true);
           await DeviceManager.ConnectPointToBusBAsync(_basePoint, context.MessageService);
 
 
-          foreach (var point in points)
+          foreach (var point in points.PointModels)
           {
             context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
 

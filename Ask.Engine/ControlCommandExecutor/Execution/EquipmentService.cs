@@ -428,16 +428,16 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// Возвращает все точки из AnalyzePoints, которые идут до указанной точки по порядку.
     /// Используется для определения ранее замкнутых точек.
     /// </summary>
-    /// <param name="currentPoint">Текущая точка, относительно которой выбираются предыдущие.</param>
+    /// <param name="currentChain">Текущая цепь, относительно которой выбираются предыдущие.</param>
     /// <returns>Список точек, предшествующих указанной точке в AnalyzePoints.</returns>
-    public static List<List<PointModel>> GetDisconnectChainsBefore(SchemeModel schemeModel, List<PointModel> currentPoint)
+    public static GroupModel GetDisconnectChainsBefore(SchemeModel schemeModel, ChainModel currentChain)
     {
-      List<List<PointModel>> result = new();
-      foreach (var chain in schemeModel.GetPointsDisconnected())
+      List<ChainModel> result = new();
+      foreach (var chain in schemeModel.GetPointsDisconnected().ChainModels)
       {
-        if (chain == currentPoint)
+        if (chain == currentChain)
         {
-          return result;
+          return new GroupModel(result);
         }
         else
         {
@@ -445,7 +445,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
       }
 
-      return result;
+      return new GroupModel(result);
     }
 
     /// <summary>
