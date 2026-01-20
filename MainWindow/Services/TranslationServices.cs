@@ -246,6 +246,7 @@ namespace MainWindowProgram.Services
         item.SetRightEditor(translateEditor);
         item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
         item.TranslationModels = models;
+        item.GetRightEditor().RightBreakpoint = models.Select(x => x.FormattedStartLineNumber).ToList();
       }
     }
 
