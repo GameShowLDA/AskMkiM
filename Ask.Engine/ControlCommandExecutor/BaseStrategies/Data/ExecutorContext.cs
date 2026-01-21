@@ -53,6 +53,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// </summary>
     public double HigherLimit { get; set; }
 
+    /// <summary>
+    /// Указывает, что текущая команда была вызвана другой командой,
+    /// а не инициирована напрямую внешним источником.
+    /// </summary>
+    public bool IsInvokedByAnotherCommand { get; set; }
+
+
     public string UnitMnemonic { get; set; }
     public string Unit { get; set; }
 
@@ -68,6 +75,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       Unit = other.Unit;
       UnitMnemonic = other.UnitMnemonic;
       TypeCommand = other.TypeCommand;
+      IsInvokedByAnotherCommand = other.IsInvokedByAnotherCommand;
     }
 
     public T CreateChild<T>() where T : ExecutorContext, new()

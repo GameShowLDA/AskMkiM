@@ -9,6 +9,7 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using System.Security.Claims;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -24,15 +25,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <returns>Задача, представляющая выполнение проверки.</returns>
     static public async Task<List<ShowMessageModel>> CheckSequenceAsync(PairwiseFirstPointContext context)
     {
-      List<ShowMessageModel> errorsMessgae = new List<ShowMessageModel>();
+      List<ShowMessageModel> errorsMessage = new List<ShowMessageModel>();
+      List<(ChainModel, ChainModel)> errorChains = new List<(ChainModel, ChainModel)>();
 
-      var pointsList = context.SchemeModel.GetPointsDisconnected();
-      if (pointsList.Count == 0)
+      var groupChains = context.SchemeModel.GetPointsDisconnected();
+      if (groupChains.ChainModels.Count <= 1)
       {
-        return errorsMessgae;
+        return errorsMessage;
       }
 
-      _basePoint = new ChainModel(pointsList.FirstOrDefault());
+      _basePoint = groupChains.ChainModels.FirstOrDefault();
       var messageService = context.MessageService;
 
       await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint));
@@ -40,17 +42,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 
       await DeviceManager.ConnectChainToBusBAsync(_basePoint, messageService);
-      pointsList.Remove(_basePoint.PointModels);
+      groupChains.ChainModels.Remove(_basePoint);
       await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
 
-      foreach (var points in pointsList)
+      foreach (var chain in groupChains.ChainModels)
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        var chain = new ChainModel(points);
 
         string pointStr = string.Empty;
         var str = _basePoint.ToString();
-        foreach (var point in points)
+        foreach (var point in chain.PointModels)
         {
           str += $"{EquipmentService.GetPointKey(point)},";
         }
@@ -60,23 +61,34 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
         await DeviceManager.ConnectChainToBusAAsync(chain, messageService);
 
-        var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken());
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), type: context.VoltageType);
         if (!measured.Result)
         {
+          errorChains.Add((_basePoint, chain));
           var chainStr = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { _basePoint, chain });
-          var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, chainStr, ">");
+          var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, chainStr);
           err.Status = ShowMessageModel.MessageType.Error;
           err.IndentLevel = 2;
           await messageService.ShowMessageAsync(err);
-         
-          errorsMessgae.Add(err);
+
+          errorsMessage.Add(err);
           context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
         }
 
         await DeviceManager.DisconnectChainFromBusAAsync(chain, messageService);
       }
 
-      return errorsMessgae;
+      foreach (var item in errorChains)
+      {
+        var chainStr = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { item.Item1, item.Item2 });
+        LogLib.LoggerUtility.LogDebug($"Замкнутая пара: {chainStr}");
+      }
+
+      if (context.IsInvokedByAnotherCommand)
+      {
+        context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
+      }
+      return errorsMessage;
     }
   }
 }
