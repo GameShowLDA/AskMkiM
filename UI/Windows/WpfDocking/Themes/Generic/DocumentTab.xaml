@@ -42,12 +42,14 @@
                                        TextWrapping="NoWrap" />
 
                             <Button Grid.Column="1"
+                                    Name="closeButton"
                                     Width="16"
                                     Height="16"
                                     Margin="5,0,0,0"
                                     Padding="0"
                                     Background="Transparent"
                                     BorderBrush="Transparent"
+                                    Visibility="{Binding CloseButtonVisibility, RelativeSource={RelativeSource TemplatedParent}}"
                                     Cursor="Hand"
                                     Command="{x:Static docking:DockCommands.PerformClose}">
                                 <Path Data="M 0 0 L 8 8 M 8 0 L 0 8"
@@ -59,12 +61,15 @@
                     </Border>
 
                     <ControlTemplate.Triggers>
+
                         <Trigger Property="UIElement.IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{StaticResource MouseOverBrush}" />
                         </Trigger>
+                        
                         <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{StaticResource SelectedBrush}" />
                         </DataTrigger>
+                        
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

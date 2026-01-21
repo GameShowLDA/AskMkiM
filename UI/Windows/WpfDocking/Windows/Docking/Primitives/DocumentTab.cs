@@ -1,6 +1,9 @@
-﻿using System.Windows;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 
 namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
 {
@@ -17,9 +20,38 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
     public static readonly DependencyProperty ShowsIconProperty = DependencyProperty.RegisterAttached(
         "ShowsIcon", typeof(bool), typeof(DocumentTab), new FrameworkPropertyMetadata(BooleanBoxes.False));
 
+    public override void OnApplyTemplate()
+    {
+      base.OnApplyTemplate();
+      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(OnLockedChanged);
+
+      CloseButtonVisibility = Ask.Core.Services.Config.AppSettings.SystemStateManager.GetIsLocked() ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void OnLockedChanged(SystemStateEvents.LockedChanged e)
+    {
+      Dispatcher.Invoke(() =>
+      {
+        CloseButtonVisibility = e.IsLocked ? Visibility.Collapsed : Visibility.Visible;
+      });
+    }
+
     static DocumentTab()
     {
       DefaultStyleKeyProperty.OverrideMetadata(typeof(DocumentTab), new FrameworkPropertyMetadata(typeof(DocumentTab)));
+    }
+
+    public static readonly DependencyProperty CloseButtonVisibilityProperty =
+        DependencyProperty.Register(
+            nameof(CloseButtonVisibility),
+            typeof(Visibility),
+            typeof(DocumentTab),
+            new FrameworkPropertyMetadata(Visibility.Visible));
+
+    public Visibility CloseButtonVisibility
+    {
+      get => (Visibility)GetValue(CloseButtonVisibilityProperty);
+      set => SetValue(CloseButtonVisibilityProperty, value);
     }
 
     /// <summary>Gets the value of <see cref="P:UI.Windows.WpfDocking.Windows.Docking.Primitives.DocumentTab.ShowsIcon" /> attached property

@@ -114,9 +114,6 @@ namespace UI.Controls.ProtocolNew
     /// <param name="cancellationToken">Токен отмены ожидания.</param>
     public static async Task WaitForNextStepKeyAsync(CancellationToken cancellationToken)
     {
-      // Выводим постоянное сообщение об ожидании
-      MessageEventAdapter.RaiseWarningMessage("Ожидание нажатия F5, F10 или F11...");
-
       _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
       using (cancellationToken.Register(() => _tcs.TrySetCanceled(cancellationToken)))
@@ -124,6 +121,10 @@ namespace UI.Controls.ProtocolNew
         try
         {
           await _tcs.Task;
+        }
+        catch (TaskCanceledException)
+        {
+          throw new OperationCanceledException("Ожидание пошаговой команды было прервано.", cancellationToken);
         }
         finally
         {
