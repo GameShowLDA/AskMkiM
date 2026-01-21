@@ -133,5 +133,10 @@ namespace NewCore.Function.Keysight3466new
     {
       return Task.FromResult(true);
     }
+
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

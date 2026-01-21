@@ -127,5 +127,10 @@ namespace NewCore.Function.ModuleRelayControl
     {
       return await ResetAsync();
     }
+
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

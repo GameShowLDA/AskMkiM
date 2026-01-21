@@ -62,5 +62,10 @@ namespace NewCore.Function.ManagerChassis
     {
       return await ResetAsync();
     }
+
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

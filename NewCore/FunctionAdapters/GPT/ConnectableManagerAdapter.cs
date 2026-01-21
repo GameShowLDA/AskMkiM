@@ -101,5 +101,10 @@ namespace NewCore.FunctionAdapters.GPT
       IsReset?.Invoke();
       return result;
     }
+
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

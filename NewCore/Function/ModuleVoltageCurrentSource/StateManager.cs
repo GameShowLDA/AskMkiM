@@ -93,5 +93,10 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
       await _moduleVoltageCurrentSource.DeviceProtocol.OperationLock.WaitAsync();
       return await ResetAsync();
     }
+
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
   }
 }

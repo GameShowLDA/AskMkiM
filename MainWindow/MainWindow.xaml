@@ -156,7 +156,6 @@
                 </MenuItem>
 
                 <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin" Command="{Binding Admin.AdminPanelCommand}">
-
                     <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
                         <MenuItem Header="МеШ" Style="{DynamicResource StyleMenuItem}" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />

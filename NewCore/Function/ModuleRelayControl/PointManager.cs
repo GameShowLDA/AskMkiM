@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -362,6 +363,25 @@ namespace NewCore.Function.ModuleRelayControl
       }
 
       return false;
+    }
+
+    public IReadOnlyList<PointConnectionInfo> GetConnectedPoints()
+    {
+      var result = new List<PointConnectionInfo>();
+
+      foreach (var kvp in IsConnectedPointBusA)
+      {
+        if (kvp.Value)
+          result.Add(new PointConnectionInfo(kvp.Key, BusPoint.A));
+      }
+
+      foreach (var kvp in IsConnectedPointBusB)
+      {
+        if (kvp.Value)
+          result.Add(new PointConnectionInfo(kvp.Key, BusPoint.B));
+      }
+
+      return result;
     }
   }
 }

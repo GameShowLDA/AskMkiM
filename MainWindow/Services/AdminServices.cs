@@ -1,6 +1,7 @@
 ﻿using MainWindowProgram.Test.Protocol;
 using System.Windows;
 using UI.Controls.AdminPanel;
+using UI.Controls.DeviceHealthView;
 using UI.Controls.GPT;
 using UI.Controls.Settings.Protocol;
 using static UI.Components.Invoke.OpenFileButton;
@@ -59,9 +60,7 @@ namespace MainWindowProgram.Services
     public async Task StartConsoleTest() => await Test.ConsoleTest.TestData.PrintTestData();
 
     public void AdminPanel() => _multiWindow.AddControl("Панель администратора", new AdminPanelControl(), TypeWindow.Settings);
-
     public void ProtocolTest() => _multiWindow.AddControl("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
-
     public void ProtocolBaseTest() => _multiWindow.AddControl("Тест теста протокола", new ProtocolTemplateEditorControl(), TypeWindow.DeviceControl);
   }
 }

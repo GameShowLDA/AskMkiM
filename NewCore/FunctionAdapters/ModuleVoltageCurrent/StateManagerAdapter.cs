@@ -72,6 +72,11 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       return result;
     }
 
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {

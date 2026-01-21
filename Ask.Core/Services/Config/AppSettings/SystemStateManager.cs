@@ -68,6 +68,7 @@ namespace Ask.Core.Services.Config.AppSettings
     {
       await Task.Run(() =>
       {
+        IsLocked = enable;
         SystemStateEventAdapter.RaiseLockedChanged(enable);
       });
     }
@@ -104,8 +105,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>
     /// <see langword="true"/>, если интерфейс заблокирован; <see langword="false"/> — если разблокирован.
     /// </returns>
-    public static async Task<bool> GetIsLocked() =>
-      await Task.Run(() => IsLocked);
+    public static bool GetIsLocked() =>IsLocked;
 
     /// <summary>
     /// Асинхронно возвращает текущий статус блокировки интерфейса.

@@ -271,4 +271,9 @@ public class ConnectableManager : IConnectable
 
     return (isValid, msg);
   }
+
+  public string GetConnectionStatus()
+  {
+    throw new NotImplementedException();
+  }
 }

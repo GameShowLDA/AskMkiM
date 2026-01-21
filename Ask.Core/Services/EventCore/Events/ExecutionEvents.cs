@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.EventInterfaces;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.EventInterfaces;
 
 namespace Ask.Core.Services.EventCore.Events
 {
@@ -34,6 +35,15 @@ namespace Ask.Core.Services.EventCore.Events
       public StepByStepModeChanged(bool isEnabled)
       {
         IsEnabled = isEnabled;
+      }
+    }
+
+    public class ActiveDeviceChanged : IEvent
+    {
+      public List<IDevice> Devices { get; }
+      public ActiveDeviceChanged(List<IDevice> devices)
+      {
+        Devices = devices;
       }
     }
   }

@@ -41,6 +41,11 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       return await ResetAsync(userMessageService);
     }
 
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {

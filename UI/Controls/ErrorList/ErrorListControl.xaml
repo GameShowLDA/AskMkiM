@@ -36,17 +36,19 @@
                 Orientation="Horizontal"
                 Margin="5"
                 HorizontalAlignment="Left">
-                <!-- Пример кнопок, потом заменишь -->
-                <ToggleButton x:Name="WarningButton"
-              Style="{StaticResource VsFilterButtonStyle}"
-              Content="0 из 0 предупреждений"
-              PreviewMouseDown="WarningButton_PreviewMouseDown"
-              Margin="0,0,6,0"/>
+                
+                <ToggleButton 
+                    x:Name="WarningButton"
+                    Style="{StaticResource VsFilterButtonStyle}"
+                    Content="0 из 0 предупреждений"
+                    PreviewMouseDown="WarningButton_PreviewMouseDown"
+                    Margin="0,0,6,0"/>
 
-                <ToggleButton x:Name="ErrorsButton"
-              Style="{StaticResource VsFilterButtonStyle}"
-              Content="0 из 0 ошибок"
-              PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
+                <ToggleButton 
+                    x:Name="ErrorsButton"
+                    Style="{StaticResource VsFilterButtonStyle}"
+                    Content="0 из 0 ошибок"
+                    PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
             </StackPanel>
 
             <DataGrid ItemsSource="{Binding Items, ElementName=root}"

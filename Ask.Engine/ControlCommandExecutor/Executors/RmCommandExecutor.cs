@@ -1,11 +1,14 @@
-﻿using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
+using System.Diagnostics.Metrics;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -33,17 +36,32 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var unique = context.GetUniqueMeasurementDevices();
 
+      List<IDevice> devices = new List<IDevice>();
+      if (EquipmentService.ValidRelayModules != null)
+      {
+        devices.AddRange(EquipmentService.ValidRelayModules);
+      }
+
+      if (EquipmentService.ValidSwitchingDevice != null)
+      {
+        devices.Add(EquipmentService.ValidSwitchingDevice);
+      }
+
       if (unique.Contains(MeasurementDevice.Multimeter))
       {
         var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
         await meter.ConnectableManager.InitializeAsync(context.Console);
+        devices.Add(meter);
       }
 
       if (unique.Contains(MeasurementDevice.BreakdownTester))
       {
         var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
         await breakDown.ConnectableManager.InitializeAsync(context.Console);
+        devices.Add(breakDown);
       }
+
+      ExecutionEventAdapter.RaiseDevicesChanged(devices);
     }
   }
 }

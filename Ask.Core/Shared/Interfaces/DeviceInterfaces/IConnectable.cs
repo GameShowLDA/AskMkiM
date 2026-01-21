@@ -36,5 +36,13 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     /// </summary>
     /// <returns></returns>
     Task<bool> ResetAsync(IUserInteractionService userMessageService = null);
+
+    /// <summary>
+    /// Возвращает текстовое описание текущего состояния подключения устройства.
+    /// Содержит информацию о статусе инициализации, подключения,
+    /// последних ответах и других параметрах, определённых реализацией.
+    /// </summary>
+    /// <returns>Строка состояния подключения.</returns>
+    string GetConnectionStatus();
   }
 }
