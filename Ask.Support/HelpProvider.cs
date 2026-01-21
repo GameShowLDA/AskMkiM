@@ -112,29 +112,33 @@ namespace Ask.Support
     /// </summary>
     public static void ShowHelp(string command)
     {
-      var helpDir = Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "AppHelp");
+      //MessageBox.Show($"[ShowHelp] command='{command}'", "DBG");
+
+      var helpDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Help", "AppHelp");
+      //MessageBox.Show($"[ShowHelp] helpDir='{helpDir}' exists={Directory.Exists(helpDir)}", "DBG");
+
       if (!Directory.Exists(helpDir))
       {
-        MessageBox.Show("Папка с справкой не найдена.", "Справка");
+        //MessageBox.Show("Папка со справкой не найдена.", "Справка");
         return;
       }
 
-      //try
-      //{
-      //  HelpServer.EnsureStarted();
-      //}
-      //catch (Exception ex)
-      //{
-      //  MessageBox.Show("Не удалось открыть справку!\nОбратитесь к разработчику!", "Справка");
-      //  LogError($"Не удалось запустить Help-сервер: {ex.Message}");
-      //  return;
-      //}
+      try
+      {
+        HelpServer.EnsureStarted();
+        //MessageBox.Show($"[ShowHelp] HelpServer started. Port={HelpServer.Port}", "DBG");
+      }
+      catch (Exception ex)
+      {
+        //MessageBox.Show("[ShowHelp] EnsureStarted failed:\n" + ex, "DBG");
+        return;
+      }
 
       string url = string.IsNullOrWhiteSpace(command)
-          ? "/index.html"
-          : $"/index.html?cmd={Uri.EscapeDataString(command)}";
+        ? "/index.html"
+        : $"/index.html?cmd={Uri.EscapeDataString(command)}";
+
+      //MessageBox.Show($"[ShowHelp] relativeUrl='{url}'", "DBG");
 
       OpenHelpViewer(url);
     }
@@ -144,32 +148,53 @@ namespace Ask.Support
 
     private static void OpenHelpViewer(string relativeFileAddress)
     {
+      // relativeFileAddress ожидается в виде "/index.html?cmd=..." или "/FastMenuCommand.html"
+      // Гарантируем старт сервера (на случай если кто-то вызвал OpenHelpViewer напрямую)
       try
       {
+        HelpServer.EnsureStarted();
+      }
+      catch (Exception ex)
+      {
+        //MessageBox.Show("Не удалось запустить сервер справки.\n" + ex.Message, "Справка");
+        return;
+      }
+
+      string fullUrl = $"http://localhost:{HelpServer.Port}{relativeFileAddress}";
+
+      try
+      {
+        // Создание/показ окна должно идти из UI-потока WPF
         if (Application.Current.Dispatcher.CheckAccess())
-          ShowHelpWindow($"http://localhost:{HelpServer.Port}" + relativeFileAddress);
+        {
+          ShowHelpWindow(fullUrl);
+        }
         else
-          Application.Current.Dispatcher.Invoke(() => ShowHelpWindow($"http://localhost:{HelpServer.Port}" + relativeFileAddress));
+        {
+          Application.Current.Dispatcher.Invoke(() => ShowHelpWindow(fullUrl));
+        }
       }
       catch (Exception ex)
       {
         Debug.WriteLine($"Ошибка открытия Help Viewer: {ex}");
-        Process.Start(new ProcessStartInfo($"http://localhost:{HelpServer.Port}" + relativeFileAddress) { UseShellExecute = true });
+
+        // Фолбэк: открыть в системном браузере
+        Process.Start(new ProcessStartInfo(fullUrl) { UseShellExecute = true });
       }
     }
 
     private static void ShowHelpWindow(string url)
     {
-      if (_helpWindow == null || !_helpWindow.IsLoaded)
+      //MessageBox.Show($"[ShowHelpWindow] url='{url}'\n_helpWindow is null={_helpWindow == null}", "DBG");
+
+      if (_helpWindow == null)
       {
         _helpWindow = new HelpViewerWindow();
-        _helpWindow.Closed += (s, e) => _helpWindow = null;
+        //MessageBox.Show("[ShowHelpWindow] HelpViewerWindow created", "DBG");
       }
 
       _helpWindow.Navigate(url);
-      _helpWindow.Show();
-      _helpWindow.Activate();
-      _helpWindow.Focus();
+      //MessageBox.Show("[ShowHelpWindow] Navigate() called", "DBG");
     }
   }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Windows;
 
 namespace Ask.Support
 {
@@ -13,13 +14,18 @@ namespace Ask.Support
     private static CancellationTokenSource _cts;
 
     /// <summary>Базовый URL (становится валидным после EnsureStarted()).</summary>
-    public static Uri BaseUrl => _port > 0 ? new Uri($"http://localhost:{_port}/") : null;
+    public static Uri? BaseUrl => _port > 0 ? new Uri($"http://localhost:{_port}/") : null;
+
+    public static string HelpRootDir => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Help", "AppHelp");
+
 
     /// <summary>
     /// Запускает HTTP-сервер на первом свободном порту, который выдаст ОС.
     /// </summary>
     public static void EnsureStarted()
     {
+      //MessageBox.Show($"[HelpServer] EnsureStarted enter. _listener null={_listener == null}", "DBG");
+
       if (_listener != null) return;
 
       const int maxAttempts = 10;
@@ -38,6 +44,8 @@ namespace Ask.Support
 
           _listener = listener;
           _port = candidatePort;
+
+          //MessageBox.Show($"[HelpServer] STARTED on port={_port}", "DBG");
 
           _cts = new CancellationTokenSource();
           _ = Task.Run(() => ListenLoop(_cts.Token));

@@ -1606,6 +1606,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />
+	  <PackageReference Include="Photino.NET" Version="4.0.16" />
 	</ItemGroup>
 
 	<ItemGroup>
