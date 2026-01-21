@@ -84,7 +84,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         LogLib.LoggerUtility.LogDebug($"Замкнутая пара: {chainStr}");
       }
 
-      context.SchemeModel.ErrorChainDisconnectedPointsMap = errorChains;
+      if (context.IsInvokedByAnotherCommand)
+      {
+        context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
+      }
       return errorsMessage;
     }
   }

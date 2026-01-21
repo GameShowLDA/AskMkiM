@@ -34,6 +34,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     static public async Task<List<ShowMessageModel>> CheckSequenceAsync(NodeAccumulationContext context)
     {
       List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
+      List<(ChainModel, ChainModel)> errorChains = new List<(ChainModel, ChainModel)>();
+
       var groupChains = context.SchemeModel.GetPointsDisconnected();
       if (groupChains.ChainModels.Count == 0)
       {
@@ -78,6 +80,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
 
             var strError = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { chain, localized });
+            errorChains.Add((chain, localized));
 
             var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, strError);
             err.Status = ShowMessageModel.MessageType.Error;
@@ -108,6 +111,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await DeviceManager.DisconnectPointFromBusBAsync(points, messageService);
         }
+      }
+
+
+      if (context.IsInvokedByAnotherCommand)
+      {
+        context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
       }
 
       return ErrorMessage;

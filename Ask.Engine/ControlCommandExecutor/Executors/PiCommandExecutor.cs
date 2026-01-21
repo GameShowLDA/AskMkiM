@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
     double amperhMaxDCW = 10;
-    double amperhMaxACW = 80;
+    double amperhMaxACW = 60;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
 
@@ -42,7 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      string nameSiCommand = $"{command.CommandNumber} СИ";
+      string nameSiCommand = $"ПИ/СИ1";
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
 
@@ -80,8 +80,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.SiCommand.CommandNumber = siCommanNumber + " " + 1;
 
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
+        commandExecutionContext.IsInvokedByAnotherCommand = true;
         var siCommandExecutor = new SiCommandExecutor();
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
+        command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 2", message: $"{nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 });
@@ -119,10 +121,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.VoltageType == VoltageEnum.Type.DCW)
       {
+        nodeFullContext.VoltageType = VoltageEnum.Type.DCW;
         pairwiseFirstPointContext.VoltageType = VoltageEnum.Type.DCW;
       }
       else
       {
+        nodeFullContext.VoltageType = VoltageEnum.Type.ACW;
         pairwiseFirstPointContext.VoltageType = VoltageEnum.Type.ACW;
       }
 
@@ -165,6 +169,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.SiCommand != null)
       {
+        nameSiCommand = $"ПИ/СИ2";
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 3", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
         var siCommandExecutor = new SiCommandExecutor();

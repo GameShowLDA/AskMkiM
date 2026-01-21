@@ -27,7 +27,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     /// <summary>
     /// Словарь цепей и списков разобщенных точек.
     /// </summary>
-    public List<(ChainModel, ChainModel)> ErrorChainDisconnectedPointsMap { get; set; }
+    private List<(ChainModel, ChainModel)> ErrorChainDisconnectedPointsMap { get; set; }
+
+    private List<(ChainModel A, ChainModel B)> _normalizedErrors = new();
 
     /// <summary>
     /// Список всех точек в схеме.
@@ -122,15 +124,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     {
       var allChains = ChainDisconnectedPointsMap.Values.ToList();
 
-      if (ErrorChainDisconnectedPointsMap == null || ErrorChainDisconnectedPointsMap.Count == 0)
+      if (_normalizedErrors == null || _normalizedErrors.Count == 0)
         return new GroupModel(allChains);
 
-      var graph = BuildGraph(allChains, ErrorChainDisconnectedPointsMap);
+      var graph = BuildGraph(allChains, _normalizedErrors);
       var components = FindConnectedComponents(allChains, graph);
 
-      // Оборачиваем все найденные цепи в один GroupModel
-      return new GroupModel(components.Select(c => MergeChainModels(c)).ToList());
+      return new GroupModel(components
+          .Select(c => MergeChainModels(c))
+          .ToList());
     }
+
 
     /// <summary>
     /// Возвращает список списков точек в строковом формате ("x.x.x").
@@ -184,6 +188,39 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
 
       return result;
     }
+
+    public void SetErrorChainDisconnectedPoints(List<(ChainModel, ChainModel)> errors)
+    {
+      _normalizedErrors = errors
+          ?.Select(e => (A: e.Item1, B: e.Item2))
+          .ToList()
+          ?? new List<(ChainModel, ChainModel)>();
+    }
+
+    public void SetErrorChainDisconnectedPoints(List<ChainModel> errors)
+    {
+      _normalizedErrors = new List<(ChainModel, ChainModel)>();
+
+      if (errors == null || errors.Count < 2)
+        return;
+
+      for (int i = 0; i < errors.Count - 1; i++)
+      {
+        _normalizedErrors.Add((errors[i], errors[i + 1]));
+      }
+    }
+
+    /// <summary>
+    /// Возвращает нормализованный список разорванных цепей 
+    /// в виде списка пар (ChainModel A, ChainModel B).
+    /// </summary>
+    /// <returns>Список нормализованных пар разорванных точек.</returns>
+    public List<(ChainModel A, ChainModel B)> GetErrorChainDisconnectedPoints()
+    {
+      return _normalizedErrors ?? new List<(ChainModel A, ChainModel B)>();
+    }
+
+
     #endregion
 
     private ChainModel MergeChainModels(List<ChainModel> chains)

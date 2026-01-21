@@ -17,6 +17,7 @@ using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -32,6 +33,19 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
 
+      if (context.IsInvokedByAnotherCommand)
+      {
+        try
+        {
+          nameCommand = $"{command.CommandNumber.Split(' ').First()} ПИ/{command.Mnemonic}{command.CommandNumber.Split(' ').Last()}";
+        }
+        catch
+        {
+          nameCommand = $"{command.CommandNumber} ПИ/{command.Mnemonic}";
+        }
+      }
+
+
       string message = string.Empty;
 
       foreach (var str in command.SourceLines)
@@ -39,7 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
 
-      if (!string.IsNullOrEmpty(message))
+      if (!string.IsNullOrEmpty(message) && !context.IsInvokedByAnotherCommand)
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
       }
@@ -85,6 +99,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeFullContext.Unit = "МОм";
       nodeFullContext.UnitMnemonic = "R";
       nodeFullContext.TypeCommand = MeasurementTypeCommand.SI;
+      nodeFullContext.IsInvokedByAnotherCommand = context.IsInvokedByAnotherCommand;
 
       MethodExecutionContext methodExecutionContext = nodeFullContext.CreateChild<MethodExecutionContext>();
       NodeAccumulationContext nodeAccumulationContext = nodeFullContext.CreateChild<NodeAccumulationContext>();
@@ -124,6 +139,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         await item.PointManager.DisconnectingAllPoint(context.Console);
       }
+
       if (errorMessage.Count > 0)
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
