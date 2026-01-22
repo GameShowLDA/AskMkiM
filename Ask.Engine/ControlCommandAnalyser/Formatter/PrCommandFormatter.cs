@@ -125,13 +125,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         }
 
         // Нижний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
+        if (!string.IsNullOrWhiteSpace(pr.DisconnectedLowerLimitResistanceSource))
         {
           yield return $"\tНижний порог сопротивления: {pr.DisconnectedLowerLimitResistanceSource}";
         }
 
         // Верхний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
+        if (!string.IsNullOrWhiteSpace(pr.DisconnectedHigherLimitResistanceSource))
         {
           yield return $"\tВерхний порог сопротивления: {pr.DisconnectedHigherLimitResistanceSource}";
         }

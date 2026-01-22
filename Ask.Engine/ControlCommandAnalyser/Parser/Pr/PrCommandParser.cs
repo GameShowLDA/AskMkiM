@@ -256,6 +256,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           $"Не указана верхняя граница при проверке на сообщение"));
       }
 
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource)&&!model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(PrErrors.ResistanceLimitsConflict(
+          model.StartLineNumber, 
+          $"{model.CommandNumber}   {model.Mnemonic}",
+          $"Не указана нижняя граница при проверке на разобщение"));
+      }
+
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
 
       LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
@@ -421,6 +430,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
         }
 
+        model.DisconnectedLowerLimitResistance = lower.Value;
+        model.DisconnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
         model.DisconnectedHigherLimitResistance = null;
         model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
@@ -443,11 +455,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
       //проверка на сообщение
-      model.ConnectedLowerLimitResistance = PR_DEFAULT_LOWER;
-      model.ConnectedLowerLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом";
+      model.ConnectedLowerLimitResistance = PR_MIN;
+      model.ConnectedLowerLimitResistanceSource = $"{PR_MIN} Ом";
 
-      model.ConnectedHigherLimitResistance = null;
-      model.ConnectedHigherLimitResistanceSource = null;
+      model.ConnectedHigherLimitResistance = PR_DEFAULT_LOWER;
+      model.ConnectedHigherLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом"; ;
     }
 
     private void ValidateAgainstMeter(PrCommandModel model, IFastMeter meter)
