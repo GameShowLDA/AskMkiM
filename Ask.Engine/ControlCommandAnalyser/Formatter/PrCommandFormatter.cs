@@ -66,6 +66,23 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
       {
         yield return "\tПроверка на сообщение:";
+
+        // Нижний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
+        {
+          yield return $"\t\tНижний порог сопротивления: {pr.ConnectedLowerLimitResistanceSource}";
+        }
+
+        // Верхний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
+        {
+          yield return $"\t\tВерхний порог сопротивления: {pr.ConnectedHigherLimitResistanceSource}";
+        }
+        else
+        {
+          yield return $"\t\tВерхний порог сопротивления не задан.";
+        }
+
         yield return "\t\tЗаданные точки:";
 
         var j = 1;
@@ -77,7 +94,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
             foreach (var points in pointsAll)
             {
               string str = string.Empty;
-              str += $"\t\t{j}. *";
+              str += $"\t\t\t{j}. *";
               j++;
               foreach (var point in points)
               {
@@ -87,26 +104,26 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
             }
           }
         }
-        // Нижний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
-        {
-          yield return $"\tНижний порог сопротивления: {pr.ConnectedLowerLimitResistanceSource}";
-        }
-
-        // Верхний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
-        {
-          yield return $"\tВерхний порог сопротивления: {pr.ConnectedHigherLimitResistanceSource}";
-        }
-        else
-        {
-          yield return $"\tВерхний порог сопротивления не задан.";
-        }
       }
 
       if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
       {
         yield return "\tПроверка на разобщение:";
+        // Нижний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.DisconnectedLowerLimitResistanceSource))
+        {
+          yield return $"\t\tНижний порог сопротивления: {pr.DisconnectedLowerLimitResistanceSource}";
+        }
+
+        // Верхний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.DisconnectedHigherLimitResistanceSource))
+        {
+          yield return $"\t\tВерхний порог сопротивления: {pr.DisconnectedHigherLimitResistanceSource}";
+        }
+        else
+        {
+          yield return $"\t\tВерхний порог сопротивления не задан.";
+        }
         yield return "\t\tЗаданные точки:";
         for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
         {
@@ -114,7 +131,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           if (points != null)
           {
             string str = string.Empty;
-            str += $"\t\t{i + 1}. *";
+            str += $"\t\t\t{i + 1}. *";
 
             foreach (var point in points)
             {
@@ -122,22 +139,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
             }
             yield return str.Remove(str.Length - 1);
           }
-        }
-
-        // Нижний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.DisconnectedLowerLimitResistanceSource))
-        {
-          yield return $"\tНижний порог сопротивления: {pr.DisconnectedLowerLimitResistanceSource}";
-        }
-
-        // Верхний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.DisconnectedHigherLimitResistanceSource))
-        {
-          yield return $"\tВерхний порог сопротивления: {pr.DisconnectedHigherLimitResistanceSource}";
-        }
-        else
-        {
-          yield return $"\tВерхний порог сопротивления не задан.";
         }
       }
 
