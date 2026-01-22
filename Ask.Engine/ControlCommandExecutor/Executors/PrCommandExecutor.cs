@@ -70,30 +70,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
 
       double resistance = 0;
-      if (command.LowerLimitResistance.HasValue)
-      {
-        firstValue = command.LowerLimitResistance.Value;
-        resistance = command.LowerLimitResistance.Value;
-      }
-      else
-      {
-        firstValue = 0;
-      }
-
-      if (command.HigherLimitResistance.HasValue)
-      {
-        secondValue = command.HigherLimitResistance.Value;
-      }
-      else
-      {
-        secondValue = meter.MaxContinuityResistance;
-      }
-
-      if (secondValue >= 1000)
-      {
-        continuityManager = false;
-      }
-
+     
       await SettingMeter(meter, context.Console);
 
       MethodExecutionContext methodExecutionContext = new MethodExecutionContext();
@@ -102,8 +79,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       methodExecutionContext.CommandModel = command;
       methodExecutionContext.MessageService = context.Console;
       methodExecutionContext.Value = resistance;
-      methodExecutionContext.LowerLimit = command.LowerLimitResistance.Value;
-      methodExecutionContext.HigherLimit = command.HigherLimitResistance != null ? command.HigherLimitResistance.Value : -1;
       methodExecutionContext.Unit = "Ом";
       methodExecutionContext.UnitMnemonic = "R";
       methodExecutionContext.TypeCommand = MeasurementTypeCommand.PR;
@@ -115,6 +90,33 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (!command.AlgorithmKey.Contains("ЗС"))
       {
+        if (command.ConnectedLowerLimitResistance.HasValue)
+        {
+          firstValue = command.ConnectedLowerLimitResistance.Value;
+          resistance = command.ConnectedLowerLimitResistance.Value;
+        }
+        else
+        {
+          firstValue = 0;
+        }
+
+        if (command.ConnectedHigherLimitResistance.HasValue)
+        {
+          secondValue = command.ConnectedHigherLimitResistance.Value;
+        }
+        else
+        {
+          secondValue = meter.MaxContinuityResistance;
+        }
+
+        if (secondValue >= 1000)
+        {
+          continuityManager = false;
+        }
+
+        methodExecutionContext.LowerLimit = firstValue;
+        methodExecutionContext.HigherLimit = secondValue != null ? secondValue : -1;
+
         ConnectedPointChecker.PerformMeasurementAsync measurePointConnected = ConnectedPointCheckerMeasurementAsync;
 
         ConnectedPointContext connectedPointContext = methodExecutionContext.CreateChild<ConnectedPointContext>();
@@ -125,6 +127,33 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
       if (!command.AlgorithmKey.Contains("ЗР"))
       {
+        if (command.DisconnectedLowerLimitResistance.HasValue)
+        {
+          firstValue = command.DisconnectedLowerLimitResistance.Value;
+          resistance = command.DisconnectedLowerLimitResistance.Value;
+        }
+        else
+        {
+          firstValue = 0;
+        }
+
+        if (command.DisconnectedHigherLimitResistance.HasValue)
+        {
+          secondValue = command.DisconnectedHigherLimitResistance.Value;
+        }
+        else
+        {
+          secondValue = meter.MaxContinuityResistance;
+        }
+
+        if (secondValue >= 1000)
+        {
+          continuityManager = false;
+        }
+
+        methodExecutionContext.LowerLimit = firstValue;
+        methodExecutionContext.HigherLimit = secondValue != null ? secondValue : -1;
+
         if (command.AlgorithmKey.Contains("К"))
         {
           NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
