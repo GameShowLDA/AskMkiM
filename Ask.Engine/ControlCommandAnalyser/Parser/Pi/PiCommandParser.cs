@@ -236,7 +236,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 
           // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
           int idxStarInFirstLine = remainderPi.IndexOf('*');
-          remainderPi = idxStarInFirstLine >= 0 ? remainderPi[..idxStarInFirstLine].Trim() : remainderPi.Trim();
+          int idxStarInSecondLine = remainderPi.LastIndexOf('*');
+          if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+          {
+            remainder =
+                remainder[..idxStarInFirstLine].Trim()
+                + remainder[(idxStarInSecondLine + 1)..].Trim();
+          }
+          else
+          {
+            remainder = remainder.Trim();
+          }
           if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
             || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
           {

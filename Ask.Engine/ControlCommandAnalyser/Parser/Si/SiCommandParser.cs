@@ -149,7 +149,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       }
 
       int idxStarInFirstLine = remainder.IndexOf('*');
-      remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+      int idxStarInSecondLine = remainder.LastIndexOf('*');
+      if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+      {
+        remainder =
+            remainder[..idxStarInFirstLine].Trim()
+            + remainder[(idxStarInSecondLine + 1)..].Trim();
+      }
+      else
+      {
+        remainder = remainder.Trim();
+      }
       if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
         var newScheme = CommandsModel.CheckKeyP(model, model.Scheme);
