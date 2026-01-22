@@ -21,7 +21,7 @@
 		<Rule color="ErrorLine">^.*!.*$</Rule>
 		
 		<!--Время-->
-		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
+		<Rule color="Time">\s\d+\s*[мm]?[сsСS]\b</Rule>
 
 		<!--Напряжение-->
 		<Rule color="Voltage">\s\+?\d+\s*[ВVv]\b</Rule>

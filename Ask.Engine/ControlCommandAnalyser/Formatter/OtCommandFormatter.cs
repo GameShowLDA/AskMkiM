@@ -14,6 +14,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var firstLine = $"{ot.CommandNumber} {ot.Mnemonic}";
       yield return firstLine;
 
+      // Время
+      if (!string.IsNullOrWhiteSpace(ot.TimeSource))
+      {
+        yield return $"\tВремя отключения точек: {ot.TimeSource}";
+      }
+      else
+      {
+        yield return $"\tВремя отключения точек не задано!";
+      }
+
       foreach (var bus in ot.BusPointsDictionary)
       {
         yield return $"\tТочки, отключаемые от шины: {bus.Key}";
