@@ -190,12 +190,17 @@ namespace UI.Components
 
     }
 
+    private void InputBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      if (IsNumberInputEnabled && e.Key == Key.Space)
+      {
+        e.Handled = true;
+      }
+    }
+
     /// <summary>
-    /// Ограничивает ввод только числовыми значениями и заменяет запятую на точку.
-    /// Не позволяет вводить две точки подряд.
+    /// Обрабатывает ввод в текстовом поле, ограничивая его числовым форматом.
     /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события ввода текста.</param>
     private void InputBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
       if (!IsNumberInputEnabled)
@@ -207,49 +212,100 @@ namespace UI.Components
       string currentText = InputBox.Text;
       int caretPos = InputBox.CaretIndex;
 
-      if (e.Text == "-")
-      {
-        if (!AllowRange)
-        {
-          e.Handled = true;
-          return;
-        }
-
-        string current = InputBox.Text;
-        int caret = InputBox.CaretIndex;
-
-        bool alreadyHasDash = current.Contains("-");
-        bool isFirst = caret == 0;
-        bool isPrevDash = caret > 0 && current[caret - 1] == '-';
-
-        e.Handled = alreadyHasDash || isFirst || isPrevDash;
+      if (HandleSpaceInput(e))
         return;
-      }
 
-      if (e.Text == ",")
+      if (HandleDashInput(e, currentText, caretPos))
+        return;
+
+      if (HandleCommaInput(e, currentText, caretPos))
+        return;
+
+      if (HandleDoubleDot(e, currentText, caretPos))
+        return;
+
+      HandleRegularInput(e);
+    }
+
+    /// <summary>
+    /// Блокирует ввод пробела, если разрешён только числовой ввод.
+    /// </summary>
+    private bool HandleSpaceInput(TextCompositionEventArgs e)
+    {
+      if (e.Text == " ")
       {
         e.Handled = true;
-
-        if (caretPos > 0 && currentText[caretPos - 1] == '.')
-        {
-          return;
-        }
-
-        InputBox.Dispatcher.BeginInvoke(new Action(() =>
-        {
-          InputBox.Text = currentText.Insert(caretPos, ".");
-          InputBox.CaretIndex = caretPos + 1;
-        }));
-
-        return;
+        return true;
       }
 
+      return false;
+    }
+
+    /// <summary>
+    /// Обрабатывает ввод символа тире, если включён режим диапазона.
+    /// Блокирует повторный ввод или ввод не в начале строки.
+    /// </summary>
+    private bool HandleDashInput(TextCompositionEventArgs e, string currentText, int caretPos)
+    {
+      if (e.Text != "-")
+        return false;
+
+      if (!AllowRange)
+      {
+        e.Handled = true;
+        return true;
+      }
+
+      bool alreadyHasDash = currentText.Contains("-");
+      bool isFirst = caretPos == 0;
+      bool isPrevDash = caretPos > 0 && currentText[caretPos - 1] == '-';
+
+      e.Handled = alreadyHasDash || isFirst || isPrevDash;
+      return true;
+    }
+
+    /// <summary>
+    /// Обрабатывает ввод запятой: блокирует её и подставляет точку,
+    /// если предыдущий символ не точка.
+    /// </summary>
+    private bool HandleCommaInput(TextCompositionEventArgs e, string currentText, int caretPos)
+    {
+      if (e.Text != ",")
+        return false;
+
+      e.Handled = true;
+
+      if (caretPos > 0 && currentText[caretPos - 1] == '.')
+        return true;
+
+      InputBox.Dispatcher.BeginInvoke(new Action(() =>
+      {
+        InputBox.Text = currentText.Insert(caretPos, ".");
+        InputBox.CaretIndex = caretPos + 1;
+      }));
+
+      return true;
+    }
+
+    /// <summary>
+    /// Блокирует ввод двух точек подряд.
+    /// </summary>
+    private bool HandleDoubleDot(TextCompositionEventArgs e, string currentText, int caretPos)
+    {
       if (e.Text == "." && caretPos > 0 && currentText[caretPos - 1] == '.')
       {
         e.Handled = true;
-        return;
+        return true;
       }
 
+      return false;
+    }
+
+    /// <summary>
+    /// Обрабатывает обычный ввод и разрешает только цифры и точку.
+    /// </summary>
+    private void HandleRegularInput(TextCompositionEventArgs e)
+    {
       e.Handled = !Regex.IsMatch(e.Text, "^[0-9.]$");
     }
 
@@ -261,6 +317,8 @@ namespace UI.Components
       BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.TitleColor);
       Keyboard.ClearFocus();
     }
+
+
   }
 
   /// <summary>
