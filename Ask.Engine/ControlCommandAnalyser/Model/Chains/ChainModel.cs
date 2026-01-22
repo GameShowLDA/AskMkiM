@@ -15,6 +15,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
       this.PointModels = pointModels;
     }
 
+    public ChainModel()
+    {
+      PointModels = new List<PointModel>();
+    }
+
     public override string ToString()
     {
       var str = string.Empty;

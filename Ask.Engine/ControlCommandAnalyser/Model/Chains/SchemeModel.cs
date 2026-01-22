@@ -16,17 +16,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     /// <summary>
     /// Словарь цепей и списков сообщенных точек.
     /// </summary>
-    public Dictionary<GroupModel, List<List<PointModel>>> ChainConnectedPointsMap = new();
+    public Dictionary<GroupModel, GroupModel> ChainConnectedPointsMap = new();
 
     /// <summary>
     /// Словарь цепей и списков разобщенных точек.
     /// </summary>
-    private Dictionary<GroupModel, List<PointModel>> ChainDisconnectedPointsMap = new();
+    private Dictionary<GroupModel, ChainModel> ChainDisconnectedPointsMap = new();
+
+
+    /// <summary>
+    /// Словарь цепей и списков разобщенных точек.
+    /// </summary>
+    private List<(ChainModel, ChainModel)> ErrorChainDisconnectedPointsMap { get; set; }
+
+    private List<(ChainModel A, ChainModel B)> _normalizedErrors = new();
 
     /// <summary>
     /// Список всех точек в схеме.
     /// </summary>
-    private List<PointModel> AllPoint;
+    private ChainModel AllPoint;
 
     public SchemeModel(List<GroupModel> chainModel)
     {
@@ -47,12 +55,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     /// </summary>
     private void InitializeAllPoint()
     {
-      AllPoint = new List<PointModel>();
+      AllPoint = new ChainModel();
       foreach (var pair in GroupModels)
       {
         foreach (var part in pair.ChainModels)
         {
-          AllPoint.AddRange(part.PointModels);
+          AllPoint.PointModels.AddRange(part.PointModels);
         }
       }
     }
@@ -61,18 +69,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     {
       foreach (var chain in GroupModels)
       {
-        var disconnectedPoint = new List<List<PointModel>>();
+        var disconnectedPoint = new GroupModel();
         foreach (var parts in chain.ChainModels)
         {
           if (parts.PointModels.Count > 1)
           {
-            var list = new List<PointModel>();
-            list.AddRange(parts.PointModels);
-            disconnectedPoint.Add(list);
+            var list = new ChainModel();
+            list.PointModels.AddRange(parts.PointModels);
+            disconnectedPoint.ChainModels.Add(list);
           }
         }
 
-        if (disconnectedPoint.Count > 0)
+        if (disconnectedPoint.ChainModels.Count > 0)
         {
           ChainConnectedPointsMap.Add(chain, disconnectedPoint);
         }
@@ -84,38 +92,49 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     {
       foreach (var group in GroupModels)
       {
-        List<PointModel> disconnectPoint = new List<PointModel>();
+        var disconnectPoint = new ChainModel();
         foreach (var chain in group.ChainModels)
         {
           foreach (var point in chain.PointModels)
           {
             if (point.PointType != PointType.Comma)
             {
-              disconnectPoint.Add(point);
+              disconnectPoint.PointModels.Add(point);
             }
           }
         }
 
-        if (disconnectPoint.Count > 0)
+        if (disconnectPoint.PointModels.Count > 0)
         {
           ChainDisconnectedPointsMap.Add(group, disconnectPoint);
         }
       }
     }
-    public List<List<PointModel>> GetPointsConnected(GroupModel groupModel)
+    public GroupModel GetPointsConnected(GroupModel groupModel)
     {
       return ChainConnectedPointsMap.GetValueOrDefault(groupModel);
     }
 
-    public List<PointModel> GetPointsDisconnected(GroupModel groupModel)
+    public ChainModel GetPointsDisconnected(GroupModel groupModel)
     {
       return ChainDisconnectedPointsMap.GetValueOrDefault(groupModel);
     }
 
-    public List<List<PointModel>> GetPointsDisconnected()
+    public GroupModel GetPointsDisconnected()
     {
-      return ChainDisconnectedPointsMap.Values.ToList();
+      var allChains = ChainDisconnectedPointsMap.Values.ToList();
+
+      if (_normalizedErrors == null || _normalizedErrors.Count == 0)
+        return new GroupModel(allChains);
+
+      var graph = BuildGraph(allChains, _normalizedErrors);
+      var components = FindConnectedComponents(allChains, graph);
+
+      return new GroupModel(components
+          .Select(c => MergeChainModels(c))
+          .ToList());
     }
+
 
     /// <summary>
     /// Возвращает список списков точек в строковом формате ("x.x.x").
@@ -125,28 +144,28 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
     {
       return ChainDisconnectedPointsMap
         .Values
-        .Select(pointList => pointList
+        .Select(pointList => pointList.PointModels
           .Select(point => point.ToString())
           .ToList())
         .ToList();
     }
 
-    public List<List<List<PointModel>>> GetPointsConnected()
+    public List<GroupModel> GetPointsConnected()
     {
       var list = ChainConnectedPointsMap.Values.ToList();
-      var result = new List<List<List<PointModel>>>();
+      var result = new List<GroupModel>();
       foreach (var item in list)
       {
-        var list1 = new List<List<PointModel>>();
-        foreach (var i in item)
+        var list1 = new GroupModel();
+        foreach (var i in item.ChainModels)
         {
-          var list2 = new List<PointModel>();
-          foreach (var j in i)
+          var list2 = new ChainModel();
+          foreach (var j in i.PointModels)
           {
-            list2.Add(j);
+            list2.PointModels.Add(j);
           }
 
-          list1.Add(list2);
+          list1.ChainModels.Add(list2);
         }
         result.Add(list1);
       }
@@ -154,21 +173,121 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
       return result;
     }
 
-    public List<PointModel> GetAllPointsDisconnected()
+    public ChainModel GetAllPointsDisconnected()
     {
       var listPoints = ChainDisconnectedPointsMap.Values.ToList();
-      var result = new List<PointModel>();
+      var result = new ChainModel();
 
       foreach (var points in listPoints)
       {
-        foreach (var point in points)
+        foreach (var point in points.PointModels)
         {
-          result.Add(point);
+          result.PointModels.Add(point);
         }
       }
 
       return result;
     }
+
+    public void SetErrorChainDisconnectedPoints(List<(ChainModel, ChainModel)> errors)
+    {
+      _normalizedErrors = errors
+          ?.Select(e => (A: e.Item1, B: e.Item2))
+          .ToList()
+          ?? new List<(ChainModel, ChainModel)>();
+    }
+
+    public void SetErrorChainDisconnectedPoints(List<ChainModel> errors)
+    {
+      _normalizedErrors = new List<(ChainModel, ChainModel)>();
+
+      if (errors == null || errors.Count < 2)
+        return;
+
+      for (int i = 0; i < errors.Count - 1; i++)
+      {
+        _normalizedErrors.Add((errors[i], errors[i + 1]));
+      }
+    }
+
+    /// <summary>
+    /// Возвращает нормализованный список разорванных цепей 
+    /// в виде списка пар (ChainModel A, ChainModel B).
+    /// </summary>
+    /// <returns>Список нормализованных пар разорванных точек.</returns>
+    public List<(ChainModel A, ChainModel B)> GetErrorChainDisconnectedPoints()
+    {
+      return _normalizedErrors ?? new List<(ChainModel A, ChainModel B)>();
+    }
+
+
     #endregion
+
+    private ChainModel MergeChainModels(List<ChainModel> chains)
+    {
+      var merged = new ChainModel();
+
+      foreach (var chain in chains)
+        merged.PointModels.AddRange(chain.PointModels);
+
+      return merged;
+    }
+
+    private Dictionary<ChainModel, HashSet<ChainModel>> BuildGraph(
+    List<ChainModel> points,
+    List<(ChainModel A, ChainModel B)> edges)
+    {
+      var adjacency = new Dictionary<ChainModel, HashSet<ChainModel>>();
+
+      foreach (var p in points)
+        adjacency[p] = new HashSet<ChainModel>();
+
+      foreach (var (a, b) in edges)
+      {
+        adjacency[a].Add(b);
+        adjacency[b].Add(a);
+      }
+
+      return adjacency;
+    }
+
+    private List<List<ChainModel>> FindConnectedComponents(
+    List<ChainModel> points,
+    Dictionary<ChainModel, HashSet<ChainModel>> graph)
+    {
+      var result = new List<List<ChainModel>>();
+      var visited = new HashSet<ChainModel>();
+
+      foreach (var start in points)
+      {
+        if (visited.Contains(start))
+          continue;
+
+        var stack = new Stack<ChainModel>();
+        var component = new List<ChainModel>();
+
+        stack.Push(start);
+        visited.Add(start);
+
+        while (stack.Count > 0)
+        {
+          var node = stack.Pop();
+          component.Add(node);
+
+          foreach (var neighbor in graph[node])
+          {
+            if (!visited.Contains(neighbor))
+            {
+              visited.Add(neighbor);
+              stack.Push(neighbor);
+            }
+          }
+        }
+
+        result.Add(component);
+      }
+
+      return result;
+    }
   }
 }

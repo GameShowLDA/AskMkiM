@@ -44,6 +44,12 @@ namespace UI.Components
     public static readonly DependencyProperty UnitElectricalProperty =
         DependencyProperty.Register(nameof(UnitElectrical), typeof(string), typeof(InputField), new PropertyMetadata(string.Empty));
 
+    /// <summary>
+    /// Свойство зависимости, определяющее, отображается ли BusSelector (AB1..AB4).
+    /// </summary>
+    public static readonly DependencyProperty IsBusGroupVisibleProperty =
+        DependencyProperty.Register(nameof(IsBusGroupVisible), typeof(bool), typeof(InputField), new PropertyMetadata(false));
+
     public static readonly DependencyProperty IsModuleInputModeProperty =
     DependencyProperty.Register(
         nameof(IsModuleInputMode),
@@ -100,6 +106,15 @@ namespace UI.Components
     {
       get => (string)GetValue(UnitElectricalProperty);
       set => SetValue(UnitElectricalProperty, value);
+    }
+
+    /// <summary>
+    /// Показывает или скрывает BusSelector (AB1..AB4).
+    /// </summary>
+    public bool IsBusGroupVisible
+    {
+      get => (bool)GetValue(IsBusGroupVisibleProperty);
+      set => SetValue(IsBusGroupVisibleProperty, value);
     }
 
     #endregion
@@ -192,6 +207,18 @@ namespace UI.Components
     /// Только геттер для получения активной шины.
     /// </summary>
     public BusPoint ActiveBus { get; private set; }
+
+    /// <summary>
+    /// Отправляет моим перечислением выбранную группу шин.
+    /// </summary>
+    public SwitchingBusNew SelectedBusGroup =>
+      InvokeSafe(() => BusGroupSelector.ActiveBus);
+
+    /// <summary>
+    /// Отправляет порядковый номер выбранной группы шин.
+    /// </summary>
+    public int SelectedBusGroupIndex =>
+      InvokeSafe(() => BusGroupSelector.ActiveBusIndex);
 
     #endregion
 
@@ -365,6 +392,8 @@ namespace UI.Components
     public string GetVoltage() => InvokeSafe(() => Voltage);
 
     public BusPoint GetBus() => InvokeSafe(() => ActiveBus);
+
+    public SwitchingBusNew GetPairBus() => InvokeSafe(() => SelectedBusGroup);
 
     private T InvokeSafe<T>(Func<T> func)
     {

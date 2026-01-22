@@ -48,5 +48,9 @@ namespace MainWindowProgram.ViewModels
     /// <summary>Перекрёстный тест МКР.</summary>
     [RelayCommand]
     private void CrossTestMkrExecutor() => _testService.AddCrossTestMkrExecutorControlAsync();
+
+    /// <summary>Контроль контактов сопротивления коммутатора.</summary>
+    [RelayCommand]
+    private void RelayContactResistExecutor() => _testService.AddRelayContactResistExecutorControlAsync();
   }
 }

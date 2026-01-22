@@ -134,7 +134,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           string str = string.Empty;
           str += $"\t\t{i + 1}. *";
 
-          foreach (var point in points)
+          foreach (var point in points.PointModels)
           {
             str += $"{point.Mnemonic}[{point}]#";
           }

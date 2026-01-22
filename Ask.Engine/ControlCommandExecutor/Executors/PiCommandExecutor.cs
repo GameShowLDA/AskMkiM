@@ -23,6 +23,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   internal class PiCommandExecutor : ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
+    double amperhMaxDCW = 10;
+    double amperhMaxACW = 60;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
 
@@ -40,7 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      string nameSiCommand = $"{command.CommandNumber} СИ";
+      string nameSiCommand = $"ПИ/СИ1";
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
 
@@ -78,8 +80,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.SiCommand.CommandNumber = siCommanNumber + " " + 1;
 
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
+        commandExecutionContext.IsInvokedByAnotherCommand = true;
         var siCommandExecutor = new SiCommandExecutor();
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
+        command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 2", message: $"{nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 });
@@ -93,9 +97,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeAccumulationContext.CommandManager = context.CommandExecutionManager;
       nodeAccumulationContext.CommandModel = command;
       nodeAccumulationContext.MessageService = context.Console;
-      nodeAccumulationContext.Value = 10;
       nodeAccumulationContext.LowerLimit = 0;
-      nodeAccumulationContext.HigherLimit = 10;
       nodeAccumulationContext.Unit = "мА";
       nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
@@ -103,26 +105,30 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (command.VoltageType == VoltageEnum.Type.DCW)
       {
         nodeAccumulationContext.TypeCommand = MeasurementTypeCommand.PI_DCW;
+        nodeAccumulationContext.Value = amperhMaxDCW;
+        nodeAccumulationContext.HigherLimit = amperhMaxDCW;
       }
       else
       {
         nodeAccumulationContext.TypeCommand = MeasurementTypeCommand.PI_ACW;
+        nodeAccumulationContext.Value = amperhMaxACW;
+        nodeAccumulationContext.HigherLimit = amperhMaxACW;
       }
 
       NodeFullContext nodeFullContext = nodeAccumulationContext.CreateChild<NodeFullContext>();
       MethodExecutionContext methodExecutionContext = nodeAccumulationContext.CreateChild<MethodExecutionContext>();
+      PairwiseFirstPointContext pairwiseFirstPointContext = nodeAccumulationContext.CreateChild<PairwiseFirstPointContext>();
 
-
-      //MethodExecutionContext methodExecutionContext = new MethodExecutionContext();
-      //nodeFullContext.SchemeModel = command.Scheme;
-      //nodeFullContext.CommandManager = context.CommandExecutionManager;
-      //nodeFullContext.CommandModel = command;
-      //nodeFullContext.MessageService = context.Console;
-      //nodeFullContext.Resistance = 80;
-      //nodeFullContext.LowerLimit = 0;
-      //nodeFullContext.HigherLimit = 80;
-      //nodeFullContext.Unit = "мА";
-      //nodeFullContext.UnitMnemonic = "I";
+      if (command.VoltageType == VoltageEnum.Type.DCW)
+      {
+        nodeFullContext.VoltageType = VoltageEnum.Type.DCW;
+        pairwiseFirstPointContext.VoltageType = VoltageEnum.Type.DCW;
+      }
+      else
+      {
+        nodeFullContext.VoltageType = VoltageEnum.Type.ACW;
+        pairwiseFirstPointContext.VoltageType = VoltageEnum.Type.ACW;
+      }
 
       if (command.AlgorithmKey.Contains("К"))
       {
@@ -138,8 +144,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
-        NodeAccumulationChecker.PerformMeasurementAsync measure = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(command.Scheme, measure, context.CommandExecutionManager, command, context.Console, nodeAccumulationContext.HigherLimit, command.VoltageType);
+        pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
+        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
         errorMessage.AddRange(errMes);
       }
       else
@@ -163,6 +169,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.SiCommand != null)
       {
+        nameSiCommand = $"ПИ/СИ2";
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 3", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
         var siCommandExecutor = new SiCommandExecutor();
@@ -202,7 +209,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.AcwManger.Mode.SetModeAsync(userMessageService);
         await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(40, userMessageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxACW, userMessageService);
 
         if (time == 60)
         {
@@ -218,7 +225,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.DcwManger.Mode.SetModeAsync(userMessageService);
         await breakDown.DcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(20, userMessageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxDCW, userMessageService);
 
         if (time == 60)
         {
@@ -236,7 +243,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.DCW)
+    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.DCW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
@@ -245,12 +252,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         if (type == VoltageEnum.Type.ACW)
         {
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(value);
-          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, 10, answer.value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
         }
         else
         {
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(value);
-          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, 10, answer.value);
+          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
         }
 
       }, messageService);
@@ -264,7 +271,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private static async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW)
+    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
       double answer = -1;
@@ -305,7 +312,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     }
 
 
-    public static async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
+    public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
     {
       var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
 

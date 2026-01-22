@@ -88,15 +88,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         var j = 1;
         for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
         {
-          var pointsAll = pr.Scheme.GetPointsConnected(pr.Scheme.GroupModels[i]);
-          if (pointsAll != null)
+          var groupChains = pr.Scheme.GetPointsConnected(pr.Scheme.GroupModels[i]);
+          if (groupChains != null)
           {
-            foreach (var points in pointsAll)
+            foreach (var chains in groupChains.ChainModels)
             {
               string str = string.Empty;
               str += $"\t\t\t{j}. *";
               j++;
-              foreach (var point in points)
+              foreach (var point in chains.PointModels)
               {
                 str += $"{point.Mnemonic}[{point}],";
               }

@@ -31,6 +31,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     public string? OpkFilePath { get; set; }
 
+    /// <summary>
+    /// Указывает, что текущая команда была вызвана другой командой,
+    /// а не инициирована напрямую внешним источником.
+    /// </summary>
+    public bool IsInvokedByAnotherCommand { get; set; }
 
     public CommandExecutionContext(CommandExecutionManager commandExecutionManager, BaseCommandModel command, IUserInteractionService console, ITextEditorAdapter editorAdapter, string opkFileName)
     {
