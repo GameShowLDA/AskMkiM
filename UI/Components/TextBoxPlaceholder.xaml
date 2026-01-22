@@ -6,7 +6,7 @@
              mc:Ignorable="d"
              xmlns:local="clr-namespace:UI.Components"
              d:DesignHeight="40" d:DesignWidth="250">
-    
+
     <UserControl.Resources>
         <local:MarginConverter x:Key="MarginConverter"/>
     </UserControl.Resources>
@@ -28,6 +28,7 @@
                  FontSize="20" 
                  Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
                  PreviewTextInput="InputBox_PreviewTextInput"
+                    PreviewKeyDown="InputBox_PreviewKeyDown"
                  GotFocus="InputBox_GotFocus"
                  CaretBrush="{DynamicResource  TestsInputHeaderSolidColorBrush}"
                  LostFocus="InputBox_LostFocus"/>
