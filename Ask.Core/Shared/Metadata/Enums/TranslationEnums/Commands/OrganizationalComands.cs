@@ -50,6 +50,12 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// Тип команды VSH.
     /// </summary>
     VSH,
+
+    [CommandOrganizationalAttribute("СК")]
+    /// <summary>
+    /// Тип команды CK.
+    /// </summary>
+    CK,
   }
 }
 
