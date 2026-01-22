@@ -11,6 +11,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   public List<int> ActiveLines { get; } = new();
   public Brush MarkerBrush { get; set; } = Brushes.LimeGreen;
 
+  //TODO: Нужно попробовать перевести на List<TextAnchor>, т.к. в нём можно привязать точку к конкретной строке
+
   /// <summary>
   /// Лист поставленных точек остановки
   /// </summary>
