@@ -184,7 +184,7 @@ namespace UI.Controls.TextEditor
     /// <summary>
     /// Лист номеров строк, где установлены точки остановки
     /// </summary>
-    public List<int> BreakPointLines
+    public List<TextAnchor> BreakPointLines
     {
       get => _executionMargin.BreakpointLines;
     }

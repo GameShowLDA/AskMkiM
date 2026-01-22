@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
 using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
@@ -11,12 +12,10 @@ public class ExecutionGlyphMargin : AbstractMargin
   public List<int> ActiveLines { get; } = new();
   public Brush MarkerBrush { get; set; } = Brushes.LimeGreen;
 
-  //TODO: Нужно попробовать перевести на List<TextAnchor>, т.к. в нём можно привязать точку к конкретной строке
-
   /// <summary>
   /// Лист поставленных точек остановки
   /// </summary>
-  public List<int> BreakpointLines { get; } = new();
+  public List<TextAnchor> BreakpointLines { get; } = new();
   /// <summary>
   /// Цвет точек остановки.
   /// </summary>
@@ -47,6 +46,14 @@ public class ExecutionGlyphMargin : AbstractMargin
   public ExecutionGlyphMargin(TextEditor textEditor)
   {
     _textEditor = textEditor;
+
+    _textEditor.DocumentChanged += (_, __) =>
+    {
+      BreakpointLines.Clear();
+      ActiveLines.Clear();
+      InvalidateVisual();
+    };
+
   }
 
   public void SetActiveLine(int lineNumber)
@@ -88,6 +95,54 @@ public class ExecutionGlyphMargin : AbstractMargin
     return new Size(20, 0);
   }
 
+  private static void RenderMarginSingle(int lineNumber,
+    TextView textView,
+    double verticalOffset,
+    double lineHeight,
+    DrawingContext drawingContext,
+    Brush brush)
+  {
+    double top = textView.GetVisualTopByDocumentLine(lineNumber);
+    if (double.IsNaN(top)) return;
+
+    double centerY = top - verticalOffset + lineHeight / 2;
+    drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
+  }
+
+  private void ToggleBreakpointAnchor(int lineNumber)
+  {
+    var doc = _textEditor.Document;
+    if (doc == null) return;
+
+    var line = doc.GetLineByNumber(lineNumber);
+    int offset = line.Offset;
+
+    // Ищем существующий breakpoint на этой строке
+    var existing = BreakpointLines.FirstOrDefault(a =>
+      doc.GetLineByOffset(a.Offset).LineNumber == lineNumber);
+
+    if (existing != null)
+    {
+      BreakpointLines.Remove(existing);
+      BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber);
+      return;
+    }
+
+    var anchor = doc.CreateAnchor(offset);
+    anchor.MovementType = AnchorMovementType.BeforeInsertion;
+    anchor.SurviveDeletion = false;
+
+    // Если удалили место — удалить breakpoint
+    anchor.Deleted += (_, __) =>
+    {
+      BreakpointLines.Remove(anchor);
+      InvalidateVisual();
+    };
+
+    BreakpointLines.Add(anchor);
+    BreakpointEventAdapter.RaiseBreakpointSet(lineNumber);
+  }
+
   protected override void OnRender(DrawingContext drawingContext)
   {
     base.OnRender(drawingContext);
@@ -105,9 +160,13 @@ public class ExecutionGlyphMargin : AbstractMargin
     double verticalOffset = TextView.ScrollOffset.Y;
     double lineHeight = TextView.DefaultLineHeight;
 
-    if (BreakpointLines.Count != 0)
+    if (_textEditor.Document != null && BreakpointLines.Count != 0)
     {
-      RenderMargin(BreakpointLines, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush);
+      foreach (var anchor in BreakpointLines)
+      {
+        int lineNumber = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
+        RenderMarginSingle(lineNumber, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush);
+      }
     }
 
     if (ActiveLines.Count != 0)
@@ -147,10 +206,16 @@ public class ExecutionGlyphMargin : AbstractMargin
     base.OnTextViewChanged(oldTextView, newTextView);
 
     if (oldTextView != null)
+    {
       oldTextView.ScrollOffsetChanged -= TextView_ScrollOffsetChanged;
+      oldTextView.VisualLinesChanged -= TextView_VisualLinesChanged;
+    }
 
     if (newTextView != null)
+    {
       newTextView.ScrollOffsetChanged += TextView_ScrollOffsetChanged;
+      newTextView.VisualLinesChanged += TextView_VisualLinesChanged;
+    }
   }
 
   protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -168,22 +233,18 @@ public class ExecutionGlyphMargin : AbstractMargin
 
     if (!_rightBreakpoints.Contains(lineNumber)) return;
 
-    if (BreakpointLines.Contains(lineNumber))
-    {
-      BreakpointLines.Remove(lineNumber);
-      BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber);
-    }
-    else
-    {
-      BreakpointLines.Add(lineNumber);
-      BreakpointEventAdapter.RaiseBreakpointSet(lineNumber);
-    }
+    ToggleBreakpointAnchor(lineNumber);
 
     InvalidateVisual();
     e.Handled = true;
   }
 
   private void TextView_ScrollOffsetChanged(object? sender, EventArgs e)
+  {
+    InvalidateVisual();
+  }
+
+  private void TextView_VisualLinesChanged(object? sender, EventArgs e)
   {
     InvalidateVisual();
   }
