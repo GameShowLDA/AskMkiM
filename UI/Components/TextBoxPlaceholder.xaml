@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression.blend/2008" 
              mc:Ignorable="d"
              xmlns:local="clr-namespace:UI.Components"
-             d:DesignHeight="40" d:DesignWidth="250">
+             d:DesignHeight="40" d:DesignWidth="250" MaxWidth="250">
 
     <UserControl.Resources>
         <local:MarginConverter x:Key="MarginConverter"/>
