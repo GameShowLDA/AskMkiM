@@ -90,74 +90,36 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
 
     private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber, Dictionary<BusStructureEnum.Type, List<int?>> busDictionary)
     {
-      if (!string.IsNullOrWhiteSpace(prefix))
+      if (string.IsNullOrWhiteSpace(prefix))
+        return busDictionary;
+
+      var prefixMap = new Dictionary<string, BusStructureEnum.Type>
       {
-        var standList = new List<int?>();
-        if (standNumber.HasValue)
-        {
-          standList.Add(standNumber.Value);
-        }
-        if (prefix == "2")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus2))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus2, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus2].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "4")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus4))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus4, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus4].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "6")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus6))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus6, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus6].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "8")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus8))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus8, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus8].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "К")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.BusCombined))
-          {
-            busDictionary.Add(BusStructureEnum.Type.BusCombined, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.BusCombined].Add(standNumber.Value);
-          }
-        }
-        else
-        {
-          model.Errors.Add(VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic));
-        }
+        ["2"] = BusStructureEnum.Type.Bus2,
+        ["4"] = BusStructureEnum.Type.Bus4,
+        ["6"] = BusStructureEnum.Type.Bus6,
+        ["8"] = BusStructureEnum.Type.Bus8,
+        ["К"] = BusStructureEnum.Type.BusCombined
+      };
+
+      if (!prefixMap.TryGetValue(prefix, out var busType))
+      {
+        model.Errors.Add(
+            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic));
         return busDictionary;
       }
+
+      if (!busDictionary.TryGetValue(busType, out var standList))
+      {
+        standList = new List<int?>();
+        busDictionary[busType] = standList;
+      }
+
+      if (standNumber.HasValue)
+      {
+        standList.Add(standNumber.Value);
+      }
+
       return busDictionary;
     }
   }

@@ -384,5 +384,26 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return (buses, errors);
     }
 
+    public static List<string> ParseBusList(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
+    {
+      var errors = new List<ErrorItem>();
+      var buses = new List<string>();
+
+      // Убираем пробелы/табы/переводы строк
+      expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
+      if (string.IsNullOrEmpty(expr))
+        return null;
+
+      // 1. Шины разделяются '*'
+      var busSegments = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
+
+      foreach (var busSeg in busSegments)
+      {
+        // 2. Формат: ШИНА:ТОЧКИ
+        var parts = busSeg.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        buses.AddRange(parts);
+      }
+      return buses;
+    }
   }
 }
