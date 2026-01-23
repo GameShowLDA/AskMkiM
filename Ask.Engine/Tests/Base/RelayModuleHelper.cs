@@ -346,8 +346,6 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      token.ThrowIfCancellationRequested();
-
       await uksh.ConnectorManager.DisconnectMultimeter(pairBus, ui);
     }
 
@@ -363,7 +361,6 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      token.ThrowIfCancellationRequested();
       await meter.ConnectableManager.DisconnectAsync(ui);
     }
 
