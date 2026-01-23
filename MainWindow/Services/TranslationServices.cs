@@ -299,7 +299,17 @@ namespace MainWindowProgram.Services
           var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
           item.TranslationModels = models;
 
-          item.GetRightEditor().RightBreakpoint = models.Select(x => x.FormattedStartLineNumber).ToList();
+          item.GetRightEditor().RightBreakpoint = models
+            .Where(x =>
+            x.Mnemonic != "СП"
+            && x.Mnemonic != "ЦУ"
+            && x.Mnemonic != "КЦ"
+            && x.Mnemonic != "РМ"
+            && x.Mnemonic != "УП"
+            && x.Mnemonic != "ОК"
+            )
+            .Select(x => x.FormattedStartLineNumber)
+            .ToList();
         }
       }
       catch (Exception ex)
