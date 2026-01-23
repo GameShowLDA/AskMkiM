@@ -12,13 +12,17 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// <summary>
     /// Генерирует событие установки точки останова на строку.
     /// </summary>
-    public static void RaiseBreakpointSet(int lineNumber) =>
-      EventAggregator.Publish(new BreakpointEvents.BreakpointSet(lineNumber));
+    /// <param name="lineNumber">На какой строке находится команда.</param>
+    /// <param name="commandNumber">Какую метку имеет команда.</param>
+    public static void RaiseBreakpointSet(int lineNumber, int commandNumber) =>
+      EventAggregator.Publish(new BreakpointEvents.BreakpointSet(lineNumber, commandNumber));
 
     /// <summary>
     /// Генерирует событие снятия точки останова со строки.
     /// </summary>
-    public static void RaiseBreakpointRemoved(int lineNumber) =>
-      EventAggregator.Publish(new BreakpointEvents.BreakpointRemoved(lineNumber));
+    /// <param name="lineNumber">На какой строке находится команда.</param>
+    /// <param name="commandNumber">Какую метку имеет команда.</param>
+    public static void RaiseBreakpointRemoved(int lineNumber, int commandNumber) =>
+      EventAggregator.Publish(new BreakpointEvents.BreakpointRemoved(lineNumber, commandNumber));
   }
 }

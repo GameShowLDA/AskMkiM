@@ -156,11 +156,14 @@ public class ExecutionGlyphMargin : AbstractMargin
     var existing = BreakpointLines.FirstOrDefault(a =>
       doc.GetLineByOffset(a.Offset).LineNumber == lineNumber);
 
+    int commandNumber;
+
     if (existing != null)
     {
+      commandNumber = GetNumberAtLine(existing.Document.Text, existing.Line);
       BreakpointLines.Remove(existing);
-      BreakpointCommandsNumbers.Remove(GetNumberAtLine(existing.Document.Text, existing.Line));
-      BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber);
+      BreakpointCommandsNumbers.Remove(commandNumber);
+      BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
       return;
     }
 
@@ -176,9 +179,10 @@ public class ExecutionGlyphMargin : AbstractMargin
       InvalidateVisual();
     };
 
-    BreakpointCommandsNumbers.Add(GetNumberAtLine(anchor.Document.Text, anchor.Line));
+    commandNumber = GetNumberAtLine(anchor.Document.Text, anchor.Line);
+    BreakpointCommandsNumbers.Add(commandNumber);
     BreakpointLines.Add(anchor);
-    BreakpointEventAdapter.RaiseBreakpointSet(lineNumber);
+    BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
 
   protected override void OnRender(DrawingContext drawingContext)

@@ -17,9 +17,15 @@ namespace Ask.Core.Services.EventCore.Events
       /// </summary>
       public int LineNumber { get; }
 
-      public BreakpointSet(int lineNumber)
+      /// <summary>
+      /// Метка команды, на которую установили точку.
+      /// </summary>
+      public int CommandNumber { get; }
+
+      public BreakpointSet(int lineNumber, int commandNumber)
       {
         LineNumber = lineNumber;
+        CommandNumber = commandNumber;
       }
     }
 
@@ -33,9 +39,15 @@ namespace Ask.Core.Services.EventCore.Events
       /// </summary>
       public int LineNumber { get; }
 
-      public BreakpointRemoved(int lineNumber)
+      /// <summary>
+      /// Метка команды, с которой убрали точку.
+      /// </summary>
+      public int CommandNumber { get; }
+
+      public BreakpointRemoved(int lineNumber, int commandNumber)
       {
         LineNumber = lineNumber;
+        CommandNumber = commandNumber;
       }
     }
   }
