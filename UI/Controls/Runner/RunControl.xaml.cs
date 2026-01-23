@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Message;
@@ -11,8 +12,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using UI.Components.Invoke;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
+using UI.Services;
+using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Runner
@@ -45,7 +50,7 @@ namespace UI.Controls.Runner
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
 
-    private TextEditorUI _leftEditor;
+    private TextEditorContainer _leftEditor;
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -126,10 +131,15 @@ namespace UI.Controls.Runner
 
         if (obj.FormattedLineNumber >= 0)
         {
-          _leftEditor?.GoToLine(obj.FormattedLineNumber);
+          //_leftEditor?.GoToLine(obj.FormattedLineNumber);
+          var dockManader = ChildTextEditorContainer.DockManager;
+          var dockItemPk = dockManader.DockItems.FirstOrDefault(di => di.TabText != "Состояние оборудования");
+          if (dockItemPk != null && dockItemPk.Content is TextEditorUI textEditor)
+          {
+            textEditor.GoToLine(obj.FormattedLineNumber);
+          }
         }
       }
-
     }
 
     private void RunControl_Loaded(object sender, RoutedEventArgs e)
@@ -175,7 +185,6 @@ namespace UI.Controls.Runner
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
       LogInformation("SetLeftEditor вызван: " + this.GetHashCode());
-
       if (textEditorUI == null)
         return;
 
@@ -192,10 +201,34 @@ namespace UI.Controls.Runner
         decorator.Child = null;
       }
 
-      LeftBox.Children.Clear();
-      LeftBox.Children.Add(textEditorUI);
+      var dockManager = ChildTextEditorContainer.DockManager;
+      //LeftBox.Children.Clear();
+      //LeftBox.Children.Add(textEditorUI);
+      if (dockManager.DockItems.Count > 0)
+      {
+        foreach (var dockItem in dockManager.DockItems.ToList())
+        {
+          dockManager.DockItems.Remove(dockItem);
+        }
+      }
 
-      _leftEditor = textEditorUI;
+      var fileName = textEditorUI.TextEditorModel.FileName;
+      var filePath = textEditorUI.TextEditorModel.FilePath;
+      var dockItemPk = new DockItem
+      {
+        Title = fileName,
+        TabText = fileName,
+        Content = textEditorUI,
+      };
+      var dockItemDeviceState = new DockItem
+      {
+        Title = filePath,
+        TabText = "Состояние оборудования",
+        Content = new TextEditorUI(),
+      };
+
+      dockManager.DockItems.Add(dockItemPk);
+      dockManager.DockItems.Add(dockItemDeviceState);
     }
 
 
