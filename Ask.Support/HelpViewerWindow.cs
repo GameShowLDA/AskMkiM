@@ -1,108 +1,121 @@
-﻿using Photino.NET;
-using System;
-using System.Drawing;
-using System.Threading;
+﻿using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Threading;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Support
 {
-  public sealed class HelpViewerWindow : IDisposable
+  public partial class HelpViewerWindow : Window
   {
-    private readonly object _sync = new();
+    private WebView2 webView;
+    private Task? _initTask;
+    private bool _initStarted;
+    private string? _pendingUrl;
 
-    private Thread? _uiThread;
-    private PhotinoWindow? _window;
+    private const uint RPC_E_DISCONNECTED = 0x80010108;
 
-    private volatile bool _disposeRequested;
-    private volatile bool _isClosed;
-
-    private string? _startUrl; // что открыть при старте
-
-    public void Navigate(string url)
+    public HelpViewerWindow()
     {
-      if (string.IsNullOrWhiteSpace(url))
-        return;
+      InitializeComponent();
+      Loaded += async (_, __) => await EnsureInitializedAsync();
+      Closed += (_, __) => webView?.Dispose();
+    }
 
-      lock (_sync)
+    private void InitializeComponent()
+    {
+      Width = 1024; Height = 768;
+      MinWidth = 600; MinHeight = 600;
+      Title = "Справочная система";
+      webView = new WebView2();
+      Content = webView;
+    }
+
+    public void Navigate(string url) => _ = NavigateAsync(url);
+    public async Task NavigateAsync(string url)
+    {
+      if (webView.CoreWebView2 == null)
       {
-        _startUrl = url;
-
-        //Если окно уже запущено — безопаснее закрыть и поднять заново с новым StartUrl
-        if (_window != null && !_isClosed)
-        {
-          try { _window.Close(); } catch { /* ignore */ }
-          _window = null;
-          _isClosed = true;
-        }
-
-        StartUiThreadIfNeeded();
+        _pendingUrl = url;
+        if (!_initStarted) _ = EnsureInitializedAsync();
+        await (_initTask ?? Task.CompletedTask);
+      }
+      if (webView.CoreWebView2 != null)
+      {
+        webView.CoreWebView2.Navigate(url);
+        _pendingUrl = null;
       }
     }
 
-    private void StartUiThreadIfNeeded()
+    private async Task EnsureInitializedAsync()
     {
-      if (_disposeRequested) return;
-      //if (_uiThread != null && _uiThread.IsAlive) return;
-
-      _isClosed = false;
-
-      _uiThread = new Thread(UiThreadMain)
+      if (!Dispatcher.CheckAccess())
       {
-        IsBackground = false, // важно для стабильности
-        Name = "HelpViewer(Photino)"
-      };
-      _uiThread.SetApartmentState(ApartmentState.STA);
-      _uiThread.Start();
+        await Dispatcher.InvokeAsync(async () => await EnsureInitializedAsync(), DispatcherPriority.Normal);
+        return;
+      }
+      if (_initStarted) { await (_initTask ?? Task.CompletedTask); return; }
+
+      _initStarted = true;
+      _initTask = InitAsync();
+      await _initTask;
     }
 
-    private void UiThreadMain()
+    private async Task InitAsync()
     {
       try
       {
-        var url = _startUrl;
+        if (!webView.IsLoaded)
+          await webView.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
 
-        var w = new PhotinoWindow()
-          .SetTitle("Справочная система")
-          .SetSize(new Size(1024, 768))
-          .SetMinSize(600, 600);
+        var fixedRoot = Path.Combine(AppContext.BaseDirectory, "Help", "WebView2Runtime");
+        var runtimePath = ResolveFixedRuntimeFolder(fixedRoot);
+        var userData = Path.Combine(
+          Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+          "AskMkiM", "WebView2", "UserData");
+        Directory.CreateDirectory(userData);
 
-        // КЛЮЧЕВОЕ: Photino требует StartUrl/StartString ДО WaitForClose()
-        if (!string.IsNullOrWhiteSpace(url))
-          w.StartUrl = url!;
-        else
-          w.StartString = "<html><body>Help</body></html>";
-
-        // Делегат должен вернуть bool
-        w.WindowClosing += (_, __) =>
+        try
         {
-          _isClosed = true;
-          return false;
-        };
+          var env = await CoreWebView2Environment.CreateAsync(runtimePath, userData, new CoreWebView2EnvironmentOptions());
+          await webView.EnsureCoreWebView2Async(env);
+        }
+        catch (COMException ex) when ((uint)ex.HResult == RPC_E_DISCONNECTED)
+        {
+          var env = await CoreWebView2Environment.CreateAsync(null, userData, new CoreWebView2EnvironmentOptions("--disable-gpu"));
+          await webView.EnsureCoreWebView2Async(env);
+        }
 
-        lock (_sync) _window = w;
+        webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
 
-        w.WaitForClose();
+        if (!string.IsNullOrWhiteSpace(_pendingUrl))
+          await NavigateAsync(_pendingUrl!);
       }
-      catch
+      catch (Exception ex)
       {
-        // тут можно логировать
-      }
-      finally
-      {
-        lock (_sync) _window = null;
-        _isClosed = true;
+        LogException(ex);
+        MessageBox.Show("Ошибка инициализации справки: " + ex.Message,
+          "Ошибка WebView2", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
-    public void Dispose()
+    private static string ResolveFixedRuntimeFolder(string fixedRoot)
     {
-      lock (_sync)
+      if (File.Exists(Path.Combine(fixedRoot, "msedgewebview2.exe")))
+        return fixedRoot;
+
+      if (Directory.Exists(fixedRoot))
       {
-        _disposeRequested = true;
-        try { _window?.Close(); } catch { }
-        _window = null;
-        _isClosed = true;
-        _uiThread = null;
+        var candidate = Directory.GetDirectories(fixedRoot)
+          .Where(d => File.Exists(Path.Combine(d, "msedgewebview2.exe")))
+          .OrderByDescending(Path.GetFileName)
+          .FirstOrDefault();
+        if (candidate != null) return candidate;
       }
+
+      return fixedRoot;
     }
   }
 }
