@@ -16,6 +16,12 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// Лист поставленных точек остановки
   /// </summary>
   public List<TextAnchor> BreakpointLines { get; } = new();
+
+  /// <summary>
+  /// Лист номеров команд, на которых установлены точки остановки.
+  /// </summary>
+  public List<int> BreakpointCommandsNumbers { get; } = new();
+
   /// <summary>
   /// Цвет точек остановки.
   /// </summary>
@@ -50,6 +56,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     _textEditor.DocumentChanged += (_, __) =>
     {
       BreakpointLines.Clear();
+      BreakpointCommandsNumbers.Clear();
       ActiveLines.Clear();
       InvalidateVisual();
     };
@@ -109,6 +116,34 @@ public class ExecutionGlyphMargin : AbstractMargin
     drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
   }
 
+  public static int GetNumberAtLine(ReadOnlySpan<char> text, int targetLine)
+  {
+    int line = 1, i = 0;
+
+    if (targetLine != 1)
+      for (; ; i++)
+      {
+        char c = text[i];
+        if (c == '\n' || c == '\r')
+        {
+          if (c == '\r' && text[i + 1] == '\n') i++;
+          if (++line == targetLine) { i++; break; }
+        }
+      }
+
+    while (text[i] == ' ' || text[i] == '\t') i++;
+
+    int value = 0;
+    for (; ; i++)
+    {
+      int d = text[i] - '0';
+      if ((uint)d > 9) break;
+      value = value * 10 + d;
+    }
+
+    return value;
+  }
+
   private void ToggleBreakpointAnchor(int lineNumber)
   {
     var doc = _textEditor.Document;
@@ -124,6 +159,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (existing != null)
     {
       BreakpointLines.Remove(existing);
+      BreakpointCommandsNumbers.Remove(GetNumberAtLine(existing.Document.Text, existing.Line));
       BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber);
       return;
     }
@@ -136,9 +172,11 @@ public class ExecutionGlyphMargin : AbstractMargin
     anchor.Deleted += (_, __) =>
     {
       BreakpointLines.Remove(anchor);
+      BreakpointCommandsNumbers.Remove(GetNumberAtLine(anchor.Document.Text, anchor.Line));
       InvalidateVisual();
     };
 
+    BreakpointCommandsNumbers.Add(GetNumberAtLine(anchor.Document.Text, anchor.Line));
     BreakpointLines.Add(anchor);
     BreakpointEventAdapter.RaiseBreakpointSet(lineNumber);
   }

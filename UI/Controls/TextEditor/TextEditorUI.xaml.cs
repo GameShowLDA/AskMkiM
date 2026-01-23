@@ -189,6 +189,14 @@ namespace UI.Controls.TextEditor
       get => _executionMargin.BreakpointLines;
     }
 
+    /// <summary>
+    /// Лист номеров команд, на которых установлены точки остановки.
+    /// </summary>
+    public List<int> BreakpointCommandsNumbers
+    {
+      get => _executionMargin.BreakpointCommandsNumbers;
+    }
+
     #endregion
 
     /// <summary>
