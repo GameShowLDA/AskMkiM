@@ -8,7 +8,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
   internal class MessageManager
   {
-    public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value)
+    public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value, string? chains = null)
     {
       if (await ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
@@ -26,7 +26,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
       {
-        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value);
+        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value, chains: chains);
         message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
         message.IndentLevel = 2;
 

@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
+using System.Globalization;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -77,19 +78,12 @@ namespace NewCore.Function.Keysight3466new
       if (response.Contains("+9.90000000E+37"))
         return 1001;
 
-      string count = response.Split("+").Last();
-      int intCount = int.Parse(count);
-
-      response = response.Substring(0, 6).Split("+")[1].Replace('.', ',');
-      double result = -1;
-      double.TryParse(response, out result);
-
-      for (int i = 0; i < intCount; i++)
+      if (double.TryParse(response, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
       {
-        result *= 10;
+        return value;
       }
 
-      return result;
+      throw new FormatException($"Неверный формат ответа прибора: '{response}'");
     }
   }
 }
