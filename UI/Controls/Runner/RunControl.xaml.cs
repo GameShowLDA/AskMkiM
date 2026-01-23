@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Errors.Models;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -212,7 +213,7 @@ namespace UI.Controls.Runner
         }
       }
 
-      var fileName = textEditorUI.TextEditorModel.FileName;
+      var fileName = Path.GetFileName(textEditorUI.TextEditorModel.FilePath);
       var filePath = textEditorUI.TextEditorModel.FilePath;
       var dockItemPk = new DockItem
       {
@@ -229,6 +230,47 @@ namespace UI.Controls.Runner
 
       dockManager.DockItems.Add(dockItemPk);
       dockManager.DockItems.Add(dockItemDeviceState);
+
+      if (dockManager == null)
+      {
+        LogError("ChildTextEditorContainer.DockControl не найден (null). Невозможно отобразить вкладку.");
+        return;
+      }
+
+      LogInformation($"Попытка показать ChildTextEditorContainer.DockItem. Title: {dockItemPk.Title}, IsLoaded: {dockManager.IsLoaded}, DockItems.Count: {dockManager.DockItems.Count}");
+
+      if (!dockManager.IsLoaded)
+      {
+        LogWarning("ChildTextEditorContainer.DockControl ещё не загружен. Подписка на Loaded...");
+
+        var capturedDockItem = dockItemPk;
+        dockManager.Loaded += (s, e) =>
+        {
+          try
+          {
+            LogInformation("ChildTextEditorContainer.DockControl загрузился. Показываем вкладку.");
+            LogInformation("ChildTextEditorContainer.DockItem отображён после загрузки.");
+            var isControlProgramActive = true;
+
+            SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+            dockItemDeviceState.Show(dockManager, DockPosition.Document);
+            capturedDockItem.Show(dockManager, DockPosition.Document);
+          }
+          catch (Exception ex)
+          {
+            LogException("Ошибка при отображении ChildTextEditorContainer.DockItem после загрузки:", ex);
+          }
+        };
+      }
+      else
+      {
+        var isControlProgramActive = true;
+
+        SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+        dockItemDeviceState.Show(dockManager, DockPosition.Document);
+        dockItemPk.Show(dockManager, DockPosition.Document);
+        LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
+      }
     }
 
 
