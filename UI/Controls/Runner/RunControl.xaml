@@ -97,8 +97,7 @@
                 </Grid>
 
                 <Grid x:Name="LeftBox" Grid.Row="1">
-                    <!--<Controls:TextEditorUI/>-->
-                    <MultiWindow:MultiEditorControl/>
+                    <Controls:TextEditorContainer x:Name="ChildTextEditorContainer"/>
                 </Grid>
             </Grid>
         </Grid>

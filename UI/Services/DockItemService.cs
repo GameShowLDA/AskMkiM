@@ -1,15 +1,21 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static;
+using ICSharpCode.AvalonEdit;
 using Message;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using UI.Components.FileComparerControls;
+using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using UI.Windows.WpfDocking.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services
@@ -163,7 +169,6 @@ namespace UI.Services
       }
     }
 
-
     /// <summary>
     /// Создаёт и отображает новую вкладку редактора.  
     /// При необходимости обрабатывает повторное открытие, назначает события и задаёт режимы.
@@ -207,6 +212,46 @@ namespace UI.Services
     }
 
     /// <summary>
+    /// Создаёт и отображает новую вкладку редактора.  
+    /// При необходимости обрабатывает повторное открытие, назначает события и задаёт режимы.
+    /// </summary>
+    /// <param name="nameFile">Имя вкладки.</param>
+    /// <param name="textEditorContainer">Контейнер редактора.</param>
+    /// <param name="textEditor">Содержимое вкладки (например, редактор, архив, панель сравнения).</param>
+    /// <param name="editorType">Тип редактора (по умолчанию — текстовый редактор).</param>
+    internal async void ShowRunDockItem(string nameFile, TextEditorContainer textEditorContainer, UserControl runControl)
+    {
+      LogDebug($"Создание DockItem для файла {nameFile}");
+      var editorType = EditorType.Run;
+      //var childTextEditorContainer = _fileManager.ContainerService.CreateEditorContainer(editorType, OpenFileButton.TypeWindow.DeviceControl);
+      var dockItem = new DockItem
+      {
+        Title = nameFile,
+        TabText = nameFile,
+        Content = runControl,
+      };
+
+      InitializeWithoutSave(dockItem, editorType);
+
+      await Task.Delay(1).ConfigureAwait(true);
+
+      ShowDockItem(textEditorContainer, dockItem);
+      _fileManager.ControlManagerService.ShowEditorContainer(textEditorContainer, editorType);
+    }
+
+    public void ShowItems(DockControl dockControl, DockItem dockItemPk, DockItem dockItemDeviceState)
+    {
+      var isControlProgramActive = true;
+
+      SystemStateManager
+          .SetIsControlProgramActive(isControlProgramActive)
+          .ConfigureAwait(true);
+
+      dockItemPk.Show(dockControl, DockPosition.Document);
+      dockItemDeviceState.Show(dockControl, DockPosition.Document);
+    }
+
+    /// <summary>
     /// Настраивает DockItem, который не требует сохранения состояния.
     /// </summary>
     private EditorType InitializeWithoutSave(DockItem dockItem, EditorType editorType)
@@ -216,7 +261,6 @@ namespace UI.Services
         var controlManager = new ControlManager(_fileManager.EditorWorkspaceModel);
         var foundPage = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Text == editorType.ToString());
         TextEditorContainer translatorContainer = _fileManager.ContainerService.GetEditorContainer(editorType);
-
         if (translatorContainer != null && translatorContainer.DockManager.DockItems.Count(item => item.DockPosition != DockPosition.Hidden) == 0)
         {
           _fileManager.ContainerService.RemoveEditorContainer(translatorContainer, editorType);

@@ -1,8 +1,10 @@
-﻿using Ask.Core.Services.Errors.Models;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Message;
@@ -11,8 +13,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using UI.Components.Invoke;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
+using UI.Services;
+using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Runner
@@ -45,7 +51,7 @@ namespace UI.Controls.Runner
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
 
-    private TextEditorUI _leftEditor;
+    private TextEditorContainer _leftEditor;
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -126,10 +132,15 @@ namespace UI.Controls.Runner
 
         if (obj.FormattedLineNumber >= 0)
         {
-          _leftEditor?.GoToLine(obj.FormattedLineNumber);
+          //_leftEditor?.GoToLine(obj.FormattedLineNumber);
+          var dockManader = ChildTextEditorContainer.DockManager;
+          var dockItemPk = dockManader.DockItems.FirstOrDefault(di => di.TabText != "Состояние оборудования");
+          if (dockItemPk != null && dockItemPk.Content is TextEditorUI textEditor)
+          {
+            textEditor.GoToLine(obj.FormattedLineNumber);
+          }
         }
       }
-
     }
 
     private void RunControl_Loaded(object sender, RoutedEventArgs e)
@@ -175,7 +186,6 @@ namespace UI.Controls.Runner
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
       LogInformation("SetLeftEditor вызван: " + this.GetHashCode());
-
       if (textEditorUI == null)
         return;
 
@@ -192,10 +202,75 @@ namespace UI.Controls.Runner
         decorator.Child = null;
       }
 
-      LeftBox.Children.Clear();
-      LeftBox.Children.Add(textEditorUI);
+      var dockManager = ChildTextEditorContainer.DockManager;
+      //LeftBox.Children.Clear();
+      //LeftBox.Children.Add(textEditorUI);
+      if (dockManager.DockItems.Count > 0)
+      {
+        foreach (var dockItem in dockManager.DockItems.ToList())
+        {
+          dockManager.DockItems.Remove(dockItem);
+        }
+      }
 
-      _leftEditor = textEditorUI;
+      var fileName = Path.GetFileName(textEditorUI.TextEditorModel.FilePath);
+      var filePath = textEditorUI.TextEditorModel.FilePath;
+      var dockItemPk = new DockItem
+      {
+        Title = fileName,
+        TabText = fileName,
+        Content = textEditorUI,
+      };
+      var dockItemDeviceState = new DockItem
+      {
+        Title = filePath,
+        TabText = "Состояние оборудования",
+        Content = new TextEditorUI(),
+      };
+
+      dockManager.DockItems.Add(dockItemPk);
+      dockManager.DockItems.Add(dockItemDeviceState);
+
+      if (dockManager == null)
+      {
+        LogError("ChildTextEditorContainer.DockControl не найден (null). Невозможно отобразить вкладку.");
+        return;
+      }
+
+      LogInformation($"Попытка показать ChildTextEditorContainer.DockItem. Title: {dockItemPk.Title}, IsLoaded: {dockManager.IsLoaded}, DockItems.Count: {dockManager.DockItems.Count}");
+
+      if (!dockManager.IsLoaded)
+      {
+        LogWarning("ChildTextEditorContainer.DockControl ещё не загружен. Подписка на Loaded...");
+
+        var capturedDockItem = dockItemPk;
+        dockManager.Loaded += (s, e) =>
+        {
+          try
+          {
+            LogInformation("ChildTextEditorContainer.DockControl загрузился. Показываем вкладку.");
+            LogInformation("ChildTextEditorContainer.DockItem отображён после загрузки.");
+            var isControlProgramActive = true;
+
+            SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+            dockItemDeviceState.Show(dockManager, DockPosition.Document);
+            capturedDockItem.Show(dockManager, DockPosition.Document);
+          }
+          catch (Exception ex)
+          {
+            LogException("Ошибка при отображении ChildTextEditorContainer.DockItem после загрузки:", ex);
+          }
+        };
+      }
+      else
+      {
+        var isControlProgramActive = true;
+
+        SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+        dockItemDeviceState.Show(dockManager, DockPosition.Document);
+        dockItemPk.Show(dockManager, DockPosition.Document);
+        LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
+      }
     }
 
 
@@ -223,7 +298,12 @@ namespace UI.Controls.Runner
 
       Application.Current.Dispatcher.Invoke(() =>
       {
-        editor = LeftBox.Children[0] as TextEditorUI;
+        var dockManager = ChildTextEditorContainer.DockManager;
+        var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TextEditorUI);
+        if (dockItem != null)
+        {
+          editor = dockItem.Content as TextEditorUI;
+        }     
       });
 
       var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath);
