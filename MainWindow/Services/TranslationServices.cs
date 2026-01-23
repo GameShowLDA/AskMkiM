@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -102,7 +104,7 @@ namespace MainWindowProgram.Services
       DockItem? foundDockItem = null;
 
       // Ждём, пока хотя бы один DockItem появится
-      for (int i = 0; i < 500; i++) // максимум 500 мс
+      for (int i = 0; i < 500; i++) 
       {
         if (dockManager.DockItems.Count > 0)
         {

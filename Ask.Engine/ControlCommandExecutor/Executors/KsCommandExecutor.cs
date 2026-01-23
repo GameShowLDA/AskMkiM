@@ -41,6 +41,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      BreakpointHandler.Handle(command, context.Console);
 
       List<ShowMessageModel> errorMessage = new();
 

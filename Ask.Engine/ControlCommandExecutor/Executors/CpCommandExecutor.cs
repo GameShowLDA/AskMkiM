@@ -16,6 +16,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = context.Command as CpCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
 
+      BreakpointHandler.Handle(command, context.Console);
+
       return Task.CompletedTask;
     }
   }

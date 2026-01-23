@@ -7,6 +7,7 @@ using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 using Message;
 using System.Windows;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -16,17 +17,19 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var cu = (CuCommandModel)context.Command;
-      if (cu.CuType == CuCommandType.Information)
+      var command = (CuCommandModel)context.Command;
+      BreakpointHandler.Handle(command, context.Console);
+
+      if (command.CuType == CuCommandType.Information)
       {
-        MessageBoxCustom.Show(cu.MessageText, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBoxCustom.Show(command.MessageText, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
         CommandExecutionState.LastCuResult = MessageBoxResult.OK;
       }
-      else if (cu.CuType == CuCommandType.Question)
+      else if (command.CuType == CuCommandType.Question)
       {
         // Вопрос — вызываем с кнопками Yes/No/Esc (или Ok/Cancel если Run/Esc)
         var result = MessageBoxCustom.Show(
-            cu.MessageText,
+            command.MessageText,
             "Запрос оператору",
             MessageBoxButton.YesNo, MessageBoxImage.Question
         );
