@@ -29,6 +29,7 @@
 		<Rule color="Mnemonic">\bЭТ\b</Rule>
 		<Rule color="Mnemonic">\bНЭ\b</Rule>
 		<Rule color="Mnemonic">\bПТ\b</Rule>
+		<Rule color="Mnemonic">\bОТ\b</Rule>
 		<Rule color="Mnemonic">\bВШ\b</Rule>
 
 		<!--Ключи-->
@@ -146,7 +147,7 @@
 		<Rule color="OkParam">^\s*Прим\b</Rule>
 
 		<!--Время-->
-		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
+		<Rule color="Time">\s\d+\s*[мm]?[сsСS]\b</Rule>
 		
 		<!--Напряжение-->
 		<Rule color="Voltage">\s\+?\d+\s*[ВVv]\b</Rule>

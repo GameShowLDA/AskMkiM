@@ -8,18 +8,19 @@ using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
+
+namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
 {
-  internal class PtCommandParser : ICommandParser
+  public class OtCommandParser : ICommandParser
   {
-    public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.PT);
+    public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.OT);
 
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
 
       LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
 
-      var model = new PtCommandModel
+      var model = new OtCommandModel
       {
         CommandNumber = commandNumber,
         SourceLines = new List<string>(lines),
@@ -78,6 +79,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       (time, unitTime, remainder) = CommonParameterParser.TimeParser.ParseTime(remainder);
       LogDebug($"После парсинга времени: time='{time}{unitTime}', remainder='{remainder}'");
 
+
       double? timeValue = -1;
       if (!string.IsNullOrEmpty(time) && time != null)
       {
@@ -102,8 +104,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
-        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");        
-        
+        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");
+
         // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
         {
@@ -117,7 +119,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
           }
         }
 
-        if(busDictionary.Count > 0)
+        if (busDictionary.Count > 0)
         {
           model.BusPointsDictionary = busDictionary;
         }
@@ -125,7 +127,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
-      }      
+      }
       else
       {
         // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
@@ -145,6 +147,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
-    }    
+    }
   }
 }
