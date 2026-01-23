@@ -298,7 +298,12 @@ namespace UI.Controls.Runner
 
       Application.Current.Dispatcher.Invoke(() =>
       {
-        editor = LeftBox.Children[0] as TextEditorUI;
+        var dockManager = ChildTextEditorContainer.DockManager;
+        var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TextEditorUI);
+        if (dockItem != null)
+        {
+          editor = dockItem.Content as TextEditorUI;
+        }     
       });
 
       var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath);
