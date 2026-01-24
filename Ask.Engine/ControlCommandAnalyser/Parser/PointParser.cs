@@ -32,6 +32,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       var errors = new List<ErrorItem>();
       var chainModels = new List<GroupModel>();
+      //var groupModels = new List<GroupModel>();
 
       // Убираем все пробелы/табы/переводы строк и внешние '*'
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
@@ -40,8 +41,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (string.IsNullOrEmpty(expr))
         return (null, errors);
 
+      const string RangeStarPlaceholder = "__RANGE_STAR__";
+
+      // перед Split
+      expr = expr.Replace("-*", RangeStarPlaceholder);
+
       // Цепи теперь разделяются одной '*'
       var chainSegs = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
+      for (int i = 0; i < chainSegs.Length; i++)
+      {
+        chainSegs[i] = chainSegs[i].Replace(RangeStarPlaceholder, "-*");
+      }
 
       for (int i = 0; i < chainSegs.Length; i++)
       {
@@ -100,6 +110,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         // Обычная обработка: каждая часть -> PartChainModel (после раскрытия диапазонов)
         var currentChainParts = new List<ChainModel>();
+        var currentGroupParts = new List<GroupModel>();
 
         foreach (var part in partTokens)
         {
@@ -111,10 +122,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
           // Раскрываем диапазоны
           var expandedTokens = new List<string>();
+          var expandedDisconnectedTokens = new List<string>();
           for (int k = 0; k < rawTokens.Count; k++)
           {
             var tok = rawTokens[k];
-            if (tok.Contains('-'))
+            if (tok.Contains("-*"))
+              expandedDisconnectedTokens.AddRange(ExpandRangeToken(tok, errors));
+            else if (tok.Contains('-'))
               expandedTokens.AddRange(ExpandRangeToken(tok, errors));
             else
               expandedTokens.Add(tok);
@@ -136,39 +150,48 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           // Преобразуем строки-точки в PointModel через карту РМ
           var (ok2, pts2) = CommandPostAnalyzer.GetPointsModel(expandedTokens, rmCommandModel.PointsMap);
           currentChainParts.Add(new ChainModel(new List<PointModel>(pts2 ?? new List<PointModel>())));
+          var (ok3, ptsDisconnected) = CommandPostAnalyzer.GetPointsModel(expandedDisconnectedTokens, rmCommandModel.PointsMap);
+          foreach (var point in ptsDisconnected)
+          {
+            currentGroupParts.Add(new GroupModel(new List<ChainModel> { new ChainModel(new List<PointModel> { point }) }));
+          }
+          currentGroupParts.Add(new GroupModel(currentChainParts));
         }
-        if (currentChainParts.Count > 0)
+        if (currentGroupParts.Count > 0 && currentChainParts.Count > 0)
         {
           if (rmCommandModel != null)
           {
-            for (int cp = 0; cp < currentChainParts.Count; cp++)
+            for (int gp = 0; gp < currentGroupParts.Count; gp++)
             {
-              var chain = currentChainParts[cp];
-              for (int pm = 0; pm < chain.PointModels.Count; pm++)
+              var group = currentGroupParts[gp];
+              for (int cp = 0; cp < group.ChainModels.Count; cp++)
               {
-                if (pm == 0 && cp == 0)
+                var chain = group.ChainModels[cp];
+                for (int pm = 0; pm < chain.PointModels.Count; pm++)
                 {
-                  chain.PointModels[pm].PointType = PointType.Star;
-                }
-                else if (pm == 0 && cp > 0)
-                {
-                  chain.PointModels[pm].PointType = PointType.Hash;
-                }
-                else
-                {
-                  chain.PointModels[pm].PointType = PointType.Comma;
-                }
+                  if (pm == 0 && cp == 0)
+                  {
+                    chain.PointModels[pm].PointType = PointType.Star;
+                  }
+                  else if (pm == 0 && cp > 0)
+                  {
+                    chain.PointModels[pm].PointType = PointType.Hash;
+                  }
+                  else
+                  {
+                    chain.PointModels[pm].PointType = PointType.Comma;
+                  }
 
-                if (rmCommandModel.TryGetKeyByValue(chain.PointModels[pm].ToString(), out string key))
-                {
-                  chain.PointModels[pm].Mnemonic = key;
+                  if (rmCommandModel.TryGetKeyByValue(chain.PointModels[pm].ToString(), out string key))
+                  {
+                    chain.PointModels[pm].Mnemonic = key;
+                  }
                 }
               }
+              chainModels.Add(group);
             }
           }
-
         }
-        chainModels.Add(new GroupModel(new List<ChainModel>(currentChainParts)));
       }
 
       var count = 0;
@@ -202,6 +225,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       var result = new List<string>();
 
       token = CleanToken(token);
+      token = Regex.Replace(token, @"-\*", "-");
 
       int dashIndex = token.IndexOf('-');
       if (dashIndex < 0)
@@ -302,7 +326,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
     private static string CleanToken(string t)
     {
-      return string.IsNullOrEmpty(t) ? string.Empty : t.Replace("*", "").Trim();
+      if (t.Contains("-*"))
+      {
+        return t;
+      }
+      else
+      {
+        return string.IsNullOrEmpty(t) ? string.Empty : t.Replace("*", "").Trim();
+      }
     }
 
     public static (Dictionary<string, List<(string, string)>>, List<ErrorItem>) ParseBusPoints(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
