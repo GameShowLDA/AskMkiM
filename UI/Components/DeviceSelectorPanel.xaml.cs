@@ -1,4 +1,6 @@
-﻿using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -16,6 +18,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Components
@@ -26,7 +29,14 @@ namespace UI.Components
   /// </summary>
   public partial class DeviceSelectorPanel : UserControl, IDeviceSelector
   {
+    /// <summary>
+    /// Прямая ссылка на элемент ChoiceDevice, используемый для отображения
+    /// и выбора вариантов перечислений в блоке самоконтроля.
+    /// Является прокси-доступом к визуальному элементу PartData.
+    /// </summary>
     public ChoiceDevice PartDataControl;
+
+    bool _isHasDevice = false;
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceSelectorPanel"/>.
@@ -35,21 +45,41 @@ namespace UI.Components
     public DeviceSelectorPanel()
     {
       InitializeComponent();
-      ChassisData.DeviceSelected += OnChassisManagerSelected;
+      EventAggregator.Subscribe<SystemStateEvents.AdminRightsChanged>(e => ChangePartVisible(e));
       RelayData.DeviceSelected += RelayData_DeviceSelected;
-      PartData.DeviceSelected += PartData_DeviceSelected;
 
-      SelectedDeviceInfoVisibility = Visibility.Collapsed;
-      FastMeterSelectionVisibility = Visibility.Collapsed;
+      SelectedDeviceInfoVisibility = Visibility.Visible;
       SelfControlPartSelectionVisibility = Visibility.Collapsed;
 
-      LoadManagerChassis();
+      LoadAllSelectableDevices();
 
       PartDataControl = PartData;
     }
 
+    private void ChangePartVisible(AdminRightsChanged e)
+    {
+      Dispatcher.Invoke(() =>
+      {
+        if (_isHasDevice)
+        {
+          SelfControlPartSelectionVisibility = e.IsAdmin ? Visibility.Visible : Visibility.Collapsed;
+        }
+        else
+        {
+          SelfControlPartSelectionVisibility = Visibility.Collapsed;
+        }
+      });
+    }
+
     #region IDeviceSelector
 
+    /// <summary>
+    /// Безопасно определяет тип выбранного устройства и возвращает его экземпляр
+    /// в соответствии с его фактическим интерфейсом (IRelaySwitchModule,
+    /// ISwitchingDevice, IPowerSourceModule, IBreakdownTester).
+    /// Гарантирует выполнение в UI-потоке.
+    /// </summary>
+    /// <returns>Экземпляр устройства соответствующего типа либо null.</returns>
     public object? GetSelectedRelayDeviceByTypeSafe()
     {
       object? device = null;
@@ -76,6 +106,15 @@ namespace UI.Components
       return device;
     }
 
+    /// <summary>
+    /// Возвращает тип выбранного устройства на основе его фактической
+    /// реализации интерфейсов.
+    /// </summary>
+    /// <returns>
+    /// Значение DeviceType:
+    /// RelaySwitchModule, SwitchingDevice, PowerSourceModule, BreakdownTester
+    /// или Unknown.
+    /// </returns>
     public DeviceType GetSelectedRelayDeviceType()
     {
       try
@@ -110,6 +149,11 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Возвращает выбранное значение enum для блока самоконтроля в непараметризованном виде.
+    /// Гарантирует выполнение в UI-потоке.
+    /// </summary>
+    /// <returns>Экземпляр Enum или null, если ничего не выбрано.</returns>
     public Enum? GetSelectedSelfControlEnumUntypedSafe()
     {
       Enum? result = null;
@@ -132,37 +176,22 @@ namespace UI.Components
     /// Возвращает выбранное устройство как IFastMeter, если возможно.
     /// </summary>
     /// <returns>Объект типа IFastMeter или null, если выбранное устройство не реализует IFastMeter.</returns>
-    public IFastMeter? GetFastMeterSafe()
+    public IFastMeter GetFastMeterSafe()
     {
-      IFastMeter? result = null;
-
-      void TryGet()
-      {
-        result = MeterData.SelectedItem as IFastMeter;
-      }
-
-      if (Dispatcher.CheckAccess())
-        TryGet();
-      else
-        Dispatcher.Invoke(TryGet);
+      IFastMeter? result = new FastMeterServices().GetAll().FirstOrDefault();
 
       return result;
     }
 
     #endregion
 
-    private void PartData_DeviceSelected(object obj)
-    {
-      var selectedDevice = RelayData.SelectedItem;
-      FastMeterSelectionVisibility = Visibility.Visible;
-
-      LoadMeter();
-    }
-
+    /// <summary>
+    /// Обрабатывает событие выбора устройства. Определяет конкретный интерфейс устройства,
+    /// получает тип enum для самоконтроля и заполняет UI элементами выбора.
+    /// </summary>
+    /// <param name="obj">Параметр события (не используется).</param>
     private void RelayData_DeviceSelected(object obj)
     {
-      SelfControlPartSelectionVisibility = Visibility.Visible;
-
       var selectedDevice = RelayData.SelectedItem;
 
       if (selectedDevice is ISwitchingDevice switchingDevice && switchingDevice.SelfTestManager is ISelfTestCheckerDeviceBusCommutation checker)
@@ -185,24 +214,12 @@ namespace UI.Components
         var enumType = checker4.GetTestTypeEnum();
         SetSelfControlEnum(enumType);
       }
-    }
+      _isHasDevice = true;
 
-
-    /// <summary>
-    /// Загружает список всех доступных управляющих шасси и отображает их в поле выбора.
-    /// </summary>
-    private void LoadManagerChassis()
-    {
-      var devices = new ChassisManagerServices().GetAll();
-      var names = new List<string>();
-
-      foreach (var chassisManager in devices)
+      if (Ask.Core.Services.Config.AppSettings.AdminConfig.GetAdminRights())
       {
-        names.Add(chassisManager.Name + " " + chassisManager.Number);
+        SelfControlPartSelectionVisibility = Visibility.Visible;
       }
-
-      ChassisData.ItemsSource = devices;
-      ChassisData.DisplayFields = names;
     }
 
     /// <summary>
@@ -211,75 +228,30 @@ namespace UI.Components
     /// </summary>
     private void LoadAllSelectableDevices()
     {
-      if (ChassisData.SelectedItem is not IChassisManager selectedChassis)
-        return;
-
-      var chassisNumber = selectedChassis.Number;
-
-      var devices = new RelaySwitchModuleServices().GetAll()
-                      .Where(d => d.NumberChassis == chassisNumber);
-
-      var uksh = new SwitchingDeviceServices().GetAll()
-                      .Where(d => d.NumberChassis == chassisNumber);
-
-      var mint = new PowerSourceModuleServices().GetAll()
-                      .Where(d => d.NumberChassis == chassisNumber);
-
-      var breakdown = new BreakdownTesterServices().GetAll()
-                .Where(d => d.NumberChassis == chassisNumber);
+      var sources = new List<IEnumerable<dynamic>>
+    {
+        new PowerSourceModuleServices().GetAll(),
+        new SwitchingDeviceServices().GetAll(),
+        new RelaySwitchModuleServices().GetAll(),
+        new BreakdownTesterServices().GetAll()
+    };
 
       var combined = new List<object>();
       var displayNames = new List<string>();
 
-      foreach (var item in mint)
+      foreach (var list in sources)
       {
-        combined.Add(item);
-        displayNames.Add($"{item.Name} {item.Number}");
-      }
-
-      foreach (var item in uksh)
-      {
-        combined.Add(item);
-        displayNames.Add($"{item.Name} {item.Number}");
-      }
-
-      foreach (var item in devices)
-      {
-        combined.Add(item);
-        displayNames.Add($"{item.Name} {item.Number}");
-      }
-
-      foreach (var item in breakdown)
-      {
-        combined.Add(item);
-        displayNames.Add($"{item.Name} {item.Number}");
+        foreach (var item in list)
+        {
+          combined.Add(item);
+          displayNames.Add($"{item.Name} {item.NumberChassis}.{item.Number}");
+        }
       }
 
       RelayData.ItemsSource = combined;
       RelayData.DisplayFields = displayNames;
     }
 
-    /// <summary>
-    /// Загружает список всех доступных измерителей и отображает их в поле выбора.
-    /// </summary>
-    private void LoadMeter()
-    {
-      if (ChassisData.SelectedItem is not IChassisManager selectedChassis)
-        return;
-
-      var chassisNumber = selectedChassis.Number;
-
-      var devices = new FastMeterServices().GetAll()
-                      .Where(d => d.NumberChassis == chassisNumber)
-                      .ToList();
-
-      var names = devices
-        .Select(d => $"{d.Name} {d.Number}")
-        .ToList();
-
-      MeterData.ItemsSource = devices;
-      MeterData.DisplayFields = names;
-    }
 
     /// <summary>
     /// Возвращает выбранное устройство как IRelaySwitchModule, если возможно.
@@ -287,14 +259,6 @@ namespace UI.Components
     public IRelaySwitchModule? GetRelayModule()
     {
       return RelayData.SelectedItem as IRelaySwitchModule;
-    }
-
-    /// <summary>
-    /// Возвращает выбранное устройство как IChassisManager, если возможно.
-    /// </summary>
-    public IChassisManager? GetChassisManager()
-    {
-      return ChassisData.SelectedItem as IChassisManager;
     }
 
     /// <summary>
@@ -310,36 +274,10 @@ namespace UI.Components
     /// <summary>
     /// Управляет видимостью элемента интерфейса, отображающего выбранный измеритель (FastMeter).
     /// </summary>
-    public Visibility FastMeterSelectionVisibility
-    {
-      get => FastMeterSelectionControl.Visibility;
-      set => FastMeterSelectionControl.Visibility = value;
-    }
-
-    /// <summary>
-    /// Управляет видимостью элемента интерфейса, отображающего выбранный измеритель (FastMeter).
-    /// </summary>
     public Visibility SelfControlPartSelectionVisibility
     {
       get => SelfControlPartSelector.Visibility;
       set => SelfControlPartSelector.Visibility = value;
-    }
-
-    /// <summary>
-    /// Обрабатывает выбор управляющего шасси. После выбора делает видимыми блоки выбора устройства и измерителя.
-    /// </summary>
-    /// <param name="obj">Выбранное устройство (ожидается IChassisManager).</param>
-    private void OnChassisManagerSelected(object obj)
-    {
-      if (obj is IChassisManager)
-      {
-        SelectedDeviceInfoVisibility = Visibility.Visible;
-        LoadAllSelectableDevices();
-      }
-      else
-      {
-        SelectedDeviceInfoVisibility = Visibility.Collapsed;
-      }
     }
 
     public T? GetSelectedRelayDevice<T>() where T : class
@@ -362,7 +300,7 @@ namespace UI.Components
     /// </summary>
     /// <param name="enumType">Тип перечисления.</param>
     /// <param name="defaultSelected">Значение, которое нужно выбрать по умолчанию (необязательно).</param>
-    public void SetSelfControlEnum(Type enumType, Enum? defaultSelected = null)
+    public void SetSelfControlEnum(Type enumType)
     {
       if (!enumType.IsEnum)
         throw new ArgumentException("Тип должен быть перечислением (enum).", nameof(enumType));
@@ -379,19 +317,14 @@ namespace UI.Components
 
       PartData.ItemsSource = items;
       PartData.DisplayFields = items.Select(i => i.Description).ToList();
-
-      if (defaultSelected != null)
-      {
-        var selectedItem = items.FirstOrDefault(i => i.Value.Equals(defaultSelected));
-        if (selectedItem != null)
-          PartData.SelectedItem = selectedItem;
-      }
+      PartData.SelectedItem = items.First();
     }
 
     /// <summary>
-    /// Получает выбранное значение enum из поля "Тип проверки".
+    /// Возвращает выбранное значение enum из панели самоконтроля, приведённое к указанному типу.
     /// </summary>
     /// <typeparam name="TEnum">Тип перечисления.</typeparam>
+    /// <returns>Значение перечисления или null, если выбранное значение несовместимо.</returns>
     public TEnum? GetSelectedSelfControlEnum<TEnum>() where TEnum : struct, Enum
     {
       if (PartData.SelectedItem is EnumDisplayItem item && item.Value is TEnum enumValue)
@@ -399,7 +332,5 @@ namespace UI.Components
 
       return null;
     }
-
-
   }
 }
