@@ -35,11 +35,6 @@ namespace NewCore.Base.Device
         {
           DeviceManager.DisableDevice(_comPort.PortName);
         }
-        if (value != null)
-        {
-          DeviceManager.DisableDevice(value.PortName);
-          DeviceManager.EnableDevice(value.PortName);
-        }
 
         LogWarning($"[{Name}] COMPort меняется: {_comPort?.PortName ?? "null"} → {value?.PortName ?? "null"}", isDeviceLog: true);
         _comPort = value;

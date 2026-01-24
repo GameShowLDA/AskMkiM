@@ -8,11 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\EventCore\Interfaces\**" />
+    <EmbeddedResource Remove="Services\EventCore\Interfaces\**" />
+    <None Remove="Services\EventCore\Interfaces\**" />
+    <Page Remove="Services\EventCore\Interfaces\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Shared\Metadata\Enums\DeviceEnums\BreakdownTypeMode.cs~" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\EventCore\Interfaces\" />
     <Folder Include="Shared\Entity\MeasurementError\" />
     <Folder Include="Shared\Interfaces\DeviceInterfaces\Rack\Capabilities\" />
     <Folder Include="Shared\Metadata\Enums\HotkeysEnums\" />
