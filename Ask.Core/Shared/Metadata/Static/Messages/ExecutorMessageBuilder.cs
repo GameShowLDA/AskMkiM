@@ -2,6 +2,7 @@
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -148,6 +149,19 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       {
         IndentLevel = 1
       };
+    }
+
+    public static ShowMessageModel BuildDeviceHealthCheckTitle(IAttachableDevice device)
+    {
+      if (device == null)
+        throw new ArgumentNullException(nameof(device));
+
+      return new ShowMessageModel
+      (
+        header: $"Тест контроля работоспособности",
+        message: $"{device.Name} {device.NumberChassis}.{device.Number}",
+        type: ShowMessageModel.MessageType.CommandBlock
+      );
     }
 
     public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null, string comparisonSign = "=")

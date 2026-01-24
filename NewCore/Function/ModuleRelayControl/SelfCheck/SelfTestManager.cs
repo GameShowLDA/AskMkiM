@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using NewCore.Communication;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 
@@ -32,6 +33,8 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
+      await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(_moduleRelay));
+
       switch (typeConnector)
       {
         case RelaySwitchTypeConnector.Points:
