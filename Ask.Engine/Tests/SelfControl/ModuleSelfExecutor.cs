@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.SelfControl
@@ -47,6 +48,8 @@ namespace Ask.Engine.Tests.SelfControl
           await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось преобразовать объект в измеритель!", type: ShowMessageModel.MessageType.Error));
           return;
         }
+
+
 
         switch (type)
         {
