@@ -34,6 +34,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
     /// </summary>
     SwitchingBusNew BusType { get; set; }
 
+    /// <summary>
+    /// Сопротивление коммутатора.
+    /// </summary>
+    double SwitchResistance { get; set; }
+
     ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }
 }
