@@ -1,9 +1,12 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Entity.Settings;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 
 namespace UI.Controls.Settings.Execution
 {
@@ -29,7 +32,24 @@ namespace UI.Controls.Settings.Execution
     {
       InitializeComponent();
       Loaded += ExecutionControl_Loaded;
+      EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(e => ChangeVisible(e.IsPowered));
+      ChangeVisible(SystemStateManager.GetIsActivePower());
     }
+
+    private void ChangeVisible(bool isPowered)
+    {
+      if (isPowered)
+      {
+        IdleMode.Visibility = Visibility.Collapsed;
+        ErrorSimulation.Visibility = Visibility.Collapsed;
+      }
+      else
+      {
+        IdleMode.Visibility = Visibility.Visible;
+        ErrorSimulation.Visibility = Visibility.Visible;
+      }
+    }
+
     private async void ExecutionControl_Loaded(object sender, RoutedEventArgs e)
     {
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
@@ -78,7 +98,7 @@ namespace UI.Controls.Settings.Execution
 
     private async void IdleMode_CheckedChanged(object? sender, bool e)
     {
-      if (await SystemStateManager.GetIsActivePower() && (sender as CheckBox).IsChecked == true)
+      if (SystemStateManager.GetIsActivePower() && (sender as CheckBox).IsChecked == true)
       {
         MessageBoxCustom.Show("Отключите питание системы для перехода в холостой режим!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         (sender as CheckBox).IsChecked = !(sender as CheckBox).IsChecked;
