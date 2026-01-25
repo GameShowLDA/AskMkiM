@@ -1,4 +1,5 @@
-﻿using Message;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Message;
 using NewCore.Base.Device;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -32,6 +33,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     }
 
     /// <summary>
+    /// Обрабатывает изменение выбранного номера стойки.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
+    private void BusTypeSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+    }
+
+    /// <summary>
     /// Обрабатывает изменение выбранной модели устройства и обновляет интерфейс
     /// в зависимости от типа подключения (IP или COM).
     /// </summary>
@@ -53,6 +63,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
+
+        if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
+        {
+          BusTypeContainer.Visibility = Visibility.Visible;
+        }
+        else
+        {
+          BusTypeContainer.Visibility = Visibility.Collapsed;
+        }
 
         if (baseClass == typeof(DeviceWithCOM))
         {

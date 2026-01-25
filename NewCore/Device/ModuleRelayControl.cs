@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Base.Device;
 using NewCore.Function.ModuleRelayControl.SelfCheck;
 using NewCore.FunctionAdapters.ModuleRelayControl;
@@ -46,6 +47,11 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IPointManager PointManager { get; set; }
+
+    /// <inheritdoc />
     public ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
+
+    /// <inheritdoc />
+    public SwitchingBusNew BusType { get; set; } = SwitchingBusNew.AB1;
   }
 }

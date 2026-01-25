@@ -81,6 +81,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!--Модель устройства-->
@@ -112,8 +113,37 @@
                         </Grid>
                     </Border>
 
+                    <!--Модель устройства-->
+                    <Border Grid.Row="1" Background="{DynamicResource SettingsMainBackground}"
+                            CornerRadius="10" Margin="0,10"
+                            Name="BusTypeContainer"
+                            >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{DynamicResource SettingsInfoTabloBackgroundSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="Тип структурной шины" Foreground="{DynamicResource ForegrounfBrushes}" 
+                           FontSize="20" FontWeight="Bold" Margin="7,0"
+                           />
+                            </Border>
+
+                            <ComboBox Grid.Row="1" 
+                                Name="BusTypeSelectionBox" 
+                                Style="{StaticResource CustomComboBoxStyle}"
+                                HorizontalAlignment="Stretch"
+                                Margin="20,0"
+                                Height="40"
+                                SelectionChanged="BusTypeSelectionBox_SelectionChanged"
+                                >
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
                     <!--Номер устройства-->
-                    <Border Grid.Row="1" Background="{DynamicResource SettingsMainBackground}" 
+                    <Border Grid.Row="2" Background="{DynamicResource SettingsMainBackground}" 
                         CornerRadius="10" Margin="0,10"
                         Name="DeviceNumberContainer"
                         >
@@ -144,7 +174,7 @@
                     </Border>
 
                     <!--Тип подлючения устройства-->
-                    <Border Grid.Row="2" 
+                    <Border Grid.Row="3" 
                         Background="{DynamicResource SettingsMainBackground}" 
                         CornerRadius="10" Margin="0,10"
                         Name="ConnectionTypeContainer"
@@ -180,7 +210,7 @@
                     </Border>
 
                     <!--IP address устройства-->
-                    <Border Grid.Row="3" Background="{DynamicResource SettingsMainBackground}" 
+                    <Border Grid.Row="4" Background="{DynamicResource SettingsMainBackground}" 
                         CornerRadius="10" Margin="0,10"
                         Name="IPAddressContainer"
                         >
@@ -255,7 +285,7 @@
                     </Border>
 
                     <!--COM устройства-->
-                    <Border Grid.Row="4" Background="{DynamicResource PrimarySolidColorBrush}" 
+                    <Border Grid.Row="5" Background="{DynamicResource PrimarySolidColorBrush}" 
                         CornerRadius="10" Margin="0,10"
                         Name="COMContainer"
                         >
