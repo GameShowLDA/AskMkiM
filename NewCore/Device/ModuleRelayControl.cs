@@ -53,5 +53,6 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public SwitchingBusNew BusType { get; set; } = SwitchingBusNew.AB1;
+    public double SwitchResistance { get; set; } = 1;
   }
 }
