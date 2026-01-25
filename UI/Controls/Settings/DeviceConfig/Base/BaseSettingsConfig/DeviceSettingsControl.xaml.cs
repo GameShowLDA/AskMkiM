@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Base.Device;
 using NewCore.Device;
 using System.IO.Ports;
@@ -51,6 +52,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       DeviceModelMap = deviceModelMap;
       DeviceModelSelectionBox.ItemsSource = deviceModelMap.Keys;
+      BusTypeSelectionBox.ItemsSource = Enum.GetValues(typeof(SwitchingBusNew));
+      BusTypeSelectionBox.SelectedIndex = 0;
     }
 
     /// <summary>
@@ -59,6 +62,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void VisibilityElements()
     {
       DeviceNumberContainer.Visibility = Visibility.Collapsed;
+      BusTypeContainer.Visibility = Visibility.Collapsed;
       ConnectionTypeContainer.Visibility = Visibility.Collapsed;
       IPAddressContainer.Visibility = Visibility.Collapsed;
       COMContainer.Visibility = Visibility.Collapsed;

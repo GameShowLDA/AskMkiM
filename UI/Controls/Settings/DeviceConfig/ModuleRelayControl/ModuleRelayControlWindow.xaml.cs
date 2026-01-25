@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
@@ -71,6 +72,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
         if (deviceEntity != null)
         {
           deviceEntity.PointCount = (baseDevice as IRelaySwitchModule).PointCount;
+          deviceEntity.BusType = (SwitchingBusNew)deviceSettingsWindow.BusTypeSelectionBox.SelectedItem;
           try
           {
             new RelaySwitchModuleServices().Create(deviceEntity);
