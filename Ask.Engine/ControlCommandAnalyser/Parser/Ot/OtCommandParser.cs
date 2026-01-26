@@ -128,12 +128,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
         int idxStarInFirstLine = remainder.IndexOf('*');
         remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
       }
-      else
-      {
-        // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
-        LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
-      }
 
       if (!string.IsNullOrEmpty(remainder))
       {
