@@ -33,8 +33,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
       BreakpointHandler.Handle(command, context.Console);
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
 
       List<ShowMessageModel> errorMessage = new();
 

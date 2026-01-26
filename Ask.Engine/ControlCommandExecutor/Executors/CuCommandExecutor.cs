@@ -18,8 +18,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = (CuCommandModel)context.Command;
-      BreakpointHandler.Handle(command, context.Console);
-
       if (command.CuType == CuCommandType.Information)
       {
         MessageBoxCustom.Show(command.MessageText, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);

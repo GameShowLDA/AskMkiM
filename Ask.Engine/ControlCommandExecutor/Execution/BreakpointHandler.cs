@@ -1,10 +1,6 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
 {
@@ -33,9 +29,9 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// Вызывается при срабатывании точки останова.
     /// Можно подписаться, логировать или остановить выполнение.
     /// </summary>
-    static void OnBreakpointHit(BaseCommandModel command)
+    private static void OnBreakpointHit(BaseCommandModel command)
     {
-      Message.MessageBoxCustom.Show($"Сработана точка останова на команде {command.CommandNumber} {command.Mnemonic}");
+      StepControlManager.EnableStepMode(true);
     }
   }
 }
