@@ -362,11 +362,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
 
         // ОК, сохраняем как есть
         // проверка на разобщение
-        model.DisconnectedLowerLimitResistance = lower.Value;
-        model.DisconnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+        model.DisconnectedLowerLimitResistance = higher.Value;
+        model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
 
-        model.DisconnectedHigherLimitResistance = higher.Value;
-        model.DisconnectedHigherLimitResistanceSource = $"{valHigher} {higherUnit}";
+        model.DisconnectedHigherLimitResistance = null;
+        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом"; 
 
         //проверка на сообщение
         model.ConnectedLowerLimitResistance = lower.Value;
