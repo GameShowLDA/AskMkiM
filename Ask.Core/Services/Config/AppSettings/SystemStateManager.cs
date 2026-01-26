@@ -95,8 +95,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>
     /// <see langword="true"/>, если питание активно; <see langword="false"/> — если отключено.
     /// </returns>
-    public static async Task<bool> GetIsActivePower() =>
-      await Task.Run(() => IsActivePower);
+    public static bool GetIsActivePower() => IsActivePower;
 
     /// <summary>
     /// Асинхронно возвращает текущий статус блокировки интерфейса.
