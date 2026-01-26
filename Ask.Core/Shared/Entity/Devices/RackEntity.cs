@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -43,5 +44,8 @@ namespace Ask.Core.Shared.Entity.Devices
     /// <inheritdoc />
     [NotMapped]
     public IDeviceProtocol DeviceProtocol { get; set; }
+
+    [NotMapped]
+    public BusStructureEnum.Type BusType { get; set; }
   }
 }
