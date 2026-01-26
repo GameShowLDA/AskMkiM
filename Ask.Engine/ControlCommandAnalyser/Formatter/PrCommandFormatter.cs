@@ -31,23 +31,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tКлючи команды не указаны.";
       }
 
-      // Нижний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(pr.LowerLimitResistanceSource))
-      {
-        yield return $"\tНижний порог сопротивления: {pr.LowerLimitResistanceSource}";
-      }
-
-
-      // Верхний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(pr.HigherLimitResistanceSource))
-      {
-        yield return $"\tВерхний порог сопротивления: {pr.HigherLimitResistanceSource}";
-      }
-      else
-      {
-        yield return $"\tВерхний порог сопротивления не задан.";
-      }
-
       if (pr.Comment.Count > 0)
       {
         yield return $"\tКомметрии:";
@@ -69,7 +52,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tВремя выполнения не задано.";
       }
 
-      yield return "\tЗаданные точки:";
       if (CommandsModel.GetRMModel() == null)
       {
         yield return "\tМодель РМ не задана!";
@@ -81,48 +63,81 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield break;
       }
 
+      if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
+      {
+        yield return "\tПроверка на сообщение:";
+
+        // Нижний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
+        {
+          yield return $"\t\tНижний порог сопротивления: {pr.ConnectedLowerLimitResistanceSource}";
+        }
+
+        // Верхний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
+        {
+          yield return $"\t\tВерхний порог сопротивления: {pr.ConnectedHigherLimitResistanceSource}";
+        }
+        else
+        {
+          yield return $"\t\tВерхний порог сопротивления не задан.";
+        }
+
+        yield return "\t\tЗаданные точки:";
+
+        var j = 1;
+        for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
+        {
+          var groupChains = pr.Scheme.GetPointsConnected(pr.Scheme.GroupModels[i]);
+          if (groupChains != null)
+          {
+            foreach (var chains in groupChains.ChainModels)
+            {
+              string str = string.Empty;
+              str += $"\t\t\t{j}. *";
+              j++;
+              foreach (var point in chains.PointModels)
+              {
+                str += $"{point.Mnemonic}[{point}],";
+              }
+              yield return str.Remove(str.Length - 1);
+            }
+          }
+        }
+      }
+
       if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
       {
-        yield return "\t\tРазобщенные точки:";
+        yield return "\tПроверка на разобщение:";
+        // Нижний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.DisconnectedLowerLimitResistanceSource))
+        {
+          yield return $"\t\tНижний порог сопротивления: {pr.DisconnectedLowerLimitResistanceSource}";
+        }
+
+        // Верхний порог сопротивления
+        if (!string.IsNullOrWhiteSpace(pr.DisconnectedHigherLimitResistanceSource))
+        {
+          yield return $"\t\tВерхний порог сопротивления: {pr.DisconnectedHigherLimitResistanceSource}";
+        }
+        else
+        {
+          yield return $"\t\tВерхний порог сопротивления не задан.";
+        }
+        yield return "\t\tЗаданные точки:";
         for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
         {
           var points = pr.Scheme.GetPointsDisconnected(pr.Scheme.GroupModels[i]);
           if (points != null)
           {
             string str = string.Empty;
-            str += $"\t\t{i + 1}. *";
+            str += $"\t\t\t{i + 1}. *";
 
-            foreach (var point in points)
+            foreach (var point in points.PointModels)
             {
               str += $"{point.Mnemonic}[{point}]#";
             }
             yield return str.Remove(str.Length - 1);
-          }
-        }
-      }
-
-
-      if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
-      {
-        yield return "\tСообщенные точки:";
-
-        var j = 1;
-        for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
-        {
-          var pointsAll = pr.Scheme.GetPointsConnected(pr.Scheme.GroupModels[i]);
-          if (pointsAll != null)
-          {
-            foreach (var points in pointsAll)
-            {
-              string str = string.Empty;
-              str += $"\t\t{j}. *";
-              j++;
-              foreach (var point in points)
-              {
-                str += $"{point.Mnemonic}[{point}],";
-              }
-              yield return str.Remove(str.Length - 1);
-            }
           }
         }
       }

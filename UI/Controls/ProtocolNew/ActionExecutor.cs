@@ -103,7 +103,7 @@ namespace UI.Controls.ProtocolNew
       processName = name;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
-      if (!await ExecutionConfig.GetIsIdleModeEnabled() && !await SystemStateManager.GetIsActivePower() && checkPower)
+      if (!await ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
       {
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
         await FinalizeAsync();

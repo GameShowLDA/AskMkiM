@@ -24,22 +24,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       List<ShowMessageModel> showMessageModels = new List<ShowMessageModel>();
 
-      var pointsList = methodExecutionContext.SchemeModel.GetPointsDisconnected();
-      if (pointsList.Count == 0)
+      var groupChains = methodExecutionContext.SchemeModel.GetPointsDisconnected();
+      if (groupChains.ChainModels.Count == 0)
       {
         return showMessageModels;
       }
 
       await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group));
 
-      List<ChainModel> chains = new List<ChainModel>();
-      foreach (var point in pointsList)
-      {
-        chains.Add(new ChainModel(point));
-      }
-
-      HighestBitCount = GetHighestPointBinaryDigits(chains);
-      var binaryPoints = ConvertToReversedBinaryRange(chains, HighestBitCount);
+      HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
+      var binaryPoints = ConvertToReversedBinaryRange(groupChains, HighestBitCount);
 
 
       for (int step = 0; step < HighestBitCount; step++)
@@ -96,9 +90,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="second">Вторая точка диапазона.</param>
     /// <param name="bitLength">Желаемая длина двоичной строки.</param>
     /// <returns>Список точек и соответствующих перевёрнутых бинарных строк.</returns>
-    static public List<(ChainModel point, string reversedBinary)> ConvertToReversedBinaryRange(
-        List<ChainModel> points,
-        int bitLength)
+    static public List<(ChainModel point, string reversedBinary)> ConvertToReversedBinaryRange(GroupModel groupChains,int bitLength)
     {
       if (bitLength <= 0)
       {
@@ -108,9 +100,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var result = new List<(ChainModel point, string reversedBinary)>();
       string reversPoint = string.Empty;
 
-      for (int i = 1; i <= points.Count; i++)
+      for (int i = 1; i <= groupChains.ChainModels.Count; i++)
       {
-        var chain = points[i - 1];
+        var chain = groupChains.ChainModels[i - 1];
         reversPoint = ConvertToReversedBinary(i, bitLength);
         result.Add((chain, reversPoint));
       }

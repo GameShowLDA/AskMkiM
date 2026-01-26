@@ -71,7 +71,7 @@ namespace NewCore.Function.GPT.Helper
           query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
           answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, responseDelay: 1000, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-          if (!answerDevice.Contains("TEST"))
+          if (answerDevice != string.Empty && !answerDevice.Contains("TEST"))
             break;
 
           await Task.Delay(300);
@@ -85,6 +85,14 @@ namespace NewCore.Function.GPT.Helper
 
       await StopMeasure(breakDown);
       var (value, unit) = ParseMeasureValue(answerDevice);
+
+      if (breakDown.Mode != Ask.Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
+      {
+        if (answerDevice.Contains("FAIL"))
+        {
+          value = -1;
+        }
+      }
 
       LogInformation($"[{nameof(MeasureFullTimeAsync)}] Значение = {value} {unit}", isDeviceLog: true);
       return (value, unit);

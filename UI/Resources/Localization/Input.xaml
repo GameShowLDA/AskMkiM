@@ -7,6 +7,12 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_A" Key="input.bus.a" />
     <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_B" Key="input.bus.b" />
 
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_Title" Key="input.bus.group.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB1" Key="input.bus.group.ab1" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB2" Key="input.bus.group.ab2" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB3" Key="input.bus.group.ab3" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB4" Key="input.bus.group.ab4" />
+
     <LocalizeStrings:LocalizedString x:Key="LS_Input_Electrical_Title" Key="input.electrical.title" />
     <LocalizeStrings:LocalizedString x:Key="LS_Input_First_Title" Key="input.first.title" />
     <LocalizeStrings:LocalizedString x:Key="LS_Input_Second_Title" Key="input.second.title" />

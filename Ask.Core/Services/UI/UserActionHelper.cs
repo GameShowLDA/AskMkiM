@@ -166,7 +166,14 @@ namespace Ask.Core.Services.UI
 
       do
       {
-        messageService?.GetCancellationToken().ThrowIfCancellationRequested();
+        try
+        {
+          messageService?.GetCancellationToken().ThrowIfCancellationRequested();
+        }
+        catch
+        { 
+
+        }
 
         bool success = await operation();
 

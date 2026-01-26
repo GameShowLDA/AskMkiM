@@ -7,6 +7,7 @@ using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -25,9 +26,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     static public async Task<List<ShowMessageModel>> CheckSequenceAsync(NodeFullContext context)
     {
       List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
+      List<ChainModel> errorChains = new();
 
-      var pointsList = context.SchemeModel.GetPointsDisconnected();
-      if (pointsList.Count == 0)
+
+      var groupChains = context.SchemeModel.GetPointsDisconnected();
+      if (groupChains.ChainModels.Count == 0)
       {
         return ErrorMessage;
       }
@@ -35,24 +38,21 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode));
 
-      foreach (var point in pointsList)
+      foreach (var chainModels in groupChains.ChainModels)
       {
-        var chainModels = new ChainModel(point);
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
         await DeviceManager.ConnectChainToBusBAsync(chainModels, context.MessageService);
       }
 
-      foreach (var point in pointsList)
+      foreach (var chainModels in groupChains.ChainModels)
       {
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
-        var chainModels = new ChainModel(point);
-
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Проверка {chainModels.ToString()}"), IsBlockStart: true);
 
         await DeviceManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService);
 
-        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken());
+        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), context.VoltageType);
 
         if (!answer.Result)
         {
@@ -72,18 +72,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel("Анализ на наличие короткого замыкания между точками"), IsBlockStart: true);
-        var chains = await FindAllShortCircuitChainsAsync(context.PerformMeasurementAsync, ErrorsPoints, context.Value, context.MessageService);
+        var chains = await FindAllShortCircuitChainsAsync(context.PerformMeasurementAsync, ErrorsPoints, context.Value, context.MessageService, context.VoltageType);
 
-
-        await context.MessageService.ShowMessageAsync(
-           new ShowMessageModel($"Результаты проверки")
-           { IndentLevel = 1 });
 
         foreach (var chain in chains)
         {
           var chainStr = await PointFormater.GetFormatDisconnectPoint(chain.Chain);
-
           context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
+          errorChains.AddRange(chain.Chain);
 
           var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, chain.Value, chainStr);
           err.Status = ShowMessageModel.MessageType.Error;
@@ -92,6 +88,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           ErrorMessage.Add(err);
           await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {err.ToString()}"));
         }
+      }
+
+      if (context.IsInvokedByAnotherCommand)
+      {
+        context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
       }
 
       return ErrorMessage;
@@ -130,7 +131,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       PerformMeasurementAsync performMeasurementAsync,
         List<ChainModel> faultyPoints,
         double resistance,
-        IUserInteractionService messageService)
+        IUserInteractionService messageService, VoltageEnum.Type typeVoltage)
     {
       var chains = new List<(List<ChainModel>, double)>();
       var visited = new HashSet<ChainModel>();
@@ -140,7 +141,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         if (visited.Contains(point))
           continue;
 
-        var chain = await FindChainAsync(performMeasurementAsync, point, faultyPoints, resistance, messageService, visited);
+        var chain = await FindChainAsync(performMeasurementAsync, point, faultyPoints, resistance, messageService, visited, typeVoltage);
 
         if (chain.Item1.Count > 1)
           chains.Add(chain);
@@ -164,7 +165,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         List<ChainModel> allPoints,
         double resistance,
         IUserInteractionService messageService,
-        HashSet<ChainModel> visited)
+        HashSet<ChainModel> visited, VoltageEnum.Type typeVoltage)
     {
       var queue = new Queue<ChainModel>();
       var chain = new List<ChainModel>();
@@ -185,7 +186,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           if (visited.Contains(candidate) || candidate.Equals(current))
             continue;
 
-          var isConnected = await IsShortCircuitedAsync(performMeasurementAsync, current, candidate, resistance, messageService);
+          var isConnected = await IsShortCircuitedAsync(performMeasurementAsync, current, candidate, resistance, messageService, typeVoltage);
           if (isConnected.Connected)
           {
             queue.Enqueue(candidate);
@@ -203,7 +204,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Проверяет, замкнуты ли две точки между собой.
     /// </summary>
-    private static async Task<(bool Connected, double Vaue)> IsShortCircuitedAsync(PerformMeasurementAsync performMeasurementAsync, ChainModel a, ChainModel b, double resistance, IUserInteractionService messageService)
+    private static async Task<(bool Connected, double Vaue)> IsShortCircuitedAsync(PerformMeasurementAsync performMeasurementAsync, ChainModel a, ChainModel b, double resistance, IUserInteractionService messageService, VoltageEnum.Type typeVoltage)
     {
       var allPoints = ErrorsPoints;
       await DisconnectAllFromBusAAsync(allPoints, messageService);

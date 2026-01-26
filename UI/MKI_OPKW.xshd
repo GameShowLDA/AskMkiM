@@ -21,7 +21,7 @@
 		<Rule color="ErrorLine">^.*!.*$</Rule>
 		
 		<!--Время-->
-		<Rule color="Time">\s\d+\s*[мm]?[сs]\b</Rule>
+		<Rule color="Time">\s\d+\s*[мm]?[сsСS]\b</Rule>
 
 		<!--Напряжение-->
 		<Rule color="Voltage">\s\+?\d+\s*[ВVv]\b</Rule>
@@ -62,6 +62,10 @@
 		<Rule color="Mnemonic">\bКС\b</Rule>
 		<Rule color="Mnemonic">\bИЕ\b</Rule>
 		<Rule color="Mnemonic">\bЭТ\b</Rule>
+		<Rule color="Mnemonic">\bПТ\b</Rule>
+		<Rule color="Mnemonic">\bОТ\b</Rule>
+		<Rule color="Mnemonic">\bВШ\b</Rule>
+		<Rule color="Mnemonic">\bСК\b</Rule>
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" multiline="true"/>

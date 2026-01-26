@@ -79,6 +79,51 @@ namespace UI.Localization {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на A1B1.
+        /// </summary>
+        internal static string input_bus_group_ab1 {
+            get {
+                return ResourceManager.GetString("input.bus.group.ab1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на A2B2.
+        /// </summary>
+        internal static string input_bus_group_ab2 {
+            get {
+                return ResourceManager.GetString("input.bus.group.ab2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на A3B3.
+        /// </summary>
+        internal static string input_bus_group_ab3 {
+            get {
+                return ResourceManager.GetString("input.bus.group.ab3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на A4B4.
+        /// </summary>
+        internal static string input_bus_group_ab4 {
+            get {
+                return ResourceManager.GetString("input.bus.group.ab4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Группа шин для проверки.
+        /// </summary>
+        internal static string input_bus_group_title {
+            get {
+                return ResourceManager.GetString("input.bus.group.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Шина для проверки.
         /// </summary>
         internal static string input_bus_title {
@@ -615,6 +660,15 @@ namespace UI.Localization {
         internal static string menu_test_tests_pidcw_node {
             get {
                 return ResourceManager.GetString("menu.test.tests.pidcw.node", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сопротивление коммутатора.
+        /// </summary>
+        internal static string menu_test_tests_relay_contact_resist_rkomm {
+            get {
+                return ResourceManager.GetString("menu.test.tests.relay.contact.resist.rkomm", resourceCulture);
             }
         }
         

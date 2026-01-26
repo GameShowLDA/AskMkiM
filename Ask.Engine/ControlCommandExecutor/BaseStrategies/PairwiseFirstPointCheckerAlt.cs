@@ -35,20 +35,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       foreach (var groups in pointsListSource)
       {
-        foreach (var chains in groups)
+        foreach (var chains in groups.ChainModels)
         {
           bool errorPoint = false;
           var str = string.Empty;
 
-          foreach (var point in chains)
+          foreach (var points in chains.PointModels)
           {
-            str += $"{EquipmentService.GetPointKey(point)},";
+            str += $"{EquipmentService.GetPointKey(points)},";
           }
           str = str.Remove(str.Length - 1);
 
           await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str));
 
-          var _basePoint = chains.First();
+          var _basePoint = chains.PointModels.First();
           await ConnectToBusAAndBAsync(messageService, _basePoint);
 
           var Rt1 = await GetResistanceAsync(messageService, resistance);
@@ -75,9 +75,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, messageService);
 
-          for (int i = 1; i < chains.Count; i++)
+          for (int i = 1; i < chains.PointModels.Count; i++)
           {
-            var point = chains[i];
+            var point = chains.PointModels[i];
             await ConnectToBusAAndBAsync(messageService, point);
 
             var Rt2 = await GetResistanceAsync(messageService, resistance);
@@ -199,9 +199,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       return result;
     }
 
-    static private async Task DisconnectAllPoints(IUserInteractionService userMessageService, List<PointModel> points)
+    static private async Task DisconnectAllPoints(IUserInteractionService userMessageService, ChainModel chain)
     {
-      var modules = EquipmentService.GetUniqueModulesByPoints(points);
+      var modules = EquipmentService.GetUniqueModulesByPoints(chain.PointModels);
       foreach (var module in modules)
       {
         await module.PointManager.DisconnectingAllPoint(userMessageService);

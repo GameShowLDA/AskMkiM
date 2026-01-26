@@ -41,7 +41,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <see langword="true"/>, если приложение работает с правами администратора;
     /// <see langword="false"/> — если без них.
     /// </returns>
-    public static async Task<bool> GetAdminRights() => await Task.Run(() => IsAdmin);
+    public static bool GetAdminRights() =>  IsAdmin;
 
     /// <summary>
     /// Асинхронно устанавливает статус прав администратора и уведомляет систему.

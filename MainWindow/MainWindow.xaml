@@ -130,6 +130,8 @@
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" utilities:HelpProvider.HelpKey="CrossTestMkr"/>
 
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Relay_Contact_Resist_RKOMM}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="RelayContactResistMenuItem" Command="{Binding Test.RelayContactResistExecutorCommand}"/>
+
                     </MenuItem>
 
                 </MenuItem>
@@ -153,9 +155,7 @@
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>
                 </MenuItem>
 
-                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin">
-
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_USB}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="USBMenuItem" Command="{Binding Admin.UsbCommand}"/>
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin" Command="{Binding Admin.AdminPanelCommand}">
 
                     <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
@@ -165,12 +165,12 @@
                         <MenuItem Header="УКШ" Style="{DynamicResource StyleMenuItem}" Name="ModuleUkshMenuItem" Command="{Binding Service.ServicesTestUkshCommand}" />
                     </MenuItem>-->
 
-                    <MenuItem Header="Тесты ПО" Style="{DynamicResource StyleMenuItem}">
+                    <!--<MenuItem Header="Тесты ПО" Style="{DynamicResource StyleMenuItem}">
                         <MenuItem Header="Протокол" Style="{DynamicResource StyleMenuItem}" Name="ProtocolTest" Command="{Binding Admin.ProtocolCommand}"/>
                         <MenuItem Header="Протокол текст" Style="{DynamicResource StyleMenuItem}" Name="ProtocolBaseTest" Command="{Binding Admin.ProtocolBaseCommand}"/>
                         <MenuItem Header="Выбор устройства" Style="{DynamicResource StyleMenuItem}" Name="ChoiceTest" Command="{Binding Admin.ChoiceCommand}"/>
                         <MenuItem Header="Тест консоли" Style="{DynamicResource StyleMenuItem}" Name="ConsoleTest" Command="{Binding Admin.ConsoleTest}"/>
-                    </MenuItem>
+                    </MenuItem>-->
 
                 </MenuItem>
 

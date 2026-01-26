@@ -110,5 +110,16 @@ namespace Ask.Core.Services.Errors.Translation
       Code = WarningCode.Gen_KeyZR,
       Description = $"В команде {command} нет точек для проверки на разобщение. Добавлен ключ ЗР.",
     };
+
+    /// <summary>
+    /// Предупреждение: команда ВШ была добавлена автоматически.
+    /// </summary>
+    public static WarningItem VshCommandAddedAutomatically(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = WarningCode.Gen_VshCommandAddedAutomatically,
+      Description = $"Команда ВШ не была указана в программе контроля и была добавлена автоматически.",
+    };
   }
 }
