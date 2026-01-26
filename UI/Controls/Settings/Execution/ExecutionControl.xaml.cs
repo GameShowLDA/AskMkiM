@@ -38,16 +38,19 @@ namespace UI.Controls.Settings.Execution
 
     private void ChangeVisible(bool isPowered)
     {
-      if (isPowered)
+      Dispatcher.Invoke(() =>
       {
-        IdleMode.Visibility = Visibility.Collapsed;
-        ErrorSimulation.Visibility = Visibility.Collapsed;
-      }
-      else
-      {
-        IdleMode.Visibility = Visibility.Visible;
-        ErrorSimulation.Visibility = Visibility.Visible;
-      }
+        if (isPowered)
+        {
+          IdleMode.Visibility = Visibility.Collapsed;
+          ErrorSimulation.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+          IdleMode.Visibility = Visibility.Visible;
+          ErrorSimulation.Visibility = Visibility.Visible;
+        }
+      });
     }
 
     private async void ExecutionControl_Loaded(object sender, RoutedEventArgs e)
