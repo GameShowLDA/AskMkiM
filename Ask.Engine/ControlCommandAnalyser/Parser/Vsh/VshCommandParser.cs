@@ -62,14 +62,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
         int? value = match.Groups["value"].Success
             ? int.Parse(match.Groups["value"].Value)
             : null;
-        var shassiBusType = BusStructureEnum.Type.Bus2;
+        var shassiBusType = BusStructureEnum.Type.None;
+        var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+        if (managerShassi != null)
+        {
+          shassiBusType = managerShassi.BusType;
+        }
         if (value == null)
         {
-          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
-          //var breakDown = ServiceLocator.GetRequired<IBreakdownTester>();
           if (managerShassi != null)
           {
-            shassiBusType = managerShassi.BusType;
             busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary, shassiBusType);
           }
           var managerRack = new RackServices().GetAllEntities();
@@ -105,36 +107,66 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
         ["К"] = BusStructureEnum.Type.BusCombined
       };
 
+      int.TryParse(shassiBusType.GetDescription(), out int resultShassi);
+
       if (!prefixMap.TryGetValue(prefix, out var busType))
       {
+        int.TryParse(busType.GetDescription(), out int resultBus);
+        string shassiStr = CreateShassiString(resultShassi);
         model.Errors.Add(
-            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic));
+            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic, shassiStr));
         return busDictionary;
       }
-
-      if (!busDictionary.TryGetValue(busType, out var standList))
+      if (shassiBusType == BusStructureEnum.Type.None)
       {
-        int.TryParse(shassiBusType.GetDescription(), out int resultShassi);
-        int.TryParse(busType.GetDescription(), out int resultBus);
-        standList = new List<int?>();
-        if (resultBus <= resultShassi)
-        {
-          busDictionary[busType] = standList;
-        }
-        else
-        {
-          model.Errors.Add(
-            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic));
-          return busDictionary;
-        }
+        model.Errors.Add(
+              VshErrors.NoneVshBusStructure(model.StartLineNumber, model.Mnemonic));
+        return busDictionary;
       }
-
-      if (standNumber.HasValue)
+      else
       {
-        standList.Add(standNumber.Value);
+        int.TryParse(busType.GetDescription(), out int resultBus);
+        if (!busDictionary.TryGetValue(busType, out var standList))
+        {
+          standList = new List<int?>();
+          if (resultBus <= resultShassi)
+          {
+            busDictionary[busType] = standList;
+          }
+          else
+          {
+            string shassiStr = CreateShassiString(resultShassi);
+            model.Errors.Add(
+              VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic, shassiStr));
+            return busDictionary;
+          }
+        }
+
+        if (standNumber.HasValue)
+        {
+          standList.Add(standNumber.Value);
+        }
       }
 
       return busDictionary;
+    }
+
+    private static string CreateShassiString(int resultShassi)
+    {
+      var shassiStr = string.Empty;
+      for (int i = 2; i <= resultShassi; i += 2)
+      {
+        if (i == resultShassi)
+        {
+          shassiStr += i.ToString() + "Ш";
+        }
+        else
+        {
+          shassiStr += i.ToString() + "Ш, ";
+        }
+      }
+
+      return shassiStr;
     }
   }
 }
