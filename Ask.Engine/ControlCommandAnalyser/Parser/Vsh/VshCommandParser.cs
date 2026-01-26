@@ -62,33 +62,36 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
         int? value = match.Groups["value"].Success
             ? int.Parse(match.Groups["value"].Value)
             : null;
+        var shassiBusType = BusStructureEnum.Type.Bus2;
         if (value == null)
         {
-          //var breakDown = ServiceLocator.GetRequired<IBreakdownTester>();
           var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+          //var breakDown = ServiceLocator.GetRequired<IBreakdownTester>();
           if (managerShassi != null)
           {
-            busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary);
+            shassiBusType = managerShassi.BusType;
+            busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary, shassiBusType);
           }
           var managerRack = new RackServices().GetAllEntities();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
             {
-              busDictionary = ManageBusStructure(model, prefix, rack.Number, busDictionary);
+              busDictionary = ManageBusStructure(model, prefix, rack.Number, busDictionary, shassiBusType);
             }
           }
           continue;
         }
 
-        busDictionary = ManageBusStructure(model, prefix, value, busDictionary);
+        busDictionary = ManageBusStructure(model, prefix, value, busDictionary, shassiBusType);
       }
       model.BusStructure = busDictionary;
 
       return model;
     }
 
-    private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber, Dictionary<BusStructureEnum.Type, List<int?>> busDictionary)
+    private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber,
+      Dictionary<BusStructureEnum.Type, List<int?>> busDictionary, BusStructureEnum.Type shassiBusType)
     {
       if (string.IsNullOrWhiteSpace(prefix))
         return busDictionary;
@@ -111,8 +114,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
 
       if (!busDictionary.TryGetValue(busType, out var standList))
       {
+        int.TryParse(shassiBusType.GetDescription(), out int resultShassi);
+        int.TryParse(busType.GetDescription(), out int resultBus);
         standList = new List<int?>();
-        busDictionary[busType] = standList;
+        if (resultBus <= resultShassi)
+        {
+          busDictionary[busType] = standList;
+        }
+        else
+        {
+          model.Errors.Add(
+            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic));
+          return busDictionary;
+        }
       }
 
       if (standNumber.HasValue)
