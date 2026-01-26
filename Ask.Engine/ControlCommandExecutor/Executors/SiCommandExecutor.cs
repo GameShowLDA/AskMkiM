@@ -53,7 +53,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
 
+      BreakpointHandler.Handle(command, context.Console);
       if (!string.IsNullOrEmpty(message) && !context.IsInvokedByAnotherCommand)
+
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
       }

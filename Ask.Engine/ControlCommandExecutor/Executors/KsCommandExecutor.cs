@@ -40,6 +40,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
 
+      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
 
       List<ShowMessageModel> errorMessage = new();

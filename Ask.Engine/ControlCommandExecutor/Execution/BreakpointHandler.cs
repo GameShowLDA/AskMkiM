@@ -1,0 +1,37 @@
+﻿using Ask.Core.Services.App;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Engine.ControlCommandAnalyser.Model;
+
+namespace Ask.Engine.ControlCommandExecutor.Execution
+{
+  /// <summary>
+  /// Сервис обработки точек останова.
+  /// Выполняет необходимые действия при достижении команды,
+  /// у которой установлен флаг HasBreakpoint.
+  /// </summary>
+  internal class BreakpointHandler
+  {
+    /// <summary>
+    /// Основной метод обработки точки останова.
+    /// Выполняется тогда, когда логика анализа дошла до команды,
+    /// содержащей установленную точку останова.
+    /// </summary>
+    /// <param name="command">Модель команды, для которой требуется обработка точки останова.</param>
+    static public void Handle(BaseCommandModel command, IUserInteractionService userInteractionService)
+    {
+      if (!command.HasBreakpoint)
+        return;
+
+      OnBreakpointHit(command);
+    }
+
+    /// <summary>
+    /// Вызывается при срабатывании точки останова.
+    /// Можно подписаться, логировать или остановить выполнение.
+    /// </summary>
+    private static void OnBreakpointHit(BaseCommandModel command)
+    {
+      StepControlManager.EnableStepMode(true);
+    }
+  }
+}

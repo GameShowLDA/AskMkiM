@@ -44,9 +44,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       string nameSiCommand = $"ПИ/СИ1";
 
+      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
-
-
 
       var points = command.Scheme?.GroupModels?
                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())

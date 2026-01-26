@@ -45,6 +45,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     public virtual string Mnemonic { get; set; }
     public string PointsSourse { get; set; }
 
+    /// <summary>
+    /// Признак установленной точки останова для данной команды.
+    /// Указывает, что выполнение анализа или обработки должно быть остановлено при достижении этой команды.
+    /// </summary>
+    public bool HasBreakpoint { get; set; }
+
     #region Методы
     public virtual T GetModel<T>(BaseCommandModel baseCommandModel) where T : class
     {
