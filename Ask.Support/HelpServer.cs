@@ -82,7 +82,7 @@ namespace Ask.Support
 
     private static async Task ListenLoop(CancellationToken token)
     {
-      var helpDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Help", "AppHelp");
+      var helpDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppHelp");
       while (!token.IsCancellationRequested)
       {
         HttpListenerContext ctx = null;
