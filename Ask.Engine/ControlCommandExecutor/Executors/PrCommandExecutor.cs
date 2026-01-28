@@ -181,6 +181,16 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         else
         {
           nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
+          nodeAccumulationContext.LowerLimit = command.DisconnectedLowerLimitResistance.Value;
+          if (command.DisconnectedHigherLimitResistance == null)
+          {
+            nodeAccumulationContext.HigherLimit = -1;
+          }
+          else
+          {
+            nodeAccumulationContext.HigherLimit = command.DisconnectedHigherLimitResistance.Value;
+          }
+
           var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
           errorMessage.AddRange(errMes);
         }
