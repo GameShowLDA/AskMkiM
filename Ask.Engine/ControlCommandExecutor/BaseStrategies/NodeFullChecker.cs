@@ -53,7 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await DeviceManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService);
 
-        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(),context.ResistanceFromRelaySwichModule, context.VoltageType);
+        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(),context.InternalResistance, context.VoltageType);
 
         if (!answer.Result)
         {

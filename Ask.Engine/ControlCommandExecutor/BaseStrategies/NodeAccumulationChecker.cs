@@ -66,7 +66,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await DeviceManager.ConnectPointToBusAAsync(point, messageService);
         }
 
-        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.ResistanceFromRelaySwichModule, context.VoltageType);
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.InternalResistance, context.VoltageType);
         if (!measured.Result)
         {
           step = 0;
