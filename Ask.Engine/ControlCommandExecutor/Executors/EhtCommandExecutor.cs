@@ -63,7 +63,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
-      await SettingFastMeter(meter, context.Console, command.AlgorithmKey.Contains("Б"));
+      await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitResistance.HasValue)
       {

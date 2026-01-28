@@ -49,13 +49,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
 
-        await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
+        await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
         var module = EquipmentService.GetModuleByPoint(binaryPoints.First().point.PointModels.First());
         var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken(), module.SwitchResistance);
         if (!result.Result)
         {
-          await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
+          await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
           await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckError(stepStr), IsBlockStart: true);
           showMessageModels.Add(new ShowMessageModel($"Разряд {stepStr}({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
@@ -66,7 +66,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           return showMessageModels;
         }
-        await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
+        await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
       }
 
       return showMessageModels;
@@ -130,17 +130,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Подключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task ConnectPointsToBusAsync(List<(ChainModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserInteractionService messageService)
+    static private async Task ConnectPointsToBusAsync(List<(ChainModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserInteractionService messageService, bool revers)
     {
       foreach (var point in points)
       {
         if (point.reversedBinary[step] == '1')
         {
-          await DeviceManager.ConnectChainToBusAAsync(point.point, messageService);
+          await DeviceManager.ConnectChainToBusAAsync(point.point, messageService, revers);
         }
         else
         {
-          await DeviceManager.ConnectChainToBusBAsync(point.point, messageService);
+          await DeviceManager.ConnectChainToBusBAsync(point.point, messageService, revers);
         }
 
       }
@@ -149,18 +149,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Отключает все точки группы к соответствующей шине в зависимости от текущего разряда.
     /// </summary>
-    static private async Task DisconnectPointsToBusAsync(List<(ChainModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserInteractionService messageService)
+    static private async Task DisconnectPointsToBusAsync(List<(ChainModel point, string reversedBinary)> points, SchemeModel schemeModel, int step, IUserInteractionService messageService, bool revers)
     {
 
       foreach (var point in points)
       {
         if (point.reversedBinary[step] == '1')
         {
-          await DeviceManager.DisconnectChainFromBusAAsync(point.point, messageService);
+          await DeviceManager.DisconnectChainFromBusAAsync(point.point, messageService, revers);
         }
         else
         {
-          await DeviceManager.DisconnectChainFromBusBAsync(point.point, messageService);
+          await DeviceManager.DisconnectChainFromBusBAsync(point.point, messageService, revers);
         }
       }
     }

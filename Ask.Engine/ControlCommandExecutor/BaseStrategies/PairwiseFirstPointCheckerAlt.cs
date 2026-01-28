@@ -77,7 +77,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
           }
 
-          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService);
+          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
           {
@@ -107,7 +107,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService);
+            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
@@ -138,7 +138,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.DisconnectPointFromBusBAsync(point, context.MessageService);
+            await DeviceManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
             if (!errorPoint)
             {
               await context.MessageService.ShowMessageAsync(new ShowMessageModel("Итог измерений"));

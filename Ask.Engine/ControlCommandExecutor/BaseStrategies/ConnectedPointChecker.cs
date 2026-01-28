@@ -102,7 +102,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           points.PointModels.Remove(_basePoint);
 
           await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = 1 }, IsBlockStart: true);
-          await DeviceManager.ConnectPointToBusBAsync(_basePoint, context.MessageService);
+          await DeviceManager.ConnectPointToBusBAsync(_basePoint, context.MessageService, false);
 
 
           foreach (var point in points.PointModels)
@@ -113,7 +113,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             string machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"({point.ToString()})" : string.Empty;
 
             await context.MessageService.ShowMessageAsync(await ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(_basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
-            await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService);
+            await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService, false);
 
             var module = EquipmentService.GetModuleByPoint(point);
             var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), module.SwitchResistance);
@@ -128,9 +128,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.DisconnectChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, $"{result.Value.ToString()} Ом", context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
             }
 
-            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService);
+            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, false);
           }
-          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService);
+          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, false);
         }
       }
 
