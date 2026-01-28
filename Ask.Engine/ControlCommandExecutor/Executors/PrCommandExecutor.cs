@@ -83,6 +83,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       methodExecutionContext.Unit = "Ом";
       methodExecutionContext.UnitMnemonic = "R";
       methodExecutionContext.TypeCommand = MeasurementTypeCommand.PR;
+
       if (command.AlgorithmKey.Contains("И"))
       {
         methodExecutionContext.IsPolarityReversed = true;
