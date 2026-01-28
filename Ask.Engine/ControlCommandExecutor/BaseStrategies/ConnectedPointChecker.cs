@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -7,6 +8,7 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Newtonsoft.Json.Linq;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -144,16 +146,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var chain = new ChainModel(item);
           var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
 
-          ShowMessageModel error = null;
-
-          if (context.HigherLimit > 0)
-          {
-            error = new ShowMessageModel($"{chainStr} ({context.LowerLimit} - {context.HigherLimit} {context.Unit})", message: $"{context.UnitMnemonic}изм = {errorChain.GetValueOrDefault(item)} {context.Unit}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
-          }
-          else
-          {
-            error = new ShowMessageModel($"{chainStr} ({context.LowerLimit} - ∞ {context.Unit})", message: $"{context.UnitMnemonic}изм = {errorChain.GetValueOrDefault(item)} {context.Unit}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
-          }
+          var overload = errorChain.GetValueOrDefault(item) != "9,9E+37" ? false : true;
+          var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Convert.ToDouble(errorChain.GetValueOrDefault(item)), chainStr, overload: overload);
+          error.Status = ShowMessageModel.MessageType.Error;
+          error.IndentLevel = 2;
 
           await context.MessageService.ShowMessageAsync(error);
           errorsMessage.Add(error);
@@ -161,7 +157,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      return errorsMessage;
+      return errorsMessage; 
+
     }
   }
 }

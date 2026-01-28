@@ -6,10 +6,12 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
+using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
@@ -75,7 +77,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var cabelResistance = command.CabelResistance != null ? command.CabelResistance.Value : 0;
 
-      var errMes = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, context.Console, (firstValue + secondValue) / 2, cabelResistance);
+      PairwiseFirstPointAltContext pairwiseFirstPointCheckerAlt = new PairwiseFirstPointAltContext();
+      pairwiseFirstPointCheckerAlt.SchemeModel = command.Scheme;
+      pairwiseFirstPointCheckerAlt.CommandManager = context.CommandExecutionManager;
+      pairwiseFirstPointCheckerAlt.CommandModel = command;
+      pairwiseFirstPointCheckerAlt.MessageService = context.Console;
+      pairwiseFirstPointCheckerAlt.Value = (firstValue + secondValue) / 2;
+      pairwiseFirstPointCheckerAlt.CabelResistance = cabelResistance;
+      pairwiseFirstPointCheckerAlt.TypeCommand = MeasurementTypeCommand.EHT;
+      pairwiseFirstPointCheckerAlt.LowerLimit = command.LowerLimitResistance.Value;
+      pairwiseFirstPointCheckerAlt.HigherLimit = command.HigherLimitResistance.Value;
+
+      var errMes = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(pairwiseFirstPointCheckerAlt);
       errorMessage.AddRange(errMes);
 
       await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
