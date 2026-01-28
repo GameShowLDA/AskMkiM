@@ -45,7 +45,7 @@ namespace Ask.Core.Shared.Entity.Devices
 
     /// <inheritdoc />
     [NotMapped]
-    public double SwitchResistance { get; set; }
+    public double SwitchResistance { get; }
 
     /// <inheritdoc />
     public SwitchingBusNew BusType { get; set; }

@@ -7,13 +7,14 @@ using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
   internal static class NodeFullChecker
   {
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW);
 
     static private List<ChainModel> ErrorsPoints = new List<ChainModel>();
 
@@ -52,7 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await DeviceManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService);
 
-        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), context.VoltageType);
+        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(),context.ResistanceFromRelaySwichModule, context.VoltageType);
 
         if (!answer.Result)
         {
@@ -213,7 +214,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await DeviceManager.ConnectChainToBusAAsync(a, messageService);
       await DeviceManager.ConnectChainToBusBAsync(b, messageService);
 
-      var anwer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken());
+      var module = EquipmentService.GetModuleByPoint(a.PointModels.FirstOrDefault());
+      var anwer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
 
       var result = (!anwer.Result, anwer.Value);
 

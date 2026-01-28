@@ -26,7 +26,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронная операция, возвращающая <c>true</c>, если измерение прошло успешно,
     /// или <c>false</c>, если обнаружена ошибка.
     /// </returns>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance);
 
     /// <summary>
     /// Асинхронно выполняет проверку соединённых точек в схеме.
@@ -113,7 +113,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             await context.MessageService.ShowMessageAsync(await ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(_basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
             await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService);
 
-            var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken());
+            var module = EquipmentService.GetModuleByPoint(point);
+            var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), module.SwitchResistance);
             if (!result.Result)
             {
               var item = new List<PointModel>() { _basePoint, point };

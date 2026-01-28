@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -22,7 +23,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="value">Ожидаемое значение.</param>
     /// <param name="userMessageService">Элемент управления для вывода сообщений.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.DCW);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance, VoltageEnum.Type type = VoltageEnum.Type.DCW);
     static private int step = 0;
 
     /// <summary>
@@ -65,7 +66,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await DeviceManager.ConnectPointToBusAAsync(point, messageService);
         }
 
-        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.VoltageType);
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.ResistanceFromRelaySwichModule, context.VoltageType);
         if (!measured.Result)
         {
           step = 0;
@@ -151,7 +152,27 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
         await DeviceManager.DisconnectAllPointFromBusBAsync(leftPart, messageService);
 
-        var measured = await performMeasurementAsync(resistance, messageService, cancellationToken, type: type);
+        IRelaySwitchModule module = null;
+        if (leftPart.ChainModels.FirstOrDefault() != null)
+        {
+          module = EquipmentService.GetModuleByPoint(leftPart.ChainModels.FirstOrDefault().PointModels.FirstOrDefault());
+        }
+        else if (rightPart.ChainModels.FirstOrDefault() != null)
+        {
+          module = EquipmentService.GetModuleByPoint(rightPart.ChainModels.FirstOrDefault().PointModels.FirstOrDefault());
+        }
+
+        (bool Result, double Value) measured;
+
+        if (module != null)
+        {
+          measured = await performMeasurementAsync(resistance, messageService, cancellationToken, module.SwitchResistance, type: type);
+        }
+        else
+        { 
+          measured = await performMeasurementAsync(resistance, messageService, cancellationToken, 0, type: type);
+        }
+
         if (!measured.Result)
         {
           if (rightPart.ChainModels.Count > 1)
@@ -178,7 +199,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
           else
           {
-            measured = await performMeasurementAsync(resistance, messageService, cancellationToken, type: type);
+            measured = await performMeasurementAsync(resistance, messageService, cancellationToken, module.SwitchResistance, type: type);
             if (!measured.Result)
             {
               errorPoint = leftPart.ChainModels[0];

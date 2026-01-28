@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -35,6 +36,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       foreach (var groups in pointsListSource)
       {
+        messageService.GetCancellationToken().ThrowIfCancellationRequested();
         foreach (var chains in groups.ChainModels)
         {
           bool errorPoint = false;
@@ -77,6 +79,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           for (int i = 1; i < chains.PointModels.Count; i++)
           {
+            messageService.GetCancellationToken().ThrowIfCancellationRequested();
             var point = chains.PointModels[i];
             await ConnectToBusAAndBAsync(messageService, point);
 

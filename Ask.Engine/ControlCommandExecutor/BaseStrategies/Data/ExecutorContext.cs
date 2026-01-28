@@ -59,7 +59,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// </summary>
     public bool IsInvokedByAnotherCommand { get; set; }
 
-
+    public double ResistanceFromRelaySwichModule { get; set; } = 0;
     public string UnitMnemonic { get; set; }
     public string Unit { get; set; }
 

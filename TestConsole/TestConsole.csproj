@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
     <ProjectReference Include="..\NewCore\NewCore.csproj" />
+    <ProjectReference Include="..\TestWPF\TestWPF.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
   </ItemGroup>
 

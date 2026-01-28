@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
     Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т,
    Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Г, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т1)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
-  [ResistanceRange(1.0, 100000.0, 10.0)]
+  [ResistanceRange(0, 100000.0, 10.0)]
   public class PrCommandModel : BaseCommandModel, IError, IHasScheme
   {
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;

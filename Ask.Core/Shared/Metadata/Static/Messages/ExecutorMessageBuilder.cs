@@ -164,7 +164,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       );
     }
 
-    public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null, string comparisonSign = "=")
+    public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null, string comparisonSign = "=", bool overload = false)
     {
       var type = typeof(MeasurementTypeCommand);
 
@@ -187,14 +187,25 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
+        if (overload && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR))
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+        }
+
         return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
       else
       {
         if ((value < lowerLimit || value > higherLimit) && (measurementTypeCommand == MeasurementTypeCommand.PI_ACW || measurementTypeCommand == MeasurementTypeCommand.PI_DCW))
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ ИЗОЛЯЦИИ");
+          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
+
+        if (overload && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR))
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+        }
+
         return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
     }
