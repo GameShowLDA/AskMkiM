@@ -61,7 +61,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
         await DeviceManager.ConnectChainToBusAAsync(chain, messageService);
 
-        var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), type: context.VoltageType);
+        var module = EquipmentService.GetModuleByPoint(chain.PointModels.FirstOrDefault());
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance, type: context.VoltageType);
         if (!measured.Result)
         {
           errorChains.Add((_basePoint, chain));

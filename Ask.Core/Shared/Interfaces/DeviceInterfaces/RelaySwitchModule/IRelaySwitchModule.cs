@@ -2,7 +2,6 @@
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
-
 {
   /// <summary>
   /// Интерфейс для модуля коммутации реле.
@@ -37,7 +36,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
     /// <summary>
     /// Сопротивление коммутатора.
     /// </summary>
-    double SwitchResistance { get; set; }
+    double SwitchResistance { get; }
 
     ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }

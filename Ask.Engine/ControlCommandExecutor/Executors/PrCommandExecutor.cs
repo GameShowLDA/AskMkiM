@@ -71,7 +71,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
 
       double resistance = 0;
-     
+
       await SettingMeter(meter, context.Console);
 
       MethodExecutionContext methodExecutionContext = new MethodExecutionContext();
@@ -241,7 +241,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.ACW)
+    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.ACW)
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
 
@@ -258,6 +258,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance);
         }
 
+        if (answer < 0)
+        {
+          answer = 0;
+        }
+
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, firstValue, -1, answer);
 
       }, messageService);
@@ -270,7 +275,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.ACW)
+    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.ACW)
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -286,6 +291,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance);
         }
 
+        if (answer < 0)
+        {
+          answer = 0;
+        }
+
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, firstValue, -1, answer);
       }, messageService);
 
@@ -297,7 +307,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken)
+    private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance)
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = -1;
@@ -312,12 +322,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           if (continuityManager)
           {
-            answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, messageService);
+            answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, messageService) - errorResistance;
           }
           else
           {
-            answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance);
+            answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance) - errorResistance;
           }
+        }
+
+
+        if (answer < 0)
+        {
+          answer = 0;
         }
 
         var result = answer >= firstValue && answer <= secondValue;

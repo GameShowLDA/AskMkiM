@@ -23,11 +23,12 @@ namespace NewCore.Device
       PointManager = new PointManagerAdapter(this);
       SelfTestManager = new SelfTestManager(this);
 
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.RelaySwitchModule;
+      DeviceType = DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";
       Description = "Добавить описание сюда";
       PointCount = 350;
       DeviceClass = GetType().FullName;
+      SwitchResistance = 1;
     }
 
     /// <inheritdoc />
@@ -53,6 +54,6 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public SwitchingBusNew BusType { get; set; } = SwitchingBusNew.AB1;
-    public double SwitchResistance { get; set; } = 1;
+    public double SwitchResistance { get; }
   }
 }

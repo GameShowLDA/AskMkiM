@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
+using Ask.Engine.ControlCommandExecutor.Execution;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -49,7 +50,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
 
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
-        var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken());
+
+        var module = EquipmentService.GetModuleByPoint(binaryPoints.First().point.PointModels.First());
+        var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken(), module.SwitchResistance);
         if (!result.Result)
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService);
