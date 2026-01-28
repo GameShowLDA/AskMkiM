@@ -63,7 +63,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
-      await SettingFastMeter(meter, context.Console, command.AlgorithmKey.Contains("Б"));
+      await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitResistance.HasValue)
       {
@@ -117,20 +117,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)
+    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
     {
       string name = meter.Name;
       int numberChassis = meter.NumberChassis;
       int number = meter.Number;
 
-      if (!fast)
-      {
-        await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
-      }
-      else
-      {
-        await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
-      }
+      await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
     }
   }
 }
