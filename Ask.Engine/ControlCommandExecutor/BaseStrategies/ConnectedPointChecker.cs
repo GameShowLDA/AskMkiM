@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -50,14 +51,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// (<see cref="ShowMessageModel"/>), если были обнаружены разрывы цепей;
     /// в противном случае возвращается пустой список.
     /// </returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(ConnectedPointContext context)
+    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context)
     {
       List<ShowMessageModel> errorsMessage = new List<ShowMessageModel>();
+      List<ShowMessageModel> infoMessage = new List<ShowMessageModel>();
+
       Dictionary<List<PointModel>, string> errorChain = new();
       var pointsList = context.SchemeModel.GetPointsConnected();
       if (pointsList.Count == 0)
       {
-        return errorsMessage;
+        return (errorsMessage, infoMessage);
       }
 
       await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint));
@@ -117,15 +120,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
             var module = EquipmentService.GetModuleByPoint(point);
             var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), module.SwitchResistance);
+
+            var item = new List<PointModel>() { _basePoint, point };
+            var chain = new ChainModel(item);
+            var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
+
             if (!result.Result)
             {
-              var item = new List<PointModel>() { _basePoint, point };
               errorChain.Add(item, result.Value.ToString());
-
-              var chain = new ChainModel(item);
-              var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
-
               context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.DisconnectChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, $"{result.Value.ToString()} Ом", context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
+            }
+
+            if (context.IsProtocolAttribute)
+            {
+              infoMessage.Add(ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, result.Value, chainStr));
             }
 
             await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, false);
@@ -146,8 +154,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var chain = new ChainModel(item);
           var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
 
-          var overload = errorChain.GetValueOrDefault(item) != "9,9E+37" ? false : true;
-          var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Convert.ToDouble(errorChain.GetValueOrDefault(item)), chainStr, overload: overload);
+          var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Convert.ToDouble(errorChain.GetValueOrDefault(item)), chainStr);
           error.Status = ShowMessageModel.MessageType.Error;
           error.IndentLevel = 2;
 
@@ -157,7 +164,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      return errorsMessage; 
+      return (errorsMessage, infoMessage);
 
     }
   }

@@ -1,4 +1,6 @@
-﻿namespace Ask.Core.Shared.DTO.Protocol
+﻿using System.Text;
+
+namespace Ask.Core.Shared.DTO.Protocol
 {
   public class ProtocolModel
   {
@@ -54,9 +56,14 @@
     public string Mode { get; set; }
 
     /// <summary>
-    /// Список ошибок программы.
+    /// Список ошибок программы контроля.
     /// </summary>
     public Dictionary<string, List<ShowMessageModel>> Errors { get; set; } = new Dictionary<string, List<ShowMessageModel>>();
+
+    /// <summary>
+    /// Список информации программы контроля.
+    /// </summary>
+    public Dictionary<string, List<ShowMessageModel>> Info { get; set; } = new Dictionary<string, List<ShowMessageModel>>();
 
     /// <summary>
     /// Время начала выполнения.
@@ -104,7 +111,9 @@
 
     static public string GetProtocolText(ProtocolModel protocolModel)
     {
-      // Формируем финальный текст протокола
+      string timeText = protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss\:ff");
+      string documentationText = BuildDocumentationBlock(protocolModel);
+
       string formattedText = Template
           .Replace("$ДАТА", protocolModel.Date.ToString("dd.MM.yyyy"))
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
@@ -113,7 +122,7 @@
           .Replace("$ПРОГРАММА", protocolModel.ProgramName)
           .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss:ff"))
           .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss:ff"))
-          .Replace("$ВРЕМЯ", protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss\:ff"))
+          .Replace("$ВРЕМЯ", timeText + documentationText)
           .Replace("$ИСПОЛНИТЕЛЬ", protocolModel.Executor)
           .Replace("$ПРЕДСТАВИТЕЛЬ", protocolModel.Agent)
           .Replace("$ЗАКАЗЧИК", protocolModel.Customer);
@@ -122,7 +131,6 @@
 
     public static string GetProtocolWithErrorsText(ProtocolModel protocolModel)
     {
-      // 1. Формируем список ошибок
       int totalErrors = protocolModel.Errors.Values.Sum(list => list.Count);
       var errorsText = $"\r\nОшибки программы (всего: {totalErrors}):";
 
@@ -137,7 +145,24 @@
         }
       }
 
-      // 2. Разделяем шаблон на две части — до и после строки с "$ПРОГРАММА"
+      int totalInfo = protocolModel.Info.Values.Sum(list => list.Count);
+      string infoText = string.Empty;
+      if (totalInfo > 0)
+      {
+        infoText = $"\r\nДокументирование (всего: {totalInfo}):";
+
+        i = 1;
+        foreach (var item in protocolModel.Info.Keys)
+        {
+          //errorsText += $"\r\n\tОшибки команды: {item}";
+          foreach (var info in protocolModel.Info[item])
+          {
+            infoText += $"\r\nDOC{i} {item}: {info}";
+            i++;
+          }
+        }
+      }
+
       const string marker = "$ПРОГРАММА";
       int markerIndex = ErrorsTemplate.IndexOf(marker);
       if (markerIndex == -1)
@@ -146,7 +171,6 @@
       string before = ErrorsTemplate.Substring(0, markerIndex + marker.Length);
       string after = ErrorsTemplate.Substring(markerIndex + marker.Length);
 
-      // 3. Выполняем подстановку в обеих частях отдельно
       before = before
           .Replace("$ДАТА", protocolModel.Date.ToString("dd.MM.yyyy"))
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
@@ -163,10 +187,41 @@
           .Replace("$ПРЕДСТАВИТЕЛЬ", protocolModel.Agent)
           .Replace("$ЗАКАЗЧИК", protocolModel.Customer);
 
-      // 4. Склеиваем финальный текст: до → ошибки → после
-      string formattedText = before + "\r\n" + errorsText + "\r\n" + after;
-
-      return formattedText;
+      if (totalInfo <= 0)
+      {
+        return before + "\r\n" + errorsText + "\r\n" + after;
+      }
+      else
+      {
+        return before + "\r\n" + errorsText + "\r\n" + infoText + "\r\n" + after;
+      }
     }
+
+    private static string BuildDocumentationBlock(ProtocolModel protocolModel)
+    {
+      int totalInfo = protocolModel.Info.Values.Sum(list => list.Count);
+
+      if (totalInfo == 0)
+        return string.Empty;
+
+      var sb = new StringBuilder();
+
+      sb.AppendLine().AppendLine()
+        .AppendLine($"Документирование (всего: {totalInfo}):");
+
+      int i = 1;
+
+      foreach (var (command, infos) in protocolModel.Info)
+      {
+        foreach (var info in infos)
+        {
+          sb.AppendLine($"DOC{i} {command}: {info}");
+          i++;
+        }
+      }
+
+      return sb.ToString();
+    }
+
   }
 }

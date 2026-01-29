@@ -26,13 +26,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
       {
-        bool overload = false;
-        if (measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR || measurementTypeCommand == MeasurementTypeCommand.EHT)
-        {
-          overload = value.ToString() != "9,9E+37" ? false : true;
-        }
-
-        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value, chains: chains, overload: overload);
+        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value, chains: chains);
         message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
         message.IndentLevel = 2;
 

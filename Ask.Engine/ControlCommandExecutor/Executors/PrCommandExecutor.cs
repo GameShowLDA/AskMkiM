@@ -93,6 +93,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       PairwiseFirstPointContext pairwiseFirstPointContext = methodExecutionContext.CreateChild<PairwiseFirstPointContext>();
 
       List<ShowMessageModel> errorMessage = new();
+      List<ShowMessageModel> infoMessage = new();
 
       if (!command.AlgorithmKey.Contains("ЗС"))
       {
@@ -128,8 +129,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         ConnectedPointContext connectedPointContext = methodExecutionContext.CreateChild<ConnectedPointContext>();
         connectedPointContext.PerformMeasurementAsync = measurePointConnected;
 
-        var connectErrMes = await ConnectedPointChecker.CheckSequenceAsync(connectedPointContext);
-        errorMessage.AddRange(connectErrMes);
+        var messageResult = await ConnectedPointChecker.CheckSequenceAsync(connectedPointContext);
+        errorMessage.AddRange(messageResult.errorMessage);
+        infoMessage.AddRange(messageResult.infoMessage);
       }
       if (!command.AlgorithmKey.Contains("ЗР"))
       {
@@ -212,6 +214,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (errorMessage.Count > 0)
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
+      }
+      if (infoMessage.Count > 0)
+      {
+        protocolModel.Info.Add(nameCommand, infoMessage);
       }
     }
 
