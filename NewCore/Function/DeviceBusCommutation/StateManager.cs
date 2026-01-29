@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
+using System.Text;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -39,7 +40,7 @@ namespace NewCore.Function.DeviceBusCommutation
 
     public string GetConnectionStatus()
     {
-      throw new NotImplementedException();
+      return string.Empty;
     }
 
     /// <inheritdoc />

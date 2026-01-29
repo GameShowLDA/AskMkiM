@@ -1,7 +1,10 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Base.Device;
 using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
 
@@ -12,6 +15,18 @@ namespace NewCore.Function.DeviceBusCommutation
   /// </summary>
   public class ConnectorManager : IConnectorDeviceBusCommutation
   {
+
+    private enum DeviceType
+    {
+      Multimeter,
+      PINT,
+      BreakdownTester,
+      BreakdownTesterAndMultimeter
+    }
+
+    private ObservableDictionary<(DeviceType, SwitchingBusNew), bool> deviceBusStatus = new ObservableDictionary<(DeviceType, SwitchingBusNew), bool>();
+    private const SwitchingBusNew BreakdownBus = SwitchingBusNew.AB1;
+
     /// <summary>
     /// Устройство коммутации шин.
     /// </summary>
@@ -21,15 +36,67 @@ namespace NewCore.Function.DeviceBusCommutation
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public ConnectorManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
+    public ConnectorManager(Device.DeviceBusCommutation deviceBusCommutation)
+    {
+      _deviceBusCommutation = deviceBusCommutation;
+      _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
+      deviceBusStatus.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_deviceBusCommutation);
+    }
+
+    /// <inheritdoc />
+    private void ConnectableManager_IsReset()
+    {
+      deviceBusStatus.Clear();
+
+      foreach (DeviceType device in Enum.GetValues(typeof(DeviceType)))
+      {
+        foreach (SwitchingBusNew bus in Enum.GetValues(typeof(SwitchingBusNew)))
+        {
+          deviceBusStatus[(device, bus)] = false;
+        }
+      }
+    }
 
     #region Мультиметр.
 
     /// <inheritdoc />
-    public async Task<bool> ConnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null) => await SetMultimeterState(true, bus);
+    public async Task<bool> ConnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    {
+      if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && isConnected)
+        return true;
+
+      foreach (var kvp in deviceBusStatus.Where(x => x.Key.Item1 == DeviceType.Multimeter && x.Value))
+      {
+        var oldBus = kvp.Key.Item2;
+        var disconnectResult = await DisconnectMultimeter(oldBus);
+        deviceBusStatus[(DeviceType.Multimeter, oldBus)] = false;
+      }
+
+      var result = await SetMultimeterState(true, bus);
+
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.Multimeter, bus)] = true;
+      }
+
+      return result;
+    }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null) => await SetMultimeterState(false, bus);
+    public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    {
+      if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && !isConnected)
+        return true;
+
+      var result = await SetMultimeterState(false, bus);
+
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.Multimeter, bus)] = false;
+      }
+
+      return result;
+    }
 
     /// <summary>
     /// Устанавливает состояние мультиметра (подключение или отключение).
@@ -104,10 +171,42 @@ namespace NewCore.Function.DeviceBusCommutation
     #region ПИНТ
 
     /// <inheritdoc />
-    public async Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null) => await SetPINTState(true, bus);
+    public async Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    {
+      if (deviceBusStatus.TryGetValue((DeviceType.PINT, bus), out var isConnected) && isConnected)
+        return true;
+
+      foreach (var kvp in deviceBusStatus.Where(x => x.Key.Item1 == DeviceType.PINT && x.Value))
+      {
+        var oldBus = kvp.Key.Item2;
+        var disconnectResult = await DisconnectPINT(oldBus);
+        deviceBusStatus[(DeviceType.PINT, oldBus)] = false;
+      }
+
+      var result = await SetPINTState(true, bus);
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.PINT, bus)] = true;
+      }
+
+      return result;
+    }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null) => await SetPINTState(true, bus);
+    public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    {
+      if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && !isConnected)
+        return true;
+
+      var result = await SetPINTState(true, bus);
+
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.PINT, bus)] = false;
+      }
+
+      return result;
+    }
 
     /// <summary>
     /// Устанавливает состояние ПИНТ (подключение или отключение).
@@ -140,10 +239,32 @@ namespace NewCore.Function.DeviceBusCommutation
     #region Пробойка.
 
     /// <inheritdoc />
-    public async Task<bool> ConnectBreakdownTester(IUserInteractionService? userMessageService = null) => await SetBreakdownTesterState(true);
+    public async Task<bool> ConnectBreakdownTester(IUserInteractionService? userMessageService = null)
+    {
+      if (deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)])
+        return true;
+
+      var result = await SetBreakdownTesterState(true);
+
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = true;
+      }
+
+      return result;
+    }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null) => await SetBreakdownTesterState(false);
+    public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null)
+    {
+      if (!deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)])
+        return true;
+
+      var result = await SetBreakdownTesterState(false);
+
+      deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = false;
+      return result;
+    }
 
     /// <summary>
     /// Устанавливает состояние мультиметра (подключение или отключение).
@@ -223,19 +344,58 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
+      if (deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)])
+        return true;
+
       var command = new DeviceCommand(5, 7, 0, 1);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
       var expectingResult = command.ToString();
-      return answer.Contains(expectingResult);
+      var result = answer.Contains(expectingResult);
+
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = true;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
+      if (!deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)])
+        return true;
+
       var command = new DeviceCommand(5, 7, 0, 2);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
       var expectingResult = command.ToString();
-      return answer.Contains(expectingResult);
+      var result = answer.Contains(expectingResult);
+
+      if (result)
+      {
+        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
+      }
+
+      return result;
     }
+
+    public IReadOnlyList<DeviceConnectionInfo> GetConnectedDevices()
+    {
+      return deviceBusStatus
+        .Where(x => x.Value)
+        .Select(x => new DeviceConnectionInfo(x.Key.Item2, DeviceTypeToText(x.Key.Item1)))
+        .OrderBy(x => x.bus)
+        .ThenBy(x => x.device)
+        .ToList();
+    }
+
+    private static string DeviceTypeToText(DeviceType type) => type switch
+    {
+      DeviceType.Multimeter => "Мультиметр",
+      DeviceType.PINT => "ПИНТ",
+      DeviceType.BreakdownTester => "Пробойная установка",
+      DeviceType.BreakdownTesterAndMultimeter => "Пробойная установка + мультиметр",
+      _ => type.ToString()
+    };
   }
 }

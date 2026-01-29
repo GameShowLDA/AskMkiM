@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {
-  public record BusConnectionInfo(SwitchingBus Bus, bool IsConnected) { }
+  public record DeviceConnectionInfo(SwitchingBusNew bus, string device);
 }

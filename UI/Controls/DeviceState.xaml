@@ -48,7 +48,7 @@
 
                             <TextBlock Grid.Row="1"
                                 Text="{Binding DeviceStatus, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                Style="{DynamicResource SettingsDescriptionStyle}" />
+                                Style="{DynamicResource SettingsDescriptionStyle}" FontSize="14" />
                         </Grid>
                     </Grid>
                 </Border>
