@@ -375,11 +375,7 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      token.ThrowIfCancellationRequested();
       await uksh.ConnectorManager.DisconnectAllBuses(ui);
-
-      token.ThrowIfCancellationRequested();
-      await uksh.ConnectableManager.DisconnectAsync(ui);
     }
 
     #endregion

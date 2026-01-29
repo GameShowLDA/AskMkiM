@@ -42,7 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var chainModels in groupChains.ChainModels)
       {
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
-        await DeviceManager.ConnectChainToBusBAsync(chainModels, context.MessageService);
+        await DeviceManager.ConnectChainToBusBAsync(chainModels, context.MessageService, context.IsPolarityReversed);
       }
 
       foreach (var chainModels in groupChains.ChainModels)
@@ -51,9 +51,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Проверка {chainModels.ToString()}"), IsBlockStart: true);
 
-        await DeviceManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService);
+        await DeviceManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService, context.IsPolarityReversed);
 
-        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(),context.ResistanceFromRelaySwichModule, context.VoltageType);
+        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(),context.InternalResistance, context.VoltageType);
 
         if (!answer.Result)
         {
@@ -61,7 +61,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           ErrorsPoints.Add(chainModels);
         }
 
-        await DeviceManager.SwitchChainFromBusAToBAsync(chainModels, context.MessageService);
+        await DeviceManager.SwitchChainFromBusAToBAsync(chainModels, context.MessageService, context.IsPolarityReversed);
       }
 
       if (ErrorsPoints.Count > 0)
@@ -73,7 +73,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel("Анализ на наличие короткого замыкания между точками"), IsBlockStart: true);
-        var chains = await FindAllShortCircuitChainsAsync(context.PerformMeasurementAsync, ErrorsPoints, context.Value, context.MessageService, context.VoltageType);
+        var chains = await FindAllShortCircuitChainsAsync(context.PerformMeasurementAsync, ErrorsPoints, context.Value, context.MessageService, context.VoltageType, context.IsPolarityReversed);
 
 
         foreach (var chain in chains)
@@ -113,11 +113,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       return (left, right);
     }
 
-    private static async Task DisconnectAllFromBusBAsync(List<ChainModel> points, IUserInteractionService messageService)
+    private static async Task DisconnectAllFromBusBAsync(List<ChainModel> points, IUserInteractionService messageService, bool revers)
     {
       foreach (var point in points)
       {
-        await DeviceManager.DisconnectChainFromBusBAsync(point, messageService);
+        await DeviceManager.DisconnectChainFromBusBAsync(point, messageService, revers);
       }
     }
 
@@ -132,7 +132,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       PerformMeasurementAsync performMeasurementAsync,
         List<ChainModel> faultyPoints,
         double resistance,
-        IUserInteractionService messageService, VoltageEnum.Type typeVoltage)
+        IUserInteractionService messageService, VoltageEnum.Type typeVoltage, bool revers)
     {
       var chains = new List<(List<ChainModel>, double)>();
       var visited = new HashSet<ChainModel>();
@@ -142,7 +142,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         if (visited.Contains(point))
           continue;
 
-        var chain = await FindChainAsync(performMeasurementAsync, point, faultyPoints, resistance, messageService, visited, typeVoltage);
+        var chain = await FindChainAsync(performMeasurementAsync, point, faultyPoints, resistance, messageService, visited, typeVoltage, revers);
 
         if (chain.Item1.Count > 1)
           chains.Add(chain);
@@ -166,7 +166,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         List<ChainModel> allPoints,
         double resistance,
         IUserInteractionService messageService,
-        HashSet<ChainModel> visited, VoltageEnum.Type typeVoltage)
+        HashSet<ChainModel> visited, VoltageEnum.Type typeVoltage, bool revers)
     {
       var queue = new Queue<ChainModel>();
       var chain = new List<ChainModel>();
@@ -187,7 +187,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           if (visited.Contains(candidate) || candidate.Equals(current))
             continue;
 
-          var isConnected = await IsShortCircuitedAsync(performMeasurementAsync, current, candidate, resistance, messageService, typeVoltage);
+          var isConnected = await IsShortCircuitedAsync(performMeasurementAsync, current, candidate, resistance, messageService, typeVoltage, revers);
           if (isConnected.Connected)
           {
             queue.Enqueue(candidate);
@@ -205,31 +205,31 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Проверяет, замкнуты ли две точки между собой.
     /// </summary>
-    private static async Task<(bool Connected, double Vaue)> IsShortCircuitedAsync(PerformMeasurementAsync performMeasurementAsync, ChainModel a, ChainModel b, double resistance, IUserInteractionService messageService, VoltageEnum.Type typeVoltage)
+    private static async Task<(bool Connected, double Vaue)> IsShortCircuitedAsync(PerformMeasurementAsync performMeasurementAsync, ChainModel a, ChainModel b, double resistance, IUserInteractionService messageService, VoltageEnum.Type typeVoltage, bool revers)
     {
       var allPoints = ErrorsPoints;
-      await DisconnectAllFromBusAAsync(allPoints, messageService);
-      await DisconnectAllFromBusBAsync(allPoints, messageService);
+      await DisconnectAllFromBusAAsync(allPoints, messageService, revers);
+      await DisconnectAllFromBusBAsync(allPoints, messageService, revers);
 
-      await DeviceManager.ConnectChainToBusAAsync(a, messageService);
-      await DeviceManager.ConnectChainToBusBAsync(b, messageService);
+      await DeviceManager.ConnectChainToBusAAsync(a, messageService, revers);
+      await DeviceManager.ConnectChainToBusBAsync(b, messageService, revers);
 
       var module = EquipmentService.GetModuleByPoint(a.PointModels.FirstOrDefault());
       var anwer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
 
       var result = (!anwer.Result, anwer.Value);
 
-      await DeviceManager.DisconnectChainFromBusAAsync(a, messageService);
-      await DeviceManager.DisconnectChainFromBusBAsync(b, messageService);
+      await DeviceManager.DisconnectChainFromBusAAsync(a, messageService, revers);
+      await DeviceManager.DisconnectChainFromBusBAsync(b, messageService, revers);
 
       return result;
     }
 
-    private static async Task DisconnectAllFromBusAAsync(List<ChainModel> points, IUserInteractionService messageService)
+    private static async Task DisconnectAllFromBusAAsync(List<ChainModel> points, IUserInteractionService messageService, bool revers)
     {
       foreach (var point in points)
       {
-        await DeviceManager.DisconnectChainFromBusAAsync(point, messageService);
+        await DeviceManager.DisconnectChainFromBusAAsync(point, messageService, revers);
       }
     }
   }

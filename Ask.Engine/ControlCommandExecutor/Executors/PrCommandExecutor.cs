@@ -84,6 +84,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       methodExecutionContext.UnitMnemonic = "R";
       methodExecutionContext.TypeCommand = MeasurementTypeCommand.PR;
 
+      if (command.AlgorithmKey.Contains("И"))
+      {
+        methodExecutionContext.IsPolarityReversed = true;
+      }
+      
       NodeAccumulationContext nodeAccumulationContext = methodExecutionContext.CreateChild<NodeAccumulationContext>();
       PairwiseFirstPointContext pairwiseFirstPointContext = methodExecutionContext.CreateChild<PairwiseFirstPointContext>();
 

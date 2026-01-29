@@ -101,6 +101,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
 
+      if (command.AlgorithmKey.Contains("И"))
+      {
+        nodeAccumulationContext.IsPolarityReversed = true;
+      }
+
       if (command.VoltageType == VoltageEnum.Type.DCW)
       {
         nodeAccumulationContext.TypeCommand = MeasurementTypeCommand.PI_DCW;

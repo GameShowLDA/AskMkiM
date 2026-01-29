@@ -103,6 +103,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeFullContext.TypeCommand = MeasurementTypeCommand.SI;
       nodeFullContext.IsInvokedByAnotherCommand = context.IsInvokedByAnotherCommand;
 
+      if (command.AlgorithmKey.Contains("И"))
+      {
+        nodeFullContext.IsPolarityReversed = true;
+      }
+
       MethodExecutionContext methodExecutionContext = nodeFullContext.CreateChild<MethodExecutionContext>();
       NodeAccumulationContext nodeAccumulationContext = nodeFullContext.CreateChild<NodeAccumulationContext>();
       PairwiseFirstPointContext pairwiseFirstPointContext = nodeFullContext.CreateChild<PairwiseFirstPointContext>();

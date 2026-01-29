@@ -63,15 +63,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         foreach (var point in chain.PointModels)
         {
-          await DeviceManager.ConnectPointToBusAAsync(point, messageService);
+          await DeviceManager.ConnectPointToBusAAsync(point, messageService, context.IsPolarityReversed);
         }
 
-        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.ResistanceFromRelaySwichModule, context.VoltageType);
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.InternalResistance, context.VoltageType);
         if (!measured.Result)
         {
           step = 0;
           var chains = EquipmentService.GetDisconnectChainsBefore(context.SchemeModel, chain);
-          var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken, context.VoltageType);
+          var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken, context.VoltageType, context.IsPolarityReversed);
           if (localized != null)
           {
 
@@ -102,7 +102,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         foreach (var point in chain.PointModels)
         {
-          await DeviceManager.SwitchPointFromBusAToBAsync(point, messageService);
+          await DeviceManager.SwitchPointFromBusAToBAsync(point, messageService, context.IsPolarityReversed);
         }
       }
 
@@ -110,7 +110,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         foreach (var points in chains.PointModels)
         {
-          await DeviceManager.DisconnectPointFromBusBAsync(points, messageService);
+          await DeviceManager.DisconnectPointFromBusBAsync(points, messageService, context.IsPolarityReversed);
         }
       }
 
@@ -138,7 +138,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         double resistance,
         IUserInteractionService messageService,
         CancellationToken cancellationToken,
-        VoltageEnum.Type type
+        VoltageEnum.Type type,
+        bool revers
         )
     {
       try
@@ -150,7 +151,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         var (leftPart, rightPart) = SplitInHalf(candidates);
 
         await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
-        await DeviceManager.DisconnectAllPointFromBusBAsync(leftPart, messageService);
+        await DeviceManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
 
         IRelaySwitchModule module = null;
         if (leftPart.ChainModels.FirstOrDefault() != null)
@@ -169,7 +170,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           measured = await performMeasurementAsync(resistance, messageService, cancellationToken, module.SwitchResistance, type: type);
         }
         else
-        { 
+        {
           measured = await performMeasurementAsync(resistance, messageService, cancellationToken, 0, type: type);
         }
 
@@ -177,7 +178,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (rightPart.ChainModels.Count > 1)
           {
-            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type);
+            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type, revers);
           }
           else
           {
@@ -188,14 +189,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         else
         {
           await messageService.ShowMessageAsync(new ShowMessageModel("Отключение правой части группы точек"));
-          await DeviceManager.DisconnectAllPointFromBusBAsync(rightPart, messageService);
+          await DeviceManager.DisconnectAllPointFromBusBAsync(rightPart, messageService, revers);
 
           await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
-          await DeviceManager.ConnectAllFromBusBAsync(leftPart, messageService);
+          await DeviceManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
 
           if (leftPart.ChainModels.Count > 1)
           {
-            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type);
+            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type, revers);
           }
           else
           {
@@ -212,7 +213,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
         }
 
-        await DeviceManager.ConnectAllFromBusBAsync(candidates, messageService);
+        await DeviceManager.ConnectAllFromBusBAsync(candidates, messageService, revers);
         return errorPoint;
       }
       catch
