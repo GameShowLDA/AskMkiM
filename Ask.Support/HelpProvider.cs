@@ -1,6 +1,4 @@
-﻿using Photino.NET;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -10,11 +8,6 @@ namespace Ask.Support
 {
   public static class HelpProvider
   {
-    //private static HelpViewerWindow _helpWindow;
-
-    private static PhotinoWindow _helpWindow;
-
-    private static bool _settingsSet = false;
 
     // 1) Для совместимости: Func<string>-провайдер старого типа
     public static readonly DependencyProperty HelpKeyProviderProperty =
@@ -118,13 +111,8 @@ namespace Ask.Support
     /// </summary>
     public static void ShowHelp(string command)
     {
-      if (_helpWindow == null)
-      {
-        _helpWindow = new();
-        _settingsSet = false;
-      }
 
-        var helpDir = Path.Combine(
+      var helpDir = Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
           "AppHelp");
       if (!Directory.Exists(helpDir))
@@ -133,102 +121,18 @@ namespace Ask.Support
         return;
       }
 
-      //try
-      //{
-      //  HelpServer.EnsureStarted();
-      //}
-      //catch (Exception ex)
-      //{
-      //  MessageBox.Show("Не удалось открыть справку!\nОбратитесь к разработчику!", "Справка");
-      //  LogError($"Не удалось запустить Help-сервер: {ex.Message}");
-      //  return;
-      //}
-
       string url = string.IsNullOrWhiteSpace(command)
           ? "/index.html"
           : $"/index.html?cmd={Uri.EscapeDataString(command)}";
 
-      OpenHelpViewer(url);
-
-      //var e = new PhotinoWindow()
-      //      .SetTitle("My First Photino.NET Application")
-      //      .SetUseOsDefaultLocation(true)
-      //      .SetSize(800, 600)
-      //      .Load($"http://localhost:{HelpServer.Port}" + url)
-      //      .RegisterWebMessageReceivedHandler((sender, message) =>
-      //      {
-      //        Console.WriteLine($"Message received from frontend: {message}");
-      //      })
-      //      .Center();
-      //e.WaitForClose();
+      if(HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow(url);
+      else HelpViewerWindow.Load(url);
     }
 
-    public static void OpenFastMenuCommand() =>
-      OpenHelpViewer("/FastMenuCommand.html");
-
-    private static void OpenHelpViewer(string relativeFileAddress)
+    public static void OpenFastMenuCommand() 
     {
-      if (_settingsSet == false)
-      {
-        SetSettings(_helpWindow);
-        _settingsSet = true;
-      }
-      _helpWindow.Load($"http://localhost:{HelpServer.Port}" + relativeFileAddress);
-
-      try
-      {
-        _helpWindow.WaitForClose();
-      }
-      catch (Exception ex)
-      {
-        Debug.WriteLine($"Ошибка открытия Help Viewer: {ex}");
-      }
-
-      //try
-      //{
-      //  if (Application.Current.Dispatcher.CheckAccess())
-      //    ShowHelpWindow($"http://localhost:{HelpServer.Port}" + relativeFileAddress);
-      //  else
-      //    Application.Current.Dispatcher.Invoke(() => ShowHelpWindow($"http://localhost:{HelpServer.Port}" + relativeFileAddress));
-      //}
-      //catch (Exception ex)
-      //{
-      //  Debug.WriteLine($"Ошибка открытия просмотрщика справочника: {ex}");
-      //  Process.Start(new ProcessStartInfo($"http://localhost:{HelpServer.Port}" + relativeFileAddress) { UseShellExecute = true });
-      //}
+      if (HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow("/FastMenuCommand.html");
+      else HelpViewerWindow.Load("/FastMenuCommand.html");
     }
-
-    private static void SetSettings(PhotinoWindow window)
-    {
-      window
-        .SetTitle("Справочная система")
-        .SetUseOsDefaultLocation(true)
-        .SetSize(1024, 768)
-        .SetMinSize(600, 600)
-        .RegisterWebMessageReceivedHandler((sender, message) =>
-        {
-          LogDebug(
-            $"A JavaScript message from the HELP-system:\n" +
-            $"Object: {sender}\n" +
-            $"Message: {message}"
-            );
-        }
-        )
-        .Center();
-    }
-
-    //private static void ShowHelpWindow(string url)
-    //{
-    //  if (_helpWindow == null || !_helpWindow.IsLoaded)
-    //  {
-    //    _helpWindow = new HelpViewerWindow();
-    //    _helpWindow.Closed += (s, e) => _helpWindow = null;
-    //  }
-
-    //  _helpWindow.Navigate(url);
-    //  _helpWindow.Show();
-    //  _helpWindow.Activate();
-    //  _helpWindow.Focus();
-    //}
   }
 }

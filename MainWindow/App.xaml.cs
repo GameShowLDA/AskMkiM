@@ -1,10 +1,11 @@
-﻿using Ask.Core.Services.App;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Support;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Init;
-using System.Runtime.InteropServices;
-using System.Windows;
 using UI.Theme;
 using static Ask.LogLib.LoggerUtility;
 
@@ -122,6 +123,9 @@ namespace MainWindowProgram
 
       GC.Collect();
       GC.WaitForPendingFinalizers();
+
+      HelpViewerWindow.Close();
+      HelpServer.Stop();
 
       // TODO : Раскомментировать, когда будет готово
       // await Core.Communication.CommunicationManager.ResetAllSystem();
