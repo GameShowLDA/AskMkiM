@@ -83,10 +83,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     public string Unit { get; set; }
 
     /// <summary>
-    /// Признак переполюсовки точек (инвертированной полярности) в текущей конфигурации.
+    /// Признак переполюсовки точек (инвертированной полярности) в текущей конфигурации (Ключ И).
     /// <c>true</c> — если полярность точек инвертирована; иначе <c>false</c>.
     /// </summary>
     public bool IsPolarityReversed { get; set; }
+
+    /// <summary>
+    /// Атрибут вывода информации в протокол и на печать (Ключ Д).
+    /// </summary>
+    public bool IsProtocolAttribute { get; set; }
 
     protected void CopyFrom(ExecutorContext other)
     {
@@ -102,6 +107,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       TypeCommand = other.TypeCommand;
       IsInvokedByAnotherCommand = other.IsInvokedByAnotherCommand;
       IsPolarityReversed = other.IsPolarityReversed;
+      IsProtocolAttribute = other.IsProtocolAttribute;
     }
 
     public T CreateChild<T>() where T : ExecutorContext, new()

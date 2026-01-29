@@ -42,6 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
 
       List<ShowMessageModel> errorMessage = new();
+      List<ShowMessageModel> infoMessage = new();
 
       var points = command.Scheme?.GroupModels?
             .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
@@ -92,8 +93,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       pointContext.UnitMnemonic = "C";
       pointContext.TypeCommand = MeasurementTypeCommand.IE;
 
-      var errMes = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(errMes);
+      if (command.AlgorithmKey.Contains("Д"))
+      {
+        pointContext.IsProtocolAttribute = true;
+      }
+
+      var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
+      errorMessage.AddRange(messageResult.errorMessage);
+      infoMessage.AddRange(messageResult.infoMessage);
 
       await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
       foreach (var item in modules)
@@ -104,6 +111,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (errorMessage.Count > 0)
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
+      }
+      if (infoMessage.Count > 0)
+      {
+        protocolModel.Info.Add(nameCommand, infoMessage);
       }
     }
 

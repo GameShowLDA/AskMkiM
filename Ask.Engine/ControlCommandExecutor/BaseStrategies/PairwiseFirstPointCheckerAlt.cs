@@ -23,16 +23,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(PairwiseFirstPointAltContext context)
+    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(PairwiseFirstPointAltContext context)
     {
       List<ShowMessageModel> errorsMessgae = new List<ShowMessageModel>();
+      List<ShowMessageModel> infoMessage = new List<ShowMessageModel>();
       var baseCommandModel = context.CommandModel;
 
       List <List<ChainModel>> errorChain = new();
       var pointsListSource = context.SchemeModel.GetPointsConnected();
       if (pointsListSource.Count == 0)
       {
-        return errorsMessgae;
+        return (errorsMessgae, infoMessage);
       }
 
       await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint));
@@ -123,7 +124,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               if (Rt > 100)
               {
-                var errorMessageModels = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Rt, chains: $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}", overload: true);
+                var errorMessageModels = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Rt, chains: $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}");
                 errorMessageModels.Status = ShowMessageModel.MessageType.Error;
                 errorMessageModels.IndentLevel = 1;
                 errorPoint = true;
@@ -180,6 +181,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
                 await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {error.ToString()}"));
               }
+
+              if (context.IsProtocolAttribute)
+              {
+                infoMessage.Add(ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, result, $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}"));
+              }
             }
           }
 
@@ -187,7 +193,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      return errorsMessgae;
+      return (errorsMessgae, infoMessage);
     }
 
     static private async Task ConnectToBusAAndBAsync(IUserInteractionService userMessageService, PointModel pointModel)
