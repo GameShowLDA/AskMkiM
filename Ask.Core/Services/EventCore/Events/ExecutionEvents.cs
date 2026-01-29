@@ -40,10 +40,20 @@ namespace Ask.Core.Services.EventCore.Events
 
     public class ActiveDeviceChanged : IEvent
     {
-      public List<IDevice> Devices { get; }
-      public ActiveDeviceChanged(List<IDevice> devices)
+      public List<IAttachableDevice> Devices { get; }
+      public ActiveDeviceChanged(List<IAttachableDevice> devices)
       {
         Devices = devices;
+      }
+    }
+
+
+    public class DeviceStatusChanged : IEvent
+    {
+      public IAttachableDevice Device { get; }
+      public DeviceStatusChanged(IAttachableDevice device)
+      {
+        Device = device;
       }
     }
   }

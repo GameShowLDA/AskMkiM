@@ -1,9 +1,11 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
@@ -15,8 +17,8 @@ namespace NewCore.Function.ModuleRelayControl
   /// </summary>
   public class PointManager : IPointManager
   {
-    private Dictionary<int, bool> IsConnectedPointBusA = new Dictionary<int, bool>();
-    private Dictionary<int, bool> IsConnectedPointBusB = new Dictionary<int, bool>();
+    private ObservableDictionary<int, bool> IsConnectedPointBusA = new ObservableDictionary<int, bool>();
+    private ObservableDictionary<int, bool> IsConnectedPointBusB = new ObservableDictionary<int, bool>();
 
     /// <summary>
     /// Экземпляр интерфейса модуля реле.
@@ -32,6 +34,9 @@ namespace NewCore.Function.ModuleRelayControl
       _moduleRelayControl = moduleRelayControl;
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
+
+      IsConnectedPointBusA.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_moduleRelayControl);
+      IsConnectedPointBusB.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_moduleRelayControl);
     }
 
     private void ConnectableManager_IsReset()
@@ -383,5 +388,6 @@ namespace NewCore.Function.ModuleRelayControl
 
       return result;
     }
+
   }
 }

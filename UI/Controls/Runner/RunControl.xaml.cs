@@ -84,6 +84,8 @@ namespace UI.Controls.Runner
     }
 
     private bool task = false;
+
+    private DevicesStatus devicesStatus;
     public RunControl()
     {
       InitializeComponent();
@@ -91,8 +93,10 @@ namespace UI.Controls.Runner
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
-      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
+      devicesStatus = new DevicesStatus();
 
+      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
+      EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(e => devicesStatus.LoadDevices(e.Devices));
 
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
@@ -131,7 +135,6 @@ namespace UI.Controls.Runner
 
         if (obj.FormattedLineNumber >= 0)
         {
-          //_leftEditor?.GoToLine(obj.FormattedLineNumber);
           var dockManader = ChildTextEditorContainer.DockManager;
           var dockItemPk = dockManader.DockItems.FirstOrDefault(di => di.TabText != "Состояние оборудования");
           if (dockItemPk != null && dockItemPk.Content is TextEditorUI textEditor)
@@ -148,7 +151,6 @@ namespace UI.Controls.Runner
     }
     private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-      // Отменяем фокусировку и возвращаем в MainContent
       e.Handled = true;
       FocusMainContent();
     }
@@ -202,8 +204,6 @@ namespace UI.Controls.Runner
       }
 
       var dockManager = ChildTextEditorContainer.DockManager;
-      //LeftBox.Children.Clear();
-      //LeftBox.Children.Add(textEditorUI);
       if (dockManager.DockItems.Count > 0)
       {
         foreach (var dockItem in dockManager.DockItems.ToList())
@@ -220,11 +220,12 @@ namespace UI.Controls.Runner
         TabText = fileName,
         Content = textEditorUI,
       };
+
       var dockItemDeviceState = new DockItem
       {
         Title = filePath,
         TabText = "Состояние оборудования",
-        Content = new TextEditorUI(),
+        Content = devicesStatus,
       };
 
       dockManager.DockItems.Add(dockItemPk);
@@ -311,6 +312,7 @@ namespace UI.Controls.Runner
 
       await manager.ExecuteAllAsync();
     }
+
     private void AddError(ErrorItem errorItem)
     {
       Application.Current.Dispatcher?.Invoke(() =>
@@ -356,24 +358,19 @@ namespace UI.Controls.Runner
       }
     }
 
-    // Пользователь начал тянуть сплиттер – не вмешиваемся
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
     {
       _userResizing = true;
 
-      // Переводим строку из Auto → FixedHeight,
-      // чтобы пользователь мог растягивать вручную
       BottomRow.Height = new GridLength(ErrorListBoxVertical.ActualHeight);
       ErrorListBoxVertical.MaxHeight = double.PositiveInfinity;
     }
 
-    // Закончил тянуть – теперь снова можем автоподстраивать при изменении контента
     private void BottomSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
       _userResizing = false;
     }
 
-    // Панель ошибок изменила размер (добавились/убрались строки)
     private void ErrorListBoxVertical_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
       if (_userResizing)
@@ -384,7 +381,6 @@ namespace UI.Controls.Runner
       if (desired > MaxAutoHeight)
         desired = MaxAutoHeight;
 
-      // Автоматический режим — строка остаётся Auto, но мы ограничиваем контент
       BottomRow.Height = GridLength.Auto;
       ErrorListBoxVertical.MaxHeight = desired;
     }

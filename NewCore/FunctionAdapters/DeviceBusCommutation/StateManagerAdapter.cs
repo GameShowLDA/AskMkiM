@@ -43,7 +43,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
 
     public string GetConnectionStatus()
     {
-      throw new NotImplementedException();
+      return string.Empty;
     }
 
     /// <inheritdoc />

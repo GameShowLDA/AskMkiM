@@ -42,20 +42,29 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       return await ResetAsync(messageService);
     }
 
+    /// <inheritdoc />
     public string GetConnectionStatus()
     {
+      var buses = _moduleRelayControl.BusManager.GetConnectedBuses();
       var points = _moduleRelayControl.PointManager.GetConnectedPoints();
 
-      if (points == null || points.Count == 0)
-        return "Подключенные точки:\n  Нет подключённых точек.";
-
       var sb = new StringBuilder();
+
+      sb.AppendLine("Подключенные шины:");
+      if (buses.Count == 0)
+        sb.AppendLine("  Нет подключённых шин.");
+      else
+        foreach (var b in buses)
+          sb.AppendLine($"  {b.Bus}");
+
+      sb.AppendLine();
       sb.AppendLine("Подключенные точки:");
 
-      foreach (var p in points)
-      {
-        sb.AppendLine($"\tТочка {p.PointNumber} = {p.Bus}");
-      }
+      if (points.Count == 0)
+        sb.AppendLine("  Нет подключённых точек.");
+      else
+        foreach (var p in points)
+          sb.AppendLine($"  Точка {p.PointNumber} = {p.Bus}");
 
       return sb.ToString();
     }

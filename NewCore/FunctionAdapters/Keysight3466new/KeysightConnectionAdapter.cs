@@ -98,7 +98,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
     public string GetConnectionStatus()
     {
-      throw new NotImplementedException();
+      return string.Empty;
     }
   }
 }

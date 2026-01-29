@@ -30,7 +30,10 @@ namespace Ask.Core.Services.EventCore.Adapters
     public static void RaiseStepByStepModeChanged(bool isEnabled)
       => EventAggregator.Publish(new ExecutionEvents.StepByStepModeChanged(isEnabled));
 
-    public static void RaiseDevicesChanged(List<IDevice> devices)
+    public static void RaiseDevicesChanged(List<IAttachableDevice> devices)
       => EventAggregator.Publish(new ExecutionEvents.ActiveDeviceChanged(devices));
+
+    public static void RaiseDeviceStatusChanged(IAttachableDevice device)
+      => EventAggregator.Publish(new ExecutionEvents.DeviceStatusChanged(device));
   }
 }

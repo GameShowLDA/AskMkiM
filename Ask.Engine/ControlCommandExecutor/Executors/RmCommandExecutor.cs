@@ -35,7 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var unique = context.GetUniqueMeasurementDevices();
 
-      List<IDevice> devices = new List<IDevice>();
+      List<IAttachableDevice> devices = new();
       if (EquipmentService.ValidRelayModules != null)
       {
         devices.AddRange(EquipmentService.ValidRelayModules);
