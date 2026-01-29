@@ -456,6 +456,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("VSH001")]
     Vsh_InvalidVshBusStructure,
 
+    /// <summary> В команде ВШ не указана структура стойки коммутации в конфигурации. </summary>
+    [ErrorCodeTag("VSH002")]
+    Vsh_NoneVshBusStructure,
+
     #endregion
 
     #region Ключи команд

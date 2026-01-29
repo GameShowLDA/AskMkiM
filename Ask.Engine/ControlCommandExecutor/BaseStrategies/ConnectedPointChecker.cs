@@ -1,12 +1,15 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Newtonsoft.Json.Linq;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -26,7 +29,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронная операция, возвращающая <c>true</c>, если измерение прошло успешно,
     /// или <c>false</c>, если обнаружена ошибка.
     /// </returns>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance);
 
     /// <summary>
     /// Асинхронно выполняет проверку соединённых точек в схеме.
@@ -48,14 +51,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// (<see cref="ShowMessageModel"/>), если были обнаружены разрывы цепей;
     /// в противном случае возвращается пустой список.
     /// </returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(ConnectedPointContext context)
+    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context)
     {
       List<ShowMessageModel> errorsMessage = new List<ShowMessageModel>();
+      List<ShowMessageModel> infoMessage = new List<ShowMessageModel>();
+
       Dictionary<List<PointModel>, string> errorChain = new();
       var pointsList = context.SchemeModel.GetPointsConnected();
       if (pointsList.Count == 0)
       {
-        return errorsMessage;
+        return (errorsMessage, infoMessage);
       }
 
       await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint));
@@ -100,7 +105,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           points.PointModels.Remove(_basePoint);
 
           await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = 1 }, IsBlockStart: true);
-          await DeviceManager.ConnectPointToBusBAsync(_basePoint, context.MessageService);
+          await DeviceManager.ConnectPointToBusBAsync(_basePoint, context.MessageService, false);
 
 
           foreach (var point in points.PointModels)
@@ -111,23 +116,29 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             string machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"({point.ToString()})" : string.Empty;
 
             await context.MessageService.ShowMessageAsync(await ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(_basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
-            await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService);
+            await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService, false);
 
-            var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken());
+            var module = EquipmentService.GetModuleByPoint(point);
+            var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), module.SwitchResistance);
+
+            var item = new List<PointModel>() { _basePoint, point };
+            var chain = new ChainModel(item);
+            var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
+
             if (!result.Result)
             {
-              var item = new List<PointModel>() { _basePoint, point };
               errorChain.Add(item, result.Value.ToString());
-
-              var chain = new ChainModel(item);
-              var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
-
               context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.DisconnectChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, $"{result.Value.ToString()} Ом", context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
             }
 
-            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService);
+            if (context.IsProtocolAttribute)
+            {
+              infoMessage.Add(ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, result.Value, chainStr));
+            }
+
+            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, false);
           }
-          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService);
+          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, false);
         }
       }
 
@@ -143,16 +154,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var chain = new ChainModel(item);
           var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
 
-          ShowMessageModel error = null;
-
-          if (context.HigherLimit > 0)
-          {
-            error = new ShowMessageModel($"{chainStr} ({context.LowerLimit} - {context.HigherLimit} {context.Unit})", message: $"{context.UnitMnemonic}изм = {errorChain.GetValueOrDefault(item)} {context.Unit}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
-          }
-          else
-          {
-            error = new ShowMessageModel($"{chainStr} ({context.LowerLimit} - ∞ {context.Unit})", message: $"{context.UnitMnemonic}изм = {errorChain.GetValueOrDefault(item)} {context.Unit}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
-          }
+          var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Convert.ToDouble(errorChain.GetValueOrDefault(item)), chainStr);
+          error.Status = ShowMessageModel.MessageType.Error;
+          error.IndentLevel = 2;
 
           await context.MessageService.ShowMessageAsync(error);
           errorsMessage.Add(error);
@@ -160,7 +164,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      return errorsMessage;
+      return (errorsMessage, infoMessage);
+
     }
   }
 }

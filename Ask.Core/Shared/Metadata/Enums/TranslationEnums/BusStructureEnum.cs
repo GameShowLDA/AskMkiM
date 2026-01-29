@@ -13,6 +13,12 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums
     public enum Type
     {
       /// <summary>
+      /// Структура не указана - значение по умолчанию.
+      /// </summary>
+      [Description("0")]
+      None,
+
+      /// <summary>
       /// Двухшинная структура стойки коммутации.
       /// </summary>
       [Description("2")]

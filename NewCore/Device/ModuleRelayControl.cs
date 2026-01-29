@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Base.Device;
 using NewCore.Function.ModuleRelayControl.SelfCheck;
 using NewCore.FunctionAdapters.ModuleRelayControl;
@@ -22,11 +23,12 @@ namespace NewCore.Device
       PointManager = new PointManagerAdapter(this);
       SelfTestManager = new SelfTestManager(this);
 
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.RelaySwitchModule;
+      DeviceType = DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";
       Description = "Добавить описание сюда";
       PointCount = 350;
       DeviceClass = GetType().FullName;
+      SwitchResistance = 1;
     }
 
     /// <inheritdoc />
@@ -46,6 +48,12 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public IPointManager PointManager { get; set; }
+
+    /// <inheritdoc />
     public ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
+
+    /// <inheritdoc />
+    public SwitchingBusNew BusType { get; set; } = SwitchingBusNew.AB1;
+    public double SwitchResistance { get; }
   }
 }

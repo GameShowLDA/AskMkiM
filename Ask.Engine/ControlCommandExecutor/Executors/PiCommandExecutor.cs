@@ -44,9 +44,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       string nameSiCommand = $"ПИ/СИ1";
 
+      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
-
-
 
       var points = command.Scheme?.GroupModels?
                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
@@ -101,6 +100,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       nodeAccumulationContext.Unit = "мА";
       nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
+
+      if (command.AlgorithmKey.Contains("И"))
+      {
+        nodeAccumulationContext.IsPolarityReversed = true;
+      }
 
       if (command.VoltageType == VoltageEnum.Type.DCW)
       {
@@ -243,7 +247,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type type = VoltageEnum.Type.DCW)
+    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.DCW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
@@ -271,7 +275,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW)
+    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
       double answer = -1;

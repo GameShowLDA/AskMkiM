@@ -28,7 +28,6 @@ namespace UI.Controls.Runner
   /// </summary>
   public partial class RunControl : UserControl
   {
-
     /// <summary>
     /// Флаг, указывающий, находится ли интерфейс в заблокированном состоянии.
     /// Используется для предотвращения повторного применения изменений.

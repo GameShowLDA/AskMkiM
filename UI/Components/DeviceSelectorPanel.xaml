@@ -15,17 +15,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Name="ManagerChassisSelectionControl" Margin="5" Grid.Row="0" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Менеджер шасси" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <Custom:ChoiceDevice x:Name="ChassisData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите шасси"/>
-            </Grid>
-        </Border>
-
         <Border Name="SelectedDeviceInfoBlock" Margin="5" Grid.Row="1" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
@@ -47,17 +36,6 @@
                 <Custom:ChoiceDevice x:Name="PartData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите тип проверку"/>
             </Grid>
         </Border>
-
-        <Border Name="FastMeterSelectionControl"  Margin="5" Grid.Row="3" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Измеритель" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <Custom:ChoiceDevice x:Name="MeterData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите измеритель"/>
-            </Grid>
-        </Border>
-
+        
     </Grid>
 </UserControl>

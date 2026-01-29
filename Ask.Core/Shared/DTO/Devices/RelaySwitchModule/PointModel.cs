@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {
@@ -125,5 +126,6 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
     {
       return HashCode.Combine(DeviceNumber, ModuleNumber, PointNumber);
     }
+
   }
 }

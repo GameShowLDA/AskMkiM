@@ -8,8 +8,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
   /// </summary>
   public interface IChassisManager : IDevice, IHeadUnit
   {
-    BusStructureEnum.Type BusType { get; set; }
-
     /// <summary>
     /// Управление питанием шасси.
     /// </summary>

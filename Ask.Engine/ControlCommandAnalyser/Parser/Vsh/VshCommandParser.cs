@@ -62,103 +62,111 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
         int? value = match.Groups["value"].Success
             ? int.Parse(match.Groups["value"].Value)
             : null;
+        var shassiBusType = BusStructureEnum.Type.None;
+        var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+        if (managerShassi != null)
+        {
+          shassiBusType = managerShassi.BusType;
+        }
         if (value == null)
         {
-          //var breakDown = ServiceLocator.GetRequired<IBreakdownTester>();
-          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
           if (managerShassi != null)
           {
-            busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary);
+            busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary, shassiBusType);
           }
           var managerRack = new RackServices().GetAllEntities();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
             {
-              busDictionary = ManageBusStructure(model, prefix, rack.Number, busDictionary);
+              busDictionary = ManageBusStructure(model, prefix, rack.Number, busDictionary, shassiBusType);
             }
           }
           continue;
         }
 
-        busDictionary = ManageBusStructure(model, prefix, value, busDictionary);
+        busDictionary = ManageBusStructure(model, prefix, value, busDictionary, shassiBusType);
       }
       model.BusStructure = busDictionary;
 
       return model;
     }
 
-    private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber, Dictionary<BusStructureEnum.Type, List<int?>> busDictionary)
+    private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber,
+      Dictionary<BusStructureEnum.Type, List<int?>> busDictionary, BusStructureEnum.Type shassiBusType)
     {
-      if (!string.IsNullOrWhiteSpace(prefix))
+      if (string.IsNullOrWhiteSpace(prefix))
+        return busDictionary;
+
+      var prefixMap = new Dictionary<string, BusStructureEnum.Type>
       {
-        var standList = new List<int?>();
+        ["2"] = BusStructureEnum.Type.Bus2,
+        ["4"] = BusStructureEnum.Type.Bus4,
+        ["6"] = BusStructureEnum.Type.Bus6,
+        ["8"] = BusStructureEnum.Type.Bus8,
+        ["К"] = BusStructureEnum.Type.BusCombined
+      };
+
+      int.TryParse(shassiBusType.GetDescription(), out int resultShassi);
+
+      if (!prefixMap.TryGetValue(prefix, out var busType))
+      {
+        int.TryParse(busType.GetDescription(), out int resultBus);
+        string shassiStr = CreateShassiString(resultShassi);
+        model.Errors.Add(
+            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic, shassiStr));
+        return busDictionary;
+      }
+      if (shassiBusType == BusStructureEnum.Type.None)
+      {
+        model.Errors.Add(
+              VshErrors.NoneVshBusStructure(model.StartLineNumber, model.Mnemonic));
+        return busDictionary;
+      }
+      else
+      {
+        int.TryParse(busType.GetDescription(), out int resultBus);
+        if (!busDictionary.TryGetValue(busType, out var standList))
+        {
+          standList = new List<int?>();
+          if (resultBus <= resultShassi)
+          {
+            busDictionary[busType] = standList;
+          }
+          else
+          {
+            string shassiStr = CreateShassiString(resultShassi);
+            model.Errors.Add(
+              VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic, shassiStr));
+            return busDictionary;
+          }
+        }
+
         if (standNumber.HasValue)
         {
           standList.Add(standNumber.Value);
         }
-        if (prefix == "2")
+      }
+
+      return busDictionary;
+    }
+
+    private static string CreateShassiString(int resultShassi)
+    {
+      var shassiStr = string.Empty;
+      for (int i = 2; i <= resultShassi; i += 2)
+      {
+        if (i == resultShassi)
         {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus2))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus2, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus2].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "4")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus4))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus4, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus4].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "6")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus6))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus6, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus6].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "8")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.Bus8))
-          {
-            busDictionary.Add(BusStructureEnum.Type.Bus8, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.Bus8].Add(standNumber.Value);
-          }
-        }
-        else if (prefix == "К")
-        {
-          if (!busDictionary.ContainsKey(BusStructureEnum.Type.BusCombined))
-          {
-            busDictionary.Add(BusStructureEnum.Type.BusCombined, standList);
-          }
-          else
-          {
-            busDictionary[BusStructureEnum.Type.BusCombined].Add(standNumber.Value);
-          }
+          shassiStr += i.ToString() + "Ш";
         }
         else
         {
-          model.Errors.Add(VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic));
+          shassiStr += i.ToString() + "Ш, ";
         }
-        return busDictionary;
       }
-      return busDictionary;
+
+      return shassiStr;
     }
   }
 }

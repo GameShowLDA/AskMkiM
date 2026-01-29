@@ -28,7 +28,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nРабочее место", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
-
       var points = command.GetAllDestinationPoints();
 
       List<PointModel> pointsModel = PointModel.ConvertToPointModels(points);

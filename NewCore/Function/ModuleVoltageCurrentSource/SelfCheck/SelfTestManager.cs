@@ -1,10 +1,12 @@
 ﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using NewCore.Communication;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
@@ -30,6 +32,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         return;
       }
 
+      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice));
 
       switch (type)
       {

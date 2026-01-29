@@ -1,8 +1,13 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.Core.Services.App
 {
   /// <summary>
   /// Статический менеджер для управления режимами пошагового выполнения алгоритма (F10/F11)

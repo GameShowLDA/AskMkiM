@@ -83,7 +83,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           pairBusCheck: true);
 
       _pairBus = data.ActivePairBus;
-
       // МКР
       _module = RelayModuleHelper.GetModulesByRange
           (
@@ -117,9 +116,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           new ShowMessageModel("Настройка оборудования"),
           IsBlockStart: true);
 
+      var busses = ConvertingInSwitchingBusNewToSwitchingBus(data.ActivePairBus);
+
       // Подключаем МКР к выбранной паре шин
-      await RelayModuleHelper.BusConnectAsync(
-          ConvertingInSwitchingBusNewToSwitchingBus(data.ActivePairBus),
+      await RelayModuleHelper.BusConnectAsync(busses.Item1,
+          _module,
+          _userInteractionService,
+          cancellationToken);
+
+      // Подключаем МКР к выбранной паре шин
+      await RelayModuleHelper.BusConnectAsync(busses.Item2,
           _module,
           _userInteractionService,
           cancellationToken);
@@ -154,10 +160,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         result = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
             _userInteractionService,
-            cancellationToken);
-
-        //await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: SuccessMessage.TitleColor, message: $"до {data.Param} Ом"));
-        await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"Сопротивление точки {i}", message: $"{result} Ом", type: result <= data.Param ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+            cancellationToken,
+            i,
+            _module,
+            data.Param);
 
         // Отключаем точку
         await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
@@ -188,13 +194,13 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// Конвертация из <see cref="SwitchingBusNew"/> в <see cref="SwitchingBus"/>.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">Если какой-либо конвертации не оказалось здесь.</exception>
-    private SwitchingBus ConvertingInSwitchingBusNewToSwitchingBus(SwitchingBusNew pairBus) =>
+    private (SwitchingBus, SwitchingBus) ConvertingInSwitchingBusNewToSwitchingBus(SwitchingBusNew pairBus) =>
         pairBus switch
         {
-          SwitchingBusNew.AB1 => SwitchingBus.AB1,
-          SwitchingBusNew.AB2 => SwitchingBus.AB2,
-          SwitchingBusNew.AB3 => SwitchingBus.AB3,
-          SwitchingBusNew.AB4 => SwitchingBus.AB4,
+          SwitchingBusNew.AB1 => (SwitchingBus.A1, SwitchingBus.B1),
+          SwitchingBusNew.AB2 => (SwitchingBus.A2, SwitchingBus.B2),
+          SwitchingBusNew.AB3 => (SwitchingBus.A3, SwitchingBus.B3),
+          SwitchingBusNew.AB4 => (SwitchingBus.A4, SwitchingBus.B4),
           _ => throw new ArgumentOutOfRangeException(nameof(pairBus), $"Недопустимое значение для {nameof(SwitchingBusNew)}: {pairBus}"),
         };
 

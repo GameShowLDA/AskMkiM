@@ -258,7 +258,7 @@ namespace Ask.Engine.Tests.Base
     {
       token.ThrowIfCancellationRequested();
 
-      await meter.ResistanceManager.SetResistanceModeAsync(ui);
+      await meter.ContinuityManager.SetContinuityModeAsync(ui);
     }
 
     /// <summary>
@@ -281,12 +281,15 @@ namespace Ask.Engine.Tests.Base
       IFastMeter meter,
       IUserInteractionService ui,
       CancellationToken token,
+      int pointNumber,
+      IRelaySwitchModule _module,
       double param = 0,
-      double lower = -1e12,
-      double upper = 1e12)
+      double lower = 0)
     {
+      var answer = await meter.ContinuityManager.CheckContinuityAsync(param);
       token.ThrowIfCancellationRequested();
-      var (_, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, upper, param);
+      string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
+      var (_, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, param, answer, point);
       return result;
     }
 
@@ -343,8 +346,6 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      token.ThrowIfCancellationRequested();
-
       await uksh.ConnectorManager.DisconnectMultimeter(pairBus, ui);
     }
 
@@ -360,7 +361,6 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      token.ThrowIfCancellationRequested();
       await meter.ConnectableManager.DisconnectAsync(ui);
     }
 
@@ -375,11 +375,7 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      token.ThrowIfCancellationRequested();
       await uksh.ConnectorManager.DisconnectAllBuses(ui);
-
-      token.ThrowIfCancellationRequested();
-      await uksh.ConnectableManager.DisconnectAsync(ui);
     }
 
     #endregion

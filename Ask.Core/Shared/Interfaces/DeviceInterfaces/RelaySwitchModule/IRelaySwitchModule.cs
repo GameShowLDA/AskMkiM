@@ -1,7 +1,7 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
-
 {
   /// <summary>
   /// Интерфейс для модуля коммутации реле.
@@ -27,6 +27,16 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
     /// Менеджер для управления реле и точками подключения.
     /// </summary>
     IPointManager PointManager { get; set; }
+    
+    /// <summary>
+    /// Тип структурной шины.
+    /// </summary>
+    SwitchingBusNew BusType { get; set; }
+
+    /// <summary>
+    /// Сопротивление коммутатора.
+    /// </summary>
+    double SwitchResistance { get; }
 
     ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }

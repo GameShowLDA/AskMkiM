@@ -15,17 +15,17 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
         return newSourseLines;
       }
       var commandBody = new StringBuilder();
-      if (!string.IsNullOrEmpty(pr.LowerLimitResistanceSource))
+      if (!string.IsNullOrEmpty(pr.ConnectedLowerLimitResistanceSource))
       {
-        commandBody.Append($"{pr.LowerLimitResistance}<");
+        commandBody.Append($"{pr.ConnectedLowerLimitResistance}<");
       }
       if (!string.IsNullOrEmpty(pr.ResistanceUnit))
       {
         commandBody.Append($"{pr.ResistanceUnit}");
       }
-      if (!string.IsNullOrEmpty(pr.HigherLimitResistanceSource))
+      if (!string.IsNullOrEmpty(pr.ConnectedHigherLimitResistanceSource))
       {
-        commandBody.Append($"<{pr.HigherLimitResistance}");
+        commandBody.Append($"<{pr.ConnectedHigherLimitResistance}");
       }
       if (!string.IsNullOrEmpty(pr.TimeSource))
       {

@@ -40,9 +40,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
 
+      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
 
       List<ShowMessageModel> errorMessage = new();
+      List<ShowMessageModel> infoMessage = new();
 
       var points = command.Scheme?.GroupModels?
             .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
@@ -101,6 +103,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       pointContext.UnitMnemonic = "R";
       pointContext.TypeCommand = MeasurementTypeCommand.KC;
 
+      if (command.AlgorithmKey.Contains("Д"))
+      {
+        pointContext.IsProtocolAttribute = true;
+      }
+
       if (secondValue != -1)
       {
         pointContext.Value = (firstValue + secondValue) / 2;
@@ -110,8 +117,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         pointContext.Value = firstValue + 10;
       }
 
-      var errMes = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(errMes);
+      var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
+      errorMessage.AddRange(messageResult.errorMessage);
+      infoMessage.AddRange(messageResult.infoMessage);
 
       await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
       foreach (var item in modules)
@@ -123,6 +131,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
       }
+      if (infoMessage.Count > 0)
+      {
+        protocolModel.Info.Add(nameCommand, infoMessage);
+      }
     }
 
     /// <summary>
@@ -130,14 +142,20 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken)
+    private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
       var meter = EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue);
+        answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue) - errorResistance;
+
+        if (answer < 0)
+        {
+          answer = 0;
+        }
+
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, firstValue, secondValue, answer);
       }, messageService);
 
@@ -149,15 +167,20 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken)
+    private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
       var meter = EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        answer = await meter.ContinuityManager.CheckContinuityAsync(value) - errorResistance;
 
-        answer = await meter.ContinuityManager.CheckContinuityAsync(value);
+        if (answer < 0)
+        {
+          answer = 0;
+        }
+
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, firstValue, secondValue, answer);
 
       }, messageService);

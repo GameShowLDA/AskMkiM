@@ -2,6 +2,7 @@
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -150,6 +151,19 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       };
     }
 
+    public static ShowMessageModel BuildDeviceHealthCheckTitle(IAttachableDevice device)
+    {
+      if (device == null)
+        throw new ArgumentNullException(nameof(device));
+
+      return new ShowMessageModel
+      (
+        header: $"Тест контроля работоспособности",
+        message: $"{device.Name} {device.NumberChassis}.{device.Number}",
+        type: ShowMessageModel.MessageType.CommandBlock
+      );
+    }
+
     public static ShowMessageModel BuildMeasurementResultMessage(MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double higherLimit, double value, string? chains = null, string comparisonSign = "=")
     {
       var type = typeof(MeasurementTypeCommand);
@@ -173,14 +187,25 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
+        if (value.ToString() == "9,9E+37" && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR))
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+        }
+
         return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
       else
       {
         if ((value < lowerLimit || value > higherLimit) && (measurementTypeCommand == MeasurementTypeCommand.PI_ACW || measurementTypeCommand == MeasurementTypeCommand.PI_DCW))
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ ИЗОЛЯЦИИ");
+          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
+
+        if (value.ToString() == "9,9E+37" && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR))
+        {
+          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+        }
+
         return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
       }
     }

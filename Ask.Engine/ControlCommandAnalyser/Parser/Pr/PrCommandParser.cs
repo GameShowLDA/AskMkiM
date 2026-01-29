@@ -121,8 +121,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
         // Проверка оборудования
         if (hasResistanceErrors == false)
         {
-          ValidateAgainstMeter(model, model.LowerLimitResistance, model.HigherLimitResistance, meter);
-
+          ValidateAgainstMeter(model, meter);
         }
       }
 
@@ -237,10 +236,33 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       }
 
       // Валидация
-      if (string.IsNullOrWhiteSpace(model.LowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.HigherLimitResistanceSource))
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.DisconnectedHigherLimitResistanceSource)
+        && string.IsNullOrWhiteSpace(model.ConnectedLowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.ConnectedHigherLimitResistanceSource))
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
-        model.Errors.Add(PrErrors.CannotParseParameters($"сопротивление было неправильно задано, или неверно указаны границы сопроитвления", model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PrErrors.CannotParseParameters(
+          $"Сопротивление было неправильно задано, или неверно указаны его границы",
+          model.StartLineNumber,
+          $"{model.CommandNumber}   {model.Mnemonic}"));
+      }
+
+      // Валидация
+      if (string.IsNullOrWhiteSpace(model.ConnectedHigherLimitResistanceSource) && !model.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(PrErrors.ResistanceLimitsConflict(
+          model.StartLineNumber,
+          $"{model.CommandNumber}   {model.Mnemonic}",
+          $"Не указана верхняя граница при проверке на сообщение"));
+      }
+
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource)&&!model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(PrErrors.ResistanceLimitsConflict(
+          model.StartLineNumber, 
+          $"{model.CommandNumber}   {model.Mnemonic}",
+          $"Не указана нижняя граница при проверке на разобщение"));
       }
 
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
@@ -295,6 +317,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       double PR_MIN = rangeAttr.Min;
       double PR_MAX = rangeAttr.Max;
       double PR_DEFAULT_LOWER = rangeAttr.DefaultLower;
+      char infinity = '\u221E';
 
       // Конвертация
       (double? valLower, string lowerUnit) = lower.HasValue ? UnitsConvertor.TryConvertBack(lower.Value, unit) : (null, unit);
@@ -338,11 +361,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
         }
 
         // ОК, сохраняем как есть
-        model.LowerLimitResistance = lower.Value;
-        model.LowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+        // проверка на разобщение
+        model.DisconnectedLowerLimitResistance = higher.Value;
+        model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
 
-        model.HigherLimitResistance = higher.Value;
-        model.HigherLimitResistanceSource = $"{valHigher} {higherUnit}";
+        model.DisconnectedHigherLimitResistance = null;
+        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом"; 
+
+        //проверка на сообщение
+        model.ConnectedLowerLimitResistance = lower.Value;
+        model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
+        model.ConnectedHigherLimitResistance = higher.Value;
+        model.ConnectedHigherLimitResistanceSource = $"{valHigher} {higherUnit}";
 
         return;
       }
@@ -362,11 +393,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           return;
         }
 
-        model.LowerLimitResistance = lowOhm;
-        model.LowerLimitResistanceSource = $"{lowOhm} Ом";
+        // проверка на разобщение
+        model.DisconnectedLowerLimitResistance = higher.Value;
+        model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
 
-        model.HigherLimitResistance = higher.Value;
-        model.HigherLimitResistanceSource = $"{valHigher} {higherUnit}";
+        model.DisconnectedHigherLimitResistance = null;
+        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
+
+        //проверка на сообщение
+        model.ConnectedLowerLimitResistance = lowOhm;
+        model.ConnectedLowerLimitResistanceSource = $"{lowOhm} Ом";
+
+        model.ConnectedHigherLimitResistance = higher.Value;
+        model.ConnectedHigherLimitResistanceSource = $"{valHigher} {higherUnit}";
 
         return;
       }
@@ -384,62 +423,113 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           return;
         }
 
-        model.LowerLimitResistance = lower.Value;
-        model.LowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+        // проверка на разобщение
+        if (higher != null)
+        {
+          model.DisconnectedLowerLimitResistance = higher.Value;
+          model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
+        }
 
-        model.HigherLimitResistance = null;
-        model.HigherLimitResistanceSource = null;
+        model.DisconnectedLowerLimitResistance = lower.Value;
+        model.DisconnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
+        model.DisconnectedHigherLimitResistance = null;
+        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
+
+        //проверка на сообщение
+        model.ConnectedLowerLimitResistance = lower.Value;
+        model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
+        model.ConnectedHigherLimitResistance = null;
+        model.ConnectedHigherLimitResistanceSource = null;
 
         return;
       }
 
       // 4) НИ ОДНОЙ ГРАНИЦЫ НЕТ
-      model.LowerLimitResistance = PR_DEFAULT_LOWER;
-      model.LowerLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом";
+      // проверка на разобщение
+      model.DisconnectedLowerLimitResistance = PR_DEFAULT_LOWER;
+      model.DisconnectedLowerLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом";
 
-      model.HigherLimitResistance = null;
-      model.HigherLimitResistanceSource = null;
+      model.DisconnectedHigherLimitResistance = null;
+      model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
+      //проверка на сообщение
+      model.ConnectedLowerLimitResistance = PR_MIN;
+      model.ConnectedLowerLimitResistanceSource = $"{PR_MIN} Ом";
+
+      model.ConnectedHigherLimitResistance = PR_DEFAULT_LOWER;
+      model.ConnectedHigherLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом"; ;
     }
 
-    private void ValidateAgainstMeter(PrCommandModel model, double? lower, double? higher, IFastMeter meter)
+    private void ValidateAgainstMeter(PrCommandModel model, IFastMeter meter)
     {
+      var connectedLower = model.ConnectedLowerLimitResistance;
+      var connectedHigher = model.ConnectedHigherLimitResistance;
+      var disconnectedLower = model.DisconnectedLowerLimitResistance;
+      var disconnectedHigher = model.DisconnectedHigherLimitResistance;
       // Проверка нижней границы
-      if (lower.HasValue && lower.Value < 0)
+      if (connectedLower.HasValue && connectedLower.Value < 0)
       {
         model.Errors.Add(
             PrErrors.EquipmentOutOfRange(
                 model.StartLineNumber,
                 $"{model.CommandNumber} {model.Mnemonic}",
-                $"Нижняя граница {lower} Ом ниже минимально измеряемой прибором (0 Ом)"));
+                $"Нижняя граница {connectedLower} Ом проверки на сообщение ниже минимально измеряемой прибором (0 Ом)"));
+      }
+      if (disconnectedLower.HasValue && disconnectedLower.Value < 0)
+      {
+        model.Errors.Add(
+            PrErrors.EquipmentOutOfRange(
+                model.StartLineNumber,
+                $"{model.CommandNumber} {model.Mnemonic}",
+                $"Нижняя граница {disconnectedLower} Ом проверки на разобщение ниже минимально измеряемой прибором (0 Ом)"));
       }
 
-      if (lower.HasValue && lower.Value > meter.MaxContinuityResistance)
+      if (connectedLower.HasValue && connectedLower.Value > meter.MaxContinuityResistance)
       {
         model.Errors.Add(
             PrErrors.EquipmentOutOfRange(
                 model.StartLineNumber,
                 $"{model.CommandNumber} {model.Mnemonic}",
-                $"Нижняя граница {lower} Ом выше максимально измеряемой прибором ({meter.MaxContinuityResistance} Ом)"));
+                $"Нижняя граница {connectedLower} Ом проверки на сообщение выше максимально измеряемой прибором ({meter.MaxContinuityResistance} Ом)"));
+      }
+
+      if (disconnectedLower.HasValue && disconnectedLower.Value > meter.MaxContinuityResistance)
+      {
+        model.Errors.Add(
+            PrErrors.EquipmentOutOfRange(
+                model.StartLineNumber,
+                $"{model.CommandNumber} {model.Mnemonic}",
+                $"Нижняя граница {disconnectedLower} Ом проверки на разобщение выше максимально измеряемой прибором ({meter.MaxContinuityResistance} Ом)"));
       }
 
       // Проверка верхней границы
-      if (higher.HasValue && higher.Value < 0)
+      if (connectedHigher.HasValue && connectedHigher.Value < 0)
       {
         model.Errors.Add(
             PrErrors.EquipmentOutOfRange(
                 model.StartLineNumber,
                 $"{model.CommandNumber} {model.Mnemonic}",
-                $"Верхняя граница {higher} Ом ниже минимально измеряемой прибором (0 Ом)"));
+                $"Верхняя граница {connectedHigher} Ом проверки на сообщение ниже минимально измеряемой прибором (0 Ом)"));
       }
 
-      if (higher.HasValue && higher.Value > meter.MaxContinuityResistance)
+      if (disconnectedHigher.HasValue && disconnectedHigher.Value < 0)
       {
         model.Errors.Add(
             PrErrors.EquipmentOutOfRange(
                 model.StartLineNumber,
                 $"{model.CommandNumber} {model.Mnemonic}",
-                $"Верхняя граница {higher} Ом выше максимально измеряемой прибором ({meter.MaxContinuityResistance} Ом)"));
+                $"Верхняя граница {disconnectedHigher} Ом проверки на разобщение ниже минимально измеряемой прибором (0 Ом)"));
+      }
+
+      if (connectedHigher.HasValue && connectedHigher.Value > meter.MaxContinuityResistance)
+      {
+        model.Errors.Add(
+            PrErrors.EquipmentOutOfRange(
+                model.StartLineNumber,
+                $"{model.CommandNumber} {model.Mnemonic}",
+                $"Верхняя граница {connectedHigher} Ом проверки на сообщение выше максимально измеряемой прибором ({meter.MaxContinuityResistance} Ом)"));
       }
     }
 

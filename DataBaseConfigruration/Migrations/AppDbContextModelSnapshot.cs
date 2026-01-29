@@ -248,6 +248,9 @@ namespace DataBaseConfiguration.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BusType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ConnectionDetails")
                         .IsRequired()
                         .HasColumnType("TEXT");
