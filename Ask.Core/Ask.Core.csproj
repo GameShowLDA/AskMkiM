@@ -21,7 +21,6 @@
   <ItemGroup>
     <Folder Include="Shared\Entity\MeasurementError\" />
     <Folder Include="Shared\Interfaces\DeviceInterfaces\Rack\Capabilities\" />
-    <Folder Include="Shared\Metadata\Enums\HotkeysEnums\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -106,11 +107,18 @@ namespace UI.Controls.ProtocolNew
 
     private Window _attachedWindow;
 
+    private Action<ExecutionEvents.ControlButtonPressed> _controlButtonHandler;
+
     /// <summary>
     /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
     /// Инициализирует компоненты и устанавливает обработчики событий PreviewMouseDown для кнопок.
     /// </summary>
-    public ProtocolUI() : this(false) { }
+    public ProtocolUI() : this(false)
+    {
+      _controlButtonHandler = OnControlButtonPressed;
+      EventAggregator.Subscribe(_controlButtonHandler);
+      Unloaded += OnUnloaded;
+    }
 
     public ProtocolUI(bool isTopMenuVisible)
     {
@@ -118,7 +126,6 @@ namespace UI.Controls.ProtocolNew
       Items = new ObservableCollection<object>();
       ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
       InitializeInternal();
-
       EventAggregator.Subscribe<ExecutionEvents.StepByStepModeChanged>(e => EventAggregator_StepByStepModeChanged(e.IsEnabled));
     }
 
@@ -191,29 +198,13 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case Key.F5:
-          if (StartButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnStartPressed?.Invoke();
-          }
-          else if (ContinueButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnContinuePressed?.Invoke();
-          }
-          else if (PauseButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnPausePressed?.Invoke();
-          }
-
+          HandleRunOrPause();
           e.Handled = true;
           break;
 
         case Key.F10:
         case Key.F11:
-          if (StartButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnStartPressedByStepMode?.Invoke();
-          }
-          e.Handled = true;
+          HandleStepModeStart();
           break;
 
         case Key.P:
@@ -252,7 +243,6 @@ namespace UI.Controls.ProtocolNew
           break;
       }
     }
-
 
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -327,5 +317,56 @@ namespace UI.Controls.ProtocolNew
       BigButtonsPanel.Visibility = vis;
     }
 
+    private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)
+    {
+      switch (e.Button)
+      {
+        case ExecutionControlButton.Run:
+          HandleRunOrPause();
+          break;
+
+        case ExecutionControlButton.StepOver:
+        case ExecutionControlButton.StepInto:
+          HandleStepModeStart();
+          break;
+      }
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+      EventAggregator.Unsubscribe(_controlButtonHandler);
+    }
+
+    /// <summary>
+    /// Обрабатывает запуск, продолжение или паузу выполнения
+    /// в зависимости от текущего состояния UI.
+    /// </summary>
+    private void HandleRunOrPause()
+    {
+      if (StartButtonElement.Visibility == Visibility.Visible)
+      {
+        KeyboardManager.OnStartPressed?.Invoke();
+      }
+      else if (ContinueButtonElement.Visibility == Visibility.Visible)
+      {
+        KeyboardManager.OnContinuePressed?.Invoke();
+      }
+      else if (PauseButtonElement.Visibility == Visibility.Visible)
+      {
+        KeyboardManager.OnPausePressed?.Invoke();
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает запуск выполнения в пошаговом режиме
+    /// (F10 / F11), если доступен старт.
+    /// </summary>
+    private void HandleStepModeStart()
+    {
+      if (StartButtonElement.Visibility == Visibility.Visible)
+      {
+        KeyboardManager.OnStartPressedByStepMode?.Invoke();
+      }
+    }
   }
 }
