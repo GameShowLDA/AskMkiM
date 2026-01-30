@@ -40,7 +40,6 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       _deviceBusCommutation = deviceBusCommutation;
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
-      deviceBusStatus.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_deviceBusCommutation);
     }
 
     /// <inheritdoc />

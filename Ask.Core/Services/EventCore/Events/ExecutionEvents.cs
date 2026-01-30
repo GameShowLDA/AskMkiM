@@ -46,15 +46,6 @@ namespace Ask.Core.Services.EventCore.Events
         Devices = devices;
       }
     }
-
-
-    public class DeviceStatusChanged : IEvent
-    {
-      public IAttachableDevice Device { get; }
-      public DeviceStatusChanged(IAttachableDevice device)
-      {
-        Device = device;
-      }
-    }
+    public class DeviceStatusUpdate : IEvent{}
   }
 }

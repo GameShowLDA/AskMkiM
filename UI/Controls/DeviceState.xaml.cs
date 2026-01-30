@@ -15,7 +15,7 @@ namespace UI.Controls
     public DeviceState()
     {
       InitializeComponent();
-      EventAggregator.Subscribe<ExecutionEvents.DeviceStatusChanged>(e => LoadData(e.Device));
+      EventAggregator.Subscribe<ExecutionEvents.DeviceStatusUpdate>(e => LoadData(_device));
     }
 
     public DeviceState(IAttachableDevice device) : this()

@@ -1,7 +1,9 @@
-﻿using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using NewCore.Device;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +29,7 @@ namespace UI.Controls
     public DevicesStatus()
     {
       InitializeComponent();
+      UpdateState.PreviewMouseDown += (s,a) => ExecutionEventAdapter.RaiseDeviceStatusUpdate();
     }
     public void AddDevice(IAttachableDevice device)
     {
@@ -43,7 +46,6 @@ namespace UI.Controls
 
     public void LoadDevices(IEnumerable<IAttachableDevice> devices)
     {
-
       ClearDevices();
 
       foreach (var device in devices)
@@ -54,7 +56,7 @@ namespace UI.Controls
 
     public void ClearDevices()
     {
-      Dispatcher.Invoke(() =>RootPanel.Children.Clear());
+      Dispatcher.Invoke(() => RootPanel.Children.Clear());
     }
   }
 }

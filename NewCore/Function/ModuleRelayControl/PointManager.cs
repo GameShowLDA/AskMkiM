@@ -34,9 +34,6 @@ namespace NewCore.Function.ModuleRelayControl
       _moduleRelayControl = moduleRelayControl;
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
-
-      IsConnectedPointBusA.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_moduleRelayControl);
-      IsConnectedPointBusB.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_moduleRelayControl);
     }
 
     private void ConnectableManager_IsReset()

@@ -26,7 +26,6 @@ namespace NewCore.Function.ModuleRelayControl
     public BusManager(IRelaySwitchModule moduleRelayControl)
     {
       _moduleRelayControl = moduleRelayControl;
-      switchingBuses.Changed += (s, a) => ExecutionEventAdapter.RaiseDeviceStatusChanged(_moduleRelayControl);
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }

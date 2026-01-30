@@ -33,7 +33,7 @@ namespace Ask.Core.Services.EventCore.Adapters
     public static void RaiseDevicesChanged(List<IAttachableDevice> devices)
       => EventAggregator.Publish(new ExecutionEvents.ActiveDeviceChanged(devices));
 
-    public static void RaiseDeviceStatusChanged(IAttachableDevice device)
-      => EventAggregator.Publish(new ExecutionEvents.DeviceStatusChanged(device));
+    public static void RaiseDeviceStatusUpdate()
+      => EventAggregator.Publish(new ExecutionEvents.DeviceStatusUpdate());
   }
 }
