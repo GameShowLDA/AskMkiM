@@ -709,7 +709,7 @@ namespace UI.Localization {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на ЗАПУСТИТЬ(Enter).
+        ///   Ищет локализованную строку, похожую на ЗАПУСТИТЬ(F5).
         /// </summary>
         internal static string protocol_button_start {
             get {

@@ -463,6 +463,12 @@ namespace UI.Controls.ProtocolNew
       {
         SetNonVisibleAllButton();
         ExitButtonVisibility = Visibility.Visible;
+
+        if (ActionExecutor.StepMode)
+        {
+          StepOverButtonVisibility = Visibility.Visible;
+          StepIntoButtonVisibility = Visibility.Visible;
+        }
       });
 
     }

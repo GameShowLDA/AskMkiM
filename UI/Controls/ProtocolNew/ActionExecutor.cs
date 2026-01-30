@@ -127,7 +127,7 @@ namespace UI.Controls.ProtocolNew
       StartProcessing?.Invoke(true);
 
 
-      if (await ExecutionConfig.GetIsStepByStepModeEnabled())
+      if (ExecutionConfig.GetIsStepByStepModeEnabled())
       {
         StepControlManager.EnableStepMode(true);
         StepMode = true;
@@ -663,7 +663,7 @@ namespace UI.Controls.ProtocolNew
       actionExecutor.ProtocolSelfCheck = parentClass;
       actionExecutor.ShouldShowPauseMessage = true;
       actionExecutor.ShouldShowResumeMessage = false;
-      actionExecutor.StepMode = await ExecutionConfig.GetIsStepByStepModeEnabled();
+      actionExecutor.StepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
       actionExecutor.IsPaused = false;
       actionExecutor.ProcessTask = null;
       return actionExecutor;

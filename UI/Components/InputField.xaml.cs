@@ -1,9 +1,12 @@
 ﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using UI.Controls.ProtocolNew;
+using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace UI.Components
 {
@@ -230,6 +233,7 @@ namespace UI.Components
       InitializeComponent();
       SubscribeToValidationEvents();
       ShinaACheckBox.IsChecked = true;
+      PreviewKeyDown += HotkeyChecked;
     }
 
     /// <summary>
@@ -244,6 +248,14 @@ namespace UI.Components
       ActionExecutor.StartProcessing += ActionExecutor_StartProcessing;
     }
 
+    /// <summary>
+    /// Обрабатывает начало и окончание выполнения шага.
+    /// Переключает режим отображения между полями ввода и сводной информацией,
+    /// а также формирует текст заголовков с текущими значениями.
+    /// </summary>
+    /// <param name="obj">
+    /// Флаг выполнения шага: true — шаг выполняется, false — режим редактирования.
+    /// </param>
     private void ActionExecutor_StartProcessing(bool obj)
     {
       var firstBaseText = "Первая точка";
@@ -361,6 +373,13 @@ namespace UI.Components
       }
     }
 
+    /// <summary>
+    /// Обрабатывает изменение режима ввода.
+    /// Переключает отображение между режимом модульного ввода
+    /// и режимом параметров шага.
+    /// </summary>
+    /// <param name="d">Объект, для которого изменилось свойство.</param>
+    /// <param name="e">Данные изменения свойства.</param>
     private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       var control = (InputField)d;
@@ -376,6 +395,14 @@ namespace UI.Components
           : Visibility.Visible;
     }
 
+    /// <summary>
+    /// Возвращает основные значения ввода в зависимости от активного режима.
+    /// В режиме модульного ввода возвращает номера устройств и диапазон,
+    /// в обычном режиме — точки и электрический параметр.
+    /// </summary>
+    /// <returns>
+    /// Кортеж строковых значений, соответствующих текущему режиму ввода.
+    /// </returns>
     public (string First, string Second, string Parameter) GetValues()
     {
       return InvokeSafe(() =>
@@ -385,16 +412,60 @@ namespace UI.Components
       );
     }
 
+    /// <summary>
+    /// Возвращает значение времени выполнения теста.
+    /// </summary>
+    /// <returns>Строковое представление времени.</returns>
     public string GetTime() => InvokeSafe(() => Time);
 
+    /// <summary>
+    /// Возвращает значение времени нарастания,
+    /// приводя разделитель дробной части к локальному формату.
+    /// </summary>
+    /// <returns>Строковое представление времени нарастания.</returns>
     public string GetTimeRamp() => InvokeSafe(() => TimeRamp.Replace('.', ','));
 
+    /// <summary>
+    /// Возвращает значение напряжения.
+    /// </summary>
+    /// <returns>Строковое представление напряжения.</returns>
     public string GetVoltage() => InvokeSafe(() => Voltage);
 
+    /// <summary>
+    /// Возвращает текущую активную шину.
+    /// </summary>
+    /// <returns>Значение активной шины.</returns>
     public BusPoint GetBus() => InvokeSafe(() => ActiveBus);
 
+    /// <summary>
+    /// Возвращает выбранную группу шин для парного подключения.
+    /// </summary>
+    /// <returns>Выбранная группа шин.</returns>
     public SwitchingBusNew GetPairBus() => InvokeSafe(() => SelectedBusGroup);
 
+    /// <summary>
+    /// Подсвечивает поле номера проверяемого устройства как содержащее ошибку.
+    /// </summary>
+    public void HighlightTestedNumber() => TestedNumberBox.DataError();
+
+    /// <summary>
+    /// Подсвечивает поле номера проверяющего устройства как содержащее ошибку.
+    /// </summary>
+    public void HighlightTesterNumber() => TesterNumberBox.DataError();
+
+    /// <summary>
+    /// Подсвечивает поле диапазона проверки как содержащее ошибку.
+    /// </summary>
+    public void HighlightTestRange() => TestRangeBox.DataError();
+
+    /// <summary>
+    /// Безопасно выполняет функцию в UI-потоке.
+    /// Если вызов производится не из UI-потока,
+    /// выполнение маршалится через Dispatcher.
+    /// </summary>
+    /// <typeparam name="T">Тип возвращаемого значения.</typeparam>
+    /// <param name="func">Функция для выполнения.</param>
+    /// <returns>Результат выполнения функции.</returns>
     private T InvokeSafe<T>(Func<T> func)
     {
       if (Dispatcher.CheckAccess())
@@ -403,10 +474,25 @@ namespace UI.Components
       return Dispatcher.Invoke(func);
     }
 
-    public void HighlightTestedNumber() => TestedNumberBox.DataError();
+    private void HotkeyChecked(object sender, KeyEventArgs e)
+    {
+      switch (e.Key)
+      {
+        case Key.F5:
+          ExecutionControlEventAdapter.Raise(ExecutionControlButton.Run);
+          e.Handled = true;
+          break;
 
-    public void HighlightTesterNumber() => TesterNumberBox.DataError();
+        case Key.F10:
+          ExecutionControlEventAdapter.Raise(ExecutionControlButton.StepOver);
+          e.Handled = true;
+          break;
 
-    public void HighlightTestRange() => TestRangeBox.DataError();
+        case Key.F11:
+          ExecutionControlEventAdapter.Raise(ExecutionControlButton.StepInto);
+          e.Handled = true;
+          break;
+      }
+    }
   }
 }

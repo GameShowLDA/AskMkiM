@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.EventInterfaces;
+using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 
 namespace Ask.Core.Services.EventCore.Events
 {
@@ -34,6 +35,22 @@ namespace Ask.Core.Services.EventCore.Events
       public StepByStepModeChanged(bool isEnabled)
       {
         IsEnabled = isEnabled;
+      }
+    }
+
+    /// <summary>
+    /// Событие нажатия кнопки управления выполнением.
+    /// </summary>
+    public class ControlButtonPressed : IEvent
+    {
+      /// <summary>
+      /// Какая кнопка была нажата.
+      /// </summary>
+      public ExecutionControlButton Button { get; }
+
+      public ControlButtonPressed(ExecutionControlButton button)
+      {
+        Button = button;
       }
     }
   }
