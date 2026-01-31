@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -74,6 +75,8 @@ namespace NewCore.FunctionAdapters.GPT
     /// Чтение и сброс конфигурации режима DCW.
     /// </summary>
     public IConfigurationProvider<DcwConfiguration> Config { get; set; }
+
+    public BreakdownTypeMode ModeType => _dcwMode.ModeType;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DcwModeAdapter"/>.
@@ -835,6 +838,8 @@ namespace NewCore.FunctionAdapters.GPT
         _dcwMode = dcwMode;
         _device = device;
       }
+
+      public Task<string> GetConfigurationAsTextAsync() => _dcwMode.Config.GetConfigurationAsTextAsync();
 
       /// <summary>
       /// Асинхронно выполняет чтение текущей конфигурации режима DCW с устройства GPT-79904.

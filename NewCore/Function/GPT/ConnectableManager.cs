@@ -216,8 +216,6 @@ public class ConnectableManager : IConnectable
     }
   }
 
-
-
   /// <summary>
   /// Асинхронно выполняет сброс устройства GPT79904 (*RST, *CLS).
   /// </summary>
@@ -274,6 +272,24 @@ public class ConnectableManager : IConnectable
 
   public string GetConnectionStatus()
   {
-    throw new NotImplementedException();
+    return GetConnectionStatusAsync().GetAwaiter().GetResult();
+  }
+
+  private async Task<string> GetConnectionStatusAsync()
+  {
+    switch (_gptModel.Mode)
+    {
+      case BreakdownTypeMode.ACW:
+        return _gptModel.AcwManger.Config.GetConfigurationAsTextAsync().Result;
+
+      case BreakdownTypeMode.DCW:
+        return _gptModel.DcwManger.Config.GetConfigurationAsTextAsync().Result;
+
+      case BreakdownTypeMode.IR:
+        return _gptModel.IrManger.Config.GetConfigurationAsTextAsync().Result;
+
+      default:
+        return "Режим не определён";
+    }
   }
 }

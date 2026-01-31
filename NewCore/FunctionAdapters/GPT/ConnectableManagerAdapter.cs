@@ -104,7 +104,7 @@ namespace NewCore.FunctionAdapters.GPT
 
     public string GetConnectionStatus()
     {
-      throw new NotImplementedException();
+      return _manager.GetConnectionStatus();
     }
   }
 }

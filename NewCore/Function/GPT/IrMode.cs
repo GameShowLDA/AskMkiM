@@ -42,6 +42,8 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public IResistanceLimitsConfigurable ResistanceLimits { get; set; }
 
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.IR;
+
     public IrMode(GPT79904 gpt79904)
     {
       _gptModel = gpt79904;

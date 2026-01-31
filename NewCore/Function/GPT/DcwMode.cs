@@ -60,6 +60,8 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public IConfigurationProvider<DcwConfiguration> Config { get; set; }
 
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.DCW;
+
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="DcwMode"/>.
     /// </summary>

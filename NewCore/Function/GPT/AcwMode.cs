@@ -64,6 +64,8 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public IConfigurationProvider<AcwConfiguration> Config { get; set; }
 
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.ACW;
+
     /// <summary>
     /// Создает новый экземпляр класса <see cref="AcwMode"/>.
     /// </summary>

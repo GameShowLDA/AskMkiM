@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -71,6 +72,8 @@ namespace NewCore.FunctionAdapters.GPT
     /// Адаптер, обеспечивающий операции чтения и сброса конфигурации режима ACW.
     /// </summary>
     public IConfigurationProvider<AcwConfiguration> Config { get; set; }
+
+    public BreakdownTypeMode ModeType => _acwMode.ModeType;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcwModeAdapter"/>,
@@ -915,6 +918,8 @@ namespace NewCore.FunctionAdapters.GPT
         _acwMode = acwMode;
         _device = device;
       }
+
+      public Task<string> GetConfigurationAsTextAsync() => _acwMode.Config.GetConfigurationAsTextAsync();
 
       /// <summary>
       /// Асинхронно считывает текущую конфигурацию режима ACW с устройства GPT-79904.

@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using System.Text;
 
 namespace NewCore.Function.GPT.Managment
 {
@@ -37,6 +38,23 @@ namespace NewCore.Function.GPT.Managment
       _offset = offset;
       _getHighResistanceLimit = getHighResistanceLimit;
       _getLowResistanceLimit = getLowResistanceLimit;
+    }
+
+    public async Task<string> GetConfigurationAsTextAsync()
+    {
+      var config = _config ?? await ReadConfigurationAsync();
+
+      var sb = new StringBuilder();
+
+      sb.AppendLine("Установленный режим: IR");
+      sb.AppendLine($"Напряжение:               {config.Voltage} В");
+      sb.AppendLine($"Верхний предел сопротивления: {config.HighResistanceLimit} ГОм");
+      sb.AppendLine($"Нижний предел сопротивления:  {config.LowResistanceLimit} ГОм");
+      sb.AppendLine($"Время теста:              {config.TestTime} с");
+      sb.AppendLine($"Время нарастания:         {config.RampTime} с");
+      sb.AppendLine($"Смещение (Offset):        {config.Offset} ГОм");
+
+      return sb.ToString();
     }
 
     /// <inheritdoc />
