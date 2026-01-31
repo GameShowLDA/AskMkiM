@@ -30,7 +30,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       LogInformation($"Устанавливаем источник питания {(voltageSources == VoltageSources.Supply12V ? "12В" : "5В")}", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -49,7 +49,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       LogInformation($"Устанавливаем напряжение {integerPart}.{decimalPart} В ({new DeviceCommand(3, integerPart, decimalPart).ToString()})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }

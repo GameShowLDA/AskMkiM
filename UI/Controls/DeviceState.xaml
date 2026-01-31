@@ -5,9 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls"
              mc:Ignorable="d" 
+             xmlns:Converters="clr-namespace:UI.Converter"
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <Border Background="{DynamicResource SettingsMainBackgroundSolidColorBrush}" CornerRadius="20" Margin="20">
+    <UserControl.Resources>
+        <Converters:IdleModeToBrushConverter x:Key="IdleModeToBrushConverter"/>
+    </UserControl.Resources>
+
+    <Border     Background="{Binding IsIdleModeEnabled,
+        RelativeSource={RelativeSource AncestorType=UserControl},
+        Converter={StaticResource IdleModeToBrushConverter}}" CornerRadius="20" Margin="10">
+        
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -24,35 +32,29 @@
                 x:Name="Header"
                 />
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Top" >
+            <Grid  Grid.Row="1">
                 <Border 
                     Style="{DynamicResource SettingCardStyle}"
-                      Padding="10"
-                      SnapsToDevicePixels="True">
-                    <Grid>
+                    Padding="10"
+                    Margin="5"
+                    SnapsToDevicePixels="True">
+                    <Grid >
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0"
+                        <TextBlock Grid.Row="0"
                                 Text="Состояние оборудования"
                                 Margin="0,0,0,2"
                                 Style="{DynamicResource SettingsHeaderStyle}" />
 
-                            <TextBlock Grid.Row="1"
+                        <TextBlock Grid.Row="1"
                                 Text="{Binding DeviceStatus, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 Style="{DynamicResource SettingsDescriptionStyle}" FontSize="14" />
-                        </Grid>
                     </Grid>
                 </Border>
-            </StackPanel>
+            </Grid>
 
         </Grid>
     </Border>

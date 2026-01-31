@@ -14,7 +14,7 @@ namespace NewCore.Function.GPT.Managment
   {
     private readonly GPT79904 _gptModel;
     private readonly int _delay;
-    private readonly Func<Task<bool>> _getIsIdleMode;
+    private readonly Func<bool> _getIsIdleMode;
     private readonly Func<double> _getHighLimitConfig;
     private readonly Action<double> _setHighLimitConfig;
     private readonly Func<double> _getLowLimitConfig;
@@ -23,7 +23,7 @@ namespace NewCore.Function.GPT.Managment
     public ResistanceLimitsManagment(
       GPT79904 gptModel,
       int delay,
-      Func<Task<bool>> getIsIdleMode,
+      Func<bool> getIsIdleMode,
       Func<double> getHighLimitConfig,
       Action<double> setHighLimitConfig,
       Func<double> getLowLimitConfig,
@@ -41,7 +41,7 @@ namespace NewCore.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetHighResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await _getIsIdleMode())
+      if (_getIsIdleMode())
         return (true, string.Empty);
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}".Replace(',', '.');
@@ -73,7 +73,7 @@ namespace NewCore.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetLowResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await _getIsIdleMode())
+      if (_getIsIdleMode())
         return (true, string.Empty);
 
       if (value == 1000) value = 999; // спец. случай

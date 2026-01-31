@@ -57,7 +57,7 @@ namespace NewCore.Function.GPT.Managment
       if (_getFrequency() == frequency)
         return (true, string.Empty);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         _setFrequency(frequency);
         LogInformation($"{nameof(SetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
@@ -107,7 +107,7 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<int> GetFrequencyAsync()
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         LogInformation($"{nameof(GetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
         return _getFrequency();

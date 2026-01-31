@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,21 +21,69 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
     public static readonly DependencyProperty ShowsIconProperty = DependencyProperty.RegisterAttached(
         "ShowsIcon", typeof(bool), typeof(DocumentTab), new FrameworkPropertyMetadata(BooleanBoxes.False));
 
+    /// <summary>
+    /// Identifies the HideCloseButton attached property.
+    /// </summary>
+    public static readonly DependencyProperty HideCloseButtonProperty =
+        DependencyProperty.RegisterAttached(
+            "HideCloseButton",
+            typeof(bool),
+            typeof(DocumentTab),
+            new FrameworkPropertyMetadata(
+                false,
+                FrameworkPropertyMetadataOptions.Inherits,
+                OnHideCloseButtonChanged));
+
+    public static bool GetHideCloseButton(DependencyObject obj)
+    {
+      return (bool)obj.GetValue(HideCloseButtonProperty);
+    }
+
+    public static void SetHideCloseButton(DependencyObject obj, bool value)
+    {
+      obj.SetValue(HideCloseButtonProperty, value);
+    }
+
+    private static void OnHideCloseButtonChanged(
+        DependencyObject d,
+        DependencyPropertyChangedEventArgs e)
+    {
+      if (d is DocumentTab tab)
+        tab.UpdateCloseButtonVisibility();
+    }
     public override void OnApplyTemplate()
     {
       base.OnApplyTemplate();
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(OnLockedChanged);
-
-      CloseButtonVisibility = Ask.Core.Services.Config.AppSettings.SystemStateManager.GetIsLocked() ? Visibility.Collapsed : Visibility.Visible;
+      UpdateCloseButtonVisibility();
     }
 
     private void OnLockedChanged(SystemStateEvents.LockedChanged e)
     {
-      Dispatcher.Invoke(() =>
-      {
-        CloseButtonVisibility = e.IsLocked ? Visibility.Collapsed : Visibility.Visible;
-      });
+      Dispatcher.Invoke(UpdateCloseButtonVisibility);
     }
+
+    private void UpdateCloseButtonVisibility()
+    {
+      Debug.WriteLine(GetHideCloseButton(this));
+
+      // 1. Явный запрет — имеет высший приоритет
+      if (DockItem != null && GetHideCloseButton(DockItem))
+      {
+        CloseButtonVisibility = Visibility.Collapsed;
+        return;
+      }
+
+      // 2. Иначе — зависит от SystemState
+      bool isLocked = Ask.Core.Services.Config.AppSettings
+          .SystemStateManager
+          .GetIsLocked();
+
+      CloseButtonVisibility = isLocked
+          ? Visibility.Collapsed
+          : Visibility.Visible;
+    }
+
 
     static DocumentTab()
     {

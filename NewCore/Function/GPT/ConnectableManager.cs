@@ -50,7 +50,7 @@ public class ConnectableManager : IConnectable
   public async Task<bool> DisconnectAsync(IUserInteractionService _ = null)
   {
     _gptModel.Mode = BreakdownTypeMode.None;
-    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return true;
     }
@@ -170,7 +170,7 @@ public class ConnectableManager : IConnectable
   /// </summary>
   public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
   {
-    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return (true, string.Empty);
     }
@@ -223,7 +223,7 @@ public class ConnectableManager : IConnectable
   /// </summary>
   public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
   {
-    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return true;
     }

@@ -32,7 +32,7 @@ namespace NewCore.Function.GPT
     /// <param name="value">Значение контрастности (1-8).</param>
     public async Task SetLcdContrastAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -47,7 +47,7 @@ namespace NewCore.Function.GPT
     /// <param name="value">Значение яркости (1 или 2).</param>
     public async Task SetLcdBrightnessAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -62,7 +62,7 @@ namespace NewCore.Function.GPT
     /// <param name="state">Состояние (ON или OFF).</param>
     public async Task SetBuzzerPrimarySound(bool state, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -78,7 +78,7 @@ namespace NewCore.Function.GPT
     /// <param name="state">Состояние (ON или OFF).</param>
     public async Task SetBuzzerFeedbackSound(bool state, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -94,7 +94,7 @@ namespace NewCore.Function.GPT
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
     public async Task SetBuzzerPrimaryTime(double duration, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -109,7 +109,7 @@ namespace NewCore.Function.GPT
     /// <param name="duration">Длительность сигнала (0.2 - 999.9).</param>
     public async Task SetBuzzerFeedbackTime(double duration, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -126,7 +126,7 @@ namespace NewCore.Function.GPT
     {
       var systemData = new SystemDataModel();
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return systemData;
       }
@@ -183,7 +183,7 @@ namespace NewCore.Function.GPT
 
     public async Task<bool> TestReset()
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

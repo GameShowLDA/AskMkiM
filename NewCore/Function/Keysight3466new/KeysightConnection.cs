@@ -38,7 +38,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, "Холостой режим");
       }
@@ -58,7 +58,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -102,7 +102,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

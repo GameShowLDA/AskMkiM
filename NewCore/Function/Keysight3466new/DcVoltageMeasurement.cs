@@ -28,7 +28,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetDCVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -46,7 +46,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<double> MeasureDCVoltageAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return param;
       }

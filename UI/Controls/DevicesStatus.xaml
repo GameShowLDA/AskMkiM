@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:UI.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid Background="{DynamicResource SecondarySolidColorBrush}" >
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -17,19 +18,31 @@
                 <Button x:Name="UpdateState" Content="Обновить состояние" Style="{DynamicResource CompareButtonStyle}" HorizontalAlignment="Left" Width="230" />
             </Grid>
         </Border>
-        
-        <WrapPanel x:Name="RootPanel" Orientation="Horizontal" Grid.Row="1">
-            <WrapPanel.Style>
-                <Style TargetType="WrapPanel">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </WrapPanel.Style>
-        </WrapPanel>
-        
+
+        <ScrollViewer 
+    Grid.Row="1"
+    VerticalScrollBarVisibility="Auto"
+    HorizontalScrollBarVisibility="Disabled">
+
+            <WrapPanel
+        x:Name="RootPanel"
+        Orientation="Horizontal"
+        VerticalAlignment="Top">
+
+                <WrapPanel.Style>
+                    <Style TargetType="WrapPanel">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}"
+                                 Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </WrapPanel.Style>
+
+            </WrapPanel>
+        </ScrollViewer>
+
     </Grid>
 </UserControl>

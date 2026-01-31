@@ -19,6 +19,7 @@ using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using UI.Services;
 using UI.Windows.WpfDocking.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Runner
@@ -227,6 +228,9 @@ namespace UI.Controls.Runner
         TabText = "Состояние оборудования",
         Content = devicesStatus,
       };
+
+      DocumentTab.SetHideCloseButton(dockItemPk, true);
+      DocumentTab.SetHideCloseButton(dockItemDeviceState, true);
 
       dockManager.DockItems.Add(dockItemPk);
       dockManager.DockItems.Add(dockItemDeviceState);

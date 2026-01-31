@@ -61,7 +61,7 @@ namespace NewCore.Function.ModuleRelayControl
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         switchingBuses[bus] = true;
         return true;
@@ -110,7 +110,7 @@ namespace NewCore.Function.ModuleRelayControl
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         switchingBuses[bus] = false;
         return true;

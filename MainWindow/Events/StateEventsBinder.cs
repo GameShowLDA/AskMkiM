@@ -66,7 +66,7 @@ namespace MainWindowProgram.Events
       _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
 
-      var idleMode = ExecutionConfig.GetIsIdleModeEnabled().Result;
+      var idleMode = ExecutionConfig.GetIsIdleModeEnabled();
       EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
 
       OnIdleModeChange(null, idleMode);
@@ -92,7 +92,7 @@ namespace MainWindowProgram.Events
     /// </summary>
     private async void OnThemeChanged(ThemeEvent.Change e)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }

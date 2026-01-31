@@ -103,7 +103,7 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
 
     public async Task<(bool, string)> TryGetCheckBusConntcrion(int number, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -130,12 +130,12 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
     {
       token.ThrowIfCancellationRequested();
 
-      string answer = !await ExecutionConfig.GetIsIdleModeEnabled()
+      string answer = !ExecutionConfig.GetIsIdleModeEnabled()
         ? await relaySwitchModule.PointManager.CheckPoint(point, userMessageService)
         : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
 
       SelfPointModel model;
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         Random random = new Random();
         bool isErrorSimulation = await ExecutionConfig.GetIsErrorSimulationEnabled();
@@ -219,7 +219,7 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
 
     private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, IUserInteractionService? userMessageService = null)
     {
-      (bool, string) answer = !await ExecutionConfig.GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
+      (bool, string) answer = !ExecutionConfig.GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
 
       ShowMessageModel showMessageModel;
       showMessageModel = new ShowMessageModel()

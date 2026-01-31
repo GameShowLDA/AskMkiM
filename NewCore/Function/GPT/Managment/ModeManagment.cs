@@ -45,7 +45,7 @@ namespace NewCore.Function.GPT.Managment
       if (result.Success)
       {
         _gptModel.Mode = _mode;
-        if (!await ExecutionConfig.GetIsIdleModeEnabled())
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
           await _reloadConfiguration();
         }

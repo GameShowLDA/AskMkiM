@@ -32,7 +32,7 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }
@@ -56,7 +56,7 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }

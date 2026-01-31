@@ -53,7 +53,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -74,7 +74,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
     public async Task<double> CheckContinuityAsync(double expectedOutcome, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return expectedOutcome;
       }

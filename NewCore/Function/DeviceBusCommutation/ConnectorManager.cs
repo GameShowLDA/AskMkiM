@@ -108,7 +108,7 @@ namespace NewCore.Function.DeviceBusCommutation
       int numberConnector = (int)SwitchingDeviceTypeConnector.Multimeter;
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber >= 1 || busNumber <= 4))
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }
@@ -150,7 +150,7 @@ namespace NewCore.Function.DeviceBusCommutation
 
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 1 || busNumber > 4))
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }
@@ -218,7 +218,7 @@ namespace NewCore.Function.DeviceBusCommutation
       int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
       if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 2 || busNumber > 3))
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           return true;
         }
@@ -274,7 +274,7 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.BreakdownTester;
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -307,7 +307,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <returns></returns>
     private async Task<bool> SetAllBusesStatus(bool connect, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

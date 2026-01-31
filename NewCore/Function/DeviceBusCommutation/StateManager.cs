@@ -46,7 +46,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -86,7 +86,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

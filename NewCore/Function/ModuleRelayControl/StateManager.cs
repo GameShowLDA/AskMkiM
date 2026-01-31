@@ -32,7 +32,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, String.Empty);
       }
@@ -77,7 +77,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

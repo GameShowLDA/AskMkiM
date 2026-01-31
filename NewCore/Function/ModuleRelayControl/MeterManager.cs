@@ -31,7 +31,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> ConnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -50,7 +50,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> DisconnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -69,7 +69,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> GetMeterResponseAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

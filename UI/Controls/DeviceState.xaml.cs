@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using System.Windows;
@@ -16,7 +17,17 @@ namespace UI.Controls
     {
       InitializeComponent();
       EventAggregator.Subscribe<ExecutionEvents.DeviceStatusUpdate>(e => LoadData(_device));
+      IsIdleModeEnabled = ExecutionConfig.GetIsIdleModeEnabled();
+
+      ExecutionConfig.IdleModeChange += (_, isIdle) =>
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+          IsIdleModeEnabled = isIdle;
+        });
+      };
     }
+
 
     public DeviceState(IAttachableDevice device) : this()
     {
@@ -58,6 +69,19 @@ namespace UI.Controls
           }
         });
       }
+    }
+
+    public static readonly DependencyProperty IsIdleModeEnabledProperty =
+    DependencyProperty.Register(
+        nameof(IsIdleModeEnabled),
+        typeof(bool),
+        typeof(DeviceState),
+        new PropertyMetadata(false));
+
+    public bool IsIdleModeEnabled
+    {
+      get => (bool)GetValue(IsIdleModeEnabledProperty);
+      set => SetValue(IsIdleModeEnabledProperty, value);
     }
   }
 }

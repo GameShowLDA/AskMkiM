@@ -33,7 +33,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       LogInformation($"МИНТ: Установка тока {integerPart}.{decimalPart} мА ({new DeviceCommand(4, integerPart, decimalPart)})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -50,7 +50,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       LogInformation($"МИНТ: Установка ограничения тока в {current} мА ({new DeviceCommand(10, current)})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

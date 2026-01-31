@@ -32,7 +32,7 @@ namespace NewCore.Function.Keysight3466new
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
     public async Task<bool> SetContinuityModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

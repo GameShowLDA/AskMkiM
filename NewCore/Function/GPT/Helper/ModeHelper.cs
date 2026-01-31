@@ -15,7 +15,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(GetModeAsync)}: Устройство в Idle Mode. Возвращаем пустую строку.", isDeviceLog: true);
           return (true, string.Empty);
@@ -41,7 +41,7 @@ namespace NewCore.Function.GPT.Helper
     {
       LogInformation($"Начало выполнения {nameof(SetModeAsync)}", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         LogInformation($"{nameof(SetModeAsync)}: Устройство в Idle Mode. Пропускаем установку режима.", isDeviceLog: true);
         return (true, string.Empty);

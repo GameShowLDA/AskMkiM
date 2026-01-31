@@ -103,7 +103,7 @@ namespace UI.Controls.ProtocolNew
       processName = name;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
-      if (!await ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
       {
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
         await FinalizeAsync();
@@ -140,7 +140,7 @@ namespace UI.Controls.ProtocolNew
 
       await PrepareForStartAsync(name);
 
-      if (!await ExecutionConfig.GetIsIdleModeEnabled())
+      if (!ExecutionConfig.GetIsIdleModeEnabled())
       {
         await ResetSystemAsync();
       }
@@ -584,7 +584,7 @@ namespace UI.Controls.ProtocolNew
     {
       await Application.Current.Dispatcher.Invoke(async () =>
       {
-        if (!await ExecutionConfig.GetIsIdleModeEnabled())
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
           await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
         }

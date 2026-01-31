@@ -62,7 +62,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
         {
@@ -119,7 +119,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
         {
@@ -172,7 +172,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
         return true;
 
       DeviceCommand cmd = new DeviceCommand
@@ -220,7 +220,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
         return true;
 
       DeviceCommand cmd = new DeviceCommand
@@ -266,7 +266,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Строка с ответом от устройства.</returns>
     public async Task<string> CheckPoint(int numberPoint, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return "Включен холостой режим.";
       }
@@ -284,7 +284,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
         {

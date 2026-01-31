@@ -10,7 +10,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
   {
     public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value, string? chains = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
         if (upperLimit != -1)
         {

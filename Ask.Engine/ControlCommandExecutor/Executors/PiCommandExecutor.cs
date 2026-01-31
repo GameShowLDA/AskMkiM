@@ -287,7 +287,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
-          answer = !await ExecutionConfig.GetIsIdleModeEnabled() ?
+          answer = !ExecutionConfig.GetIsIdleModeEnabled() ?
                    (await breadDown.AcwManger.Measure.MeasureAsync(10)).value :
                    !await ExecutionConfig.GetIsErrorSimulationEnabled() ? 10 : new Random().Next(80, 150);
 
@@ -318,7 +318,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
     {
-      var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
+      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
 
       if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
       {
