@@ -11,7 +11,7 @@ using UI.Controls.TextEditor;
 public class ExecutionGlyphMargin : AbstractMargin
 {
   public List<int> ActiveLines { get; } = new();
-  public Brush MarkerBrush { get; set; } = Brushes.LimeGreen;
+  public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["GreenColorSolidColorBrush"];
 
   /// <summary>
   /// Лист поставленных точек остановки
@@ -26,7 +26,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// <summary>
   /// Цвет точек остановки.
   /// </summary>
-  public Brush BreakpointBrush { get; set; } = Brushes.Red;
+  public Brush BreakpointBrush { get; set; } = (Brush)Application.Current.Resources["RedColorSolidColorBrush"];
+
   /// <summary>
   /// Лист, куда можно поставить точки остановки.
   /// </summary>
@@ -128,7 +129,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       int length = line.Length;
       if (length <= 0) length = 1;
 
-      svc.AddMarker(start, length, Color.FromRgb(255, 0, 0));
+      svc.AddMarker(start, length, ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color);
     }
   }
 
