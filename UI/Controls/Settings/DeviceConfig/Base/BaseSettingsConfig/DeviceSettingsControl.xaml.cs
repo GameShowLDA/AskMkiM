@@ -88,6 +88,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       DeviceNumberContainer.Visibility = Visibility.Collapsed;
       BusTypeContainer.Visibility = Visibility.Collapsed;
+      ResistanceContainer.Visibility = Visibility.Collapsed;
       ConnectionTypeContainer.Visibility = Visibility.Collapsed;
       IPAddressContainer.Visibility = Visibility.Collapsed;
       COMContainer.Visibility = Visibility.Collapsed;
