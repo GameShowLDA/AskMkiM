@@ -73,6 +73,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
         {
           deviceEntity.PointCount = (baseDevice as IRelaySwitchModule).PointCount;
           deviceEntity.BusType = (SwitchingBusNew)deviceSettingsWindow.BusTypeSelectionBox.SelectedItem;
+          deviceEntity.SwitchResistance = deviceSettingsWindow.GetResistance();
           try
           {
             new RelaySwitchModuleServices().Create(deviceEntity);

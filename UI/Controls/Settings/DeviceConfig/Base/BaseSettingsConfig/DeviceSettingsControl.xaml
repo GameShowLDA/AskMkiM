@@ -82,6 +82,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!--Модель устройства-->
@@ -173,8 +174,38 @@
                         </Grid>
                     </Border>
 
+                    <!--Номер устройства-->
+                    <Border Grid.Row="3" Background="{DynamicResource SettingsMainBackground}" 
+                            CornerRadius="10" Margin="0,10"
+                            Name="ResistanceContainer"
+                            >
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
+
+                            <Border CornerRadius="10" Background="{DynamicResource SettingsInfoTabloBackgroundSolidColorBrush}" Height="40" Padding="5">
+                                <TextBlock Text="Сопротивление коммутатора, Ом" Foreground="{DynamicResource ForegrounfBrushes}" 
+                                           FontSize="20" FontWeight="Bold" Margin="7,0"/>
+                            </Border>
+
+                            <Border Grid.Row="1" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5" Margin="5,5">
+                                <TextBox 
+                                    Background="Transparent" 
+                                    BorderThickness="0" 
+                                    VerticalAlignment="Center" 
+                                    FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
+                                    PreviewTextInput="ResistanceDevice_PreviewTextInput"
+                                    TextChanged="ResistanceDevice_TextChanged"
+                                    Name="ResistanceTextBox"
+                                    />
+                            </Border>
+                        </Grid>
+                    </Border>
+
                     <!--Тип подлючения устройства-->
-                    <Border Grid.Row="3" 
+                    <Border Grid.Row="4" 
                         Background="{DynamicResource SettingsMainBackground}" 
                         CornerRadius="10" Margin="0,10"
                         Name="ConnectionTypeContainer"
@@ -210,7 +241,7 @@
                     </Border>
 
                     <!--IP address устройства-->
-                    <Border Grid.Row="4" Background="{DynamicResource SettingsMainBackground}" 
+                    <Border Grid.Row="5" Background="{DynamicResource SettingsMainBackground}" 
                         CornerRadius="10" Margin="0,10"
                         Name="IPAddressContainer"
                         >
@@ -285,7 +316,7 @@
                     </Border>
 
                     <!--COM устройства-->
-                    <Border Grid.Row="5" Background="{DynamicResource PrimarySolidColorBrush}" 
+                    <Border Grid.Row="6" Background="{DynamicResource PrimarySolidColorBrush}" 
                         CornerRadius="10" Margin="0,10"
                         Name="COMContainer"
                         >
@@ -529,7 +560,7 @@
                         </Grid>
                     </Border>
 
-                    <ContentControl x:Name="AdditionalSettingsContainer" Grid.Row="5" Margin="0,10,0,10"/>
+                    <ContentControl x:Name="AdditionalSettingsContainer" Grid.Row="7" Margin="0,10,0,10"/>
                 </Grid>
 
             </ScrollViewer>
