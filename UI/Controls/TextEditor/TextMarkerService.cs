@@ -90,6 +90,9 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    /// <summary>
+    /// Перепривязывает внутреннее хранилище маркеров к текущему экземпляру <see cref="TextDocument"/> редактора.
+    /// </summary>
     private void RebindToCurrentDocument()
     {
       if (editor.Document == null)

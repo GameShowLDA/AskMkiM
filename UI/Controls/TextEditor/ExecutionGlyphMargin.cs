@@ -12,6 +12,7 @@ public class ExecutionGlyphMargin : AbstractMargin
 {
   public List<int> ActiveLines { get; } = new();
   public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["GreenColorSolidColorBrush"];
+  public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
 
   /// <summary>
   /// Лист поставленных точек остановки
@@ -102,12 +103,25 @@ public class ExecutionGlyphMargin : AbstractMargin
     }
   }
 
+  /// <summary>
+  /// Пытается получить экземпляр <see cref="TextMarkerService"/>, зарегистрированный в сервисах визуального слоя AvalonEdit.
+  /// </summary>
+  /// <remarks>
+  /// Сервис маркеров обычно добавляется один раз при инициализации редактора и хранится внутри
+  /// <see cref="ICSharpCode.AvalonEdit.Rendering.TextView.Services"/>.
+  /// </remarks>
+  /// <returns>
+  /// Экземпляр <see cref="TextMarkerService"/>, если он доступен; иначе <c>null</c>.
+  /// </returns>
   private TextMarkerService? GetMarkerService()
   {
     return _textEditor?.TextArea?.TextView?.Services?
       .GetService(typeof(TextMarkerService)) as TextMarkerService;
   }
 
+  /// <summary>
+  /// Пересоздаёт подсветку строк, на которых установлены точки остановки.
+  /// </summary>
   private void RebuildBreakpointLineHighlights()
   {
     var doc = _textEditor.Document;
@@ -116,20 +130,12 @@ public class ExecutionGlyphMargin : AbstractMargin
 
     svc.ClearAllMarkers();
 
-    // Ставим красный фон на все текущие брейкпоинты
+    DocumentLine line;
+
     foreach (var anchor in BreakpointLines)
     {
-      // anchor.Offset может стать невалидным в крайних случаях — подстрахуемся
-      int offset = anchor.Offset;
-      if (offset < 0 || offset >= doc.TextLength) continue;
-
-      var line = doc.GetLineByOffset(offset);
-
-      int start = line.Offset;
-      int length = line.Length;
-      if (length <= 0) length = 1;
-
-      svc.AddMarker(start, length, ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color);
+      line = doc.GetLineByOffset(anchor.Offset);
+      svc.AddMarker(line.Offset, line.Length, LineBrush);
     }
   }
 
@@ -188,7 +194,6 @@ public class ExecutionGlyphMargin : AbstractMargin
     var line = doc.GetLineByNumber(lineNumber);
     int offset = line.Offset;
 
-    // Ищем существующий breakpoint на этой строке
     var existing = BreakpointLines.FirstOrDefault(a =>
       doc.GetLineByOffset(a.Offset).LineNumber == lineNumber);
 
@@ -208,7 +213,6 @@ public class ExecutionGlyphMargin : AbstractMargin
     anchor.MovementType = AnchorMovementType.BeforeInsertion;
     anchor.SurviveDeletion = false;
 
-    // Если удалили место — удалить breakpoint
     anchor.Deleted += (_, __) =>
     {
       BreakpointLines.Remove(anchor);
