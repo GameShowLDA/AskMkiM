@@ -40,9 +40,19 @@ namespace UI.Controls.AdminPanel
         new()
         {
           Id = 2,
-          Name = "Разомкнуть все реле",
-          Syntax = "2.0.0.0.",
-          Response = "-"
+          Name = "Сброс коммутатора",
+          Syntax = "2.1.0.0.",
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           - результат выполнения (2.0.1)
+                        NotDefaultState  – состояние устройства:
+                                           false – устройство перезагрузилось (состояние по умолчанию)
+                                           true  – начата работа с устройством
+                      """,
+          ResponseExample = "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"2.0.1\", \"NotDefaultState\": false}"
         },
         new()
         {
@@ -50,90 +60,219 @@ namespace UI.Controls.AdminPanel
           Name = "Замкнуть или разомкнуть шину",
           Syntax = "4.a.b.c.",
           Variables = """
-          a – выбор шины А или/и В (1,2,3)
-          b – номер шины (1-4 низковольтные, 11-14 высоковольтные)
-          c – замкнуть/разомкнуть (1,2)
-          """,
-          Response = "4.a.b.c."
+                      a – выбор шины A или/и B:
+                          1 – шина A
+                          2 – шина B
+                          3 – шины A и B
+                      b – номер шины:
+                          1–4   – низковольтные
+                          11–14 – высоковольтные
+                      c – состояние:
+                          1 – замкнуть
+                          2 – разомкнуть
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (4.a.b.c)
+                      """,
+          ResponseExample = "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"4.a.b.c\"}"
         },
         new()
         {
           Id = 5,
-          Name = "Замкнуть или разомкнуть измеритель",
+          Name = "Включить или отключить измеритель",
           Syntax = "5.a.0.0.",
-          Variables = "a – замкнуть/разомкнуть (1,2)",
-          Response = "5.a."
+          Variables = """
+                      a – состояние измерителя:
+                          1 – включить
+                          2 – отключить
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (5.a)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"5.a\"}"
         },
         new()
         {
           Id = 6,
           Name = "Самоконтроль точки МКР",
           Syntax = "6.a.0.0.",
-          Variables = "a – номер точки МКР",
-          Response = "JSON с отчетом"
+          Variables = """
+                      a – номер точки МКР
+                      """,
+          Response = """
+                      JSON с отчетом самоконтроля.
+        
+                      Поля отчета:
+                        ModuleName     – тип модуля (MKR)
+                        NumberDevice   – номер устройства
+                        NumberChassis  – номер шасси
+                        Status         – результат выполнения:
+                                         success – самоконтроль выполнен успешно
+                        NumberPoint    – номер проверяемой точки
+                        ConnectPoint   – результат подключения точки
+                        DisconnectBusA – результат отключения шины A
+                        DisconnectBusB – результат отключения шины B
+                        SelfControl    – общий результат самоконтроля
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Status\":\"success\",\"NumberPoint\":1,\"ConnectPoint\":true,\"DisconnectBusA\":true,\"DisconnectBusB\":true,\"SelfControl\":true}"
         },
         new()
         {
           Id = 7,
           Name = "Получить ответ от измерителя",
           Syntax = "7.0.0.0.",
+          Variables = "-",
           Response = """
-          7.1 – есть напряжение
-          7.2 – нет напряжения
-          """
+                      JSON:
+        
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – результат измерения:
+                                           7.1 – есть напряжение
+                                           7.2 – нет напряжения
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"7.1\"}"
         },
         new()
         {
           Id = 8,
-          Name = "Замкнуть/разомкнуть точку",
+          Name = "Подлючить или отключить точку",
           Syntax = "8.a.b.c.",
           Variables = """
-          a – номер точки
-          b – шина A/B/AB (1,2,3)
-          c – замкнуть/разомкнуть (1,2)
-          """,
-          Response = "8.a.b.c."
+                      a – номер точки
+                      b – шина:
+                          1 – A
+                          2 – B
+                          3 – A и B
+                      c – состояние:
+                          1 – подлючить
+                          2 – отключить
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (8.a.b.c)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"8.a.b.c\"}"
         },
         new()
         {
           Id = 81,
-          Name = "Перекинуть точку с одной шины на другую",
+          Name = "Переподлючить точку с одной шины на другую",
           Syntax = "81.a.b.0.",
           Variables = """
-          a – номер точки
-          b – шина, на которую замкнуть
-          """,
-          Response = "81.a.b.0."
+                      a – номер точки
+                      b – шина, на которую необходимо подключить точку:
+                          1 – шина A
+                          2 – шина B
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (81.a.b.0)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"81.a.b.0\"}"
         },
         new()
         {
           Id = 9,
-          Name = "Подключить/отключить все точки к шине",
+          Name = "Подключить или отключить все точки к шине",
           Syntax = "9.a.b.0.",
           Variables = """
-          a – номер шины A/B (1,2)
-          b – замкнуть/разомкнуть (1,2)
-          """,
-          Response = "9.a.b.0."
+                      a – шина:
+                          1 – A
+                          2 – B
+                      b – состояние:
+                          1 – подключить
+                          2 – отключить
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (9.a.b)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"9.a.b\"}"
         },
         new()
         {
           Id = 10,
           Name = "Самоконтроль внешних шин",
           Syntax = "10.a.0.0.",
-          Variables = "a – номер шины (1-4)",
-          Response = "JSON с отчетом"
+          Variables = """
+                      a – номер внешней шины (1–4)
+                      """,
+          Response = """
+                      JSON с отчетом самоконтроля внешней шины.
+        
+                      Поля отчета:
+                        ModuleName        – тип модуля (MKR)
+                        NumberDevice      – номер устройства
+                        NumberChassis     – номер шасси
+                        NumberBus         – номер проверяемой шины
+                        ProtectReleBusA   – номер защитного реле шины A
+                        ProtectReleBusB   – номер защитного реле шины B
+                        ConnectProtect    – состояние защитных реле:
+                                             true  – подключены
+                                             false – отключены
+                        MainReleBusA      – номер главного реле шины A
+                        MainReleBusB      – номер главного реле шины B
+                        ConnectMain       – состояние главных реле:
+                                             true  – подключены
+                                             false – отключены
+                        Error             – код ошибки:
+                                             0 – ошибок не обнаружено
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"NumberBus\":1,\"ProtectReleBusA\":101,\"ProtectReleBusB\":111,\"ConnectProtect\":false,\"MainReleBusA\":102,\"MainReleBusB\":112,\"ConnectMain\":false,\"Error\":0}"
         },
         new()
         {
           Id = 11,
-          Name = "Подключить/отключить группу точек",
+          Name = "Подключить или отключить группу точек",
           Syntax = "11.a.b.c.",
           Variables = """
-          a – начальная точка
-          b – конечная точка
-          c – AB + состояние (например 21 — подключить к B)
-          """
+                      a – начальная точка диапазона
+                      b – конечная точка диапазона
+                      c – код операции:
+                          первая цифра – шина:
+                              1 – A
+                              2 – B
+                          вторая цифра – состояние:
+                              1 – подключить
+                              2 – отключить
+                          пример:
+                              21 – подключить точки к шине B
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (11.a.b.c)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Answer\":\"11.a.b.c\"}"
         }
       ]
     };
