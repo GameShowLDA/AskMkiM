@@ -37,18 +37,18 @@ namespace NewCore.Function.GPT.Managment
 
     public async Task<string> GetConfigurationAsTextAsync()
     {
-      var config = _config ?? await ReadConfigurationAsync();
+      var config = await ReadConfigurationAsync();
 
       var sb = new StringBuilder();
 
       sb.AppendLine("Установленный режим: DCW");
-      sb.AppendLine($"Напряжение:               {config.Voltage} кВ");
-      sb.AppendLine($"Верхний предел тока:      {config.HighCurrentLimit} мА");
-      sb.AppendLine($"Нижний предел тока:       {config.LowCurrentLimit} мА");
-      sb.AppendLine($"Время теста:              {config.TestTime} с");
-      sb.AppendLine($"Время нарастания:         {config.RampTime} с");
-      sb.AppendLine($"Смещение (Offset):        {config.Offset} мА");
-      sb.AppendLine($"Ток дугового пробоя:      {config.ArcCurrent} мА");
+      sb.AppendLine($"Напряжение: {config.Voltage} кВ");
+      sb.AppendLine($"Верхний предел тока: {config.HighCurrentLimit} мА");
+      sb.AppendLine($"Нижний предел тока: {config.LowCurrentLimit} мА");
+      sb.AppendLine($"Время теста: {config.TestTime} с");
+      sb.AppendLine($"Время нарастания: {config.RampTime} с");
+      sb.AppendLine($"Смещение (Offset): {config.Offset} мА");
+      sb.AppendLine($"Ток дугового пробоя: {config.ArcCurrent} мА");
 
       return sb.ToString();
     }

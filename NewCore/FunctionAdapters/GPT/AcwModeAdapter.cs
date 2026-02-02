@@ -75,6 +75,8 @@ namespace NewCore.FunctionAdapters.GPT
 
     public BreakdownTypeMode ModeType => _acwMode.ModeType;
 
+    private AcwConfiguration _config = new AcwConfiguration();
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcwModeAdapter"/>,
     /// создавая все подадаптеры, обеспечивающие доступ к функциональности режима ACW
@@ -107,7 +109,6 @@ namespace NewCore.FunctionAdapters.GPT
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _acwMode = new AcwMode(device);
 
-      Voltage = new VoltageAdapterMode(_acwMode, _device);
       Mode = new AcwAdapterMode(_acwMode, _device);
       CurrentLimits = new CurrentLimitsAdapterMode(_acwMode, _device);
       Time = new TimeAdapterMode(_acwMode, _device);

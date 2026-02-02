@@ -42,17 +42,17 @@ namespace NewCore.Function.GPT.Managment
 
     public async Task<string> GetConfigurationAsTextAsync()
     {
-      var config = _config ?? await ReadConfigurationAsync();
+      var config = await ReadConfigurationAsync();
 
       var sb = new StringBuilder();
 
       sb.AppendLine("Установленный режим: IR");
-      sb.AppendLine($"Напряжение:               {config.Voltage} В");
-      sb.AppendLine($"Верхний предел сопротивления: {config.HighResistanceLimit} ГОм");
-      sb.AppendLine($"Нижний предел сопротивления:  {config.LowResistanceLimit} ГОм");
-      sb.AppendLine($"Время теста:              {config.TestTime} с");
-      sb.AppendLine($"Время нарастания:         {config.RampTime} с");
-      sb.AppendLine($"Смещение (Offset):        {config.Offset} ГОм");
+      sb.AppendLine($"Напряжение: {config.Voltage} В");
+      sb.AppendLine($"Верхний предел сопротивления: {config.HighResistanceLimit} МОм");
+      sb.AppendLine($"Нижний предел сопротивления: {config.LowResistanceLimit} МОм");
+      sb.AppendLine($"Время теста: {config.TestTime} с");
+      sb.AppendLine($"Время нарастания: {config.RampTime} с");
+      sb.AppendLine($"Смещение (Offset): {config.Offset} МОм");
 
       return sb.ToString();
     }

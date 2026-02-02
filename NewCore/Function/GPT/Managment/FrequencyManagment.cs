@@ -21,6 +21,7 @@ namespace NewCore.Function.GPT.Managment
     private readonly int _delay;
     private readonly Func<int> _getFrequency;
     private readonly Action<int> _setFrequency;
+    private int _frequency;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="FrequencyManagment"/>.
@@ -55,12 +56,16 @@ namespace NewCore.Function.GPT.Managment
         return (false, "Частота должна быть 50 или 60 Гц.");
 
       if (_getFrequency() == frequency)
+      {
+        _frequency = frequency;
         return (true, string.Empty);
+      }
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         _setFrequency(frequency);
         LogInformation($"{nameof(SetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
+        _frequency = frequency;
         return (true, string.Empty);
       }
 
@@ -76,6 +81,7 @@ namespace NewCore.Function.GPT.Managment
         if (actual == frequency)
         {
           _setFrequency(frequency);
+          _frequency = frequency;
           return (true, string.Empty);
         }
 
@@ -85,6 +91,7 @@ namespace NewCore.Function.GPT.Managment
         if (actual == frequency)
         {
           _setFrequency(frequency);
+          _frequency = frequency;
           return (true, string.Empty);
         }
 
@@ -109,8 +116,7 @@ namespace NewCore.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        LogInformation($"{nameof(GetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-        return _getFrequency();
+        return _frequency;
       }
 
       try
