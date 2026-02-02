@@ -6,6 +6,7 @@ using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using UI.Controls.TextEditor;
 
 public class ExecutionGlyphMargin : AbstractMargin
 {
@@ -58,6 +59,9 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Clear();
       BreakpointCommandsNumbers.Clear();
       ActiveLines.Clear();
+
+      RebuildBreakpointLineHighlights();
+
       InvalidateVisual();
     };
 
@@ -94,6 +98,37 @@ public class ExecutionGlyphMargin : AbstractMargin
     {
       ActiveLines.Clear();
       InvalidateVisual();
+    }
+  }
+
+  private TextMarkerService? GetMarkerService()
+  {
+    return _textEditor?.TextArea?.TextView?.Services?
+      .GetService(typeof(TextMarkerService)) as TextMarkerService;
+  }
+
+  private void RebuildBreakpointLineHighlights()
+  {
+    var doc = _textEditor.Document;
+    var svc = GetMarkerService();
+    if (doc == null || svc == null) return;
+
+    svc.ClearAllMarkers();
+
+    // Ставим красный фон на все текущие брейкпоинты
+    foreach (var anchor in BreakpointLines)
+    {
+      // anchor.Offset может стать невалидным в крайних случаях — подстрахуемся
+      int offset = anchor.Offset;
+      if (offset < 0 || offset >= doc.TextLength) continue;
+
+      var line = doc.GetLineByOffset(offset);
+
+      int start = line.Offset;
+      int length = line.Length;
+      if (length <= 0) length = 1;
+
+      svc.AddMarker(start, length, Color.FromRgb(255, 0, 0));
     }
   }
 
@@ -164,6 +199,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Remove(existing);
       BreakpointCommandsNumbers.Remove(commandNumber);
       BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
+      RebuildBreakpointLineHighlights();
       return;
     }
 
@@ -177,11 +213,13 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Remove(anchor);
       BreakpointCommandsNumbers.Remove(GetNumberAtLine(anchor.Document.Text, anchor.Line));
       InvalidateVisual();
+      RebuildBreakpointLineHighlights();
     };
 
     commandNumber = GetNumberAtLine(anchor.Document.Text, anchor.Line);
     BreakpointCommandsNumbers.Add(commandNumber);
     BreakpointLines.Add(anchor);
+    RebuildBreakpointLineHighlights();
     BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
 
