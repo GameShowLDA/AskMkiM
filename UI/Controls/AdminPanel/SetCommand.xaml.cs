@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace UI.Controls.AdminPanel
 {
@@ -276,6 +277,237 @@ namespace UI.Controls.AdminPanel
         }
       ]
     };
+    private static readonly DeviceHelpInfo DBCHelp = new()
+    {
+      DeviceName = "DeviceBusCommutation",
+      Commands =
+      [
+        new()
+        {
+          Id = 1,
+          Name = "Инициализация",
+          Syntax = "1.0.0.0.",
+          Variables = "-",
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (DeviceBusCommutation)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1}"
+        },
+
+        new()
+        {
+          Id = 2,
+          Name = "Сброс всех реле",
+          Syntax = "2.1.0.0.",
+          Variables = "-",
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (DeviceBusCommutation)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – результат выполнения (2.0.1)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1,\"Answer\":\"2.0.1\"}"
+        },
+
+        new()
+        {
+          Id = 4,
+          Name = "Проверка цепочек для самоконтроля (мультиметр)",
+          Syntax = "4.a.b.c.",
+          Variables = """
+                      a – что проверяем:
+                          1 – блокировочные реле
+                          2 – мультиметр
+                          3 – АЦП
+                          4 – АЦП с переполюсовкой
+                          5 – ПИНТ
+                          6 – шунт
+                          7 – ППУ
+
+                      b – выбор шины и контакта:
+                          первая цифра – шина (1 – A, 2 – B)
+                          вторая цифра – контакт (1–4)
+                          при проверке шунта – одна цифра (1–2)
+
+                      c – действие:
+                          1 – замкнуть
+                          2 – разомкнуть
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (DeviceBusCommutation)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (4.a.b.c)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1,\"Answer\":\"4.2.21.1\"}"
+        },
+
+        new()
+        {
+          Id = 41,
+          Name = "Проверка главных реле в цепочках",
+          Syntax = "41.a.b.c.",
+          Variables = """
+                      a – тип цепочки (см. команду 4) + номер реле.
+                          Если a = 0, устройство возвращает количество
+                          главных реле в цепи
+
+                      b – выбор шины и контакта (см. команду 4)
+
+                      c – действие:
+                          1 – замкнуть
+                          2 – разомкнуть
+                      """,
+          Response = """
+                      Ответ:
+                        количество главных реле в цепи
+                      """,
+          ResponseExample = "Ответ от устройства: 1"
+        },
+
+        new()
+        {
+          Id = 5,
+          Name = "Замыкание / размыкание устройств на шины A и B",
+          Syntax = "5.a.b.c.",
+          Variables = """
+                      a – Что подключить (см. п. 4, без блокировочных реле и шунта)(Самоконтроль ППУ - 7)
+
+                      b – контакт:
+                          1. 1
+                          2. 1-4
+                          3. 1-4
+                          4. 1-4
+                          5. 2-3
+                          6. Самоконтроль ППУ - 0
+
+                      c – действие:
+                          1 – замкнуть
+                          2 – разомкнуть
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (DeviceBusCommutation)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (5.a.b.c)
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1,\"Answer\":\"5.2.21.1\"}"
+        },
+
+        new()
+        {
+          Id = 51,
+          Name = "Получение текущей замкнутой цепочки",
+          Syntax = "51.0.0.0.",
+          Variables = "-",
+          Response = """
+                       JSON:
+                         ModuleName       – тип модуля (DeviceBusCommutation)
+                         NumberDevice     – номер устройства
+                         NumberChassis    – номер шасси
+                         Answer           – информация о текущей замкнутой цепочке (51.a.b.c)
+                       """,
+          ResponseExample =
+            "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1,\"Answer\":\"51.2.21.2\"}"
+        },
+
+        new()
+        {
+          Id = 6,
+          Name = "Самоконтроль мультиметра",
+          Syntax = "6.a.b.c.",
+          Variables = """
+                      a – тип элемента:
+                          1 – резистор
+                          2 – конденсатор
+
+                      b – номер резистора или конденсатора
+
+                      c – действие:
+                          1 – замкнуть
+                          2 – разомкнуть
+                      """,
+          Response = "-",
+          ResponseExample = "Ответ отсутствует"
+        }
+      ]
+    };
+    private static readonly DeviceHelpInfo PowerSupplyModuleHelp = new()
+    {
+      DeviceName = "МШ",
+      Commands =
+      [
+        // 1
+        new()
+        {
+          Id = 1,
+          Name = "Инициализация",
+          Syntax = "1.0.0.0.",
+          Variables = "-",
+          Response = """
+                      Answer:
+                        1.0.1 – инициализация выполнена успешно
+                      """,
+          ResponseExample =
+            "{\"Answer\":\"1.0.1\"}"
+        },
+
+        // 2.1.1
+        new()
+        {
+          Id = 21,
+          Name = "Включение источников питания 3/4",
+          Syntax = "2.1.1.0.",
+          Variables = """
+                      a = 1 – включить
+                      b = 1 – источники 3 и 4
+                      """,
+          Response = "-",
+          ResponseExample = "-"
+        },
+
+        // 2.2.1
+        new()
+        {
+          Id = 22,
+          Name = "Выключение источников питания 3/4",
+          Syntax = "2.2.1.0.",
+          Variables = """
+                      a = 2 – выключить
+                      b = 1 – источники 3 и 4
+                      """,
+          Response = "-",
+          ResponseExample = "-"
+        },
+
+        // 7
+        new()
+        {
+          Id = 7,
+          Name = "Проверка состояния питания",
+          Syntax = "7.0.0.0.",
+          Variables = "-",
+          Response = """
+                      Answer:
+                        0 – питание отсутствует
+                        1 – питание присутствует
+                      """,
+          ResponseExample =
+            "{\"Answer\":\"1\"}"
+        }
+      ]
+    };
+
 
     #endregion
 
@@ -286,7 +518,9 @@ namespace UI.Controls.AdminPanel
     private static readonly Dictionary<string, DeviceHelpInfo> HelpRegistry =
       new(StringComparer.OrdinalIgnoreCase)
       {
-        ["MKR"] = MkrHelp
+        ["MKR"] = MkrHelp,
+        ["DBC"] = DBCHelp,
+        ["MS"] = PowerSupplyModuleHelp
       };
 
     // История команд
@@ -370,6 +604,12 @@ namespace UI.Controls.AdminPanel
           return;
 
         input = input.Trim();
+        if (input.StartsWith("clear", StringComparison.OrdinalIgnoreCase))
+        {
+          Dispatcher.Invoke(() => ConsolePanel.Children.Clear());
+          return;
+        }
+
 
         if (input.StartsWith("help", StringComparison.OrdinalIgnoreCase))
         {
@@ -378,10 +618,10 @@ namespace UI.Controls.AdminPanel
           if (parts.Length == 1)
             ShowHelp();
           else
-            ShowHelp(parts[1]); 
+            ShowHelp(parts[1]);
           return;
         }
-        
+
         var partsCmd = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
 
         if (partsCmd.Length < 2)
