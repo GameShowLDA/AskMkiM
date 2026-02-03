@@ -96,9 +96,6 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       return connect;
     }
 
-    public string GetConnectionStatus()
-    {
-      return string.Empty;
-    }
+    public string GetConnectionStatus() => _connection.GetConnectionStatus();
   }
 }

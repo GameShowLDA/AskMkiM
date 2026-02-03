@@ -110,6 +110,7 @@ namespace NewCore.FunctionAdapters.GPT
       _acwMode = new AcwMode(device);
 
       Mode = new AcwAdapterMode(_acwMode, _device);
+      Voltage = new VoltageAdapterMode(_acwMode, _device);
       CurrentLimits = new CurrentLimitsAdapterMode(_acwMode, _device);
       Time = new TimeAdapterMode(_acwMode, _device);
       Offset = new OffsetAdapterMode(_acwMode, _device);

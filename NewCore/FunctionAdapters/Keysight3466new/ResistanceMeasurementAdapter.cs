@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
@@ -36,7 +37,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _resistanceMeasurement.SetResistanceModeAsync();
+               var succes = await _resistanceMeasurement.SetResistanceModeAsync();
 
         if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
         {
@@ -51,6 +52,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         throw ResistanceExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 
+      _device.TypeMode = MultimeterTypeMode.Resistance;
       return result;
     }
   }

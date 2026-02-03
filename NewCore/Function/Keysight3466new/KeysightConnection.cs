@@ -136,7 +136,30 @@ namespace NewCore.Function.Keysight3466new
 
     public string GetConnectionStatus()
     {
-      throw new NotImplementedException();
+      var mode = "Режим: ";
+      switch (_device.TypeMode)
+      {
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.None:
+          mode += "Не задан";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.AcVoltage:
+          mode += "Измерение переменного напряжения";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.DcVoltage:
+          mode += "Измерение постоянного напряжения";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Capacitance:
+          mode += "Измерение ёмкости.";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Continuity:
+          mode += "Прозвонка.";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Resistance:
+          mode += "Измерение электрического сопротивления.";
+          break;
+      }
+
+      return mode;
     }
   }
 }

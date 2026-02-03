@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 
 namespace NewCore.Function.Keysight3466new
@@ -32,6 +33,10 @@ namespace NewCore.Function.Keysight3466new
       {
         return true;
       }
+      if (_device.TypeMode == MultimeterTypeMode.DcVoltage)
+      {
+        return true;
+      }
 
       if (!_device.IsConnected)
       {
@@ -40,7 +45,13 @@ namespace NewCore.Function.Keysight3466new
 
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:DC");
       var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
-      return answer.Contains("VOLT");
+      if (answer.Contains("VOLT"))
+      {
+        _device.TypeMode = MultimeterTypeMode.DcVoltage;
+        return true;
+      }
+
+      return false;
     }
 
     /// <inheritdoc />
