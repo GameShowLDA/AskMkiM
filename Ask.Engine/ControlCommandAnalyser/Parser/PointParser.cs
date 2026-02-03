@@ -436,5 +436,47 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
       return buses;
     }
+
+    public static List<ParsedExprPart> ExtractSigns(string expr)
+    {
+      var result = new List<ParsedExprPart>();
+
+      if (string.IsNullOrWhiteSpace(expr))
+        return result;
+
+      // убираем пробелы
+      expr = Regex.Replace(expr, @"\s+", "");
+
+      // разбиваем по '*'
+      var segments = expr.Split('*', StringSplitOptions.RemoveEmptyEntries);
+
+      foreach (var seg in segments)
+      {
+        if (string.IsNullOrWhiteSpace(seg))
+          continue;
+
+        char? sign = null;
+        string body = seg;
+
+        // знак ТОЛЬКО в начале сегмента
+        if (seg[0] == '+' || seg[0] == '-')
+        {
+          sign = seg[0];
+          body = seg.Substring(1);
+        }
+
+        if (string.IsNullOrWhiteSpace(body))
+          continue;
+
+        result.Add(new ParsedExprPart(
+            CleanExpr: $"*{body}*",
+            Sign: sign
+        ));
+      }
+
+      return result;
+    }
+
+
   }
 }
