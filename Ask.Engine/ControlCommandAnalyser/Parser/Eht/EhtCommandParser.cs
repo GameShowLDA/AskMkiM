@@ -270,7 +270,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        int idxStarInSecondLine = remainder.LastIndexOf('*');
+        if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+        {
+          remainder =
+              remainder[..idxStarInFirstLine].Trim()
+              + remainder[(idxStarInSecondLine + 1)..].Trim();
+        }
+        else
+        {
+          remainder = remainder.Trim();
+        }
       }
       else
       {
