@@ -5,9 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
 using System.Text.RegularExpressions;
-using System.Windows.Controls;
 using static Ask.LogLib.LoggerUtility;
 
 
@@ -99,9 +97,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ck
           model.BusList = Enum.GetNames(typeof(SwitchingBus)).ToList();
         }
 
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        int idxStarInSecondLine = remainder.LastIndexOf('*');
+        if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+        {
+          remainder =
+              remainder[..idxStarInFirstLine].Trim()
+              + remainder[(idxStarInSecondLine + 1)..].Trim();
+        }
+        else
+        {
+          remainder = remainder.Trim();
+        }
       }
       else
       {
