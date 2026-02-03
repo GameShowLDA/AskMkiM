@@ -529,8 +529,6 @@ namespace UI.Controls.AdminPanel
     public SetCommand()
     {
       InitializeComponent();
-
-      // UDP-сокет один на весь класс
       socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     }
 
@@ -549,7 +547,7 @@ namespace UI.Controls.AdminPanel
           _historyIndex--;
 
         CommandInput.Text = _history[_historyIndex];
-        CommandInput.CaretIndex = CommandInput.Text.Length; // курсор в конец
+        CommandInput.CaretIndex = CommandInput.Text.Length;
         e.Handled = true;
         return;
       }
@@ -563,7 +561,6 @@ namespace UI.Controls.AdminPanel
           _historyIndex++;
         else
         {
-          // после последней — очистить поле
           _historyIndex = -1;
           CommandInput.Text = "";
           e.Handled = true;
@@ -576,7 +573,6 @@ namespace UI.Controls.AdminPanel
         return;
       }
 
-      // Ввод команды — ENTER
       if (e.Key != Key.Enter)
         return;
 
@@ -584,7 +580,6 @@ namespace UI.Controls.AdminPanel
       if (string.IsNullOrWhiteSpace(text))
         return;
 
-      // Добавляем в историю
       _history.Add(text);
       _historyIndex = -1;
 
@@ -609,7 +604,6 @@ namespace UI.Controls.AdminPanel
           Dispatcher.Invoke(() => ConsolePanel.Children.Clear());
           return;
         }
-
 
         if (input.StartsWith("help", StringComparison.OrdinalIgnoreCase))
         {
@@ -646,7 +640,6 @@ namespace UI.Controls.AdminPanel
     {
       try
       {
-        // рассчитываем порты
         string lastByte = ip.Substring(ip.LastIndexOf('.') + 1);
 
         int po = 8888 + int.Parse(lastByte);
@@ -673,10 +666,7 @@ namespace UI.Controls.AdminPanel
       var endpoint = new IPEndPoint(address, Convert.ToInt32(portOutput));
       var buffer = Encoding.UTF8.GetBytes(msg);
 
-      // отправка команды
       await socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, endpoint);
-
-      // получаем ответ
       string response = await GetMessageDeviceAsync();
 
       AddConsoleLine(response, Brushes.LightGreen);
@@ -719,7 +709,6 @@ namespace UI.Controls.AdminPanel
       }
     }
 
-    // Механизм визуального вывода
     private TextBlock lastStatusLine = null;
 
     private void AddConsoleLine(string text, Brush color, bool replaceLast = false)
