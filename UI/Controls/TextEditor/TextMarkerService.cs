@@ -37,8 +37,9 @@ namespace UI.Controls.TextEditor
   /// </summary>
   public sealed class TextMarkerService : IBackgroundRenderer
   {
-    private readonly TextSegmentCollection<TextMarker> markers;
+    private TextSegmentCollection<TextMarker> markers;
     private readonly ICSharpCode.AvalonEdit.TextEditor editor;
+    private TextMarkerColorizer? _colorizer;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
@@ -47,8 +48,14 @@ namespace UI.Controls.TextEditor
     public TextMarkerService(ICSharpCode.AvalonEdit.TextEditor editor)
     {
       this.editor = editor ?? throw new ArgumentNullException(nameof(editor));
-      markers = new TextSegmentCollection<TextMarker>(editor.Document);
-      editor.TextArea.TextView.LineTransformers.Add(new TextMarkerColorizer(markers));
+
+      RebindToCurrentDocument();
+
+      editor.DocumentChanged += (_, __) =>
+      {
+        RebindToCurrentDocument();
+        editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      };
     }
 
     /// <summary>
@@ -84,11 +91,28 @@ namespace UI.Controls.TextEditor
     }
 
     /// <summary>
+    /// Перепривязывает внутреннее хранилище маркеров к текущему экземпляру <see cref="TextDocument"/> редактора.
+    /// </summary>
+    private void RebindToCurrentDocument()
+    {
+      if (editor.Document == null)
+        return;
+
+      markers = new TextSegmentCollection<TextMarker>(editor.Document);
+
+      if (_colorizer != null)
+        editor.TextArea.TextView.LineTransformers.Remove(_colorizer);
+
+      _colorizer = new TextMarkerColorizer(markers);
+      editor.TextArea.TextView.LineTransformers.Add(_colorizer);
+    }
+
+    /// <summary>
     /// Очищает все существующие маркеры подсветки.
     /// </summary>
     public void ClearAllMarkers()
     {
-      markers.Clear();
+      markers?.Clear();
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
       Console.WriteLine("Все маркеры удалены.");
     }
