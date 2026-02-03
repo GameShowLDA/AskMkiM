@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using System.Net;
 using System.Net.Sockets;
@@ -139,22 +140,22 @@ namespace NewCore.Function.Keysight3466new
       var mode = "Режим: ";
       switch (_device.TypeMode)
       {
-        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.None:
+        case MultimeterTypeMode.None:
           mode += "Не задан";
           break;
-        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.AcVoltage:
+        case MultimeterTypeMode.AcVoltage:
           mode += "Измерение переменного напряжения";
           break;
-        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.DcVoltage:
+        case MultimeterTypeMode.DcVoltage:
           mode += "Измерение постоянного напряжения";
           break;
-        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Capacitance:
+        case MultimeterTypeMode.Capacitance:
           mode += "Измерение ёмкости.";
           break;
-        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Continuity:
+        case MultimeterTypeMode.Continuity:
           mode += "Прозвонка.";
           break;
-        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Resistance:
+        case MultimeterTypeMode.Resistance:
           mode += "Измерение электрического сопротивления.";
           break;
       }
