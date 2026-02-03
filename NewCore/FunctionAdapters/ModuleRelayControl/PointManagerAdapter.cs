@@ -38,7 +38,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.ConnectRelayAsync(bus, number);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
         }
@@ -60,7 +60,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.DisconnectRelayAsync(bus, number);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
         }
@@ -82,7 +82,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение диапазона точек {description}", succes, 1, userMessageService);
         }
@@ -105,7 +105,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение диапазона точек {description}", succes, 1, userMessageService);
         }
@@ -126,7 +126,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.DisconnectingAllPoint(userMessageService);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
         }
@@ -156,7 +156,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,

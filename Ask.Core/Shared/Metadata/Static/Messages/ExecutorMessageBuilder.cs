@@ -101,9 +101,9 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// <summary>
     /// Формирует заголовок блока проверки между двумя точками.
     /// </summary>
-    public static async Task<ShowMessageModel> BuildPointsCheckHeaderAsync(PointModel firstPoint, PointModel secondPoint, CircuitFaultType circuitFaultType)
+    public static ShowMessageModel BuildPointsCheckHeaderAsync(PointModel firstPoint, PointModel secondPoint, CircuitFaultType circuitFaultType)
     {
-      bool showAddress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync();
+      bool showAddress = DeviceDisplayConfig.GetMachineAddressVisibility();
 
       string firstAddress = showAddress ? $"({firstPoint})" : string.Empty;
       string secondAddress = showAddress ? $"({secondPoint})" : string.Empty;
@@ -174,6 +174,11 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
 
       var attr = member?
           .GetCustomAttribute<CommandDisplayInfoAttribute>();
+
+      if (attr == null)
+      {
+        return new ShowMessageModel("Ошибка формирования сообщения измерения", message: "Атрибут CommandDisplayInfoAttribute не найден.");
+      }
 
       if (chains == null)
       {

@@ -34,10 +34,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       }
 
-      await GetProtocol(context, command, protocolModel);
+      GetProtocol(context, command, protocolModel);
     }
 
-    private async Task GetProtocol(CommandExecutionContext context, KscCommandModel command, ProtocolModel protocolModel)
+    private void GetProtocol(CommandExecutionContext context, KscCommandModel command, ProtocolModel protocolModel)
     {
       protocolModel.Designation = command.OkCommandModel.ObjectCode;
       protocolModel.ControlObjectName = command.OkCommandModel.ControlObjectName;
@@ -52,7 +52,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           ? "Название программы контроля"
           : Path.GetFileName(opkPath);
 
-      if (await ProtocolConfig.GetGenerateProtocol())
+      if (ProtocolConfig.GetGenerateProtocol())
       {
         FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
       }

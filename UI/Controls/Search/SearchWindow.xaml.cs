@@ -36,7 +36,7 @@ namespace UI.Controls.Search
 
     public event Action ClearHighlights;
 
-    public event Func<Task> SelectFileForSearch;
+    public event Action SelectFileForSearch;
     public string SearchTextData { get; set; }
 
     private bool _isDraggingSlider = false;

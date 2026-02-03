@@ -37,9 +37,9 @@ namespace UI.Controls.Settings.Protocol
     /// Обработчик события загрузки контрола.
     /// Подгружает сохранённую модель, заполняет UI и подписывается на изменения.
     /// </summary>
-    private async void ProtocolControl_Loaded(object sender, RoutedEventArgs e)
+    private void ProtocolControl_Loaded(object sender, RoutedEventArgs e)
     {
-      _baseProtocolModel = await ProtocolConfig.GetProtocolModel();
+      _baseProtocolModel = ProtocolConfig.GetProtocolModel();
       DefalultData();
 
       // DeviceInfo.CheckedChanged += CheckedChanged;
@@ -61,7 +61,7 @@ namespace UI.Controls.Settings.Protocol
 
       DeviceDisplaySettingsCon.DeviceDisplayModelChanged += DeviceDisplaySettingsCon_DeviceDisplayModelChanged;
 
-      if (BaseTextProtocol.Text != await ProtocolConfig.GetBaseTextProtocol())
+      if (BaseTextProtocol.Text != ProtocolConfig.GetBaseTextProtocol())
       {
         RestartClearProtocol.Visibility = Visibility.Visible;
       }
@@ -70,7 +70,7 @@ namespace UI.Controls.Settings.Protocol
         RestartClearProtocol.Visibility = Visibility.Collapsed;
       }
 
-      if (BaseTextProtocolErrors.Text != await ProtocolConfig.GetBaseTextErrorsProtocol())
+      if (BaseTextProtocolErrors.Text != ProtocolConfig.GetBaseTextErrorsProtocol())
       {
         RestartClearProtocolErrors.Visibility = Visibility.Visible;
       }
@@ -100,16 +100,15 @@ namespace UI.Controls.Settings.Protocol
     /// Клик по галочке «сохранить»: сохраняет текущую модель,
     /// перечитывает базу и скрывает индикаторы изменений.
     /// </summary>
-    private async void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await SaveData();
-    public async Task SaveData()
+    private void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e) => SaveData();
+    public void SaveData()
     {
       DeviceDisplaySettingsModel model = DeviceDisplaySettingsCon.GetModel();
 
-      await DeviceDisplayConfig.SaveSettingsAsync(model);
-      await ProtocolConfig.SaveProtocolModel(GetModel());
+      DeviceDisplayConfig.SaveSettings(model);
+      ProtocolConfig.SaveProtocolModel(GetModel());
 
-      _baseProtocolModel = await ProtocolConfig.GetProtocolModel();
-
+      _baseProtocolModel = ProtocolConfig.GetProtocolModel();
 
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
@@ -134,7 +133,7 @@ namespace UI.Controls.Settings.Protocol
     /// Унифицированный обработчик изменений любого переключателя.
     /// Сравнивает текущую модель с сохранённой и показывает/скрывает индикаторы.
     /// </summary>
-    private async void CheckedChanged(object? sender, bool e)
+    private void CheckedChanged(object? sender, bool e)
     {
       if (!ProtocolEquals(_baseProtocolModel, GetModel()))
       {
@@ -149,7 +148,7 @@ namespace UI.Controls.Settings.Protocol
         HasUnsavedChanges = false;
       }
 
-      if (BaseTextProtocol.Text != await ProtocolConfig.GetBaseTextProtocol())
+      if (BaseTextProtocol.Text != ProtocolConfig.GetBaseTextProtocol())
       {
         RestartClearProtocol.Visibility = Visibility.Visible;
       }
@@ -158,7 +157,7 @@ namespace UI.Controls.Settings.Protocol
         RestartClearProtocol.Visibility = Visibility.Collapsed;
       }
 
-      if (BaseTextProtocolErrors.Text != await ProtocolConfig.GetBaseTextErrorsProtocol())
+      if (BaseTextProtocolErrors.Text != ProtocolConfig.GetBaseTextErrorsProtocol())
       {
         RestartClearProtocolErrors.Visibility = Visibility.Visible;
       }
@@ -217,15 +216,15 @@ namespace UI.Controls.Settings.Protocol
       BaseTextProtocolErrors.Text = _baseProtocolModel.CleanTextErrorsProtocol;
     }
 
-    private async void RepeatIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void RepeatIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      BaseTextProtocol.Text = await ProtocolConfig.GetBaseTextProtocol();
+      BaseTextProtocol.Text = ProtocolConfig.GetBaseTextProtocol();
       RestartClearProtocol.Visibility = Visibility.Collapsed;
     }
 
-    private async void RepeatErrorIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void RepeatErrorIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      BaseTextProtocolErrors.Text = await ProtocolConfig.GetBaseTextErrorsProtocol();
+      BaseTextProtocolErrors.Text = ProtocolConfig.GetBaseTextErrorsProtocol();
       RestartClearProtocolErrors.Visibility = Visibility.Collapsed;
     }
   }

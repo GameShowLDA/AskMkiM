@@ -35,7 +35,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       {
         var succes = await _measurement.SetDCVoltageModeAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения постоянного напряжения", succes, 1, userMessageService);
         }

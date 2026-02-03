@@ -13,6 +13,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Interface
     /// </summary>
     /// <param name="chain">Модель цепочки точек, содержащая данные об ошибке.</param>
     /// <returns>Строка, представляющая цепочку ошибок для отображения.</returns>
-    Task<string> BuildErrorChainStringAsync(ChainModel chain);
+    string BuildErrorChainStringAsync(ChainModel chain);
   }
 }

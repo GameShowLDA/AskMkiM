@@ -163,7 +163,7 @@ namespace UI.Components
       }
 
       taskInProgress = false;
-      await SystemStateManager.SetIsActivePower(active);
+      SystemStateManager.SetIsActivePower(active);
     }
 
     /// <summary>

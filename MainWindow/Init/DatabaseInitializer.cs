@@ -28,7 +28,7 @@ namespace MainWindowProgram.Init
 
         if (protocol != null)
         {
-          await ProtocolConfig.SetProtocolModel(protocol);
+          ProtocolConfig.SetProtocolModel(protocol);
           ProtocolModel.SetTemplate(protocol.CleanTextProtocol);
           ProtocolModel.SetErrorsTemplate(protocol.CleanTextErrorsProtocol);
         }

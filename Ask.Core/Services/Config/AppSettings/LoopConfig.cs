@@ -11,18 +11,12 @@
     /// Устанавливает режим циклического измерения.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetLoopMeasurement(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        IsLoopMeasurementActive = enable;
-      });
-    }
+    public static void SetLoopMeasurement(bool enable) => IsLoopMeasurementActive = enable;
 
     /// <summary>
     /// Возвращает статус режима циклического измерения.
     /// </summary>
     /// <returns>true, если включен; false, если выключен.</returns>
-    static public async Task<bool> GetIsLoopMeasurementEnabled() => await Task.Run(() => IsLoopMeasurementActive);
+    static public bool GetIsLoopMeasurementEnabled() => IsLoopMeasurementActive;
   }
 }

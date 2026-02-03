@@ -138,7 +138,7 @@ namespace UI.Controls.ProtocolNew
         return;
       }
 
-      await PrepareForStartAsync(name);
+      PrepareForStartAsync(name);
 
       if (!ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -422,11 +422,11 @@ namespace UI.Controls.ProtocolNew
     /// Подготавливает систему к запуску нового процесса.
     /// </summary>
     /// <param name="name">Имя запускаемого процесса.</param>
-    private async Task PrepareForStartAsync(string name)
+    private void PrepareForStartAsync(string name)
     {
       LogInformation($"Запуск \"{name}\"");
 
-      if (await ProtocolConfig.GetTimeStart())
+      if (ProtocolConfig.GetTimeStart())
       {
         SystemStateManager._stopwatch.Restart();
       }
@@ -467,12 +467,10 @@ namespace UI.Controls.ProtocolNew
         {
           SystemStateManager._stopwatch.Restart();
 
-          // Запускаем задачу с новым токеном
           ProcessTask = Task.Run(() => startDelegate(ProtocolSelfCheck, ProtocolSelfCheck, ProtocolSelfCheck.GetInputHighlightService(), CancellationTokenSource.Token));
-          await SystemStateManager.SetIsLocked(true);
+          SystemStateManager.SetIsLocked(true);
           await ProcessTask;
 
-          // После выполнения задачи
           if (isRepeatEnabled)
           {
             ProtocolSelfCheck.ShowAdditionalFunctionButtons();
@@ -494,7 +492,7 @@ namespace UI.Controls.ProtocolNew
         }
         finally
         {
-          await SystemStateManager.SetIsLocked(false);
+          SystemStateManager.SetIsLocked(false);
           SystemStateManager._stopwatch.Stop();
           await ProtocolSelfCheck.FinalizeAsync(stop);
         }
@@ -513,7 +511,6 @@ namespace UI.Controls.ProtocolNew
       {
         try
         {
-          // Отмена токена
           CancellationTokenSource?.Cancel();
           LogInformation($"Процесс \"{name}\" запрошен на завершение.");
         }
@@ -524,7 +521,6 @@ namespace UI.Controls.ProtocolNew
 
         try
         {
-          // Ждём завершения задачи
           await ProcessTask;
         }
         catch (OperationCanceledException)
@@ -589,9 +585,9 @@ namespace UI.Controls.ProtocolNew
           await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
         }
 
-        await SystemStateManager.SetIsLocked(false);
+        SystemStateManager.SetIsLocked(false);
 
-        if (await ProtocolConfig.GetTimeStart())
+        if (ProtocolConfig.GetTimeStart())
         {
           SystemStateManager._stopwatch.Stop();
         }
@@ -615,7 +611,7 @@ namespace UI.Controls.ProtocolNew
         PrintUtility.PrintProtocol(ProtocolSelfCheck.GetShowMessageModels());
       }
 
-      await SystemStateManager.SetIsLocked(false);
+      SystemStateManager.SetIsLocked(false);
     }
     #endregion
 

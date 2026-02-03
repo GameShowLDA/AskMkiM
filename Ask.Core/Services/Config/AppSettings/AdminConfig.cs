@@ -31,8 +31,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <see langword="true"/>, если запущено с правами администратора;
     /// <see langword="false"/> — если в обычном режиме.
     /// </param>
-    public static async Task SetAdminRights(bool enable) =>
-      await Task.Run(() => SystemStateEventAdapter.RaiseAdminRightsChanged(enable));
+    public static void SetAdminRights(bool enable) => SystemStateEventAdapter.RaiseAdminRightsChanged(enable);
 
     /// <summary>
     /// Асинхронно возвращает текущий статус прав администратора.
@@ -41,7 +40,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <see langword="true"/>, если приложение работает с правами администратора;
     /// <see langword="false"/> — если без них.
     /// </returns>
-    public static bool GetAdminRights() =>  IsAdmin;
+    public static bool GetAdminRights() => IsAdmin;
 
     /// <summary>
     /// Асинхронно устанавливает статус прав администратора и уведомляет систему.
@@ -50,8 +49,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <see langword="true"/>, если запущено с правами администратора;
     /// <see langword="false"/> — если в обычном режиме.
     /// </param>
-    public static async Task SetDebugRights(bool enable) =>
-      await Task.Run(() => SystemStateEventAdapter.RaiseDebugRightsChanged(enable));
+    public static async Task SetDebugRights(bool enable) => SystemStateEventAdapter.RaiseDebugRightsChanged(enable);
 
     /// <summary>
     /// Асинхронно возвращает текущий статус прав администратора.

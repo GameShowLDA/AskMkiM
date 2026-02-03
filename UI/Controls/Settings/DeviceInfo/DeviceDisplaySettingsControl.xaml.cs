@@ -28,9 +28,9 @@ namespace UI.Controls.Settings.DeviceInfo
     /// Обработчик события загрузки контрола.
     /// Подгружает сохранённую модель, заполняет UI и подписывается на изменения.
     /// </summary>
-    private async void ProtocolControl_Loaded(object sender, RoutedEventArgs e)
+    private void ProtocolControl_Loaded(object sender, RoutedEventArgs e)
     {
-      _baseModel = await DeviceDisplayConfig.GetDeviceDisplayModel();
+      _baseModel = DeviceDisplayConfig.GetDeviceDisplayModel();
       DefalultData();
 
       MachineAddressesCard.CheckedChanged += CheckedChanged;
@@ -43,7 +43,7 @@ namespace UI.Controls.Settings.DeviceInfo
     /// Унифицированный обработчик изменений любого переключателя.
     /// Сравнивает текущую модель с сохранённой и показывает/скрывает индикаторы.
     /// </summary>
-    private async void CheckedChanged(object? sender, bool e)
+    private void CheckedChanged(object? sender, bool e)
     {
       if (!ProtocolEquals(_baseModel, GetModel()))
       {
@@ -71,9 +71,9 @@ namespace UI.Controls.Settings.DeviceInfo
       return model;
     }
 
-    internal async Task SetBaseModel()
+    internal void SetBaseModel()
     {
-      _baseModel = await DeviceDisplayConfig.GetDeviceDisplayModel();
+      _baseModel = DeviceDisplayConfig.GetDeviceDisplayModel();
     }
 
     /// <summary>

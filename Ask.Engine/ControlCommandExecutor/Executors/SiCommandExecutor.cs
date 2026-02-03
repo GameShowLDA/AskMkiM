@@ -68,7 +68,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
@@ -172,7 +172,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
       }

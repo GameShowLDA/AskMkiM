@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
 
-      if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+      if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
       {
         var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value, chains: chains);
         message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;

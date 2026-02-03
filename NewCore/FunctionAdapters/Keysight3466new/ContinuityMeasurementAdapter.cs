@@ -35,7 +35,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       {
         var succes = await _measurement.SetContinuityModeAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима прозвонки", string.Empty, succes, 1, userMessageService);
         }

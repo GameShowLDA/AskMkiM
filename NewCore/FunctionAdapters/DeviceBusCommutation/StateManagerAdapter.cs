@@ -67,7 +67,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var result = await _stateManager.ConnectAsync();
 
-        if (!result.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Инициализация устройства", !result.Connect ? result.Answer : string.Empty, result.Connect, 1, userMessageService);
         }
@@ -88,7 +88,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var succes = await _stateManager.DisconnectAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Сброс устройства", succes, 1, userMessageService);
         }

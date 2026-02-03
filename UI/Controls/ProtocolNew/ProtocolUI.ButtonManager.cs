@@ -222,16 +222,16 @@ namespace UI.Controls.ProtocolNew
     private void RegisterHotkeys()
     {
       KeyboardManager.OnStartPressed = () =>
-        Application.Current.Dispatcher.Invoke(async () =>
+        Application.Current.Dispatcher.Invoke(() =>
         {
-          await ExecutionConfig.SetStepByStepMode(false);
+          ExecutionConfig.SetStepByStepMode(false);
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
 
       KeyboardManager.OnStartPressedByStepMode = () =>
-        Application.Current.Dispatcher.Invoke(async () =>
+        Application.Current.Dispatcher.Invoke(() =>
         {
-          await ExecutionConfig.SetStepByStepMode(true);
+          ExecutionConfig.SetStepByStepMode(true);
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
 

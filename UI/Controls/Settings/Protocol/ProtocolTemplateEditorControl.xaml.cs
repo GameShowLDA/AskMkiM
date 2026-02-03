@@ -73,17 +73,15 @@ namespace UI.Controls.Settings.Protocol
         TextChanged?.Invoke(this, EventArgs.Empty);
       };
 
-      // Загружаем базовый шаблон сразу
-
       Loaded += async (s, e) =>
       {
         if (!string.IsNullOrEmpty(ProtocolEditor.Text))
-          return; // если уже установлен снаружи — не трогаем
+          return; 
 
         if (IsErrorsTemplate)
-          BaseTemplate = await ProtocolConfig.GetBaseTextErrorsProtocol();
+          BaseTemplate = ProtocolConfig.GetBaseTextErrorsProtocol();
         else
-          BaseTemplate = await ProtocolConfig.GetBaseTextProtocol();
+          BaseTemplate = ProtocolConfig.GetBaseTextProtocol();
 
         LoadTemplateWithRequiredLines(BaseTemplate);
       };
@@ -98,12 +96,10 @@ namespace UI.Controls.Settings.Protocol
       if (string.IsNullOrWhiteSpace(templateText))
         templateText = string.Empty;
 
-      // Проверяем, что все обязательные строки есть в шаблоне
       foreach (var line in _readonlyLines)
       {
         if (!templateText.Contains(line, StringComparison.Ordinal))
         {
-          // Если строки нет — добавляем её в конец
           templateText += Environment.NewLine + line;
         }
       }

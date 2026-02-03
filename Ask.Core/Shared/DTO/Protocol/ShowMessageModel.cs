@@ -261,7 +261,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// <param name="headerColor">Цвет заголовка сообщения (по умолчанию null).</param>
     /// <param name="message">Основной текст сообщения (по умолчанию null).</param>
     /// <param name="messageColor">Цвет основного текста сообщения (по умолчанию null).</param>
-    public ShowMessageModel(string header = null, Color? headerColor = null, string message = null, string debug = null, Color? messageColor = null, MessageType? type = MessageType.Info) : this()
+    public ShowMessageModel(string? header = null, Color? headerColor = null, string? message = null, string? debug = null, Color? messageColor = null, MessageType? type = MessageType.Info) : this()
     {
       if (headerColor != null)
       {
@@ -273,8 +273,16 @@ namespace Ask.Core.Shared.DTO.Protocol
         MessageColor = messageColor;
       }
 
-      Header = header;
-      Message = message;
+      if (header != null)
+      {
+        Header = header;
+      }
+
+      if (message != null)
+      {
+        Message = message;
+      }
+
       Status = type;
     }
   }

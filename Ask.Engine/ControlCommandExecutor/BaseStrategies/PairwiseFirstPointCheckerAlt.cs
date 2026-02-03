@@ -60,7 +60,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var Rt1 = await GetResistanceAsync(context.MessageService, context.Value);
           if (Rt1 > 100)
           {
-            var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
 
             var errorMessageModels = new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: "Rизм = Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
             errorPoint = true;
@@ -72,8 +72,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
           else
           {
-            var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{_basePoint.ToString()}]" : string.Empty;
-            if (await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+            var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            if (DeviceDisplayConfig.GetMeasurementResultsVisibility())
             {
               await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: $"Rизм = {Rt1:F5} Ом", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
             }
@@ -90,7 +90,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var Rt2 = await GetResistanceAsync(context.MessageService, context.Value);
             if (Rt2 > 100)
             {
-              var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{point.ToString()}]" : string.Empty;
+              var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
 
               var errorMessageModels = new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
               errorPoint = true;
@@ -102,8 +102,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
             else
             {
-              var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{point.ToString()}]" : string.Empty;
-              if (await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+              var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
+              if (DeviceDisplayConfig.GetMeasurementResultsVisibility())
               {
                 await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Rизм = {Rt2:F5} Ом", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
               }
@@ -115,8 +115,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
             var UpperBound = (baseCommandModel as EhtCommandModel).HigherLimitResistance.Value;
 
-            string machineAdressFirst = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{_basePoint.ToString()}]" : string.Empty;
-            string machineAdressSecond = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{point.ToString()}]" : string.Empty;
+            string machineAdressFirst = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            string machineAdressSecond = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
 
             if (!errorPoint)
             {

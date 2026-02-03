@@ -154,7 +154,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _dcwMode.Mode.SetModeAsync();
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -244,7 +244,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _dcwMode.Voltage.SetVoltageAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -329,7 +329,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _dcwMode.CurrentLimits.SetHighCurrentLimitAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -380,7 +380,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _dcwMode.CurrentLimits.SetLowCurrentLimitAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -464,7 +464,7 @@ namespace NewCore.FunctionAdapters.GPT
         var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
           var succes = await _dcwMode.Time.SetTestTimeAsync(value);
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -514,7 +514,7 @@ namespace NewCore.FunctionAdapters.GPT
         var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
           var succes = await _dcwMode.Time.SetRampTimeAsync(value);
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -599,7 +599,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _dcwMode.Offset.SetOffsetAsync(value, userMessageService);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -684,7 +684,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _dcwMode.ArcCurrent.SetArcCurrentAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,

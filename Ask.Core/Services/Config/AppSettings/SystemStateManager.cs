@@ -52,38 +52,26 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Включает или выключает питание системы и публикует соответствующее событие.
     /// </summary>
     /// <param name="enable">true — включить питание; false — выключить.</param>
-    public static async Task SetIsActivePower(bool enable)
+    public static void SetIsActivePower(bool enable) => SystemStateEventAdapter.RaisePowerChanged(enable);
+
+    /// <summary>
+    /// Включает или отключает блокировку интерфейса и публикует соответствующее событие.
+    /// </summary>
+    /// <param name="enable">true — заблокировать; false — разблокировать.</param>
+    public static void SetIsLocked(bool enable)
     {
-      await Task.Run(() =>
-      {
-        SystemStateEventAdapter.RaisePowerChanged(enable);
-      });
+      IsLocked = enable;
+      SystemStateEventAdapter.RaiseLockedChanged(enable);
     }
 
     /// <summary>
     /// Включает или отключает блокировку интерфейса и публикует соответствующее событие.
     /// </summary>
     /// <param name="enable">true — заблокировать; false — разблокировать.</param>
-    public static async Task SetIsLocked(bool enable)
+    public static void SetIsControlProgramActive(bool enable)
     {
-      await Task.Run(() =>
-      {
-        IsLocked = enable;
-        SystemStateEventAdapter.RaiseLockedChanged(enable);
-      });
-    }
-
-    /// <summary>
-    /// Включает или отключает блокировку интерфейса и публикует соответствующее событие.
-    /// </summary>
-    /// <param name="enable">true — заблокировать; false — разблокировать.</param>
-    public static async Task SetIsControlProgramActive(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        IsControlProgramActive = enable;
-        SystemStateEventAdapter.RaiseControlProgramActiveChanged(enable);
-      });
+      IsControlProgramActive = enable;
+      SystemStateEventAdapter.RaiseControlProgramActiveChanged(enable);
     }
 
     #endregion
@@ -104,7 +92,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>
     /// <see langword="true"/>, если интерфейс заблокирован; <see langword="false"/> — если разблокирован.
     /// </returns>
-    public static bool GetIsLocked() =>IsLocked;
+    public static bool GetIsLocked() => IsLocked;
 
     /// <summary>
     /// Асинхронно возвращает текущий статус блокировки интерфейса.
@@ -112,8 +100,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>
     /// <see langword="true"/>, если интерфейс заблокирован; <see langword="false"/> — если разблокирован.
     /// </returns>
-    public static async Task<bool> GetIsControlProgramActive() =>
-      await Task.Run(() => IsControlProgramActive);
+    public static bool GetIsControlProgramActive() => IsControlProgramActive;
 
     #endregion
   }

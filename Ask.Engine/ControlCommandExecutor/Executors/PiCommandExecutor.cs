@@ -55,7 +55,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       //var points = PointModel.ConvertToPointModels(command.Points);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
@@ -203,7 +203,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
       }
@@ -320,7 +320,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
 
-      if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+      if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
       {
         var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(MeasurementTypeCommand.IE, lowerLimit, upperLimit, value);
         message.Status = value >= lowerLimit && value <= upperLimit ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
