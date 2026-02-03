@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace Ask.Core.Services.App
 {
@@ -85,22 +87,8 @@ namespace Ask.Core.Services.App
     /// </summary>
     public static async Task InitializeAsync()
     {
-      _stepMode = await ExecutionConfig.GetIsStepByStepModeEnabled();
+      _stepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
       if (_stepMode)
-      {
-        IsStepInto = true;
-      }
-
-      EventAggregator.Subscribe<ExecutionEvents.StepByStepModeChanged>(e => EventAggregator_StepByStepModeChanged(e.IsEnabled));
-    }
-
-    /// <summary>
-    /// Обработчик события изменения состояния пошагового режима.
-    /// </summary>
-    /// <param name="obj">Новое значение флага пошагового режима.</param>
-    private static void EventAggregator_StepByStepModeChanged(bool obj)
-    {
-      if (obj)
       {
         EnableStepMode(true);
       }
@@ -122,6 +110,7 @@ namespace Ask.Core.Services.App
       _stepMode = true;
       IsStepInto = isStepInto;
       _stepBypassRequested = false;
+      ExecutionEventAdapter.RaiseStepByStepModeChanged(true);
     }
 
     /// <summary>
@@ -132,6 +121,7 @@ namespace Ask.Core.Services.App
     {
       _stepMode = false;
       _stepBypassRequested = true;
+      ExecutionEventAdapter.RaiseStepByStepModeChanged(false);
     }
 
     /// <summary>

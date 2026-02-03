@@ -108,7 +108,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает, включен ли пошаговый режим.
     /// </summary>
     /// <returns>true, если включен; false, если выключена.</returns>
-    public static Task<bool> GetIsStepByStepModeEnabled() => Task.FromResult(SettingsExecutionModel?.StepByStepMode ?? false);
+    public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
 
     public static async Task<SettingsExecutionModel> GetExecitonModel()
     {

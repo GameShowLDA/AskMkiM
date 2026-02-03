@@ -307,7 +307,7 @@
     <value>Ваша надпись</value>
   </data>
   <data name="protocol.button.start" xml:space="preserve">
-    <value>ЗАПУСТИТЬ(Enter)</value>
+    <value>ЗАПУСТИТЬ(F5)</value>
   </data>
   <data name="protocol.button.repeat" xml:space="preserve">
     <value>ПОВТОРИТЬ(R)</value>

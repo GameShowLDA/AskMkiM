@@ -307,7 +307,7 @@
     <value>Your title</value>
   </data>
   <data name="protocol.button.start" xml:space="preserve">
-    <value>START (Enter)</value>
+    <value>START (F5)</value>
   </data>
   <data name="protocol.button.repeat" xml:space="preserve">
     <value>REPEAT (R)</value>

@@ -45,5 +45,18 @@ namespace NewCore.Function.ManagerChassis
       var cmd = new DeviceCommand(2, 2, 1);
       await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }
+
+    public async Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
+    {
+      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      var cmd = new DeviceCommand(7);
+      var result = await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+
+      return result.Contains("1");
+    }
   }
 }

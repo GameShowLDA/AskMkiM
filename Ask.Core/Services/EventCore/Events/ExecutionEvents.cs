@@ -1,5 +1,6 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Interfaces.EventInterfaces;
+﻿using Ask.Core.Shared.Interfaces.EventInterfaces;
+using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+
 
 namespace Ask.Core.Services.EventCore.Events
 {
@@ -38,14 +39,20 @@ namespace Ask.Core.Services.EventCore.Events
       }
     }
 
-    public class ActiveDeviceChanged : IEvent
+    /// <summary>
+    /// Событие нажатия кнопки управления выполнением.
+    /// </summary>
+    public class ControlButtonPressed : IEvent
     {
-      public List<IAttachableDevice> Devices { get; }
-      public ActiveDeviceChanged(List<IAttachableDevice> devices)
+      /// <summary>
+      /// Какая кнопка была нажата.
+      /// </summary>
+      public ExecutionControlButton Button { get; }
+
+      public ControlButtonPressed(ExecutionControlButton button)
       {
-        Devices = devices;
+        Button = button;
       }
     }
-    public class DeviceStatusUpdate : IEvent{}
   }
 }

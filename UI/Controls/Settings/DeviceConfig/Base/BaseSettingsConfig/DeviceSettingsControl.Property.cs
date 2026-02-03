@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using System.Globalization;
 using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
@@ -126,5 +127,29 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// Получает номер устройства.
     /// </summary>
     public int NumberDevice => int.TryParse(DeviceNumberTextBox.Text, out int number) ? number : -1;
+
+    public double GetResistance()
+    {
+      if (ResistanceTextBox == null)
+        return 0;
+
+      var text = ResistanceTextBox.Text?.Trim();
+
+      if (string.IsNullOrEmpty(text))
+        return 0;
+
+      text = text.Replace(',', '.');
+
+      if (text.EndsWith("."))
+      {
+        text += "0";
+        ResistanceTextBox.Text = text;
+      }
+
+      return double.Parse(
+        text,
+        CultureInfo.InvariantCulture
+      );
+    }
   }
 }

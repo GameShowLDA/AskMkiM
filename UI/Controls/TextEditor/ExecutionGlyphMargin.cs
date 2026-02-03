@@ -6,11 +6,13 @@ using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using UI.Controls.TextEditor;
 
 public class ExecutionGlyphMargin : AbstractMargin
 {
   public List<int> ActiveLines { get; } = new();
-  public Brush MarkerBrush { get; set; } = Brushes.LimeGreen;
+  public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["GreenColorSolidColorBrush"];
+  public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
 
   /// <summary>
   /// Лист поставленных точек остановки
@@ -25,7 +27,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// <summary>
   /// Цвет точек остановки.
   /// </summary>
-  public Brush BreakpointBrush { get; set; } = Brushes.Red;
+  public Brush BreakpointBrush { get; set; } = (Brush)Application.Current.Resources["RedColorSolidColorBrush"];
+
   /// <summary>
   /// Лист, куда можно поставить точки остановки.
   /// </summary>
@@ -58,6 +61,9 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Clear();
       BreakpointCommandsNumbers.Clear();
       ActiveLines.Clear();
+
+      RebuildBreakpointLineHighlights();
+
       InvalidateVisual();
     };
 
@@ -94,6 +100,42 @@ public class ExecutionGlyphMargin : AbstractMargin
     {
       ActiveLines.Clear();
       InvalidateVisual();
+    }
+  }
+
+  /// <summary>
+  /// Пытается получить экземпляр <see cref="TextMarkerService"/>, зарегистрированный в сервисах визуального слоя AvalonEdit.
+  /// </summary>
+  /// <remarks>
+  /// Сервис маркеров обычно добавляется один раз при инициализации редактора и хранится внутри
+  /// <see cref="ICSharpCode.AvalonEdit.Rendering.TextView.Services"/>.
+  /// </remarks>
+  /// <returns>
+  /// Экземпляр <see cref="TextMarkerService"/>, если он доступен; иначе <c>null</c>.
+  /// </returns>
+  private TextMarkerService? GetMarkerService()
+  {
+    return _textEditor?.TextArea?.TextView?.Services?
+      .GetService(typeof(TextMarkerService)) as TextMarkerService;
+  }
+
+  /// <summary>
+  /// Пересоздаёт подсветку строк, на которых установлены точки остановки.
+  /// </summary>
+  private void RebuildBreakpointLineHighlights()
+  {
+    var doc = _textEditor.Document;
+    var svc = GetMarkerService();
+    if (doc == null || svc == null) return;
+
+    svc.ClearAllMarkers();
+
+    DocumentLine line;
+
+    foreach (var anchor in BreakpointLines)
+    {
+      line = doc.GetLineByOffset(anchor.Offset);
+      svc.AddMarker(line.Offset, line.Length, LineBrush);
     }
   }
 
@@ -152,7 +194,6 @@ public class ExecutionGlyphMargin : AbstractMargin
     var line = doc.GetLineByNumber(lineNumber);
     int offset = line.Offset;
 
-    // Ищем существующий breakpoint на этой строке
     var existing = BreakpointLines.FirstOrDefault(a =>
       doc.GetLineByOffset(a.Offset).LineNumber == lineNumber);
 
@@ -164,6 +205,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Remove(existing);
       BreakpointCommandsNumbers.Remove(commandNumber);
       BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
+      RebuildBreakpointLineHighlights();
       return;
     }
 
@@ -171,17 +213,18 @@ public class ExecutionGlyphMargin : AbstractMargin
     anchor.MovementType = AnchorMovementType.BeforeInsertion;
     anchor.SurviveDeletion = false;
 
-    // Если удалили место — удалить breakpoint
     anchor.Deleted += (_, __) =>
     {
       BreakpointLines.Remove(anchor);
       BreakpointCommandsNumbers.Remove(GetNumberAtLine(anchor.Document.Text, anchor.Line));
       InvalidateVisual();
+      RebuildBreakpointLineHighlights();
     };
 
     commandNumber = GetNumberAtLine(anchor.Document.Text, anchor.Line);
     BreakpointCommandsNumbers.Add(commandNumber);
     BreakpointLines.Add(anchor);
+    RebuildBreakpointLineHighlights();
     BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
 

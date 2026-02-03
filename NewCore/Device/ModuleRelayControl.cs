@@ -28,7 +28,6 @@ namespace NewCore.Device
       Description = "Добавить описание сюда";
       PointCount = 350;
       DeviceClass = GetType().FullName;
-      SwitchResistance = 1;
     }
 
     /// <inheritdoc />
@@ -54,6 +53,6 @@ namespace NewCore.Device
 
     /// <inheritdoc />
     public SwitchingBusNew BusType { get; set; } = SwitchingBusNew.AB1;
-    public double SwitchResistance { get; }
+    public double SwitchResistance { get; set; }
   }
 }
