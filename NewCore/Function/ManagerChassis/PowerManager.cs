@@ -48,7 +48,7 @@ namespace NewCore.Function.ManagerChassis
 
     public async Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
