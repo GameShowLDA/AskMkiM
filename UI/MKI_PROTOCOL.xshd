@@ -37,9 +37,10 @@
 
 		<!-- Номер команды (вместе с номером строки, чтобы не перекрывало) -->
 		<Rule color="CommandNumber">^ERR\d+\s*\d+</Rule>
+		<Rule color="CommandNumber">^DOC\d+\s*\d+</Rule>
 
 		<!-- Мнемоника -->
-		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ)\b</Rule>
+		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ)\b</Rule>
 
 		<!-- Между двоеточиями -->
 		<Rule>:\s*[^:]+:</Rule>

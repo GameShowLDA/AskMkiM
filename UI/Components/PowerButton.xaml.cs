@@ -185,14 +185,18 @@ namespace UI.Components
     /// </summary>
     private async Task StopPowerSequenceAsync()
     {
-      active = false;
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await Task.Delay(500);
 
-      await Task.Delay(1000);
+      var power = true;
+      while (power)
+      {
+        await model.PowerManager.StopPowerAsync();
+        power = await model.PowerManager.VerifyPowerAsync();
+        await Task.Delay(100);
+      }
 
-      await model.PowerManager.StopPowerAsync();
-      await Task.Delay(1000);
-
+      active = false;
       SetDisconnectedState("Подключить систему");
     }
 
@@ -201,9 +205,9 @@ namespace UI.Components
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await model.ConnectableManager.InitializeAsync(null);
+      var result = await model.PowerManager.VerifyPowerAsync(null);
 
-      if (result.Item1)
+      if (result)
       {
         SetConnectedState("Отключить систему");
         return true;

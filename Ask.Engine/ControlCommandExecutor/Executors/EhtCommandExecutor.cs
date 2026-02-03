@@ -6,10 +6,12 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
+using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
@@ -33,9 +35,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message += "\r\n  " + str;
       }
 
+      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
 
       List<ShowMessageModel> errorMessage = new();
+      List<ShowMessageModel> infoMessage = new();
+
 
       var points = command.Scheme?.GroupModels?
             .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
@@ -60,7 +65,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
 
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
-      await SettingFastMeter(meter, context.Console, command.AlgorithmKey.Contains("Б"));
+      await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitResistance.HasValue)
       {
@@ -74,8 +79,25 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var cabelResistance = command.CabelResistance != null ? command.CabelResistance.Value : 0;
 
-      var errMes = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(command.Scheme, context.CommandExecutionManager, command, context.Console, (firstValue + secondValue) / 2, cabelResistance);
-      errorMessage.AddRange(errMes);
+      PairwiseFirstPointAltContext pairwiseFirstPointCheckerAlt = new PairwiseFirstPointAltContext();
+      pairwiseFirstPointCheckerAlt.SchemeModel = command.Scheme;
+      pairwiseFirstPointCheckerAlt.CommandManager = context.CommandExecutionManager;
+      pairwiseFirstPointCheckerAlt.CommandModel = command;
+      pairwiseFirstPointCheckerAlt.MessageService = context.Console;
+      pairwiseFirstPointCheckerAlt.Value = (firstValue + secondValue) / 2;
+      pairwiseFirstPointCheckerAlt.CabelResistance = cabelResistance;
+      pairwiseFirstPointCheckerAlt.TypeCommand = MeasurementTypeCommand.EHT;
+      pairwiseFirstPointCheckerAlt.LowerLimit = command.LowerLimitResistance.Value;
+      pairwiseFirstPointCheckerAlt.HigherLimit = command.HigherLimitResistance.Value;
+
+      if (command.AlgorithmKey.Contains("Д"))
+      {
+        pairwiseFirstPointCheckerAlt.IsProtocolAttribute = true;
+      }
+
+      var messageResult = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(pairwiseFirstPointCheckerAlt);
+      errorMessage.AddRange(messageResult.errorMessage);
+      infoMessage.AddRange(messageResult.infoMessage);
 
       await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
       foreach (var item in modules)
@@ -86,6 +108,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (errorMessage.Count > 0)
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
+      }
+      if (infoMessage.Count > 0)
+      {
+        protocolModel.Info.Add(nameCommand, infoMessage);
       }
     }
 
@@ -103,20 +129,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)
+    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
     {
       string name = meter.Name;
       int numberChassis = meter.NumberChassis;
       int number = meter.Number;
 
-      if (!fast)
-      {
-        await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
-      }
-      else
-      {
-        await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
-      }
+      await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
     }
   }
 }

@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using NewCore.Base.Device;
 using NewCore.Device;
 using System.IO.Ports;
@@ -32,6 +34,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public void SetHeadUnit<T>(T headUnit) where T : class, IHeadUnit
     {
       _headUnit = headUnit;
+      BusTypeLoaded();
     }
 
     /// <summary>
@@ -52,6 +55,31 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       DeviceModelMap = deviceModelMap;
       DeviceModelSelectionBox.ItemsSource = deviceModelMap.Keys;
     }
+    private void BusTypeLoaded()
+    {
+      var values = Enum.GetValues(typeof(SwitchingBusNew)).Cast<SwitchingBusNew>().ToList();
+
+      switch (_headUnit.BusType)
+      {
+        case BusStructureEnum.Type.Bus2:
+          values.Remove(SwitchingBusNew.AB2);
+          values.Remove(SwitchingBusNew.AB3);
+          values.Remove(SwitchingBusNew.AB4);
+          break;
+
+        case BusStructureEnum.Type.Bus4:
+          values.Remove(SwitchingBusNew.AB3);
+          values.Remove(SwitchingBusNew.AB4);
+          break;
+
+        case BusStructureEnum.Type.Bus6:
+          values.Remove(SwitchingBusNew.AB4);
+          break;
+      }
+
+      BusTypeSelectionBox.ItemsSource = values;
+      BusTypeSelectionBox.SelectedIndex = 0;
+    }
 
     /// <summary>
     /// Скрывает элементы интерфейса.
@@ -59,6 +87,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void VisibilityElements()
     {
       DeviceNumberContainer.Visibility = Visibility.Collapsed;
+      BusTypeContainer.Visibility = Visibility.Collapsed;
+      ResistanceContainer.Visibility = Visibility.Collapsed;
       ConnectionTypeContainer.Visibility = Visibility.Collapsed;
       IPAddressContainer.Visibility = Visibility.Collapsed;
       COMContainer.Visibility = Visibility.Collapsed;

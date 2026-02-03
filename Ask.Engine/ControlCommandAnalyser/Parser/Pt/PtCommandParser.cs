@@ -73,24 +73,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
 
       string time = string.Empty, unitTime = string.Empty;
 
-      remainder = KeyParser.ParseKeys(numberLine, model, remainder);      
+      remainder = KeyParser.ParseKeys(numberLine, model, remainder);
+
+      (time, unitTime, remainder) = CommonParameterParser.TimeParser.ParseTime(remainder);
+      LogDebug($"После парсинга времени: time='{time}{unitTime}', remainder='{remainder}'");
 
       double? timeValue = -1;
       if (!string.IsNullOrEmpty(time) && time != null)
       {
         timeValue = CommonParameterParser.ParseToDouble(time);
       }
-      else if (!string.IsNullOrEmpty(unitTime))
-      {
-        timeValue = 1;
-        model.Warnings.Add(GeneralWarnings.DefaultTime(model.StartLineNumber, $"{commandNumber} {mnemonic}", $"{timeValue} {unitTime}"));
-      }
-
-      if (timeValue.HasValue && timeValue > -1)
+      if (timeValue.HasValue)
       {
         model.Time = timeValue.Value;
       }
-      model.TimeSource = time + unitTime;
+      model.TimeSource = $"{time} {unitTime}";
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 

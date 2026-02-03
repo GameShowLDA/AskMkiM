@@ -172,6 +172,31 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    /// <summary>
+    /// Установка разрешенных строк, где можно ставить точки остановки, и вытаскивание данных об этом.
+    /// </summary>
+    public List<int> RightBreakpoint
+    {
+      get => _executionMargin.RightBreakpoints;
+      set => _executionMargin.RightBreakpoints = value;
+    }
+
+    /// <summary>
+    /// Лист номеров строк, где установлены точки остановки
+    /// </summary>
+    public List<TextAnchor> BreakPointLines
+    {
+      get => _executionMargin.BreakpointLines;
+    }
+
+    /// <summary>
+    /// Лист номеров команд, на которых установлены точки остановки.
+    /// </summary>
+    public List<int> BreakpointCommandsNumbers
+    {
+      get => _executionMargin.BreakpointCommandsNumbers;
+    }
+
     #endregion
 
     /// <summary>
@@ -399,49 +424,50 @@ namespace UI.Controls.TextEditor
     public TextEditorUI(FileType fileType = FileType.None, TextEditorModel textEditorModel = null)
     {
       InitializeComponent();
+
       FileTypeDock = fileType;
       TextEditorModel = textEditorModel;
       _defaultFontSize = textEditor.FontSize;
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
 
+      if (_executionMargin == null)
+      {
+        _executionMargin = new ExecutionGlyphMargin(textEditor);
+        textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
+      }
+
+      if (_markerService == null)
+      {
+        if (textEditor.Document == null)
+          textEditor.Document = new TextDocument();
+
+        _markerService = new TextMarkerService(textEditor);
+
+        var textView = textEditor.TextArea.TextView;
+        textView.BackgroundRenderers.Add(_markerService);
+
+        var services = textView.Services;
+        if (services.GetService(typeof(TextMarkerService)) == null)
+          services.AddService(typeof(TextMarkerService), _markerService);
+      }
+
       Loaded += (s, e) =>
       {
-        if (_markerService == null)
-        {
-          _markerService = new TextMarkerService(textEditor);
-          textEditor.TextArea.TextView.BackgroundRenderers.Add(_markerService);
-
-          var services = textEditor.TextArea.TextView.Services;
-          if (services.GetService(typeof(TextMarkerService)) == null)
-          {
-            services.AddService(typeof(TextMarkerService), _markerService);
-          }
-
-          Console.WriteLine("TextMarkerService зарегистрирован.");
-        }
-        else
-        {
-          Console.WriteLine("TextMarkerService уже инициализирован.");
-        }
-
         ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
-
-        if (_executionMargin == null)
-        {
-          _executionMargin = new ExecutionGlyphMargin(textEditor);
-          textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
-        }
-
       };
 
       HelpProvider.SetHelpKeyProvider(textEditor, () =>
       {
         var sel = textEditor.SelectedText?.Trim();
-        return string.IsNullOrWhiteSpace(sel) ? "DescriptionWorkTextEditor" : sel;
+        return string.IsNullOrWhiteSpace(sel)
+          ? "DescriptionWorkTextEditor"
+          : sel;
       });
 
-      EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(e => ApplySyntaxHighlighting(e.IsEnabled));
+      EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(
+        e => ApplySyntaxHighlighting(e.IsEnabled)
+      );
     }
 
     #endregion

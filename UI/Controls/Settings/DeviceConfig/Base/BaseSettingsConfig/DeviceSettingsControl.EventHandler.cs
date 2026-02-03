@@ -1,5 +1,7 @@
-﻿using Message;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Message;
 using NewCore.Base.Device;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +15,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
   /// </summary>
   public partial class DeviceSettingsControl
   {
+    private bool _internalChange;
+
     /// <summary>
     /// Обрабатывает изменение выбранной модели шасси.
     /// </summary>
@@ -28,6 +32,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Аргументы события выбора.</param>
     private void RacksNumberBorder_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+    }
+
+    /// <summary>
+    /// Обрабатывает изменение выбранного номера стойки.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события выбора.</param>
+    private void BusTypeSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
     }
 
@@ -53,6 +66,17 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
+
+        if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
+        {
+          BusTypeContainer.Visibility = Visibility.Visible;
+          ResistanceContainer.Visibility = Visibility.Visible;
+        }
+        else
+        {
+          BusTypeContainer.Visibility = Visibility.Collapsed;
+          ResistanceContainer.Visibility = Visibility.Collapsed;
+        }
 
         if (baseClass == typeof(DeviceWithCOM))
         {
@@ -117,6 +141,66 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           ConnectionTypeContainer.Visibility = Visibility.Visible;
         }
+      }
+    }
+
+
+    /// <summary>
+    /// Ограничивает ввод только числовыми значениями для номера устройства.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события ввода текста.</param>
+    private void ResistanceDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+      e.Handled = !char.IsDigit(e.Text, 0) && e.Text != "." && e.Text != ",";
+    }
+
+    private void ResistanceDevice_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      if (_internalChange)
+        return;
+
+      if (sender is not TextBox textBox)
+        return;
+
+      if (string.IsNullOrWhiteSpace(textBox.Text))
+      {
+        ConnectionTypeContainer.Visibility = Visibility.Collapsed;
+        return;
+      }
+
+      _internalChange = true;
+
+      string text = textBox.Text.Replace(',', '.');
+
+      if (text.StartsWith("."))
+      {
+        textBox.Text = string.Empty;
+        _internalChange = false;
+        return;
+      }
+
+      if (text.Count(c => c == '.') > 1)
+      {
+        textBox.Text = text.Remove(text.LastIndexOf('.'), 1);
+      }
+
+      textBox.Text = text;
+      textBox.CaretIndex = textBox.Text.Length;
+
+      _internalChange = false;
+
+      if (double.TryParse(
+            text,
+            NumberStyles.AllowDecimalPoint,
+            CultureInfo.InvariantCulture,
+            out _))
+      {
+        ConnectionTypeContainer.Visibility = Visibility.Visible;
+      }
+      else
+      {
+        ConnectionTypeContainer.Visibility = Visibility.Collapsed;
       }
     }
 

@@ -44,6 +44,12 @@ namespace Ask.Core.Shared.Entity.Devices
     public string DeviceClass { get; set; }
 
     /// <inheritdoc />
+    public double SwitchResistance { get; set; }
+
+    /// <inheritdoc />
+    public SwitchingBusNew BusType { get; set; }
+
+    /// <inheritdoc />
     [NotMapped]
     public IBusManager BusManager { get; set; }
 

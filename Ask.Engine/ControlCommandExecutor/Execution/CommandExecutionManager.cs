@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -46,6 +48,9 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       translationControl = textEditor;
       _opkFilePath = opkFilePath;
       RegisterExecutors();
+
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
     }
 
     /// <summary>
@@ -136,6 +141,32 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         await ExecuteOneAsync(CommandsToExecute[i]);
       }
+    }
+
+    private void BreakpointSet(BreakpointEvents.BreakpointSet obj)
+    {
+      var model = GetCommandByNumber(obj.CommandNumber);
+      if (model == null)
+        return;
+
+      model.HasBreakpoint = true;
+    }
+
+    private void BreakpointRemoved(BreakpointEvents.BreakpointRemoved obj)
+    {
+      var model = GetCommandByNumber(obj.CommandNumber);
+      if (model == null)
+        return;
+
+      model.HasBreakpoint = false;
+    }
+
+    private BaseCommandModel? GetCommandByNumber(int commandNumber)
+    {
+      return CommandsToExecute
+          .FirstOrDefault(x =>
+              int.TryParse(x.CommandNumber, out var num) &&
+              num == commandNumber);
     }
   }
 }

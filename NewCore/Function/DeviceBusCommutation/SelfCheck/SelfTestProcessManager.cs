@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using NewCore.Communication;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
@@ -39,6 +40,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return;
       }
 
+      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(device));
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
 
       if (!await SelfTestConnectionHelper.SettingsMeter(meter, messageService))

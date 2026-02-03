@@ -13,7 +13,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.UP).DisplayName;
 
-
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var up = (UpCommandModel)context.Command;

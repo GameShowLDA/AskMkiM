@@ -6,9 +6,11 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
         <Setter Property="GridLinesVisibility" Value="All"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="AlternatingRowBackground" Value="{DynamicResource SecondarySolidColorBrush}"/>
         <Setter Property="RowBackground" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     </Style>
 
     <Style TargetType="DataGridColumnHeader">
@@ -35,7 +37,9 @@
                     BorderBrush="{DynamicResource PrimarySolidColorBrush}"
                     BorderThickness="0"
                     Background="{DynamicResource PrimarySolidColorBrush}">
-                        <ContentPresenter VerticalAlignment="Bottom"/>
+                        <ContentPresenter
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Left"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

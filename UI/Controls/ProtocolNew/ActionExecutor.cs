@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -102,7 +103,7 @@ namespace UI.Controls.ProtocolNew
       processName = name;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
-      if (!await ExecutionConfig.GetIsIdleModeEnabled() && !await SystemStateManager.GetIsActivePower() && checkPower)
+      if (!await ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
       {
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
         await FinalizeAsync();
@@ -126,7 +127,7 @@ namespace UI.Controls.ProtocolNew
       StartProcessing?.Invoke(true);
 
 
-      if (await ExecutionConfig.GetIsStepByStepModeEnabled())
+      if (ExecutionConfig.GetIsStepByStepModeEnabled())
       {
         StepControlManager.EnableStepMode(true);
         StepMode = true;
@@ -662,7 +663,7 @@ namespace UI.Controls.ProtocolNew
       actionExecutor.ProtocolSelfCheck = parentClass;
       actionExecutor.ShouldShowPauseMessage = true;
       actionExecutor.ShouldShowResumeMessage = false;
-      actionExecutor.StepMode = await ExecutionConfig.GetIsStepByStepModeEnabled();
+      actionExecutor.StepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
       actionExecutor.IsPaused = false;
       actionExecutor.ProcessTask = null;
       return actionExecutor;

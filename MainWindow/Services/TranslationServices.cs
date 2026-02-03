@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -102,7 +104,7 @@ namespace MainWindowProgram.Services
       DockItem? foundDockItem = null;
 
       // Ждём, пока хотя бы один DockItem появится
-      for (int i = 0; i < 500; i++) // максимум 500 мс
+      for (int i = 0; i < 500; i++) 
       {
         if (dockManager.DockItems.Count > 0)
         {
@@ -246,6 +248,7 @@ namespace MainWindowProgram.Services
         item.SetRightEditor(translateEditor);
         item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
         item.TranslationModels = models;
+        item.GetRightEditor().RightBreakpoint = models.Select(x => x.FormattedStartLineNumber).ToList();
       }
     }
 
@@ -297,6 +300,18 @@ namespace MainWindowProgram.Services
 
           var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
           item.TranslationModels = models;
+
+          item.GetRightEditor().RightBreakpoint = models
+            .Where(x =>
+            x.Mnemonic != "СП"
+            && x.Mnemonic != "ЦУ"
+            && x.Mnemonic != "КЦ"
+            && x.Mnemonic != "РМ"
+            && x.Mnemonic != "УП"
+            && x.Mnemonic != "ОК"
+            )
+            .Select(x => x.FormattedStartLineNumber)
+            .ToList();
         }
       }
       catch (Exception ex)

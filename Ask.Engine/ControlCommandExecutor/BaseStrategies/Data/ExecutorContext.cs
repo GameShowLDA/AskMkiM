@@ -8,6 +8,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
   internal abstract class ExecutorContext
   {
+    /// <summary>
+    /// Тип измерительной команды, определяющий режим или метод выполнения измерения.
+    /// Используется для выбора логики обработки параметров и запуска соответствующего алгоритма.
+    /// </summary>
     internal MeasurementTypeCommand TypeCommand { get; set; }
 
     /// <summary>
@@ -59,9 +63,35 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// </summary>
     public bool IsInvokedByAnotherCommand { get; set; }
 
+    /// <summary>
+    /// Собственное сопротивление релейного коммутационного модуля,
+    /// вносимое в цепь при прохождении сигнала через его коммутируемый путь.
+    /// Значение выражено в единицах, указанных в <see cref="Unit"/>.
+    /// </summary>
+    public double InternalResistance { get; set; } = 0;
 
+    /// <summary>
+    /// Мнемоническое обозначение измеряемой физической величины
+    /// Используется для краткой идентификации параметра.
+    /// </summary>
     public string UnitMnemonic { get; set; }
+
+    /// <summary>
+    /// Единица измерения параметра (например: Ом, В, А).
+    /// Соответствует текущей конфигурации измерительной подсистемы.
+    /// </summary>
     public string Unit { get; set; }
+
+    /// <summary>
+    /// Признак переполюсовки точек (инвертированной полярности) в текущей конфигурации (Ключ И).
+    /// <c>true</c> — если полярность точек инвертирована; иначе <c>false</c>.
+    /// </summary>
+    public bool IsPolarityReversed { get; set; }
+
+    /// <summary>
+    /// Атрибут вывода информации в протокол и на печать (Ключ Д).
+    /// </summary>
+    public bool IsProtocolAttribute { get; set; }
 
     protected void CopyFrom(ExecutorContext other)
     {
@@ -76,6 +106,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       UnitMnemonic = other.UnitMnemonic;
       TypeCommand = other.TypeCommand;
       IsInvokedByAnotherCommand = other.IsInvokedByAnotherCommand;
+      IsPolarityReversed = other.IsPolarityReversed;
+      IsProtocolAttribute = other.IsProtocolAttribute;
     }
 
     public T CreateChild<T>() where T : ExecutorContext, new()
