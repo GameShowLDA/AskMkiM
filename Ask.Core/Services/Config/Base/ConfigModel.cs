@@ -12,26 +12,26 @@ namespace Ask.Core.Services.Config.Base
     /// Устанавливает текущую модель выполнения (ExecutionModel).
     /// </summary>
     /// <param name="executionModel">Модель выполнения.</param>
-    static public async Task SetExecutionModelAsync(SettingsExecutionModel executionModel)
+    static public void SetExecutionModelAsync(SettingsExecutionModel executionModel)
     {
-      await ExecutionConfig.SetStopOnError(executionModel.StopOnError);
-      await ExecutionConfig.SetIsErrorSimulationMode(executionModel.IsErrorSimulationMode);
-      await ExecutionConfig.SetStepByStepMode(executionModel.StepByStepMode);
-      await ExecutionConfig.SetIdleMode(executionModel.IdleModeExecution);
+      ExecutionConfig.SetStopOnError(executionModel.StopOnError);
+      ExecutionConfig.SetIsErrorSimulationMode(executionModel.IsErrorSimulationMode);
+      ExecutionConfig.SetStepByStepMode(executionModel.StepByStepMode);
+      ExecutionConfig.SetIdleMode(executionModel.IdleModeExecution);
     }
 
     /// <summary>
     /// Устанавливает текущую модель протокола (ProtocolModel).
     /// </summary>
     /// <param name="executionModel">Модель протокола.</param>
-    static public async Task SetProtocolModelAsync(SettingsProtocolModel executionModel)
+    static public void SetProtocolModelAsync(SettingsProtocolModel executionModel)
     {
-      await ProtocolConfig.SetDeviceInfo(executionModel.ShowDeviceInfo);
-      await ProtocolConfig.SetHeaderInfo(executionModel.ShowHeaderInfo);
-      await ProtocolConfig.SetSaveProtocol(executionModel.AutoSaveProtocol);
-      await ProtocolConfig.SetPrintProtocol(executionModel.AutoPrintProtocol);
-      await ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
-      await ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
+      ProtocolConfig.SetDeviceInfo(executionModel.ShowDeviceInfo);
+      ProtocolConfig.SetHeaderInfo(executionModel.ShowHeaderInfo);
+      ProtocolConfig.SetSaveProtocol(executionModel.AutoSaveProtocol);
+      ProtocolConfig.SetPrintProtocol(executionModel.AutoPrintProtocol);
+      ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
+      ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
     }
 
 

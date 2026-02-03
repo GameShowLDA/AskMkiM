@@ -48,7 +48,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             .ToList()
             ?? new List<PointModel>();
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }

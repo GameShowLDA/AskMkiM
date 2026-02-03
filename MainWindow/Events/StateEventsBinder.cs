@@ -77,14 +77,14 @@ namespace MainWindowProgram.Events
       AdminConfig.SetDebugRights(e).ConfigureAwait(true);
     }
 
-    private async void AdminCommand_PowerChanged(object? sender, bool e)
+    private void AdminCommand_PowerChanged(object? sender, bool e)
     {
-      await SystemStateManager.SetIsActivePower(e);
+      SystemStateManager.SetIsActivePower(e);
     }
 
-    private async void AdminCommand_PauseInStopChanged(object? sender, bool e)
+    private void AdminCommand_PauseInStopChanged(object? sender, bool e)
     {
-      await ExecutionConfig.SetStopOnError(e);
+      ExecutionConfig.SetStopOnError(e);
     }
 
     /// <summary>
@@ -219,7 +219,7 @@ namespace MainWindowProgram.Events
     /// <param name="newRights">Новое состояние прав администратора.</param>
     private void OnAdminRightsChangedHandler(object sender, bool newRights)
     {
-      AdminConfig.SetAdminRights(newRights).ConfigureAwait(true);
+      AdminConfig.SetAdminRights(newRights);
     }
 
     /// <summary>

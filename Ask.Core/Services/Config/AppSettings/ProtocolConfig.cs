@@ -17,131 +17,52 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Устанавливает отображение информации об устройствах в протоколе.
     /// </summary>
     /// <param name="enable">true для отображения, false для скрытия.</param>
-    public static async Task SetDeviceInfo(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.ShowDeviceInfo = enable;
-      });
-    }
-
+    public static void SetDeviceInfo(bool enable) => ProtocolModel.ShowDeviceInfo = enable;
     /// <summary>
     /// Устанавливает отображение информации об устройствах в протоколе.
     /// </summary>
     /// <param name="enable">true для отображения, false для скрытия.</param>
-    public static async Task SetHeaderInfo(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.ShowHeaderInfo = enable;
-      });
-    }
+    public static void SetHeaderInfo(bool enable) => ProtocolModel.ShowHeaderInfo = enable;
 
     /// <summary>
     /// Устанавливает режим подробного вывода информации в протокол.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    static public async Task SetShowDetailedProtocol(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.ShowDetailedProtocol = enable;
-      });
-    }
+    static public void SetShowDetailedProtocol(bool enable) => ProtocolModel.ShowDetailedProtocol = enable;
 
     /// <summary>
     /// Устанавливает автосохранение протокола.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetSaveProtocol(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.AutoSaveProtocol = enable;
-      });
-    }
+    public static void SetSaveProtocol(bool enable) => ProtocolModel.AutoSaveProtocol = enable;
 
     /// <summary>
     /// Устанавливает автоматическую печать протокола.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetPrintProtocol(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.AutoPrintProtocol = enable;
-      });
-    }
+    public static void SetPrintProtocol(bool enable) => ProtocolModel.AutoPrintProtocol = enable;
+    /// <summary>
+    /// Устанавливает отображение времени выполнения операций.
+    /// </summary>
+    /// <param name="enable">true для отображения, false для скрытия.</param>
+    public static void SetTimeStart(bool enable) => ProtocolModel.DisplayOperationTime = enable;
+
 
     /// <summary>
     /// Устанавливает отображение времени выполнения операций.
     /// </summary>
     /// <param name="enable">true для отображения, false для скрытия.</param>
-    public static async Task SetTimeStart(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.DisplayOperationTime = enable;
-      });
-    }
+    public static void SetShowProtocolInSoftware(bool enable) => ProtocolModel.ShowProtocolInSoftware = enable;
 
     /// <summary>
     /// Устанавливает отображение времени выполнения операций.
     /// </summary>
     /// <param name="enable">true для отображения, false для скрытия.</param>
-    public static async Task SetShowProtocolInSoftware(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.ShowProtocolInSoftware = enable;
-      });
-    }
-
-    /// <summary>
-    /// Устанавливает отображение времени выполнения операций.
-    /// </summary>
-    /// <param name="enable">true для отображения, false для скрытия.</param>
-    public static async Task SetGenerateProtocol(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.GenerateProtocol = enable;
-      });
-    }
-
-    public static async Task SetCleanTextProtocol(string text)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.CleanTextProtocol = text;
-      });
-    }
-
-    public static async Task SetCleanTextErrorProtocol(string text)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.CleanTextErrorsProtocol = text;
-      });
-    }
-
-    public static async Task SetErrorTextProtocol(string text)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel.ErrorTextProtocol = text;
-      });
-    }
-
-    public static async Task SetProtocolModel(SettingsProtocolModel protocolModel)
-    {
-      await Task.Run(() =>
-      {
-        ProtocolModel = protocolModel;
-      });
-    }
-
-
+    public static void SetGenerateProtocol(bool enable) => ProtocolModel.GenerateProtocol = enable;
+    public static void SetCleanTextProtocol(string text) => ProtocolModel.CleanTextProtocol = text;
+    public static void SetCleanTextErrorProtocol(string text) => ProtocolModel.CleanTextErrorsProtocol = text;
+    public static void SetErrorTextProtocol(string text) => ProtocolModel.ErrorTextProtocol = text;
+    public static void SetProtocolModel(SettingsProtocolModel protocolModel) => ProtocolModel = protocolModel;
 
     #endregion
 
@@ -181,56 +102,50 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает статус отображения времени в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetTimeStart() => await Task.Run(() => ProtocolModel.DisplayOperationTime);
-    public static async Task<bool> GetShowProtocolInSoftware() => await Task.Run(() => ProtocolModel.ShowProtocolInSoftware);
-    public static async Task<bool> GetGenerateProtocol() => await Task.Run(() => ProtocolModel.GenerateProtocol);
-    public static async Task<string> GetCleanTextProtocol() => await Task.Run(() => ProtocolModel.CleanTextProtocol);
-    public static async Task<string> GetCleanTextProtocolError() => await Task.Run(() => ProtocolModel.CleanTextErrorsProtocol);
+    public static bool GetTimeStart() => ProtocolModel.DisplayOperationTime;
+    public static bool GetShowProtocolInSoftware() => ProtocolModel.ShowProtocolInSoftware;
+    public static bool GetGenerateProtocol() => ProtocolModel.GenerateProtocol;
+    public static string GetCleanTextProtocol() => ProtocolModel.CleanTextProtocol;
+    public static string GetCleanTextProtocolError() => ProtocolModel.CleanTextErrorsProtocol;
+    public static string GetErrorTextProtocol() => ProtocolModel.ErrorTextProtocol;
 
-    public static async Task<string> GetErrorTextProtocol() => await Task.Run(() => ProtocolModel.ErrorTextProtocol);
-
-    public static async Task<SettingsProtocolModel> GetProtocolModel()
+    public static SettingsProtocolModel GetProtocolModel()
     {
-      return await Task.Run(() =>
-      {
-        SettingsProtocolModel protocolModel = new SettingsProtocolModel();
-        protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;
-        protocolModel.ShowHeaderInfo = ProtocolModel.ShowHeaderInfo;
-        protocolModel.ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol;
-        protocolModel.AutoSaveProtocol = ProtocolModel.AutoSaveProtocol;
-        protocolModel.AutoPrintProtocol = ProtocolModel.AutoPrintProtocol;
-        protocolModel.DisplayOperationTime = ProtocolModel.DisplayOperationTime;
-        protocolModel.ShowProtocolInSoftware = ProtocolModel.ShowProtocolInSoftware;
-        protocolModel.GenerateProtocol = ProtocolModel.GenerateProtocol;
-        protocolModel.CleanTextProtocol = ProtocolModel.CleanTextProtocol;
-        protocolModel.CleanTextErrorsProtocol = ProtocolModel.CleanTextErrorsProtocol;
-        return protocolModel;
-      });
+      SettingsProtocolModel protocolModel = new SettingsProtocolModel();
+      protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;
+      protocolModel.ShowHeaderInfo = ProtocolModel.ShowHeaderInfo;
+      protocolModel.ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol;
+      protocolModel.AutoSaveProtocol = ProtocolModel.AutoSaveProtocol;
+      protocolModel.AutoPrintProtocol = ProtocolModel.AutoPrintProtocol;
+      protocolModel.DisplayOperationTime = ProtocolModel.DisplayOperationTime;
+      protocolModel.ShowProtocolInSoftware = ProtocolModel.ShowProtocolInSoftware;
+      protocolModel.GenerateProtocol = ProtocolModel.GenerateProtocol;
+      protocolModel.CleanTextProtocol = ProtocolModel.CleanTextProtocol;
+      protocolModel.CleanTextErrorsProtocol = ProtocolModel.CleanTextErrorsProtocol;
+      return protocolModel;
     }
 
     #endregion
 
-    public static async Task SaveProtocolModel(SettingsProtocolModel protocolModel)
+    public static void SaveProtocolModel(SettingsProtocolModel protocolModel)
     {
-      await Task.Run(() =>
-      {
-        ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
-        ProtocolModel.ShowHeaderInfo = protocolModel.ShowHeaderInfo;
-        ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
-        ProtocolModel.AutoSaveProtocol = protocolModel.AutoSaveProtocol;
-        ProtocolModel.AutoPrintProtocol = protocolModel.AutoPrintProtocol;
-        ProtocolModel.DisplayOperationTime = protocolModel.DisplayOperationTime;
-        ProtocolModel.ShowProtocolInSoftware = protocolModel.ShowProtocolInSoftware;
-        ProtocolModel.GenerateProtocol = protocolModel.GenerateProtocol;
-        ProtocolModel.CleanTextProtocol = protocolModel.CleanTextProtocol;
-        ProtocolModel.CleanTextErrorsProtocol = protocolModel.CleanTextErrorsProtocol;
-      });
+
+      ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
+      ProtocolModel.ShowHeaderInfo = protocolModel.ShowHeaderInfo;
+      ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
+      ProtocolModel.AutoSaveProtocol = protocolModel.AutoSaveProtocol;
+      ProtocolModel.AutoPrintProtocol = protocolModel.AutoPrintProtocol;
+      ProtocolModel.DisplayOperationTime = protocolModel.DisplayOperationTime;
+      ProtocolModel.ShowProtocolInSoftware = protocolModel.ShowProtocolInSoftware;
+      ProtocolModel.GenerateProtocol = protocolModel.GenerateProtocol;
+      ProtocolModel.CleanTextProtocol = protocolModel.CleanTextProtocol;
+      ProtocolModel.CleanTextErrorsProtocol = protocolModel.CleanTextErrorsProtocol;
 
       SaveProtocolEvent?.Invoke(protocolModel);
     }
 
 
-    public static async Task<string> GetBaseTextProtocol() => await Task.Run(() =>
+    public static string GetBaseTextProtocol() =>
 @"Протокол($РЕЖИМ) от $ДАТА
 проверки электрических параметров сборочной единицы $ОБОЗНАЧЕНИЕ Зав.N $НОМЕР
 Цель проверки: проверка электрических параметров сборочной единицы на соответствие техническим условиям
@@ -251,9 +166,9 @@ namespace Ask.Core.Services.Config.AppSettings
 
 Представитель ОК: ________________ / $ПРЕДСТАВИТЕЛЬ
 
-Представитель заказчика (ВП): ________________ / $ЗАКАЗЧИК");
+Представитель заказчика (ВП): ________________ / $ЗАКАЗЧИК";
 
-    public static async Task<string> GetBaseTextErrorsProtocol() => await Task.Run(() =>
+    public static string GetBaseTextErrorsProtocol() =>
 @"Протокол($РЕЖИМ) от $ДАТА
 проверки электрических параметров сборочной единицы $ОБОЗНАЧЕНИЕ Зав.N $НОМЕР
 Программа проверки: $ПРОГРАММА
@@ -265,6 +180,6 @@ namespace Ask.Core.Services.Config.AppSettings
 
 Представитель ОТК: ________________ / $ПРЕДСТАВИТЕЛЬ
 
-Представитель заказчика (ВП): ________________ /  $ЗАКАЗЧИК");
+Представитель заказчика (ВП): ________________ /  $ЗАКАЗЧИК";
   }
 }

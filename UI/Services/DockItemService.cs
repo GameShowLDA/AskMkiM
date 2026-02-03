@@ -82,7 +82,7 @@ namespace UI.Services
                 isControlProgramActive = true;
               }
 
-              SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+              SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
               capturedDockItem.Show(dockControl, DockPosition.Document);
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace UI.Services
             isControlProgramActive = true;
           }
 
-          SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+          SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
           dockItem.Show(dockControl, DockPosition.Document);
           LogInformation("DockItem отображён немедленно.");
         }
@@ -243,9 +243,7 @@ namespace UI.Services
     {
       var isControlProgramActive = true;
 
-      SystemStateManager
-          .SetIsControlProgramActive(isControlProgramActive)
-          .ConfigureAwait(true);
+      SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
 
       dockItemPk.Show(dockControl, DockPosition.Document);
       dockItemDeviceState.Show(dockControl, DockPosition.Document);
@@ -265,7 +263,7 @@ namespace UI.Services
         {
           _fileManager.ContainerService.RemoveEditorContainer(translatorContainer, editorType);
         }
-        SystemStateManager.SetIsControlProgramActive(false).ConfigureAwait(true);
+        SystemStateManager.SetIsControlProgramActive(false);
       };
       return editorType;
     }
@@ -294,7 +292,7 @@ namespace UI.Services
           }
 
           EditorEventAdapter.RaiseTextEditorContainerClosing(true, nameFile);
-          SystemStateManager.SetIsControlProgramActive(false).ConfigureAwait(true);
+          SystemStateManager.SetIsControlProgramActive(false);
         }
       };
     }

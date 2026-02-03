@@ -35,7 +35,7 @@ namespace NewCore.FunctionAdapters.GPT
       {
         var succes = await _manager.ConnectAsync(messageService);
 
-        if (!succes.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!succes.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(succes.Answer) ? "Успешно" : succes.Answer, succes.Connect, 1, messageService);
         }
@@ -60,7 +60,7 @@ namespace NewCore.FunctionAdapters.GPT
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.DisconnectAsync(), messageService, deviceTask: true);
 
-      if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение пробойной установки", result ? "Успешно" : "Ошибка отключения", result, 1, messageService);
       }
@@ -80,7 +80,7 @@ namespace NewCore.FunctionAdapters.GPT
       var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.InitializeAsync(messageService), messageService, deviceTask: true);
 
 
-      if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(answer) ? "ОК" : answer, result, 1, messageService);
       }

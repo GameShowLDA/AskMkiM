@@ -256,7 +256,7 @@ namespace UI.Controls.Runner
             LogInformation("ChildTextEditorContainer.DockItem отображён после загрузки.");
             var isControlProgramActive = true;
 
-            SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+            SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
             dockItemDeviceState.Show(dockManager, DockPosition.Document);
             capturedDockItem.Show(dockManager, DockPosition.Document);
           }
@@ -270,7 +270,7 @@ namespace UI.Controls.Runner
       {
         var isControlProgramActive = true;
 
-        SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+        SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
         dockItemDeviceState.Show(dockManager, DockPosition.Document);
         dockItemPk.Show(dockManager, DockPosition.Document);
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");

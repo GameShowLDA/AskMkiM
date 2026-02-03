@@ -34,7 +34,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _measurement.SetACVoltageModeAsync();
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения переменного напряжения", succes, 1, userMessageService);
         }

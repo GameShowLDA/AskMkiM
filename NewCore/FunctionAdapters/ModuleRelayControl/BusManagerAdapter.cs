@@ -40,7 +40,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _busManager.ConnectBusAsync(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", succes, 1, userMessageService);
         }
@@ -57,7 +57,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
       {
         var succes = await _busManager.DisconnectBusAsync(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", succes, 1, userMessageService);
         }

@@ -21,27 +21,27 @@ namespace MainWindowProgram.ViewModels
 
     /// <summary>Команда открытия файла.</summary>
     [RelayCommand]
-    private async Task OpenFile() => await _fileService.OpenFileAsync();
+    private void OpenFile() => _fileService.OpenFileAsync();
 
     /// <summary>Команда сохранения файла.</summary>
     [RelayCommand]
-    private async Task SaveFile() => await _fileService.SaveFileAsync();
+    private void SaveFile() => _fileService.SaveFileAsync();
 
     /// <summary>Команда сохранения файла под другим именем.</summary>
     [RelayCommand]
-    private async Task SaveFileAs() => await _fileService.SaveFileAsAsync();
+    private void SaveFileAs() => _fileService.SaveFileAsAsync();
 
     /// <summary>Команда открытия папки.</summary>
     [RelayCommand]
-    private async Task OpenFolder() => await _fileService.OpenFolder();
+    private void OpenFolder() => _fileService.OpenFolder();
 
     /// <summary>Команда печати файла.</summary>
     [RelayCommand]
-    private async Task PrintFile() => await _fileService.PrintFileAsync();
+    private void PrintFile() => _fileService.PrintFileAsync();
 
     /// <summary>Команда завершения работы приложения.</summary>
     [RelayCommand]
-    private async Task ExitApplication() => await _fileService.ExitApplicationAsync();
+    private void ExitApplication() => _fileService.ExitApplicationAsync();
 
     /// <summary>Команда поиска по файлу.</summary>
     [RelayCommand]
@@ -53,6 +53,6 @@ namespace MainWindowProgram.ViewModels
 
     /// <summary>Команда создания нового файла.</summary>
     [RelayCommand]
-    private async Task CreateNewFile() => await _fileService.CreateNewFileAsync();
+    private void CreateNewFile() => _fileService.CreateNewFileAsync();
   }
 }

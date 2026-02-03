@@ -32,7 +32,7 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private async Task RunAsync()
     {
-      await ExecutionConfig.SetStepByStepMode(false);
+      ExecutionConfig.SetStepByStepMode(false);
       await _service.RunAsync();
     }
 
@@ -42,7 +42,7 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private async Task RunStepByStepModeAsync()
     {
-      await ExecutionConfig.SetStepByStepMode(true);
+      ExecutionConfig.SetStepByStepMode(true);
       await _service.RunAsync();
     }
   }

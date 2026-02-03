@@ -362,11 +362,11 @@ namespace UI.Windows.WpfDocking.Windows.Docking
           {
             isControlProgramActive = true;
           }
-          SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+          SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
         }
         else
         {
-          SystemStateManager.SetIsControlProgramActive(false).ConfigureAwait(true);
+          SystemStateManager.SetIsControlProgramActive(false);
         }
       }
     }

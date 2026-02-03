@@ -55,8 +55,8 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task BuildAsync()
     {
-      var editor = await _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
-      var translationContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
+      var translationContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
       if (editor == null && translationContainer != null)
       {
@@ -80,14 +80,14 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      var editor = await _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
-      var container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
-      var runContainer = await _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
+      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
+      var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
       if (container == null && editor != null)
       {
         await BuildAsync();
-        editor = await _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
-        container = await _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+        editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
+        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       }
 
       if (container == null && runContainer == null && editor == null)
@@ -323,7 +323,7 @@ namespace MainWindowProgram.Services
         LogError($"Не удалось запустить трансляцию программы контроля: {ex}.");
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
-        await _multiWindow.OpenFileInEditor(editor.TextEditorModel.FilePath);
+        _multiWindow.OpenFileInEditor(editor.TextEditorModel.FilePath);
       }
     }
   }

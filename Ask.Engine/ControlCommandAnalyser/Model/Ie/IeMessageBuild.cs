@@ -5,9 +5,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ie
 {
   internal class IeMessageBuild : IDislpayInfo
   {
-    public async Task<string> BuildErrorChainStringAsync(ChainModel chain)
+    public string BuildErrorChainStringAsync(ChainModel chain)
     {
-      var chainStr = await PointFormater.GetFormatConnectPoint(chain);
+      var chainStr = PointFormater.GetFormatConnectPoint(chain);
       return chainStr;
     }
   }

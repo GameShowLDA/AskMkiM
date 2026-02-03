@@ -27,50 +27,31 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <summary>
     /// Устанавливает значение отображения машинных адресов точек.
     /// </summary>
-    public static Task SetMachineAddressVisibilityAsync(bool isVisible)
-    {
-      _settingsModel.ShowMachineAddresses = isVisible;
-      return Task.CompletedTask;
-    }
+    public static void SetMachineAddressVisibility(bool isVisible) => _settingsModel.ShowMachineAddresses = isVisible;
 
     /// <summary>
     /// Устанавливает значение отображения информации о подключении точек и шин.
     /// </summary>
-    public static Task SetConnectionInfoVisibilityAsync(bool isVisible)
-    {
-      _settingsModel.ShowConnectionInfo = isVisible;
-      return Task.CompletedTask;
-    }
+    public static void SetConnectionInfoVisibility(bool isVisible) => _settingsModel.ShowConnectionInfo = isVisible;
 
     /// <summary>
     /// Устанавливает значение отображения параметров, которые задаются устройствам
     /// во время выполнения программы контроля.
     /// </summary>
-    public static Task SetExecutionParametersVisibilityAsync(bool isVisible)
-    {
-      _settingsModel.ShowDeviceExecutionParameters = isVisible;
-      return Task.CompletedTask;
-    }
+    public static void SetExecutionParametersVisibility(bool isVisible) => _settingsModel.ShowDeviceExecutionParameters = isVisible;
 
     /// <summary>
     /// Устанавливает значение отображения результатов измерений,
     /// получаемых в процессе выполнения программы контроля.
     /// </summary>
-    public static Task SetMeasurementResultsVisibilityAsync(bool isVisible)
-    {
-      _settingsModel.ShowMeasurementResults = isVisible;
-      return Task.CompletedTask;
-    }
+    public static void SetMeasurementResultsVisibility(bool isVisible) => _settingsModel.ShowMeasurementResults = isVisible;
 
     public static async Task SetDeviceDisplaySettingsModel(DeviceDisplaySettingsModel model)
     {
-      await Task.Run(async () =>
-      {
-        await SetMachineAddressVisibilityAsync(model.ShowMachineAddresses);
-        await SetConnectionInfoVisibilityAsync(model.ShowConnectionInfo);
-        await SetExecutionParametersVisibilityAsync(model.ShowDeviceExecutionParameters);
-        await SetMeasurementResultsVisibilityAsync(model.ShowMeasurementResults);
-      });
+      SetMachineAddressVisibility(model.ShowMachineAddresses);
+      SetConnectionInfoVisibility(model.ShowConnectionInfo);
+      SetExecutionParametersVisibility(model.ShowDeviceExecutionParameters);
+      SetMeasurementResultsVisibility(model.ShowMeasurementResults);
     }
 
     #endregion
@@ -78,39 +59,32 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <summary>
     /// Возвращает признак отображения машинных адресов точек.
     /// </summary>
-    public static Task<bool> GetMachineAddressVisibilityAsync() =>
-        Task.FromResult(_settingsModel.ShowMachineAddresses);
+    public static bool GetMachineAddressVisibility() => _settingsModel.ShowMachineAddresses;
 
     /// <summary>
     /// Возвращает признак отображения сведений о подключении точек и шин.
     /// </summary>
-    public static Task<bool> GetConnectionInfoVisibilityAsync() =>
-        Task.FromResult(_settingsModel.ShowConnectionInfo);
+    public static bool GetConnectionInfoVisibility() => _settingsModel.ShowConnectionInfo;
 
     /// <summary>
     /// Возвращает признак отображения параметров, которые задаются устройствам
     /// во время выполнения программы контроля.
     /// </summary>
-    public static Task<bool> GetExecutionParametersVisibilityAsync() =>
-        Task.FromResult(_settingsModel.ShowDeviceExecutionParameters);
+    public static bool GetExecutionParametersVisibility() => _settingsModel.ShowDeviceExecutionParameters;
 
     /// <summary>
     /// Возвращает признак отображения результатов измерений.
     /// </summary>
-    public static Task<bool> GetMeasurementResultsVisibilityAsync() =>
-        Task.FromResult(_settingsModel.ShowMeasurementResults);
+    public static bool GetMeasurementResultsVisibility() => _settingsModel.ShowMeasurementResults;
 
-    public static async Task<DeviceDisplaySettingsModel> GetDeviceDisplayModel()
+    public static DeviceDisplaySettingsModel GetDeviceDisplayModel()
     {
-      return await Task.Run(() =>
-      {
-        DeviceDisplaySettingsModel protocolModel = new DeviceDisplaySettingsModel();
-        protocolModel.ShowMachineAddresses = _settingsModel.ShowMachineAddresses;
-        protocolModel.ShowConnectionInfo = _settingsModel.ShowConnectionInfo;
-        protocolModel.ShowDeviceExecutionParameters = _settingsModel.ShowDeviceExecutionParameters;
-        protocolModel.ShowMeasurementResults = _settingsModel.ShowMeasurementResults;
-        return protocolModel;
-      });
+      DeviceDisplaySettingsModel protocolModel = new DeviceDisplaySettingsModel();
+      protocolModel.ShowMachineAddresses = _settingsModel.ShowMachineAddresses;
+      protocolModel.ShowConnectionInfo = _settingsModel.ShowConnectionInfo;
+      protocolModel.ShowDeviceExecutionParameters = _settingsModel.ShowDeviceExecutionParameters;
+      protocolModel.ShowMeasurementResults = _settingsModel.ShowMeasurementResults;
+      return protocolModel;
     }
     #endregion
 
@@ -120,12 +94,12 @@ namespace Ask.Core.Services.Config.AppSettings
     /// и вызывает внешний обработчик сохранения.
     /// </summary>
     /// <param name="model">Модель с новыми значениями настроек.</param>
-    public static async Task SaveSettingsAsync(DeviceDisplaySettingsModel model)
+    public static void SaveSettings(DeviceDisplaySettingsModel model)
     {
-      await SetMachineAddressVisibilityAsync(model.ShowMachineAddresses);
-      await SetConnectionInfoVisibilityAsync(model.ShowConnectionInfo);
-      await SetExecutionParametersVisibilityAsync(model.ShowDeviceExecutionParameters);
-      await SetMeasurementResultsVisibilityAsync(model.ShowMeasurementResults);
+      SetMachineAddressVisibility(model.ShowMachineAddresses);
+      SetConnectionInfoVisibility(model.ShowConnectionInfo);
+      SetExecutionParametersVisibility(model.ShowDeviceExecutionParameters);
+      SetMeasurementResultsVisibility(model.ShowMeasurementResults);
 
       DeviceDisplaySettingsSaved?.Invoke(model);
     }

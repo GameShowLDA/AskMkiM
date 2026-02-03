@@ -336,7 +336,7 @@ namespace UI.Components.MultiEditorMethods
         }
       }
 
-      SystemStateManager.SetIsControlProgramActive(isControlProgramActive).ConfigureAwait(true);
+      SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
     }
 
     /// <summary>

@@ -77,7 +77,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             if ((z + 1) == points.PointModels.Count)
             {
-              if (await DeviceDisplayConfig.GetMachineAddressVisibilityAsync())
+              if (DeviceDisplayConfig.GetMachineAddressVisibility())
               {
                 chainsStr += $"{points.PointModels[z].Mnemonic}[{points.PointModels[z].ToString()}]*";
               }
@@ -88,7 +88,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
             else
             {
-              if (await DeviceDisplayConfig.GetMachineAddressVisibilityAsync())
+              if (DeviceDisplayConfig.GetMachineAddressVisibility())
               {
                 chainsStr += $"{points.PointModels[z].Mnemonic}[{points.PointModels[z].ToString()}],";
               }
@@ -112,10 +112,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
 
-            string _baseMachineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"({_basePoint.ToString()})" : string.Empty;
-            string machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"({point.ToString()})" : string.Empty;
+            string _baseMachineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"({_basePoint.ToString()})" : string.Empty;
+            string machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"({point.ToString()})" : string.Empty;
 
-            await context.MessageService.ShowMessageAsync(await ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(_basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
+            await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(_basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
             await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService, false);
 
             var module = EquipmentService.GetModuleByPoint(point);
@@ -123,7 +123,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
             var item = new List<PointModel>() { _basePoint, point };
             var chain = new ChainModel(item);
-            var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
+            var chainStr = context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
 
             if (!result.Result)
             {
@@ -152,7 +152,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         foreach (var item in errorChain.Keys)
         {
           var chain = new ChainModel(item);
-          var chainStr = await context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
+          var chainStr = context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
 
           var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Convert.ToDouble(errorChain.GetValueOrDefault(item)), chainStr);
           error.Status = ShowMessageModel.MessageType.Error;

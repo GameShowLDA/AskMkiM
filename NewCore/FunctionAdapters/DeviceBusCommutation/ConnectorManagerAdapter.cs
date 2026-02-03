@@ -43,7 +43,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.ConnectBreakdownTester();
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение пробойной установки", succes, 1, userMessageService);
         }
@@ -66,7 +66,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var succes = await _connectorManager.DisconnectBreakdownTester();
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение пробойной установки", succes, 1, userMessageService);
         }
@@ -90,7 +90,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.ConnectMultimeter(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
         }
@@ -114,7 +114,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.DisconnectMultimeter(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
         }
@@ -136,7 +136,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.ConnectPINT(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
         }
@@ -159,7 +159,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var succes = await _connectorManager.DisconnectPINT(bus);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
         }
@@ -181,7 +181,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.ConnectAllBuses();
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
         }
@@ -203,7 +203,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
       {
         var succes = await _connectorManager.DisconnectAllBuses();
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
         }

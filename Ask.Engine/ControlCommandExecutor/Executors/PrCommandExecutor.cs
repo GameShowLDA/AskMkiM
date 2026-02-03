@@ -53,7 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
@@ -242,7 +242,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = meter.NumberChassis;
       int number = meter.Number;
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage());
       }
@@ -359,7 +359,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         var result = answer >= firstValue && answer <= secondValue;
 
-        if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+        if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
         {
           await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{answer} Ом", type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
         }
