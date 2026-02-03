@@ -102,7 +102,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       ProcessVoltageLimits(model, unitVoltage, lower, higher, defaultHigher, defaultLower);
 
       model.Voltage = defaultHigher;
-      model.VoltageSource = $"{defaultHigher} {commandInfo.Unit}";
+      model.VoltageSource = $"{defaultHigher}{commandInfo.Unit}";
+      model.VoltageUnit = commandInfo.Unit;
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
