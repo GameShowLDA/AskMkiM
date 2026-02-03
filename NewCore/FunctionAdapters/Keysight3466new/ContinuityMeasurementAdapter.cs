@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
@@ -47,13 +48,15 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         throw ContinuityExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
       }
 
+      _device.TypeMode = MultimeterTypeMode.Continuity;
+
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -74,7 +77,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
     public async Task<double> CheckContinuityAsync(double expectedOutcome, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return expectedOutcome;
       }

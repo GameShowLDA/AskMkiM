@@ -155,7 +155,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 Rx = Rt;
               }
 
-              var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? Rx : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? (LowerBound + UpperBound) / 2 : Rx;
+              var result = !ExecutionConfig.GetIsIdleModeEnabled() ? Rx : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? (LowerBound + UpperBound) / 2 : Rx;
 
               result -= context.CabelResistance;
 
@@ -209,7 +209,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(userMessageService);
       await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-      var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ContinuityManager.CheckContinuityAsync(param) : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
+      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ContinuityManager.CheckContinuityAsync(param) : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
       return result;
     }
 

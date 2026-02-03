@@ -1,8 +1,11 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
@@ -14,8 +17,8 @@ namespace NewCore.Function.ModuleRelayControl
   /// </summary>
   public class PointManager : IPointManager
   {
-    private Dictionary<int, bool> IsConnectedPointBusA = new Dictionary<int, bool>();
-    private Dictionary<int, bool> IsConnectedPointBusB = new Dictionary<int, bool>();
+    private ObservableDictionary<int, bool> IsConnectedPointBusA = new ObservableDictionary<int, bool>();
+    private ObservableDictionary<int, bool> IsConnectedPointBusB = new ObservableDictionary<int, bool>();
 
     /// <summary>
     /// Экземпляр интерфейса модуля реле.
@@ -59,7 +62,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
         {
@@ -116,7 +119,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
         {
@@ -169,7 +172,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
         return true;
 
       DeviceCommand cmd = new DeviceCommand
@@ -217,7 +220,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
         return true;
 
       DeviceCommand cmd = new DeviceCommand
@@ -263,7 +266,7 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Строка с ответом от устройства.</returns>
     public async Task<string> CheckPoint(int numberPoint, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return "Включен холостой режим.";
       }
@@ -281,7 +284,7 @@ namespace NewCore.Function.ModuleRelayControl
         return true;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
         {
@@ -363,5 +366,25 @@ namespace NewCore.Function.ModuleRelayControl
 
       return false;
     }
+
+    public IReadOnlyList<PointConnectionInfo> GetConnectedPoints()
+    {
+      var result = new List<PointConnectionInfo>();
+
+      foreach (var kvp in IsConnectedPointBusA)
+      {
+        if (kvp.Value)
+          result.Add(new PointConnectionInfo(kvp.Key, BusPoint.A));
+      }
+
+      foreach (var kvp in IsConnectedPointBusB)
+      {
+        if (kvp.Value)
+          result.Add(new PointConnectionInfo(kvp.Key, BusPoint.B));
+      }
+
+      return result;
+    }
+
   }
 }

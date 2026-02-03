@@ -29,7 +29,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = context.Command as KscCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
 
-      if (!await ExecutionConfig.GetIsIdleModeEnabled())
+      if (!ExecutionConfig.GetIsIdleModeEnabled())
       {
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       }
@@ -64,7 +64,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       protocolModel.Executor = executor;
       protocolModel.Agent = agent;
       protocolModel.Customer = customer;
-      protocolModel.Mode = await ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
+      protocolModel.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
       // TODO: формирование протокола с ошибкой
       //ProtocolModel.GetPathProtocol(protocolModel); 
       FileInteractionEventAdapter.RaiseViewProtocol(protocolModel);

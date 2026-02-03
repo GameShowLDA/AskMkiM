@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
 using static Ask.LogLib.LoggerUtility;
@@ -14,16 +15,18 @@ namespace NewCore.Function.GPT.Managment
   {
     private readonly GPT79904 _gptModel;
     private readonly int _delay;
-    private readonly Func<Task<bool>> _getIsIdleMode;
+    private readonly Func<bool> _getIsIdleMode;
     private readonly Func<double> _getHighLimitConfig;
     private readonly Action<double> _setHighLimitConfig;
     private readonly Func<double> _getLowLimitConfig;
     private readonly Action<double> _setLowLimitConfig;
+    private double _highLimit;
+    private double _lowLimit;
 
     public ResistanceLimitsManagment(
       GPT79904 gptModel,
       int delay,
-      Func<Task<bool>> getIsIdleMode,
+      Func<bool> getIsIdleMode,
       Func<double> getHighLimitConfig,
       Action<double> setHighLimitConfig,
       Func<double> getLowLimitConfig,
@@ -41,8 +44,11 @@ namespace NewCore.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetHighResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await _getIsIdleMode())
+      if (_getIsIdleMode())
+      {
+        _highLimit = value;
         return (true, string.Empty);
+      }
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} {value:F3}".Replace(',', '.');
 
@@ -54,6 +60,7 @@ namespace NewCore.Function.GPT.Managment
         if (Math.Abs(actual - value) < 0.1)
         {
           _setHighLimitConfig(value);
+          _highLimit = value;
           return (true, string.Empty);
         }
 
@@ -66,6 +73,10 @@ namespace NewCore.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<double> GetHighResistanceLimitAsync()
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _highLimit;
+      }
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?", timeout: 1000);
       return ParseDouble(response, "G");
     }
@@ -73,10 +84,13 @@ namespace NewCore.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetLowResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      if (await _getIsIdleMode())
+      if (_getIsIdleMode())
+      { 
+        _lowLimit = value;
         return (true, string.Empty);
+      }
 
-      if (value == 1000) value = 999; // спец. случай
+      if (value == 1000) value = 999;
 
       string command = $"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} {value:F0}M";
 
@@ -89,6 +103,7 @@ namespace NewCore.Function.GPT.Managment
         if (Math.Abs(actual - value) < 0.5)
         {
           _setLowLimitConfig(value);
+          _lowLimit = value;
           return (true, string.Empty);
         }
 
@@ -101,6 +116,10 @@ namespace NewCore.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<double> GetLowResistanceLimitAsync()
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _lowLimit;
+      }
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?", timeout: 1000);
       return ParseDouble(response, "M");
     }

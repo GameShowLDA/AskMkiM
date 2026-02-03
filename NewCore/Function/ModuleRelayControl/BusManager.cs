@@ -1,8 +1,11 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
@@ -20,7 +23,23 @@ namespace NewCore.Function.ModuleRelayControl
     /// Создаёт новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="moduleRelayControl">Экземпляр интерфейса модуля реле.</param>
-    public BusManager(IRelaySwitchModule moduleRelayControl) => _moduleRelayControl = moduleRelayControl;
+    public BusManager(IRelaySwitchModule moduleRelayControl)
+    {
+      _moduleRelayControl = moduleRelayControl;
+      _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
+      ConnectableManager_IsReset();
+    }
+
+    private readonly ObservableDictionary<SwitchingBus, bool> switchingBuses = new ObservableDictionary<SwitchingBus, bool>();
+
+    private void ConnectableManager_IsReset()
+    {
+      switchingBuses.Clear();
+      foreach (SwitchingBus item in System.Enum.GetValues(typeof(SwitchingBus)))
+      {
+        switchingBuses.Add(item, false);
+      }
+    }
 
     /// <summary>
     /// Подключить шину МКР.
@@ -30,18 +49,25 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Результат замыкания шины.</returns>
     public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
+      switchingBuses.TryGetValue(bus, out bool connected);
+      if (connected)
+      {
+        return true;
+      }
+
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
         LogError("Ошибка данных шины!", isDeviceLog: true);
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        switchingBuses[bus] = true;
         return true;
       }
 
-      int typeVoltage =  numberBus;
+      int typeVoltage = numberBus;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
       string commandText = cmd.ToString();
 
@@ -54,6 +80,7 @@ namespace NewCore.Function.ModuleRelayControl
 
         if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
         {
+          switchingBuses[bus] = true;
           return true;
         }
 
@@ -73,14 +100,19 @@ namespace NewCore.Function.ModuleRelayControl
     /// <returns>Результат замыкания шины.</returns>
     public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
+      switchingBuses.TryGetValue(bus, out bool connected);
+      if (!connected)
+        return true;
+
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
         LogError("Ошибка данных шины!", isDeviceLog: true);
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        switchingBuses[bus] = false;
         return true;
       }
 
@@ -97,6 +129,7 @@ namespace NewCore.Function.ModuleRelayControl
 
         if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}.2")
         {
+          switchingBuses[bus] = false;
           return true;
         }
 
@@ -156,5 +189,12 @@ namespace NewCore.Function.ModuleRelayControl
       return busType != -1;
     }
 
+    public IReadOnlyList<BusConnectionInfo> GetConnectedBuses()
+    {
+      return switchingBuses
+        .Where(kv => kv.Value)
+        .Select(kv => new BusConnectionInfo(kv.Key, true))
+        .ToList();
+    }
   }
 }

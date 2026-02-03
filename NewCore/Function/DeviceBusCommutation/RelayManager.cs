@@ -34,7 +34,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -57,7 +57,7 @@ namespace NewCore.Function.DeviceBusCommutation
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

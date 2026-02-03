@@ -23,10 +23,6 @@
 		<GenerateApplicationDefinition>false</GenerateApplicationDefinition>
 	</PropertyGroup>
 
-	<Target Name="CreateEmptyFolder" AfterTargets="Build">
-		<MakeDir Directories="D:\AskMkiM\Тесты ПК" />
-	</Target>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<WarningLevel>9999</WarningLevel>
 	</PropertyGroup>
@@ -77,6 +73,17 @@
 		<Move SourceFiles="@(PublishFiles)" DestinationFolder="C:\AskMkiM\Bin\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
 		<RemoveDir Directories="$(PublishDir)" />
+	</Target>
+
+	<Target Name="CopyTestsNextToBin" AfterTargets="Build">
+		<ItemGroup>
+			<TestFiles Include="Тесты ПК\**\*" />
+		</ItemGroup>
+
+		<Copy
+		  SourceFiles="@(TestFiles)"
+		  DestinationFiles="@(TestFiles->'$(OutputPath)..\Тесты ПК\%(RecursiveDir)%(Filename)%(Extension)')"
+		  SkipUnchangedFiles="true" />
 	</Target>
 
 

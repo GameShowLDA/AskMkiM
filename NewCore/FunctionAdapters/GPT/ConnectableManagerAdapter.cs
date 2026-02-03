@@ -26,7 +26,7 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -53,7 +53,7 @@ namespace NewCore.FunctionAdapters.GPT
 
     public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -100,6 +100,11 @@ namespace NewCore.FunctionAdapters.GPT
 
       IsReset?.Invoke();
       return result;
+    }
+
+    public string GetConnectionStatus()
+    {
+      return _manager.GetConnectionStatus();
     }
   }
 }

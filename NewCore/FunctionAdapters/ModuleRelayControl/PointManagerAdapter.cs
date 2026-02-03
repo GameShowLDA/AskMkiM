@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -151,7 +152,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     {
       var description = $"{nubmerPoint} к шине [{bus}]";
 
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
 
@@ -174,5 +175,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       return result;
     }
+
+    public IReadOnlyList<PointConnectionInfo> GetConnectedPoints() => _pointManager.GetConnectedPoints();
   }
 }

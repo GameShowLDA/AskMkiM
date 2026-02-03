@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using System.Text;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -39,6 +40,24 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
       return await ResetAsync(userMessageService);
+    }
+
+    public string GetConnectionStatus()
+    {
+      var devices = _deviceBusCommutation.ConnectorManager.GetConnectedDevices();
+
+      if (devices.Count() == 0)
+        return "Подключенные устройства:\n  Нет подключённых устройств.";
+
+      var sb = new StringBuilder();
+      sb.AppendLine("Подключенные устройства:");
+
+      foreach (var d in devices)
+      {
+        sb.AppendLine($"  {d.device} — {d.bus}");
+      }
+
+      return sb.ToString();
     }
 
     /// <inheritdoc />

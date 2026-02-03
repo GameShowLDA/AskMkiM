@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
+using System.Text;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
@@ -39,6 +40,33 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
       return await ResetAsync(messageService);
+    }
+
+    /// <inheritdoc />
+    public string GetConnectionStatus()
+    {
+      var buses = _moduleRelayControl.BusManager.GetConnectedBuses();
+      var points = _moduleRelayControl.PointManager.GetConnectedPoints();
+
+      var sb = new StringBuilder();
+
+      sb.AppendLine("Подключенные шины:");
+      if (buses.Count == 0)
+        sb.AppendLine("  Нет подключённых шин.");
+      else
+        foreach (var b in buses)
+          sb.AppendLine($"  {b.Bus}");
+
+      sb.AppendLine();
+      sb.AppendLine("Подключенные точки:");
+
+      if (points.Count == 0)
+        sb.AppendLine("  Нет подключённых точек.");
+      else
+        foreach (var p in points)
+          sb.AppendLine($"  Точка {p.PointNumber} = {p.Bus}");
+
+      return sb.ToString();
     }
 
     /// <inheritdoc />

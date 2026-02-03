@@ -90,7 +90,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Проверяет, активен ли холостой режим.
     /// </summary>
     /// <returns>true, если включен; false, если выключен.</returns>
-    public static Task<bool> GetIsIdleModeEnabled() => Task.FromResult(SettingsExecutionModel?.IdleModeExecution ?? false);
+    public static bool GetIsIdleModeEnabled() => SettingsExecutionModel?.IdleModeExecution ?? false;
 
     /// <summary>
     /// Проверяет, установлен ли флаг остановки при ошибке.

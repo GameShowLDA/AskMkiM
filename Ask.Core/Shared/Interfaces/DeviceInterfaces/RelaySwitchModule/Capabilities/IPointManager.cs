@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities
@@ -63,5 +64,12 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabili
     /// <param name="userMessageService">Сервис для отображения сообщений пользователю (необязательный).</param>
     /// <returns>Асинхронная операция завершения отключения всех точек.</returns>
     Task<bool> DisconnectingAllPoint(IUserInteractionService? userMessageService = null);
+
+    /// <summary>
+    /// Возвращает список всех точек, которые подключены к шинам.
+    /// Возвращаются только точки, имеющие состояние "подключено".
+    /// </summary>
+    /// <returns>Список подключённых точек с указанием соответствующей шины.</returns>
+    IReadOnlyList<PointConnectionInfo> GetConnectedPoints();
   }
 }

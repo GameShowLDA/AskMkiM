@@ -17,7 +17,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
@@ -80,7 +80,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(GetHighCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;
@@ -114,7 +114,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
@@ -170,7 +170,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(GetLowCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;

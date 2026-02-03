@@ -38,7 +38,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, "Холостой режим");
       }
@@ -58,7 +58,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -102,7 +102,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -132,6 +132,34 @@ namespace NewCore.Function.Keysight3466new
     public Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
       return Task.FromResult(true);
+    }
+
+    public string GetConnectionStatus()
+    {
+      var mode = "Режим: ";
+      switch (_device.TypeMode)
+      {
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.None:
+          mode += "Не задан";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.AcVoltage:
+          mode += "Измерение переменного напряжения";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.DcVoltage:
+          mode += "Измерение постоянного напряжения";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Capacitance:
+          mode += "Измерение ёмкости.";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Continuity:
+          mode += "Прозвонка.";
+          break;
+        case Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterTypeMode.Resistance:
+          mode += "Измерение электрического сопротивления.";
+          break;
+      }
+
+      return mode;
     }
   }
 }

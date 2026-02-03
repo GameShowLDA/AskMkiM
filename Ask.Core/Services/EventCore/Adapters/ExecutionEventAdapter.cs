@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 
 namespace Ask.Core.Services.EventCore.Adapters
@@ -28,6 +29,12 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// </example>
     public static void RaiseStepByStepModeChanged(bool isEnabled)
       => EventAggregator.Publish(new ExecutionEvents.StepByStepModeChanged(isEnabled));
+
+    public static void RaiseDevicesChanged(List<IAttachableDevice> devices)
+      => EventAggregator.Publish(new ExecutionEvents.ActiveDeviceChanged(devices));
+
+    public static void RaiseDeviceStatusUpdate()
+      => EventAggregator.Publish(new ExecutionEvents.DeviceStatusUpdate());
 
     /// <summary>
     /// Адаптер для публикации событий управления выполнением.

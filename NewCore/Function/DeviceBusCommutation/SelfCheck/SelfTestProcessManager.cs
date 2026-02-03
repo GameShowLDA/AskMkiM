@@ -283,7 +283,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -301,7 +301,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

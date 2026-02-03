@@ -82,7 +82,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(resistance, messageService);
         double result = resistance;
 
-        if (!await ExecutionConfig.GetIsIdleModeEnabled())
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
           result = voltage / currentAmps;
         }

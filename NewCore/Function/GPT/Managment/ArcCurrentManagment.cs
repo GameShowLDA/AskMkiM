@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
@@ -17,6 +18,7 @@ namespace NewCore.Function.GPT.Managment
     private readonly int _delay;
     private readonly Func<double> _getArcCurrent;
     private readonly Action<double> _setArcCurrent;
+    private double _arcCurrent;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="ArcCurrentManagment"/>.
@@ -46,11 +48,18 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<(bool Success, string Message)> SetArcCurrentAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      return await CongifHelper.SetParameterAsync(
+      var result = await CongifHelper.SetParameterAsync(
           getter: async () => _getArcCurrent(),
           setter: async () => await ArcCurrentHelper.SetArcCurrentAsync(_gptModel, _mode, value, _delay),
           updateConfig: v => _setArcCurrent(v),
           newValue: value);
+
+      if (result.Success)
+      { 
+        _arcCurrent = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
@@ -59,6 +68,11 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<double> GetArcCurrentAsync()
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _arcCurrent;
+      }
+
       return await ArcCurrentHelper.GetArcCurrentAsync(_gptModel, _mode, _delay);
     }
   }

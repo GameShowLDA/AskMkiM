@@ -27,7 +27,7 @@ namespace NewCore.Function.GPT.Helper
         return (false, $"Максимальное напряжение для {breakDown.Name} = {breakDown.PiMaxVoltage}");
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         LogInformation($"{nameof(SetVoltageAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
         return (true, string.Empty);
@@ -92,7 +92,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(GetVoltageAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;

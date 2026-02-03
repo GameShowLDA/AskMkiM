@@ -30,7 +30,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> ConnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -49,7 +49,7 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

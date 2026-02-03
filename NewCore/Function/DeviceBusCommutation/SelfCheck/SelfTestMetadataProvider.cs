@@ -57,7 +57,7 @@ namespace NewCore.Function.DeviceBusCommutation.SelfCheck
     /// <inheritdoc />
     static public async Task<int> GetRelayCountAsync(Device.DeviceBusCommutation _deviceBusCommutation, SwitchingDeviceTypeConnector testType, int busContact)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return 0;
       }

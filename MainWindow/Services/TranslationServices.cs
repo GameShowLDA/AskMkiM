@@ -7,6 +7,8 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.IO;
 using System.Windows;
+using UI.Components.Invoke;
+using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -154,6 +156,7 @@ namespace MainWindowProgram.Services
       }
     }
 
+    // TODO: вот тут нужно для LeftBox попробовать контент задавать нужный
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;

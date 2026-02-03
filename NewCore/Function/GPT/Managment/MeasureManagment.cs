@@ -18,7 +18,7 @@ namespace NewCore.Function.GPT.Managment
     private readonly int _delayBeforeCall;
     private readonly Func<Task<double>> _getTestTime;
     private readonly Func<Task<double>> _getRampTime;
-    private readonly Func<Task<bool>> _getIsIdleMode;
+    private readonly bool _getIsIdleMode;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="MeasureManagment"/>.
@@ -33,7 +33,7 @@ namespace NewCore.Function.GPT.Managment
       int delayBeforeCall,
       Func<Task<double>> getTestTime,
       Func<Task<double>> getRampTime,
-      Func<Task<bool>> getIsIdleMode)
+      bool getIsIdleMode)
     {
       _gptModel = gptModel;
       _delayBeforeCall = delayBeforeCall;
@@ -72,7 +72,7 @@ namespace NewCore.Function.GPT.Managment
       LogInformation($"Начало {nameof(ApplyVoltageAsync)}", isDeviceLog: true);
       try
       {
-        if (await _getIsIdleMode())
+        if (_getIsIdleMode)
         {
           LogInformation($"{nameof(ApplyVoltageAsync)}: Устройство в Idle Mode. Пропускаем применение напряжения.", isDeviceLog: true);
           return;

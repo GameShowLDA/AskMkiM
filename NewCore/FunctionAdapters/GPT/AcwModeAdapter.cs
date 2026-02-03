@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -72,6 +73,10 @@ namespace NewCore.FunctionAdapters.GPT
     /// </summary>
     public IConfigurationProvider<AcwConfiguration> Config { get; set; }
 
+    public BreakdownTypeMode ModeType => _acwMode.ModeType;
+
+    private AcwConfiguration _config = new AcwConfiguration();
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcwModeAdapter"/>,
     /// создавая все подадаптеры, обеспечивающие доступ к функциональности режима ACW
@@ -104,8 +109,8 @@ namespace NewCore.FunctionAdapters.GPT
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _acwMode = new AcwMode(device);
 
-      Voltage = new VoltageAdapterMode(_acwMode, _device);
       Mode = new AcwAdapterMode(_acwMode, _device);
+      Voltage = new VoltageAdapterMode(_acwMode, _device);
       CurrentLimits = new CurrentLimitsAdapterMode(_acwMode, _device);
       Time = new TimeAdapterMode(_acwMode, _device);
       Offset = new OffsetAdapterMode(_acwMode, _device);
@@ -915,6 +920,8 @@ namespace NewCore.FunctionAdapters.GPT
         _acwMode = acwMode;
         _device = device;
       }
+
+      public Task<string> GetConfigurationAsTextAsync() => _acwMode.Config.GetConfigurationAsTextAsync();
 
       /// <summary>
       /// Асинхронно считывает текущую конфигурацию режима ACW с устройства GPT-79904.

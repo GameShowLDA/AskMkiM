@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
@@ -16,6 +17,7 @@ namespace NewCore.Function.GPT.Managment
     private readonly int _delay;
     private readonly Func<double> _getConfigVoltage;
     private readonly Action<double> _setConfigVoltage;
+    private double voltage;
 
     /// <summary>
     /// Создает новый экземпляр класса <see cref="VoltageManagment"/>.
@@ -44,17 +46,31 @@ namespace NewCore.Function.GPT.Managment
     {
       double kvValue = value / 1000;
 
-      return await CongifHelper.SetParameterAsync(
+      var result = await CongifHelper.SetParameterAsync(
         getter: async () => _getConfigVoltage(),
         setter: async () => await VoltageHelper.SetVoltageAsync(_gptModel, _mode, value, kvValue, _delay),
         updateConfig: v => _setConfigVoltage(v),
         newValue: kvValue);
+
+      if (result.Success)
+      {
+        voltage = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
     public async Task<double> GetVoltageAsync()
     {
-      return await VoltageHelper.GetVoltageAsync(_gptModel, _mode, _delay);
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return voltage;
+      }
+      else
+      {
+        return await VoltageHelper.GetVoltageAsync(_gptModel, _mode, _delay);
+      }
     }
   }
 }

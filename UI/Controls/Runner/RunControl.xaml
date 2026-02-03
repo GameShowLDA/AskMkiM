@@ -8,23 +8,58 @@
              xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
              xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
              xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
+             xmlns:MultiWindow="clr-namespace:UI.Components"
              xmlns:Icons="clr-namespace:UI.Icon"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition x:Name="BottomRow" Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="50*"/>
+        </Grid.ColumnDefinitions>
 
         <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition x:Name="BottomRow" Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="75*"/>
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="40*"/>
-            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid x:Name="RightBox" Grid.Column="0" >
+                    <ContentControl  x:Name="MainContent"/>
+                </Grid>
+            </Grid>
 
+            <GridSplitter  Grid.Row="1" 
+              Height="5"
+              Background="{StaticResource RedColorSolidColorBrush}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              ResizeDirection="Rows"
+              DragStarted="BottomSplitter_OnDragStarted"
+              DragCompleted="BottomSplitter_OnDragCompleted" Cursor="SizeNS"/>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <ErrorList:ErrorListControl  
+                x:Name="ErrorListBoxVertical" 
+                MinHeight="60"
+                StringsNumberVisible="Visible" 
+                MeasureResultVisible="Visible" 
+                Grid.ColumnSpan="3"
+                SizeChanged="ErrorListBoxVertical_OnSizeChanged"/>
+            </Grid>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Background="{StaticResource RedColorSolidColorBrush}" 
+        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+
+        <Grid Grid.Column="2">
             <Grid Grid.Column="2" x:Name="TranstatedFile">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -32,8 +67,7 @@
                 </Grid.RowDefinitions>
 
                 <Grid x:Name="TopPanel" Height="20">
-                    <Grid x:Name="StartButtonTop" Grid.Column="1" Background="{StaticResource IsCheckedColorSolidColorBrush}" 
-                          Cursor="Hand">
+                    <Grid x:Name="StartButtonTop" Grid.Column="1" Background="{StaticResource IsCheckedColorSolidColorBrush}" Cursor="Hand">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto"/>
@@ -41,12 +75,12 @@
                         </Grid.ColumnDefinitions>
 
                         <Icons:ArrowButton x:Name="BackToFileButton"
-                                           ButtonBackground="Transparent" 
-                                           Cursor="Hand" Height="15" Width="15" 
-                                           RenderTransformOrigin="0.5,0.5" Click="ArrowButton_Click" 
-                                           Margin="5,0" 
-                                           ButtonBorder="Transparent" ArrowBrush="{StaticResource ForegroundSolidColorBrush}"
-                                           ArrowHoverBrush="{StaticResource ActiveForegroundSolidColorBrush}">
+                               ButtonBackground="Transparent" 
+                               Cursor="Hand" Height="15" Width="15" 
+                               RenderTransformOrigin="0.5,0.5" Click="ArrowButton_Click" 
+                               Margin="5,0" 
+                               ButtonBorder="Transparent" ArrowBrush="{StaticResource ForegroundSolidColorBrush}"
+                               ArrowHoverBrush="{StaticResource ActiveForegroundSolidColorBrush}">
                             <Icons:ArrowButton.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -57,50 +91,16 @@
                             </Icons:ArrowButton.RenderTransform>
                         </Icons:ArrowButton>
                         <TextBlock Name="headerFile" 
-               Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+   Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
 
                     </Grid>
                 </Grid>
 
                 <Grid x:Name="LeftBox" Grid.Row="1">
-                    <Controls:TextEditorUI/>
+                    <Controls:TextEditorContainer x:Name="ChildTextEditorContainer"/>
                 </Grid>
             </Grid>
-
-            <GridSplitter Grid.Column="1" Background="{StaticResource RedColorSolidColorBrush}" 
-                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
-
-
-            <Grid x:Name="RightBox" Grid.Column="0" >
-                <ContentControl  x:Name="MainContent"/>
-            </Grid>
         </Grid>
-
-        <GridSplitter  Grid.Row="1" 
-              Height="5"
-              Background="{StaticResource RedColorSolidColorBrush}"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch"
-              ResizeDirection="Rows"
-              DragStarted="BottomSplitter_OnDragStarted"
-              DragCompleted="BottomSplitter_OnDragCompleted" Cursor="SizeNS"/>
-
-
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
-            <ErrorList:ErrorListControl  
-                x:Name="ErrorListBoxVertical" 
-                MinHeight="60"
-                StringsNumberVisible="Visible" 
-                MeasureResultVisible="Visible" 
-                Grid.ColumnSpan="3"
-                SizeChanged="ErrorListBoxVertical_OnSizeChanged"/>
-        </Grid>
-
     </Grid>
 
 </UserControl>

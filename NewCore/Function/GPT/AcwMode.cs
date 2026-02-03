@@ -64,6 +64,8 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public IConfigurationProvider<AcwConfiguration> Config { get; set; }
 
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.ACW;
+
     /// <summary>
     /// Создает новый экземпляр класса <see cref="AcwMode"/>.
     /// </summary>
@@ -78,7 +80,7 @@ namespace NewCore.Function.GPT
       Offset = new OffsetManagment(_gptModel, BreakdownTypeMode.ACW, delay, getOffset: () => _config.Offset, setOffset: v => _config.Offset = v);
       ArcCurrent = new ArcCurrentManagment(_gptModel, BreakdownTypeMode.ACW, delay, getArcCurrent: () => _config.ArcCurrent, setArcCurrent: v => _config.ArcCurrent = v);
       FrequencyConfigurable = new FrequencyManagment(_gptModel, BreakdownTypeMode.ACW, delay, getFrequency: () => _config.Frequency, setFrequency: v => _config.Frequency = v);
-      Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: async () => await ExecutionConfig.GetIsIdleModeEnabled());
+      Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: ExecutionConfig.GetIsIdleModeEnabled());
       Config = new AcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent, FrequencyConfigurable);
       Mode = new ModeManagment(_gptModel, BreakdownTypeMode.ACW, delay, async () => _config = await Config.ReadConfigurationAsync());
     }

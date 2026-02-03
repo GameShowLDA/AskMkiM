@@ -50,7 +50,7 @@ public class ConnectableManager : IConnectable
   public async Task<bool> DisconnectAsync(IUserInteractionService _ = null)
   {
     _gptModel.Mode = BreakdownTypeMode.None;
-    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return true;
     }
@@ -170,7 +170,7 @@ public class ConnectableManager : IConnectable
   /// </summary>
   public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
   {
-    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return (true, string.Empty);
     }
@@ -216,14 +216,12 @@ public class ConnectableManager : IConnectable
     }
   }
 
-
-
   /// <summary>
   /// Асинхронно выполняет сброс устройства GPT79904 (*RST, *CLS).
   /// </summary>
   public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
   {
-    if (await ExecutionConfig.GetIsIdleModeEnabled())
+    if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return true;
     }
@@ -270,5 +268,28 @@ public class ConnectableManager : IConnectable
     }
 
     return (isValid, msg);
+  }
+
+  public string GetConnectionStatus()
+  {
+    return GetConnectionStatusAsync().GetAwaiter().GetResult();
+  }
+
+  private async Task<string> GetConnectionStatusAsync()
+  {
+    switch (_gptModel.Mode)
+    {
+      case BreakdownTypeMode.ACW:
+        return _gptModel.AcwManger.Config.GetConfigurationAsTextAsync().Result;
+
+      case BreakdownTypeMode.DCW:
+        return _gptModel.DcwManger.Config.GetConfigurationAsTextAsync().Result;
+
+      case BreakdownTypeMode.IR:
+        return _gptModel.IrManger.Config.GetConfigurationAsTextAsync().Result;
+
+      default:
+        return "Режим не определён";
+    }
   }
 }

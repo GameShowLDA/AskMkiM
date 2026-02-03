@@ -26,7 +26,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, "Включен холостой режим");
       }
@@ -69,7 +69,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -92,6 +92,11 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
     {
       await _moduleVoltageCurrentSource.DeviceProtocol.OperationLock.WaitAsync();
       return await ResetAsync();
+    }
+
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
     }
   }
 }
