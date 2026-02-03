@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.EventInterfaces;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.EventInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 
 
@@ -38,6 +39,16 @@ namespace Ask.Core.Services.EventCore.Events
         IsEnabled = isEnabled;
       }
     }
+
+    public class ActiveDeviceChanged : IEvent
+    {
+      public List<IAttachableDevice> Devices { get; }
+      public ActiveDeviceChanged(List<IAttachableDevice> devices)
+      {
+        Devices = devices;
+      }
+    }
+    public class DeviceStatusUpdate : IEvent { }
 
     /// <summary>
     /// Событие нажатия кнопки управления выполнением.
