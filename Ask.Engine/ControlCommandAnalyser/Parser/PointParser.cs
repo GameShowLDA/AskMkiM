@@ -463,24 +463,27 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
 
-    public static List<string> ParseBusList(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
+    public static List<SwitchingBus> ParseBusList(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
     {
       var errors = new List<ErrorItem>();
-      var buses = new List<string>();
+      var buses = new List<SwitchingBus>();
 
-      // Убираем пробелы/табы/переводы строк
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
       if (string.IsNullOrEmpty(expr))
         return null;
 
-      // 1. Шины разделяются '*'
       var busSegments = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
 
       foreach (var busSeg in busSegments)
       {
-        // 2. Формат: ШИНА:ТОЧКИ
         var parts = busSeg.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        buses.AddRange(parts);
+        foreach (var item in parts)
+        {
+          if (BusConverter.TryParseSwitchingBus(item, out SwitchingBus bus))
+          {
+            buses.Add(bus);
+          }
+        }
       }
       return buses;
     }

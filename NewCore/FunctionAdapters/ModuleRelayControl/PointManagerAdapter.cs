@@ -140,6 +140,47 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
 
+    public async Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null)
+    {
+      var description = $"всех точек от шины А";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _pointManager.DisconnectingAllPointFromBusA(userMessageService);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw RelayExceptionFactory.DisconnectRangeFailed(description);
+
+      return result;
+    }
+
+    public async Task<bool> DisconnectingAllPointFromBusB(IUserInteractionService? userMessageService = null)
+    {
+      var description = $"всех точек от шины В";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _pointManager.DisconnectingAllPointFromBusB(userMessageService);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw RelayExceptionFactory.DisconnectRangeFailed(description);
+
+      return result;
+    }
+
+
     /// <inheritdoc />
     public async Task<string> CheckPoint(int numberPoint, IUserInteractionService? userMessageService = null)
     {
