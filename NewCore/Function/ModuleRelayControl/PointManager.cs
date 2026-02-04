@@ -33,7 +33,6 @@ namespace NewCore.Function.ModuleRelayControl
     {
       _moduleRelayControl = moduleRelayControl;
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
-      ConnectableManager_IsReset();
     }
 
     private void ConnectableManager_IsReset()
@@ -345,6 +344,40 @@ namespace NewCore.Function.ModuleRelayControl
       return success;
     }
 
+    public async Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null)
+    {
+      bool success = true;
+
+      foreach (var kv in IsConnectedPointBusA.ToList())
+      {
+        if (kv.Value)
+        {
+          var result = await DisconnectRelayAsync(BusPoint.A, kv.Key, userMessageService);
+          if (!result)
+            success = false;
+        }
+      }
+
+      return success;
+    }
+
+    public async Task<bool> DisconnectingAllPointFromBusB(IUserInteractionService? userMessageService = null)
+    {
+      bool success = true;
+
+      foreach (var kv in IsConnectedPointBusB.ToList())
+      {
+        if (kv.Value)
+        {
+          var result = await DisconnectRelayAsync(BusPoint.B, kv.Key, userMessageService);
+          if (!result)
+            success = false;
+        }
+      }
+
+      return success;
+    }
+
     private bool CheckPointConnected(int number, BusPoint busPoint, bool connect)
     {
       if (busPoint == BusPoint.A)
@@ -385,6 +418,5 @@ namespace NewCore.Function.ModuleRelayControl
 
       return result;
     }
-
   }
 }

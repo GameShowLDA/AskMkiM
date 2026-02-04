@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
@@ -10,7 +11,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public List<string> BusList { get; set; } = new();
+    public List<SwitchingBus> BusList { get; set; } = new();
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

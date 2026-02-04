@@ -94,7 +94,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ck
         }
         else
         {
-          model.BusList = Enum.GetNames(typeof(SwitchingBus)).ToList();
+          model.BusList = Enum.GetValues<SwitchingBus>().Where(x => !x.ToString().StartsWith("AB")).ToList();
         }
 
         int idxStarInFirstLine = remainder.IndexOf('*');
@@ -112,7 +112,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ck
       }
       else
       {
-        model.BusList = Enum.GetNames(typeof(SwitchingBus)).ToList();
+        model.BusList = Enum.GetValues<SwitchingBus>().Where(x => !x.ToString().StartsWith("AB")).ToList();
       }
 
       if (!string.IsNullOrEmpty(remainder))

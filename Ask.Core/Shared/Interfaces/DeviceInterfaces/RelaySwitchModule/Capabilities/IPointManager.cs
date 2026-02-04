@@ -66,6 +66,20 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabili
     Task<bool> DisconnectingAllPoint(IUserInteractionService? userMessageService = null);
 
     /// <summary>
+    /// Отключает все точки от шины A.
+    /// </summary>
+    /// <param name="userMessageService">Сервис для отображения сообщений пользователю (необязательный).</param>
+    /// <returns>Асинхронная операция завершения отключения всех точек от шины A.</returns>
+    Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null);
+
+    /// <summary>
+    /// Отключает все точки от шины B.
+    /// </summary>
+    /// <param name="userMessageService">Сервис для отображения сообщений пользователю (необязательный).</param>
+    /// <returns>Асинхронная операция завершения отключения всех точек от шины B.</returns>
+    Task<bool> DisconnectingAllPointFromBusB(IUserInteractionService? userMessageService = null);
+
+    /// <summary>
     /// Возвращает список всех точек, которые подключены к шинам.
     /// Возвращаются только точки, имеющие состояние "подключено".
     /// </summary>
