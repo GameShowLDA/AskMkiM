@@ -129,6 +129,7 @@
                                FontSize="25"
                                TextWrapping="Wrap" TextTrimming="None"
                                FontFamily="{DynamicResource WinstonBold}"
+                               MaxWidth="250"
                                />
 
                             </Grid>

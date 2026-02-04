@@ -340,7 +340,7 @@
     <value>Администратор</value>
   </data>
   <data name="input.bus.group.title" xml:space="preserve">
-    <value>Группа шин для проверки</value>
+    <value>Группа шин</value>
   </data>
   <data name="input.bus.group.ab1" xml:space="preserve">
     <value>A1B1</value>
