@@ -12,13 +12,13 @@ using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class PtCommandExecutor : ICommandExecutor
+  internal class OtCommandExecutor : ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.PT).DisplayName;
+    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.OT).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = context.Command as PtCommandModel;
+      var command = context.Command as OtCommandModel;
       context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
 
       string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
@@ -35,7 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       foreach (var item in command.BusPointsDictionary.Keys)
       {
-        await ConnectedPoint(item, command.BusPointsDictionary[item], context.Console);
+        await DisconnectedPoint(item, command.BusPointsDictionary[item], context.Console);
       }
 
       if (command.Time > 0)
@@ -44,7 +44,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         foreach (var item in command.BusPointsDictionary.Keys)
         {
-          await DisconnectedPoint(item, command.BusPointsDictionary[item], context.Console);
+          await ConnectedPoint(item, command.BusPointsDictionary[item], context.Console);
         }
       }
     }
@@ -86,7 +86,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task Delay(double? time, IUserInteractionService interactionService)
     {
-      await interactionService.ShowMessageAsync(new ShowMessageModel("Задержка перед отключением", message: $"{time}сек.") { IndentLevel = 2 });
+      await interactionService.ShowMessageAsync(new ShowMessageModel("Задержка перед включением", message: $"{time}сек.") { IndentLevel = 2 });
       time *= 1000;
       await Task.Delay(Convert.ToInt32(time));
     }
