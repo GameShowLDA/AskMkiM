@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public Dictionary<SwitchingBus, List<(string, PointModel)>> BusPointsDictionary { get; set; } = new();
+    public Dictionary<SwitchingBus, List<PointModel>> BusPointsDictionary { get; set; } = new();
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

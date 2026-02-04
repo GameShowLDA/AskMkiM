@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tТочки, подключаемые к шине: {bus.Key}";
         foreach(var point in bus.Value)
         {
-          yield return $"\t\t{point.Item1} = {point.Item2.ToString()}";
+          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
         }
       }
       

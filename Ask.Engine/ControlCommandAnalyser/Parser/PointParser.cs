@@ -338,14 +338,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
     }
 
-    public static (
-    Dictionary<SwitchingBus, List<(string, PointModel)>>,
-    List<ErrorItem>
-  ) ParseBusPoints(
-    string expr,
-    RmCommandModel rmCommandModel,
-    int lineNumber,
-    string command)
+    public static (Dictionary<SwitchingBus, List<PointModel>>, List<ErrorItem>) ParseBusPoints(
+      string expr,
+      RmCommandModel rmCommandModel,
+      int lineNumber,
+      string command)
     {
       if (rmCommandModel == null ||
           rmCommandModel.PointsMap == null ||
@@ -355,7 +352,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
 
       var errors = new List<ErrorItem>();
-      var buses = new Dictionary<SwitchingBus, List<(string, PointModel)>>();
+      var buses = new Dictionary<SwitchingBus, List<PointModel>>();
 
       // Убираем пробелы/табы/переводы строк
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
@@ -419,7 +416,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           }
 
           var point = PointModel.ParsePointString(address);
-          var realysModule = new RelaySwitchModuleServices().GetById(point.ModuleNumber);
+          point.Mnemonic = token;
+
+          var realysModule = new RelaySwitchModuleServices().GetDevicesByNumberChassis(point.DeviceNumber).Where(x => x.Number == point.ModuleNumber).First();
+
+          if (realysModule == null)
+          {
+            errors.Add(new ErrorItem
+            {
+              Description = $"Модуль {point.DeviceNumber}.{point.ModuleNumber} не найден в конфигурации.",
+              Code = ErrorCode.Gen_InvalidRange
+            });
+            continue;
+
+          }
+
           BusConverter.TrySplitAbBus(realysModule.BusType, out SwitchingBus busA, out SwitchingBus busB);
 
           bool error = false;
@@ -439,10 +450,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             // 7. Добавляем точку в словарь
             if (!buses.TryGetValue(bus, out var list))
             {
-              list = new List<(string, PointModel)>();
+              list = new List<PointModel>();
               buses[bus] = list;
             }
-            list.Add((token, point));
+
+            list.Add((point));
           }
         }
       }
