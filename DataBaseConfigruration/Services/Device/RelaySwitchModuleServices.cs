@@ -101,5 +101,23 @@ namespace DataBaseConfiguration.Services.Device
     {
       return GetAllData().OfType<RelaySwitchModuleEntity>().ToList();
     }
+
+    public void UpdateResistance(int chassis, int module, double value)
+    {
+      var entity = _context.Set<RelaySwitchModuleEntity>()
+        .FirstOrDefault(e =>
+          e.NumberChassis == chassis &&
+          e.Number == module);
+
+      if (entity == null)
+      {
+        throw new Exception(
+          $"Модуль коммутации реле с шасси {chassis} и номером {module} не найден.");
+      }
+
+      entity.SwitchResistance = value;
+
+      _context.SaveChanges();
+    }
   }
 }

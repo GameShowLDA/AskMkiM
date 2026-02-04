@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="UI.Components.SettingsResistanceInput"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Components"
+             mc:Ignorable="d" 
+             xmlns:Compomnents ="clr-namespace:UI.Components"
+             d:DesignHeight="80" d:DesignWidth="320" MaxWidth="300">
+
+    <!-- Карточка -->
+    <Border 
+        Style="{DynamicResource SettingCardStyle}"
+          Padding="10"
+          SnapsToDevicePixels="True">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок/описание -->
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                 Margin="0,0,0,2"
+                 Style="{DynamicResource SettingsHeaderStyle}"
+                 >
+                
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0}({1}.{2})">
+                        <Binding Path="Name"/>
+                        <Binding Path="NumberChassis"/>
+                        <Binding Path="Number"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+
+            </TextBlock>
+
+            <Border BorderThickness="1" BorderBrush="{DynamicResource ForegroundSolidColorBrush}" CornerRadius="5" Grid.Row="2" Margin="0,6,0,0">
+                <TextBox x:Name="ResistanceDataTexBox"  Text="{Binding SwitchResistance}" Style="{DynamicResource BorderedTextBox}"/>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

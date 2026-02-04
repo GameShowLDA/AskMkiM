@@ -36,7 +36,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
     /// <summary>
     /// Сопротивление коммутатора.
     /// </summary>
-    double SwitchResistance { get; }
+    double SwitchResistance { get; set; }
 
     ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }
