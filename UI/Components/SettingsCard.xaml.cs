@@ -11,8 +11,8 @@ namespace UI.Components
     public SettingsCard()
     {
       InitializeComponent();
-      Loaded += (_, __) => _suppressEvents = false;   // можно слать события
-      Unloaded += (_, __) => _suppressEvents = true;  // гасим на выгрузке
+      Loaded += (_, __) => _suppressEvents = false;   
+      Unloaded += (_, __) => _suppressEvents = true; 
     }
 
     // Заголовок
@@ -66,7 +66,6 @@ namespace UI.Components
     protected override void OnVisualParentChanged(DependencyObject oldParent)
     {
       base.OnVisualParentChanged(oldParent);
-      // Когда нас вынимают из визуального дерева, события гасим немедленно.
       if (VisualParent == null) _suppressEvents = true;
     }
   }
