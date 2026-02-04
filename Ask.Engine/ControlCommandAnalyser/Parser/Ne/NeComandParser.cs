@@ -7,9 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
@@ -36,13 +34,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       if (rmCommandModel == null)
       {
         LogError($"Команда РМ не найдена");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(NeErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
       if (lines == null || lines.Count == 0)
       {
         LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(PrErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(NeErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
         return model;
       }
 
@@ -101,9 +99,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 
       ProcessVoltageLimits(model, unitVoltage, lower, higher, defaultHigher, defaultLower);
 
-      model.Voltage = defaultHigher;
-      model.VoltageSource = $"{defaultHigher}{commandInfo.Unit}";
-      model.VoltageUnit = commandInfo.Unit;
+
+      if (!model.AlgorithmKey.Contains(AlgorithmKey.Н.ToString()))
+      {
+        model.Voltage = defaultHigher;
+        model.VoltageSource = $"{defaultHigher}{commandInfo.Unit}";
+        model.VoltageUnit = commandInfo.Unit;
+      }
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
@@ -166,7 +168,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
                $"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
           }
         }
-        //ApplySign(scheme, )
 
         // Проверим, что схема непуста (есть хотя бы одна точка)
         ValidateScheme(commandNumber, mnemonic, numberLine, model, scheme);
@@ -189,7 +190,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       {
         // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(NeErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
       if (!string.IsNullOrEmpty(remainder))
@@ -203,8 +204,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       if (string.IsNullOrWhiteSpace(model.HigherLimitVoltageSource) && string.IsNullOrWhiteSpace(model.LowerLimitVoltageSource))
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
-        model.Errors.Add(PrErrors.CannotParseParameters(
-          $"Сопротивление было неправильно задано, или неверно указаны его границы",
+        model.Errors.Add(NeErrors.CannotParseParameters(
+          $"Диапазон напряжения был неправильно задан или неверно указаны его границы",
           model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }
@@ -221,7 +222,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       if (scheme == null || scheme.IsEmpty())
       {
         LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(NeErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
       else
       {
@@ -235,13 +236,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
     {
       // парсинг диапазона напряжения, силы тока, напряжения. Силу тока игнорим, напряжение задаем по умолчанию 10В.
       (lowerLimitVoltage, higherLimitVoltage, unit, remainder) = CommonParameterParser.VoltageParser.ParseVoltageRange(remainder);
-      LogDebug($"После парсинга напряжения: нижняя граница сопртивления='{lowerLimitVoltage}',верхняя граница сопртивления='{higherLimitVoltage}', единица измерения = '{unit}' remainder='{remainder}'");
-     
+      LogDebug($"После парсинга напряжения: нижняя граница напряжения='{lowerLimitVoltage}',верхняя граница напряжения='{higherLimitVoltage}', единица измерения = '{unit}' remainder='{remainder}'");
+
       (var amperage, var unitAmperage, remainder) = CommonParameterParser.AmperageParser.ParseAmperage(remainder);
-      LogDebug($"После парсинга напряжения: нижняя граница сопртивления='{lowerLimitVoltage}',верхняя граница сопртивления='{higherLimitVoltage}', единица измерения = '{unit}' remainder='{remainder}'");
-      
+      LogDebug($"После парсинга силы тока: сила тока='{amperage}', единица измерения = '{unitAmperage}', remainder='{remainder}'");
+
       (var voltage, var unitVoltage, remainder) = CommonParameterParser.VoltageParser.ParseVoltage(remainder);
-      LogDebug($"После парсинга напряжения: нижняя граница сопртивления='{lowerLimitVoltage}',верхняя граница сопртивления='{higherLimitVoltage}', единица измерения = '{unit}' remainder='{remainder}'");
+      LogDebug($"После парсинга напряжения: напряжение='{voltage}',единица измерения = '{unitVoltage}' remainder='{remainder}'");
 
       return remainder;
     }
@@ -260,7 +261,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
         if (lower!.Value > higher!.Value)
         {
           model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
+            NeErrors.VoltageLimitsConflict(
               model.StartLineNumber,
               $"{model.CommandNumber} {model.Mnemonic}",
               $"Нижняя граница ({valLower} {lowerUnit}) больше верхней ({valHigher} {higherUnit})"));
@@ -271,7 +272,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
         if (lower.Value < defaultLower)
         {
           model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
+            NeErrors.VoltageLimitsConflict(
               model.StartLineNumber,
               $"{model.CommandNumber} {model.Mnemonic}",
               $"Нижняя граница ({valLower} {lowerUnit}) меньше минимально допустимой ({defaultLower} В)"));
@@ -282,7 +283,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
         if (higher.Value > defaultHigher)
         {
           model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
+            NeErrors.VoltageLimitsConflict(
               model.StartLineNumber,
               $"{model.CommandNumber} {model.Mnemonic}",
               $"Верхняя граница ({valHigher} {higherUnit}) больше максимально допустимой ({defaultHigher} В)"));
@@ -291,10 +292,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 
         // ОК, сохраняем как есть
         model.HigherLimitVoltage = higher.Value;
-        model.HigherLimitVoltageSource = $"{valHigher} {higherUnit}";
+        model.HigherLimitVoltageSource = $"{valHigher}{higherUnit}";
 
         model.LowerLimitVoltage = lower.Value;
-        model.LowerLimitVoltageSource = $"{valLower} {lowerUnit}";
+        model.LowerLimitVoltageSource = $"{valLower}{lowerUnit}";
 
         return;
       }
@@ -313,7 +314,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       if (sign == null)
         return;
 
-      if(sign == '+')
+      if (sign == '+')
         model.ElementEnablingType.Add((chain, ElementEnabling.Type.Direct));
       else if (sign == '-')
         model.ElementEnablingType.Add((chain, ElementEnabling.Type.Reverse));

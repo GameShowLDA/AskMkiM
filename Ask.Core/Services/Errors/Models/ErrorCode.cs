@@ -462,6 +462,55 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
+    #region Режим НЭ
+
+    /// <summary> Ошибка при замкнутной цепи в команде НЭ. </summary>
+    [ErrorCodeTag("NE001")]
+    Ne_ChainError,
+
+    /// <summary> В команде НЭ замкнутые точки. </summary>
+    [ErrorCodeTag("NE002")]
+    Ne_PairError,
+
+    /// <summary> Тело команды НЭ отсутствует или пустое. </summary>
+    [ErrorCodeTag("NE003")]
+    Ne_EmptyCommandBody,
+
+
+    /// <summary> В команде НЭ отсутствует список точек. </summary>
+    [ErrorCodeTag("NE004")]
+    Ne_EmptyPoints,
+
+    /// <summary> В команде НЭ отсутствует напряжение. </summary>
+    [ErrorCodeTag("PR005")]
+    Ne_EmptyVoltage,
+
+    /// <summary> В команде НЭ отсутствует сила тока. </summary>
+    [ErrorCodeTag("PR006")]
+    Ne_EmptyAmperage,
+
+    /// <summary> В команде НЭ нижняя граница напряжения больше верхней границы напряжения. </summary>
+    [ErrorCodeTag("PR007")]
+    Ne_VoltageLimitsConflict,
+
+    /// <summary> В команде НЭ не удалось распознать параметры. </summary>
+    [ErrorCodeTag("PR008")]
+    Ne_CannotParseParameters,
+
+    /// <summary> В команде НЭ верхняя граница напряжения больше максимально допустимой границы напряжения.  </summary>
+    [ErrorCodeTag("PR009")]
+    Ne_VoltageMaxLimitsConflict,
+
+    /// <summary> В команде НЭ одна из границ напряжения больше максимально измеряемой мультиметром границы напряжения или ниже минимально измеряемой.  </summary>
+    [ErrorCodeTag("PR010")]
+    Ne_EquipmentOutOfRange,
+
+    /// <summary> Ошибка при проверке точки про методе полного узла в команде ПР. </summary>
+    [ErrorCodeTag("PR011")]
+    Ne_NodeExecutePointError,
+
+    #endregion
+
     #region Ключи команд
 
     /// <summary> Использованный ключ не разрешён для данной команды. </summary>
