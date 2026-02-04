@@ -212,18 +212,17 @@ namespace UI.Components
     public BusPoint ActiveBus { get; private set; }
 
     /// <summary>
-    /// Отправляет моим перечислением выбранную группу шин.
+    /// Активная группа шин (AB1..AB4).
     /// </summary>
-    public SwitchingBusNew SelectedBusGroup =>
-      InvokeSafe(() => BusGroupSelector.ActiveBus);
-
-    /// <summary>
-    /// Отправляет порядковый номер выбранной группы шин.
-    /// </summary>
-    public int SelectedBusGroupIndex =>
-      InvokeSafe(() => BusGroupSelector.ActiveBusIndex);
+    public SwitchingBusNew ActiveBusGroup { get; private set; } = SwitchingBusNew.AB1;
 
     #endregion
+
+    /// <summary>
+    /// Флаг, предотвращающий реакцию обработчиков Checked/Unchecked на изменения,
+    /// выполненные программно (во время синхронизации чекбоксов с <see cref="ActiveBusGroup"/>).
+    /// </summary>
+    private bool _busGroupInternalChange;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="InputField"/>.
@@ -231,6 +230,11 @@ namespace UI.Components
     public InputField()
     {
       InitializeComponent();
+
+      _busGroupInternalChange = true;
+      SetActiveBusGroup(SwitchingBusNew.AB1);
+      _busGroupInternalChange = false;
+
       SubscribeToValidationEvents();
       ShinaACheckBox.IsChecked = true;
       PreviewKeyDown += HotkeyChecked;
@@ -264,7 +268,8 @@ namespace UI.Components
       var timeBaseText = "Время выполнения";
       var timeRampBaseText = "Время нарастания";
       var voltageBaseText = "Напряжение";
-      var BusBaseText = "Шина для проверки";
+      var busBaseText = "Шина для проверки";
+      var busGroupBaseText = "Группа шин";
 
       Visibility visibility = obj ? Visibility.Collapsed : Visibility.Visible;
       FirstTextBox.Visibility = visibility;
@@ -274,6 +279,7 @@ namespace UI.Components
       TimeRampTextBox.Visibility = visibility;
       VoltageTextBox.Visibility = visibility;
       BusBorder.Visibility = visibility;
+      BusGroupBorder.Visibility = visibility;
 
       if (obj)
       {
@@ -283,7 +289,8 @@ namespace UI.Components
         headerTimeData.Text = $"{timeBaseText}: {TimeTextBox.Text} {TimeTextBox.Unit}";
         headerTimeRampData.Text = $"{timeRampBaseText}: {TimeRampTextBox.Text} {TimeRampTextBox.Unit}";
         headerVoltageData.Text = $"{voltageBaseText}: {VoltageTextBox.Text} {VoltageTextBox.Unit}";
-        headerBusData.Text = $"{BusBaseText}: {ActiveBus}";
+        headerBusData.Text = $"{busBaseText}: {ActiveBus}";
+        headerBusGroupData.Text = $"{busGroupBaseText}: {ActiveBusGroup}";
       }
       else
       {
@@ -293,7 +300,8 @@ namespace UI.Components
         headerTimeData.Text = $"{timeBaseText} в сек.";
         headerTimeRampData.Text = $"{timeRampBaseText} в сек.";
         headerVoltageData.Text = $"{voltageBaseText} в В.";
-        headerBusData.Text = $"{BusBaseText}";
+        headerBusData.Text = $"{busBaseText}";
+        headerBusGroupData.Text = busGroupBaseText;
       }
     }
 
@@ -413,6 +421,78 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Устанавливает активную группу шин и синхронизирует состояние чекбоксов AB1..AB4.
+    /// </summary>
+    /// <param name="bus">Новая активная группа шин.</param>
+    private void SetActiveBusGroup(SwitchingBusNew bus)
+    {
+      ActiveBusGroup = bus;
+
+      BusAB1CheckBox.IsChecked = bus == SwitchingBusNew.AB1;
+      BusAB2CheckBox.IsChecked = bus == SwitchingBusNew.AB2;
+      BusAB3CheckBox.IsChecked = bus == SwitchingBusNew.AB3;
+      BusAB4CheckBox.IsChecked = bus == SwitchingBusNew.AB4;
+    }
+
+    /// <summary>
+    /// Возвращает следующую группу шин по кругу: AB1 → AB2 → AB3 → AB4 → AB1.
+    /// Используется, чтобы при снятии галочки с активной группы всегда оставалась выбранной какая-либо группа.
+    /// </summary>
+    private SwitchingBusNew NextBusGroup(SwitchingBusNew current) => current switch
+    {
+      SwitchingBusNew.AB1 => SwitchingBusNew.AB2,
+      SwitchingBusNew.AB2 => SwitchingBusNew.AB3,
+      SwitchingBusNew.AB3 => SwitchingBusNew.AB4,
+      _ => SwitchingBusNew.AB1
+    };
+
+    /// <summary>
+    /// Обработчик включения чекбокса группы шин (AB1..AB4).
+    /// При выборе одной группы остальные автоматически снимаются.
+    /// </summary>
+    private void BusGroup_Checked(object sender, RoutedEventArgs e)
+    {
+      if (_busGroupInternalChange) return;
+      if (sender is not CheckBox cb) return;
+
+      _busGroupInternalChange = true;
+
+      if (cb == BusAB1CheckBox) SetActiveBusGroup(SwitchingBusNew.AB1);
+      else if (cb == BusAB2CheckBox) SetActiveBusGroup(SwitchingBusNew.AB2);
+      else if (cb == BusAB3CheckBox) SetActiveBusGroup(SwitchingBusNew.AB3);
+      else if (cb == BusAB4CheckBox) SetActiveBusGroup(SwitchingBusNew.AB4);
+
+      _busGroupInternalChange = false;
+    }
+
+    /// <summary>
+    /// Обработчик выключения чекбокса группы шин.
+    /// Если пользователь пытается снять галочку с текущей активной группы, автоматически выбирается следующая группа,
+    /// чтобы не допустить состояния "ничего не выбрано".
+    /// </summary>
+    private void BusGroup_Unchecked(object sender, RoutedEventArgs e)
+    {
+      if (_busGroupInternalChange) return;
+      if (sender is not CheckBox cb) return;
+
+      bool wasActive =
+          (cb == BusAB1CheckBox && ActiveBusGroup == SwitchingBusNew.AB1) ||
+          (cb == BusAB2CheckBox && ActiveBusGroup == SwitchingBusNew.AB2) ||
+          (cb == BusAB3CheckBox && ActiveBusGroup == SwitchingBusNew.AB3) ||
+          (cb == BusAB4CheckBox && ActiveBusGroup == SwitchingBusNew.AB4);
+
+      _busGroupInternalChange = true;
+
+      if (wasActive)
+        SetActiveBusGroup(NextBusGroup(ActiveBusGroup));
+      else
+        SetActiveBusGroup(ActiveBusGroup);
+
+      _busGroupInternalChange = false;
+    }
+
+
+    /// <summary>
     /// Возвращает значение времени выполнения теста.
     /// </summary>
     /// <returns>Строковое представление времени.</returns>
@@ -441,7 +521,7 @@ namespace UI.Components
     /// Возвращает выбранную группу шин для парного подключения.
     /// </summary>
     /// <returns>Выбранная группа шин.</returns>
-    public SwitchingBusNew GetPairBus() => InvokeSafe(() => SelectedBusGroup);
+    public SwitchingBusNew GetPairBus() => InvokeSafe(() => ActiveBusGroup);
 
     /// <summary>
     /// Подсвечивает поле номера проверяемого устройства как содержащее ошибку.
