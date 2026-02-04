@@ -31,13 +31,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       if (rmCommandModel == null)
       {
         LogError($"Команда РМ не найдена");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PtErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
       if (lines == null || lines.Count == 0)
       {
         LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(PrErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
         return model;
       }
 
@@ -140,7 +140,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       {
         // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PtErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
       if (!string.IsNullOrEmpty(remainder))
@@ -148,6 +148,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         model.UnparsedParameters = "! Не распознанные параметры: ";
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
+      }
+
+      if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
+      {
+        LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+        model.Errors.Add(PtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        return model;
       }
 
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);

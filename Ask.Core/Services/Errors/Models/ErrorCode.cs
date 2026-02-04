@@ -450,6 +450,20 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
+    #region Режим ПТ
+
+    /// <summary> В команде ПТ отсутствует список точек. </summary>
+    [ErrorCodeTag("PT001")]
+    Pt_EmptyPoints,
+
+    /// <summary> Тело команды ПТ отсутствует или пустое. </summary>
+    [ErrorCodeTag("PT002")]
+    Pt_EmptyCommandBody,
+
+    #endregion
+
+
+
     #region Режим ВШ
 
     /// <summary> В команде ВШ указана неверная структура стойки коммутации. </summary>

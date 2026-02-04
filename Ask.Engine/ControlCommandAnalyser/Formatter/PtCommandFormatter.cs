@@ -14,6 +14,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var firstLine = $"{pt.CommandNumber} {pt.Mnemonic}";
       yield return firstLine;
 
+      // Ключи команды
+      if (pt.AlgorithmKey.Count > 0)
+      {
+        yield return $"\tКлючи команды: {string.Join(", ", pt.AlgorithmKey)}";
+      }
+      else
+      {
+        yield return $"\tКлючи команды не указаны.";
+      }
+
       if (!string.IsNullOrWhiteSpace(pt.TimeSource))
       {
         yield return $"\tВремя подключения точек: {pt.TimeSource}";
@@ -30,7 +40,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       
       if (pt.Comment.Count > 0)
       {
-        yield return $"\tКомметрии:";
+        yield return $"\tКомметарии:";
         foreach (var line in pt.Comment)
         {
           var trimmed = line.Trim();
