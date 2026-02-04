@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
@@ -25,7 +26,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// <summary>
     /// Список точек измерения.
     /// </summary>
-    public Dictionary<string, List<(string, string)>> BusPointsDictionary { get; set; } = new();
+    public Dictionary<SwitchingBus, List<PointModel>> BusPointsDictionary { get; set; } = new();
 
     /// <summary>
     /// Остаток строки с нераспознанными параметрами.

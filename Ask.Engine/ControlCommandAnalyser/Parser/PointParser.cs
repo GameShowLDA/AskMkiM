@@ -2,10 +2,12 @@
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using DataBaseConfiguration.Services.Device;
 using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
@@ -336,13 +338,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
     }
 
-    public static (Dictionary<string, List<(string, string)>>, List<ErrorItem>) ParseBusPoints(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
+    public static (Dictionary<SwitchingBus, List<PointModel>>, List<ErrorItem>) ParseBusPoints(
+      string expr,
+      RmCommandModel rmCommandModel,
+      int lineNumber,
+      string command)
     {
-      if (rmCommandModel == null || rmCommandModel.PointsMap == null || rmCommandModel.PointsMap.Count == 0)
+      if (rmCommandModel == null ||
+          rmCommandModel.PointsMap == null ||
+          rmCommandModel.PointsMap.Count == 0)
+      {
         return (null, null);
+      }
 
       var errors = new List<ErrorItem>();
-      var buses = new Dictionary<string, List<(string, string)>>();
+      var buses = new Dictionary<SwitchingBus, List<PointModel>>();
 
       // Убираем пробелы/табы/переводы строк
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
@@ -366,17 +376,27 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           continue;
         }
 
-        string busName = parts[0];
+        // 3. Парсим шину
+        if (!BusConverter.TryParseSwitchingBus(parts[0], out var bus))
+        {
+          errors.Add(new ErrorItem
+          {
+            Description = $"Неизвестная шина: {parts[0]}",
+            Code = ErrorCode.Gen_InvalidRange
+          });
+          continue;
+        }
+
         string pointsPart = parts[1];
 
-        // 3. Токены точек по запятой
+        // 4. Токены точек по запятой
         var rawTokens = pointsPart
             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(CleanToken)
             .Where(t => !string.IsNullOrEmpty(t))
             .ToList();
 
-        // 4. Раскрываем диапазоны (поддержка сложных диапазонов)
+        // 5. Раскрываем диапазоны
         var expandedTokens = new List<string>();
         foreach (var tok in rawTokens)
         {
@@ -388,32 +408,60 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         foreach (var token in expandedTokens)
         {
-          // Проверяем наличие точки в РМ
-          if (rmCommandModel.PointsMap.ContainsKey(token) == false)
+          // 6. Проверка наличия точки в РМ
+          if (!rmCommandModel.PointsMap.TryGetValue(token, out var address))
           {
             errors.Add(GeneralErrors.UnknownPoint(token, lineNumber, command));
-            continue; // просто пишем ошибку и идём дальше
+            continue;
           }
 
-          // Получаем мнемонику (ключ) по значению
-          if (rmCommandModel.PointsMap.ContainsKey(token))
+          var point = PointModel.ParsePointString(address);
+          point.Mnemonic = token;
+
+          var realysModule = new RelaySwitchModuleServices().GetDevicesByNumberChassis(point.DeviceNumber).Where(x => x.Number == point.ModuleNumber).First();
+
+          if (realysModule == null)
           {
-            if (buses.ContainsKey(busName) == false)
+            errors.Add(new ErrorItem
             {
-              buses.Add(busName, new List<(string, string)>());
-            }
-            var adress = rmCommandModel.PointsMap[token];
-            buses[busName].Add((token, adress));
+              Description = $"Модуль {point.DeviceNumber}.{point.ModuleNumber} не найден в конфигурации.",
+              Code = ErrorCode.Gen_InvalidRange
+            });
+            continue;
+
           }
-          else
+
+          BusConverter.TrySplitAbBus(realysModule.BusType, out SwitchingBus busA, out SwitchingBus busB);
+
+          bool error = false;
+
+          if (bus != busA && bus != busB)
           {
-            errors.Add(GeneralErrors.UnknownPoint(token, lineNumber, command));
+            errors.Add(new ErrorItem
+            {
+              Description = $"Модуль {realysModule.NumberChassis}.{realysModule.Number} не поддерживает шину {bus}",
+              Code = ErrorCode.Gen_InvalidRange
+            });
+
+            error = true;
+          }
+          if (!error)
+          {
+            // 7. Добавляем точку в словарь
+            if (!buses.TryGetValue(bus, out var list))
+            {
+              list = new List<PointModel>();
+              buses[bus] = list;
+            }
+
+            list.Add((point));
           }
         }
       }
 
       return (buses, errors);
     }
+
 
     public static List<string> ParseBusList(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
     {

@@ -14,14 +14,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var firstLine = $"{pt.CommandNumber} {pt.Mnemonic}";
       yield return firstLine;
 
-      // Время
       if (!string.IsNullOrWhiteSpace(pt.TimeSource))
       {
         yield return $"\tВремя подключения точек: {pt.TimeSource}";
-      }
-      else
-      {
-        yield return $"\tВремя подключения точек не задано!";
       }
 
       foreach (var bus in pt.BusPointsDictionary)
@@ -29,7 +24,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tТочки, подключаемые к шине: {bus.Key}";
         foreach(var point in bus.Value)
         {
-          yield return $"\t\t{point.Item1} = {point.Item2}";
+          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
         }
       }
       

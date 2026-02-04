@@ -29,7 +29,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tТочки, отключаемые от шины: {bus.Key}";
         foreach (var point in bus.Value)
         {
-          yield return $"\t\t{point.Item1} = {point.Item2}";
+          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
         }
       }
 
