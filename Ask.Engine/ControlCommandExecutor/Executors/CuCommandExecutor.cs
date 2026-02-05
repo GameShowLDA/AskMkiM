@@ -10,28 +10,32 @@ using System.Windows;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  public class CuCommandExecutor : ICommandExecutor
+  internal class CuCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.CU).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = (CuCommandModel)context.Command;
-      if (command.CuType == CuCommandType.Information)
+      var command = GetRequiredCommand<CuCommandModel>(context);
+      SetActiveLine(context, command);
+
+      CommandExecutionState.LastCuResult = command.CuType switch
       {
-        MessageBoxCustom.Show(command.MessageText, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-        CommandExecutionState.LastCuResult = MessageBoxResult.OK;
-      }
-      else if (command.CuType == CuCommandType.Question)
-      {
-        // Вопрос — вызываем с кнопками Yes/No/Esc (или Ok/Cancel если Run/Esc)
-        var result = MessageBoxCustom.Show(
-            command.MessageText,
-            "Запрос оператору",
-            MessageBoxButton.YesNo, MessageBoxImage.Question
-        );
-        CommandExecutionState.LastCuResult = result;
-      }
+        CuCommandType.Information => ShowInformation(command.MessageText),
+        CuCommandType.Question => AskQuestion(command.MessageText),
+        _ => MessageBoxResult.None
+      };
+    }
+
+    private static MessageBoxResult ShowInformation(string message)
+    {
+      MessageBoxCustom.Show(message, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+      return MessageBoxResult.OK;
+    }
+
+    private static MessageBoxResult AskQuestion(string message)
+    {
+      return MessageBoxCustom.Show(message, "Запрос оператору", MessageBoxButton.YesNo, MessageBoxImage.Question);
     }
   }
 }

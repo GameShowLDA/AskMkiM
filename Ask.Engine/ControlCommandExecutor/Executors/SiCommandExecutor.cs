@@ -4,7 +4,6 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -18,17 +17,17 @@ using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class SiCommandExecutor : ICommandExecutor
+  internal class SiCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
 
     private double firstValue = 0;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = context.Command as SiCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
-
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var command = GetRequiredCommand<SiCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
 
       if (context.IsInvokedByAnotherCommand)
       {
@@ -40,14 +39,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           nameCommand = $"{command.CommandNumber} ПИ/{command.Mnemonic}";
         }
-      }
-
-
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
       }
 
       BreakpointHandler.Handle(command, context.Console);

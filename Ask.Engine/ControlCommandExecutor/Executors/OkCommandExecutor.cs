@@ -11,7 +11,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   /// <summary>
   /// Исполнитель команды "ОК".
   /// </summary>
-  public class OkCommandExecutor : ICommandExecutor
+  internal class OkCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.OK).DisplayName;
 
@@ -24,8 +24,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       context.CommandExecutionManager.ClearErrorsMethod();
 
-      var command = context.Command as OkCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      var command = GetRequiredCommand<OkCommandModel>(context);
+      SetActiveLine(context, command);
+
       command.ProtocolModel = new ProtocolModel();
       command.ProtocolModel.ProgramPath = command.ObjectName;
 

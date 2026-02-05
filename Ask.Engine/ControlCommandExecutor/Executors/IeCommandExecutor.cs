@@ -9,6 +9,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
@@ -18,7 +19,7 @@ using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class IeCommandExecutor : ICommandExecutor
+  internal class IeCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
     private double firstValue = 0;
@@ -26,16 +27,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = context.Command as IeCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
-
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
-      }
+      var command = GetRequiredCommand<IeCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
 
       BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);

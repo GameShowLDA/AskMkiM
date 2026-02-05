@@ -12,6 +12,7 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -20,7 +21,7 @@ using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class PrCommandExecutor : ICommandExecutor
+  internal class PrCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
     private double firstValue = 0;
@@ -29,17 +30,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = context.Command as PrCommandModel;
-
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
-
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
-      }
+      var command = GetRequiredCommand<PrCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
 
       BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);

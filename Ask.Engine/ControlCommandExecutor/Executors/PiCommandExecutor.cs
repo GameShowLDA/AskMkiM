@@ -11,6 +11,7 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -18,29 +19,22 @@ using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class PiCommandExecutor : ICommandExecutor
+  internal class PiCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
     private double amperhMaxDCW = 10;
     private double amperhMaxACW = 60;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-
-      var command = context.Command as PiCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
-
+      var command = GetRequiredCommand<PiCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
 
       var time = command.Time;
       var voltage = command.Voltage;
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
-      }
-
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       string nameSiCommand = $"ПИ/СИ1";
+
 
       BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
@@ -50,7 +44,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
                  .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
                  .ToList()
                  ?? new List<PointModel>();
-      //var points = PointModel.ConvertToPointModels(command.Points);
+
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
       if (DeviceDisplayConfig.GetExecutionParametersVisibility())

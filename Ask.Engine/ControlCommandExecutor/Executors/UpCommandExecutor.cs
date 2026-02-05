@@ -9,17 +9,17 @@ using System.Windows;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  public class UpCommandExecutor : ICommandExecutor
+  internal class UpCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.UP).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var up = (UpCommandModel)context.Command;
+      var command = GetRequiredCommand<UpCommandModel>(context);
 
       if (CommandExecutionState.LastCuResult == MessageBoxResult.No)
       {
-        context.JumpToCommandNumber?.Invoke(up.TargetLabel);
+        context.JumpToCommandNumber?.Invoke(command.TargetLabel);
       }
 
       CommandExecutionState.LastCuResult = MessageBoxResult.None;

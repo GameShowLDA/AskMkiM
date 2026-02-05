@@ -14,17 +14,18 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
   /// </summary>
   public class CommandExecutionManager
   {
-    private readonly Dictionary<string, ICommandExecutor> _executors = new();
+    private readonly Dictionary<string, ICommandExecutor> _executors = new(StringComparer.OrdinalIgnoreCase);
     private readonly IUserInteractionService _console;
-    private readonly ITextEditorAdapter translationControl;
-    private ProtocolModel protocolModel = new ProtocolModel();
+    private readonly ITextEditorAdapter _textEditor;
+    private ProtocolModel _protocolModel = new ProtocolModel();
+    private readonly string? _opkFilePath;
+
     /// <summary>
     /// Событие, которое вызывается при изменении состояния блокировки.
     /// </summary>
     public event Action<ErrorItem> AddError;
     public event Action ClearError;
 
-    private readonly string? _opkFilePath;
 
     /// <summary>
     /// Флаг, указывающий, активно ли питание системы.
@@ -45,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     {
       _console = console;
       CommandsToExecute = ControlProgram;
-      translationControl = textEditor;
+      _textEditor = textEditor;
       _opkFilePath = opkFilePath;
       RegisterExecutors();
 
@@ -63,7 +64,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         var command = CommandsToExecute[i];
 
-        var context = new CommandExecutionContext(this, command, _console, translationControl, _opkFilePath)
+        var context = new CommandExecutionContext(this, command, _console, _textEditor, _opkFilePath)
         {
           JumpToCommandNumber = (number) =>
           {
@@ -77,7 +78,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (_executors.TryGetValue(command.Mnemonic, out var executor))
         {
-          await executor.ExecuteAsync(context, protocolModel);
+          await executor.ExecuteAsync(context, _protocolModel);
         }
         else
         {
@@ -95,8 +96,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     {
       if (_executors.TryGetValue(command.Mnemonic, out var executor))
       {
-        var context = new CommandExecutionContext(this, command, _console, translationControl, _opkFilePath);
-        await executor.ExecuteAsync(context, protocolModel);
+        var context = new CommandExecutionContext(this, command, _console, _textEditor, _opkFilePath);
+        await executor.ExecuteAsync(context, _protocolModel);
       }
       else
       {

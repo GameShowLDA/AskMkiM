@@ -11,7 +11,7 @@ using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class KscCommandExecutor : ICommandExecutor
+  internal class KscCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.KSC).DisplayName;
 
@@ -26,8 +26,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
       EventAggregator.Subscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
 
-      var command = context.Command as KscCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      var command = GetRequiredCommand<KscCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
+
 
       if (!ExecutionConfig.GetIsIdleModeEnabled())
       {

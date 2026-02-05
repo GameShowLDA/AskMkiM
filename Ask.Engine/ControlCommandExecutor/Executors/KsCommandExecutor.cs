@@ -4,9 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
@@ -18,7 +16,7 @@ using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class KsCommandExecutor : ICommandExecutor
+  internal class KsCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
     private double firstValue = 0;
@@ -28,16 +26,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       firstValue = 0;
       secondValue = 10000000;
-      var command = context.Command as KsCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
 
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
-      }
+      var command = GetRequiredCommand<KsCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
 
       BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
