@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
@@ -171,6 +173,26 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           else
           {
             await SwitchPointFromBusAToBAsync(point, messageService, false);
+          }
+        }
+
+        /// <summary>
+        /// Выполняет сброс состояния всех точек коммутации.
+        /// Отключает все точки во всех указанных модулях реле, приводя систему в исходное безопасное состояние.
+        /// </summary>
+        /// <param name="relaySwitchModules">
+        /// Набор модулей коммутации реле, для которых требуется выполнить сброс точек.
+        /// </param>
+        /// <param name="userMessageService">
+        /// Сервис отображения сообщений и взаимодействия с пользователем.
+        /// </param>
+        public static async Task ResetAllPointsAsync(IEnumerable<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
+        {
+          await userMessageService.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
+
+          foreach (var module in relaySwitchModules)
+          {
+            await module.PointManager.DisconnectingAllPoint(userMessageService);
           }
         }
       }
@@ -442,6 +464,45 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             await DisconnectAlPointlFromBusAAsync(groupChains, messageService, false);
           }
+        }
+      }
+    }
+
+    /// <summary>
+    /// Менеджер коммутации модулей и устройств.
+    /// Определяет сценарии подключения измерительных и испытательных устройств к шинам A и B.
+    /// </summary>
+    internal static class SwitchModuleManager
+    {
+      /// <summary>
+      /// Менеджер коммутации устройств на шины.
+      /// Обеспечивает подключение и отключение измерительных и испытательных устройств к шинам A и B.
+      /// </summary>
+      internal static class DeviceConnectionManager
+      {
+        /// <summary>
+        /// Выполняет коммутацию мультиметра на шины A и B. Подключает устройство к заданной конфигурации шин.
+        /// </summary>
+        /// <param name="dbc">Коммутируемое устройство.</param>
+        /// <param name="userMessageService">
+        /// Сервис отображения сообщений и взаимодействия с пользователем.
+        /// </param>
+        internal static async Task ConnectMultimeter(ISwitchingDevice dbc, IUserInteractionService userMessageService)
+        {
+          await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
+        }
+
+        /// <summary>
+        /// Выполняет коммутацию установки пробоя на шины.
+        /// Подключает испытательное устройство к шинам A1B1.
+        /// </summary>
+        /// <param name="dbc">Коммутируемое устройство.</param>
+        /// <param name="userMessageService">
+        /// Сервис отображения сообщений и взаимодействия с пользователем.
+        /// </param>
+        internal static async Task ConnectBreakdownTester(ISwitchingDevice dbc, IUserInteractionService userMessageService)
+        {
+          await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
         }
       }
     }

@@ -65,7 +65,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-      await SettingsDeviceBusCommutatuion(dbc, context.Console);
+      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console, command.AlgorithmKey.Contains("Б"));
@@ -120,11 +120,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       errorMessage.AddRange(messageResult.errorMessage);
       infoMessage.AddRange(messageResult.infoMessage);
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
-      foreach (var item in modules)
-      {
-        await item.PointManager.DisconnectingAllPoint(context.Console);
-      }
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(modules, context.Console);
 
       if (errorMessage.Count > 0)
       {
@@ -185,11 +181,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }, messageService);
 
       return result;
-    }
-
-    private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
-    {
-      await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
     private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)

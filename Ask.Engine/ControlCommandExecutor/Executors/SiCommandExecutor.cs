@@ -80,7 +80,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var dbc = EquipmentService.GetSwitchingDevice();
 
-      await SettingsDeviceBusCommutatuion(dbc, context.Console);
+      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, command.Time.Value, command.Resistance.Value, command.Voltage.Value);
@@ -135,26 +135,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
         errorMessage.AddRange(errMes);
       }
+
       await PointFormater.MessageResult(errorMessage, context.Console);
-
-
-      await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
-      foreach (var item in modules)
-      {
-        await item.PointManager.DisconnectingAllPoint(context.Console);
-      }
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(modules, context.Console);
 
       if (errorMessage.Count > 0)
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
       }
     }
-
-    private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
-    {
-      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
-    }
-
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
     {
       string name = breakDown.Name;

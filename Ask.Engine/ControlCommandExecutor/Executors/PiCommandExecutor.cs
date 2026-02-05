@@ -67,7 +67,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-      await SettingsDeviceBusCommutatuion(dbc, context.Console);
+      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
+
       var siCommanNumber = command.SiCommand.CommandNumber;
       // Первый тест СИ
       if (command.SiCommand != null)
@@ -163,11 +164,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         protocolModel.Errors.Add(nameCommand, errorMessage);
       }
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
-      foreach (var item in modules)
-      {
-        await item.PointManager.DisconnectingAllPoint(context.Console);
-      }
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(modules, context.Console);
 
       if (command.SiCommand != null)
       {
@@ -180,11 +177,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
       }
     }
-    private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
-    {
-      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
-    }
-
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double voltage, VoltageEnum.Type voltageType)
     {
       string name = breakDown.Name;
