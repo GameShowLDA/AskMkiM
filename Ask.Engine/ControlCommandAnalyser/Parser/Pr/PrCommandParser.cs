@@ -92,13 +92,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       }
       else
       {
-        // значения по умолчанию
         var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR);
 
         double defaultLower = commandInfo.LowerLimit; //1Ом
         double defaultHigher = commandInfo.UpperLimit;
 
-        // --- 1️⃣ Парсим входные значения, если они заданы ---
         double? lower = !string.IsNullOrWhiteSpace(lowerLimitResistance)
             ? CommonParameterParser.ParseToDouble(lowerLimitResistance)
             : null;
@@ -107,18 +105,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
             ? CommonParameterParser.ParseToDouble(higherLimitResistance)
             : null;
 
-        // --- 2️⃣ Проверка валидности, если обе границы заданы ---
 
         ProcessResistanceLimits(model, unit, lower, higher);
 
-        // Если есть ошибки правил – нечего проверять оборудование
+        // Если есть ошибки правил - оборудование не проверяем
         bool hasResistanceErrors = model.Errors.Any(e =>
               e.Code == ErrorCode.Pr_ResistanceLimitsConflict ||
               e.Code == ErrorCode.Pr_ResistanceMaxLimitsConflict ||
               e.Code == ErrorCode.Pr_EmptyResistance);
 
 
-        // Проверка оборудования
         if (hasResistanceErrors == false)
         {
           ValidateAgainstMeter(model, meter);
@@ -144,13 +140,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-      // Ищем первую и последнюю '*'
       int firstStar = bodyNoWs.IndexOf('*');
       int lastStar = bodyNoWs.LastIndexOf('*');
 
       if (firstStar >= 0 && lastStar > firstStar)
       {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
         string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
@@ -162,7 +156,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           pointErrors.Remove(pointErrors.FirstOrDefault(item => item.Code == ErrorCode.Gen_InvalidNumberOfDisconnectedRanges));
         }
 
-        // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
         {
           foreach (var error in pointErrors)
@@ -175,10 +168,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           }
         }
 
-        // Проверим, что схема непуста (есть хотя бы одна точка)
         ValidateScheme(commandNumber, mnemonic, numberLine, model, scheme);
 
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         int idxStarInSecondLine = remainder.LastIndexOf('*');
         if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
@@ -233,7 +224,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       }
       else
       {
-        // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
         model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
@@ -256,7 +246,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
-      // Валидация
       if (string.IsNullOrWhiteSpace(model.ConnectedHigherLimitResistanceSource) && !model.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
@@ -291,7 +280,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       }
       else
       {
-        model.Scheme = scheme; // ← просто присваиваем схему в модель
+        model.Scheme = scheme; 
         LogInformation(
            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
       }
@@ -331,13 +320,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
 
       // Конвертация
       (double? valLower, string lowerUnit) = lower.HasValue ? UnitsConvertor.TryConvertBack(lower.Value, unit) : (null, unit);
-
       (double? valHigher, string higherUnit) = higher.HasValue ? UnitsConvertor.TryConvertBack(higher.Value, unit) : (null, unit);
 
       // 1) ЕСЛИ ОБЕ ГРАНИЦЫ ЗАДАНЫ
       if (valLower.HasValue && valHigher.HasValue)
       {
-        // 1) Проверка: нижняя > верхней (в ОМАХ)
         if (lower!.Value > higher!.Value)
         {
           model.Errors.Add(
@@ -348,7 +335,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           return;
         }
 
-        // 2) Нижняя < минимально допустимой (в ОМАХ)
         if (lower.Value < PR_MIN)
         {
           model.Errors.Add(
@@ -359,7 +345,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           return;
         }
 
-        // 3) Верхняя > максимально допустимой (в ОМАХ)
         if (higher.Value > PR_MAX)
         {
           model.Errors.Add(
@@ -370,7 +355,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           return;
         }
 
-        // ОК, сохраняем как есть
         // проверка на разобщение
         model.DisconnectedLowerLimitResistance = higher.Value;
         model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
@@ -478,7 +462,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       var connectedHigher = model.ConnectedHigherLimitResistance;
       var disconnectedLower = model.DisconnectedLowerLimitResistance;
       var disconnectedHigher = model.DisconnectedHigherLimitResistance;
-      // Проверка нижней границы
       if (connectedLower.HasValue && connectedLower.Value < 0)
       {
         model.Errors.Add(
@@ -514,7 +497,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
                 $"Нижняя граница {disconnectedLower} Ом проверки на разобщение выше максимально измеряемой прибором ({meter.MaxContinuityResistance} Ом)"));
       }
 
-      // Проверка верхней границы
       if (connectedHigher.HasValue && connectedHigher.Value < 0)
       {
         model.Errors.Add(
@@ -552,7 +534,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       int idxResistance = -1;
       int idxPoint = firstLine.IndexOf('*');
 
-      // Позиция первого ключа
       foreach (var key in algorithmKeys)
       {
         int idx = firstLine.IndexOf(key, StringComparison.OrdinalIgnoreCase);
@@ -560,41 +541,35 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           idxKey = idx;
       }
 
-      // Время
       if (!string.IsNullOrWhiteSpace(time))
       {
         idxTime = firstLine.IndexOf(time, StringComparison.OrdinalIgnoreCase);
       }
 
-      // Сопротивление
       if (!string.IsNullOrWhiteSpace(resistanceStart))
       {
         idxResistance = firstLine.IndexOf(resistanceStart, StringComparison.OrdinalIgnoreCase);
       }
 
       // Проверка порядка
-      // - Ключ должен идти до времени
       if (idxKey != -1 && idxTime != -1 && idxKey > idxTime)
       {
         errorDescription = "Ключ алгоритма указан после времени.";
         return true;
       }
 
-      // - Ключ должен идти до сопротивления
       if (idxKey != -1 && idxResistance != -1 && idxKey > idxResistance)
       {
         errorDescription = "Ключ алгоритма указан после сопротивления.";
         return true;
       }
 
-      // - Время должно быть после сопротивления
       if (idxTime != -1 && idxResistance != -1 && idxResistance > idxTime)
       {
         errorDescription = "Время указано до сопротивления.";
         return true;
       }
 
-      // - Все параметры должны быть до точек
       if (idxPoint != -1)
       {
         if ((idxKey != -1 && idxKey > idxPoint)

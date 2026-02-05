@@ -31,7 +31,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         }
       }
 
-      // удаляем найденные ключи ТОЛЬКО из ПИ-остатка
       foreach (var (key, hasError) in result)
       {
         remainder = Regex.Replace(

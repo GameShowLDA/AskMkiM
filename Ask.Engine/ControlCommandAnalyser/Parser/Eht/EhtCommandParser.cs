@@ -55,10 +55,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       List<string> processedLines = CommentsParser.ParseComments(lines, model);
 
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
-      // сохраняем результат
       model.SourceLines = model.SourceLines
-          .Where(l => !string.IsNullOrWhiteSpace(l)) // если нужны только непустые строки
+          .Where(l => !string.IsNullOrWhiteSpace(l)) 
           .ToList();
 
       // Склеиваем всё в одну строку и удаляем \r \n \t
@@ -68,10 +66,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
         .Replace("\n", "")
         .Replace("\t", "");
 
-      // Для логов
       LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
 
-      // Дальше работаем ТОЛЬКО с body:
       var remainder = body;
 
       var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
@@ -93,7 +89,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
       (time, unitTime, remainder) = CommonParameterParser.TimeParser.ParseTime(remainder);
       LogDebug($"После парсинга времени: time='{time}{unitTime}', remainder='{remainder}'");
 
-      // флаг ошибок при проверке
       bool hasResistanceErrors = false;
 
       // значения по умолчанию
@@ -103,7 +98,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
       double defaultHigher = commandInfo.UpperLimit;
       string defaultUnit = commandInfo.Unit;
 
-      // --- 1️⃣ Парсим входные значения, если они заданы ---
       double? lower = !string.IsNullOrWhiteSpace(lowerLimitResistance)
           ? CommonParameterParser.ParseToDouble(lowerLimitResistance)
           : 0;
@@ -160,20 +154,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       if (hasResistanceErrors == false)
       {
-        // если юнит не задан → дефолт
         string unitFinal = !string.IsNullOrWhiteSpace(unit) ? unit : defaultUnit;
-        // если нижняя не задана → дефолт
         double lowerFinal = -1;
         if (lower == null)
         {
           lowerFinal = defaultLower;
-          //model.Warnings.Add(GeneralWarnings.DefaultResistainceLowLimit(model.StartLineNumber, $"{commandNumber} {mnemonic}", $"{lowerFinal} {unitFinal}"));
         }
         else
         {
           lowerFinal = lower.Value;
         }
-        // если верхняя не задана → дефолт
         double higherFinal = -1;
         if (higher == null)
         {
@@ -229,20 +219,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-      // Ищем первую и последнюю '*'
       int firstStar = bodyNoWs.IndexOf('*');
       int lastStar = bodyNoWs.LastIndexOf('*');
 
       if (firstStar >= 0 && lastStar > firstStar)
       {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
         string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
         var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, model, rmCommandModel);
 
-        // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
         {
           foreach (var error in pointErrors)
@@ -255,7 +242,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
           }
         }
 
-        // Проверим, что схема непуста (есть хотя бы одна точка)
         if (scheme == null || scheme.IsEmpty())
         {
           LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
@@ -263,12 +249,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
         }
         else
         {
-          model.Scheme = scheme; // ← просто присваиваем схему в модель
+          model.Scheme = scheme; 
           LogInformation(
              $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
         }
 
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         int idxStarInSecondLine = remainder.LastIndexOf('*');
         if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
@@ -284,7 +269,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
       }
       else
       {
-        // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
         model.Errors.Add(EhtErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
       }
@@ -309,7 +293,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       return model;
     }
-
-
   }
 }

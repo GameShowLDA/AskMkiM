@@ -57,22 +57,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
       }
 
       List<string> processedLines = CommentsParser.ParseComments(lines, model);
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
       model.SourceLines = model.SourceLines
         .Where(l => !string.IsNullOrWhiteSpace(l))
         .ToList();
 
-      // Склеиваем всё в одну строку и удаляем \r \n \t
       var body = string.Concat(processedLines.Count > 0 && processedLines.FindAll(l => string.IsNullOrEmpty(l) || string.IsNullOrWhiteSpace(l)).Count == 0 ?
         processedLines : model.SourceLines)
         .Replace("\r", "")
         .Replace("\n", "")
         .Replace("\t", "");
 
-      // Для логов
       LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
 
-      // Дальше работаем ТОЛЬКО с body:
       var remainder = body;
 
       var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
@@ -86,7 +82,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
       (lowerLimitResistance, higherLimitResistance, unit, remainder) = CommonParameterParser.ResistanceParser.ParseResistanceRange(remainder);
       LogDebug($"После парсинга сопротивления: нижняя граница='{lowerLimitResistance}', верхняя граница='{higherLimitResistance}', единица='{unit}', remainder='{remainder}'");
 
-      // 1️⃣ Если обе границы не указаны — ошибка и выход
       if (string.IsNullOrEmpty(lowerLimitResistance) && string.IsNullOrEmpty(higherLimitResistance))
       {
         model.Errors.Add(KsErrors.EmptyResistance(numberLine, $"{commandNumber} {mnemonic}"));
@@ -101,11 +96,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
         return model;
       }
 
-      // 3️⃣ Парсим числа (если они заданы)
       double? lower = !string.IsNullOrWhiteSpace(lowerLimitResistance) ? CommonParameterParser.ParseToDouble(lowerLimitResistance) : null;
       double? higher = !string.IsNullOrWhiteSpace(higherLimitResistance) ? CommonParameterParser.ParseToDouble(higherLimitResistance) : null;
 
-      // 4️⃣ Пороговые значения
       var meter = new DataBaseConfiguration.Services.Device.FastMeterServices().GetAll().FirstOrDefault();
       if (meter == null)
       {
@@ -120,10 +113,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
         double minResistance = commandInfo.LowerLimit;
         double maxResistance = commandInfo.UpperLimit;
 
-        // 5️⃣ Флаг ошибок
         bool hasErrors = false;
 
-        // 6️⃣ Проверки диапазона, если обе границы заданы
         if (lower.HasValue && higher.HasValue)
         {
           if (lower.Value >= higher.Value)
@@ -137,7 +128,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           }
         }
 
-        // 7️⃣ Проверка нижней границы, если она указана
         if (lower.HasValue && !hasErrors)
         {
           var lowerValue = UnitsConvertor.TryConvertBack(lower.Value, unit);
@@ -160,7 +150,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           }
         }
 
-        // 8️⃣ Проверка верхней границы, если она указана
         if (higher.HasValue && !hasErrors)
         {
           var higherValue = UnitsConvertor.TryConvertBack(higher.Value, unit);
@@ -183,17 +172,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           }
         }
 
-        // 9️⃣ Установка значений, только если не было ошибок
         if (hasErrors == false)
         {
           model.ResistanceUnit = unit ?? string.Empty;
 
-          // нижняя граница: задана → используем; не задана → по умолчанию
           double finalLower = -1;
           if (lower == null)
           {
             finalLower = minResistance;
-            //model.Warnings.Add(GeneralWarnings.DefaultResistainceLowLimit(model.StartLineNumber, $"{commandNumber} {mnemonic}", $"{finalLower} {model.ResistanceUnit}"));
           }
           else
           {
@@ -202,7 +188,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           model.LowerLimitResistance = finalLower;
           model.LowerLimitResistanceSource = $"{finalLower} {unit}";
 
-          // верхняя граница: задана → используем; не задана → по умолчанию
           double finalHigher = -1;
           if (higher == null)
           {
@@ -227,20 +212,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
 
         string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-        // Ищем первую и последнюю '*'
         int firstStar = bodyNoWs.IndexOf('*');
         int lastStar = bodyNoWs.LastIndexOf('*');
 
         if (firstStar >= 0 && lastStar > firstStar)
         {
-          // Выделяем блок точек (включительно) — PointParser сам Trim('*')
           string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
           model.PointsSourse = pointsBlob;
           LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
           var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, model, rmCommandModel);
 
-          // Поднимем ошибки парсера точек
           if (pointErrors?.Count > 0)
           {
             foreach (var error in pointErrors)
@@ -253,7 +235,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
             }
           }
 
-          // Проверим, что схема непуста (есть хотя бы одна точка)
           if (scheme == null || scheme.IsEmpty())
           {
             LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
@@ -261,12 +242,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           }
           else
           {
-            model.Scheme = scheme; // ← просто присваиваем схему в модель
+            model.Scheme = scheme;
             LogInformation(
                $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
           }
 
-          // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
           int idxStarInFirstLine = remainder.IndexOf('*');
           int idxStarInSecondLine = remainder.LastIndexOf('*');
           if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
@@ -282,7 +262,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
         }
         else
         {
-          // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
           LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
           model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
         }
@@ -339,28 +318,24 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
       }
 
       // Проверка порядка
-      // - Ключ должен идти до времени
       if (idxKey != -1 && idxTime != -1 && idxKey > idxTime)
       {
         errorDescription = "Ключ алгоритма указан после времени.";
         return true;
       }
 
-      // - Ключ должен идти до сопротивления
       if (idxKey != -1 && idxResistance != -1 && idxKey > idxResistance)
       {
         errorDescription = "Ключ алгоритма указан после сопротивления.";
         return true;
       }
 
-      // - Время должно быть после сопротивления
       if (idxTime != -1 && idxResistance != -1 && idxResistance > idxTime)
       {
         errorDescription = "Время указано до сопротивления.";
         return true;
       }
 
-      // - Все параметры должны быть до точек
       if (idxPoint != -1)
       {
         if ((idxKey != -1 && idxKey > idxPoint)
@@ -374,6 +349,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
 
       return false;
     }
-
   }
 }

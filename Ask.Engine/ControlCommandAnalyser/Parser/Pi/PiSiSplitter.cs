@@ -77,8 +77,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return (NormalizeSi(siStr), piStr.Trim());
     }
 
-    // ------------------------ VALIDATION ------------------------
-
     private static bool IsValidSi(List<Tok> toks)
     {
       if (toks.Count == 0) return true;
@@ -127,15 +125,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 
     private static bool IsSiKey(string k) => SiKeys.Contains(k);
 
-    // ------------------------ LEXER ------------------------
-
     private static List<Tok> Lex(string s)
     {
       var toks = new List<Tok>();
       int i = 0;
       while (i < s.Length)
       {
-        // whitespace
         if (char.IsWhiteSpace(s[i]))
         {
           int j = i + 1;
@@ -145,7 +140,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           continue;
         }
 
-        // comma
         if (s[i] == ',')
         {
           toks.Add(new Tok(TokType.Comma, ",", i, 1));
@@ -153,7 +147,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           continue;
         }
 
-        // points block: from '*' up to next whitespace or end-of-line if нет завершающей '*'
         if (s[i] == '*')
         {
           int j = i + 1;
@@ -163,7 +156,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           continue;
         }
 
-        // voltage: [+/-]?\d+\s*В
         {
           var m = Regex.Match(s.Substring(i), @"^[\+\-]?\d+\s*В", RegexOptions.IgnoreCase);
           if (m.Success)
@@ -174,7 +166,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           }
         }
 
-        // time: \d+\s*С
         {
           var m = Regex.Match(s.Substring(i), @"^\d+\s*С", RegexOptions.IgnoreCase);
           if (m.Success)
@@ -185,7 +176,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           }
         }
 
-        // resistance: \d+<МОм / кОм / ГОм (МОМ нормализуем в МОм)
         {
           var m = Regex.Match(s.Substring(i), @"^\d+\s*<\s*(МОМ|МОм|кОм|ГОм)", RegexOptions.IgnoreCase);
           if (m.Success)
@@ -196,7 +186,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           }
         }
 
-        // keys: Т1 / T1, или одиночный П С К Д И Г — перед запятой/пробелом/табом/концом
         {
           var mT1 = Regex.Match(s.Substring(i), @"^(?:T|Т)1(?=$|[\s,])", RegexOptions.IgnoreCase);
           if (mT1.Success)
@@ -215,7 +204,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           }
         }
 
-        // fallback: копим до ближайшего разделителя
+        // копим до ближайшего разделителя
         int k = i + 1;
         while (k < s.Length && !char.IsWhiteSpace(s[k]) && s[k] != ',' && s[k] != '*') k++;
         toks.Add(new Tok(TokType.Other, s[i..k], i, k - i));
@@ -232,8 +221,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       t = Regex.Replace(t, "МОМ", "МОм", RegexOptions.IgnoreCase);
       return t;
     }
-
-    // ------------------------ HELPERS ------------------------
 
     private static bool IsBigWhitespaceBoundary(string input, List<Tok> left, List<Tok> right)
     {
@@ -263,7 +250,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return input.Substring(from, to - from);
     }
 
-    // Вставь внутрь PiSiSplitter
     public static string PreNormalize(string s)
     {
       if (string.IsNullOrEmpty(s)) return s;
@@ -308,81 +294,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 
       return new string(arr);
     }
-
-
-    //private static string NormalizeSi(string s)
-    //{
-    //  if (string.IsNullOrWhiteSpace(s)) return s?.Trim() ?? string.Empty;
-    //  s = Regex.Replace(s, @"\s+", " ");
-    //  s = Regex.Replace(s, @"\s+,", ",");
-    //  s = Regex.Replace(s, @",\s*", ", ");
-    //  return s.Trim();
-    //}
   }
 
   public static partial class PiSiSplitter
   {
-    // Включить/выключить строгую трактовку
-    public static bool StrictWhitespaceMode { get; set; } = true;
-
-    // Жёсткая граница между СИ и ПИ: 2+ пробела или любой \t
-    private static readonly Regex StrictBoundaryRegex =
-      new(@"(?<=\S)(?:\t| {2,})(?=\S)", RegexOptions.Compiled);
-
-    // Внутри частей запрещаем табы и 2+ пробелов
-    private static readonly Regex BadInnerWhitespaceRegex =
-      new(@"(?:\t| {2,})", RegexOptions.Compiled);
-
-    ///// <summary>
-    ///// Разделение СИ/ПИ в "строгом" режиме:
-    ///// - граница = 2+ пробелов или таб;
-    ///// - внутри частей допускается максимум один пробел (запятая+пробел), табы запрещены;
-    ///// - если строгая граница не найдена — fallback к обычной грамматике SplitSiFromPi.
-    ///// </summary>
-    //public static (string SiPart, string PiPart, List<string> Errors) SplitSiFromPiStrict(string input)
-    //{
-    //  var errors = new List<string>();
-
-    //  if (string.IsNullOrWhiteSpace(input))
-    //    return ("", "", errors);
-
-    //  if (StrictWhitespaceMode)
-    //  {
-    //    var m = StrictBoundaryRegex.Matches(input);
-
-    //    if (m.Count >= 1)
-    //    {
-    //      // Берём ПЕРВУЮ «жёсткую» границу как разделитель СИ/ПИ.
-    //      // (Опционально: если m.Count > 1 — добавим предупреждение.)
-    //      if (m.Count > 1)
-    //        errors.Add("E-WS-AMB: найдено несколько жёстких разделителей, используется первый.");
-
-    //      int cutStart = m[0].Index;
-    //      int cutLen = m[0].Length;
-
-    //      var siRaw = input[..cutStart];
-    //      var piRaw = input[(cutStart + cutLen)..];
-
-    //      // Проверка «внутренней» чистоты пробелов
-    //      if (BadInnerWhitespaceRegex.IsMatch(siRaw))
-    //        errors.Add("E-WS-SI: внутри параметров СИ есть таб/двойные пробелы (недопустимо в strict).");
-
-    //      if (BadInnerWhitespaceRegex.IsMatch(piRaw))
-    //        errors.Add("E-WS-PI: внутри параметров ПИ есть таб/двойные пробелы (недопустимо в strict).");
-
-    //      // Нормализуем вид СИ (запятые, один пробел)
-    //      var si = NormalizeSi(siRaw);
-    //      var pi = piRaw.Trim(); // ПИ вид оставляем как в исходнике
-
-    //      return (si, pi, errors);
-    //    }
-    //  }
-
-    //  // Fallback к «умной» грамматике, если строгая граница не найдена
-    //  var (siPart, piPart) = SplitSiFromPi(input);
-    //  return (siPart, piPart, errors);
-    //}
-
     public static (string SiPart, string PiPart, List<string> Errors) SplitSiFromPiStrict(string input)
     {
       var errors = new List<string>();
@@ -390,7 +305,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       if (string.IsNullOrWhiteSpace(input))
         return ("", "", errors);
 
-      // 1) Хвост после ПИ / СИ
       var matchAfterPi = Regex.Match(input, @"\bПИ\b\s*(.*)", RegexOptions.IgnoreCase);
       var matchAfterSi = Regex.Match(input, @"\bСИ\b\s*(.*)", RegexOptions.IgnoreCase);
 
@@ -406,7 +320,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
         return ("", "", errors);
       }
 
-      // Regex напряжений: 10В, +50В, -25В, 100В,
       var voltageRegex = new Regex(@"[+-]?\d+\s*В\s*,?", RegexOptions.IgnoreCase);
 
       var allVoltages = voltageRegex.Matches(tail);
@@ -416,8 +329,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
         return ("", "", errors);
       }
 
-      // 2) Из всех напряжений выбираем только те,
-      //    перед которыми НЕТ запятой.
+      // 2) Из всех напряжений выбираем только те, перед которыми нет запятой.
       var validSplitPoints = new List<Match>();
 
       foreach (Match m in allVoltages)
@@ -431,19 +343,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
         // Берём символ перед напряжением
         char before = tail[idx - 1];
 
-        // Считаем допустимым split, если символ перед номером напряжения НЕ запятая.
         if (before != ',')
           validSplitPoints.Add(m);
       }
 
       if (validSplitPoints.Count == 0)
       {
-        // Ни одного безопасного разделителя → строка выглядит как одиночная команда
         string piOnly = tail.Trim();
         return ("", piOnly, errors);
       }
 
-      // 3) Берём ПОСЛЕДНИЙ валидный split point
       var split = validSplitPoints.Last();
       int splitIndex = split.Index;
 
@@ -456,17 +365,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return (si, pi, errors);
     }
 
-    /// <summary>
-    /// Удобный адаптер: сначала пробуем strict, при неуспехе — обычный.
-    /// Подставь этот вызов вместо прямого SplitSiFromPi, если переходишь на строгие правила.
-    /// </summary>
-    public static (string SiPart, string PiPart) SplitPreferStrict(string input)
-    {
-      var (si, pi, _) = SplitSiFromPiStrict(input);
-      return (si, pi);
-    }
-
-    // Нормализация СИ (табы/множественные пробелы -> один пробел; " , " -> ", ")
     private static string NormalizeSi(string s)
     {
       if (string.IsNullOrWhiteSpace(s)) return s?.Trim() ?? string.Empty;

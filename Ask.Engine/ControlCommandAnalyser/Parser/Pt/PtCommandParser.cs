@@ -91,20 +91,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-      // Ищем первую и последнюю '*'
       int firstStar = bodyNoWs.IndexOf('*');
       int lastStar = bodyNoWs.LastIndexOf('*');
 
       if (firstStar >= 0 && lastStar > firstStar)
       {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
         string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
         var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");        
         
-        // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
         {
           foreach (var error in pointErrors)
@@ -122,7 +119,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
           model.BusPointsDictionary = busDictionary;
         }
 
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         int idxStarInSecondLine = remainder.LastIndexOf('*');
         if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
@@ -138,7 +134,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       }      
       else
       {
-        // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
         model.Errors.Add(PtErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }

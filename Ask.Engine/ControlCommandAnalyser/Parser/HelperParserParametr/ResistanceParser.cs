@@ -327,8 +327,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
            );
       }
 
-
-      // Ничего не нашли
       return (null, null, null, input);
     }
 
