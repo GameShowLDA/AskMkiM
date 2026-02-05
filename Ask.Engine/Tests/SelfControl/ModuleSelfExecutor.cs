@@ -6,7 +6,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.SelfControl

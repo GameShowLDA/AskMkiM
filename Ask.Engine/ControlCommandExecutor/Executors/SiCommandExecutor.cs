@@ -4,10 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -16,22 +13,22 @@ using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class SiCommandExecutor : ICommandExecutor
+  internal class SiCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
 
     private double firstValue = 0;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = context.Command as SiCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      var command = GetRequiredCommand<SiCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
 
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      SetActiveLine(context, command);
+      BreakpointHandler.Handle(command, context.Console);
 
       if (context.IsInvokedByAnotherCommand)
       {
@@ -45,45 +42,28 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
       }
 
-
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
-      }
-
       BreakpointHandler.Handle(command, context.Console);
       if (!string.IsNullOrEmpty(message) && !context.IsInvokedByAnotherCommand)
-
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
       }
-
-      var points = command.Scheme?.GroupModels?
-                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
-                  .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
-                  .ToList()
-                  ?? new List<PointModel>();
-
-      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
       if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
 
-      var modules = points
-          .Select(EquipmentService.GetModuleByPoint)
-          .Where(m => m != null)
-          .DistinctBy(m => (m.NumberChassis, m.Number))
-          .ToList();
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
-      await SettingModuleRelayControl(modules, context.Console);
+      var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
+      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
+
+      var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-
-      await SettingsDeviceBusCommutatuion(dbc, context.Console);
+      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, command.Time.Value, command.Resistance.Value, command.Voltage.Value);
@@ -138,35 +118,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
         errorMessage.AddRange(errMes);
       }
+
       await PointFormater.MessageResult(errorMessage, context.Console);
-
-
-      await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
-      foreach (var item in modules)
-      {
-        await item.PointManager.DisconnectingAllPoint(context.Console);
-      }
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
 
       if (errorMessage.Count > 0)
       {
         protocolModel.Errors.Add(nameCommand, errorMessage);
       }
     }
-
-    private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
-    {
-      await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
-    }
-    private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
-    {
-      foreach (var module in relaySwitchModules)
-      {
-        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
-        await module.BusManager.ConnectBusAsync(busA, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(busB, userMessageService: userMessageService);
-      }
-    }
-
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
     {
       string name = breakDown.Name;

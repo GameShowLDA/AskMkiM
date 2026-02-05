@@ -7,11 +7,10 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class KscCommandExecutor : ICommandExecutor
+  internal class KscCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.KSC).DisplayName;
 
@@ -26,14 +25,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
       EventAggregator.Subscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
 
-      var command = context.Command as KscCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      var command = GetRequiredCommand<KscCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
+      SetActiveLine(context, command);
 
-      if (!ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-      }
-
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       GetProtocol(context, command, protocolModel);
     }
 
@@ -65,8 +62,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       protocolModel.Agent = agent;
       protocolModel.Customer = customer;
       protocolModel.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
-      // TODO: формирование протокола с ошибкой
-      //ProtocolModel.GetPathProtocol(protocolModel); 
       FileInteractionEventAdapter.RaiseViewProtocol(protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
     }

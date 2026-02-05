@@ -454,7 +454,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
               buses[bus] = list;
             }
 
-            list.Add((point));
+            list.Add(point);
           }
         }
       }

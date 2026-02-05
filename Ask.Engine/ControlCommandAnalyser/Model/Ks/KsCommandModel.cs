@@ -14,7 +14,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ks
   /// </summary>
   [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Д)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
-  public class KsCommandModel : BaseCommandModel
+  public class KsCommandModel : BaseCommandModel, IHasScheme
   {
 
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.KC).DisplayName;

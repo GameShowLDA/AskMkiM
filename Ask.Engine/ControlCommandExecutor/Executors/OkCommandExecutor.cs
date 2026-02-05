@@ -4,28 +4,24 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   /// <summary>
   /// Исполнитель команды "ОК".
   /// </summary>
-  public class OkCommandExecutor : ICommandExecutor
+  internal class OkCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.OK).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      if (!ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-      }
-      
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       context.CommandExecutionManager.ClearErrorsMethod();
 
-      var command = context.Command as OkCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
+      var command = GetRequiredCommand<OkCommandModel>(context);
+      SetActiveLine(context, command);
+
       command.ProtocolModel = new ProtocolModel();
       command.ProtocolModel.ProgramPath = command.ObjectName;
 

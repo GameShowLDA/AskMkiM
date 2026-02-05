@@ -84,7 +84,7 @@ namespace Ask.Engine.ControlCommandAnalyser
 
     private static void CheckVshModel(List<BaseCommandModel> models)
     {
-      if (models.FirstOrDefault(model => model is VshCommandModel == true) == null)
+      if (models.FirstOrDefault(model => (model is VshCommandModel) == true) == null)
       {
         var rmIndex = models.FindLastIndex(model => model is RmCommandModel);
         if (rmIndex >= 0)
