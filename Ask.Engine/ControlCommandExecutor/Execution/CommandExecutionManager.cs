@@ -88,6 +88,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       _console = console;
       _textEditor = textEditor;
       _opkFilePath = opkFilePath;
+      CommandsToExecute = controlProgram;
 
       _commands = new CommandCollection(controlProgram);
       _executorRegistry = new CommandExecutorRegistry();
