@@ -226,8 +226,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
+        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
+        await module.BusManager.ConnectBusAsync(busA, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(busB, userMessageService: userMessageService);
       }
     }
 

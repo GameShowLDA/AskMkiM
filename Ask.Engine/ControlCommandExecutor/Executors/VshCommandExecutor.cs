@@ -44,28 +44,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var rsm = EquipmentService.ValidRelayModules;
       foreach (var module in rsm)
       {
-        var busses = await GetBusses(module);
-        await module.BusManager.ConnectBusAsync(busses.bus1, userInteractionService);
-        await module.BusManager.ConnectBusAsync(busses.bus2, userInteractionService);
+        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
+        await module.BusManager.ConnectBusAsync(busA, userMessageService: userInteractionService);
+        await module.BusManager.ConnectBusAsync(busB, userMessageService: userInteractionService);
       }
-    }
-
-    private async Task<(SwitchingBus bus1, SwitchingBus bus2)> GetBusses(IRelaySwitchModule relaySwitch)
-    {
-      var busStruct = relaySwitch.BusType;
-      switch (busStruct)
-      {
-        case SwitchingBusNew.AB1:
-          return (SwitchingBus.A1, SwitchingBus.B1);
-        case SwitchingBusNew.AB2:
-          return (SwitchingBus.A2, SwitchingBus.B2);
-        case SwitchingBusNew.AB3:
-          return (SwitchingBus.A3, SwitchingBus.B3);
-        case SwitchingBusNew.AB4:
-          return (SwitchingBus.A4, SwitchingBus.B4);
-      }
-
-      throw new NotImplementedException();
     }
   }
 }
