@@ -166,10 +166,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)
     {
-      string name = meter.Name;
-      int numberChassis = meter.NumberChassis;
-      int number = meter.Number;
-
       if (!fast)
       {
         await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);

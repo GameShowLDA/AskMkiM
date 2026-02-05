@@ -30,11 +30,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
 
-      if (!ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-      }
-
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       GetProtocol(context, command, protocolModel);
     }
 
@@ -66,8 +62,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       protocolModel.Agent = agent;
       protocolModel.Customer = customer;
       protocolModel.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
-      // TODO: формирование протокола с ошибкой
-      //ProtocolModel.GetPathProtocol(protocolModel); 
       FileInteractionEventAdapter.RaiseViewProtocol(protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
     }

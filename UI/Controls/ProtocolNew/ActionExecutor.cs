@@ -580,10 +580,7 @@ namespace UI.Controls.ProtocolNew
     {
       await Application.Current.Dispatcher.Invoke(async () =>
       {
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-        }
+        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
 
         SystemStateManager.SetIsLocked(false);
 

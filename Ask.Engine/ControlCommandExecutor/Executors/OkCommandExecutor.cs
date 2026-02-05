@@ -16,11 +16,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      if (!ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-      }
-
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       context.CommandExecutionManager.ClearErrorsMethod();
 
       var command = GetRequiredCommand<OkCommandModel>(context);
