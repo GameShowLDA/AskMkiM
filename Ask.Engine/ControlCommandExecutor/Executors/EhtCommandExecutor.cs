@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -119,8 +120,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       foreach (var module in relaySwitchModules)
       {
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
+        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
+        await module.BusManager.ConnectBusAsync(busA, userMessageService: userMessageService);
+        await module.BusManager.ConnectBusAsync(busB, userMessageService: userMessageService);
       }
     }
 
