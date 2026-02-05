@@ -340,7 +340,7 @@
     <value>Admin</value>
   </data>
   <data name="input.bus.group.title" xml:space="preserve">
-    <value>Group bus for check</value>
+    <value>Bus group</value>
   </data>
   <data name="input.bus.group.ab1" xml:space="preserve">
     <value>A1B1</value>
