@@ -13,7 +13,6 @@ using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -43,34 +42,22 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       BreakpointHandler.Handle(command, context.Console);
       if (!string.IsNullOrEmpty(message) && !context.IsInvokedByAnotherCommand)
-
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
       }
-
-      var points = command.Scheme?.GroupModels?
-                  .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
-                  .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
-                  .ToList()
-                  ?? new List<PointModel>();
-
-      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
       if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
 
-      var modules = points
-          .Select(EquipmentService.GetModuleByPoint)
-          .Where(m => m != null)
-          .DistinctBy(m => (m.NumberChassis, m.Number))
-          .ToList();
+      var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
+      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
+      var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
@@ -128,7 +115,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       await PointFormater.MessageResult(errorMessage, context.Console);
-      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(modules, context.Console);
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
 
       if (errorMessage.Count > 0)
       {

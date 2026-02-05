@@ -15,7 +15,6 @@ using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -29,42 +28,27 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = GetRequiredCommand<PiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
+
       SetActiveLine(context, command);
-
-      var time = command.Time;
-      var voltage = command.Voltage;
-      string nameSiCommand = $"ПИ/СИ1";
-
-
       BreakpointHandler.Handle(command, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
 
-      var points = command.Scheme?.GroupModels?
-                 .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
-                 .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
-                 .ToList()
-                 ?? new List<PointModel>();
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
+      var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
-      }
-
-      var modules = points
-        .Select(EquipmentService.GetModuleByPoint)
-        .Where(m => m != null)
-        .DistinctBy(m => (m.NumberChassis, m.Number))
-        .ToList();
-
-      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
+      var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
 
+      var time = command.Time;
+      var voltage = command.Voltage;
+      string nameSiCommand = $"ПИ/СИ1";
       var siCommanNumber = command.SiCommand.CommandNumber;
-      // Первый тест СИ
+
       if (command.SiCommand != null)
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 1", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
@@ -158,7 +142,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         protocolModel.Errors.Add(nameCommand, errorMessage);
       }
 
-      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(modules, context.Console);
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
 
       if (command.SiCommand != null)
       {

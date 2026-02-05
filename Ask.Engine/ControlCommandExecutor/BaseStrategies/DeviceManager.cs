@@ -1,11 +1,15 @@
-﻿using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
@@ -194,6 +198,25 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             await module.PointManager.DisconnectingAllPoint(userMessageService);
           }
+        }
+
+        /// <summary>
+        /// Собирает список всех точек измерения из схемы команды.
+        /// </summary>
+        /// <param name="command">
+        /// Объект, содержащий схему измерений.
+        /// </param>
+        /// <returns>
+        /// Список всех точек измерения, найденных в схеме.
+        /// Если схема отсутствует, возвращается пустой список.
+        /// </returns>
+        public static List<PointModel> CollectPoints(IHasScheme command)
+        {
+          return command.Scheme?.GroupModels?
+                .SelectMany(g => g?.ChainModels ?? Enumerable.Empty<ChainModel>())
+                .SelectMany(c => c?.PointModels ?? Enumerable.Empty<PointModel>())
+                .ToList()
+                ?? new List<PointModel>();
         }
       }
 
@@ -466,6 +489,29 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
         }
       }
+
+      /// <summary>
+      /// Определяет набор уникальных модулей коммутации реле, задействованных для указанных точек измерения.
+      /// </summary>
+      /// <param name="points">
+      /// Коллекция точек измерения, для которых требуется определить используемые модули коммутации.
+      /// </param>
+      /// <param name="context">
+      /// Контекст выполнения команды.
+      /// </param>
+      /// <returns>
+      /// Список уникальных модулей коммутации релейных, используемых в процессе выполнения команды.
+      /// </returns>
+      internal static List<IRelaySwitchModule> PrepareRelayModules(IEnumerable<PointModel> points, CommandExecutionContext context)
+      {
+        var modules = points
+            .Select(EquipmentService.GetModuleByPoint)
+            .Where(m => m != null)
+            .DistinctBy(m => (m.NumberChassis, m.Number))
+            .ToList();
+
+        return modules;
+      }
     }
 
     /// <summary>
@@ -504,6 +550,22 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
         }
+      }
+    }
+
+    /// <summary>
+    /// Отображает сообщение о подготовке измерительных устройств,
+    /// если включён вывод параметров выполнения в настройках приложения.
+    /// </summary>
+    /// <param name="context">
+    /// Контекст выполнения команды, содержащий сервис
+    /// взаимодействия с пользователем.
+    /// </param>
+    internal static async Task ShowDevicesPreparationMessageIfNeededAsync(CommandExecutionContext context)
+    {
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
+      {
+        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
     }
   }

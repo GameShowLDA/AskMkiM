@@ -5,12 +5,13 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Д)]
-  public class EhtCommandModel : BaseCommandModel
+  public class EhtCommandModel : BaseCommandModel, IHasScheme
   {
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.EHT).DisplayName;
 
