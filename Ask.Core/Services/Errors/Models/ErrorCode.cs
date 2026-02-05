@@ -476,6 +476,13 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
+    #region Режим ОТ
+
+    /// <summary> Тело команды ОТ отсутствует или пустое. </summary>
+    [ErrorCodeTag("OT001")]
+    Ot_EmptyCommandBody,
+    #endregion
+
     #region Ключи команд
 
     /// <summary> Использованный ключ не разрешён для данной команды. </summary>
