@@ -23,18 +23,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = GetRequiredCommand<EhtCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      SetActiveLine(context, command);
-
-      BreakpointHandler.Handle(command, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
-
       List<ShowMessageModel> errorMessage = new();
       List<ShowMessageModel> infoMessage = new();
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
-      }
+      SetActiveLine(context, command);
+      BreakpointHandler.Handle(command, context.Console);
+
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);

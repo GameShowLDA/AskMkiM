@@ -26,7 +26,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = GetRequiredCommand<SiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
+
       SetActiveLine(context, command);
+      BreakpointHandler.Handle(command, context.Console);
 
       if (context.IsInvokedByAnotherCommand)
       {
@@ -50,6 +52,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
       }
+
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);

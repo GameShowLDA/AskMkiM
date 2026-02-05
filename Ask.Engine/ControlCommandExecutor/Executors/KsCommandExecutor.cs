@@ -37,23 +37,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       List<ShowMessageModel> errorMessage = new();
       List<ShowMessageModel> infoMessage = new();
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
-      }
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      var relayModules = points
-         .Select(EquipmentService.GetModuleByPoint)
-         .Where(m => m != null)
-         .DistinctBy(m => (m.NumberChassis, m.Number))
-         .ToList();
-
       var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
-      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
-
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();

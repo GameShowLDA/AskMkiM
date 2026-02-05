@@ -29,28 +29,17 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = GetRequiredCommand<IeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      SetActiveLine(context, command);
-
-      BreakpointHandler.Handle(command, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
-
       List<ShowMessageModel> errorMessage = new();
       List<ShowMessageModel> infoMessage = new();
+      
+      SetActiveLine(context, command);
+      BreakpointHandler.Handle(command, context.Console);
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
-      }
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
-
-      var relayModules = points
-         .Select(EquipmentService.GetModuleByPoint)
-         .Where(m => m != null)
-         .DistinctBy(m => (m.NumberChassis, m.Number))
-         .ToList();
-      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);

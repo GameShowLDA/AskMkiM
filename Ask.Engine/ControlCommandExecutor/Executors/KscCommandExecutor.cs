@@ -30,7 +30,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
 
-
       if (!ExecutionConfig.GetIsIdleModeEnabled())
       {
         await NewCore.Communication.DeviceCommandSender.ResetAllSystem();

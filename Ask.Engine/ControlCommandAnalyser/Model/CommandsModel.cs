@@ -2,6 +2,7 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
@@ -175,7 +176,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
       }
       else
       {
-        // у этой команды схемы нет — просто пропускаем/логируем
         LogInformation($"Команда {newCommand.GetType().Name} не содержит Scheme.");
       }
       return scheme;
