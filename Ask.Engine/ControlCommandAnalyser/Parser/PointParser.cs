@@ -418,7 +418,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           var point = PointModel.ParsePointString(address);
           point.Mnemonic = token;
 
-          var realysModule = new RelaySwitchModuleServices().GetDevicesByNumberChassis(point.DeviceNumber).Where(x => x.Number == point.ModuleNumber).First();
+          var realysModule = new RelaySwitchModuleServices().GetDevicesByNumberChassis(point.DeviceNumber).Where(x => x.Number == point.ModuleNumber).FirstOrDefault();
 
           if (realysModule == null)
           {
