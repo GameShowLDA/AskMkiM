@@ -75,7 +75,7 @@ namespace NewCore.Device
     /// </summary>
     public KeysightDevice()
     {
-      Name = "Keysight 3466 new";
+      Name = "Мультиметр 34465A";
       Description = "Реализовать описание в NewCore.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
       DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.FastMeter;
