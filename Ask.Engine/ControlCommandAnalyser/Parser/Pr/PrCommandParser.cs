@@ -322,125 +322,29 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       (double? valLower, string lowerUnit) = lower.HasValue ? UnitsConvertor.TryConvertBack(lower.Value, unit) : (null, unit);
       (double? valHigher, string higherUnit) = higher.HasValue ? UnitsConvertor.TryConvertBack(higher.Value, unit) : (null, unit);
 
-      // 1) ЕСЛИ ОБЕ ГРАНИЦЫ ЗАДАНЫ
       if (valLower.HasValue && valHigher.HasValue)
       {
-        if (lower!.Value > higher!.Value)
-        {
-          model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
-              model.StartLineNumber,
-              $"{model.CommandNumber} {model.Mnemonic}",
-              $"Нижняя граница ({valLower} {lowerUnit}) больше верхней ({valHigher} {higherUnit})"));
-          return;
-        }
-
-        if (lower.Value < PR_MIN)
-        {
-          model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
-              model.StartLineNumber,
-              $"{model.CommandNumber} {model.Mnemonic}",
-              $"Нижняя граница ({valLower} {lowerUnit}) меньше минимально допустимой ({PR_MIN} Ом)"));
-          return;
-        }
-
-        if (higher.Value > PR_MAX)
-        {
-          model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
-              model.StartLineNumber,
-              $"{model.CommandNumber} {model.Mnemonic}",
-              $"Верхняя граница ({valHigher} {higherUnit}) больше максимально допустимой ({PR_MAX} Ом)"));
-          return;
-        }
-
-        // проверка на разобщение
-        model.DisconnectedLowerLimitResistance = higher.Value;
-        model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
-
-        model.DisconnectedHigherLimitResistance = null;
-        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом"; 
-
-        //проверка на сообщение
-        model.ConnectedLowerLimitResistance = lower.Value;
-        model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
-
-        model.ConnectedHigherLimitResistance = higher.Value;
-        model.ConnectedHigherLimitResistanceSource = $"{valHigher} {higherUnit}";
-
+        ApplyResistanceRange(model, lower, higher, PR_MIN, PR_MAX, infinity, valLower, lowerUnit, valHigher, higherUnit);
         return;
       }
 
-      // 2) ЕСЛИ ЗАДАНА ТОЛЬКО ВЕРХНЯЯ
       if (!valLower.HasValue && valHigher.HasValue)
       {
-        double lowOhm = 0.0; // по правилам
-
-        if (higher!.Value > PR_MAX)
-        {
-          model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
-              model.StartLineNumber,
-              $"{model.CommandNumber} {model.Mnemonic}",
-              $"Верхняя граница ({valHigher} {higherUnit}) больше максимально допустимой ({PR_MAX} Ом)"));
-          return;
-        }
-
-        // проверка на разобщение
-        model.DisconnectedLowerLimitResistance = higher.Value;
-        model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
-
-        model.DisconnectedHigherLimitResistance = null;
-        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
-
-        //проверка на сообщение
-        model.ConnectedLowerLimitResistance = lowOhm;
-        model.ConnectedLowerLimitResistanceSource = $"{lowOhm} Ом";
-
-        model.ConnectedHigherLimitResistance = higher.Value;
-        model.ConnectedHigherLimitResistanceSource = $"{valHigher} {higherUnit}";
-
+        ApplyUpperResistanceLimit(model, higher, PR_MAX, infinity, valHigher, higherUnit);
         return;
       }
 
-      // 3) ЕСЛИ ЗАДАНА ТОЛЬКО НИЖНЯЯ
       if (valLower.HasValue && !valHigher.HasValue)
       {
-        if (lower!.Value < PR_MIN)
-        {
-          model.Errors.Add(
-            PrErrors.ResistanceLimitsConflict(
-              model.StartLineNumber,
-              $"{model.CommandNumber} {model.Mnemonic}",
-              $"Нижняя граница ({valLower} {lowerUnit}) меньше минимально допустимой ({PR_MIN} Ом)"));
-          return;
-        }
-
-        // проверка на разобщение
-        if (higher != null)
-        {
-          model.DisconnectedLowerLimitResistance = higher.Value;
-          model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
-        }
-
-        model.DisconnectedLowerLimitResistance = lower.Value;
-        model.DisconnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
-
-        model.DisconnectedHigherLimitResistance = null;
-        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
-
-        //проверка на сообщение
-        model.ConnectedLowerLimitResistance = lower.Value;
-        model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
-
-        model.ConnectedHigherLimitResistance = null;
-        model.ConnectedHigherLimitResistanceSource = null;
-
+        ApplyLowerResistanceLimit(model, lower, higher, PR_MIN, infinity, valLower, lowerUnit, valHigher, higherUnit);
         return;
       }
 
-      // 4) НИ ОДНОЙ ГРАНИЦЫ НЕТ
+      ApplyDefaultLimits(model, PR_MIN, PR_DEFAULT_LOWER, infinity);
+    }
+
+    private static void ApplyDefaultLimits(PrCommandModel model, double PR_MIN, double PR_DEFAULT_LOWER, char infinity)
+    {
       // проверка на разобщение
       model.DisconnectedLowerLimitResistance = PR_DEFAULT_LOWER;
       model.DisconnectedLowerLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом";
@@ -453,7 +357,170 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       model.ConnectedLowerLimitResistanceSource = $"{PR_MIN} Ом";
 
       model.ConnectedHigherLimitResistance = PR_DEFAULT_LOWER;
-      model.ConnectedHigherLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом"; ;
+      model.ConnectedHigherLimitResistanceSource = $"{PR_DEFAULT_LOWER} Ом";
+    }
+
+    /// <summary>
+    /// Применяет нижнюю границу сопротивления.
+    /// </summary>
+    /// <param name="model">Модель команды PR.</param>
+    /// <param name="lowerLimit">Нижняя граница сопротивления в омах.</param>
+    /// <param name="upperLimit">
+    /// Дополнительная верхняя граница (если была указана в выражении).
+    /// Используется для проверки разобщения.
+    /// </param>
+    /// <param name="minAllowed">Минимально допустимое сопротивление по правилам PR.</param>
+    /// <param name="infinity">Символ бесконечности для отображения.</param>
+    /// <param name="valLower">Исходное значение нижней границы (до конвертации).</param>
+    /// <param name="lowerUnit">Единица измерения нижней границы.</param>
+    /// <param name="valUpper">Исходное значение верхней границы (если есть).</param>
+    /// <param name="upperUnit">Единица измерения верхней границы.</param>
+    private static void ApplyLowerResistanceLimit(PrCommandModel model, double? lowerLimit, double? upperLimit, double minAllowed, char infinity,double? valLower,
+        string lowerUnit, double? valUpper, string upperUnit)
+    {
+      if (lowerLimit < minAllowed)
+      {
+        model.Errors.Add(
+            PrErrors.ResistanceLimitsConflict(
+                model.StartLineNumber,
+                $"{model.CommandNumber} {model.Mnemonic}",
+                $"Нижняя граница ({valLower} {lowerUnit}) меньше минимально допустимой ({minAllowed} Ом)"));
+        return;
+      }
+
+      // Разобщение
+      if (upperLimit != null)
+      {
+        model.DisconnectedLowerLimitResistance = upperLimit.Value;
+        model.DisconnectedLowerLimitResistanceSource = $"{valUpper} {upperUnit}";
+      }
+
+      model.DisconnectedLowerLimitResistance = lowerLimit;
+      model.DisconnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
+      model.DisconnectedHigherLimitResistance = null;
+      model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
+
+      // Сообщение
+      model.ConnectedLowerLimitResistance = lowerLimit;
+      model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
+      model.ConnectedHigherLimitResistance = null;
+      model.ConnectedHigherLimitResistanceSource = null;
+    }
+
+    /// <summary>
+    /// Применяет верхнюю границу сопротивления.
+    /// </summary>
+    /// <param name="model">Модель команды PR.</param>
+    /// <param name="upperLimit">Верхняя граница сопротивления в омах.</param>
+    /// <param name="maxAllowed">Максимально допустимое сопротивление по правилам PR.</param>
+    /// <param name="infinity">Символ бесконечности для отображения.</param>
+    /// <param name="valUpper">Исходное значение верхней границы.</param>
+    /// <param name="upperUnit">Единица измерения верхней границы.</param>
+    private static void ApplyUpperResistanceLimit(PrCommandModel model, double? upperLimit, double maxAllowed, char infinity, double? valUpper, string upperUnit)
+    {
+      const double minConnectedResistance = 0.0;
+
+      if (upperLimit > maxAllowed)
+      {
+        model.Errors.Add(
+            PrErrors.ResistanceLimitsConflict(
+                model.StartLineNumber,
+                $"{model.CommandNumber} {model.Mnemonic}",
+                $"Верхняя граница ({valUpper} {upperUnit}) больше максимально допустимой ({maxAllowed} Ом)"));
+        return;
+      }
+
+      // Разобщение
+      model.DisconnectedLowerLimitResistance = upperLimit;
+      model.DisconnectedLowerLimitResistanceSource = $"{valUpper} {upperUnit}";
+
+      model.DisconnectedHigherLimitResistance = null;
+      model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
+
+      // Сообщение
+      model.ConnectedLowerLimitResistance = minConnectedResistance;
+      model.ConnectedLowerLimitResistanceSource = $"{minConnectedResistance} Ом";
+
+      model.ConnectedHigherLimitResistance = upperLimit;
+      model.ConnectedHigherLimitResistanceSource = $"{valUpper} {upperUnit}";
+    }
+
+    /// <summary>
+    /// Применяет диапазон сопротивлений (нижняя и верхняя границы).
+    /// </summary>
+    /// <remarks>
+    /// Для обоих режимов ("разобщение" и "сообщение")
+    /// используется один и тот же диапазон допустимых значений.
+    /// </remarks>
+    /// <param name="model">Модель команды PR.</param>
+    /// <param name="lowerLimit">Нижняя граница сопротивления в омах.</param>
+    /// <param name="upperLimit">Верхняя граница сопротивления в омах.</param>
+    /// <param name="minAllowed">Минимально допустимое сопротивление по правилам PR.</param>
+    /// <param name="maxAllowed">Максимально допустимое сопротивление по правилам PR.</param>
+    /// <param name="infinity">Символ бесконечности для отображения.</param>
+    /// <param name="valLower">Исходное значение нижней границы.</param>
+    /// <param name="lowerUnit">Единица измерения нижней границы.</param>
+    /// <param name="valUpper">Исходное значение верхней границы.</param>
+    /// <param name="upperUnit">Единица измерения верхней границы.</param>
+    private static void ApplyResistanceRange(PrCommandModel model, double? lowerLimit, double? upperLimit, double minAllowed, double maxAllowed,
+        char infinity, double? valLower, string lowerUnit, double? valUpper, string upperUnit)
+    {
+      bool isValid = CheckBothLimits(model, lowerLimit, upperLimit, minAllowed, maxAllowed, valLower, lowerUnit, valUpper, upperUnit);
+
+      if (!isValid)
+        return;
+
+      // Разобщение
+      model.DisconnectedLowerLimitResistance = upperLimit;
+      model.DisconnectedLowerLimitResistanceSource = $"{valUpper} {upperUnit}";
+
+      model.DisconnectedHigherLimitResistance = null;
+      model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
+
+      // Сообщение
+      model.ConnectedLowerLimitResistance = lowerLimit;
+      model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+
+      model.ConnectedHigherLimitResistance = upperLimit;
+      model.ConnectedHigherLimitResistanceSource = $"{valUpper} {upperUnit}";
+    }
+
+
+    private static bool CheckBothLimits(PrCommandModel model, double? lower, double? higher, double PR_MIN, double PR_MAX, double? valLower, string lowerUnit, double? valHigher, string higherUnit)
+    {
+      if (lower!.Value > higher!.Value)
+      {
+        model.Errors.Add(
+          PrErrors.ResistanceLimitsConflict(
+            model.StartLineNumber,
+            $"{model.CommandNumber} {model.Mnemonic}",
+            $"Нижняя граница ({valLower} {lowerUnit}) больше верхней ({valHigher} {higherUnit})"));
+        return false;
+      }
+
+      if (lower.Value < PR_MIN)
+      {
+        model.Errors.Add(
+          PrErrors.ResistanceLimitsConflict(
+            model.StartLineNumber,
+            $"{model.CommandNumber} {model.Mnemonic}",
+            $"Нижняя граница ({valLower} {lowerUnit}) меньше минимально допустимой ({PR_MIN} Ом)"));
+        return false;
+      }
+
+      if (higher.Value > PR_MAX)
+      {
+        model.Errors.Add(
+          PrErrors.ResistanceLimitsConflict(
+            model.StartLineNumber,
+            $"{model.CommandNumber} {model.Mnemonic}",
+            $"Верхняя граница ({valHigher} {higherUnit}) больше максимально допустимой ({PR_MAX} Ом)"));
+        return false;
+      }
+
+      return true;
     }
 
     private void ValidateAgainstMeter(PrCommandModel model, IFastMeter meter)

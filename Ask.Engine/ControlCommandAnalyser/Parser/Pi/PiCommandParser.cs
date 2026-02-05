@@ -234,13 +234,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           int idxStarInSecondLine = remainderPi.LastIndexOf('*');
           if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
           {
-            remainder =
-                remainder[..idxStarInFirstLine].Trim()
-                + remainder[(idxStarInSecondLine + 1)..].Trim();
+            remainderPi =
+                remainderPi[..idxStarInFirstLine].Trim()
+                + remainderPi[(idxStarInSecondLine + 1)..].Trim();
           }
           else
           {
-            remainder = remainder.Trim();
+            remainderPi = remainderPi.Trim();
           }
           if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
             || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
