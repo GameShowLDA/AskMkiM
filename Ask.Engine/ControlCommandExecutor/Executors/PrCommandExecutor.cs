@@ -4,7 +4,6 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -63,7 +62,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       .Where(m => m != null)
       .DistinctBy(m => (m.NumberChassis, m.Number))
       .ToList();
-      await SettingModuleRelayControl(modules, context.Console);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
@@ -88,7 +87,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         methodExecutionContext.IsPolarityReversed = true;
       }
-      
+
       NodeAccumulationContext nodeAccumulationContext = methodExecutionContext.CreateChild<NodeAccumulationContext>();
       PairwiseFirstPointContext pairwiseFirstPointContext = methodExecutionContext.CreateChild<PairwiseFirstPointContext>();
 
@@ -218,17 +217,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (infoMessage.Count > 0)
       {
         protocolModel.Info.Add(nameCommand, infoMessage);
-      }
-    }
-
-
-    private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
-    {
-      foreach (var module in relaySwitchModules)
-      {
-        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
-        await module.BusManager.ConnectBusAsync(busA, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(busB, userMessageService: userMessageService);
       }
     }
 

@@ -7,7 +7,6 @@ using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 using Message;
 using System.Windows;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {

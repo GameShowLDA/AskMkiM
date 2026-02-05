@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
 {

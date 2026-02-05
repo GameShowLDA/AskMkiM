@@ -99,7 +99,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       // Мультиметр
       _fastMeter = RelayModuleHelper.ResolveFastMeter(data.FirstPoint.DeviceNumber);
 
-      needReset = true; 
+      needReset = true;
 
       await _userInteractionService.ShowMessageAsync(
           new ShowMessageModel("Инициализация оборудования"),

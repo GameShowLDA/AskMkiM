@@ -4,10 +4,8 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -23,8 +21,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   internal class PiCommandExecutor : ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
-    double amperhMaxDCW = 10;
-    double amperhMaxACW = 60;
+    private double amperhMaxDCW = 10;
+    private double amperhMaxACW = 60;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
 
@@ -66,7 +64,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         .DistinctBy(m => (m.NumberChassis, m.Number))
         .ToList();
 
-      await SettingModuleRelayControl(modules, context.Console);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
       await SettingsDeviceBusCommutatuion(dbc, context.Console);
@@ -182,17 +180,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
       }
     }
-
-    private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
-    {
-      foreach (var module in relaySwitchModules)
-      {
-        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
-        await module.BusManager.ConnectBusAsync(busA, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(busB, userMessageService: userMessageService);
-      }
-    }
-
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
       await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);

@@ -8,7 +8,6 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Microsoft.EntityFrameworkCore;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -42,7 +41,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       foreach (var chainModels in groupChains.ChainModels)
       {
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
-        await DeviceManager.ConnectChainToBusBAsync(chainModels, context.MessageService, context.IsPolarityReversed);
+        await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(chainModels, context.MessageService, context.IsPolarityReversed);
       }
 
       foreach (var chainModels in groupChains.ChainModels)
@@ -51,9 +50,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Проверка {chainModels.ToString()}"), IsBlockStart: true);
 
-        await DeviceManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService, context.IsPolarityReversed);
+        await DeviceManager.RelayModule.ChainManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService, context.IsPolarityReversed);
 
-        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(),context.InternalResistance, context.VoltageType);
+        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), context.InternalResistance, context.VoltageType);
 
         if (!answer.Result)
         {
@@ -61,7 +60,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           ErrorsPoints.Add(chainModels);
         }
 
-        await DeviceManager.SwitchChainFromBusAToBAsync(chainModels, context.MessageService, context.IsPolarityReversed);
+        await DeviceManager.RelayModule.ChainManager.SwitchChainFromBusAToBAsync(chainModels, context.MessageService, context.IsPolarityReversed);
       }
 
       if (ErrorsPoints.Count > 0)
@@ -117,7 +116,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       foreach (var point in points)
       {
-        await DeviceManager.DisconnectChainFromBusBAsync(point, messageService, revers);
+        await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusBAsync(point, messageService, revers);
       }
     }
 
@@ -211,16 +210,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await DisconnectAllFromBusAAsync(allPoints, messageService, revers);
       await DisconnectAllFromBusBAsync(allPoints, messageService, revers);
 
-      await DeviceManager.ConnectChainToBusAAsync(a, messageService, revers);
-      await DeviceManager.ConnectChainToBusBAsync(b, messageService, revers);
+      await DeviceManager.RelayModule.ChainManager.ConnectChainToBusAAsync(a, messageService, revers);
+      await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(b, messageService, revers);
 
       var module = EquipmentService.GetModuleByPoint(a.PointModels.FirstOrDefault());
       var anwer = await performMeasurementAsync(resistance, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
 
       var result = (!anwer.Result, anwer.Value);
 
-      await DeviceManager.DisconnectChainFromBusAAsync(a, messageService, revers);
-      await DeviceManager.DisconnectChainFromBusBAsync(b, messageService, revers);
+      await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusAAsync(a, messageService, revers);
+      await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusBAsync(b, messageService, revers);
 
       return result;
     }
@@ -229,7 +228,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       foreach (var point in points)
       {
-        await DeviceManager.DisconnectChainFromBusAAsync(point, messageService, revers);
+        await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusAAsync(point, messageService, revers);
       }
     }
   }

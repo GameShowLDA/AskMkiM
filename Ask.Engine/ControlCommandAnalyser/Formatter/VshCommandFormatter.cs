@@ -19,7 +19,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       if (vsh.AlgorithmKey.Count > 0)
         yield return $"\tКлючи команды: {string.Join(", ", vsh.AlgorithmKey)}";
 
-      if(vsh.BusStructure.Count == 0)
+      if (vsh.BusStructure.Count == 0)
       {
         yield return $"\tСтруктура стойки коммутации не указана!";
       }

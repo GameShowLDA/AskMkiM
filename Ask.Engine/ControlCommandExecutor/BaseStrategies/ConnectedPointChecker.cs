@@ -1,15 +1,12 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Newtonsoft.Json.Linq;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -105,7 +102,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           points.PointModels.Remove(_basePoint);
 
           await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = 1 }, IsBlockStart: true);
-          await DeviceManager.ConnectPointToBusBAsync(_basePoint, context.MessageService, false);
+          await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(_basePoint, context.MessageService, false);
 
 
           foreach (var point in points.PointModels)
@@ -116,7 +113,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             string machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"({point.ToString()})" : string.Empty;
 
             await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(_basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
-            await DeviceManager.ConnectPointToBusAAsync(point, context.MessageService, false);
+            await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, context.MessageService, false);
 
             var module = EquipmentService.GetModuleByPoint(point);
             var result = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), module.SwitchResistance);
@@ -136,9 +133,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               infoMessage.Add(ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, result.Value, chainStr));
             }
 
-            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, false);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, false);
           }
-          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, false);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, false);
         }
       }
 

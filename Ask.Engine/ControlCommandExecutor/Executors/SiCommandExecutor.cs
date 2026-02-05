@@ -4,10 +4,8 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -17,7 +15,6 @@ using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors.Interface;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -79,7 +76,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           .DistinctBy(m => (m.NumberChassis, m.Number))
           .ToList();
 
-      await SettingModuleRelayControl(modules, context.Console);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(modules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
 
@@ -156,15 +153,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
     {
       await dbc.ConnectorManager.ConnectBreakdownTester(userMessageService);
-    }
-    private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
-    {
-      foreach (var module in relaySwitchModules)
-      {
-        BusConverter.TrySplitAbBus(module.BusType, out SwitchingBus busA, out SwitchingBus busB);
-        await module.BusManager.ConnectBusAsync(busA, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(busB, userMessageService: userMessageService);
-      }
     }
 
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
