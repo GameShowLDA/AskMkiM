@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Text.Unicode;
 using Ude;
 
 namespace Utilities.Services
@@ -59,11 +60,12 @@ namespace Utilities.Services
       {
         try
         {
-          return Encoding.GetEncoding(detector.Charset);
+          var enc = Encoding.GetEncoding(detector.Charset);
+          return enc; 
         }
         catch
         {
-          return Encoding.UTF8;
+          return Encoding.GetEncoding(866);
         }
       }
 

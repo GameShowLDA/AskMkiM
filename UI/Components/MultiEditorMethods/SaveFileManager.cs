@@ -139,7 +139,7 @@ namespace UI.Components.MultiEditorMethods
     {
       var saveFileDialog = new SaveFileDialog
       {
-        Filter = "Файлы программ контроля (*.pk, *.PK, *.Pk)|*.pk;*.PK;*.Pk|Текстовые файлы (*.txt)|*.txt",
+        Filter = "Файлы программ контроля (*.pkw, *.PKW, *.Pkw)|*.pkw;*.PKW;*.Pkw|Текстовые файлы (*.txt)|*.txt",
         Title = "Сохранить файл как",
         FileName = GetActiveTabName(),
       };
@@ -208,15 +208,16 @@ namespace UI.Components.MultiEditorMethods
     private bool SaveDataFromTextEditor(TextEditorUI textEditor, string filePath)
     {
       var fileData = textEditor.Text;
-      if (filePath.ToLower().Contains(".pk") && !filePath.ToLower().Contains(".pkw"))
+      if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt"))
+      {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        File.WriteAllText(filePath, fileData, Encoding.UTF8);
+      }
+      else 
       {
         var encoding = textEditor.TextEditorModel.Encoding;
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         File.WriteAllText(filePath, fileData, encoding == null ? Encoding.GetEncoding(866) : encoding);
-      }
-      else
-      {
-        File.WriteAllText(filePath, fileData);
       }
       LogInformation($"Файл {filePath} сохранен");
       MessageBoxCustom.Show($"Файл {filePath} сохранен", image: MessageBoxImage.Information);
