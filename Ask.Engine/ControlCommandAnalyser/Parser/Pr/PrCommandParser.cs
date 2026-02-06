@@ -228,7 +228,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
         model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
-      if (!string.IsNullOrEmpty(remainder))
+      if (!string.IsNullOrEmpty(remainder)&&!string.IsNullOrWhiteSpace(remainder))
       {
         model.UnparsedParameters = "! Не распознанные параметры: ";
         model.UnparsedParameters += remainder;

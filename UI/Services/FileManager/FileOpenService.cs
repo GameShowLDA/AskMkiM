@@ -166,7 +166,17 @@ namespace UI.Services.FileManager
     internal (string, Encoding) ReadFileContent(string path)
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-      var encoding = EncodingService.DetectEncodingFromFile(path);
+      //var encoding = EncodingService.DetectEncodingFromFile(path);
+      var extention = Path.GetExtension(path).ToLowerInvariant();
+      Encoding encoding;
+      if (extention == ".pkw" || extention == ".txt")
+      {
+        encoding = Encoding.UTF8;
+      }
+      else
+      {
+        encoding = Encoding.GetEncoding(866);
+      }
 
       var lines = File.ReadLines(path, encoding)
                       .Where(line => !string.IsNullOrEmpty(line))
