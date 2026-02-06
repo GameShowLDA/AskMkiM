@@ -68,7 +68,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await messageService.ShowMessageAsync(err);
 
           errorsMessage.Add(err);
-          context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
+          context.CommandManager.AddErrorMethod(
+            context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", 
+            chainStr, 
+            context.MessageService.GetLastLineNumber(), 
+            context.CommandModel.FormattedStartLineNumber));
         }
 
         await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusAAsync(chain, messageService, context.IsPolarityReversed);

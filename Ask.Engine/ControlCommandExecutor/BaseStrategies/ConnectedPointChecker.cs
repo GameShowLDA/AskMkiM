@@ -125,7 +125,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             if (!result.Result)
             {
               errorChain.Add(item, result.Value.ToString());
-              context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.DisconnectChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, $"{result.Value.ToString()} Ом", context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
+              context.CommandManager.AddErrorMethod(
+                context.CommandModel.PointErrors.DisconnectChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+                chainStr, $"{result.Value.ToString()} Ом",
+                context.MessageService.GetLastLineNumber(),
+                context.CommandModel.FormattedStartLineNumber));
             }
 
             if (context.IsProtocolAttribute)

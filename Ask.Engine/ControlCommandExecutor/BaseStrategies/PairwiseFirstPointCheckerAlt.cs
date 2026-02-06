@@ -66,7 +66,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             await context.MessageService.ShowMessageAsync(errorMessageModels);
             errorsMessgae.Add(errorMessageModels);
             await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
-            context.CommandManager.AddErrorMethod(EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", $"{_basePoint}{machineAdress}", context.MessageService.GetLastLineNumber(), baseCommandModel.FormattedStartLineNumber));
+            context.CommandManager.AddErrorMethod(
+              EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
+              $"{_basePoint}{machineAdress}", 
+              context.MessageService.GetLastLineNumber(), 
+              baseCommandModel.FormattedStartLineNumber));
           }
           else
           {
@@ -95,7 +99,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               await context.MessageService.ShowMessageAsync(errorMessageModels);
               errorsMessgae.Add(errorMessageModels);
-              context.CommandManager.AddErrorMethod(EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", $"{point.Mnemonic}{machineAdress}", context.MessageService.GetLastLineNumber(), baseCommandModel.FormattedStartLineNumber));
+              context.CommandManager.AddErrorMethod(
+                EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
+                $"{point.Mnemonic}{machineAdress}", 
+                context.MessageService.GetLastLineNumber(), 
+                baseCommandModel.FormattedStartLineNumber));
+
               await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
             }
             else
@@ -128,7 +137,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 errorPoint = true;
 
                 await context.MessageService.ShowMessageAsync(errorMessageModels);
-                context.CommandManager.AddErrorMethod(EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", $"{_basePoint.Mnemonic}{machineAdressFirst}", $"{point.Mnemonic}{machineAdressSecond}", context.MessageService.GetLastLineNumber(), baseCommandModel.FormattedStartLineNumber));
+                context.CommandManager.AddErrorMethod(
+                  EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
+                  $"{_basePoint.Mnemonic}{machineAdressFirst}", 
+                  $"{point.Mnemonic}{machineAdressSecond}", 
+                  context.MessageService.GetLastLineNumber(), 
+                  baseCommandModel.FormattedStartLineNumber));
+
                 errorsMessgae.Add(errorMessageModels);
                 await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
               }
@@ -175,7 +190,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               if (!succes)
               {
                 errorsMessgae.Add(error);
-                context.CommandManager.AddErrorMethod(EhtErrors.ResistanceOutOfRange($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", result, _basePoint.ToString(), point.ToString(), LowerBound, UpperBound, context.MessageService.GetLastLineNumber(), baseCommandModel.FormattedStartLineNumber));
+                context.CommandManager.AddErrorMethod(
+                  EhtErrors.ResistanceOutOfRange($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
+                  result, 
+                  _basePoint.ToString(), 
+                  point.ToString(), 
+                  LowerBound, 
+                  UpperBound, 
+                  context.MessageService.GetLastLineNumber(), 
+                  baseCommandModel.FormattedStartLineNumber));
 
                 await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {error.ToString()}"));
               }
