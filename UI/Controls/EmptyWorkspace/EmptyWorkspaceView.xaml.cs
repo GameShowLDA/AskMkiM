@@ -1,17 +1,22 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace UI.Controls.EmptyWorkspace
 {
-  /// <summary>
-  /// Логика взаимодействия для EmptyWorkspaceView.xaml
-  /// </summary>
   public partial class EmptyWorkspaceView : UserControl, INotifyPropertyChanged
   {
     private readonly DispatcherTimer _timer;
     private DateTime _currentDateTime;
+    private string _buildDate = string.Empty;
+    private string _appVersion = string.Empty;
+
+    private static Assembly AppAssembly => Assembly.GetEntryAssembly() ?? throw new InvalidOperationException("EntryAssembly not found");
 
     public DateTime CurrentDateTime
     {
@@ -21,12 +26,11 @@ namespace UI.Controls.EmptyWorkspace
         if (_currentDateTime != value)
         {
           _currentDateTime = value;
-          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentDateTime)));
+          OnPropertyChanged(nameof(CurrentDateTime));
         }
       }
     }
 
-    private string _buildDate;
     public string BuildDate
     {
       get => _buildDate;
@@ -35,11 +39,23 @@ namespace UI.Controls.EmptyWorkspace
         if (_buildDate != value)
         {
           _buildDate = value;
-          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BuildDate)));
+          OnPropertyChanged(nameof(BuildDate));
         }
       }
     }
 
+    public string AppVersion
+    {
+      get => _appVersion;
+      set
+      {
+        if (_appVersion != value)
+        {
+          _appVersion = value;
+          OnPropertyChanged(nameof(AppVersion));
+        }
+      }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -49,34 +65,52 @@ namespace UI.Controls.EmptyWorkspace
 
       CurrentDateTime = DateTime.Now;
       BuildDate = GetBuildDate();
+      AppVersion = GetAppVersion();
 
-      // тикаем каждую секунду
       _timer = new DispatcherTimer(DispatcherPriority.Background)
       {
-        Interval = TimeSpan.FromMilliseconds(100)
+        Interval = TimeSpan.FromSeconds(1)
       };
+
       _timer.Tick += (_, __) => CurrentDateTime = DateTime.Now;
       _timer.Start();
 
-      // корректный стоп при выгрузке
       Unloaded += (_, __) => _timer.Stop();
     }
+
     private string GetBuildDate()
     {
       try
       {
-        var asm = System.Reflection.Assembly.GetEntryAssembly();
+        var asm = AppAssembly;
 
-        var attr = asm.GetCustomAttributes(typeof(System.Reflection.AssemblyMetadataAttribute), false)
-                      .Cast<AssemblyMetadataAttribute>()
+        var attr = asm.GetCustomAttributes<AssemblyMetadataAttribute>()
                       .FirstOrDefault(a => a.Key == "BuildDate");
 
-        return attr?.Value ?? "Неизвестно";
+        return !string.IsNullOrWhiteSpace(attr?.Value)
+          ? attr.Value
+          : "Неизвестно";
       }
       catch
       {
-        return "Ошибка";
+        return "Неизвестно";
       }
     }
+
+    private string GetAppVersion()
+    {
+      var version = AppAssembly.GetName().Version;
+      var data = AppAssembly.GetName().Version;
+
+      var versionValue = version is null
+        ? "Неизвестно"
+        : $"{version.Major}.{version.Minor}.{version.Build}";
+
+      return $"Версия {versionValue} • Сборка {BuildDate}";
+    }
+
+
+    private void OnPropertyChanged(string propertyName)
+      => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
 }
