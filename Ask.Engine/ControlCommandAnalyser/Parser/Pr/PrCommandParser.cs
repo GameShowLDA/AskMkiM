@@ -402,11 +402,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
       // Сообщение
-      model.ConnectedLowerLimitResistance = lowerLimit;
-      model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+      model.ConnectedLowerLimitResistance = minAllowed;
+      model.ConnectedLowerLimitResistanceSource = $"{minAllowed} Ом";
 
-      model.ConnectedHigherLimitResistance = null;
-      model.ConnectedHigherLimitResistanceSource = null;
+      model.ConnectedHigherLimitResistance = lowerLimit;
+      model.ConnectedHigherLimitResistanceSource = $"{valLower} {lowerUnit}";
     }
 
     /// <summary>
