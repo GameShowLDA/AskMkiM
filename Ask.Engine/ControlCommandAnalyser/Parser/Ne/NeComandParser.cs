@@ -80,13 +80,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 
       remainder = ParseNeParams(remainder, out lowerLimitVoltage, out higherLimitVoltage, out unitVoltage);
 
-      // значения по умолчанию
       var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE);
 
-      double defaultLower = commandInfo.LowerLimit; //1Ом
+      double defaultLower = commandInfo.LowerLimit; 
       double defaultHigher = commandInfo.UpperLimit;
 
-      // --- 1️⃣ Парсим входные значения, если они заданы ---
       double? lower = !string.IsNullOrWhiteSpace(lowerLimitVoltage)
           ? CommonParameterParser.ParseToDouble(lowerLimitVoltage)
           : null;
@@ -95,10 +93,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
           ? CommonParameterParser.ParseToDouble(higherLimitVoltage)
           : null;
 
-      // --- 2️⃣ Проверка валидности, если обе границы заданы ---
-
       ProcessVoltageLimits(model, unitVoltage, lower, higher, defaultHigher, defaultLower);
-
 
       if (!model.AlgorithmKey.Contains(AlgorithmKey.Н.ToString()))
       {
@@ -109,13 +104,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-      // Ищем первую и последнюю '*'
       int firstStar = bodyNoWs.IndexOf('*');
       int lastStar = bodyNoWs.LastIndexOf('*');
 
       if (firstStar >= 0 && lastStar > firstStar)
       {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
         string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
@@ -143,10 +136,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
           {
             foreach (var chain in group.ChainModels)
             {
-              // применяем знак к цепи
               ApplySign(chain, part.Sign, model);
 
-              // добавляем цепь в итоговую схему
               finalGroups.Add(
                   new GroupModel(new List<ChainModel> { chain })
               );
@@ -156,7 +147,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 
         scheme = new SchemeModel(finalGroups);
 
-        // Поднимем ошибки парсера точек
         if (allErrors?.Count > 0)
         {
           foreach (var error in allErrors)
@@ -169,10 +159,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
           }
         }
 
-        // Проверим, что схема непуста (есть хотя бы одна точка)
         ValidateScheme(commandNumber, mnemonic, numberLine, model, scheme);
 
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
         int idxStarInSecondLine = remainder.LastIndexOf('*');
         if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
@@ -188,7 +176,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       }
       else
       {
-        // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
         model.Errors.Add(NeErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
@@ -226,7 +213,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       }
       else
       {
-        model.Scheme = scheme; // ← просто присваиваем схему в модель
+        model.Scheme = scheme; 
         LogInformation(
            $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
       }
@@ -254,10 +241,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 
       (double? valHigher, string higherUnit) = higher.HasValue ? UnitsConvertor.TryConvertBack(higher.Value, unit) : (null, unit);
 
-      // 1) ЕСЛИ ОБЕ ГРАНИЦЫ ЗАДАНЫ
       if (valLower.HasValue && valHigher.HasValue)
       {
-        // 1) Проверка: нижняя > верхней (в ОМАХ)
         if (lower!.Value > higher!.Value)
         {
           model.Errors.Add(
@@ -268,7 +253,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
           return;
         }
 
-        // 2) Нижняя < минимально допустимой (в ОМАХ)
         if (lower.Value < defaultLower)
         {
           model.Errors.Add(
@@ -279,7 +263,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
           return;
         }
 
-        // 3) Верхняя > максимально допустимой (в ОМАХ)
         if (higher.Value > defaultHigher)
         {
           model.Errors.Add(
@@ -290,7 +273,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
           return;
         }
 
-        // ОК, сохраняем как есть
         model.HigherLimitVoltage = higher.Value;
         model.HigherLimitVoltageSource = $"{valHigher}{higherUnit}";
 
