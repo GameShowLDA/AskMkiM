@@ -522,6 +522,7 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> Ошибка при проверке точки про методе полного узла в команде ПР. </summary>
     [ErrorCodeTag("NE011")]
     Ne_NodeExecutePointError,
+    #endregion
 
     #region Режим ОТ
 
