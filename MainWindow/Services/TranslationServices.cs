@@ -1,15 +1,10 @@
-﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Services.EventCore.Services;
+﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.IO;
 using System.Windows;
-using UI.Components.Invoke;
-using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -97,7 +92,6 @@ namespace MainWindowProgram.Services
 
       if (container == null && editor != null)
       {
-        await BuildAsync();
         editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
         container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       }
@@ -107,6 +101,8 @@ namespace MainWindowProgram.Services
         MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
         return;
       }
+
+      await BuildAsync();
 
       if (container == null && runContainer != null)
       {
