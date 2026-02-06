@@ -1,9 +1,5 @@
 ﻿using Ask.Engine.ControlCommandAnalyser.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandAnalyser.ComandBody
 {
@@ -34,11 +30,11 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
             {
               if (busPoint.Value.Count == 1 || i == busPoint.Value.Count - 1)
               {
-                commandBody.Append($"{busPoint.Value[i].Item1}");
+                commandBody.Append($"{busPoint.Value[i].Mnemonic}");
               }
               else
               {
-                commandBody.Append($",{busPoint.Value[i].Item1}");
+                commandBody.Append($",{busPoint.Value[i].Mnemonic}");
               }
             }
           }

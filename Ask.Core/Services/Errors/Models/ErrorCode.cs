@@ -450,6 +450,20 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
+    #region Режим ПТ
+
+    /// <summary> В команде ПТ отсутствует список точек. </summary>
+    [ErrorCodeTag("PT001")]
+    Pt_EmptyPoints,
+
+    /// <summary> Тело команды ПТ отсутствует или пустое. </summary>
+    [ErrorCodeTag("PT002")]
+    Pt_EmptyCommandBody,
+
+    #endregion
+
+
+
     #region Режим ВШ
 
     /// <summary> В команде ВШ указана неверная структура стойки коммутации. </summary>
@@ -482,33 +496,38 @@ namespace Ask.Core.Services.Errors.Models
     Ne_EmptyPoints,
 
     /// <summary> В команде НЭ отсутствует напряжение. </summary>
-    [ErrorCodeTag("PR005")]
+    [ErrorCodeTag("NE005")]
     Ne_EmptyVoltage,
 
     /// <summary> В команде НЭ отсутствует сила тока. </summary>
-    [ErrorCodeTag("PR006")]
+    [ErrorCodeTag("NE006")]
     Ne_EmptyAmperage,
 
     /// <summary> В команде НЭ нижняя граница напряжения больше верхней границы напряжения. </summary>
-    [ErrorCodeTag("PR007")]
+    [ErrorCodeTag("NE007")]
     Ne_VoltageLimitsConflict,
 
     /// <summary> В команде НЭ не удалось распознать параметры. </summary>
-    [ErrorCodeTag("PR008")]
+    [ErrorCodeTag("NE008")]
     Ne_CannotParseParameters,
 
     /// <summary> В команде НЭ верхняя граница напряжения больше максимально допустимой границы напряжения.  </summary>
-    [ErrorCodeTag("PR009")]
+    [ErrorCodeTag("NE009")]
     Ne_VoltageMaxLimitsConflict,
 
     /// <summary> В команде НЭ одна из границ напряжения больше максимально измеряемой мультиметром границы напряжения или ниже минимально измеряемой.  </summary>
-    [ErrorCodeTag("PR010")]
+    [ErrorCodeTag("NE010")]
     Ne_EquipmentOutOfRange,
 
     /// <summary> Ошибка при проверке точки про методе полного узла в команде ПР. </summary>
-    [ErrorCodeTag("PR011")]
+    [ErrorCodeTag("NE011")]
     Ne_NodeExecutePointError,
 
+    #region Режим ОТ
+
+    /// <summary> Тело команды ОТ отсутствует или пустое. </summary>
+    [ErrorCodeTag("OT001")]
+    Ot_EmptyCommandBody,
     #endregion
 
     #region Ключи команд

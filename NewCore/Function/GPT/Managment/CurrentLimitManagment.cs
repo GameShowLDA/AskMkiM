@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
@@ -19,6 +20,8 @@ namespace NewCore.Function.GPT.Managment
     private readonly Action<double> _setHighLimit;
     private readonly Func<double> _getLowLimit;
     private readonly Action<double> _setLowLimit;
+    private double _highLimit;
+    private double _lowLimit;
 
     /// <summary>
     /// Создает новый экземпляр класса <see cref="CurrentLimitManagment"/>.
@@ -54,11 +57,18 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<(bool Success, string Message)> SetHighCurrentLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      return await CongifHelper.SetParameterAsync(
+      var result = await CongifHelper.SetParameterAsync(
           getter: async () => _getHighLimit(),
           setter: async () => await CurrentLimitHelper.SetHighCurrentLimitAsync(_gptModel, _mode, value, _delay),
           updateConfig: v => _setHighLimit(v),
           newValue: value);
+
+      if (result.Success)
+      {
+        _highLimit = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
@@ -67,6 +77,11 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<double> GetHighCurrentLimitAsync()
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _highLimit;
+      }
+
       return await CurrentLimitHelper.GetHighCurrentLimitAsync(_gptModel, _mode, _delay);
     }
 
@@ -76,11 +91,18 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<(bool Success, string Message)> SetLowCurrentLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      return await CongifHelper.SetParameterAsync(
+      var result = await CongifHelper.SetParameterAsync(
           getter: async () => _getLowLimit(),
           setter: async () => await CurrentLimitHelper.SetLowCurrentLimitAsync(_gptModel, _mode, value, _delay),
           updateConfig: v => _setLowLimit(v),
           newValue: value);
+
+      if (result.Success)
+      {
+        _lowLimit = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
@@ -89,6 +111,11 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<double> GetLowCurrentLimitAsync()
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _lowLimit;
+      }
+
       return await CurrentLimitHelper.GetLowCurrentLimitAsync(_gptModel, _mode, _delay);
     }
   }

@@ -25,7 +25,7 @@ namespace NewCore.Function.ManagerChassis
     /// <inheritdoc />
     public async Task StartPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -37,7 +37,7 @@ namespace NewCore.Function.ManagerChassis
     /// <inheritdoc />
     public async Task StopPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return;
       }
@@ -48,7 +48,7 @@ namespace NewCore.Function.ManagerChassis
 
     public async Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

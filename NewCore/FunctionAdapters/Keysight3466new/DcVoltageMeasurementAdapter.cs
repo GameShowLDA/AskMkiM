@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
@@ -30,11 +31,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetDCVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _measurement.SetDCVoltageModeAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения постоянного напряжения", succes, 1, userMessageService);
         }

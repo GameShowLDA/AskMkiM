@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 using System.Reflection;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
@@ -14,43 +13,85 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
   /// </summary>
   public class CommandExecutionManager
   {
-    private readonly Dictionary<string, ICommandExecutor> _executors = new();
-    private readonly IUserInteractionService _console;
-    private readonly ITextEditorAdapter translationControl;
-    private ProtocolModel protocolModel = new ProtocolModel();
     /// <summary>
-    /// Событие, которое вызывается при изменении состояния блокировки.
+    /// Реестр исполнителей команд, обеспечивающий получение исполнителя по мнемонике команды.
     /// </summary>
-    public event Action<ErrorItem> AddError;
-    public event Action ClearError;
+    private readonly CommandExecutorRegistry _executorRegistry;
 
+    /// <summary>
+    /// Коллекция команд управляющей программы, предназначенных для выполнения.
+    /// </summary>
+    private readonly CommandCollection _commands;
+
+    /// <summary>
+    /// Менеджер точек останова команд, синхронизирующий состояние breakpoint-ов с моделями команд.
+    /// </summary>
+    private readonly BreakpointManager _breakpointManager;
+
+    /// <summary>
+    /// Сервис взаимодействия с пользователем,
+    /// используемый для вывода сообщений и уведомлений.
+    /// </summary>
+    private readonly IUserInteractionService _console;
+
+    /// <summary>
+    /// Адаптер текстового редактора,
+    /// используемый для навигации и визуального отображения команд.
+    /// </summary>
+    private readonly ITextEditorAdapter _textEditor;
+
+    /// <summary>
+    /// Модель протокола выполнения команд,
+    /// используемая для накопления результатов выполнения.
+    /// </summary>
+    private readonly ProtocolModel _protocolModel = new();
+
+    /// <summary>
+    /// Путь к файлу управляющей программы (ОПК),
+    /// используемый в процессе выполнения команд.
+    /// </summary>
     private readonly string? _opkFilePath;
 
     /// <summary>
-    /// Флаг, указывающий, активно ли питание системы.
+    /// Событие добавления ошибки выполнения.
+    /// Используется для уведомления внешних компонентов
+    /// о возникновении ошибки.
     /// </summary>
-    public void ClearErrorsMethod()
-    {
-      ClearError?.Invoke();
-    }
+    public event Action<ErrorItem> AddError;
 
-    public void AddErrorMethod(ErrorItem errorItem)
-    {
-      AddError?.Invoke(errorItem);
-    }
+    /// <summary>
+    /// Событие очистки списка ошибок выполнения.
+    /// </summary>
+    public event Action ClearError;
+
+    /// <summary>
+    /// Вызывает событие очистки ошибок выполнения.
+    /// </summary>
+    public void ClearErrorsMethod() => ClearError?.Invoke();
+
+    /// <summary>
+    /// Вызывает событие добавления ошибки выполнения.
+    /// </summary>
+    /// <param name="errorItem">
+    /// Информация об ошибке выполнения команды.
+    /// </param>
+    public void AddErrorMethod(ErrorItem errorItem) => AddError?.Invoke(errorItem);
 
     public List<BaseCommandModel> CommandsToExecute { get; set; } = new();
 
-    public CommandExecutionManager(IUserInteractionService console, ITextEditorAdapter textEditor, List<BaseCommandModel> ControlProgram, string? opkFilePath)
+    public CommandExecutionManager(
+     IUserInteractionService console,
+     ITextEditorAdapter textEditor,
+     List<BaseCommandModel> controlProgram,
+     string? opkFilePath)
     {
       _console = console;
-      CommandsToExecute = ControlProgram;
-      translationControl = textEditor;
+      _textEditor = textEditor;
       _opkFilePath = opkFilePath;
-      RegisterExecutors();
 
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
+      _commands = new CommandCollection(controlProgram);
+      _executorRegistry = new CommandExecutorRegistry();
+      _breakpointManager = new BreakpointManager(_commands);
     }
 
     /// <summary>
@@ -58,115 +99,29 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// </summary>
     public async Task ExecuteAllAsync()
     {
-      int i = 0;
-      while (i < CommandsToExecute.Count)
+      int index = 0;
+
+      while (index < _commands.Count)
       {
-        var command = CommandsToExecute[i];
+        var command = _commands[index];
 
-        var context = new CommandExecutionContext(this, command, _console, translationControl, _opkFilePath)
-        {
-          JumpToCommandNumber = (number) =>
-          {
-            int newIndex = CommandsToExecute.FindIndex(cmd => cmd.CommandNumber == number);
-            if (newIndex >= 0)
-            {
-              i = newIndex - 1;
-            }
-          }
-        };
+        var context = new CommandExecutionContext(
+            this, command, _console, _textEditor, _opkFilePath);
 
-        if (_executors.TryGetValue(command.Mnemonic, out var executor))
+        if (_executorRegistry.TryGet(command.Mnemonic, out var executor))
         {
-          await executor.ExecuteAsync(context, protocolModel);
+          await executor.ExecuteAsync(context, _protocolModel);
         }
         else
         {
-          await _console.ShowMessageAsync(new ShowMessageModel("Неизвестная команда", message: command.Mnemonic, type: ShowMessageModel.MessageType.Error));
+          await _console.ShowMessageAsync(
+              new ShowMessageModel("Неизвестная команда",
+                  message: command.Mnemonic,
+                  type: ShowMessageModel.MessageType.Error));
         }
 
-        i++;
+        index++;
       }
-    }
-
-    /// <summary>
-    /// Выполняет одну команду по предоставленной модели.
-    /// </summary>
-    public async Task ExecuteOneAsync(BaseCommandModel command)
-    {
-      if (_executors.TryGetValue(command.Mnemonic, out var executor))
-      {
-        var context = new CommandExecutionContext(this, command, _console, translationControl, _opkFilePath);
-        await executor.ExecuteAsync(context, protocolModel);
-      }
-      else
-      {
-        await _console.ShowMessageAsync(new ShowMessageModel("Неизвестная команда", message: command.Mnemonic, type: ShowMessageModel.MessageType.Error));
-      }
-    }
-
-    /// <summary>
-    /// Регистрирует исполнителей команд.
-    /// </summary>
-    private void RegisterExecutors()
-    {
-      var executorInterface = typeof(ICommandExecutor);
-      var executorTypes = Assembly.GetExecutingAssembly()
-          .GetTypes()
-          .Where(t => !t.IsAbstract && !t.IsInterface && executorInterface.IsAssignableFrom(t));
-
-      foreach (var type in executorTypes)
-      {
-        var instance = (ICommandExecutor)Activator.CreateInstance(type)!;
-        _executors[instance.Mnemonic] = instance;
-      }
-    }
-
-    /// <summary>
-    /// Пропускает команды до указанного номера и продолжает выполнение с неё (включительно или после неё).
-    /// </summary>
-    public async Task JumpToCommandAndExecuteAsync(string commandNumber)
-    {
-      int index = CommandsToExecute.FindIndex(cmd => cmd.CommandNumber == commandNumber);
-
-      if (index < 0)
-      {
-        await _console.ShowMessageAsync(new ShowMessageModel(
-            $"Команда с номером {commandNumber} не найдена.",
-            message: "",
-            type: ShowMessageModel.MessageType.Error));
-        return;
-      }
-
-      for (int i = index; i < CommandsToExecute.Count; i++)
-      {
-        await ExecuteOneAsync(CommandsToExecute[i]);
-      }
-    }
-
-    private void BreakpointSet(BreakpointEvents.BreakpointSet obj)
-    {
-      var model = GetCommandByNumber(obj.CommandNumber);
-      if (model == null)
-        return;
-
-      model.HasBreakpoint = true;
-    }
-
-    private void BreakpointRemoved(BreakpointEvents.BreakpointRemoved obj)
-    {
-      var model = GetCommandByNumber(obj.CommandNumber);
-      if (model == null)
-        return;
-
-      model.HasBreakpoint = false;
-    }
-
-    private BaseCommandModel? GetCommandByNumber(int commandNumber)
-    {
-      return CommandsToExecute
-          .FirstOrDefault(x =>
-              int.TryParse(x.CommandNumber, out var num) &&
-              num == commandNumber);
     }
   }
 }

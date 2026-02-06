@@ -134,7 +134,7 @@ namespace UI.Components
         return;
       }
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
         return;
@@ -163,7 +163,7 @@ namespace UI.Components
       }
 
       taskInProgress = false;
-      await SystemStateManager.SetIsActivePower(active);
+      SystemStateManager.SetIsActivePower(active);
     }
 
     /// <summary>

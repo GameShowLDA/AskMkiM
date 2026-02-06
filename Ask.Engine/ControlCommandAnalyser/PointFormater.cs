@@ -20,7 +20,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         for (int i = 0; i < count; i++)
         {
           string point = item.PointModels[i].Mnemonic;
-          point += await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $" [{item.PointModels[i].ToString()}]" : string.Empty;
+          point += DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{item.PointModels[i].ToString()}]" : string.Empty;
 
           if (i == 0 && i + 1 == count)
           {
@@ -73,7 +73,7 @@ namespace Ask.Engine.ControlCommandAnalyser
       return result;
     }
 
-    public static async Task<string> GetFormatConnectPoint(ChainModel chainModels)
+    public static string GetFormatConnectPoint(ChainModel chainModels)
     {
       var result = string.Empty;
       var count = chainModels.PointModels.Count;
@@ -83,7 +83,7 @@ namespace Ask.Engine.ControlCommandAnalyser
       {
         var point = chainModels.PointModels[i];
 
-        var machineAddress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $" [{point.ToString()}]" : string.Empty;
+        var machineAddress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{point.ToString()}]" : string.Empty;
         result += $"*{point.Mnemonic}{machineAddress}*";
       }
 

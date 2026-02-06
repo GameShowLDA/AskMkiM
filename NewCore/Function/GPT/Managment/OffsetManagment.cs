@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
@@ -17,6 +18,7 @@ namespace NewCore.Function.GPT.Managment
     private readonly int _delay;
     private readonly Func<double> _getOffset;
     private readonly Action<double> _setOffset;
+    private double _offset;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="OffsetManagment"/>.
@@ -46,11 +48,18 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<(bool Success, string Message)> SetOffsetAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      return await CongifHelper.SetParameterAsync(
+      var result = await CongifHelper.SetParameterAsync(
           getter: async () => _getOffset(),
           setter: async () => await OffsetHelper.SetOffsetAsync(_gptModel, _mode, value, _delay),
           updateConfig: v => _setOffset(v),
           newValue: value);
+
+      if (result.Success)
+      {
+        _offset = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
@@ -59,6 +68,10 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<double> GetOffsetAsync()
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _offset;
+      }
       return await OffsetHelper.GetOffsetAsync(_gptModel, _mode, _delay);
     }
   }

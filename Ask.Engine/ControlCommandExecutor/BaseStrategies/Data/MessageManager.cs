@@ -10,7 +10,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
   {
     public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value, string? chains = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
         if (upperLimit != -1)
         {
@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
 
-      if (!result || await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+      if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
       {
         var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value, chains: chains);
         message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;

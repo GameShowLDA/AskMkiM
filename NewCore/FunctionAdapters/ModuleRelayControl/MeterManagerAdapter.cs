@@ -41,7 +41,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _meterManager.ConnectMeterAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение измерителя {description}", succes, 1, userMessageService);
         }
@@ -73,7 +73,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _meterManager.DisconnectMeterAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение измерителя {description}", succes, 1, userMessageService);
         }

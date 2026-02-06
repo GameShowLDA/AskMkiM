@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.DeviceBusCommutation;
 using NewCore.Function.Helpers;
+using System.Text;
 
 namespace NewCore.FunctionAdapters.DeviceBusCommutation
 {
@@ -41,6 +42,24 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       return await ResetAsync(userMessageService);
     }
 
+    public string GetConnectionStatus()
+    {
+      var devices = _deviceBusCommutation.ConnectorManager.GetConnectedDevices();
+
+      if (devices.Count() == 0)
+        return "Подключенные устройства:\n  Нет подключённых устройств.";
+
+      var sb = new StringBuilder();
+      sb.AppendLine("Подключенные устройства:");
+
+      foreach (var d in devices)
+      {
+        sb.AppendLine($"  {d.device} — {d.bus}");
+      }
+
+      return sb.ToString();
+    }
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
@@ -48,7 +67,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var result = await _stateManager.ConnectAsync();
 
-        if (!result.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Инициализация устройства", !result.Connect ? result.Answer : string.Empty, result.Connect, 1, userMessageService);
         }
@@ -69,7 +88,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var succes = await _stateManager.DisconnectAsync();
 
-        if (!succes || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Сброс устройства", succes, 1, userMessageService);
         }

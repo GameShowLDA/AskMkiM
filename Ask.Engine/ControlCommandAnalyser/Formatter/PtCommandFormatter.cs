@@ -14,28 +14,33 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var firstLine = $"{pt.CommandNumber} {pt.Mnemonic}";
       yield return firstLine;
 
-      // Время
-      if (!string.IsNullOrWhiteSpace(pt.TimeSource))
+      // Ключи команды
+      if (pt.AlgorithmKey.Count > 0)
       {
-        yield return $"\tВремя подключения точек: {pt.TimeSource}";
+        yield return $"\tКлючи команды: {string.Join(", ", pt.AlgorithmKey)}";
       }
       else
       {
-        yield return $"\tВремя подключения точек не задано!";
+        yield return $"\tКлючи команды не указаны.";
+      }
+
+      if (!string.IsNullOrWhiteSpace(pt.TimeSource))
+      {
+        yield return $"\tВремя подключения точек: {pt.TimeSource}";
       }
 
       foreach (var bus in pt.BusPointsDictionary)
       {
         yield return $"\tТочки, подключаемые к шине: {bus.Key}";
-        foreach(var point in bus.Value)
+        foreach (var point in bus.Value)
         {
-          yield return $"\t\t{point.Item1} = {point.Item2}";
+          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
         }
       }
-      
+
       if (pt.Comment.Count > 0)
       {
-        yield return $"\tКомметрии:";
+        yield return $"\tКомметарии:";
         foreach (var line in pt.Comment)
         {
           var trimmed = line.Trim();

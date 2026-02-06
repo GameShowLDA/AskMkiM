@@ -28,6 +28,11 @@ namespace UI.Controls.AdminPanel
     {
       RightContentPresenter.Content = new SetCommand();
     }
+
+    private void ResistanceButton_Click(object sender, MouseButtonEventArgs e)
+    {
+      RightContentPresenter.Content = new CheckResistanceControl();
+    }
   }
 
 }

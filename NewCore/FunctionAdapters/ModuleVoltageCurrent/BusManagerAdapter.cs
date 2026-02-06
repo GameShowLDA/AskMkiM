@@ -30,7 +30,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _busManager.ConnectBusToPositiveAsync(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к +", bus.ToString(), succes, 1, userMessageService);
         }
@@ -51,7 +51,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       {
         var succes = await _busManager.ConnectBusToNegativeAsync(bus);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к -", bus.ToString(), succes, 1, userMessageService);
         }
@@ -71,7 +71,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _busManager.DisconnectBusToPositiveAsync(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от +", bus.ToString(), succes, 1, userMessageService);
         }
@@ -90,7 +90,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _busManager.DisconnectBusToNegativeAsync(bus);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от -", bus.ToString(), succes, 1, userMessageService);
         }

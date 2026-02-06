@@ -1,8 +1,10 @@
-﻿using Ask.Core.Services.Errors.Models;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Message;
@@ -11,8 +13,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using UI.Components.Invoke;
+using UI.Components.MultiEditorMethods;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
+using UI.Services;
+using UI.Windows.WpfDocking.Windows.Docking;
+using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Runner
@@ -44,7 +51,7 @@ namespace UI.Controls.Runner
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
 
-    private TextEditorUI _leftEditor;
+    private TextEditorContainer _leftEditor;
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -78,6 +85,8 @@ namespace UI.Controls.Runner
     }
 
     private bool task = false;
+
+    private DevicesStatus devicesStatus;
     public RunControl()
     {
       InitializeComponent();
@@ -85,8 +94,10 @@ namespace UI.Controls.Runner
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
-      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
+      devicesStatus = new DevicesStatus();
 
+      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
+      EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(e => devicesStatus.LoadDevices(e.Devices));
 
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
@@ -125,10 +136,14 @@ namespace UI.Controls.Runner
 
         if (obj.FormattedLineNumber >= 0)
         {
-          _leftEditor?.GoToLine(obj.FormattedLineNumber);
+          var dockManader = ChildTextEditorContainer.DockManager;
+          var dockItemPk = dockManader.DockItems.FirstOrDefault(di => di.TabText != "Состояние оборудования");
+          if (dockItemPk != null && dockItemPk.Content is TextEditorUI textEditor)
+          {
+            textEditor.GoToLine(obj.FormattedLineNumber);
+          }
         }
       }
-
     }
 
     private void RunControl_Loaded(object sender, RoutedEventArgs e)
@@ -137,7 +152,6 @@ namespace UI.Controls.Runner
     }
     private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-      // Отменяем фокусировку и возвращаем в MainContent
       e.Handled = true;
       FocusMainContent();
     }
@@ -174,7 +188,6 @@ namespace UI.Controls.Runner
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
       LogInformation("SetLeftEditor вызван: " + this.GetHashCode());
-
       if (textEditorUI == null)
         return;
 
@@ -191,10 +204,77 @@ namespace UI.Controls.Runner
         decorator.Child = null;
       }
 
-      LeftBox.Children.Clear();
-      LeftBox.Children.Add(textEditorUI);
+      var dockManager = ChildTextEditorContainer.DockManager;
+      if (dockManager.DockItems.Count > 0)
+      {
+        foreach (var dockItem in dockManager.DockItems.ToList())
+        {
+          dockManager.DockItems.Remove(dockItem);
+        }
+      }
 
-      _leftEditor = textEditorUI;
+      var fileName = Path.GetFileName(textEditorUI.TextEditorModel.FilePath);
+      var filePath = textEditorUI.TextEditorModel.FilePath;
+      var dockItemPk = new DockItem
+      {
+        Title = fileName,
+        TabText = fileName,
+        Content = textEditorUI,
+      };
+
+      var dockItemDeviceState = new DockItem
+      {
+        Title = filePath,
+        TabText = "Состояние оборудования",
+        Content = devicesStatus,
+      };
+
+      DocumentTab.SetHideCloseButton(dockItemPk, true);
+      DocumentTab.SetHideCloseButton(dockItemDeviceState, true);
+
+      dockManager.DockItems.Add(dockItemPk);
+      dockManager.DockItems.Add(dockItemDeviceState);
+
+      if (dockManager == null)
+      {
+        LogError("ChildTextEditorContainer.DockControl не найден (null). Невозможно отобразить вкладку.");
+        return;
+      }
+
+      LogInformation($"Попытка показать ChildTextEditorContainer.DockItem. Title: {dockItemPk.Title}, IsLoaded: {dockManager.IsLoaded}, DockItems.Count: {dockManager.DockItems.Count}");
+
+      if (!dockManager.IsLoaded)
+      {
+        LogWarning("ChildTextEditorContainer.DockControl ещё не загружен. Подписка на Loaded...");
+
+        var capturedDockItem = dockItemPk;
+        dockManager.Loaded += (s, e) =>
+        {
+          try
+          {
+            LogInformation("ChildTextEditorContainer.DockControl загрузился. Показываем вкладку.");
+            LogInformation("ChildTextEditorContainer.DockItem отображён после загрузки.");
+            var isControlProgramActive = true;
+
+            SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
+            dockItemDeviceState.Show(dockManager, DockPosition.Document);
+            capturedDockItem.Show(dockManager, DockPosition.Document);
+          }
+          catch (Exception ex)
+          {
+            LogException("Ошибка при отображении ChildTextEditorContainer.DockItem после загрузки:", ex);
+          }
+        };
+      }
+      else
+      {
+        var isControlProgramActive = true;
+
+        SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
+        dockItemDeviceState.Show(dockManager, DockPosition.Document);
+        dockItemPk.Show(dockManager, DockPosition.Document);
+        LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
+      }
     }
 
 
@@ -222,7 +302,12 @@ namespace UI.Controls.Runner
 
       Application.Current.Dispatcher.Invoke(() =>
       {
-        editor = LeftBox.Children[0] as TextEditorUI;
+        var dockManager = ChildTextEditorContainer.DockManager;
+        var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TextEditorUI);
+        if (dockItem != null)
+        {
+          editor = dockItem.Content as TextEditorUI;
+        }     
       });
 
       var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath);
@@ -231,6 +316,7 @@ namespace UI.Controls.Runner
 
       await manager.ExecuteAllAsync();
     }
+
     private void AddError(ErrorItem errorItem)
     {
       Application.Current.Dispatcher?.Invoke(() =>
@@ -276,24 +362,19 @@ namespace UI.Controls.Runner
       }
     }
 
-    // Пользователь начал тянуть сплиттер – не вмешиваемся
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
     {
       _userResizing = true;
 
-      // Переводим строку из Auto → FixedHeight,
-      // чтобы пользователь мог растягивать вручную
       BottomRow.Height = new GridLength(ErrorListBoxVertical.ActualHeight);
       ErrorListBoxVertical.MaxHeight = double.PositiveInfinity;
     }
 
-    // Закончил тянуть – теперь снова можем автоподстраивать при изменении контента
     private void BottomSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
       _userResizing = false;
     }
 
-    // Панель ошибок изменила размер (добавились/убрались строки)
     private void ErrorListBoxVertical_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
       if (_userResizing)
@@ -304,7 +385,6 @@ namespace UI.Controls.Runner
       if (desired > MaxAutoHeight)
         desired = MaxAutoHeight;
 
-      // Автоматический режим — строка остаётся Auto, но мы ограничиваем контент
       BottomRow.Height = GridLength.Auto;
       ErrorListBoxVertical.MaxHeight = desired;
     }

@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using System.Net;
 using System.Net.Sockets;
@@ -38,7 +39,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, "Холостой режим");
       }
@@ -58,7 +59,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -102,7 +103,7 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -132,6 +133,34 @@ namespace NewCore.Function.Keysight3466new
     public Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
       return Task.FromResult(true);
+    }
+
+    public string GetConnectionStatus()
+    {
+      var mode = "Режим: ";
+      switch (_device.TypeMode)
+      {
+        case MultimeterTypeMode.None:
+          mode += "Не задан";
+          break;
+        case MultimeterTypeMode.AcVoltage:
+          mode += "Измерение переменного напряжения";
+          break;
+        case MultimeterTypeMode.DcVoltage:
+          mode += "Измерение постоянного напряжения";
+          break;
+        case MultimeterTypeMode.Capacitance:
+          mode += "Измерение ёмкости.";
+          break;
+        case MultimeterTypeMode.Continuity:
+          mode += "Прозвонка.";
+          break;
+        case MultimeterTypeMode.Resistance:
+          mode += "Измерение электрического сопротивления.";
+          break;
+      }
+
+      return mode;
     }
   }
 }

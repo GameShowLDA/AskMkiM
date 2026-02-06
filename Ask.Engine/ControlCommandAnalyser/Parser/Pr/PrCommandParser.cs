@@ -180,7 +180,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        int idxStarInSecondLine = remainder.LastIndexOf('*');
+        if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+        {
+          remainder =
+              remainder[..idxStarInFirstLine].Trim()
+              + remainder[(idxStarInSecondLine + 1)..].Trim();
+        }
+        else
+        {
+          remainder = remainder.Trim();
+        }
         if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
         {
           // находим цепи точек из предыдущей команды проверки
@@ -256,11 +266,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           $"Не указана верхняя граница при проверке на сообщение"));
       }
 
-      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource)&&!model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource) && !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(PrErrors.ResistanceLimitsConflict(
-          model.StartLineNumber, 
+          model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}",
           $"Не указана нижняя граница при проверке на разобщение"));
       }
@@ -366,7 +376,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
         model.DisconnectedLowerLimitResistanceSource = $"{valHigher} {higherUnit}";
 
         model.DisconnectedHigherLimitResistance = null;
-        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом"; 
+        model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
         //проверка на сообщение
         model.ConnectedLowerLimitResistance = lower.Value;

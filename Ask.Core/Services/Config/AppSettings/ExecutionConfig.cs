@@ -25,61 +25,40 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Включает или выключает холостой режим.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetIdleMode(bool enable)
+    public static void SetIdleMode(bool enable)
     {
-      await Task.Run(() =>
-      {
-        SettingsExecutionModel.IdleModeExecution = enable;
-        IdleModeChange?.Invoke(null, enable);
-      });
+      SettingsExecutionModel.IdleModeExecution = enable;
+      IdleModeChange?.Invoke(null, enable);
     }
 
     /// <summary>
     /// Устанавливает режим по шагам.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetStepByStepMode(bool enable)
+    public static void SetStepByStepMode(bool enable)
     {
-      await Task.Run(() =>
-      {
-        SettingsExecutionModel.StepByStepMode = enable;
-        ExecutionEventAdapter.RaiseStepByStepModeChanged(enable);
-      });
+      SettingsExecutionModel.StepByStepMode = enable;
+      ExecutionEventAdapter.RaiseStepByStepModeChanged(enable);
     }
 
     /// <summary>
     /// Устанавливает флаг остановки выполнения при ошибке.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetStopOnError(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        SettingsExecutionModel.StopOnError = enable;
-      });
-    }
+    public static void SetStopOnError(bool enable) => SettingsExecutionModel.StopOnError = enable;
 
     /// <summary>
     /// Включает или выключает режим симуляции ошибок.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static async Task SetIsErrorSimulationMode(bool enable)
-    {
-      await Task.Run(() =>
-      {
-        SettingsExecutionModel.IsErrorSimulationMode = enable;
-      });
-    }
+    public static void SetIsErrorSimulationMode(bool enable) => SettingsExecutionModel.IsErrorSimulationMode = enable;
 
     public static async Task SetExecutionModel(SettingsExecutionModel protocolModel)
     {
-      await Task.Run(async () =>
-      {
-        await SetIdleMode(protocolModel.IdleModeExecution);
-        await SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
-        await SetStepByStepMode(protocolModel.StepByStepMode);
-        await SetStopOnError(protocolModel.StopOnError);
-      });
+      SetIdleMode(protocolModel.IdleModeExecution);
+      SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
+      SetStepByStepMode(protocolModel.StepByStepMode);
+      SetStopOnError(protocolModel.StopOnError);
     }
 
     #endregion
@@ -90,7 +69,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Проверяет, активен ли холостой режим.
     /// </summary>
     /// <returns>true, если включен; false, если выключен.</returns>
-    public static Task<bool> GetIsIdleModeEnabled() => Task.FromResult(SettingsExecutionModel?.IdleModeExecution ?? false);
+    public static bool GetIsIdleModeEnabled() => SettingsExecutionModel?.IdleModeExecution ?? false;
 
     /// <summary>
     /// Проверяет, установлен ли флаг остановки при ошибке.
@@ -126,13 +105,10 @@ namespace Ask.Core.Services.Config.AppSettings
 
     public static async Task SaveExecutionModel(SettingsExecutionModel execution)
     {
-      await Task.Run(async () =>
-      {
-        await SetIdleMode(execution.IdleModeExecution);
-        await SetIsErrorSimulationMode(execution.IsErrorSimulationMode);
-        await SetStepByStepMode(execution.StepByStepMode);
-        await SetStopOnError(execution.StopOnError);
-      });
+      SetIdleMode(execution.IdleModeExecution);
+      SetIsErrorSimulationMode(execution.IsErrorSimulationMode);
+      SetStepByStepMode(execution.StepByStepMode);
+      SetStopOnError(execution.StopOnError);
 
       SaveExecutionEvent?.Invoke(execution);
     }

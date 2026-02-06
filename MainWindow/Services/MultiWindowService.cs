@@ -35,38 +35,25 @@ namespace MainWindowProgram.Services
     /// <param name="name">Название вкладки или окна.</param>
     /// <param name="control">Элемент управления, который необходимо отобразить.</param>
     /// <param name="type">Тип окна, в котором должен отображаться элемент управления.</param>
-    /// <returns>Задача, представляющая операцию добавления.</returns>
     public void AddControl(string name, UserControl control, TypeWindow type) => _multiWindowControl.AddControl(name, control, type);
 
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public Task OpenFileInEditor(string filePath)
-    {
-      _multiWindowControl.OpenFileInEditor(filePath);
-      return Task.CompletedTask;
-    }
+    public void OpenFileInEditor(string filePath) => _multiWindowControl.OpenFileInEditor(filePath);
 
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public Task ViewProtocol(ProtocolModel protocol, bool showInSoftware)
-    {
-      _multiWindowControl.ViewProtocol(protocol, showInSoftware);
-      return Task.CompletedTask;
-    }
+    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware) => _multiWindowControl.ViewProtocol(protocol, showInSoftware);
 
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public Task OpenFileFromEvent(string filePath)
-    {
-      _multiWindowControl.OpenFileInEditor(filePath);
-      return Task.CompletedTask;
-    }
+    public void OpenFileFromEvent(string filePath) => _multiWindowControl.OpenFileInEditor(filePath);
 
     /// <summary>
     /// Создает новый файл в редакторе.
@@ -75,57 +62,30 @@ namespace MainWindowProgram.Services
     /// Этот метод вызывает создание нового файла в редакторе, если редактор был инициализирован.
     /// Если редактор не инициализирован, выводится сообщение об ошибке.
     /// </remarks>
-    public Task CreateNewFile()
-    {
-      _multiWindowControl.CreateNewFile();
-      return Task.CompletedTask;
-    }
+    public void CreateNewFile() => _multiWindowControl.CreateNewFile();
 
     /// <summary>
     /// Сохраняет файл.
     /// </summary>
-    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
-    public Task SaveFile()
-    {
-      _multiWindowControl.SaveFile();
-      return Task.CompletedTask;
-    }
+    public void SaveFile() => _multiWindowControl.SaveFile();
 
     /// <summary>
     /// Сохранить файл как.
     /// </summary>
-    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
-    public Task SaveFileAs()
-    {
-      _multiWindowControl.SaveFileAs();
-      return Task.CompletedTask;
-    }
+    public void SaveFileAs() => _multiWindowControl.SaveFileAs();
 
     /// <summary>
     /// Выводит файл на печать.
     /// </summary>
-    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
-    public Task PrintFile()
-    {
-      _multiWindowControl.PrintFile();
-      return Task.CompletedTask;
-    }
+    public void PrintFile() => _multiWindowControl.PrintFile();
 
     /// <summary>
     /// Получает активный текстовый редактор.
     /// </summary>
     /// <returns>Асинхронную задачу, представляющую результат поиска текстового редактора.</returns>
-    public Task<TextEditorUI> GetActiveTextEditor(EditorType editorType)
-    {
-      var foundEditor = _multiWindowControl.GetActiveTextEditor(editorType);
-      return Task.FromResult(foundEditor);
-    }
+    public TextEditorUI GetActiveTextEditor(EditorType editorType) => _multiWindowControl.GetActiveTextEditor(editorType);
 
-    public Task<TextEditorUI> GetActiveTextEditor()
-    {
-      var foundEditor = _multiWindowControl.GetActiveTextEditor();
-      return Task.FromResult(foundEditor);
-    }
+    public TextEditorUI GetActiveTextEditor() => _multiWindowControl.GetActiveTextEditor();
 
     /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.
@@ -160,12 +120,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <param name="editorType">Тип вкладок.</param>
     /// <returns>Асинхронную задачу, представляющую результат поиска контейнера.</returns>
-    internal Task<TextEditorContainer> GetActiveTextEditorContainer(EditorType editorType)
-    {
-      var foundContainer = _multiWindowControl.GetActiveTextEditorContainer(editorType);
-      return Task.FromResult(foundContainer);
-    }
-
+    internal TextEditorContainer GetActiveTextEditorContainer(EditorType editorType) => _multiWindowControl.GetActiveTextEditorContainer(editorType);
 
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
@@ -193,12 +148,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Открывает папку, содержащую файл, в проводнике.
     /// </summary>
-    /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
-    internal Task OpenFolder()
-    {
-      _multiWindowControl.OpenFolder();
-      return Task.CompletedTask;
-    }
+    internal void OpenFolder() => _multiWindowControl.OpenFolder();
 
     internal async Task CloseRunItem(RunControl runControl, EditorType editorType)
     {

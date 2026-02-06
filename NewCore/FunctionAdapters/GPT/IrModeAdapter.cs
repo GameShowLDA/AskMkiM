@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Converters;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -69,6 +70,8 @@ namespace NewCore.FunctionAdapters.GPT
     /// при испытании изоляции в режиме IR.
     /// </summary>
     public IResistanceLimitsConfigurable ResistanceLimits { get; set; }
+
+    public BreakdownTypeMode ModeType => _irMode.ModeType;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="IrModeAdapter"/>,
@@ -162,7 +165,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _irMode.Mode.SetModeAsync();
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -252,7 +255,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _irMode.Voltage.SetVoltageAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -350,7 +353,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _irMode.ResistanceLimits.SetHighResistanceLimitAsync((int)value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -399,7 +402,7 @@ namespace NewCore.FunctionAdapters.GPT
         var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
           var succes = await _irMode.ResistanceLimits.SetLowResistanceLimitAsync((int)value);
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -483,7 +486,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _irMode.Time.SetTestTimeAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -533,7 +536,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _irMode.Time.SetRampTimeAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -616,7 +619,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _irMode.Offset.SetOffsetAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -778,6 +781,7 @@ namespace NewCore.FunctionAdapters.GPT
         _irMode = irMode;
         _device = device;
       }
+      public Task<string> GetConfigurationAsTextAsync() => _irMode.Config.GetConfigurationAsTextAsync();
 
       /// <summary>
       /// Асинхронно считывает текущую конфигурацию режима IR с устройства GPT-79904.

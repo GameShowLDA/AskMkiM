@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using System.Text;
 
 namespace NewCore.Function.GPT.Managment
 {
@@ -35,6 +36,25 @@ namespace NewCore.Function.GPT.Managment
       _offset = offset;
       _arcCurrent = arcCurrent;
       _frequency = frequency;
+    }
+
+    public async Task<string> GetConfigurationAsTextAsync()
+    {
+      var config = await ReadConfigurationAsync();
+
+      var sb = new StringBuilder();
+
+      sb.AppendLine("Режим испытания: ACW");
+      sb.AppendLine($"Напряжение: {config.Voltage} кВ");
+      sb.AppendLine($"Верхний предел тока: {config.HighCurrentLimit} мА");
+      sb.AppendLine($"Нижний предел тока: {config.LowCurrentLimit} мА");
+      sb.AppendLine($"Время теста: {config.TestTime} с");
+      sb.AppendLine($"Время нарастания: {config.RampTime} с");
+      sb.AppendLine($"Частота: {config.Frequency} Гц");
+      sb.AppendLine($"Смещение (Offset): {config.Offset} мА");
+      sb.AppendLine($"Ток дугового пробоя: {config.ArcCurrent} мА");
+
+      return sb.ToString();
     }
 
     /// <inheritdoc />

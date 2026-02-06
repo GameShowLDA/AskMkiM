@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities
@@ -39,5 +40,10 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabili
     /// <param name="busType">Выходной параметр, содержащий тип шины (1 - A, 2 - B, 3 - AB).</param>
     /// <returns>True, если тип успешно получен; иначе false.</returns>
     bool TryGetBusType(SwitchingBus bus, out int busType);
+
+    /// <summary>
+    /// Возвращает список шин и их текущее состояние подключения.
+    /// </summary>
+    IReadOnlyList<BusConnectionInfo> GetConnectedBuses();
   }
 }

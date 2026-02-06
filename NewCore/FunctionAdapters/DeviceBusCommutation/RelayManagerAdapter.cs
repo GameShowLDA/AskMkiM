@@ -33,7 +33,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var succes = await _relayManager.ConnectRelay(numberRelay);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", succes, 1, userMessageService);
         }
@@ -55,7 +55,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
       {
         var succes = await _relayManager.DisconnectRelay(numberRelay);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", succes, 1, userMessageService);
         }

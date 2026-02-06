@@ -40,7 +40,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
 
       LogInformation($"МИНТ: Подключение шины {bus} к + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1)})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -64,7 +64,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
 
       LogInformation($"МИНТ: Подключение шины {bus} к - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1)})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -88,7 +88,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
 
       LogInformation($"МИНТ: Отключение шины {bus} от + ({new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2)})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
@@ -112,7 +112,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource
 
       LogInformation($"МИНТ: Отключение шины {bus} от - ({new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2)})", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }

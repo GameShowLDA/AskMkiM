@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
@@ -19,6 +20,8 @@ namespace NewCore.Function.GPT.Managment
     private readonly Action<double> _setTestTime;
     private readonly Func<double> _getRampTime;
     private readonly Action<double> _setRampTime;
+    private double _testTime;
+    private double _rampTime;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="TimeManagment"/>.
@@ -54,11 +57,18 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<(bool Success, string Message)> SetTestTimeAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      return await CongifHelper.SetParameterAsync(
+      var result = await CongifHelper.SetParameterAsync(
           getter: async () => _getTestTime(),
           setter: async () => await TimeHelper.SetTestTimeAsync(_gptModel, _mode, value, _delay),
           updateConfig: v => _setTestTime(v),
           newValue: value);
+
+      if (result.Success)
+      {
+        _testTime = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
@@ -67,7 +77,14 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<double> GetTestTimeAsync()
     {
-      return await TimeHelper.GetTestTimeAsync(_gptModel, _mode, _delay);
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _testTime;
+      }
+      else
+      {
+        return await TimeHelper.GetTestTimeAsync(_gptModel, _mode, _delay);
+      }
     }
 
     /// <inheritdoc />
@@ -76,11 +93,18 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<(bool Success, string Message)> SetRampTimeAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      return await CongifHelper.SetParameterAsync(
-          getter: async () => _getRampTime(),
-          setter: async () => await TimeHelper.SetRampTimeAsync(_gptModel, value, _delay),
-          updateConfig: v => _setRampTime(v),
-          newValue: value);
+      var result = await CongifHelper.SetParameterAsync(
+           getter: async () => _getRampTime(),
+           setter: async () => await TimeHelper.SetRampTimeAsync(_gptModel, value, _delay),
+           updateConfig: v => _setRampTime(v),
+           newValue: value);
+
+      if (result.Success)
+      {
+        _rampTime = value;
+      }
+
+      return result;
     }
 
     /// <inheritdoc />
@@ -89,7 +113,14 @@ namespace NewCore.Function.GPT.Managment
     /// </summary>
     public async Task<double> GetRampTimeAsync()
     {
-      return await TimeHelper.GetRampTimeAsync(_gptModel, _delay);
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return _rampTime;
+      }
+      else
+      {
+        return await TimeHelper.GetRampTimeAsync(_gptModel, _delay);
+      }
     }
   }
 }

@@ -36,7 +36,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       {
         var result = await _connection.ConnectAsync();
 
-        if (!result.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Подключение к мультиметру Keysight", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, messageService);
         }
@@ -54,7 +54,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       {
         var result = await _connection.InitializeAsync();
 
-        if (!result.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация мультиметра Keysight", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, messageService);
         }
@@ -72,7 +72,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       {
         var result = await _connection.DisconnectAsync();
 
-        if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение мультиметра Keysight", result ? "Соединение разорвано" : "Ошибка отключения", result, 1, messageService);
         }
@@ -95,5 +95,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
       return connect;
     }
+
+    public string GetConnectionStatus() => _connection.GetConnectionStatus();
   }
 }

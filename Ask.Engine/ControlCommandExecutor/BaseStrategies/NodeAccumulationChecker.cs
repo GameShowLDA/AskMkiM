@@ -63,7 +63,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         foreach (var point in chain.PointModels)
         {
-          await DeviceManager.ConnectPointToBusAAsync(point, messageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, messageService, context.IsPolarityReversed);
         }
 
         var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.InternalResistance, context.VoltageType);
@@ -102,7 +102,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         foreach (var point in chain.PointModels)
         {
-          await DeviceManager.SwitchPointFromBusAToBAsync(point, messageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.SwitchPointFromBusAToBAsync(point, messageService, context.IsPolarityReversed);
         }
       }
 
@@ -110,7 +110,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         foreach (var points in chains.PointModels)
         {
-          await DeviceManager.DisconnectPointFromBusBAsync(points, messageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(points, messageService, context.IsPolarityReversed);
         }
       }
 
@@ -151,7 +151,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         var (leftPart, rightPart) = SplitInHalf(candidates);
 
         await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
-        await DeviceManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
+        await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
 
         IRelaySwitchModule module = null;
         if (leftPart.ChainModels.FirstOrDefault() != null)
@@ -189,10 +189,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         else
         {
           await messageService.ShowMessageAsync(new ShowMessageModel("Отключение правой части группы точек"));
-          await DeviceManager.DisconnectAllPointFromBusBAsync(rightPart, messageService, revers);
+          await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(rightPart, messageService, revers);
 
           await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
-          await DeviceManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
+          await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
 
           if (leftPart.ChainModels.Count > 1)
           {
@@ -213,7 +213,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
         }
 
-        await DeviceManager.ConnectAllFromBusBAsync(candidates, messageService, revers);
+        await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(candidates, messageService, revers);
         return errorPoint;
       }
       catch

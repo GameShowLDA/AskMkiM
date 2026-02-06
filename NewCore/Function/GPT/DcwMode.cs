@@ -60,6 +60,8 @@ namespace NewCore.Function.GPT
     /// <inheritdoc />
     public IConfigurationProvider<DcwConfiguration> Config { get; set; }
 
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.DCW;
+
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="DcwMode"/>.
     /// </summary>
@@ -76,7 +78,7 @@ namespace NewCore.Function.GPT
       Time = new TimeManagment(_gptModel, BreakdownTypeMode.DCW, delay, getTestTime: () => _config.TestTime, setTestTime: v => _config.TestTime = v, getRampTime: () => _config.RampTime, setRampTime: v => _config.RampTime = v);
       Offset = new OffsetManagment(_gptModel, BreakdownTypeMode.DCW, delay, getOffset: () => _config.Offset, setOffset: v => _config.Offset = v);
       ArcCurrent = new ArcCurrentManagment(_gptModel, BreakdownTypeMode.DCW, delay, getArcCurrent: () => _config.ArcCurrent, setArcCurrent: v => _config.ArcCurrent = v);
-      Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: async () => await ExecutionConfig.GetIsIdleModeEnabled());
+      Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: ExecutionConfig.GetIsIdleModeEnabled());
       Config = new DcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent);
       Mode = new ModeManagment(_gptModel, BreakdownTypeMode.DCW, delay, async () => _config = await Config.ReadConfigurationAsync());
     }

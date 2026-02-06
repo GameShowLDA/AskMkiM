@@ -17,7 +17,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(SetArcCurrentAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
           return (true, string.Empty);
@@ -73,7 +73,7 @@ namespace NewCore.Function.GPT.Helper
 
       try
       {
-        if (await ExecutionConfig.GetIsIdleModeEnabled())
+        if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(GetArcCurrentAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
           return 0;

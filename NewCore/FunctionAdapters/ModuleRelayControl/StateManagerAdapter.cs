@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
+using System.Text;
 
 namespace NewCore.FunctionAdapters.ModuleRelayControl
 {
@@ -42,13 +43,40 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
+    public string GetConnectionStatus()
+    {
+      var buses = _moduleRelayControl.BusManager.GetConnectedBuses();
+      var points = _moduleRelayControl.PointManager.GetConnectedPoints();
+
+      var sb = new StringBuilder();
+
+      sb.AppendLine("Подключенные шины:");
+      if (buses.Count == 0)
+        sb.AppendLine("  Нет подключённых шин.");
+      else
+        foreach (var b in buses)
+          sb.AppendLine($"  {b.Bus}");
+
+      sb.AppendLine();
+      sb.AppendLine("Подключенные точки:");
+
+      if (points.Count == 0)
+        sb.AppendLine("  Нет подключённых точек.");
+      else
+        foreach (var p in points)
+          sb.AppendLine($"  Точка {p.PointNumber} = {p.Bus}");
+
+      return sb.ToString();
+    }
+
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
       var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var answer = await _stateManager.ConnectAsync();
 
-        if (!answer.Connect || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!answer.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, "Инициализация модуля коммутации реле", !answer.Connect ? answer.Answer : string.Empty, answer.Connect, 1, messageService);
         }
@@ -69,7 +97,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _stateManager.DisconnectAsync(), messageService, deviceTask: true);
 
-      if (!result || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, "Сброс устройства", string.Empty, result, 1, messageService);
       }

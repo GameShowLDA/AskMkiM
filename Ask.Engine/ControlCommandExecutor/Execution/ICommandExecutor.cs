@@ -1,13 +1,16 @@
 ﻿using Ask.Core.Shared.DTO.Protocol;
-using Ask.Engine.ControlCommandExecutor.Execution;
 
-namespace Ask.Engine.ControlCommandExecutor.Executors.Interface
+namespace Ask.Engine.ControlCommandExecutor.Execution
 {
   /// <summary>
   /// Интерфейс исполнителя команды контроля.
   /// </summary>
   public interface ICommandExecutor
   {
+    /// <summary>
+    /// Мнемоника команды, которую обрабатывает данный исполнитель.
+    /// Используется для сопоставления команды с соответствующим исполнителем.
+    /// </summary>
     string Mnemonic { get; }
 
     /// <summary>

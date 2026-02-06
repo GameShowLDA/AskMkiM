@@ -32,7 +32,7 @@ namespace NewCore.Function.GPT.Helper
 
       LogInformation($"Начало {nameof(MeasureAsync)}", isDeviceLog: true);
 
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем param.", isDeviceLog: true);
         return (param, "");

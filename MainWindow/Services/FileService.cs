@@ -74,7 +74,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Открывает диалог выбора файла и загружает его в редактор.
     /// </summary>
-    public async Task OpenFileAsync()
+    public void OpenFileAsync()
     {
       if (_isLockedProvider())
       {
@@ -91,12 +91,12 @@ namespace MainWindowProgram.Services
         if (openFileDialog.ShowDialog() == true)
         {
           string filePath = openFileDialog.FileName;
-          await _multiWindow.OpenFileInEditor(filePath);
+          _multiWindow.OpenFileInEditor(filePath);
         }
       }
     }
 
-    public async void ViewProtocol(ProtocolModel protocol)
+    public void ViewProtocol(ProtocolModel protocol)
     {
       if (_isLockedProvider())
       {
@@ -104,14 +104,14 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        await _multiWindow.ViewProtocol(protocol, await ProtocolConfig.GetShowProtocolInSoftware());
+        _multiWindow.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
       }
     }
 
     /// <summary>
     /// Открывает диалог выбора файла и загружает его в редактор.
     /// </summary>
-    public async Task OpenFileAsync(string filePath)
+    public void OpenFileAsync(string filePath)
     {
       if (_isLockedProvider())
       {
@@ -119,14 +119,14 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        await _multiWindow.OpenFileInEditor(filePath);
+        _multiWindow.OpenFileInEditor(filePath);
       }
     }
 
     /// <summary>
     /// Создаёт новый файл в редакторе.
     /// </summary>
-    public async Task CreateNewFileAsync()
+    public void CreateNewFileAsync()
     {
       if (_isLockedProvider())
       {
@@ -134,41 +134,40 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        await _multiWindow.CreateNewFile();
+        _multiWindow.CreateNewFile();
       }
     }
 
     /// <summary>
     /// Сохраняет текущий файл.
     /// </summary>
-    public async Task SaveFileAsync()
+    public void SaveFileAsync()
     {
-      await _multiWindow.SaveFile();
+      _multiWindow.SaveFile();
     }
 
     /// <summary>
     /// Сохраняет текущий файл под другим именем.
     /// </summary>
-    public async Task SaveFileAsAsync()
+    public void SaveFileAsAsync()
     {
-      await _multiWindow.SaveFileAs();
+      _multiWindow.SaveFileAs();
     }
 
     /// <summary>
     /// Отправляет текущий файл на печать.
     /// </summary>
-    public async Task PrintFileAsync()
+    public void PrintFileAsync()
     {
-      await _multiWindow.PrintFile();
+      _multiWindow.PrintFile();
     }
 
     /// <summary>
     /// Закрывает приложение.
     /// </summary>
-    public async Task ExitApplicationAsync()
+    public void ExitApplicationAsync()
     {
       Application.Current.Shutdown();
-      await Task.CompletedTask;
     }
 
     /// <summary>
@@ -176,7 +175,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      TextEditorUI activeEditor = await _multiWindow.GetActiveTextEditor();
+      TextEditorUI activeEditor = _multiWindow.GetActiveTextEditor();
 
       if (_isSearchWindowOpen == false && activeEditor != null)
       {
@@ -235,9 +234,6 @@ namespace MainWindowProgram.Services
         return _multiWindow.CreateTranslationFileAsync();
       }
     }
-    internal async Task OpenFolder()
-    {
-      await _multiWindow.OpenFolder();
-    }
+    internal void OpenFolder() => _multiWindow.OpenFolder();
   }
 }

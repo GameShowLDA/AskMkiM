@@ -10,8 +10,6 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -29,7 +27,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       List<ShowMessageModel> infoMessage = new List<ShowMessageModel>();
       var baseCommandModel = context.CommandModel;
 
-      List <List<ChainModel>> errorChain = new();
+      List<List<ChainModel>> errorChain = new();
       var pointsListSource = context.SchemeModel.GetPointsConnected();
       if (pointsListSource.Count == 0)
       {
@@ -60,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var Rt1 = await GetResistanceAsync(context.MessageService, context.Value);
           if (Rt1 > 100)
           {
-            var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
 
             var errorMessageModels = new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: "Rизм = Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
             errorPoint = true;
@@ -72,14 +70,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
           else
           {
-            var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{_basePoint.ToString()}]" : string.Empty;
-            if (await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+            var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            if (DeviceDisplayConfig.GetMeasurementResultsVisibility())
             {
               await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: $"Rизм = {Rt1:F5} Ом", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
             }
           }
 
-          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
           {
@@ -90,7 +88,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var Rt2 = await GetResistanceAsync(context.MessageService, context.Value);
             if (Rt2 > 100)
             {
-              var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{point.ToString()}]" : string.Empty;
+              var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
 
               var errorMessageModels = new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
               errorPoint = true;
@@ -102,21 +100,21 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
             else
             {
-              var machineAdress = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{point.ToString()}]" : string.Empty;
-              if (await DeviceDisplayConfig.GetMeasurementResultsVisibilityAsync())
+              var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
+              if (DeviceDisplayConfig.GetMeasurementResultsVisibility())
               {
                 await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Rизм = {Rt2:F5} Ом", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
               }
             }
 
-            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
             var UpperBound = (baseCommandModel as EhtCommandModel).HigherLimitResistance.Value;
 
-            string machineAdressFirst = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{_basePoint.ToString()}]" : string.Empty;
-            string machineAdressSecond = await DeviceDisplayConfig.GetMachineAddressVisibilityAsync() ? $"[{point.ToString()}]" : string.Empty;
+            string machineAdressFirst = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            string machineAdressSecond = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
 
             if (!errorPoint)
             {
@@ -140,7 +138,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
             if (!errorPoint)
             {
               await context.MessageService.ShowMessageAsync(new ShowMessageModel("Итог измерений"));
@@ -155,7 +153,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 Rx = Rt;
               }
 
-              var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? Rx : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? (LowerBound + UpperBound) / 2 : Rx;
+              var result = !ExecutionConfig.GetIsIdleModeEnabled() ? Rx : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? (LowerBound + UpperBound) / 2 : Rx;
 
               result -= context.CabelResistance;
 
@@ -209,7 +207,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(userMessageService);
       await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-      var result = !await ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ContinuityManager.CheckContinuityAsync(param) : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
+      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ContinuityManager.CheckContinuityAsync(param) : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
       return result;
     }
 

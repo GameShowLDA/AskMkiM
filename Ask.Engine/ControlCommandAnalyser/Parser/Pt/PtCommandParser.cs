@@ -31,13 +31,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       if (rmCommandModel == null)
       {
         LogError($"Команда РМ не найдена");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PtErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
       if (lines == null || lines.Count == 0)
       {
         LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(PrErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
         return model;
       }
 
@@ -102,8 +102,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         model.PointsSourse = pointsBlob;
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
-        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");        
-        
+        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");
+
         // Поднимем ошибки парсера точек
         if (pointErrors?.Count > 0)
         {
@@ -117,20 +117,30 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
           }
         }
 
-        if(busDictionary.Count > 0)
+        if (busDictionary.Count > 0)
         {
           model.BusPointsDictionary = busDictionary;
         }
 
         // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
-      }      
+        int idxStarInSecondLine = remainder.LastIndexOf('*');
+        if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+        {
+          remainder =
+              remainder[..idxStarInFirstLine].Trim()
+              + remainder[(idxStarInSecondLine + 1)..].Trim();
+        }
+        else
+        {
+          remainder = remainder.Trim();
+        }
+      }
       else
       {
         // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(PtErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
 
       if (!string.IsNullOrEmpty(remainder))
@@ -140,11 +150,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
       }
 
+      if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
+      {
+        LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
+        model.Errors.Add(PtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        return model;
+      }
+
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
 
       LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
-    }    
+    }
   }
 }

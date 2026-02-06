@@ -37,7 +37,7 @@
                                         </Track.DecreaseRepeatButton>
                                         <Track.Thumb>
                                             <Thumb Name="Thumb" 
-                                         Background="{StaticResource SecondarySolidColorBrush}" 
+                                         Background="{DynamicResource SecondarySolidColorBrush}" 
                                          BorderThickness="0"
                                          Cursor="ScrollNS">
                                                 <Thumb.Template>

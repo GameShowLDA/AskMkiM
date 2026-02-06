@@ -33,7 +33,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       {
         var (success, message) = await _stateManager.ConnectAsync();
 
-        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!success || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Подключение", message, success, 1, messageService);
         }
@@ -56,7 +56,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       {
         var success = await _stateManager.DisconnectAsync();
 
-        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!success || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение", success, 1);
         }
@@ -72,6 +72,11 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       return result;
     }
 
+    public string GetConnectionStatus()
+    {
+      throw new NotImplementedException();
+    }
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
@@ -79,7 +84,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       {
         var (success, message) = await _stateManager.InitializeAsync();
 
-        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!success || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация", message, success, 1, messageService);
         }
@@ -102,7 +107,7 @@ namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
       {
         var success = await _stateManager.ResetAsync();
 
-        if (!success || await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+        if (!success || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Сброс", success, 1);
         }

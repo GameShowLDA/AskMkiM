@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 
 namespace NewCore.Function.Keysight3466new
@@ -25,10 +26,15 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetACVoltageModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
+      if (_device.TypeMode == MultimeterTypeMode.AcVoltage)
+      {
+        return true;
+      }
+
 
       if (!_device.IsConnected)
       {
@@ -37,13 +43,19 @@ namespace NewCore.Function.Keysight3466new
 
       await _device.DeviceProtocol.QueryAsync("CONF:VOLT:AC");
       var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
-      return answer.Contains("VOLT:AC");
+      if (answer.Contains("VOLT:AC"))
+      {
+        _device.TypeMode = MultimeterTypeMode.AcVoltage;
+        return true;
+      }
+      
+      return false;
     }
 
     /// <inheritdoc />
     public async Task<double> MeasureACVoltageAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return param;
       }

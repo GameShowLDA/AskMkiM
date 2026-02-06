@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
 {
@@ -7,6 +8,8 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
   /// </summary>
   public interface IFastMeter : IAttachableDevice
   {
+    MultimeterTypeMode TypeMode { get; set; }
+
     /// <summary>
     /// Управление измерением переменного напряжения.
     /// </summary>

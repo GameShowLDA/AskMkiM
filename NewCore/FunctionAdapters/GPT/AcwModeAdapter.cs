@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -72,6 +73,10 @@ namespace NewCore.FunctionAdapters.GPT
     /// </summary>
     public IConfigurationProvider<AcwConfiguration> Config { get; set; }
 
+    public BreakdownTypeMode ModeType => _acwMode.ModeType;
+
+    private AcwConfiguration _config = new AcwConfiguration();
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcwModeAdapter"/>,
     /// создавая все подадаптеры, обеспечивающие доступ к функциональности режима ACW
@@ -104,8 +109,8 @@ namespace NewCore.FunctionAdapters.GPT
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _acwMode = new AcwMode(device);
 
-      Voltage = new VoltageAdapterMode(_acwMode, _device);
       Mode = new AcwAdapterMode(_acwMode, _device);
+      Voltage = new VoltageAdapterMode(_acwMode, _device);
       CurrentLimits = new CurrentLimitsAdapterMode(_acwMode, _device);
       Time = new TimeAdapterMode(_acwMode, _device);
       Offset = new OffsetAdapterMode(_acwMode, _device);
@@ -173,7 +178,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.Mode.SetModeAsync();
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима ACW", succes.Success ? "ACW" : succes.Message, succes.Success, 1, userMessageService);
             return succes;
@@ -262,7 +267,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.Voltage.SetVoltageAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка напряжения ACW", succes.Success ? $"{value} В" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -359,7 +364,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.CurrentLimits.SetHighCurrentLimitAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка верхнего предела тока ACW", succes.Success ? $"{value} мА" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -398,7 +403,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.CurrentLimits.SetLowCurrentLimitAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка нижнего предела тока ACW", succes.Success ? $"{value} мА" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -470,7 +475,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.Time.SetTestTimeAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка времени теста ACW", succes.Success ? $"{value} сек" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -517,7 +522,7 @@ namespace NewCore.FunctionAdapters.GPT
         var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
           var succes = await _acwMode.Time.SetRampTimeAsync(value);
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка Ramp Time ACW", succes.Success ? $"{value} сек" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -598,7 +603,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.FrequencyConfigurable.SetFrequencyAsync(frequency);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка частоты ACW", succes.Success ? $"{frequency} Гц" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -679,7 +684,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.Offset.SetOffsetAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка смещения ACW", succes.Success ? $"{value} мА" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -760,7 +765,7 @@ namespace NewCore.FunctionAdapters.GPT
         {
           var succes = await _acwMode.ArcCurrent.SetArcCurrentAsync(value);
 
-          if (!succes.Success || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
             await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка дугового тока ACW", succes.Success ? $"{value} мА" : succes.Message, succes.Success, 1, userMessageService);
           }
@@ -915,6 +920,8 @@ namespace NewCore.FunctionAdapters.GPT
         _acwMode = acwMode;
         _device = device;
       }
+
+      public Task<string> GetConfigurationAsTextAsync() => _acwMode.Config.GetConfigurationAsTextAsync();
 
       /// <summary>
       /// Асинхронно считывает текущую конфигурацию режима ACW с устройства GPT-79904.

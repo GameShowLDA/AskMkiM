@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities
@@ -69,6 +70,8 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabiliti
     /// </summary>
     /// <param name="userMessageService">Сервис для вывода сообщений.</param>
     Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null);
+
+    IReadOnlyList<DeviceConnectionInfo> GetConnectedDevices();
   }
 }
 

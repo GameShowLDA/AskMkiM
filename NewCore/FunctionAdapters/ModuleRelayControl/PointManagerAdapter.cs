@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -37,7 +38,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.ConnectRelayAsync(bus, number);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
         }
@@ -59,7 +60,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.DisconnectRelayAsync(bus, number);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
         }
@@ -81,7 +82,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение диапазона точек {description}", succes, 1, userMessageService);
         }
@@ -104,7 +105,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение диапазона точек {description}", succes, 1, userMessageService);
         }
@@ -125,7 +126,48 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
       {
         var succes = await _pointManager.DisconnectingAllPoint(userMessageService);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw RelayExceptionFactory.DisconnectRangeFailed(description);
+
+      return result;
+    }
+
+
+    public async Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null)
+    {
+      var description = $"всех точек от шины А";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _pointManager.DisconnectingAllPointFromBusA(userMessageService);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw RelayExceptionFactory.DisconnectRangeFailed(description);
+
+      return result;
+    }
+
+    public async Task<bool> DisconnectingAllPointFromBusB(IUserInteractionService? userMessageService = null)
+    {
+      var description = $"всех точек от шины В";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _pointManager.DisconnectingAllPointFromBusB(userMessageService);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
         }
@@ -151,11 +193,11 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     {
       var description = $"{nubmerPoint} к шине [{bus}]";
 
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
 
-        if (!succes || await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _moduleRelayControl,
@@ -174,5 +216,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
 
       return result;
     }
+
+    public IReadOnlyList<PointConnectionInfo> GetConnectedPoints() => _pointManager.GetConnectedPoints();
   }
 }

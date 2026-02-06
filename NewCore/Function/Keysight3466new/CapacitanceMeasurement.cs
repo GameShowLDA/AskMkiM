@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using static Ask.LogLib.LoggerUtility;
 
@@ -29,7 +30,11 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<bool> SetCapacitanceModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+      if (_device.TypeMode == MultimeterTypeMode.Capacitance)
       {
         return true;
       }
@@ -41,13 +46,19 @@ namespace NewCore.Function.Keysight3466new
 
       await _device.DeviceProtocol.QueryAsync("CONF:CAP");
       var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
-      return answer.Contains("CAP");
+      if (answer.Contains("CAP"))
+      {
+        _device.TypeMode = MultimeterTypeMode.Capacitance;
+        return true;
+      }
+
+      return false;
     }
 
     /// <inheritdoc />
     public async Task<double> MeasureCapacitanceAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return param;
       }

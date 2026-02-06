@@ -35,9 +35,9 @@ namespace MainWindowProgram.Services
       EventAggregator.Subscribe<EditorEvents.CloseRunItem>(e => CloseRunItem(e.RunControl));
     }
 
-    public async void OpenFileCommand(string filePath)
+    public void OpenFileCommand(string filePath)
     {
-      await _fileService.OpenFileAsync(filePath);
+      _fileService.OpenFileAsync(filePath);
     }
 
     public async void CloseRunItem(UserControl userControl)

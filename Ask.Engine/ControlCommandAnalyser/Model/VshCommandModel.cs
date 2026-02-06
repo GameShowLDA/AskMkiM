@@ -1,11 +1,6 @@
 ﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
@@ -16,6 +11,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// <summary>
     /// Структура шин стойки коммутации.
     /// </summary>
-    public Dictionary <BusStructureEnum.Type, List<int?>> BusStructure { get; set; }
+    public Dictionary<BusStructureEnum.Type, List<int?>> BusStructure { get; set; }
   }
 }

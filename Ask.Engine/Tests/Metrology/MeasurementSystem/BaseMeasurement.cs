@@ -131,7 +131,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         throw MetrologyValidationErrors.DeviceCollectFailed(ex);
       }
 
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await messageService.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
       }
@@ -203,7 +203,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public virtual async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
     {
-      if (await DeviceDisplayConfig.GetExecutionParametersVisibilityAsync())
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await messageService.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
       }
@@ -222,10 +222,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeMeasurement(IUserInteractionService messageService)
     {
-      if (!await ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-      }
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
 
     /// <summary>
@@ -393,7 +390,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="modeDevice">Тип метрологического устройства.</param>
     private async Task ConnectBusesAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice, IUserInteractionService protocolUI)
     {
-      if (await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
       {
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин"), IsBlockStart: true);
       }
@@ -428,7 +425,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="point2">Вторая точка коммутации.</param>
     public virtual async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, IUserInteractionService protocolUI)
     {
-      if (await DeviceDisplayConfig.GetConnectionInfoVisibilityAsync())
+      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
       {
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек"), IsBlockStart: true);
       }

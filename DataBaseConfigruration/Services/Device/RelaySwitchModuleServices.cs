@@ -66,6 +66,26 @@ namespace DataBaseConfiguration.Services.Device
     }
 
     /// <summary>
+    /// Получает список всех устройств, привязанных к определенному шасси.
+    /// </summary>
+    /// <param name="numberChassis">Номер шасси.</param>
+    /// <returns>Список модулей коммутации реле.</returns>
+    public IRelaySwitchModule GetDeviceByNumberChassis(int numberChassis, int number)
+    {
+      var data = _context.Set<RelaySwitchModuleEntity>()
+                         .Where(device => device.NumberChassis == numberChassis && device.Number == number)
+                         .ToList();
+
+      var result = data
+          .OfType<IRelaySwitchModule>()
+          .Select(GetDeviceInstance)
+          .Where(instance => instance != null)
+          .ToList().FirstOrDefault();
+
+      return result;
+    }
+
+    /// <summary>
     /// Получает список сущностей пробойных установок, привязанных к определённому шасси.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
@@ -80,6 +100,24 @@ namespace DataBaseConfiguration.Services.Device
     public List<RelaySwitchModuleEntity> GetAllEntities()
     {
       return GetAllData().OfType<RelaySwitchModuleEntity>().ToList();
+    }
+
+    public void UpdateResistance(int chassis, int module, double value)
+    {
+      var entity = _context.Set<RelaySwitchModuleEntity>()
+        .FirstOrDefault(e =>
+          e.NumberChassis == chassis &&
+          e.Number == module);
+
+      if (entity == null)
+      {
+        throw new Exception(
+          $"Модуль коммутации реле с шасси {chassis} и номером {module} не найден.");
+      }
+
+      entity.SwitchResistance = value;
+
+      _context.SaveChanges();
     }
   }
 }

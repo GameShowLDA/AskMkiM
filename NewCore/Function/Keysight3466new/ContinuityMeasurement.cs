@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
 using System.Globalization;
 
@@ -32,14 +33,24 @@ namespace NewCore.Function.Keysight3466new
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
     public async Task<bool> SetContinuityModeAsync(IUserInteractionService? userMessageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+      if (_device.TypeMode == MultimeterTypeMode.Continuity)
       {
         return true;
       }
 
       await _device.DeviceProtocol.QueryAsync("CONF:CONT");
       var answer = await _device.DeviceProtocol.QueryAsync("FUNC?", timeout: 1000);
-      return answer.Contains("CONT");
+      if (answer.Contains("CONT"))
+      {
+        _device.TypeMode = MultimeterTypeMode.Continuity;
+        return true;
+      }
+
+      return false;
     }
 
     /// <summary>

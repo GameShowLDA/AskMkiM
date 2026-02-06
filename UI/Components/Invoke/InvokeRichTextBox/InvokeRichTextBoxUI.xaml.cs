@@ -242,7 +242,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
           paragraph.Inlines.Add(descriptionRun);
         }
 
-        if (await ProtocolConfig.GetTimeStart())
+        if (ProtocolConfig.GetTimeStart())
         {
           string elapsedTime = SystemStateManager._stopwatch.Elapsed.ToString(@"mm\:ss\.fff", System.Globalization.CultureInfo.InvariantCulture);
           paragraph.Inlines.Add(new Run("  ["));
@@ -251,7 +251,7 @@ namespace UI.Components.Invoke.InvokeRichTextBox
           paragraph.Inlines.Add(new Run("]"));
         }
 
-        if (await ExecutionConfig.GetIsIdleModeEnabled() && showMessageModel.IsDeviceMessage)
+        if (ExecutionConfig.GetIsIdleModeEnabled() && showMessageModel.IsDeviceMessage)
         {
           string idleText = " | Холостой режим";
           Run run = new Run(idleText) { FontSize = _currentFontSize, Foreground = new SolidColorBrush(showMessageModel.HeaderColor.Value) };

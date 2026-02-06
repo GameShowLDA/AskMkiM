@@ -93,7 +93,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="second">Вторая точка диапазона.</param>
     /// <param name="bitLength">Желаемая длина двоичной строки.</param>
     /// <returns>Список точек и соответствующих перевёрнутых бинарных строк.</returns>
-    static public List<(ChainModel point, string reversedBinary)> ConvertToReversedBinaryRange(GroupModel groupChains,int bitLength)
+    static public List<(ChainModel point, string reversedBinary)> ConvertToReversedBinaryRange(GroupModel groupChains, int bitLength)
     {
       if (bitLength <= 0)
       {
@@ -136,11 +136,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         if (point.reversedBinary[step] == '1')
         {
-          await DeviceManager.ConnectChainToBusAAsync(point.point, messageService, revers);
+          await DeviceManager.RelayModule.ChainManager.ConnectChainToBusAAsync(point.point, messageService, revers);
         }
         else
         {
-          await DeviceManager.ConnectChainToBusBAsync(point.point, messageService, revers);
+          await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(point.point, messageService, revers);
         }
 
       }
@@ -156,11 +156,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         if (point.reversedBinary[step] == '1')
         {
-          await DeviceManager.DisconnectChainFromBusAAsync(point.point, messageService, revers);
+          await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusAAsync(point.point, messageService, revers);
         }
         else
         {
-          await DeviceManager.DisconnectChainFromBusBAsync(point.point, messageService, revers);
+          await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusBAsync(point.point, messageService, revers);
         }
       }
     }

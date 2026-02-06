@@ -38,7 +38,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
       if (lines == null || lines.Count == 0)
       {
         LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(PrErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        model.Errors.Add(OtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
         return model;
       }
 
@@ -88,8 +88,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
       if (timeValue.HasValue)
       {
         model.Time = timeValue.Value;
+        model.TimeSource = $"{time} {unitTime}";
       }
-      model.TimeSource = $"{time} {unitTime}";
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
@@ -124,9 +124,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
           model.BusPointsDictionary = busDictionary;
         }
 
-        // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
         int idxStarInFirstLine = remainder.IndexOf('*');
-        remainder = idxStarInFirstLine >= 0 ? remainder[..idxStarInFirstLine].Trim() : remainder.Trim();
+        int idxStarInSecondLine = remainder.LastIndexOf('*');
+        if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
+        {
+          remainder =
+              remainder[..idxStarInFirstLine].Trim()
+              + remainder[(idxStarInSecondLine + 1)..].Trim();
+        }
+        else
+        {
+          remainder = remainder.Trim();
+        }
       }
 
       if (!string.IsNullOrEmpty(remainder))
@@ -134,6 +143,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
         model.UnparsedParameters = "! Не распознанные параметры: ";
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
+      }
+
+      if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
+      {
+        LogWarning($"В команде {commandNumber} {mnemonic} не указано ни время, ни точки (строка {numberLine})");
+        model.Errors.Add(OtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+        return model;
       }
 
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);

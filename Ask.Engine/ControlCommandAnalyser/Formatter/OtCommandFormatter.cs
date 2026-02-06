@@ -14,6 +14,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var firstLine = $"{ot.CommandNumber} {ot.Mnemonic}";
       yield return firstLine;
 
+      // Ключи команды
+      if (ot.AlgorithmKey.Count > 0)
+      {
+        yield return $"\tКлючи команды: {string.Join(", ", ot.AlgorithmKey)}";
+      }
+      else
+      {
+        yield return $"\tКлючи команды не указаны.";
+      }
+
       // Время
       if (!string.IsNullOrWhiteSpace(ot.TimeSource))
       {
@@ -29,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return $"\tТочки, отключаемые от шины: {bus.Key}";
         foreach (var point in bus.Value)
         {
-          yield return $"\t\t{point.Item1} = {point.Item2}";
+          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
         }
       }
 

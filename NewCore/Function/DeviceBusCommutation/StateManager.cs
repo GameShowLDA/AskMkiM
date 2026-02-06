@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
+using System.Text;
 
 namespace NewCore.Function.DeviceBusCommutation
 {
@@ -37,10 +38,15 @@ namespace NewCore.Function.DeviceBusCommutation
       return await ResetAsync();
     }
 
+    public string GetConnectionStatus()
+    {
+      return string.Empty;
+    }
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return (true, string.Empty);
       }
@@ -80,7 +86,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (await ExecutionConfig.GetIsIdleModeEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return true;
       }
