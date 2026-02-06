@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Static;
@@ -83,6 +84,17 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
+
+      if (runContainer != null)
+      {
+        var runControl = runContainer.GetDockControl().DockItems[0].Content as RunControl;
+        if (runControl != null)
+        {
+          await runControl.Start(runControl.TranslationModels);
+          return;
+        }
+      }
+
       if (container == null && editor != null)
       {
         await BuildAsync();
@@ -106,7 +118,7 @@ namespace MainWindowProgram.Services
       DockItem? foundDockItem = null;
 
       // Ждём, пока хотя бы один DockItem появится
-      for (int i = 0; i < 500; i++) 
+      for (int i = 0; i < 500; i++)
       {
         if (dockManager.DockItems.Count > 0)
         {
@@ -156,7 +168,6 @@ namespace MainWindowProgram.Services
       }
     }
 
-    // TODO: вот тут нужно для LeftBox попробовать контент задавать нужный
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;

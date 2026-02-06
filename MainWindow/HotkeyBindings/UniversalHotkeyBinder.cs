@@ -356,9 +356,6 @@ namespace MainWindowProgram.HotkeyBindings
     {
       if (isMenuItem)
       {
-        // Для MenuItem шорткат уже отображается через InputGestureText.
-        // Но если хочешь ещё и тултип — раскомментируй:
-        // MergeTooltip(element, combo);
         return;
       }
 
@@ -372,16 +369,13 @@ namespace MainWindowProgram.HotkeyBindings
 
       if (string.IsNullOrWhiteSpace(baseText))
       {
-        // Тултипа не было — ставим только шорткат
         newTip = combo;
       }
       else
       {
-        // Уже есть текст; если шорткат уже вписан — ничего не делаем
         if (baseText.Contains(combo, StringComparison.OrdinalIgnoreCase))
           return;
 
-        // Добавляем « — Ctrl+O» к существующему
         newTip = $"{baseText} — {combo}";
       }
 
@@ -403,7 +397,6 @@ namespace MainWindowProgram.HotkeyBindings
         case ToolTip tt2 when tt2.Content is TextBlock tbt && tbt.Text is { Length: > 0 }:
           return tbt.Text;
         default:
-          // Сложный объект — не трогаем, чтобы ничего не поломать
           return null;
       }
     }

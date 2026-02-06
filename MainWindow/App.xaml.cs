@@ -126,15 +126,6 @@ namespace MainWindowProgram
         LogError(e.Exception.ToString());
 
         SaveFatalInfo(e.Exception, "DispatcherUnhandledException");
-
-        MessageBox.Show(
-          "Произошла критическая ошибка приложения.\n" +
-          "Информация сохранена в лог.",
-          "Ошибка",
-          MessageBoxButton.OK,
-          MessageBoxImage.Error);
-
-        Application.Current.Shutdown();
       };
 
       AppDomain.CurrentDomain.UnhandledException += (s, e) =>
