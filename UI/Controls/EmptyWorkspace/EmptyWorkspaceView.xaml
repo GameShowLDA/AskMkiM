@@ -139,6 +139,6 @@
                FontSize="18"
                Opacity="0.45"
                Foreground="{DynamicResource ForegroundSolidColorBrush}"
-               Text="{Binding AppVersion, FallbackValue=Версия 1.0.0 (demo) • Сборка 08.12.2025}"/>
+               Text="{Binding AppVersion, FallbackValue=Версия 1.0.0 (demo) • Сборка 06.02.2026}"/>
     </Grid>
 </UserControl>
