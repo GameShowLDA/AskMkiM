@@ -34,9 +34,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       var errors = new List<ErrorItem>();
       var chainModels = new List<GroupModel>();
-      //var groupModels = new List<GroupModel>();
 
-      // Убираем все пробелы/табы/переводы строк и внешние '*'
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
       expr = expr.Trim('*');
 
@@ -45,7 +43,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       const string RangeStarPlaceholder = "__RANGE_STAR__";
 
-      // перед Split
       expr = expr.Replace("-*", RangeStarPlaceholder);
 
       // Цепи теперь разделяются одной '*'
@@ -77,14 +74,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
           if (rawTokensSingle.Count == 1 && rawTokensSingle[0].EndsWith("-") && (i + 1) < chainSegs.Length)
           {
-            string leftWithDash = rawTokensSingle[0];                  // напр. "Х51/51-"
-            string rightSeg = CleanToken(chainSegs[i + 1]);            // напр. "60"
+            string leftWithDash = rawTokensSingle[0];                  
+            string rightSeg = CleanToken(chainSegs[i + 1]);            
             // правый сегмент не должен содержать '#', ',' — иначе это не продолжение диапазона
             if (!string.IsNullOrEmpty(rightSeg)
                 && !rightSeg.Contains('#')
                 && !rightSeg.Contains(','))
             {
-              string combinedRange = leftWithDash + rightSeg;          // "Х51/51-60"
+              string combinedRange = leftWithDash + rightSeg;          
               var expanded = ExpandRangeToken(combinedRange, errors);
               if (expanded.Count > 0)
               {
@@ -116,7 +113,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         foreach (var part in partTokens)
         {
-          // Токены в части по запятым
           var rawTokens = part.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                               .Select(CleanToken)
                               .Where(t => !string.IsNullOrEmpty(t))
@@ -149,7 +145,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             });
           }
 
-          // Преобразуем строки-точки в PointModel через карту РМ
           var (ok2, pts2) = CommandPostAnalyzer.GetPointsModel(expandedTokens, rmCommandModel.PointsMap);
           currentChainParts.Add(new ChainModel(new List<PointModel>(pts2 ?? new List<PointModel>())));
           var (ok3, ptsDisconnected) = CommandPostAnalyzer.GetPointsModel(expandedDisconnectedTokens, rmCommandModel.PointsMap);
@@ -354,17 +349,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       var errors = new List<ErrorItem>();
       var buses = new Dictionary<SwitchingBus, List<PointModel>>();
 
-      // Убираем пробелы/табы/переводы строк
       expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
       if (string.IsNullOrEmpty(expr))
         return (null, errors);
 
-      // 1. Шины разделяются '*'
       var busSegments = expr.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
 
       foreach (var busSeg in busSegments)
       {
-        // 2. Формат: ШИНА:ТОЧКИ
+        // Формат: ШИНА:ТОЧКИ
         var parts = busSeg.Split(':');
         if (parts.Length != 2)
         {
@@ -376,7 +369,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           continue;
         }
 
-        // 3. Парсим шину
         if (!BusConverter.TryParseSwitchingBus(parts[0], out var bus))
         {
           errors.Add(new ErrorItem
@@ -389,7 +381,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         string pointsPart = parts[1];
 
-        // 4. Токены точек по запятой
         var rawTokens = pointsPart
             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(CleanToken)
@@ -408,7 +399,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         foreach (var token in expandedTokens)
         {
-          // 6. Проверка наличия точки в РМ
           if (!rmCommandModel.PointsMap.TryGetValue(token, out var address))
           {
             errors.Add(GeneralErrors.UnknownPoint(token, lineNumber, command));
@@ -447,7 +437,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           }
           if (!error)
           {
-            // 7. Добавляем точку в словарь
             if (!buses.TryGetValue(bus, out var list))
             {
               list = new List<PointModel>();

@@ -25,7 +25,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
       };
 
       List<string> processedLines = CommentsParser.ParseComments(lines, model);
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
       model.SourceLines = model.SourceLines
         .Where(l => !string.IsNullOrWhiteSpace(l))
         .ToList();
@@ -38,7 +37,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
 
       var firstLine = lines[0].Trim();
 
-      // Универсальное регулярное выражение — всегда выдёргиваем номер и мнемонику
       var match = Regex.Match(firstLine, @"^\s*(\d+)\s+ОК(\s+.*)?$", RegexOptions.IgnoreCase);
       if (!match.Success)
       {
@@ -46,7 +44,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
         return model;
       }
 
-      // Остаток после "ОК" (группа 2) может быть пустым
       var mainPart = match.Groups[2].Success ? match.Groups[2].Value.Trim() : string.Empty;
 
       string objectCode = string.Empty;
@@ -54,14 +51,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
 
       if (string.IsNullOrWhiteSpace(mainPart))
       {
-        // Нет обозначения — ошибка
         model.Errors.Add(OkErrors.MissingObjectCode(numberLine, $"{commandNumber} {mnemonic}"));
         model.ObjectCode = string.Empty;
         model.ObjectName = null;
       }
       else
       {
-        // Всё что после ОК — это обозначение (наименование не обязательно!)
         if (mainPart.Contains("*"))
         {
           var parts = mainPart.Split(new[] { '*' }, 2, StringSplitOptions.None);
@@ -84,11 +79,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
         model.ObjectName = objectName;
         model.ControlObjectTitle = objectCode;
         model.ControlObjectName = objectName;
-        // Всё, больше никаких ошибок!
       }
 
 
-      // --- Параметры (со 2-й строки)
       var uniqueKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
       var multiKeys = new HashSet<string> { "ОПК", "КД", "ИК", "ЦЕХ", "ПРИМ", "ПРИМЕЧ", "ПРИМЕЧАНИЕ" };
 
@@ -169,10 +162,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
         var key = paramMatch.Groups[1].Value.Trim().ToUpperInvariant();
         var value = paramMatch.Groups[2].Value.Trim();
 
-        // Группируем "ПРИМ/ПРИМЕЧ/ПРИМЕЧАНИЕ" как "ПРИМ"
         if (key is "ПРИМЕЧАНИЕ" or "ПРИМЕЧ" or "ПРИМ")
         {
-
           key = "ПРИМ";
 
           if (key.Length > 39)
@@ -186,7 +177,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
             model.Errors.Add(OkErrors.ParameterValueTooLong(numberLine + i, $"{commandNumber} {mnemonic}", key, maxLen));
           }
 
-          // Проверка уникальности идентификаторов (кроме разрешённых)
           if (!multiKeys.Contains(key))
           {
             if (!uniqueKeys.Add(key))

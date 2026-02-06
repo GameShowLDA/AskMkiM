@@ -19,7 +19,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       CheckUniqueMnemonics(models);
       CheckUpLabels(models);
 
-      // Извлечение PointsMap из RmCommandModel
       var rmModel = models.OfType<RmCommandModel>().FirstOrDefault();
       Dictionary<string, string> pointsMap = null;
       if (rmModel != null)
@@ -36,8 +35,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
       catch
       { }
-
-      //CheckPointExistence(models, pointsMap);
     }
 
     private static void CheckPointLinks(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
@@ -132,26 +129,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
     private static void CheckUpLabels(List<BaseCommandModel> models)
     {
-      // Собираем все номера команд для поиска
       var allNumbers = new HashSet<string>(models.Select(m => m.CommandNumber));
 
       foreach (var up in models.OfType<UpCommandModel>())
       {
-        // Проверка: есть ли метка
         if (string.IsNullOrWhiteSpace(up.TargetLabel))
         {
           up.Errors.Add(UpErrors.MissingOrInvalidLabel(up.StartLineNumber, $"{up.CommandNumber} {up.Mnemonic}"));
           continue;
         }
 
-        // Проверка: существует ли команда с таким номером
         if (!allNumbers.Contains(up.TargetLabel))
         {
           up.Errors.Add(UpErrors.LabelNotFound(up.TargetLabel, up.StartLineNumber, $"{up.CommandNumber} {up.Mnemonic}"));
           continue;
         }
 
-        // Проверка: метка должна быть числом
         if (!int.TryParse(up.TargetLabel, out int targetNumber))
         {
           up.Errors.Add(UpErrors.LabelIsNotNumber(up.TargetLabel, up.StartLineNumber, $"{up.CommandNumber} {up.Mnemonic}"));
@@ -160,17 +153,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         if (!int.TryParse(up.CommandNumber, out int currentNumber))
         {
-          // Пропусти, если не число
           continue;
         }
 
-        // Проверка: метка должна быть больше номера текущей команды
         if (targetNumber <= currentNumber)
         {
           up.Errors.Add(UpErrors.LabelLessOrEqual(up.TargetLabel, up.CommandNumber, up.StartLineNumber, $"{up.CommandNumber} {up.Mnemonic}"));
         }
       }
     }
-
   }
 }

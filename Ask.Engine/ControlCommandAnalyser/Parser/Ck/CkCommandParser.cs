@@ -76,13 +76,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ck
 
       string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-      // Ищем первую и последнюю '*'
       int firstStar = bodyNoWs.IndexOf('*');
       int lastStar = bodyNoWs.LastIndexOf('*');
 
       if (firstStar >= 0 && lastStar > firstStar)
       {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
         string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 

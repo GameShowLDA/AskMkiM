@@ -16,7 +16,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
     /// </returns>
     public (string? Value, string? Unit, string Remainder) ParseTime(string input)
     {
-      // Теперь часть с числом необязательная: (?:...)?
       var match = Regex.Match(
           input,
           @"(?:(?<val>\d+(?:[.,]\d+)?)\s*)?(?<unit>(?:м[сc]|ms|с|c))\b",
@@ -28,7 +27,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
         string? value = match.Groups["val"].Success ? match.Groups["val"].Value : null;
         string unit = match.Groups["unit"].Value;
 
-        // удаляем найденный фрагмент вместе с запятой и пробелами после него
         var remainder = Regex.Replace(
             input,
             $@"\b{Regex.Escape(match.Value)}\s*,?",
@@ -41,6 +39,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       return (null, null, input);
     }
-
   }
 }

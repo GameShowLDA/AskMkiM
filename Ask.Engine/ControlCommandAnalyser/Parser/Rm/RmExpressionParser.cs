@@ -387,12 +387,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 
       if (leftMatch.Success && rightMatch.Success)
       {
-        // Парсим левую часть
         int leftFrom = int.Parse(leftMatch.Groups[1].Value);
         int leftTo = int.Parse(leftMatch.Groups[2].Value);
         int leftTotal = leftTo - leftFrom + 1;
 
-        // Парсим правую часть
         int rightPrefix = int.Parse(rightMatch.Groups[1].Value);
         var midList = rightMatch.Groups[2].Value.Split(',').Select(x => int.Parse(x.Trim())).ToList();
         int rightStart = int.Parse(rightMatch.Groups[3].Value);
@@ -422,7 +420,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
             result.Add(new RmPairModel
             {
               OkPoint = leftPtr++.ToString(),
-              Synonym = middle, // Не поддерживаем синонимы в таких записях (можно расширить при необходимости)
+              Synonym = middle, 
               AskInput = $"{rightPrefix}.{mid}.{rightNum}"
             });
           }

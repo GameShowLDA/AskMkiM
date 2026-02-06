@@ -62,14 +62,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
 
         string body = AllLinesInOne(model, lines);
 
-        // Дальше работаем ТОЛЬКО с body:
         var remainder = body;
 
         remainder = ManageSiParametersParse(model, commandNumber, mnemonic, numberLine, remainder, breakDown);
 
         string bodyNoWs = string.Concat(lines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-        // Ищем первую и последнюю '*'
         int firstStar = bodyNoWs.IndexOf('*');
         int lastStar = bodyNoWs.LastIndexOf('*');
 
@@ -96,7 +94,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         }
         else
         {
-          // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
           LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
           model.Errors.Add(IeErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
         }
@@ -115,7 +112,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         return model;
       }
     }
-
 
     private static string ParsePoints(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, RmCommandModel rmCommandModel, string remainder, string bodyNoWs, int firstStar, int lastStar)
     {
@@ -192,7 +188,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       return remainder;
     }
 
-    // TODO: добавить минимальное напряжение, максимальное для переменного тока и постоянного, минимальное и максимальное сопротивление для ППУ
     private static string ExtractSiParameters(string commandNumber, string mnemonic, int numberLine, SiCommandModel model,
       string remainder, IBreakdownTester breakDown)
     {
@@ -275,9 +270,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
 
       if (resistanceValue.HasValue)
       {
-        //var maxValue = UnitsConvertor.TryParseValue($"{maxResistance}", defaultResistainceunit);
-        //var minValue = UnitsConvertor.TryParseValue($"{minResistance}", defaultResistainceunit);
-        //var resistanceFormatted = UnitsConvertor.TryConvertBack(resistanceValue.Value, unitResistance);
         if (resistanceValue.Value > maxResistance)
         {
           LogError($"В команде СИ указано сопротивление, превышающее максимально допустимое сопротивление пробойной установки.");
@@ -343,58 +335,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         LogWarning($"Не указано время (строка {numberLine}): {commandNumber} {mnemonic}");
       }
     }
-
-    private static string ExtractSiKeys(string commandNumber, string mnemonic, int numberLine, SiCommandModel model, string body, string remainder)
-    {
-      var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(body, model);
-
-      foreach (var (key, hasError) in result)
-      {
-        if (hasError)
-        {
-          model.Errors.Add(GeneralErrors.WrongKey(numberLine, mnemonic, $"{commandNumber} {mnemonic}", key));
-        }
-        else
-        {
-          if (!model.AlgorithmKey.Contains(key))
-          {
-            model.AlgorithmKey.Add(key);
-            LogDebug($"Найден ключ алгоритма: {key}");
-          }
-        }
-      }
-
-      // удаляем найденные ключи ТОЛЬКО из ПИ-остатка
-      foreach (var (key, hasError) in result)
-      {
-        remainder = Regex.Replace(
-        remainder,
-        $@"\b{Regex.Escape(key)}\s*,?",
-        "",
-        RegexOptions.IgnoreCase);
-      }
-
-      return remainder;
-    }
-
+    
     private static string AllLinesInOne(SiCommandModel model, List<string> lines)
     {
       List<string> processedLines = CommentsParser.ParseComments(lines, model);
       lines.Clear();
       lines.AddRange(processedLines);
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
       model.SourceLines = model.SourceLines
         .Where(l => !string.IsNullOrWhiteSpace(l))
         .ToList();
 
-      // Склеиваем всё в одну строку и удаляем \r \n \t
       var body = string.Concat(processedLines.Count > 0 && processedLines.FindAll(l => string.IsNullOrEmpty(l) || string.IsNullOrWhiteSpace(l)).Count == 0 ?
         processedLines : model.SourceLines)
         .Replace("\r", "")
         .Replace("\n", "")
         .Replace("\t", "");
 
-      // Для логов
       LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
       return body;
     }
