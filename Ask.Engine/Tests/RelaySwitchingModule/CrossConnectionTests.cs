@@ -59,13 +59,11 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       var searchService = new RelaySwitchModuleServices();
       var searckChassis = new ChassisManagerServices();
 
-      // Разбираем "шасси.модуль" на две части
       var testedCoords = numTestedModule.Split('.').Select(int.Parse).ToArray();
       var verificatCoords = numVerificatModule.Split('.').Select(int.Parse).ToArray();
 
       var chassis = searckChassis.GetEntityById(testedCoords[0]);
 
-      // 1) Получить список модулей из шасси тестируемого
       if (chassis == null)
       {
         await _userInteractionService
@@ -77,7 +75,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       var list = searchService.GetDevicesByNumberChassis(testedCoords[0]);
 
-      // 2) Найти сам модуль по его Id
       testedModuleRelayControl = list.FirstOrDefault(m => m.Number == testedCoords[1]);
       if (testedModuleRelayControl == null)
       {
@@ -88,7 +85,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return false;
       }
 
-      // 3) То же самое для проверяющего модуля
       list = searchService.GetDevicesByNumberChassis(verificatCoords[0]);
       if (list == null || list.Count == 0)
       {
@@ -121,7 +117,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      // 1. Валидация и парсинг трёх полей
       var (ok, message, tested, tester, range) = UIValidationHelperLightweight.TryValidateAndParseInput(_messageService, inputFieldProvider, inputHighlightService);
       if (!ok)
       {
@@ -129,7 +124,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      // 2. Присваивание ссылок на модули
       if (!await SearchAndInitializeRelaySwitchModules(tested, tester))
       {
         LogError("Не были присвоены ссылки на модули");
@@ -138,13 +132,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       LogInformation("Запуск теста CrossTestMKR...");
 
-      // Устанавливаем флаг сброса
       needReset = true;
 
-      // 3. Преобразуем диапазон в список точек
       List<int> points = ParseRange(range);
 
-      // 4. Подготовка оборудования
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования"), IsBlockStart: true);
       await RelayModuleHelper.InitializeModule(_userInteractionService, testedModuleRelayControl, _userInteractionService, cancellationToken, "тестируемый");
       await RelayModuleHelper.InitializeModule(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken, "проверяющий");
@@ -152,7 +143,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"), IsBlockStart: true);
       await RelayModuleHelper.MeterEnableAsync(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken);
 
-      // 5. Собственно сам тест
       await RunPart1(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
       await RunPart2(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
       await RunPart3(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
@@ -269,7 +259,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     {
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 3: проверка замыканий между всеми шинами\n"), IsBlockStart: true);
 
-      // Подключаем МКР2 ко всем 8 шинам
       var allVerifBuses = new[] {
         SwitchingBus.A1, SwitchingBus.B1,
         SwitchingBus.A2, SwitchingBus.B2,
@@ -279,11 +268,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       foreach (var bus in allVerifBuses)
         await RelayModuleHelper.BusConnectAsync(bus, verificat_module, _userInteractionService, cancellationToken);
 
-      // Подключаем первую точку МКР1 к шинам A и B
       await RelayModuleHelper.PointConnectAsync(tested_module, BusPoint.A, 1, _userInteractionService, cancellationToken);
       await RelayModuleHelper.PointConnectAsync(tested_module, BusPoint.B, 1, _userInteractionService, cancellationToken);
 
-      // Циклическая часть для каждой пары шин A1/B1 … A4/B4
       var busPairs = new (SwitchingBus A, SwitchingBus B)[]
       {
         (SwitchingBus.A1, SwitchingBus.B1),
@@ -308,7 +295,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание шин {busA} и {busB}", type: MessageType.Success));
         }
 
-        // Проверяем отсутствие обрыва на A
         await RelayModuleHelper.BusDisconnectAsync(busA, verificat_module, _userInteractionService, cancellationToken);
 
         if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
@@ -322,7 +308,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание на шине {busA} отсутствует", type: MessageType.Success));
         }
 
-        // Проверяем отсутствие обрыва на B
         await RelayModuleHelper.BusConnectAsync(busA, verificat_module, _userInteractionService, cancellationToken);
         await RelayModuleHelper.BusDisconnectAsync(busB, verificat_module, _userInteractionService, cancellationToken);
 
@@ -365,7 +350,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <returns>Список уникальных номеров точек.</returns>
     private List<int> ParseRange(string rangeText)
     {
-      // Используем HashSet для автоматического удаления дубликатов
       HashSet<int> pointsSet = new HashSet<int>();
       var segments = rangeText.Split(',');
       foreach (var segment in segments)
@@ -373,7 +357,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         var trimmed = segment.Trim();
         if (trimmed.Contains('-'))
         {
-          // формат "2-25"
           var bounds = trimmed.Split('-');
           if (bounds.Length == 2 &&
               int.TryParse(bounds[0].Trim(), out int start) &&
@@ -386,7 +369,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         }
         else
         {
-          // одиночное число
           if (int.TryParse(trimmed, out int singleVal))
             pointsSet.Add(singleVal);
         }
@@ -425,15 +407,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       CancellationToken cancellationToken,
       bool needRestartModuleAfter = true)
     {
-      // 1. Подключаем модули к заданным шинам
       await RelayModuleHelper.BusConnectAsync(switchingBus1, tested_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus2, tested_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus1, verificat_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus2, verificat_module, _userInteractionService, cancellationToken);
-
-      // Подключаем все точки в МКР2 к выбранной шине
-      // foreach (int point in rangePoints)
-      //   await PointConnectAsync(verificat_module, bus2, point, cancellationToken);
 
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Подлючение точек"));
 
@@ -465,7 +442,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           await RelayModuleHelper.PointDisconnectAsync(verificat_module, bus2, point, _userInteractionService, cancellationToken);
-          // Проверяем отсутствие замыкания между шинами
+
           cancellationToken.ThrowIfCancellationRequested();
           if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
           {
@@ -477,8 +454,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           return type == ShowMessageModel.MessageType.Success ? true : false;
         }, _userInteractionService);
 
-
-        // Подключаем точку МКР2 обратно и отключаем соответствующую точку МКР1 от своей шины
         await RelayModuleHelper.PointConnectAsync(verificat_module, bus2, point, _userInteractionService, cancellationToken);
         await RelayModuleHelper.PointDisconnectAsync(tested_module, bus1, point, _userInteractionService, cancellationToken);
       }
