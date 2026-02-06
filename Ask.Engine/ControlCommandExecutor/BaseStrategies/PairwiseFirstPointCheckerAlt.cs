@@ -10,8 +10,6 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -29,7 +27,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       List<ShowMessageModel> infoMessage = new List<ShowMessageModel>();
       var baseCommandModel = context.CommandModel;
 
-      List <List<ChainModel>> errorChain = new();
+      List<List<ChainModel>> errorChain = new();
       var pointsListSource = context.SchemeModel.GetPointsConnected();
       if (pointsListSource.Count == 0)
       {
@@ -79,7 +77,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
           }
 
-          await DeviceManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
           {
@@ -109,7 +107,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
@@ -140,7 +138,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
             if (!errorPoint)
             {
               await context.MessageService.ShowMessageAsync(new ShowMessageModel("Итог измерений"));

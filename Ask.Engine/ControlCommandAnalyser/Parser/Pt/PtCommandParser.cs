@@ -101,7 +101,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
         var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");        
-        
+
         if (pointErrors?.Count > 0)
         {
           foreach (var error in pointErrors)
@@ -114,7 +114,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
           }
         }
 
-        if(busDictionary.Count > 0)
+        if (busDictionary.Count > 0)
         {
           model.BusPointsDictionary = busDictionary;
         }
@@ -131,7 +131,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
         {
           remainder = remainder.Trim();
         }
-      }      
+      }
       else
       {
         LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
@@ -157,6 +157,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
       return model;
-    }    
+    }
   }
 }

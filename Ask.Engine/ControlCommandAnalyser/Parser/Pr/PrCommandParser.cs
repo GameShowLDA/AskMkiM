@@ -255,11 +255,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
           $"Не указана верхняя граница при проверке на сообщение"));
       }
 
-      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource)&&!model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource) && !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(PrErrors.ResistanceLimitsConflict(
-          model.StartLineNumber, 
+          model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}",
           $"Не указана нижняя граница при проверке на разобщение"));
       }

@@ -1,15 +1,12 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Services.Errors.Translation;
+﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using System.Diagnostics.Eventing.Reader;
+using DataBaseConfiguration.Services.Device;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
-using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
 {

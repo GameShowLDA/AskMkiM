@@ -32,12 +32,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       foreach (var bus in pt.BusPointsDictionary)
       {
         yield return $"\tТочки, подключаемые к шине: {bus.Key}";
-        foreach(var point in bus.Value)
+        foreach (var point in bus.Value)
         {
           yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
         }
       }
-      
+
       if (pt.Comment.Count > 0)
       {
         yield return $"\tКомметарии:";

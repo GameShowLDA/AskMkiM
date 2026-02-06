@@ -4,22 +4,21 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Ask.Engine.ControlCommandExecutor.Executors.Interface;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class IeCommandExecutor : ICommandExecutor
+  internal class IeCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
     private double firstValue = 0;
@@ -27,43 +26,26 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      var command = context.Command as IeCommandModel;
-      context.TranslationControl.SetActiveLine(command.FormattedStartLineNumber);
-
-      string nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      string message = string.Empty;
-
-      foreach (var str in command.SourceLines)
-      {
-        message += "\r\n  " + str;
-      }
-
-      BreakpointHandler.Handle(command, context.Console);
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
-
+      var command = GetRequiredCommand<IeCommandModel>(context);
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var message = BuildSourceLinesMessage(command);
       List<ShowMessageModel> errorMessage = new();
       List<ShowMessageModel> infoMessage = new();
+      
+      SetActiveLine(context, command);
+      BreakpointHandler.Handle(command, context.Console);
 
-      var points = command.Scheme?.GroupModels?
-            .SelectMany(chain => chain?.ChainModels ?? Enumerable.Empty<ChainModel>())
-            .SelectMany(part => part?.PointModels ?? Enumerable.Empty<PointModel>())
-            .ToList()
-            ?? new List<PointModel>();
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
-      }
+      var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
+      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      var modules = points
-         .Select(EquipmentService.GetModuleByPoint)
-         .Where(m => m != null)
-         .DistinctBy(m => (m.NumberChassis, m.Number))
-         .ToList();
-      await SettingModuleRelayControl(modules, context.Console);
+      var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-      await SettingsDeviceBusCommutatuion(dbc, context.Console);
+      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console);
@@ -102,11 +84,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       errorMessage.AddRange(messageResult.errorMessage);
       infoMessage.AddRange(messageResult.infoMessage);
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
-      foreach (var item in modules)
-      {
-        await item.PointManager.DisconnectingAllPoint(context.Console);
-      }
+      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
 
       if (errorMessage.Count > 0)
       {
@@ -136,20 +114,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }, messageService);
 
       return result;
-    }
-
-    private async Task SettingModuleRelayControl(List<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
-    {
-      foreach (var module in relaySwitchModules)
-      {
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: userMessageService);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: userMessageService);
-      }
-    }
-
-    private async Task SettingsDeviceBusCommutatuion(ISwitchingDevice dbc, IUserInteractionService userMessageService)
-    {
-      await dbc.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
     private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)

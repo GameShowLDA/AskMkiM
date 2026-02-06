@@ -1,15 +1,10 @@
-﻿using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using System.Security.Claims;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -41,7 +36,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 
-      await DeviceManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
+      await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
       groupChains.ChainModels.Remove(_basePoint);
       await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
 
@@ -59,7 +54,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         str += "*";
 
         await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
-        await DeviceManager.ConnectChainToBusAAsync(chain, messageService, context.IsPolarityReversed);
+        await DeviceManager.RelayModule.ChainManager.ConnectChainToBusAAsync(chain, messageService, context.IsPolarityReversed);
 
         var module = EquipmentService.GetModuleByPoint(chain.PointModels.FirstOrDefault());
         var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance, type: context.VoltageType);
@@ -76,7 +71,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", chainStr, context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
         }
 
-        await DeviceManager.DisconnectChainFromBusAAsync(chain, messageService, context.IsPolarityReversed);
+        await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusAAsync(chain, messageService, context.IsPolarityReversed);
       }
 
       foreach (var item in errorChains)

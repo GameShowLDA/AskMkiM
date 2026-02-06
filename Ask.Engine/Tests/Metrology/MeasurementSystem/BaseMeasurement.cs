@@ -222,10 +222,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeMeasurement(IUserInteractionService messageService)
     {
-      if (!ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
-      }
+      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
     }
 
     /// <summary>
