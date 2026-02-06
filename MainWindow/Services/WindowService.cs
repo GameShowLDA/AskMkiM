@@ -82,7 +82,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task DragMoveAsync()
     {
-      await Application.Current.Dispatcher.InvokeAsync(() =>
+      await Application.Current.Dispatcher?.InvokeAsync(() =>
       {
         _mainWindow.DragMove();
       });

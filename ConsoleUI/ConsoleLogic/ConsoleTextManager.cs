@@ -26,7 +26,7 @@ namespace ConsoleUI.ConsoleLogic
         _buffer.Add(entry);
       }
 
-      Application.Current.Dispatcher.BeginInvoke(() =>
+      Application.Current?.Dispatcher?.BeginInvoke(() =>
       {
         foreach (var sub in _subscribers)
           sub(entry);
