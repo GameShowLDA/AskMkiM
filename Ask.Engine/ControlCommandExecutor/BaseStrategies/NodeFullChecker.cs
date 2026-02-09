@@ -36,7 +36,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
       ErrorsPoints = new List<ChainModel>();
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode));
+      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
 
       foreach (var chainModels in groupChains.ChainModels)
       {
