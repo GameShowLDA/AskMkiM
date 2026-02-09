@@ -33,6 +33,13 @@ namespace MainWindowProgram.Services
 
     private TextEditorUI _actualTextEditor;
 
+    /// <summary>
+    /// Проверяет, разрешено ли ставить точку остановки на указанной команде.
+    /// </summary>
+    /// <param name="m">Название команды.</param>
+    /// <returns>
+    /// <see langword="true"/>, если команда поддерживает точки остановки; иначе <see langword="false"/>.
+    /// </returns>
     private static bool IsBreakpointAllowed(BaseCommandModel m) =>
       m.Mnemonic != "СП"
       && m.Mnemonic != "ЦУ"
@@ -42,10 +49,23 @@ namespace MainWindowProgram.Services
       && m.Mnemonic != "ОК"
       ;
 
+    /// <summary>
+    /// Строит список строк исходного текста, на которые можно ставить точку остановки в левом редакторе.
+    /// </summary>
+    /// <param name="allowed">Команды, на которые разрешены точки.</param>
+    /// <returns>Список номеров строк исходного текста.</returns>
     private static List<int> BuildLeftBreakpointLines(IEnumerable<BaseCommandModel> allowed)
       => allowed.Select(m => m.StartLineNumber)
                 .ToList();
 
+    /// <summary>
+    /// Строит список строк документа трансляции, на которые можно ставить точку остановки.
+    /// </summary>
+    /// <param name="doc">Документ правого редактора (текст трансляции).</param>
+    /// <param name="models">Список моделей команд (результат разбора/трансляции).</param>
+    /// <returns>
+    /// Список номеров строк в документе трансляции, на которые разрешено ставить точку остановки.
+    /// </returns>
     private static List<int> BuildRightBreakpointLinesFromDocument(TextDocument doc, List<BaseCommandModel> models)
     {
       var allowedCommands = new HashSet<int>(models.Count);
@@ -213,6 +233,12 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Подготавливает вкладку исполнения и запускает выполнение.
+    /// </summary>
+    /// <param name="runContainer">Контейнер исполнения.</param>
+    /// <param name="editor">Редактор, содержащий путь к файлу и исходные данные.</param>
+    /// <param name="runControl">Контрол исполнения.</param>
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;

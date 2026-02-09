@@ -150,6 +150,12 @@ namespace UI.Controls
       FirstFileName.Text = newText;
     }
 
+    /// <summary>
+    /// Обработчик события установки точки.
+    /// Обновляет модель команды и синхронизирует точки в обоих редакторах
+    /// без повторной генерации событий.
+    /// </summary>
+    /// <param name="obj">Событие установки точки (содержит номер команды).</param>
     private void BreakpointSet(BreakpointEvents.BreakpointSet obj)
     {
       var model = GetCommandByNumber(obj.CommandNumber);
@@ -165,6 +171,12 @@ namespace UI.Controls
       right.EnsureBreakpoint(model.FormattedStartLineNumber + 1, obj.CommandNumber, isSet: true, raiseEvents: false);
     }
 
+    /// <summary>
+    /// Обработчик события снятия точки.
+    /// Обновляет модель команды и синхронизирует снятие точки в обоих редакторах
+    /// без повторной генерации событий.
+    /// </summary>
+    /// <param name="obj">Событие снятия точки (содержит номер команды).</param>
     private void BreakpointRemoved(BreakpointEvents.BreakpointRemoved obj)
     {
       var model = GetCommandByNumber(obj.CommandNumber);
