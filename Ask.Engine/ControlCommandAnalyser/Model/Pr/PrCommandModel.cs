@@ -6,21 +6,27 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
+using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
 {
-  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.К,
-   Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.ЗР,
-   Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.ЗС,
-   Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.С, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.П,
-    Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.И,
-    Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т,
-   Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Г, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т1)]
+  [AllowedKeys(К, ЗР, ЗС, С, П, И, Т, Г, Т1)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [ResistanceRange(0, 100000.0, 10.0)]
   public class PrCommandModel : BaseCommandModel, IError, IHasScheme
   {
+    /// <summary>
+    /// Мнемоническое обозначение измерительной команды.
+    /// Используется для отображения команды в пользовательском интерфейсе,
+    /// протоколах выполнения и диагностических сообщениях.
+    /// </summary>
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
+
+    /// <summary>
+    /// Тип измерительной команды.
+    /// Определяет категорию и логику выполнения команды и используется для выбора соответствующего алгоритма измерения.
+    /// </summary>
+    public override MeasurementTypeCommand TypeCommand => MeasurementTypeCommand.PR;
 
     /// <summary>
     /// Единицы измерения сопротивления (например, "МОм", "кОм" и т.п.)

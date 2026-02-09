@@ -32,7 +32,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       _basePoint = groupChains.ChainModels.FirstOrDefault();
       var messageService = context.MessageService;
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint));
+      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 

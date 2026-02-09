@@ -3,10 +3,11 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
+using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
-  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.П, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.С)]
+  [AllowedKeys(Б, П, С)]
   public class OtCommandModel : BaseCommandModel
   {
     public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.OT).DisplayName;

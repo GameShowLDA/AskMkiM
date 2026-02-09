@@ -34,7 +34,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errorsMessgae, infoMessage);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint));
+      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
 
       foreach (var groups in pointsListSource)
       {

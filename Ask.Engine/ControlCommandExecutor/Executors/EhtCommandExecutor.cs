@@ -35,7 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
       await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      var relayModules =DeviceManager.RelayModule.PrepareRelayModules(points, context);
+      var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
@@ -56,16 +56,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var cabelResistance = command.CabelResistance != null ? command.CabelResistance.Value : 0;
 
-      PairwiseFirstPointAltContext pairwiseFirstPointCheckerAlt = new PairwiseFirstPointAltContext();
-      pairwiseFirstPointCheckerAlt.SchemeModel = command.Scheme;
-      pairwiseFirstPointCheckerAlt.CommandManager = context.CommandExecutionManager;
-      pairwiseFirstPointCheckerAlt.CommandModel = command;
-      pairwiseFirstPointCheckerAlt.MessageService = context.Console;
-      pairwiseFirstPointCheckerAlt.Value = (firstValue + secondValue) / 2;
+      PairwiseFirstPointAltContext pairwiseFirstPointCheckerAlt = new PairwiseFirstPointAltContext(
+        context,
+        command,
+        command,
+        (firstValue + secondValue) / 2,
+        firstValue,
+        secondValue);
       pairwiseFirstPointCheckerAlt.CabelResistance = cabelResistance;
-      pairwiseFirstPointCheckerAlt.TypeCommand = MeasurementTypeCommand.EHT;
-      pairwiseFirstPointCheckerAlt.LowerLimit = command.LowerLimitResistance.Value;
-      pairwiseFirstPointCheckerAlt.HigherLimit = command.HigherLimitResistance.Value;
 
       if (command.AlgorithmKey.Contains("Д"))
       {

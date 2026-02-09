@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var messageService = context.MessageService;
       var cancellationToken = messageService.GetCancellationToken();
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode));
+      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
 
       foreach (var chain in groupChains.ChainModels)
       {

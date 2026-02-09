@@ -49,22 +49,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await SettingMeter(meter, context.Console);
 
-      MethodExecutionContext methodExecutionContext = new MethodExecutionContext();
-      methodExecutionContext.SchemeModel = command.Scheme;
-      methodExecutionContext.CommandManager = context.CommandExecutionManager;
-      methodExecutionContext.CommandModel = command;
-      methodExecutionContext.MessageService = context.Console;
+      MethodExecutionContext methodExecutionContext = new MethodExecutionContext(context, command, command);
       methodExecutionContext.Value = resistance;
-      methodExecutionContext.Unit = "Ом";
-      methodExecutionContext.UnitMnemonic = "R";
-      methodExecutionContext.TypeCommand = MeasurementTypeCommand.PR;
 
-      if (command.AlgorithmKey.Contains("И"))
-      {
-        methodExecutionContext.IsPolarityReversed = true;
-      }
-
-      NodeAccumulationContext nodeAccumulationContext = methodExecutionContext.CreateChild<NodeAccumulationContext>();
       PairwiseFirstPointContext pairwiseFirstPointContext = methodExecutionContext.CreateChild<PairwiseFirstPointContext>();
 
       List<ShowMessageModel> errorMessage = new();
@@ -136,46 +123,38 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         methodExecutionContext.LowerLimit = firstValue;
         methodExecutionContext.HigherLimit = secondValue != null ? secondValue : -1;
+        methodExecutionContext.Value = firstValue + 1;
 
-        if (command.AlgorithmKey.Contains("К"))
-        {
-          NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-          NodeFullContext nodeFullContext = methodExecutionContext.CreateChild<NodeFullContext>();
-          nodeFullContext.PerformMeasurementAsync = measure;
+        NodeFullContext nodeFullContext = methodExecutionContext.CreateChild<NodeFullContext>();
+        nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
+        methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
+        pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
 
-          var errMes = await NodeFullChecker.CheckSequenceAsync(nodeFullContext);
-          errorMessage.AddRange(errMes);
-        }
-        else if (command.AlgorithmKey.Contains("Г"))
-        {
-          NodeFullChecker.PerformMeasurementAsync measure = NodeFullPerformMeasurementAsync;
-          methodExecutionContext.PerformMeasurementAsync = measure;
+        NodeAccumulationContext nodeAccumulationContext = methodExecutionContext.CreateChild<NodeAccumulationContext>();
+        nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
+        nodeAccumulationContext.LowerLimit = command.DisconnectedLowerLimitResistance.Value;
 
-          var errMes = await MethodExecutor.CheckSequenceAsync(methodExecutionContext);
-          errorMessage.AddRange(errMes);
-        }
-        else if (command.AlgorithmKey.Contains("Т1"))
+        if (command.DisconnectedHigherLimitResistance == null)
         {
-          pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-          var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
-          errorMessage.AddRange(errMes);
+          nodeAccumulationContext.HigherLimit = -1;
         }
         else
         {
-          nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-          nodeAccumulationContext.LowerLimit = command.DisconnectedLowerLimitResistance.Value;
-          if (command.DisconnectedHigherLimitResistance == null)
-          {
-            nodeAccumulationContext.HigherLimit = -1;
-          }
-          else
-          {
-            nodeAccumulationContext.HigherLimit = command.DisconnectedHigherLimitResistance.Value;
-          }
-
-          var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
-          errorMessage.AddRange(errMes);
+          nodeAccumulationContext.HigherLimit = command.DisconnectedHigherLimitResistance.Value;
         }
+
+        DisconnectionCheckRequest disconnectionCheckRequest = new DisconnectionCheckRequest()
+        {
+          AlgorithmKey = command.AlgorithmKey,
+          NodeFullContext = nodeFullContext,
+          MethodExecutionContext = methodExecutionContext,
+          PairwiseFirstPointContext = pairwiseFirstPointContext,
+          NodeAccumulationContext = nodeAccumulationContext
+        };
+
+        var messageResult = await DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest);
+        errorMessage.AddRange(messageResult.Errors);
+        infoMessage.AddRange(messageResult.Info);
       }
 
       await PointFormater.MessageResult(errorMessage, context.Console);
@@ -210,6 +189,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
       }
     }
+
+    #region Измерения.
+
 
     /// <summary>
     /// Выполняет измерение между уже подключёнными точками метод накапливающего узла.
@@ -329,4 +311,5 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return (result, answer);
     }
   }
+    #endregion
 }

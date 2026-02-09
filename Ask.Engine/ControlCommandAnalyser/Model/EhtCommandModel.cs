@@ -6,14 +6,26 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
+using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [MeasurementDevice(MeasurementDevice.Multimeter)]
-  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Д)]
+  [AllowedKeys(Д)]
   public class EhtCommandModel : BaseCommandModel, IHasScheme
   {
+    /// <summary>
+    /// Мнемоническое обозначение измерительной команды.
+    /// Используется для отображения команды в пользовательском интерфейсе,
+    /// протоколах выполнения и диагностических сообщениях.
+    /// </summary>
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.EHT).DisplayName;
+
+    /// <summary>
+    /// Тип измерительной команды.
+    /// Определяет категорию и логику выполнения команды и используется для выбора соответствующего алгоритма измерения.
+    /// </summary>
+    public override MeasurementTypeCommand TypeCommand => MeasurementTypeCommand.EHT;
 
     /// <summary>
     /// Единицы измерения сопротивления проводов (например, "МОм", "кОм" и т.п.)
