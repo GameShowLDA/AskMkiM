@@ -59,13 +59,11 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       var searchService = new RelaySwitchModuleServices();
       var searckChassis = new ChassisManagerServices();
 
-      // Разбираем "шасси.модуль" на две части
       var testedCoords = numTestedModule.Split('.').Select(int.Parse).ToArray();
       var verificatCoords = numVerificatModule.Split('.').Select(int.Parse).ToArray();
 
       var chassis = searckChassis.GetEntityById(testedCoords[0]);
 
-      // 1) Получить список модулей из шасси тестируемого
       if (chassis == null)
       {
         await _userInteractionService
@@ -77,7 +75,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       var list = searchService.GetDevicesByNumberChassis(testedCoords[0]);
 
-      // 2) Найти сам модуль по его Id
       testedModuleRelayControl = list.FirstOrDefault(m => m.Number == testedCoords[1]);
       if (testedModuleRelayControl == null)
       {
@@ -88,7 +85,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return false;
       }
 
-      // 3) То же самое для проверяющего модуля
       list = searchService.GetDevicesByNumberChassis(verificatCoords[0]);
       if (list == null || list.Count == 0)
       {
@@ -121,7 +117,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      // 1. Валидация и парсинг трёх полей
       var (ok, message, tested, tester, range) = UIValidationHelperLightweight.TryValidateAndParseInput(_messageService, inputFieldProvider, inputHighlightService);
       if (!ok)
       {
@@ -129,7 +124,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      // 2. Присваивание ссылок на модули
       if (!await SearchAndInitializeRelaySwitchModules(tested, tester))
       {
         LogError("Не были присвоены ссылки на модули");
@@ -138,21 +132,17 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       LogInformation("Запуск теста CrossTestMKR...");
 
-      // Устанавливаем флаг сброса
       needReset = true;
 
-      // 3. Преобразуем диапазон в список точек
       List<int> points = ParseRange(range);
 
-      // 4. Подготовка оборудования
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования"), IsBlockStart: true);
-      await InitializeModule(_userInteractionService, testedModuleRelayControl, cancellationToken, "тестируемый");
-      await InitializeModule(_userInteractionService, verificatModuleRelayControl, cancellationToken, "проверяющий");
+      await RelayModuleHelper.InitializeModule(_userInteractionService, testedModuleRelayControl, _userInteractionService, cancellationToken, "тестируемый");
+      await RelayModuleHelper.InitializeModule(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken, "проверяющий");
 
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"), IsBlockStart: true);
-      await MeterEnableAsync(_userInteractionService, verificatModuleRelayControl, cancellationToken);
+      await RelayModuleHelper.MeterEnableAsync(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken);
 
-      // 5. Собственно сам тест
       await RunPart1(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
       await RunPart2(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
       await RunPart3(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
@@ -170,130 +160,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       if (!needReset) return;
       needReset = false;
     }
-
-    #region Методы для общения
-
-    /// <summary>
-    /// Подключает заданный БК к указанной шине.
-    /// </summary>
-    /// <param name="bus">Шина</param>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="lowVoltage">
-    /// Флаг режима низкого вольтажа:
-    /// <c>true</c> — использовать низкий уровень напряжения,
-    /// <c>false</c> — использовать стандартный (высокий) уровень напряжения.
-    /// </param>
-    private async Task<bool> BusConnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.BusManager.ConnectBusAsync(bus, userMessageService: _userInteractionService);
-
-      return true;
-    }
-
-    /// <summary>
-    /// Отключает заданный БК от указанной шины.
-    /// </summary>
-    /// <param name="bus">Коммутационная шина</param>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="lowVoltage">
-    /// Флаг режима низкого вольтажа:
-    /// <c>true</c> — использовать низкий уровень напряжения,
-    /// <c>false</c> — использовать стандартный (высокий) уровень напряжения.
-    /// </param>
-    private async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.BusManager.DisconnectBusAsync(bus, userMessageService: _userInteractionService);
-      return true;
-    }
-
-    /// <summary>
-    /// Инициализирует БК и отображает сообщение об инициализации.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="roleName">Название роли блока коммутации</param>
-    /// <returns>Возвращает <c>true</c>, если инициализация прошла успешно; иначе — <c>false</c>.</returns>
-    private async Task<bool> InitializeModule(IUserInteractionService messageService, IRelaySwitchModule module, CancellationToken cancellationToken, string roleName = null)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.ConnectableManager.InitializeAsync(messageService);
-      return true;
-    }
-
-    /// <summary>
-    /// Выполняет сброс указанного БК.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    private async Task ResetModule(IUserInteractionService messageService, IRelaySwitchModule module)
-    {
-      await module.ConnectableManager.ResetAsync(messageService);
-    }
-
-    /// <summary>
-    /// Подключает точку (реле) заданного БК к указанной шине.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="bus">Шина</param>
-    /// <param name="point">Точка (реле)</param>
-    /// <returns>Возвращает <c>true</c>, если точка успешно подключена; иначе — <c>false</c>.</returns>
-    private async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.PointManager.ConnectRelayAsync(bus, point, _userInteractionService);
-      return true;
-    }
-
-    /// <summary>
-    /// Отключает точку (реле) заданного БК от указанной шины.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="bus">Шина</param>
-    /// <param name="point">Точка (реле)</param>
-    /// <returns>Возвращает <c>true</c>, если точка успешно отключена; иначе — <c>false</c>.</returns>
-    private async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.PointManager.DisconnectRelayAsync(bus, point, _userInteractionService);
-      return true;
-    }
-
-    /// <summary>
-    /// Включает измеритель БК.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <returns>Возвращает <c>true</c>, устройство включилось; иначе — <c>false</c>.</returns>
-    private async Task<bool> MeterEnableAsync(IUserInteractionService messageService, IRelaySwitchModule module, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.MeterManager.ConnectMeterAsync(_userInteractionService);
-      return true;
-    }
-
-    /// <summary>
-    /// Отключает измеритель БК.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <returns>Возвращает <c>true</c>, если устройство выключилось; иначе — <c>false</c>.</returns>
-    private async Task<bool> MeterDisableAsync(IUserInteractionService messageService, IRelaySwitchModule module)
-    {
-      await module.MeterManager.DisconnectMeterAsync(_userInteractionService);
-      return true;
-    }
-
-    /// <summary>
-    /// Получает ответ измерителя указанного БК и отображает сообщение об измерении.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <returns>Возвращает <c>true</c>, если есть замыкание; иначе — <c>false</c>.</returns>
-    private async Task<bool> GetMeterAnswer(IRelaySwitchModule module, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.MeterManager.GetMeterResponseAsync(_userInteractionService);
-      return true;
-    }
-
-    #endregion
 
     #region Логика теста
 
@@ -393,7 +259,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     {
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 3: проверка замыканий между всеми шинами\n"), IsBlockStart: true);
 
-      // Подключаем МКР2 ко всем 8 шинам
       var allVerifBuses = new[] {
         SwitchingBus.A1, SwitchingBus.B1,
         SwitchingBus.A2, SwitchingBus.B2,
@@ -401,13 +266,11 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         SwitchingBus.A4, SwitchingBus.B4
     };
       foreach (var bus in allVerifBuses)
-        await BusConnectAsync(bus, verificat_module, cancellationToken);
+        await RelayModuleHelper.BusConnectAsync(bus, verificat_module, _userInteractionService, cancellationToken);
 
-      // Подключаем первую точку МКР1 к шинам A и B
-      await PointConnectAsync(tested_module, BusPoint.A, 1, cancellationToken);
-      await PointConnectAsync(tested_module, BusPoint.B, 1, cancellationToken);
+      await RelayModuleHelper.PointConnectAsync(tested_module, BusPoint.A, 1, _userInteractionService, cancellationToken);
+      await RelayModuleHelper.PointConnectAsync(tested_module, BusPoint.B, 1, _userInteractionService, cancellationToken);
 
-      // Циклическая часть для каждой пары шин A1/B1 … A4/B4
       var busPairs = new (SwitchingBus A, SwitchingBus B)[]
       {
         (SwitchingBus.A1, SwitchingBus.B1),
@@ -418,10 +281,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       foreach (var (busA, busB) in busPairs)
       {
-        await BusConnectAsync(busA, tested_module, cancellationToken);
-        await BusConnectAsync(busB, tested_module, cancellationToken);
+        await RelayModuleHelper.BusConnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.BusConnectAsync(busB, tested_module, _userInteractionService, cancellationToken);
 
-        if (!await GetMeterAnswer(verificat_module, cancellationToken))
+        if (!await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
         {
           cancellationToken.ThrowIfCancellationRequested();
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ОБРЫВ ШИНЫ]", message: $"обрыв БК {tested_module.Number} от шин {busA} и {busB}", type: MessageType.Error));
@@ -432,10 +295,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание шин {busA} и {busB}", type: MessageType.Success));
         }
 
-        // Проверяем отсутствие обрыва на A
-        await BusDisconnectAsync(busA, verificat_module, cancellationToken);
+        await RelayModuleHelper.BusDisconnectAsync(busA, verificat_module, _userInteractionService, cancellationToken);
 
-        if (await GetMeterAnswer(verificat_module, cancellationToken))
+        if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
         {
           cancellationToken.ThrowIfCancellationRequested();
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", message: $"замыкание при отключении БК {tested_module.Number} от шины {busA}", type: MessageType.Error));
@@ -446,11 +308,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание на шине {busA} отсутствует", type: MessageType.Success));
         }
 
-        // Проверяем отсутствие обрыва на B
-        await BusConnectAsync(busA, verificat_module, cancellationToken);
-        await BusDisconnectAsync(busB, verificat_module, cancellationToken);
+        await RelayModuleHelper.BusConnectAsync(busA, verificat_module, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.BusDisconnectAsync(busB, verificat_module, _userInteractionService, cancellationToken);
 
-        if (await GetMeterAnswer(verificat_module, cancellationToken))
+        if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
         {
           cancellationToken.ThrowIfCancellationRequested();
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", message: $"замыкание при отключении БК {tested_module.Number} от шины {busB}", type: MessageType.Error));
@@ -461,16 +322,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание на шине {busB} отсутствует", type: MessageType.Error));
         }
 
-        await BusConnectAsync(busB, verificat_module, cancellationToken);
+        await RelayModuleHelper.BusConnectAsync(busB, verificat_module, _userInteractionService, cancellationToken);
 
-        await BusDisconnectAsync(busA, tested_module, cancellationToken);
-        await BusDisconnectAsync(busB, tested_module, cancellationToken);
+        await RelayModuleHelper.BusDisconnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.BusDisconnectAsync(busB, tested_module, _userInteractionService, cancellationToken);
       }
 
       if (needRestartModuleAfter)
       {
-        await ResetModule(messageService, tested_module);
-        await ResetModule(messageService, verificat_module);
+        await RelayModuleHelper.ResetModule(messageService, _userInteractionService, tested_module);
+        await RelayModuleHelper.ResetModule(messageService, _userInteractionService, verificat_module);
       }
       return true;
     }
@@ -489,7 +350,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <returns>Список уникальных номеров точек.</returns>
     private List<int> ParseRange(string rangeText)
     {
-      // Используем HashSet для автоматического удаления дубликатов
       HashSet<int> pointsSet = new HashSet<int>();
       var segments = rangeText.Split(',');
       foreach (var segment in segments)
@@ -497,7 +357,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         var trimmed = segment.Trim();
         if (trimmed.Contains('-'))
         {
-          // формат "2-25"
           var bounds = trimmed.Split('-');
           if (bounds.Length == 2 &&
               int.TryParse(bounds[0].Trim(), out int start) &&
@@ -510,7 +369,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         }
         else
         {
-          // одиночное число
           if (int.TryParse(trimmed, out int singleVal))
             pointsSet.Add(singleVal);
         }
@@ -549,15 +407,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       CancellationToken cancellationToken,
       bool needRestartModuleAfter = true)
     {
-      // 1. Подключаем модули к заданным шинам
-      await BusConnectAsync(switchingBus1, tested_module, cancellationToken);
-      await BusConnectAsync(switchingBus2, tested_module, cancellationToken);
-      await BusConnectAsync(switchingBus1, verificat_module, cancellationToken);
-      await BusConnectAsync(switchingBus2, verificat_module, cancellationToken);
-
-      // Подключаем все точки в МКР2 к выбранной шине
-      // foreach (int point in rangePoints)
-      //   await PointConnectAsync(verificat_module, bus2, point, cancellationToken);
+      await RelayModuleHelper.BusConnectAsync(switchingBus1, tested_module, _userInteractionService, cancellationToken);
+      await RelayModuleHelper.BusConnectAsync(switchingBus2, tested_module, _userInteractionService, cancellationToken);
+      await RelayModuleHelper.BusConnectAsync(switchingBus1, verificat_module, _userInteractionService, cancellationToken);
+      await RelayModuleHelper.BusConnectAsync(switchingBus2, verificat_module, _userInteractionService, cancellationToken);
 
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Подлючение точек"));
 
@@ -571,9 +424,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           cancellationToken.ThrowIfCancellationRequested();
-          await PointConnectAsync(tested_module, bus1, point, cancellationToken);
+          await RelayModuleHelper.PointConnectAsync(tested_module, bus1, point, _userInteractionService, cancellationToken);
 
-          if (!await GetMeterAnswer(verificat_module, cancellationToken))
+          if (!await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
           {
             type = ShowMessageModel.MessageType.Error;
           }
@@ -588,10 +441,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          await PointDisconnectAsync(verificat_module, bus2, point, cancellationToken);
-          // Проверяем отсутствие замыкания между шинами
+          await RelayModuleHelper.PointDisconnectAsync(verificat_module, bus2, point, _userInteractionService, cancellationToken);
+
           cancellationToken.ThrowIfCancellationRequested();
-          if (await GetMeterAnswer(verificat_module, cancellationToken))
+          if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
           {
             type = ShowMessageModel.MessageType.Error;
             message = $"Замыкание при отключении точки {point} от шины {bus2}";
@@ -601,16 +454,14 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           return type == ShowMessageModel.MessageType.Success ? true : false;
         }, _userInteractionService);
 
-
-        // Подключаем точку МКР2 обратно и отключаем соответствующую точку МКР1 от своей шины
-        await PointConnectAsync(verificat_module, bus2, point, cancellationToken);
-        await PointDisconnectAsync(tested_module, bus1, point, cancellationToken);
+        await RelayModuleHelper.PointConnectAsync(verificat_module, bus2, point, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.PointDisconnectAsync(tested_module, bus1, point, _userInteractionService, cancellationToken);
       }
 
       if (needRestartModuleAfter)
       {
-        await ResetModule(messageService, tested_module);
-        await ResetModule(messageService, verificat_module);
+        await RelayModuleHelper.ResetModule(messageService, _userInteractionService, tested_module);
+        await RelayModuleHelper.ResetModule(messageService, _userInteractionService, verificat_module);
       }
 
       return true;
