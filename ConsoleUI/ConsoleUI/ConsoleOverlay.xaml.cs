@@ -12,6 +12,8 @@ namespace ConsoleUI.ConsoleUI
 {
   public partial class ConsoleOverlay : Window
   {
+    private const int MaxUiEntries = ConsoleTextManager.MaxBufferSize;
+
     private readonly List<string> _commandHistory = new();
     private int _historyIndex = -1;
     private List<string> _commandSuggestions = new();
@@ -86,14 +88,21 @@ namespace ConsoleUI.ConsoleUI
         if (TryClassify(entry, out bool isDevice))
         {
           if (isDevice)
+          {
             _devCol!.Children.Add(block);
+            TrimPanel(_devCol);
+          }
           else
+          {
             _uiCol!.Children.Add(block);
+            TrimPanel(_uiCol);
+          }
         }
         else
         {
           block.Opacity = 0.8;
           _uiCol!.Children.Add(block);
+          TrimPanel(_uiCol);
         }
 
         ConsoleScroll.ScrollToEnd();
@@ -110,6 +119,7 @@ namespace ConsoleUI.ConsoleUI
       };
 
       ConsolePanel.Children.Add(normal);
+      TrimPanel(ConsolePanel);
       ConsoleScroll.ScrollToEnd();
     }
 
@@ -275,6 +285,12 @@ namespace ConsoleUI.ConsoleUI
       _splitRoot.Children.Add(_devCol);
 
       ConsolePanel.Children.Add(_splitRoot);
+    }
+
+    private static void TrimPanel(StackPanel panel)
+    {
+      while (panel.Children.Count > MaxUiEntries)
+        panel.Children.RemoveAt(0);
     }
 
     private void CommandInput_PreviewTextInput(object sender, TextCompositionEventArgs e)
