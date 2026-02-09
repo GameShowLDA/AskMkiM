@@ -59,6 +59,58 @@
             <EventSetter Event="MouseDoubleClick" Handler="LogItem_MouseDoubleClick"/>
         </Style>
 
+        <DataTemplate x:Key="ToastTemplate">
+            <Border Background="#E01E1E1E"
+                    BorderBrush="#33FFFFFF"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="10,6"
+                    Margin="0,0,0,6"
+                    Opacity="0"
+                    RenderTransformOrigin="0.5,0.5">
+                <Border.RenderTransform>
+                    <TranslateTransform X="16"/>
+                </Border.RenderTransform>
+                <TextBlock Text="{Binding Text}"
+                           Foreground="White"
+                           FontFamily="Consolas"
+                           FontSize="13"/>
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="0" Opacity="0.35"/>
+                </Border.Effect>
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 From="0" To="1"
+                                                 Duration="0:0:0.15"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)"
+                                                 From="16" To="0"
+                                                 Duration="0:0:0.2">
+                                    <DoubleAnimation.EasingFunction>
+                                        <CubicEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 To="0"
+                                                 BeginTime="0:0:1.6"
+                                                 Duration="0:0:0.3"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)"
+                                                 To="8"
+                                                 BeginTime="0:0:1.6"
+                                                 Duration="0:0:0.3">
+                                    <DoubleAnimation.EasingFunction>
+                                        <CubicEase EasingMode="EaseIn"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Border.Triggers>
+            </Border>
+        </DataTemplate>
+
         <Style x:Key="ConsoleListBoxStyle" TargetType="ListBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -91,8 +143,22 @@
             </Grid.RowDefinitions>
 
             <!-- Вывод логов -->
-            <ContentControl x:Name="ConsoleHost"
-                            Grid.Row="0"/>
+            <Grid Grid.Row="0">
+                <ContentControl x:Name="ConsoleHost"/>
+                <ItemsControl x:Name="ToastHost"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Top"
+                              Margin="0,4,4,0"
+                              IsHitTestVisible="False"
+                              Panel.ZIndex="5"
+                              ItemTemplate="{StaticResource ToastTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Grid>
 
             <!-- Ввод команд -->
             <TextBox x:Name="CommandInput"

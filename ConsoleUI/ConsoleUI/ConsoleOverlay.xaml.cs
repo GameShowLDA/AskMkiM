@@ -19,6 +19,8 @@ namespace ConsoleUI.ConsoleUI
     private const int UiTrimChunk = 200;
     private const int MaxPendingEntries = 20000;
     private const int MaxBatchEntries = 200;
+    private const int MaxToasts = 3;
+    private static readonly TimeSpan ToastDuration = TimeSpan.FromSeconds(2);
 
     private readonly List<string> _commandHistory = new();
     private int _historyIndex = -1;
@@ -42,6 +44,8 @@ namespace ConsoleUI.ConsoleUI
     private ObservableCollection<LogEntry> _singleEntries = new();
     private ObservableCollection<LogEntry> _uiEntries = new();
     private ObservableCollection<LogEntry> _devEntries = new();
+    private readonly ObservableCollection<ToastNotification> _toasts = new();
+    private readonly Dictionary<ToastNotification, CancellationTokenSource> _toastTokens = new();
 
     private ListBox? _singleList;
     private ListBox? _uiList;
@@ -55,6 +59,11 @@ namespace ConsoleUI.ConsoleUI
     private bool _autoScrollUi = true;
     private bool _autoScrollDev = true;
 
+    private sealed class ToastNotification
+    {
+      public string Text { get; set; } = string.Empty;
+    }
+
     public ConsoleOverlay() : this(false) { }
 
     public ConsoleOverlay(bool startSplit)
@@ -66,6 +75,7 @@ namespace ConsoleUI.ConsoleUI
         Interval = TimeSpan.FromMilliseconds(33)
       };
       _renderTimer.Tick += (_, _) => FlushPendingEntries();
+      ToastHost.ItemsSource = _toasts;
 
       var writer = new ConsoleWriterAdapter();
       var factory = new CommandFactory();
@@ -505,7 +515,61 @@ namespace ConsoleUI.ConsoleUI
         if (!string.IsNullOrEmpty(entry.Text))
           Clipboard.SetText(entry.Text);
 
+        ShowToast("Текст скопирован");
         e.Handled = true;
+      }
+    }
+
+    private void ShowToast(string message)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(() => ShowToast(message));
+        return;
+      }
+
+      if (_toasts.Count >= MaxToasts)
+        RemoveToast(_toasts[0]);
+
+      var toast = new ToastNotification { Text = message };
+      _toasts.Add(toast);
+
+      var cts = new CancellationTokenSource();
+      _toastTokens[toast] = cts;
+
+      _ = RemoveToastAfterDelayAsync(toast, cts.Token);
+    }
+
+    private async Task RemoveToastAfterDelayAsync(ToastNotification toast, CancellationToken token)
+    {
+      try
+      {
+        await Task.Delay(ToastDuration, token);
+      }
+      catch (TaskCanceledException)
+      {
+        return;
+      }
+
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(() => RemoveToast(toast));
+        return;
+      }
+
+      RemoveToast(toast);
+    }
+
+    private void RemoveToast(ToastNotification toast)
+    {
+      if (!_toasts.Remove(toast))
+        return;
+
+      if (_toastTokens.TryGetValue(toast, out var cts))
+      {
+        _toastTokens.Remove(toast);
+        cts.Cancel();
+        cts.Dispose();
       }
     }
 
