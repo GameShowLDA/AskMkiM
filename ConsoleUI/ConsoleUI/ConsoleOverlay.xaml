@@ -11,6 +11,35 @@
         ResizeMode="CanResizeWithGrip"
         Opacity="0.95">
 
+    <Window.Resources>
+        <DataTemplate x:Key="LogEntryTemplate">
+            <TextBlock Text="{Binding Text}"
+                       Foreground="{Binding Color}"
+                       FontFamily="Consolas"
+                       FontSize="14"
+                       TextWrapping="Wrap"
+                       Margin="0,2,0,2"/>
+        </DataTemplate>
+
+        <Style x:Key="ConsoleListBoxStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="ItemTemplate" Value="{StaticResource LogEntryTemplate}"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+            <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
+            <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+            <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+            <Setter Property="VirtualizingStackPanel.CacheLengthUnit" Value="Item"/>
+            <Setter Property="VirtualizingStackPanel.CacheLength" Value="2,2"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+    </Window.Resources>
+
     <Border Background="#CC1E1E1E" CornerRadius="10" Padding="10"
         BorderThickness="1" BorderBrush="#33FFFFFF"
         MouseLeftButtonDown="Border_MouseLeftButtonDown">
@@ -22,13 +51,9 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Прокручиваемый вывод -->
-            <ScrollViewer x:Name="ConsoleScroll"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Grid.Row="0">
-                <StackPanel x:Name="ConsolePanel"/>
-            </ScrollViewer>
+            <!-- Вывод логов -->
+            <ContentControl x:Name="ConsoleHost"
+                            Grid.Row="0"/>
 
             <!-- Ввод команд -->
             <TextBox x:Name="CommandInput"

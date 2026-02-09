@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace ConsoleUI.ConsoleLogic
 {
@@ -23,28 +22,29 @@ namespace ConsoleUI.ConsoleLogic
         Color = ParseColor(text)
       };
 
+      List<Action<LogEntry>> subscribers;
       lock (_lock)
       {
         _buffer.Add(entry);
         TrimBufferIfNeeded();
+        subscribers = _subscribers.ToList();
       }
 
-      Application.Current?.Dispatcher?.BeginInvoke(() =>
-      {
-        foreach (var sub in _subscribers)
-          sub(entry);
-      });
+      foreach (var sub in subscribers)
+        sub(entry);
     }
 
     public void Subscribe(Action<LogEntry> callback)
     {
+      List<LogEntry> snapshot;
       lock (_lock)
       {
         _subscribers.Add(callback);
-
-        foreach (var entry in _buffer)
-          callback(entry); // при подписке отдаём всё ранее накопленное
+        snapshot = _buffer.ToList();
       }
+
+      foreach (var entry in snapshot)
+        callback(entry); // при подписке отдаём всё ранее накопленное
     }
 
     public void Unsubscribe(Action<LogEntry> callback)
