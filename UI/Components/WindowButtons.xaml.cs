@@ -26,6 +26,32 @@ namespace UI.Components
       set => SetValue(CommandProperty, value);
     }
 
+    public static readonly DependencyProperty CommandParameterProperty =
+      DependencyProperty.Register(
+        nameof(CommandParameter),
+        typeof(object),
+        typeof(WindowButtons),
+        new PropertyMetadata(null));
+
+    public object CommandParameter
+    {
+      get => GetValue(CommandParameterProperty);
+      set => SetValue(CommandParameterProperty, value);
+    }
+
+    public static readonly DependencyProperty CommandTargetProperty =
+      DependencyProperty.Register(
+        nameof(CommandTarget),
+        typeof(IInputElement),
+        typeof(WindowButtons),
+        new PropertyMetadata(null));
+
+    public IInputElement CommandTarget
+    {
+      get => (IInputElement)GetValue(CommandTargetProperty);
+      set => SetValue(CommandTargetProperty, value);
+    }
+
     /// <summary>
     /// Перечисление, представляющее варианты выбора для кнопок окна.
     /// </summary>
@@ -102,10 +128,86 @@ namespace UI.Components
 
     private void WindowButtons_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      if (Command?.CanExecute(null) == true)
+      if (Command == null)
+        return;
+
+      if (TryExecuteSystemCommand())
+        return;
+
+      ExecuteCommand(Command, CommandParameter, CommandTarget);
+    }
+
+    private bool TryExecuteSystemCommand()
+    {
+      if (!IsSystemCommand(Command))
+        return false;
+
+      if (CommandParameter != null || CommandTarget != null)
+        return false;
+
+      Window window = Window.GetWindow(this);
+      if (window == null)
+        return false;
+
+      if (ReferenceEquals(Command, SystemCommands.MinimizeWindowCommand))
       {
-        Command.Execute(null);
+        SystemCommands.MinimizeWindow(window);
+        return true;
       }
+
+      if (ReferenceEquals(Command, SystemCommands.MaximizeWindowCommand))
+      {
+        if (window.WindowState == WindowState.Maximized)
+          SystemCommands.RestoreWindow(window);
+        else
+          SystemCommands.MaximizeWindow(window);
+        return true;
+      }
+
+      if (ReferenceEquals(Command, SystemCommands.RestoreWindowCommand))
+      {
+        SystemCommands.RestoreWindow(window);
+        return true;
+      }
+
+      if (ReferenceEquals(Command, SystemCommands.CloseWindowCommand))
+      {
+        SystemCommands.CloseWindow(window);
+        return true;
+      }
+
+      return false;
+    }
+
+    private void ExecuteCommand(ICommand command, object commandParameter, IInputElement commandTarget)
+    {
+      if (IsSystemCommand(command))
+      {
+        Window window = Window.GetWindow(this);
+        if (commandParameter == null)
+          commandParameter = window;
+        if (commandTarget == null)
+          commandTarget = window;
+      }
+
+      if (command is RoutedCommand routedCommand)
+      {
+        IInputElement target = commandTarget ?? this;
+        if (routedCommand.CanExecute(commandParameter, target))
+          routedCommand.Execute(commandParameter, target);
+        return;
+      }
+
+      if (command.CanExecute(commandParameter))
+        command.Execute(commandParameter);
+    }
+
+    private static bool IsSystemCommand(ICommand command)
+    {
+      return ReferenceEquals(command, SystemCommands.MinimizeWindowCommand)
+        || ReferenceEquals(command, SystemCommands.MaximizeWindowCommand)
+        || ReferenceEquals(command, SystemCommands.RestoreWindowCommand)
+        || ReferenceEquals(command, SystemCommands.CloseWindowCommand);
     }
 
     public static readonly DependencyProperty SizeProperty =
