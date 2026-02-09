@@ -39,52 +39,77 @@
     <!-- ======= Главное меню ======= -->
     <Style x:Key="StyleMenuItem" TargetType="{x:Type MenuItem}">
         <!-- Базовые визуальные параметры -->
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Padding" Value="5,10,10,10"/>
+        <Setter Property="Padding" Value="12,6,14,6"/>
+        <Setter Property="MinHeight" Value="30"/>
         <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
 
         <!-- Шаблон отображения MenuItem -->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
-                        <DockPanel x:Name="ItemDockPanel" Background="Transparent">
+                        <Border x:Name="ItemBackground"
+                                Background="Transparent"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MenuIconCol"/>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MenuHotkeyCol"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MenuArrowCol"/>
+                                </Grid.ColumnDefinitions>
 
-                            <!-- Иконка (если задана) -->
-                            <ContentPresenter x:Name="Icon"
-                                              ContentSource="Icon"
-                                              Margin="4,0,6,0"
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                              VerticalAlignment="Center"/>
+                                <!-- Иконка (если задана) -->
+                                <ContentPresenter x:Name="Icon"
+                                                  Grid.Column="0"
+                                                  ContentSource="Icon"
+                                                  Margin="0,0,8,0"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                  VerticalAlignment="Center"/>
 
-                            <!-- Дополнительный значок (галочка, стрелка и т.п.) -->
-                            <Path x:Name="GlyphPanel"
-                                  Fill="#000000"
-                                  FlowDirection="LeftToRight"
-                                  Margin="7,0,0,0"
-                                  Visibility="Collapsed"
-                                  VerticalAlignment="Center"/>
+                                <!-- Основной текст -->
+                                <TextBlock x:Name="HeaderText"
+                                           Grid.Column="1"
+                                           Text="{TemplateBinding Header}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
 
-                            <!-- Основной текст -->
-                            <TextBlock x:Name="HeaderText"
-                                       Text="{TemplateBinding Header}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       Margin="{TemplateBinding Padding}"/>
+                                <!-- Горячая клавиша -->
+                                <TextBlock x:Name="HotkeyText"
+                                           Grid.Column="2"
+                                           Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
+                                           Foreground="{DynamicResource ForegrounfBrushes45}"
+                                           VerticalAlignment="Center"
+                                           Margin="14,0,6,0"/>
 
-                            <!-- Горячая клавиша -->
-                            <TextBlock x:Name="HotkeyText"
-                                       Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       Margin="10,0,10,0"/>
-                        </DockPanel>
+                                <!-- Индикатор подменю -->
+                                <Path x:Name="SubmenuIndicator"
+                                      Grid.Column="3"
+                                      Data="M 0 0 L 4 4 L 0 8"
+                                      Stroke="{DynamicResource ForegrounfBrushes45}"
+                                      StrokeThickness="1.6"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      VerticalAlignment="Center"
+                                      Margin="6,0,2,0"
+                                      Visibility="Collapsed"
+                                      SnapsToDevicePixels="True"
+                                      Stretch="Uniform"
+                                      Width="8"
+                                      Height="8"/>
+                            </Grid>
+                        </Border>
 
                         <!-- Подменю -->
                         <Popup x:Name="PART_Popup"
@@ -115,12 +140,46 @@
                     <!-- Триггеры -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                        </Trigger>
+                        <Trigger Property="HasItems" Value="True">
+                            <Setter TargetName="SubmenuIndicator" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                            <Setter TargetName="HotkeyText" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                            <Setter TargetName="HotkeyText" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Role" Value="TopLevelHeader"/>
+                                <Condition Property="HasItems" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="SubmenuIndicator" Property="Data" Value="M 0 0 L 4 4 L 8 0"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Margin" Value="6,2,2,0"/>
+                        </MultiTrigger>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter TargetName="HeaderText" Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="10,6,12,6"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -134,34 +193,56 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
-                        <DockPanel x:Name="ItemDockPanel" Background="Transparent">
+                        <Border x:Name="ItemBackground"
+                                Background="Transparent"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MenuIconCol"/>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MenuHotkeyCol"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MenuArrowCol"/>
+                                </Grid.ColumnDefinitions>
 
-                            <ContentPresenter x:Name="Icon"
-                                              ContentSource="Icon"
-                                              Margin="4,0,6,0"
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                              VerticalAlignment="Center"/>
+                                <ContentPresenter x:Name="Icon"
+                                                  Grid.Column="0"
+                                                  ContentSource="Icon"
+                                                  Margin="0,0,8,0"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                  VerticalAlignment="Center"/>
 
-                            <Path x:Name="GlyphPanel"
-                                  Fill="#000000"
-                                  FlowDirection="LeftToRight"
-                                  Margin="7,0,0,0"
-                                  Visibility="Collapsed"
-                                  VerticalAlignment="Center"/>
+                                <TextBlock x:Name="HeaderText"
+                                           Grid.Column="1"
+                                           Text="{TemplateBinding Header}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
 
-                            <TextBlock x:Name="HeaderText"
-                                       Text="{TemplateBinding Header}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       Margin="{TemplateBinding Padding}"/>
+                                <TextBlock x:Name="HotkeyText"
+                                           Grid.Column="2"
+                                           Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
+                                           Foreground="{DynamicResource ForegrounfBrushes45}"
+                                           VerticalAlignment="Center"
+                                           Margin="14,0,6,0"/>
 
-                            <TextBlock x:Name="HotkeyText"
-                                       Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       Margin="10,0,0,0"/>
-                        </DockPanel>
+                                <Path x:Name="SubmenuIndicator"
+                                      Grid.Column="3"
+                                      Data="M 0 0 L 4 4 L 0 8"
+                                      Stroke="{DynamicResource ForegrounfBrushes45}"
+                                      StrokeThickness="1.6"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      VerticalAlignment="Center"
+                                      Margin="6,0,2,0"
+                                      Visibility="Collapsed"
+                                      SnapsToDevicePixels="True"
+                                      Stretch="Uniform"
+                                      Width="8"
+                                      Height="8"/>
+                            </Grid>
+                        </Border>
 
                         <!-- Подменю -->
                         <Popup x:Name="PART_Popup"
@@ -192,12 +273,46 @@
                     <!-- Триггеры -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                        </Trigger>
+                        <Trigger Property="HasItems" Value="True">
+                            <Setter TargetName="SubmenuIndicator" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                            <Setter TargetName="HotkeyText" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                            <Setter TargetName="HotkeyText" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Role" Value="TopLevelHeader"/>
+                                <Condition Property="HasItems" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="SubmenuIndicator" Property="Data" Value="M 0 0 L 4 4 L 8 0"/>
+                            <Setter TargetName="SubmenuIndicator" Property="Margin" Value="6,2,2,0"/>
+                        </MultiTrigger>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter TargetName="HeaderText" Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="10,6,12,6"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
