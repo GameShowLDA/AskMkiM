@@ -16,7 +16,7 @@ namespace Ask.LogLib
     public static string LogInformation(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Info(BuildMessage("INFO", message, callerFilePath, lineNumber));
+      logger.Info(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -31,7 +31,7 @@ namespace Ask.LogLib
     public static string LogWarning(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Warn(BuildMessage("WARN", message, callerFilePath, lineNumber));
+      logger.Warn(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -46,7 +46,7 @@ namespace Ask.LogLib
     public static string LogError(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Error(BuildMessage("ERROR", message, callerFilePath, lineNumber));
+      logger.Error(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -61,7 +61,7 @@ namespace Ask.LogLib
     public static string LogDebug(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Debug(BuildMessage("DEBUG", message, callerFilePath, lineNumber));
+      logger.Debug(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -87,7 +87,7 @@ namespace Ask.LogLib
         ? ex.Message
         : $"{customMessage}: {ex.Message}";
 
-      var message = BuildMessage("ERROR", messageCore, file, line);
+      var message = BuildMessage(messageCore, file, line);
 
       if (!onlyProjectStack)
       {
@@ -120,7 +120,7 @@ namespace Ask.LogLib
       var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
       if (!string.IsNullOrWhiteSpace(userHint))
       {
-        logger.Error(BuildMessage("ERROR", userHint, file, line));
+        logger.Error(BuildMessage(userHint, file, line));
       }
 
       LogException(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
@@ -138,11 +138,28 @@ namespace Ask.LogLib
       return isDeviceLog ? $"{baseName}_Device" : $"{baseName}_UI";
     }
 
-    private static string BuildMessage(string level, string message, string filePath, int lineNumber)
+    private static string BuildMessage(string message, string filePath, int lineNumber)
     {
       var safeMessage = message ?? string.Empty;
-      var safePath = string.IsNullOrWhiteSpace(filePath) ? "unknown" : filePath;
-      return $"[{level}][{safePath}:{lineNumber}] {safeMessage}";
+      var safePath = string.IsNullOrWhiteSpace(filePath) ? "unknown" : TrimPathToProject(filePath);
+      return $"[{safePath}:{lineNumber}] {safeMessage}";
+    }
+
+    private static string TrimPathToProject(string filePath)
+    {
+      const string projectName = "AskMkiM";
+      var normalized = filePath.Replace('/', '\\');
+
+      var marker = "\\" + projectName + "\\";
+      var index = normalized.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+      if (index >= 0)
+        return normalized.Substring(index + 1);
+
+      index = normalized.IndexOf(projectName + "\\", StringComparison.OrdinalIgnoreCase);
+      if (index >= 0)
+        return normalized.Substring(index);
+
+      return normalized;
     }
   }
 }
