@@ -10,7 +10,7 @@
     <SolidColorBrush x:Key="ForegrounfBrushes85" Color="#000000" Opacity="0.85"/>
     
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#dedddf"/>
-    <SolidColorBrush x:Key="MenuPopupBackgroundBrush" Color="#F0dedddf"/>
+    <SolidColorBrush x:Key="MenuPopupBackgroundBrush" Color="#E0dedddf"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#90465945"/>
     <SolidColorBrush x:Key="SettingsMainBackground" Color="#E9E8E9"/>
     <!--#endregion-->
@@ -90,7 +90,7 @@
                                 <TextBlock x:Name="HotkeyText"
                                            Grid.Column="2"
                                            Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
-                                           Foreground="{DynamicResource ForegrounfBrushes45}"
+                                           Foreground="{DynamicResource ForegrounfBrushes85}"
                                            VerticalAlignment="Center"
                                            Margin="14,0,6,0"/>
 
@@ -144,15 +144,18 @@
                             <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                             <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="HotkeyText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                             <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="HotkeyText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsSubmenuOpen" Value="True">
                             <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="HotkeyText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="HasItems" Value="True">
                             <Setter TargetName="SubmenuIndicator" Property="Visibility" Value="Visible"/>
@@ -223,7 +226,7 @@
                                 <TextBlock x:Name="HotkeyText"
                                            Grid.Column="2"
                                            Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
-                                           Foreground="{DynamicResource ForegrounfBrushes45}"
+                                           Foreground="{DynamicResource ForegrounfBrushes85}"
                                            VerticalAlignment="Center"
                                            Margin="14,0,6,0"/>
 
@@ -276,15 +279,18 @@
                             <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                             <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="HotkeyText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                             <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="HotkeyText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsSubmenuOpen" Value="True">
                             <Setter TargetName="ItemBackground" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="SubmenuIndicator" Property="Stroke" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter TargetName="HotkeyText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="HasItems" Value="True">
                             <Setter TargetName="SubmenuIndicator" Property="Visibility" Value="Visible"/>
