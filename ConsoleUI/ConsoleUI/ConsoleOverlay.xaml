@@ -9,7 +9,7 @@
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
-        Opacity="0.97">
+        Opacity="1">
 
     <Window.Resources>
         <SolidColorBrush x:Key="GlassBackground" Color="#D916181D"/>
@@ -151,6 +151,32 @@
             <Setter Property="VirtualizingStackPanel.CacheLength" Value="2,2"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
         </Style>
+
+        <Style x:Key="WindowDotButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="#FF5F56"/>
+            <Setter Property="Opacity" Value="0.9"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Ellipse Fill="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Border CornerRadius="14" Padding="14"
@@ -183,9 +209,19 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse Width="10" Height="10" Fill="#FF5F56" Margin="0,0,6,0"/>
-                    <Ellipse Width="10" Height="10" Fill="#FFBD2E" Margin="0,0,6,0"/>
-                    <Ellipse Width="10" Height="10" Fill="#27C93F"/>
+                    <Button Style="{StaticResource WindowDotButtonStyle}"
+                            Background="#FF5F56"
+                            ToolTip="Close"
+                            Click="CloseButton_Click"/>
+                    <Button Style="{StaticResource WindowDotButtonStyle}"
+                            Background="#FFBD2E"
+                            ToolTip="Minimize"
+                            Click="MinimizeButton_Click"/>
+                    <Button Style="{StaticResource WindowDotButtonStyle}"
+                            Background="#27C93F"
+                            ToolTip="Maximize"
+                            Margin="0,0,0,0"
+                            Click="MaximizeButton_Click"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="1"
