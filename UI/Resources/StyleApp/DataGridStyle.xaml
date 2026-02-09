@@ -199,15 +199,9 @@
         <Setter Property="EnableColumnVirtualization" Value="True"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarStyle" Value="{StaticResource AdminDbScrollBarStyle}"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarStyle" Value="{StaticResource AdminDbScrollBarStyle}"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
-        <Setter Property="Resources">
-            <Setter.Value>
-                <ResourceDictionary>
-                    <Style TargetType="ScrollBar" BasedOn="{StaticResource AdminDbScrollBarStyle}"/>
-                    <Style TargetType="Thumb" BasedOn="{StaticResource AdminDbScrollBarThumbStyle}"/>
-                </ResourceDictionary>
-            </Setter.Value>
-        </Setter>
     </Style>
 
 </ResourceDictionary>
