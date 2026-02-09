@@ -152,6 +152,50 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
         </Style>
 
+        <Style x:Key="CommandInputStyle" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+            <Setter Property="Background" Value="#14161C"/>
+            <Setter Property="BorderBrush" Value="#2BFFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="SelectionBrush" Value="#4D7CF7"/>
+            <Setter Property="SelectionOpacity" Value="0.55"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Margin="0"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#55FFFFFF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#171A22"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#6EA3FF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#161A23"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="WindowDotButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="12"/>
             <Setter Property="Height" Value="12"/>
@@ -261,15 +305,8 @@
             <!-- Ввод команд -->
             <TextBox x:Name="CommandInput"
                  Grid.Row="2"
-                 FontFamily="{StaticResource MonoFont}"
-                 FontSize="13.5"
                  Margin="0,12,0,0"
-                 Padding="10,6"
-                 Background="{StaticResource PanelBackground}"
-                 Foreground="{StaticResource PrimaryText}"
-                 BorderThickness="1"
-                 BorderBrush="#2FFFFFFF"
-                 CaretBrush="White"
+                 Style="{StaticResource CommandInputStyle}"
                      TextChanged="CommandInput_TextChanged"
                      PreviewTextInput="CommandInput_PreviewTextInput"
                  KeyDown="CommandInput_KeyDown"/>
