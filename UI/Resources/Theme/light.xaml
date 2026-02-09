@@ -94,8 +94,7 @@
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Right"
                                            TextAlignment="Right"
-                                           Margin="14,0,6,0"
-                                           MinWidth="56"/>
+                                           Margin="14,0,6,0"/>
 
                                 <!-- Индикатор подменю -->
                                 <Path x:Name="SubmenuIndicator"
@@ -176,10 +175,10 @@
                             <Setter TargetName="SubmenuIndicator" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuItem">
-                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,3"/>
+                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,2.5"/>
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuHeader">
-                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,3"/>
+                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,2.5"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -227,8 +226,7 @@
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Right"
                                            TextAlignment="Right"
-                                           Margin="14,0,6,0"
-                                           MinWidth="56"/>
+                                           Margin="14,0,6,0"/>
 
                                 <Path x:Name="SubmenuIndicator"
                                       Grid.Column="3"
@@ -308,10 +306,10 @@
                             <Setter TargetName="SubmenuIndicator" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuItem">
-                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,3"/>
+                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,2.5"/>
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuHeader">
-                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,3"/>
+                            <Setter TargetName="ItemBackground" Property="Margin" Value="4,2.5"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
