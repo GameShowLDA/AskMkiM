@@ -6,11 +6,80 @@
              xmlns:local="clr-namespace:UI.Controls.AdminPanel"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="AdminDbTableItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="ItemBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
+                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimarySolidColorBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AdminDbTableTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Background="{DynamicResource SettingsMainBackgroundSolidColorBrush}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Padding="8,8,8,12">
-            <StackPanel x:Name="TablesContainer" Margin="4,2,4,8"/>
-        </ScrollViewer>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Margin="8" Padding="8" Style="{DynamicResource SettingPanelStyle}">
+            <DockPanel LastChildFill="True">
+                <TextBlock Text="Таблицы"
+                           Style="{DynamicResource SettingsTitleStyle}"
+                           Margin="6,4,6,10"
+                           DockPanel.Dock="Top"/>
+                <ListBox x:Name="TablesList"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ItemContainerStyle="{StaticResource AdminDbTableItemStyle}"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         SelectionChanged="TablesList_SelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"
+                                       Style="{StaticResource AdminDbTableTextStyle}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Margin="8" Padding="8" Style="{DynamicResource SettingPanelStyle}">
+            <ContentControl x:Name="TableContent"/>
+        </Border>
     </Grid>
 </UserControl>

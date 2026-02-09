@@ -199,8 +199,6 @@
         <Setter Property="EnableColumnVirtualization" Value="True"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible"/>
-        <Setter Property="ScrollViewer.HorizontalScrollBarStyle" Value="{StaticResource AdminDbScrollBarStyle}"/>
-        <Setter Property="ScrollViewer.VerticalScrollBarStyle" Value="{StaticResource AdminDbScrollBarStyle}"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
     </Style>
 
