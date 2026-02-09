@@ -95,7 +95,7 @@ namespace UI.Controls
         decorator.Child = null;
       }
 
-      LeftBox.Children.Clear(); // Можно просто очистить всё, если нужно заменить
+      LeftBox.Children.Clear();
       LeftBox.Children.Add(textEditorUI);
     }
 
@@ -153,19 +153,30 @@ namespace UI.Controls
     private void BreakpointSet(BreakpointEvents.BreakpointSet obj)
     {
       var model = GetCommandByNumber(obj.CommandNumber);
-      if (model == null)
-        return;
+      if (model == null) return;
 
       model.HasBreakpoint = true;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+
+      left.EnsureBreakpoint(model.StartLineNumber + 1, obj.CommandNumber, isSet: true, raiseEvents: false);
+
+      right.EnsureBreakpoint(model.FormattedStartLineNumber + 1, obj.CommandNumber, isSet: true, raiseEvents: false);
     }
 
     private void BreakpointRemoved(BreakpointEvents.BreakpointRemoved obj)
     {
       var model = GetCommandByNumber(obj.CommandNumber);
-      if (model == null)
-        return;
+      if (model == null) return;
 
       model.HasBreakpoint = false;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+
+      left.EnsureBreakpoint(model.StartLineNumber + 1, obj.CommandNumber, isSet: false, raiseEvents: false);
+      right.EnsureBreakpoint(model.FormattedStartLineNumber + 1, obj.CommandNumber, isSet: false, raiseEvents: false);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)

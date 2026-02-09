@@ -233,6 +233,19 @@ namespace UI.Controls.TextEditor
       _pendingHighlights.Clear();
     }
 
+    public void ConfigureBreakpoints(bool interactive, bool visible)
+    {
+      _executionMargin.BreakpointsInteractive = interactive;
+      _executionMargin.BreakpointsVisible = visible;
+
+      _executionMargin.InvalidateVisual();
+    }
+
+    public void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false)
+    {
+      _executionMargin.EnsureBreakpoint(formattedLine, commandNumber, isSet, raiseEvents);
+    }
+
     /// <summary>
     /// Подсвечивает набор диапазонов текста.
     /// </summary>
