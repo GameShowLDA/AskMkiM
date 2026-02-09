@@ -11,79 +11,94 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
+            <Setter Property="Opacity" Value="0.85"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
-    <Border Padding="12" Margin="12,8" CornerRadius="14" Style="{DynamicResource SettingCardStyle}">
+    <Border Padding="14" Margin="12,10" CornerRadius="16" Style="{DynamicResource SettingCardStyle}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Margin="4,0,4,12" VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <Border Margin="2,0,2,12"
+                    Padding="0,0,0,10"
+                    BorderBrush="{DynamicResource ForegroundSolidColorBrush60}"
+                    BorderThickness="0,0,0,1">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="TableTitle"
-                               Style="{DynamicResource SettingsTitleStyle}"
-                               FontSize="20"
-                               TextTrimming="CharacterEllipsis"/>
-                    <TextBlock x:Name="RowCount"
-                               Margin="12,2,0,0"
-                               Style="{DynamicResource SettingsDescriptionStyle}"
-                               VerticalAlignment="Center"/>
-                    <Border x:Name="DirtyBadge"
-                            Margin="10,2,0,0"
-                            Padding="8,2"
-                            CornerRadius="8"
-                            Background="{DynamicResource ActiveBorderSolidColorBrush}"
-                            Visibility="Collapsed">
-                        <TextBlock Text="Есть изменения"
-                                   Foreground="{DynamicResource PrimarySolidColorBrush}"
-                                   FontSize="11"
-                                   FontFamily="{DynamicResource WinstonMedium}"/>
-                    </Border>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="TableTitle"
+                                   Style="{DynamicResource SettingsTitleStyle}"
+                                   FontSize="18"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="RowCount"
+                                   Margin="12,2,0,0"
+                                   Style="{DynamicResource SettingsDescriptionStyle}"
+                                   VerticalAlignment="Center"/>
+                        <Border x:Name="DirtyBadge"
+                                Margin="10,2,0,0"
+                                Padding="8,2"
+                                CornerRadius="10"
+                                Background="Transparent"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
+                                Visibility="Collapsed">
+                            <TextBlock Text="Есть изменения"
+                                       Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                                       FontSize="10"
+                                       FontFamily="{DynamicResource WinstonMedium}"/>
+                        </Border>
+                    </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="SaveButton"
-                            Style="{StaticResource AdminDbActionButtonStyle}"
-                            Visibility="Collapsed"
-                            Click="SaveButton_Click"
-                            ToolTip="Сохранить изменения">
-                        <Icons:SuccessIconControlV2
-                            Width="30"
-                            Height="30"
-                            CheckThickness="4"
-                            CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                            CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-                    </Button>
-                    <Button x:Name="ResetButton"
-                            Style="{StaticResource AdminDbActionButtonStyle}"
-                            Visibility="Collapsed"
-                            Click="ResetButton_Click"
-                            ToolTip="Сбросить изменения">
-                        <Icons:ErrorIconControlV2
-                            Width="30"
-                            Height="30"
-                            CrossThickness="4"
-                            CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                            CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-                    </Button>
-                </StackPanel>
-            </Grid>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="SaveButton"
+                                Style="{StaticResource AdminDbActionButtonStyle}"
+                                Visibility="Collapsed"
+                                Click="SaveButton_Click"
+                                ToolTip="Сохранить изменения">
+                            <Icons:SuccessIconControlV2
+                                Width="26"
+                                Height="26"
+                                CheckThickness="3"
+                                CircleBackground="{DynamicResource PrimarySolidColorBrush}"
+                                CircleBorder="{DynamicResource ForegroundSolidColorBrush60}"
+                                CheckBrush="{DynamicResource ActiveBorderSolidColorBrush}"/>
+                        </Button>
+                        <Button x:Name="ResetButton"
+                                Style="{StaticResource AdminDbActionButtonStyle}"
+                                Visibility="Collapsed"
+                                Click="ResetButton_Click"
+                                ToolTip="Сбросить изменения">
+                            <Icons:ErrorIconControlV2
+                                Width="26"
+                                Height="26"
+                                CrossThickness="3"
+                                CircleBackground="{DynamicResource PrimarySolidColorBrush}"
+                                CircleBorder="{DynamicResource ForegroundSolidColorBrush60}"
+                                CrossBrush="{DynamicResource FadedRedSolidColorBrush}"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
             <Border Grid.Row="1"
-                    CornerRadius="10"
+                    CornerRadius="12"
                     BorderThickness="1"
-                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                    BorderBrush="{DynamicResource ForegroundSolidColorBrush60}"
                     Background="{DynamicResource PrimarySolidColorBrush}"
                     ClipToBounds="True">
                 <DataGrid x:Name="Grid"
