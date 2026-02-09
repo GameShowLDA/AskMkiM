@@ -579,6 +579,13 @@ namespace ConsoleUI.ConsoleUI
         DragMove();
     }
 
+    private void RootBorder_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      var radius = 14.0;
+      var rect = new Rect(0, 0, RootBorder.ActualWidth, RootBorder.ActualHeight);
+      RootBorder.Clip = new RectangleGeometry(rect, radius, radius);
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
       Close();

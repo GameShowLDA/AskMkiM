@@ -179,18 +179,17 @@
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="14" Padding="14"
+    <Border x:Name="RootBorder"
+        CornerRadius="14" Padding="14"
         BorderThickness="1" BorderBrush="{StaticResource PanelBorder}"
-        MouseLeftButtonDown="Border_MouseLeftButtonDown">
+        MouseLeftButtonDown="Border_MouseLeftButtonDown"
+        SizeChanged="RootBorder_SizeChanged">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#E015161B" Offset="0"/>
                 <GradientStop Color="#E021232A" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
-        <Border.Effect>
-            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.45"/>
-        </Border.Effect>
 
         <Grid>
             <Grid.RowDefinitions>
