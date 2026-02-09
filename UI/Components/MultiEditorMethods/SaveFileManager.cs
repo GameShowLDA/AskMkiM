@@ -1,5 +1,7 @@
-﻿using Message;
+﻿using Ask.Core.Shared.Metadata.Static;
+using Message;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
@@ -44,6 +46,10 @@ namespace UI.Components.MultiEditorMethods
         {
           saveFileResult = SaveFile(control);
         }
+        else
+        {
+          SaveBackup(control);
+        }
       }
     }
 
@@ -59,7 +65,8 @@ namespace UI.Components.MultiEditorMethods
         var fileName = control.Title;
         if (fileManager.EditorWorkspaceModel.FilePaths.ContainsKey(fileName))
         {
-          if (fileManager.EditorWorkspaceModel.FilePaths[fileName] == string.Empty)
+          if (fileManager.EditorWorkspaceModel.FilePaths[fileName] == string.Empty
+            || fileManager.EditorWorkspaceModel.FilePaths[fileName].Contains(FileLocations.BackupDirectory))
           {
             return SaveFileAs();
           }
@@ -78,12 +85,66 @@ namespace UI.Components.MultiEditorMethods
           if (control.Content is TranslatorItem translator)
           {
             var textEditor = translator.GetLeftEditor();
-            return SaveDataFromTextEditor(textEditor, textEditor.TextEditorModel.FilePath);
+            if (textEditor.TextEditorModel.FilePath.Contains(FileLocations.BackupDirectory))
+            {
+              return SaveFileAs();
+            }
+            else
+            {
+              return SaveDataFromTextEditor(textEditor, textEditor.TextEditorModel.FilePath);
+            }
           }
         }
       }
 
       return false;
+    }
+
+    public bool SaveBackup(DockItem control)
+    {
+      if (control != null)
+      {
+        var fileName = control.Title;
+        if (fileManager.EditorWorkspaceModel.FilePaths.ContainsKey(fileName))
+        {
+          if (control.Content is TextEditorUI)
+          {
+            var textEditor = control.Content as TextEditorUI;
+            SetBackup(textEditor.TextEditorModel.FileName, textEditor.Text);
+            return true;
+          }
+        }
+        else
+        {
+          if (control.Content is TranslatorItem translator)
+          {
+            var leftTextEditor = translator.GetLeftEditor();
+            var rightTextEditor = translator.GetRightEditor();
+            var fullPath = SetBackup(leftTextEditor.TextEditorModel.FileName, leftTextEditor.Text);
+            rightTextEditor.TextEditorModel.FilePath = fullPath;
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    private static string SetBackup(string fileName, string text)
+    {
+      string fullPath = Path.Combine($"{FileLocations.BackupDirectory}", fileName);
+      if (!Directory.Exists(Path.GetDirectoryName(fullPath)))
+      {
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+      }
+      using var fs = new FileStream(
+        fullPath,
+        FileMode.Create,
+        FileAccess.Write,
+        FileShare.None);
+
+      using var sw = new StreamWriter(fs);
+      sw.Write(text);
+      return fullPath;
     }
 
     /// <summary>
@@ -213,7 +274,7 @@ namespace UI.Components.MultiEditorMethods
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         File.WriteAllText(filePath, fileData, Encoding.UTF8);
       }
-      else 
+      else
       {
         var encoding = textEditor.TextEditorModel.Encoding;
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
