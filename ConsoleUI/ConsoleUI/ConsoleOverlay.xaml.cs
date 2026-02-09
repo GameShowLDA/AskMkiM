@@ -498,6 +498,17 @@ namespace ConsoleUI.ConsoleUI
       }
     }
 
+    private void LogItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      if (sender is ListBoxItem item && item.DataContext is LogEntry entry)
+      {
+        if (!string.IsNullOrEmpty(entry.Text))
+          Clipboard.SetText(entry.Text);
+
+        e.Handled = true;
+      }
+    }
+
     private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       if (e.ButtonState == MouseButtonState.Pressed)
