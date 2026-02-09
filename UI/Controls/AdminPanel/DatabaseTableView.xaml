@@ -14,11 +14,6 @@
             <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Opacity" Value="0.4"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
@@ -60,6 +55,7 @@
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="SaveButton"
                             Style="{StaticResource AdminDbActionButtonStyle}"
+                            Visibility="Collapsed"
                             Click="SaveButton_Click"
                             ToolTip="Сохранить изменения">
                         <Icons:SuccessIconControlV2
@@ -71,6 +67,7 @@
                     </Button>
                     <Button x:Name="ResetButton"
                             Style="{StaticResource AdminDbActionButtonStyle}"
+                            Visibility="Collapsed"
                             Click="ResetButton_Click"
                             ToolTip="Сбросить изменения">
                         <Icons:ErrorIconControlV2

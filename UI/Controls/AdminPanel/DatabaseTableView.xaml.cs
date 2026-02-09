@@ -275,6 +275,9 @@ namespace UI.Controls.AdminPanel
         return;
       }
 
+      var isVisible = _hasPendingChanges ? Visibility.Visible : Visibility.Collapsed;
+      SaveButton.Visibility = isVisible;
+      ResetButton.Visibility = isVisible;
       SaveButton.IsEnabled = _hasPendingChanges;
       ResetButton.IsEnabled = _hasPendingChanges;
       DirtyBadge.Visibility = _hasPendingChanges ? Visibility.Visible : Visibility.Collapsed;
