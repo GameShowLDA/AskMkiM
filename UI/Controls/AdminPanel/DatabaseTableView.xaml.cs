@@ -284,4 +284,3 @@ namespace UI.Controls.AdminPanel
     }
   }
 }
-}
