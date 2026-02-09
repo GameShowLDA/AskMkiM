@@ -156,26 +156,54 @@
             <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
-            <Setter Property="Background" Value="#14161C"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#14171E" Offset="0"/>
+                        <GradientStop Color="#181C25" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
             <Setter Property="BorderBrush" Value="#2BFFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="SelectionBrush" Value="#4D7CF7"/>
+            <Setter Property="SelectionBrush" Value="#5A8DFF"/>
             <Setter Property="SelectionOpacity" Value="0.55"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Grid>
+                            <Border x:Name="Glow"
+                                    CornerRadius="12"
+                                    BorderThickness="1"
+                                    BorderBrush="#6FA7FF"
+                                    Opacity="0"
+                                    Background="Transparent">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#7FB0FF"
+                                                      BlurRadius="18"
+                                                      ShadowDepth="0"
+                                                      Opacity="0.7"/>
+                                </Border.Effect>
+                            </Border>
                             <Border x:Name="Bd"
                                     Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="10">
-                                <ScrollViewer x:Name="PART_ContentHost"
-                                              Margin="0"
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                <Grid>
+                                    <Border x:Name="InnerHighlight"
+                                            CornerRadius="9"
+                                            BorderThickness="1,1,1,0"
+                                            BorderBrush="#1AFFFFFF"
+                                            Margin="1"
+                                            Background="Transparent"/>
+                                    <ScrollViewer x:Name="PART_ContentHost"
+                                                  Margin="0"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </Grid>
                             </Border>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -186,6 +214,7 @@
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter TargetName="Bd" Property="BorderBrush" Value="#6EA3FF"/>
                                 <Setter TargetName="Bd" Property="Background" Value="#161A23"/>
+                                <Setter TargetName="Glow" Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
