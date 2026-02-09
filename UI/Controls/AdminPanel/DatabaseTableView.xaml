@@ -4,33 +4,143 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.AdminPanel"
+             xmlns:Icons="clr-namespace:UI.Icon"
              mc:Ignorable="d">
-    <Border Padding="10" Margin="5" CornerRadius="10" Style="{DynamicResource ConfigAdditionalBlockStyle}">
+    <UserControl.Resources>
+        <Style x:Key="AdminDbActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
+            <Setter Property="Opacity" Value="0.85"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="999">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Padding="14" Margin="12,10" CornerRadius="16" Style="{DynamicResource SettingCardStyle}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock x:Name="TableTitle"
-                   Margin="0 0 0 10"
-                   FontSize="20"
-                   FontWeight="Bold"
-                   Style="{DynamicResource ConfigInfoStyle}"
-                   />
+            <Border Margin="2,0,2,12"
+                    Padding="0,0,0,10"
+                    BorderBrush="{DynamicResource ForegroundSolidColorBrush60}"
+                    BorderThickness="0,0,0,1">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            <DataGrid x:Name="Grid"
-                    Grid.Row="1"
-                    AutoGenerateColumns="True"
-                    IsReadOnly="True"
-                    Style="{DynamicResource DataGrid}"
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="TableTitle"
+                                   Style="{DynamicResource SettingsTitleStyle}"
+                                   FontSize="18"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="RowCount"
+                                   Margin="12,2,0,0"
+                                   Style="{DynamicResource SettingsDescriptionStyle}"
+                                   VerticalAlignment="Center"/>
+                        <Border x:Name="DirtyBadge"
+                                Margin="10,2,0,0"
+                                Padding="8,2"
+                                CornerRadius="10"
+                                Background="Transparent"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
+                                Visibility="Collapsed">
+                            <TextBlock Text="Есть изменения"
+                                       Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                                       FontSize="10"
+                                       FontFamily="{DynamicResource WinstonMedium}"/>
+                        </Border>
+                    </StackPanel>
 
-                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    ScrollViewer.CanContentScroll="True"
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="SaveButton"
+                                Style="{StaticResource AdminDbActionButtonStyle}"
+                                Visibility="Collapsed"
+                                Click="SaveButton_Click"
+                                ToolTip="Сохранить изменения">
+                            <Icons:SuccessIconControlV2
+                                Width="30"
+                                Height="30"
+                                CheckThickness="4"
+                                CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                        </Button>
+                        <Button x:Name="ResetButton"
+                                Style="{StaticResource AdminDbActionButtonStyle}"
+                                Visibility="Collapsed"
+                                Click="ResetButton_Click"
+                                ToolTip="Сбросить изменения">
+                            <Icons:ErrorIconControlV2
+                                Width="30"
+                                Height="30"
+                                CrossThickness="4"
+                                CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-                    HorizontalAlignment="Left"
-                      AutoGeneratedColumns="Grid_AutoGeneratedColumns"/>
+            <Border Grid.Row="1"
+                    CornerRadius="12"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ForegroundSolidColorBrush60}"
+                    Background="{DynamicResource PrimarySolidColorBrush}"
+                    ClipToBounds="True">
+                <DataGrid x:Name="Grid"
+                          AutoGenerateColumns="True"
+                          IsReadOnly="False"
+                          Style="{DynamicResource AdminDbDataGridStyle}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.VerticalScrollBarVisibility="Visible"
+                          ScrollViewer.CanContentScroll="True"
+                          HorizontalAlignment="Stretch"
+                          AutoGeneratedColumns="Grid_AutoGeneratedColumns"
+                          CellEditEnding="Grid_CellEditEnding"
+                          RowEditEnding="Grid_RowEditEnding">
+                    <DataGrid.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource AdminDbScrollBarStyle}"/>
+                        <Style TargetType="Thumb" BasedOn="{StaticResource AdminDbScrollBarThumbStyle}"/>
+                    </DataGrid.Resources>
+                </DataGrid>
+            </Border>
         </Grid>
     </Border>
 </UserControl>
