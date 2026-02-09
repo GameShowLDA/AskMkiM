@@ -86,10 +86,10 @@
     </Style>
 
     <Style x:Key="AdminDbDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
-        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
         <Setter Property="Padding" Value="12,6"/>
         <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
         <Setter Property="FontSize" Value="13"/>
@@ -105,6 +105,11 @@
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
         <Style.Triggers>
+            <Trigger Property="IsEditing" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Trigger>
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="Background" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
                 <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
@@ -191,9 +196,11 @@
         <Setter Property="RowStyle" Value="{StaticResource AdminDbDataGridRowStyle}"/>
         <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
         <Setter Property="FontSize" Value="13"/>
+        <Setter Property="CanUserSortColumns" Value="True"/>
         <Setter Property="SelectionMode" Value="Extended"/>
         <Setter Property="SelectionUnit" Value="FullRow"/>
         <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
         <Setter Property="CanUserResizeRows" Value="False"/>
         <Setter Property="EnableRowVirtualization" Value="True"/>
         <Setter Property="EnableColumnVirtualization" Value="True"/>

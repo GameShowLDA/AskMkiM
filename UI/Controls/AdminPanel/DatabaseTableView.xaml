@@ -4,7 +4,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.AdminPanel"
+             xmlns:Icons="clr-namespace:UI.Icon"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="AdminDbActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Border Padding="12" Margin="12,8" CornerRadius="14" Style="{DynamicResource SettingCardStyle}">
         <Grid>
             <Grid.RowDefinitions>
@@ -12,16 +29,59 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal" Margin="4,0,4,12" VerticalAlignment="Center">
-                <TextBlock x:Name="TableTitle"
-                           Style="{DynamicResource SettingsTitleStyle}"
-                           FontSize="20"
-                           TextTrimming="CharacterEllipsis"/>
-                <TextBlock x:Name="RowCount"
-                           Margin="12,2,0,0"
-                           Style="{DynamicResource SettingsDescriptionStyle}"
-                           VerticalAlignment="Center"/>
-            </StackPanel>
+            <Grid Margin="4,0,4,12" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="TableTitle"
+                               Style="{DynamicResource SettingsTitleStyle}"
+                               FontSize="20"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="RowCount"
+                               Margin="12,2,0,0"
+                               Style="{DynamicResource SettingsDescriptionStyle}"
+                               VerticalAlignment="Center"/>
+                    <Border x:Name="DirtyBadge"
+                            Margin="10,2,0,0"
+                            Padding="8,2"
+                            CornerRadius="8"
+                            Background="{DynamicResource ActiveBorderSolidColorBrush}"
+                            Visibility="Collapsed">
+                        <TextBlock Text="Есть изменения"
+                                   Foreground="{DynamicResource PrimarySolidColorBrush}"
+                                   FontSize="11"
+                                   FontFamily="{DynamicResource WinstonMedium}"/>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="SaveButton"
+                            Style="{StaticResource AdminDbActionButtonStyle}"
+                            Click="SaveButton_Click"
+                            ToolTip="Сохранить изменения">
+                        <Icons:SuccessIconControlV2
+                            Width="30"
+                            Height="30"
+                            CheckThickness="4"
+                            CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                            CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                    </Button>
+                    <Button x:Name="ResetButton"
+                            Style="{StaticResource AdminDbActionButtonStyle}"
+                            Click="ResetButton_Click"
+                            ToolTip="Сбросить изменения">
+                        <Icons:ErrorIconControlV2
+                            Width="30"
+                            Height="30"
+                            CrossThickness="4"
+                            CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                            CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
             <Border Grid.Row="1"
                     CornerRadius="10"
@@ -31,13 +91,15 @@
                     ClipToBounds="True">
                 <DataGrid x:Name="Grid"
                           AutoGenerateColumns="True"
-                          IsReadOnly="True"
+                          IsReadOnly="False"
                           Style="{DynamicResource AdminDbDataGridStyle}"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.VerticalScrollBarVisibility="Visible"
                           ScrollViewer.CanContentScroll="True"
                           HorizontalAlignment="Stretch"
-                          AutoGeneratedColumns="Grid_AutoGeneratedColumns">
+                          AutoGeneratedColumns="Grid_AutoGeneratedColumns"
+                          CellEditEnding="Grid_CellEditEnding"
+                          RowEditEnding="Grid_RowEditEnding">
                     <DataGrid.Resources>
                         <Style TargetType="ScrollBar" BasedOn="{StaticResource AdminDbScrollBarStyle}"/>
                         <Style TargetType="Thumb" BasedOn="{StaticResource AdminDbScrollBarThumbStyle}"/>
