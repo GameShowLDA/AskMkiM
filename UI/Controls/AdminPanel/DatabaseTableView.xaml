@@ -10,11 +10,36 @@
         <Style x:Key="AdminDbActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="10,0,0,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
             <Setter Property="Opacity" Value="0.85"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="999">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Opacity" Value="1"/>
@@ -71,12 +96,11 @@
                                 Click="SaveButton_Click"
                                 ToolTip="Сохранить изменения">
                             <Icons:SuccessIconControlV2
-                                Width="26"
-                                Height="26"
-                                CheckThickness="3"
-                                CircleBackground="{DynamicResource PrimarySolidColorBrush}"
-                                CircleBorder="{DynamicResource ForegroundSolidColorBrush60}"
-                                CheckBrush="{DynamicResource ActiveBorderSolidColorBrush}"/>
+                                Width="30"
+                                Height="30"
+                                CheckThickness="4"
+                                CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
                         </Button>
                         <Button x:Name="ResetButton"
                                 Style="{StaticResource AdminDbActionButtonStyle}"
@@ -84,12 +108,11 @@
                                 Click="ResetButton_Click"
                                 ToolTip="Сбросить изменения">
                             <Icons:ErrorIconControlV2
-                                Width="26"
-                                Height="26"
-                                CrossThickness="3"
-                                CircleBackground="{DynamicResource PrimarySolidColorBrush}"
-                                CircleBorder="{DynamicResource ForegroundSolidColorBrush60}"
-                                CrossBrush="{DynamicResource FadedRedSolidColorBrush}"/>
+                                Width="30"
+                                Height="30"
+                                CrossThickness="4"
+                                CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
                         </Button>
                     </StackPanel>
                 </Grid>
