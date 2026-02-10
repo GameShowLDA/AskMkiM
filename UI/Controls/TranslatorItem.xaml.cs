@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Windows.Controls;
+using System.Windows.Media.TextFormatting;
 using UI.Controls.TextEditor;
 
 namespace UI.Controls
@@ -166,9 +167,15 @@ namespace UI.Controls
       var left = GetLeftEditor();
       var right = GetRightEditor();
 
-      left.EnsureBreakpoint(model.StartLineNumber + 1, obj.CommandNumber, isSet: true, raiseEvents: false);
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
 
-      right.EnsureBreakpoint(model.FormattedStartLineNumber + 1, obj.CommandNumber, isSet: true, raiseEvents: false);
+      left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: true, raiseEvents: false);
+
+      right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: true, raiseEvents: false);
+
+      if (obj.LineNumber == leftLine - 1)
+        right.GoToLine(rightLine);
     }
 
     /// <summary>
@@ -187,8 +194,14 @@ namespace UI.Controls
       var left = GetLeftEditor();
       var right = GetRightEditor();
 
-      left.EnsureBreakpoint(model.StartLineNumber + 1, obj.CommandNumber, isSet: false, raiseEvents: false);
-      right.EnsureBreakpoint(model.FormattedStartLineNumber + 1, obj.CommandNumber, isSet: false, raiseEvents: false);
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: false, raiseEvents: false);
+      right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: false, raiseEvents: false);
+
+      if (obj.LineNumber == leftLine - 1)
+        right.GoToLine(rightLine);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)
