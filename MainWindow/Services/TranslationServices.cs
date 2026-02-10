@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using ICSharpCode.AvalonEdit.Document;
 using Message;
 using System.IO;
 using System.Windows;
@@ -31,6 +32,77 @@ namespace MainWindowProgram.Services
     private readonly FileService _fileService;
 
     private TextEditorUI _actualTextEditor;
+
+    /// <summary>
+    /// Проверяет, разрешено ли ставить точку остановки на указанной команде.
+    /// </summary>
+    /// <param name="m">Название команды.</param>
+    /// <returns>
+    /// <see langword="true"/>, если команда поддерживает точки остановки; иначе <see langword="false"/>.
+    /// </returns>
+    private static bool IsBreakpointAllowed(BaseCommandModel m) =>
+      m.Mnemonic != "СП"
+      && m.Mnemonic != "ЦУ"
+      && m.Mnemonic != "КЦ"
+      && m.Mnemonic != "РМ"
+      && m.Mnemonic != "УП"
+      && m.Mnemonic != "ОК"
+      ;
+
+    /// <summary>
+    /// Строит список строк исходного текста, на которые можно ставить точку остановки в левом редакторе.
+    /// </summary>
+    /// <param name="allowed">Команды, на которые разрешены точки.</param>
+    /// <returns>Список номеров строк исходного текста.</returns>
+    private static List<int> BuildLeftBreakpointLines(IEnumerable<BaseCommandModel> allowed)
+      => allowed.Select(m => m.StartLineNumber)
+                .ToList();
+
+    /// <summary>
+    /// Строит список строк документа трансляции, на которые можно ставить точку остановки.
+    /// </summary>
+    /// <param name="doc">Документ правого редактора (текст трансляции).</param>
+    /// <param name="models">Список моделей команд (результат разбора/трансляции).</param>
+    /// <returns>
+    /// Список номеров строк в документе трансляции, на которые разрешено ставить точку остановки.
+    /// </returns>
+    private static List<int> BuildRightBreakpointLinesFromDocument(TextDocument doc, List<BaseCommandModel> models)
+    {
+      var allowedCommands = new HashSet<int>(models.Count);
+      for (int i = 0; i < models.Count; i++)
+      {
+        if (IsBreakpointAllowed(models[i]))
+          allowedCommands.Add(int.Parse(models[i].CommandNumber));
+      }
+
+      var result = new List<int>(allowedCommands.Count);
+
+      for (int lineNumber = 1; lineNumber <= doc.LineCount; lineNumber++)
+      {
+        var line = doc.GetLineByNumber(lineNumber);
+        var text = doc.GetText(line);
+
+        int i = 0;
+        while (text[i] == ' ' || text[i] == '\t') i++;
+
+        int value = 0;
+        bool hasDigits = false;
+
+        while (i < text.Length)
+        {
+          char c = text[i];
+          if (c < '0' || c > '9') break;
+          hasDigits = true;
+          value = value * 10 + (c - '0');
+          i++;
+        }
+
+        if (hasDigits && allowedCommands.Contains(value))
+          result.Add(lineNumber);
+      }
+
+      return result;
+    }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AdminServices"/>.
@@ -112,7 +184,6 @@ namespace MainWindowProgram.Services
 
       DockItem? foundDockItem = null;
 
-      // Ждём, пока хотя бы один DockItem появится
       for (int i = 0; i < 500; i++)
       {
         if (dockManager.DockItems.Count > 0)
@@ -156,13 +227,18 @@ namespace MainWindowProgram.Services
 
         await _multiWindow.DeleteTranslatorItem(translator, EditorType.Translator);
 
-
         RunControl runControl = new RunControl();
         runControl.TranslationModels = translator.TranslationModels;
         await PrepareRun(runContainer, _actualTextEditor, runControl);
       }
     }
 
+    /// <summary>
+    /// Подготавливает вкладку исполнения и запускает выполнение.
+    /// </summary>
+    /// <param name="runContainer">Контейнер исполнения.</param>
+    /// <param name="editor">Редактор, содержащий путь к файлу и исходные данные.</param>
+    /// <param name="runControl">Контрол исполнения.</param>
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
@@ -247,17 +323,26 @@ namespace MainWindowProgram.Services
     private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
       string text = editor.Text;
+
       var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
 
       var manager = new CommandTranslationManager();
       var models = manager.ParseAllAndDisplay(text, translateEditor);
+      manager.SetSourseLines(models);
+
+      var allowed = models.Where(IsBreakpointAllowed).ToList();
+
+      editor.ConfigureBreakpoints(interactive: true, visible: false);
+      editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
 
       if (foundDockItem.Content is TranslatorItem item)
       {
         item.SetRightEditor(translateEditor);
-        item.SetRightEditorName(translateEditor.TextEditorModel.FileName);
+        item.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
         item.TranslationModels = models;
-        item.GetRightEditor().RightBreakpoint = models.Select(x => x.FormattedStartLineNumber).ToList();
+
+        translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
+        translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
       }
     }
 
@@ -273,59 +358,61 @@ namespace MainWindowProgram.Services
       try
       {
         var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
+
         editor.TextArea.Document.Text = text;
-        editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
+
+        if (!editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
+          editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
+
         CancellationTokenSource redrawToken = null;
 
         editor.TextChanged += async (_, __) =>
-         {
-           redrawToken?.Cancel();
-           redrawToken = new CancellationTokenSource();
-           var token = redrawToken.Token;
-
-           try
-           {
-             await Task.Delay(80, token);
-             if (!token.IsCancellationRequested)
-             {
-               Application.Current.Dispatcher.Invoke(() =>
-               {
-                 editor.TextArea.TextView.Redraw();
-               });
-             }
-           }
-           catch (TaskCanceledException) { }
-         };
-
-
-        if (translateEditor != null)
         {
+          redrawToken?.Cancel();
+          redrawToken = new CancellationTokenSource();
+          var token = redrawToken.Token;
+
+          try
+          {
+            await Task.Delay(80, token);
+            if (!token.IsCancellationRequested)
+            {
+              Application.Current.Dispatcher.Invoke(() =>
+              {
+                editor.TextArea.TextView.Redraw();
+              });
+            }
+          }
+          catch (TaskCanceledException) { }
+        };
+
+        if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
           translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
-          var manager = new CommandTranslationManager();
-          var models = manager.ParseAllAndDisplay(text, translateEditor);
-          manager.SetSourseLines(models);
 
-          EditorEventAdapter.RaiseCloseRunItem(editor);
+        var manager = new CommandTranslationManager();
+        var models = manager.ParseAllAndDisplay(text, translateEditor);
+        manager.SetSourseLines(models);
 
-          var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
-          item.TranslationModels = models;
+        var allowed = models.Where(IsBreakpointAllowed).ToList();
 
-          item.GetRightEditor().RightBreakpoint = models
-            .Where(x =>
-            x.Mnemonic != "СП"
-            && x.Mnemonic != "ЦУ"
-            && x.Mnemonic != "КЦ"
-            && x.Mnemonic != "РМ"
-            && x.Mnemonic != "УП"
-            && x.Mnemonic != "ОК"
-            )
-            .Select(x => x.FormattedStartLineNumber)
-            .ToList();
-        }
+        editor.ConfigureBreakpoints(interactive: true, visible: false);
+        editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+
+        EditorEventAdapter.RaiseCloseRunItem(editor);
+
+        var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
+        item.TranslationModels = models;
+
+        translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
+        translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Не удалось запустить трансляцию программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
+        MessageBoxCustom.Show(
+          $"Не удалось запустить трансляцию программы контроля.",
+          "Ошибка запуска программы контроля",
+          image: MessageBoxImage.Error);
+
         LogError($"Не удалось запустить трансляцию программы контроля: {ex}.");
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
