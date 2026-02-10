@@ -18,6 +18,7 @@ using UI.Components.MultiEditorMethods;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using UI.Services;
+using UI.Services.FileManager;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -213,7 +214,7 @@ namespace UI.Controls.Runner
         }
       }
 
-      var fileName = Path.GetFileName(textEditorUI.TextEditorModel.FilePath);
+      var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
       var dockItemPk = new DockItem
       {
@@ -350,13 +351,27 @@ namespace UI.Controls.Runner
           var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.Title != "Состояние оборудования");
           if (foundItem != null && foundItem.Content is TextEditorUI textEditor)
           {
-            if (textEditor.TextEditorModel != null
-              && !string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath)
-              && File.Exists(textEditor.TextEditorModel.FilePath))
+            if (textEditor.TextEditorModel != null)
             {
-              FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);
-              EditorEventAdapter.RaiseCloseRunItem(this);
+              if (!string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath)
+                && File.Exists(textEditor.TextEditorModel.FilePath))
+              {
+                FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);
+                EditorEventAdapter.RaiseCloseRunItem(this);
+              }
+              else
+              {
+                MessageBoxCustom.Show("Ошибка обнаружения исходного файла", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
+              }
             }
+            else
+            {
+              MessageBoxCustom.Show("Текстовый редактор не найден", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+          }
+          else
+          {
+            MessageBoxCustom.Show("Ошибка обнаружения исходного файла", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
           }
         }
         else
