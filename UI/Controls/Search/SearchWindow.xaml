@@ -19,31 +19,149 @@
         <Storyboard x:Key="ShowAnimation">
             <DoubleAnimation
                 Storyboard.TargetName="WindowContainer"
-                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                From="-200" To="0" Duration="0:0:0.5" />
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                From="-18" To="0" Duration="0:0:0.28" DecelerationRatio="0.9">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                From="0.985" To="1" Duration="0:0:0.28" DecelerationRatio="0.9">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                From="0.985" To="1" Duration="0:0:0.28" DecelerationRatio="0.9">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
             <DoubleAnimation
                 Storyboard.TargetName="WindowContainer"
                 Storyboard.TargetProperty="Opacity"
-                From="0" To="1" Duration="0:0:0.5" />
+                From="0" To="1" Duration="0:0:0.24" DecelerationRatio="0.9"/>
         </Storyboard>
 
         <Storyboard x:Key="HideAnimation">
             <DoubleAnimation
                 Storyboard.TargetName="WindowContainer"
-                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                From="0" To="-200" Duration="0:0:0.5" />
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                From="0" To="-18" Duration="0:0:0.2" AccelerationRatio="0.8">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                From="1" To="0.985" Duration="0:0:0.2" AccelerationRatio="0.8">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="WindowContainer"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                From="1" To="0.985" Duration="0:0:0.2" AccelerationRatio="0.8">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
             <DoubleAnimation
                 Storyboard.TargetName="WindowContainer"
                 Storyboard.TargetProperty="Opacity"
-                From="1" To="0" Duration="0:0:0.5" />
+                From="1" To="0" Duration="0:0:0.18" AccelerationRatio="0.8"/>
+        </Storyboard>
+
+        <!-- Анимации раскрытия строки замены -->
+        <Storyboard x:Key="ExpandReplaceRowAnimation">
+            <DoubleAnimation
+                Storyboard.TargetName="ReplaceRowPanel"
+                Storyboard.TargetProperty="Opacity"
+                From="0" To="1" Duration="0:0:0.30" DecelerationRatio="0.9">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="ReplaceRowPanel"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                From="-10" To="0" Duration="0:0:0.30" DecelerationRatio="0.9">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="OptionsShiftDownAnimation">
+            <DoubleAnimation
+                Storyboard.TargetName="OptionsRowPanel"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                From="-8" To="0" Duration="0:0:0.28" DecelerationRatio="0.9"
+                FillBehavior="Stop" BeginTime="0:0:0.04">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="CollapseReplaceRowAnimation">
+            <DoubleAnimation
+                Storyboard.TargetName="ReplaceRowPanel"
+                Storyboard.TargetProperty="Opacity"
+                From="1" To="0" Duration="0:0:0.22" AccelerationRatio="0.7">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="ReplaceRowPanel"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                From="0" To="-10" Duration="0:0:0.22" AccelerationRatio="0.7">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="OptionsShiftUpAnimation">
+            <DoubleAnimation
+                Storyboard.TargetName="OptionsRowPanel"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                From="0" To="-8" Duration="0:0:0.20" AccelerationRatio="0.75"
+                FillBehavior="Stop" BeginTime="0:0:0.02">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
         </Storyboard>
     </Window.Resources>
 
-    <Grid x:Name="WindowContainer" RenderTransformOrigin="0.5,0.0">
+    <Grid x:Name="WindowContainer" RenderTransformOrigin="0.5,0.0" Margin="12">
+        <Grid.Effect>
+            <!-- Тень в стиле Spotlight: ярче, смещена вниз, без подсветки верхней грани -->
+            <DropShadowEffect Color="#88000000"
+                              BlurRadius="24"
+                              ShadowDepth="12"
+                              Opacity="0.32"
+                              Direction="270"
+                              RenderingBias="Quality"/>
+        </Grid.Effect>
         <Grid.RenderTransform>
-            <TranslateTransform Y="0"/>
+            <TransformGroup>
+                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                <TranslateTransform Y="0"/>
+            </TransformGroup>
         </Grid.RenderTransform>
-        <Border  Background="{StaticResource SecondarySolidColorBrush}" CornerRadius="0,0,15,15">
+        <Border  Background="{StaticResource SecondarySolidColorBrush}"
+                BorderBrush="Transparent"
+                BorderThickness="0"
+                CornerRadius="0,0,15,15">
 
         <Grid x:Name="MainGrid">
 
@@ -54,7 +172,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition x:Name="ReplaceRow" Height="*"/>
+                <RowDefinition x:Name="ReplaceRow" Height="0"/>
                 <!-- Скрытая строка по умолчанию -->
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -67,6 +185,7 @@
                       ArrowColor="{StaticResource ForegroundSolidColorBrush}" 
                       HoverArrowColor="{StaticResource ActiveBorderSolidColorBrush}" 
                       IsArrowUp="False"
+                      Cursor="Hand"
                       PreviewMouseDown="ToggleArrow_PreviewMouseDown"/>
 
             <TextBox
@@ -97,6 +216,7 @@
              Width="30"
              Height="30"
              HorizontalAlignment="Right"
+             Cursor="Hand"
              PreviewMouseDown="exitButton_PreviewMouseDown"
              />
             <Rectangle Width="Auto" Grid.Column="1" Grid.Row="0" Margin="2 0" 
@@ -110,56 +230,73 @@
                     <ColumnDefinition Width="50*"/>
                 </Grid.ColumnDefinitions>
 
-                <Elements:SearchArrows x:Name="searchArrows" Grid.Column="0" Margin="3 0 0 0"/>
+                <Elements:SearchArrows x:Name="searchArrows" Grid.Column="0" Margin="3 0 0 0" Cursor="Hand"/>
 
             </Grid>
 
             <!-- Строка 2 (По умолчанию скрыта) -->
-            <TextBox
-            x:Name="ReplaceTextBox"  Grid.Column="1" Grid.Row="1" Margin="2 3" Tag="Заменить..." BorderThickness="0"
-            VerticalContentAlignment="Bottom"
-            HorizontalContentAlignment="Left"
-            Background="Transparent"
-            BorderBrush="Transparent"
-            Foreground="{StaticResource ForegroundSolidColorBrush}"
-            FontSize="14"
-            CaretBrush="{StaticResource ForegroundSolidColorBrush}"
-            GotFocus="ReplaceTextBox_GotFocus"
-            LostFocus="ReplaceTextBox_LostFocus"/>
-
-            <TextBlock x:Name="ReplcePlaceholder" Grid.Column="1" Grid.Row="1"
-             Text="Заменить..."
-             FontSize="14"
-             Foreground="{StaticResource ForegroundSolidColorBrush}"
-             IsHitTestVisible="False"
-             VerticalAlignment="Bottom"
-             HorizontalAlignment="Left"
-             Margin="2 3"/>
-
-            <Rectangle Width="Auto" Grid.Column="1" Grid.Row="1" Margin="2 0" 
-            HorizontalAlignment="Stretch" 
-            Height="2" 
-            VerticalAlignment="Bottom" Fill="{StaticResource ForegroundSolidColorBrush}">
-            </Rectangle>
-
-            <Grid Grid.Row="1" Grid.Column="2">
+            <Grid x:Name="ReplaceRowPanel"
+                  Grid.Row="1"
+                  Grid.ColumnSpan="3"
+                  Opacity="0"
+                  Visibility="Collapsed"
+                  RenderTransformOrigin="0.5,0">
+                <Grid.RenderTransform>
+                    <TranslateTransform Y="-12"/>
+                </Grid.RenderTransform>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*"/>
-                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="87"/>
                 </Grid.ColumnDefinitions>
-                <Elements:ReplaseWordButton Height="25" Width="25"/>
-                <Elements:ReplaseAllWordsButton Height="25" Width="25" Grid.Column="1"/>
+
+                <TextBox
+                    x:Name="ReplaceTextBox"  Grid.Column="1" Margin="2 3" Tag="Заменить..." BorderThickness="0"
+                    VerticalContentAlignment="Bottom"
+                    HorizontalContentAlignment="Left"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    Foreground="{StaticResource ForegroundSolidColorBrush}"
+                    FontSize="14"
+                    CaretBrush="{StaticResource ForegroundSolidColorBrush}"
+                    GotFocus="ReplaceTextBox_GotFocus"
+                    LostFocus="ReplaceTextBox_LostFocus"/>
+
+                <TextBlock x:Name="ReplcePlaceholder" Grid.Column="1"
+                 Text="Заменить..."
+                 FontSize="14"
+                 Foreground="{StaticResource ForegroundSolidColorBrush}"
+                 IsHitTestVisible="False"
+                 VerticalAlignment="Bottom"
+                 HorizontalAlignment="Left"
+                 Margin="2 3"/>
+
+                <Rectangle Width="Auto" Grid.Column="1" Margin="2 0" 
+                HorizontalAlignment="Stretch" 
+                Height="2" 
+                VerticalAlignment="Bottom" Fill="{StaticResource ForegroundSolidColorBrush}">
+                </Rectangle>
+
+                <Grid Grid.Column="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>
+                    <Elements:ReplaseWordButton Height="25" Width="25" Cursor="Hand" ToolTip="Заменить текущее совпадение"/>
+                    <Elements:ReplaseAllWordsButton Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Заменить все совпадения"/>
+                </Grid>
             </Grid>
-                <TextBlock x:Name="SearchSlider" Grid.Row="2" Grid.Column="0" Margin="4 10 2 2" 
-                           Text="&lt;&gt;" 
-                           Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                           PreviewMouseLeftButtonDown="SearchSlider_MouseLeftButtonDown"
-                           PreviewMouseLeftButtonUp="SearchSlider_MouseLeftButtonUp"
-                           MouseMove="SearchSlider_MouseMove"
-                           ToolTip="Передвинуть окно поиска"/>
+                <Elements:SearchSliderHandle x:Name="SearchSlider" Grid.Row="2" Grid.Column="0" Margin="4 10 2 2"
+                                             PreviewMouseLeftButtonDown="SearchSlider_MouseLeftButtonDown"
+                                             PreviewMouseLeftButtonUp="SearchSlider_MouseLeftButtonUp"
+                                             MouseMove="SearchSlider_MouseMove"
+                                             ToolTip="Передвинуть окно поиска"/>
 
                 <!-- Строка 3 -->
-            <Grid Grid.Row="2" Grid.Column="1">
+            <Grid x:Name="OptionsRowPanel" Grid.Row="2" Grid.Column="1" RenderTransformOrigin="0.5,0" MinHeight="40">
+                <Grid.RenderTransform>
+                    <TranslateTransform Y="0"/>
+                </Grid.RenderTransform>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="12*"/>
                     <ColumnDefinition Width="12*"/>
@@ -169,9 +306,9 @@
                            Width="25" Height="25"
                            Foreground="Black"
                            Cursor="Hand"
-                           ToolTip="Учитывать регистр"
+                           ToolTip="Учитывать регистр при поиске"
                            />
-                <Elements:WholeWordToggleButton x:Name="wholeWordButton" Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Слово целиком"/>
+                <Elements:WholeWordToggleButton x:Name="wholeWordButton" Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Искать только целые слова"/>
 
                 <ComboBox x:Name="searchAreaParameters" Grid.Column="2" Margin="2" VerticalAlignment="Stretch" SelectedIndex="0"
                 SelectionChanged="PART_EditableTextBox_SelectionChanged">
