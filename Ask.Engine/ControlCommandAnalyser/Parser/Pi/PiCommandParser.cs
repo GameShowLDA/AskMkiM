@@ -5,6 +5,7 @@ using Ask.Core.Services.Translator;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
@@ -297,7 +298,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           && model.AlgorithmKey != null
           && model.SiCommand.AlgorithmKey != null)
         {
-          model.AlgorithmKey = model.SiCommand.AlgorithmKey;
+          var type = model.GetType();
+          var attribute = type.GetCustomAttributes(typeof(AllowedKeysAttribute), false)
+                          .FirstOrDefault() as AllowedKeysAttribute;
+          foreach (var key in model.SiCommand.AlgorithmKey)
+          {
+            if (!model.AlgorithmKey.Contains(key) && attribute.Keys.Where(item => item.ToString() == key).Count() == 1)
+            {
+              model.AlgorithmKey.Add(key);
+            }
+          }
         }
 
         LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");

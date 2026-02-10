@@ -67,5 +67,11 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// Тип команды EHT постоянным током.
     /// </summary>
     EHT,
+
+    [CommandDisplayInfo("Сопротивления", "НЭ", UnitEnums.QuantitySymbol.U, "В", 0, 10)]
+    /// <summary>
+    /// Тип команды NE.
+    /// </summary>
+    NE,
   }
 }

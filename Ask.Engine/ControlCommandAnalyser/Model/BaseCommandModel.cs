@@ -10,7 +10,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// </summary>
   public abstract class BaseCommandModel : IError
   {
-    public MeasurementTypeCommand TypeCommand { get; set; }
+    public virtual MeasurementTypeCommand TypeCommand { get; set; }
     public List<string> SourceLines { get; set; } = new List<string>();
 
     public List<ErrorItem> Errors { get; set; } = new List<ErrorItem>();

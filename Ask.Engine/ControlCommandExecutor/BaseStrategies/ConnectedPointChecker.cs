@@ -60,7 +60,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errorsMessage, infoMessage);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint));
+      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
 
       for (int i = 0; i < pointsList.Count; i++)
       {

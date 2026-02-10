@@ -66,6 +66,7 @@
 		<Rule color="Mnemonic">\bОТ\b</Rule>
 		<Rule color="Mnemonic">\bВШ\b</Rule>
 		<Rule color="Mnemonic">\bСК\b</Rule>
+		<Rule color="Mnemonic">\bНЭ\b</Rule>
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" multiline="true"/>

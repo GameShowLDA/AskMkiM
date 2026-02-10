@@ -222,7 +222,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Создает новый файл трансляции (.opkw) в редакторе.
     /// </summary>
-    public TextEditorUI CreateTranslationFileAsync()
+    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
     {
       if (_isLockedProvider())
       {
@@ -231,7 +231,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        return _multiWindow.CreateTranslationFileAsync();
+        return _multiWindow.CreateTranslationFileAsync(parentFilePath);
       }
     }
     internal void OpenFolder() => _multiWindow.OpenFolder();

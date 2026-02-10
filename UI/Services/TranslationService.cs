@@ -36,10 +36,10 @@ namespace UI.Services
     /// Создаёт новый текстовый редактор для отображения результатов трансляции.
     /// </summary>
     /// <returns>Экземпляр <see cref="TextEditorUI"/> с предзаполненным сообщением и режимом только для чтения
-    public TextEditorUI CreateTranslationEditor()
+    public TextEditorUI CreateTranslationEditor(string parentFilePath)
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
-      var textEditorModel = new TextEditorModel(fileName);
+      var textEditorModel = new TextEditorModel(parentFilePath, fileName);
 
       var textEditor = new TextEditorUI(FileType.OPKW, textEditorModel)
       {

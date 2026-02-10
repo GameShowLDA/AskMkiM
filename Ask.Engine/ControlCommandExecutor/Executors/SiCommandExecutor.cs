@@ -70,54 +70,29 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       List<ShowMessageModel> errorMessage = new();
 
-      NodeFullContext nodeFullContext = new NodeFullContext();
-      nodeFullContext.SchemeModel = command.Scheme;
-      nodeFullContext.CommandManager = context.CommandExecutionManager;
-      nodeFullContext.CommandModel = command;
-      nodeFullContext.MessageService = context.Console;
-      nodeFullContext.Value = command.Resistance.Value;
-      nodeFullContext.LowerLimit = command.Resistance.Value;
-      nodeFullContext.HigherLimit = -1;
-      nodeFullContext.Unit = "МОм";
-      nodeFullContext.UnitMnemonic = "R";
-      nodeFullContext.TypeCommand = MeasurementTypeCommand.SI;
+      NodeFullContext nodeFullContext = new NodeFullContext(context, command, command, command.Resistance.Value + 1, command.Resistance.Value, -1);
       nodeFullContext.IsInvokedByAnotherCommand = context.IsInvokedByAnotherCommand;
-
-      if (command.AlgorithmKey.Contains("И"))
-      {
-        nodeFullContext.IsPolarityReversed = true;
-      }
 
       MethodExecutionContext methodExecutionContext = nodeFullContext.CreateChild<MethodExecutionContext>();
       NodeAccumulationContext nodeAccumulationContext = nodeFullContext.CreateChild<NodeAccumulationContext>();
       PairwiseFirstPointContext pairwiseFirstPointContext = nodeFullContext.CreateChild<PairwiseFirstPointContext>();
-
+      nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
+      methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
+      pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
+      nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
       firstValue = nodeFullContext.LowerLimit;
 
-      if (command.AlgorithmKey.Contains("К"))
+      DisconnectionCheckRequest disconnectionCheckRequest = new DisconnectionCheckRequest()
       {
-        nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
-        var errMes = await NodeFullChecker.CheckSequenceAsync(nodeFullContext);
-        errorMessage.AddRange(errMes);
-      }
-      else if (command.AlgorithmKey.Contains("Г"))
-      {
-        methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
-        var errMes = await MethodExecutor.CheckSequenceAsync(methodExecutionContext);
-        errorMessage.AddRange(errMes);
-      }
-      else if (command.AlgorithmKey.Contains("Т1"))
-      {
-        pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
-        errorMessage.AddRange(errMes);
-      }
-      else
-      {
-        nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
-        errorMessage.AddRange(errMes);
-      }
+        AlgorithmKey = command.AlgorithmKey,
+        NodeFullContext = nodeFullContext,
+        MethodExecutionContext = methodExecutionContext,
+        PairwiseFirstPointContext = pairwiseFirstPointContext,
+        NodeAccumulationContext = nodeAccumulationContext
+      };
+
+      var messageResult = await DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest);
+      errorMessage.AddRange(messageResult.Errors);
 
       await PointFormater.MessageResult(errorMessage, context.Console);
       await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);

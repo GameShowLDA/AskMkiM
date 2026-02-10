@@ -162,17 +162,17 @@ namespace MainWindowProgram.Services
         }
       }
 
-      if (container == null && editor != null)
-      {
-        await BuildAsync();
-        editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
-        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
-      }
-
       if (container == null && runContainer == null && editor == null)
       {
         MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
         return;
+      }
+
+      await BuildAsync();
+
+      if (container == null && editor != null)
+      {
+        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       }
 
       if (container == null && runContainer != null)
@@ -324,15 +324,7 @@ namespace MainWindowProgram.Services
     {
       string text = editor.Text;
 
-      var translateEditor = _fileService.CreateTranslationFileAsync();
-      if (translateEditor == null)
-      {
-        MessageBoxCustom.Show("Не удалось создать редактор трансляции.", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        return;
-      }
-
-      if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
-        translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
+      var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
 
       var manager = new CommandTranslationManager();
       var models = manager.ParseAllAndDisplay(text, translateEditor);
@@ -365,9 +357,7 @@ namespace MainWindowProgram.Services
     {
       try
       {
-        var translateEditor = _fileService.CreateTranslationFileAsync();
-        if (translateEditor == null)
-          throw new InvalidOperationException("Не удалось создать редактор трансляции (translateEditor == null).");
+        var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
 
         editor.TextArea.Document.Text = text;
 

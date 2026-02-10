@@ -1,8 +1,11 @@
 ﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using System.Reflection;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
@@ -93,6 +96,39 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// </summary>
     public bool IsProtocolAttribute { get; set; }
 
+    internal ExecutorContext() { }
+    internal ExecutorContext(
+      CommandExecutionContext context,
+      BaseCommandModel command,
+      IHasScheme hasScheme,
+      double value = 0,
+      double lowerLimit =0,
+      double higherLimit = 0)
+    {
+      TypeCommand = command.TypeCommand;
+
+      var member = typeof(MeasurementTypeCommand)
+        .GetMember(TypeCommand.ToString())
+        .FirstOrDefault();
+
+      var attr = member?
+        .GetCustomAttribute<CommandDisplayInfoAttribute>();
+
+      if (attr == null)
+        throw new InvalidOperationException(
+          $"CommandDisplayInfoAttribute not found for {TypeCommand}");
+
+      SchemeModel = hasScheme.Scheme;
+      CommandManager = context.CommandExecutionManager;
+      CommandModel = command;
+      MessageService = context.Console;
+      Value = value;
+      LowerLimit = lowerLimit;
+      HigherLimit = higherLimit;
+
+      Unit = attr.Unit;
+      UnitMnemonic = attr.Symbol.ToString();
+    }
     protected void CopyFrom(ExecutorContext other)
     {
       SchemeModel = other.SchemeModel;

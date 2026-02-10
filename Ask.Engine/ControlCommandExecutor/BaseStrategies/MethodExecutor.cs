@@ -31,7 +31,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return showMessageModels;
       }
 
-      await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group));
+      await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
 
       HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
       var binaryPoints = ConvertToReversedBinaryRange(groupChains, HighestBitCount);
