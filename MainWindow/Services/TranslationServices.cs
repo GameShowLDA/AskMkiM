@@ -90,12 +90,6 @@ namespace MainWindowProgram.Services
         }
       }
 
-      if (container == null && editor != null)
-      {
-        editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
-        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
-      }
-
       if (container == null && runContainer == null && editor == null)
       {
         MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
@@ -103,6 +97,11 @@ namespace MainWindowProgram.Services
       }
 
       await BuildAsync();
+
+      if (container == null && editor != null)
+      {
+        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      }
 
       if (container == null && runContainer != null)
       {
