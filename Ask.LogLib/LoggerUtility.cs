@@ -11,11 +11,12 @@ namespace Ask.LogLib
     /// <param name="message">Сообщение для логирования.</param>
     /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
+    /// <param name="lineNumber">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogInformation(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "")
+    public static string LogInformation(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Info(message);
+      logger.Info(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -25,11 +26,12 @@ namespace Ask.LogLib
     /// <param name="message">Сообщение для логирования.</param>
     /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
+    /// <param name="lineNumber">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogWarning(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "")
+    public static string LogWarning(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Warn(message);
+      logger.Warn(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -44,7 +46,7 @@ namespace Ask.LogLib
     public static string LogError(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Error($"{Path.GetFileName(callerFilePath)}:{lineNumber} — {message}");
+      logger.Error(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -54,11 +56,12 @@ namespace Ask.LogLib
     /// <param name="message">Сообщение для логирования.</param>
     /// <param name="isDeviceLog">Если true, логируется в файл для оборудования.</param>
     /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
+    /// <param name="lineNumber">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <returns>Исходное сообщение.</returns>
-    public static string LogDebug(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "")
+    public static string LogDebug(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Debug(message);
+      logger.Debug(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
 
@@ -80,11 +83,11 @@ namespace Ask.LogLib
       }
 
       var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
-      var fileName = Path.GetFileName(file);
+      var messageCore = string.IsNullOrEmpty(customMessage)
+        ? ex.Message
+        : $"{customMessage}: {ex.Message}";
 
-      var message = string.IsNullOrEmpty(customMessage)
-        ? $"[{fileName}:{line}] {ex.Message}"
-        : $"[{fileName}:{line}] {customMessage}: {ex.Message}";
+      var message = BuildMessage(messageCore, file, line);
 
       if (!onlyProjectStack)
       {
@@ -115,11 +118,9 @@ namespace Ask.LogLib
     public static void LogException(string userHint, Exception ex, string customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
     {
       var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
-      var fileName = Path.GetFileName(file);
-
       if (!string.IsNullOrWhiteSpace(userHint))
       {
-        logger.Error($"[{fileName}:{line}] {userHint}");
+        logger.Error(BuildMessage(userHint, file, line));
       }
 
       LogException(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
@@ -135,6 +136,30 @@ namespace Ask.LogLib
     {
       var baseName = Path.GetFileNameWithoutExtension(filePath);
       return isDeviceLog ? $"{baseName}_Device" : $"{baseName}_UI";
+    }
+
+    private static string BuildMessage(string message, string filePath, int lineNumber)
+    {
+      var safeMessage = message ?? string.Empty;
+      var safePath = string.IsNullOrWhiteSpace(filePath) ? "unknown" : TrimPathToProject(filePath);
+      return $"[{safePath}:{lineNumber}] {safeMessage}";
+    }
+
+    private static string TrimPathToProject(string filePath)
+    {
+      const string projectName = "AskMkiM";
+      var normalized = filePath.Replace('/', '\\');
+
+      var marker = "\\" + projectName + "\\";
+      var index = normalized.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+      if (index >= 0)
+        return normalized.Substring(index + 1);
+
+      index = normalized.IndexOf(projectName + "\\", StringComparison.OrdinalIgnoreCase);
+      if (index >= 0)
+        return normalized.Substring(index);
+
+      return normalized;
     }
   }
 }
