@@ -28,7 +28,6 @@ namespace UI.Controls.TextEditor
     /// </summary>
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-      if (HandleBreakpointShortcut(e)) return;
       if (HandleCtrlM(e)) return;
       ResetCtrlMFlagIfNeeded(e);
       if (HandleZoomShortcuts(e)) return;
@@ -123,26 +122,6 @@ namespace UI.Controls.TextEditor
       }
 
       return false;
-    }
-
-    /// <summary>
-    /// Обрабатывает клавишу F8 — переключение точки остановки
-    /// на текущей строке каретки.
-    /// </summary>
-    private bool HandleBreakpointShortcut(KeyEventArgs e)
-    {
-      if (e.Key != Key.F8)
-        return false;
-
-      if (!_executionMargin.BreakpointsInteractive)
-        return true;
-
-      int lineNumber = textEditor.TextArea.Caret.Line;
-
-      _executionMargin.ToggleBreakpointFromKeyboard(lineNumber);
-
-      e.Handled = true;
-      return true;
     }
   }
 }

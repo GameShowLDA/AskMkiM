@@ -10,38 +10,17 @@ using UI.Controls.TextEditor;
 
 public class ExecutionGlyphMargin : AbstractMargin
 {
-  /// <summary>
-  /// Список активных строк выполнения.
-  /// </summary>
   public List<int> ActiveLines { get; } = new();
-
-  /// <summary>
-  /// Кисть маркера активной строки выполнения.
-  /// </summary>
   public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["GreenColorSolidColorBrush"];
-
-  /// <summary>
-  /// Цвет фоновой подсветки строки, на которой установлена точка остановки (для <see cref="TextMarkerService"/>).
-  /// </summary>
   public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
 
   /// <summary>
-  /// Определяет, должны ли клики по марджину изменять состояние точек остановки.
-  /// </summary>
-  public bool BreakpointsInteractive { get; set; } = true;
-
-  /// <summary>
-  /// Определяет, должны ли точки остановки визуально отображаться (кружок и подсветка строки).
-  /// </summary>
-  public bool BreakpointsVisible { get; set; } = true;
-
-  /// <summary>
-  /// Лист поставленных точек остановки (для рендера/внешнего доступа).
+  /// Лист поставленных точек остановки
   /// </summary>
   public List<TextAnchor> BreakpointLines { get; } = new();
 
   /// <summary>
-  /// Лист номеров команд, на которых установлены точки остановки (для внешнего доступа).
+  /// Лист номеров команд, на которых установлены точки остановки.
   /// </summary>
   public List<int> BreakpointCommandsNumbers { get; } = new();
 
@@ -50,8 +29,19 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   public Brush BreakpointBrush { get; set; } = (Brush)Application.Current.Resources["RedColorSolidColorBrush"];
 
-  private readonly HashSet<int> _rightBreakpoints = new();        
-  private readonly Dictionary<int, TextAnchor> _bpByCommand = new();
+  /// <summary>
+  /// Лист, куда можно поставить точки остановки.
+  /// </summary>
+  public List<int> RightBreakpoints
+  {
+    get { return new List<int>(_rightBreakpoints); }
+    set
+    {
+      _rightBreakpoints = value ?? new List<int>();
+    }
+  }
+  private List<int> _rightBreakpoints = new();
+
 
   /// <summary>
   /// Ссылка на редактор AvalonEdit для прокрутки.
@@ -70,152 +60,47 @@ public class ExecutionGlyphMargin : AbstractMargin
     {
       BreakpointLines.Clear();
       BreakpointCommandsNumbers.Clear();
-      _bpByCommand.Clear();
       ActiveLines.Clear();
 
       RebuildBreakpointLineHighlights();
-      InvalidateVisual();
-    };
-  }
 
-  /// <summary>
-  /// Лист, куда можно поставить точки остановки.
-  /// </summary>
-  public List<int> RightBreakpoints
-  {
-    get => _rightBreakpoints.ToList();
-    set => SetRightBreakpoints(value);
-  }
-
-  /// <summary>
-  /// Устанавливает набор разрешённых строк для клика по марджину.
-  /// </summary>
-  /// <param name="lines">Список номеров строк, на которые разрешена установка точек.</param>
-  public void SetRightBreakpoints(List<int> lines)
-  {
-    _rightBreakpoints.Clear();
-    for (int i = 0; i < lines.Count; i++)
-      _rightBreakpoints.Add(lines[i]);
-  }
-
-  /// <summary>
-  /// Проверяет, установлена ли точка остановки на указанной команде.
-  /// </summary>
-  /// <param name="commandNumber">Номер команды.</param>
-  /// <returns><see langword="true"/>, если точка остановки установлена; иначе <see langword="false"/>.</returns>
-  public bool HasBreakpointCommand(int commandNumber) => _bpByCommand.ContainsKey(commandNumber);
-
-  /// <summary>
-  /// Гарантирует наличие или отсутствие точки остановки для команды.
-  /// Используется для синхронизации состояния между редакторами.
-  /// </summary>
-  /// <param name="lineNumber">Номер строки, где находится команда.</param>
-  /// <param name="commandNumber">Номер команды.</param>
-  /// <param name="isSet"><c>true</c> — установить; <c>false</c> — снять.</param>
-  /// <param name="raiseEvents">
-  /// Нужно ли поднимать события через <see cref="BreakpointEventAdapter"/>.
-  /// Для внутренней синхронизации обычно <c>false</c>.
-  /// </param>
-  public void EnsureBreakpoint(int lineNumber, int commandNumber, bool isSet, bool raiseEvents)
-  {
-    if (isSet) SetBreakpoint(lineNumber, commandNumber, raiseEvents);
-    else RemoveBreakpoint(commandNumber, raiseEvents);
-  }
-
-  /// <summary>
-  /// Устанавливает точку остановки на указанной строке и команде.
-  /// </summary>
-  /// <param name="lineNumber">Номер строки в текущем документе.</param>
-  /// <param name="commandNumber">Номер команды.</param>
-  /// <param name="raiseEvents">Нужно ли поднять событие установки точки остановки.</param>
-  private void SetBreakpoint(int lineNumber, int commandNumber, bool raiseEvents)
-  {
-    if (_bpByCommand.ContainsKey(commandNumber)) return;
-
-    var doc = _textEditor.Document;
-    var line = doc.GetLineByNumber(lineNumber);
-
-    var anchor = doc.CreateAnchor(line.Offset);
-    anchor.MovementType = AnchorMovementType.BeforeInsertion;
-    anchor.SurviveDeletion = false;
-
-    _bpByCommand.Add(commandNumber, anchor);
-    BreakpointLines.Add(anchor);
-    BreakpointCommandsNumbers.Add(commandNumber);
-
-    anchor.Deleted += (_, __) =>
-    {
-      _bpByCommand.Remove(commandNumber);
-      int idx = BreakpointCommandsNumbers.IndexOf(commandNumber);
-      if (idx >= 0)
-      {
-        BreakpointCommandsNumbers.RemoveAt(idx);
-        BreakpointLines.RemoveAt(idx);
-      }
-      RebuildBreakpointLineHighlights();
       InvalidateVisual();
     };
 
-    RebuildBreakpointLineHighlights();
-    InvalidateVisual();
-
-    if (raiseEvents)
-      BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
 
-  /// <summary>
-  /// Снимает точку остановки для указанной команды.
-  /// </summary>
-  /// <param name="commandNumber">Номер команды.</param>
-  /// <param name="raiseEvents">Нужно ли поднять событие снятия точки остановки.</param>
-  private void RemoveBreakpoint(int commandNumber, bool raiseEvents)
-  {
-    if (!_bpByCommand.TryGetValue(commandNumber, out var anchor)) return;
-
-    _bpByCommand.Remove(commandNumber);
-
-    int idx = BreakpointCommandsNumbers.IndexOf(commandNumber);
-    BreakpointCommandsNumbers.RemoveAt(idx);
-    BreakpointLines.RemoveAt(idx);
-
-    RebuildBreakpointLineHighlights();
-    InvalidateVisual();
-
-    if (raiseEvents)
-    {
-      int lineNumber = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
-      BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
-    }
-  }
-
-  /// <summary>
-  /// Устанавливает активную строку выполнения (очищая предыдущую) и прокручивает редактор к ней.
-  /// </summary>
-  /// <param name="lineNumber">Номер строки.</param>
   public void SetActiveLine(int lineNumber)
   {
-    if (ActiveLines.Count == 1 && ActiveLines[0] == lineNumber) return;
+    if (!Dispatcher.CheckAccess())
+    {
+      Dispatcher.Invoke(() => SetActiveLine(lineNumber));
+      return;
+    }
+
+    if (ActiveLines.Count == 1 && ActiveLines[0] == lineNumber)
+      return;
 
     ActiveLines.Clear();
     ActiveLines.Add(lineNumber);
 
     InvalidateVisual();
+
     _textEditor.ScrollTo(lineNumber, 1);
   }
 
-  /// <summary>
-  /// Очищает маркеры активной строки выполнения.
-  /// </summary>
   public void ClearMarkers()
   {
-    if (ActiveLines.Count == 0) return;
-    ActiveLines.Clear();
-    InvalidateVisual();
-  }
+    if (!Dispatcher.CheckAccess())
+    {
+      Dispatcher.Invoke(ClearMarkers);
+      return;
+    }
 
-  public void ToggleBreakpointFromKeyboard(int lineNumber)
-  {
-    HandleBreakpointToggle(lineNumber);
+    if (ActiveLines.Count > 0)
+    {
+      ActiveLines.Clear();
+      InvalidateVisual();
+    }
   }
 
   /// <summary>
@@ -239,33 +124,27 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   private void RebuildBreakpointLineHighlights()
   {
-    if (!BreakpointsVisible) return;
-
     var doc = _textEditor.Document;
     var svc = GetMarkerService();
+    if (doc == null || svc == null) return;
 
     svc.ClearAllMarkers();
 
-    for (int i = 0; i < BreakpointLines.Count; i++)
+    DocumentLine line;
+
+    foreach (var anchor in BreakpointLines)
     {
-      var line = doc.GetLineByOffset(BreakpointLines[i].Offset);
+      line = doc.GetLineByOffset(anchor.Offset);
       svc.AddMarker(line.Offset, line.Length, LineBrush);
     }
   }
 
-  protected override Size MeasureOverride(Size availableSize) => new Size(20, 0);
+  protected override Size MeasureOverride(Size availableSize)
+  {
+    return new Size(20, 0);
+  }
 
-  /// <summary>
-  /// Отрисовывает одиночный маркер напротив строки документа.
-  /// </summary>
-  /// <param name="lineNumber">Номер строки.</param>
-  /// <param name="textView">Текущее представление AvalonEdit.</param>
-  /// <param name="verticalOffset">Текущая координата по вертикали.</param>
-  /// <param name="lineHeight">Высота строки.</param>
-  /// <param name="drawingContext">Контекст рисования.</param>
-  /// <param name="brush">Кисть для отрисовки.</param>
-  private static void RenderMarginSingle(
-    int lineNumber,
+  private static void RenderMarginSingle(int lineNumber,
     TextView textView,
     double verticalOffset,
     double lineHeight,
@@ -275,19 +154,25 @@ public class ExecutionGlyphMargin : AbstractMargin
     double top = textView.GetVisualTopByDocumentLine(lineNumber);
     if (double.IsNaN(top)) return;
 
-    double centerY = top - verticalOffset + lineHeight * 0.5;
+    double centerY = top - verticalOffset + lineHeight / 2;
     drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
   }
 
-  /// <summary>
-  /// Быстро парсит ведущий целочисленный префикс строки (номер команды),
-  /// пропуская пробелы и табуляции в начале.
-  /// </summary>
-  /// <param name="text">Текст строки.</param>
-  /// <returns>Распарсенный номер команды.</returns>
-  private static int ParseLeadingInt(ReadOnlySpan<char> text)
+  public static int GetNumberAtLine(ReadOnlySpan<char> text, int targetLine)
   {
-    int i = 0;
+    int line = 1, i = 0;
+
+    if (targetLine != 1)
+      for (; ; i++)
+      {
+        char c = text[i];
+        if (c == '\n' || c == '\r')
+        {
+          if (c == '\r' && text[i + 1] == '\n') i++;
+          if (++line == targetLine) { i++; break; }
+        }
+      }
+
     while (text[i] == ' ' || text[i] == '\t') i++;
 
     int value = 0;
@@ -297,82 +182,107 @@ public class ExecutionGlyphMargin : AbstractMargin
       if ((uint)d > 9) break;
       value = value * 10 + d;
     }
+
     return value;
   }
 
-  /// <summary>
-  /// Переключает состояние точки остановки на указанной строке:
-  /// если точка есть — снимает, иначе устанавливает.
-  /// Номер команды извлекается из фактического текста строки документа.
-  /// </summary>
-  /// <param name="lineNumber">Номер строки.</param>
-  private void ToggleBreakpointAtLine(int lineNumber)
+  private void ToggleBreakpointAnchor(int lineNumber)
   {
     var doc = _textEditor.Document;
+    if (doc == null) return;
+
     var line = doc.GetLineByNumber(lineNumber);
+    int offset = line.Offset;
 
-    int commandNumber = ParseLeadingInt(doc.GetText(line).AsSpan());
+    var existing = BreakpointLines.FirstOrDefault(a =>
+      doc.GetLineByOffset(a.Offset).LineNumber == lineNumber);
 
-    if (_bpByCommand.ContainsKey(commandNumber))
+    int commandNumber;
+
+    if (existing != null)
     {
-      RemoveBreakpoint(commandNumber, raiseEvents: true);
+      commandNumber = GetNumberAtLine(existing.Document.Text, existing.Line);
+      BreakpointLines.Remove(existing);
+      BreakpointCommandsNumbers.Remove(commandNumber);
+      BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
+      RebuildBreakpointLineHighlights();
       return;
     }
 
-    SetBreakpoint(lineNumber, commandNumber, raiseEvents: true);
+    var anchor = doc.CreateAnchor(offset);
+    anchor.MovementType = AnchorMovementType.BeforeInsertion;
+    anchor.SurviveDeletion = false;
+
+    anchor.Deleted += (_, __) =>
+    {
+      BreakpointLines.Remove(anchor);
+      BreakpointCommandsNumbers.Remove(GetNumberAtLine(anchor.Document.Text, anchor.Line));
+      InvalidateVisual();
+      RebuildBreakpointLineHighlights();
+    };
+
+    commandNumber = GetNumberAtLine(anchor.Document.Text, anchor.Line);
+    BreakpointCommandsNumbers.Add(commandNumber);
+    BreakpointLines.Add(anchor);
+    RebuildBreakpointLineHighlights();
+    BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
 
   protected override void OnRender(DrawingContext drawingContext)
   {
     base.OnRender(drawingContext);
 
-    drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
+    drawingContext.DrawRectangle(
+        Brushes.Transparent,
+        null,
+        new Rect(0, 0, ActualWidth, ActualHeight));
 
-    if (TextView == null || !TextView.VisualLinesValid) return;
+    if (TextView == null || !TextView.VisualLinesValid)
+      return;
 
     TextView.EnsureVisualLines();
 
     double verticalOffset = TextView.ScrollOffset.Y;
     double lineHeight = TextView.DefaultLineHeight;
 
-    if (BreakpointsVisible && BreakpointLines.Count != 0)
+    if (_textEditor.Document != null && BreakpointLines.Count != 0)
     {
-      var doc = _textEditor.Document;
-      for (int i = 0; i < BreakpointLines.Count; i++)
+      foreach (var anchor in BreakpointLines)
       {
-        int lineNumber = doc.GetLineByOffset(BreakpointLines[i].Offset).LineNumber;
+        int lineNumber = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
         RenderMarginSingle(lineNumber, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush);
       }
     }
 
     if (ActiveLines.Count != 0)
+    {
       RenderMargin(ActiveLines, TextView, verticalOffset, lineHeight, drawingContext, MarkerBrush);
+    }
   }
 
   /// <summary>
-  /// Отрисовывает маркеры напротив набора строк документа.
+  /// Отрисовка точек в левой области редактора напротив указанных строк документа.
   /// </summary>
-  /// <param name="margin">Список строк.</param>
-  /// <param name="textView">Текущее представление AvalonEdit.</param>
-  /// <param name="verticalOffset">Текущая координата по вертикали.</param>
-  /// <param name="lineHeight">Высота строки.</param>
-  /// <param name="drawingContext">Контекст рисования.</param>
-  /// <param name="brush">Кисть для отрисовки.</param>
   private static void RenderMargin(
     List<int> margin,
     TextView textView,
     double verticalOffset,
     double lineHeight,
     DrawingContext drawingContext,
-    Brush brush)
+    Brush brush
+    )
   {
-    for (int i = 0; i < margin.Count; i++)
+    foreach (int lineNumber in margin)
     {
-      double top = textView.GetVisualTopByDocumentLine(margin[i] + 1);
+      double top = textView.GetVisualTopByDocumentLine(lineNumber+1);
       if (double.IsNaN(top)) continue;
 
-      double centerY = top - verticalOffset + lineHeight * 0.5;
-      drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
+      double centerY = top - verticalOffset + lineHeight / 2;
+      drawingContext.DrawEllipse(
+          brush,
+          null,
+          new Point(10, centerY),
+          8, 8);
     }
   }
 
@@ -397,40 +307,31 @@ public class ExecutionGlyphMargin : AbstractMargin
   {
     base.OnMouseLeftButtonDown(e);
 
-    if (!BreakpointsInteractive)
-      return;
-
     TextView.EnsureVisualLines();
 
     var pos = e.GetPosition(this);
     double visualY = pos.Y + TextView.ScrollOffset.Y;
 
-    int lineNumber = TextView
-        .GetDocumentLineByVisualTop(visualY)
-        .LineNumber;
+    var docLine = TextView.GetDocumentLineByVisualTop(visualY);
 
-    HandleBreakpointToggle(lineNumber);
+    int lineNumber = docLine.LineNumber;
 
+    if (!_rightBreakpoints.Contains(lineNumber)) return;
+
+    ToggleBreakpointAnchor(lineNumber);
+
+    InvalidateVisual();
     e.Handled = true;
   }
 
-  private void HandleBreakpointToggle(int lineNumber)
+  private void TextView_ScrollOffsetChanged(object? sender, EventArgs e)
   {
-    if (!_rightBreakpoints.Contains(lineNumber))
-      return;
-
-    ToggleBreakpointAtLine(lineNumber);
     InvalidateVisual();
   }
 
-  /// <summary>
-  /// Обработчик изменения смещения прокрутки. Перерисовывает марджин.
-  /// </summary>
-  private void TextView_ScrollOffsetChanged(object? sender, EventArgs e) => InvalidateVisual();
+  private void TextView_VisualLinesChanged(object? sender, EventArgs e)
+  {
+    InvalidateVisual();
+  }
 
-  /// <summary>
-  /// Обработчик изменения набора визуальных строк (например, при сворачивании/разворачивании).
-  /// Перерисовывает марджин.
-  /// </summary>
-  private void TextView_VisualLinesChanged(object? sender, EventArgs e) => InvalidateVisual();
 }
