@@ -104,11 +104,12 @@
 
     <Grid x:Name="WindowContainer" RenderTransformOrigin="0.5,0.0" Margin="12">
         <Grid.Effect>
-            <DropShadowEffect Color="#B0000000"
-                              BlurRadius="26"
-                              ShadowDepth="5"
-                              Opacity="0.26"
-                              Direction="90"
+            <!-- Тень в стиле Spotlight: ярче, смещена вниз, без подсветки верхней грани -->
+            <DropShadowEffect Color="#88000000"
+                              BlurRadius="24"
+                              ShadowDepth="12"
+                              Opacity="0.32"
+                              Direction="270"
                               RenderingBias="Quality"/>
         </Grid.Effect>
         <Grid.RenderTransform>
