@@ -5,6 +5,7 @@ using Ask.Core.Services.Translator;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
@@ -195,20 +196,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 
         string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
 
-        // Ищем первую и последнюю '*'
         int firstStar = bodyNoWs.IndexOf('*');
         int lastStar = bodyNoWs.LastIndexOf('*');
 
         if (firstStar >= 0 && lastStar > firstStar)
         {
-          // Выделяем блок точек (включительно) — PointParser сам Trim('*')
           string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
           model.PointsSourse = pointsBlob;
           LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
           var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, model, rmCommandModel);
 
-          // Поднимем ошибки парсера точек
           if (pointErrors?.Count > 0)
           {
             foreach (var error in pointErrors)
@@ -221,7 +219,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
             }
           }
 
-          // Проверим, что схема непуста (есть хотя бы одна точка)
           if (scheme == null || scheme.IsEmpty())
           {
             LogWarning($"Не найдено ни одной точки (строка {numberLine}): {commandNumber} {mnemonic}");
@@ -229,23 +226,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           }
           else
           {
-            model.Scheme = scheme; // ← просто присваиваем схему в модель
+            model.Scheme = scheme;
             LogInformation(
                $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
           }
 
-          // Обновим remainder: оставим в нём только то, что до первой '*' в ПЕРВОЙ строке
           int idxStarInFirstLine = remainderPi.IndexOf('*');
           int idxStarInSecondLine = remainderPi.LastIndexOf('*');
           if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
           {
-            remainder =
-                remainder[..idxStarInFirstLine].Trim()
-                + remainder[(idxStarInSecondLine + 1)..].Trim();
+            remainderPi =
+                remainderPi[..idxStarInFirstLine].Trim()
+                + remainderPi[(idxStarInSecondLine + 1)..].Trim();
           }
           else
           {
-            remainder = remainder.Trim();
+            remainderPi = remainderPi.Trim();
           }
           if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
             || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
@@ -292,7 +288,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
         }
         else
         {
-          // Во всём теле команды не нашли пары '*...*' → считаем, что точек нет
           LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
           model.Errors.Add(PiErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
         }
@@ -303,7 +298,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           && model.AlgorithmKey != null
           && model.SiCommand.AlgorithmKey != null)
         {
-          model.AlgorithmKey = model.SiCommand.AlgorithmKey;
+          var type = model.GetType();
+          var attribute = type.GetCustomAttributes(typeof(AllowedKeysAttribute), false)
+                          .FirstOrDefault() as AllowedKeysAttribute;
+          foreach (var key in model.SiCommand.AlgorithmKey)
+          {
+            if (!model.AlgorithmKey.Contains(key) && attribute.Keys.Where(item => item.ToString() == key).Count() == 1)
+            {
+              model.AlgorithmKey.Add(key);
+            }
+          }
         }
 
         LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");

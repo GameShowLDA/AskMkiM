@@ -7,7 +7,6 @@ namespace Ask.Engine.ControlCommandAnalyser
 {
   public static class PointFormater
   {
-
     public static async Task<string> GetFormatDisconnectPoint(List<ChainModel> chainModels)
     {
       var formatPoint = new List<string>();

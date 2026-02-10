@@ -18,11 +18,17 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// <summary>
     /// Создаёт заголовок блока проверки по алгоритму контроля.
     /// </summary>
-    public static ShowMessageModel BuildCheckBlockHeader(ControlCheckAlgorithm algorithm)
+    public static ShowMessageModel BuildCheckBlockHeader(ControlCheckAlgorithm algorithm, bool inversion)
     {
+      string header = algorithm.GetDescription();
+      if (inversion)
+      {
+        header += "(инверсия)";
+      }
+
       return new ShowMessageModel
       {
-        Header = algorithm.GetDescription(),
+        Header = header,
         Status = ShowMessageModel.MessageType.CommandBlock
       };
     }

@@ -18,8 +18,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
     {
       var firstLine = lines[0].Trim();
 
-      // После мнемоники сразу идёт номер перехода (метка)
-      // Например: "50 УП 1000"
       var parts = firstLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
       string targetLabel = null;
@@ -42,7 +40,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
       };
 
       List<string> processedLines = CommentsParser.ParseComments(lines, model);
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
       model.SourceLines = model.SourceLines
         .Where(l => !string.IsNullOrWhiteSpace(l))
         .ToList();

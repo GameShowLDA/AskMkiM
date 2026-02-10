@@ -26,7 +26,6 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
     public static AlgorithmKey[] GetNotAllowedKeysForModel(BaseCommandModel model)
     {
-      // 1. Получаем разрешённые ключи через уже существующий кэш
       Type type = model.GetType();
 
       if (!Cache.TryGetValue(type, out var allowedKeys))
@@ -39,10 +38,8 @@ namespace Ask.Engine.ControlCommandAnalyser
         Cache[type] = allowedKeys;
       }
 
-      // 2. Получаем полный список всех ключей enum
       var allKeys = (AlgorithmKey[])Enum.GetValues(typeof(AlgorithmKey));
 
-      // 3. Вычисляем запрещённые
       return allKeys
           .Where(k => !allowedKeys.Contains(k))
           .ToArray();

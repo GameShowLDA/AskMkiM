@@ -21,8 +21,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-
-      EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
       EventAggregator.Subscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
 
       var command = GetRequiredCommand<KscCommandModel>(context);
@@ -32,6 +30,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       GetProtocol(context, command, protocolModel);
+      EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
     }
 
     private void GetProtocol(CommandExecutionContext context, KscCommandModel command, ProtocolModel protocolModel)

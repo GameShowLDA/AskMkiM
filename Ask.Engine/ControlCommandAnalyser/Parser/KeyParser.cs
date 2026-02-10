@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
@@ -19,10 +20,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         }
         else
         {
+          var type = model.GetType();
+          var attribute = type.GetCustomAttributes(typeof(AllowedKeysAttribute), false)
+              .FirstOrDefault() as AllowedKeysAttribute;
           if (!model.AlgorithmKey.Contains(key))
           {
-            model.AlgorithmKey.Add(key);
-            LogDebug($"Найден ключ алгоритма: {key}");
+            if (attribute.Keys.Where(item => item.ToString() == key).Count() == 1)
+            {
+              model.AlgorithmKey.Add(key);
+              LogDebug($"Найден ключ алгоритма: {key}");
+            }
+            else
+            {
+              model.Errors.Add(GeneralErrors.WrongKey(numberLine, model.Mnemonic, $"{model.CommandNumber} {model.Mnemonic}", key));
+            }
           }
           else
           {
@@ -31,7 +42,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         }
       }
 
-      // удаляем найденные ключи ТОЛЬКО из ПИ-остатка
       foreach (var (key, hasError) in result)
       {
         remainder = Regex.Replace(

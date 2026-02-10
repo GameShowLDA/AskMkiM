@@ -20,7 +20,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       var enumKeys = Enum.GetNames(typeof(AlgorithmKey));
 
-      // Разбиваем строку и ищем совпадения с допустимыми ключами (точно по имени)
       return line
         .Split(new[] { '\t', ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries)
         .Where(token => enumKeys.Contains(token))
@@ -40,12 +39,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         .Select(k => k.ToString())
         .ToHashSet();
 
-      // Разбиваем строку на токены
       var tokens = line.Split(new[] { ' ', '\t', ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries);
-
-      // Собираем только те, что являются ключами
       var matchedKeys = tokens.Where(token => allowedEnumKeys.Contains(token)).ToList();
-
 
       var notAllowedKeys = KeysHelper
         .GetNotAllowedKeysForModel(model)
@@ -56,7 +51,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (matchedKeys.Count == 0 && foundNotAllowedKeys.Count == 0)
         return result;
 
-      // Проверка: была ли запятая после последнего ключа
       if (matchedKeys.Count > 0)
       {
         string lastKey = matchedKeys.Last();

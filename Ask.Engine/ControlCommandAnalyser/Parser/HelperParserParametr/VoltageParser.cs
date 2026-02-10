@@ -40,5 +40,49 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
         remainder
       );
     }
+
+    /// <summary>
+    /// Парсит выражения с диапазонами напряжения.
+    /// </summary>
+    /// <param name="input">Входная строка.</param>
+    /// <returns>
+    /// Кортеж:
+    /// - Min — минимальное значение (если есть),  
+    /// - Max — максимальное значение (если есть),  
+    /// - Unit — единица измерения сопротивления,  
+    /// - Remainder — остаток строки.
+    /// </returns>
+    public (string? Min, string? Max, string? Unit, string Remainder) ParseVoltageRange(string input)
+    {
+      if (string.IsNullOrWhiteSpace(input))
+        return (null, null, null, input);
+
+      // 4. Диапазон вида "10<МОм<20"
+      var m = Regex.Match(input,
+           @"(?<!\w)(?<min>\d+(?:[.,]\d+)?)\s*(?<op1><=|>=|<|>|≤|≥)\s*(?<unit>В|кВ|КВ|мВ|МВ)\s*(?<op2><=|>=|<|>|≤|≥)\s*(?<max>\d+(?:[.,]\d+)?)\b",
+           RegexOptions.IgnoreCase);
+
+      if (m.Success)
+      {
+        string? unit = m.Groups["unit"].Value;
+        double? maxValue = UnitsConvertor.TryParseValue(m.Groups["max"].Value, unit);
+        double? minValue = UnitsConvertor.TryParseValue(m.Groups["min"].Value, unit);
+        string remainder = Regex.Replace(
+        input,
+        $@"\b{Regex.Escape(m.Value)}\s*,?",
+        "",
+        RegexOptions.IgnoreCase
+      ).Trim();
+        return (
+           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+           "В",
+           remainder
+           );
+      }
+
+      // Ничего не нашли
+      return (null, null, null, input);
+    }
   }
 }

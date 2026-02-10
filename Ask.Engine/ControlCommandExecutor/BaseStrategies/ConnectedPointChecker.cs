@@ -47,7 +47,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errors, infos);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint));
+      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
 
       var newGroups = new List<GroupModel>();
 

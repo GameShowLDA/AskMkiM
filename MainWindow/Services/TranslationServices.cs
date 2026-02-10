@@ -1,14 +1,10 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.IO;
 using System.Windows;
-using UI.Components.Invoke;
-using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -83,17 +79,28 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
-      if (container == null && editor != null)
+
+      if (runContainer != null)
       {
-        await BuildAsync();
-        editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
-        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+        var runControl = runContainer.GetDockControl().DockItems[0].Content as RunControl;
+        if (runControl != null)
+        {
+          await runControl.Start(runControl.TranslationModels);
+          return;
+        }
       }
 
       if (container == null && runContainer == null && editor == null)
       {
         MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
         return;
+      }
+
+      await BuildAsync();
+
+      if (container == null && editor != null)
+      {
+        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       }
 
       if (container == null && runContainer != null)
@@ -106,7 +113,7 @@ namespace MainWindowProgram.Services
       DockItem? foundDockItem = null;
 
       // Ждём, пока хотя бы один DockItem появится
-      for (int i = 0; i < 500; i++) 
+      for (int i = 0; i < 500; i++)
       {
         if (dockManager.DockItems.Count > 0)
         {
@@ -156,7 +163,6 @@ namespace MainWindowProgram.Services
       }
     }
 
-    // TODO: вот тут нужно для LeftBox попробовать контент задавать нужный
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;

@@ -307,7 +307,7 @@ namespace UI.Controls.Runner
         if (dockItem != null)
         {
           editor = dockItem.Content as TextEditorUI;
-        }     
+        }
       });
 
       var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath);
@@ -345,14 +345,18 @@ namespace UI.Controls.Runner
       if (BackToFileButton.Visibility == Visibility.Visible)
       {
         var test = this.LeftBox.Children[0];
-        if (test != null && test is TextEditorUI textEditor)
+        if (test != null && test is TextEditorContainer textEditorContainer)
         {
-          if (textEditor.TextEditorModel != null
-            && !string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath)
-            && File.Exists(textEditor.TextEditorModel.FilePath))
+          var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.Title != "Состояние оборудования");
+          if (foundItem != null && foundItem.Content is TextEditorUI textEditor)
           {
-            FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);
-            EditorEventAdapter.RaiseCloseRunItem(this);
+            if (textEditor.TextEditorModel != null
+              && !string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath)
+              && File.Exists(textEditor.TextEditorModel.FilePath))
+            {
+              FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);
+              EditorEventAdapter.RaiseCloseRunItem(this);
+            }
           }
         }
         else

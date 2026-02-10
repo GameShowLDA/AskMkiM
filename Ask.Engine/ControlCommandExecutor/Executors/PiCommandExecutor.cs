@@ -68,14 +68,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       List<ShowMessageModel> errorMessage = new();
 
-      NodeAccumulationContext nodeAccumulationContext = new NodeAccumulationContext();
-      nodeAccumulationContext.SchemeModel = command.Scheme;
-      nodeAccumulationContext.CommandManager = context.CommandExecutionManager;
-      nodeAccumulationContext.CommandModel = command;
-      nodeAccumulationContext.MessageService = context.Console;
+      NodeAccumulationContext nodeAccumulationContext = new NodeAccumulationContext(context, command, command);
       nodeAccumulationContext.LowerLimit = 0;
-      nodeAccumulationContext.Unit = "мА";
-      nodeAccumulationContext.UnitMnemonic = "I";
       nodeAccumulationContext.VoltageType = command.VoltageType;
 
       if (command.AlgorithmKey.Contains("И"))

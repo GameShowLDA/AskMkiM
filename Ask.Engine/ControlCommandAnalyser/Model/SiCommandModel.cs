@@ -6,22 +6,29 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
+using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
-
   /// <summary>
   /// Модель для команды СИ (сопротивление изоляции).
   /// </summary>
-  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.К,
-    Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.С, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.П,
-     Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т,
-      Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.И,
-    Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Г, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т1)]
+  [AllowedKeys(К,С,П,Т,И,Г,Т1)]
   [MeasurementDevice(MeasurementDevice.BreakdownTester)]
   public class SiCommandModel : BaseCommandModel, IHasScheme
   {
+    /// <summary>
+    /// Мнемоническое обозначение измерительной команды.
+    /// Используется для отображения команды в пользовательском интерфейсе,
+    /// протоколах выполнения и диагностических сообщениях.
+    /// </summary>
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
+
+    /// <summary>
+    /// Тип измерительной команды.
+    /// Определяет категорию и логику выполнения команды и используется для выбора соответствующего алгоритма измерения.
+    /// </summary>
+    public override MeasurementTypeCommand TypeCommand => MeasurementTypeCommand.SI;
 
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").

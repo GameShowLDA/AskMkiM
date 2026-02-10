@@ -26,7 +26,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Vsh
 
       List<string> processedLines = CommentsParser.ParseComments(lines, model);
 
-      // Убираем полностью пустые/пробельные строки (чтобы не таскать мусор)
       if (lines == null || lines.Count == 0)
       {
         LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");

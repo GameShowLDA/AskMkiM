@@ -149,7 +149,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     private List<(int SourceLineNumber, int FormattedLineNumber)> BuildFormattedTextAndMapping(List<BaseCommandModel> models, List<string> formattedLines)
     {
       var lineMapping = new List<(int SourceLineNumber, int FormattedLineNumber)>();
-      int formattedLineNumber = 1;
+      int formattedLineNumber = 0;
 
       foreach (var model in models)
       {
@@ -167,13 +167,22 @@ namespace Ask.Engine.ControlCommandAnalyser
         int localSourceLineIdx = 0;
         foreach (var line in lines)
         {
-          formattedLines.Add(line);
+          var splitStr = line.Split("\n");
+
+          foreach (var item in splitStr)
+          {
+            if (!string.IsNullOrEmpty(item))
+            {
+              formattedLines.Add(item);
+              formattedLineNumber++;
+            }
+          }
+
           int sourceLineNumber = (localSourceLineIdx < countSourceLines)
               ? startSourceLineNumber + localSourceLineIdx
               : startSourceLineNumber;
 
           lineMapping.Add((sourceLineNumber, formattedLineNumber));
-          formattedLineNumber++;
           localSourceLineIdx++;
         }
       }

@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace ConsoleUI.ConsoleLogic
 {
@@ -7,6 +6,8 @@ namespace ConsoleUI.ConsoleLogic
   {
     private static readonly Lazy<ConsoleTextManager> _instance = new(() => new ConsoleTextManager());
     public static ConsoleTextManager Instance => _instance.Value;
+
+    public const int MaxBufferSize = 5000;
 
     private readonly List<LogEntry> _buffer = new();
     private readonly List<Action<LogEntry>> _subscribers = new();
@@ -21,27 +22,29 @@ namespace ConsoleUI.ConsoleLogic
         Color = ParseColor(text)
       };
 
+      List<Action<LogEntry>> subscribers;
       lock (_lock)
       {
         _buffer.Add(entry);
+        TrimBufferIfNeeded();
+        subscribers = _subscribers.ToList();
       }
 
-      Application.Current.Dispatcher.BeginInvoke(() =>
-      {
-        foreach (var sub in _subscribers)
-          sub(entry);
-      });
+      foreach (var sub in subscribers)
+        sub(entry);
     }
 
     public void Subscribe(Action<LogEntry> callback)
     {
+      List<LogEntry> snapshot;
       lock (_lock)
       {
         _subscribers.Add(callback);
-
-        foreach (var entry in _buffer)
-          callback(entry); // при подписке отдаём всё ранее накопленное
+        snapshot = _buffer.ToList();
       }
+
+      foreach (var entry in snapshot)
+        callback(entry); // при подписке отдаём всё ранее накопленное
     }
 
     public void Unsubscribe(Action<LogEntry> callback)
@@ -60,12 +63,40 @@ namespace ConsoleUI.ConsoleLogic
 
     private Brush ParseColor(string text)
     {
+      if (string.IsNullOrWhiteSpace(text))
+        return Brushes.LightGray;
+
       var normalized = text.ToUpperInvariant();
-      if (normalized.Contains("|ERROR")) return Brushes.OrangeRed;
-      if (normalized.Contains("|WARN")) return Brushes.Goldenrod;
-      if (normalized.Contains("|DEBUG")) return Brushes.Gray;
-      if (normalized.Contains("|INFO")) return Brushes.White;
+
+      if (HasLevelToken(normalized, "ERROR") || HasLevelToken(normalized, "EXCEPTION"))
+        return Brushes.OrangeRed;
+      if (HasLevelToken(normalized, "WARN") || HasLevelToken(normalized, "WARNING"))
+        return Brushes.Goldenrod;
+      if (HasLevelToken(normalized, "DEBUG"))
+        return Brushes.Gray;
+      if (HasLevelToken(normalized, "INFO"))
+        return Brushes.White;
+
       return Brushes.LightGray;
+    }
+
+    private static bool HasLevelToken(string text, string token)
+    {
+      return text.Contains($"[{token}]") ||
+             text.Contains($"|{token}") ||
+             text.Contains($"{token}:") ||
+             text.Contains($" {token} ") ||
+             text.Contains($" {token}]") ||
+             text.Contains($"[{token} ");
+    }
+
+    private void TrimBufferIfNeeded()
+    {
+      if (_buffer.Count <= MaxBufferSize)
+        return;
+
+      var removeCount = _buffer.Count - MaxBufferSize;
+      _buffer.RemoveRange(0, removeCount);
     }
   }
 }

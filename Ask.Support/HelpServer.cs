@@ -1,100 +1,139 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Support
 {
+  /// <summary>
+  /// Локальный HTTP-сервер для обслуживания HTML-контента справочной системы.
+  /// Используется для отдачи файлов из каталога <c>AppHelp</c> через <see cref="HttpListener"/>.
+  /// </summary>
   public static class HelpServer
   {
+    /// <summary>
+    /// Экземпляр <see cref="HttpListener"/>, обслуживающий входящие HTTP-запросы.
+    /// Равен <c>null</c>, пока сервер не запущен.
+    /// </summary>
     private static HttpListener _listener;
-    private static int _port;
-    private static CancellationTokenSource _cts;
-
-    /// <summary>Базовый URL (становится валидным после EnsureStarted()).</summary>
-    public static Uri BaseUrl => _port > 0 ? new Uri($"http://localhost:{_port}/") : null;
 
     /// <summary>
-    /// Запускает HTTP-сервер на первом свободном порту, который выдаст ОС.
+    /// TCP-порт, на котором запущен HTTP-сервер.
+    /// Значение валидно только после вызова <see cref="EnsureStarted"/>.
     /// </summary>
+    private static int _port;
+
+    /// <summary>
+    /// Источник токенов отмены для фонового цикла приёма соединений.
+    /// Используется для корректной остановки сервера.
+    /// </summary>
+    private static CancellationTokenSource _cts;
+
+    /// <summary>
+    /// Базовый URL сервера (например, <c>http://localhost:54321/</c>).
+    /// </summary>
+    /// <remarks>
+    /// Возвращает <c>null</c>, если сервер ещё не был запущен.
+    /// </remarks>
+    public static Uri BaseUrl =>
+      _port > 0 ? new Uri($"http://localhost:{_port}/") : null;
+
+    /// <summary>
+    /// Текущий TCP-порт, на котором работает сервер.
+    /// </summary>
+    public static int Port => _port;
+
+    /// <summary>
+    /// Гарантирует запуск HTTP-сервера.
+    /// Если сервер уже запущен, повторный вызов ничего не делает.
+    /// </summary>
+    /// <remarks>
+    /// В случае нехватки прав на регистрацию URL — выбрасывает исключение.
+    /// </remarks>
     public static void EnsureStarted()
     {
-      if (_listener != null) return;
+      if (_listener != null)
+        return;
 
-      const int maxAttempts = 10;
-      Exception lastError = null;
+      int port = GetFreeTcpPort();
 
-      for (int attempt = 0; attempt < maxAttempts; attempt++)
+      var listener = new HttpListener();
+      listener.Prefixes.Add($"http://localhost:{port}/");
+
+      try
       {
-        int candidatePort = GetFreeTcpPort(); // спросили у ОС свободный порт
-
-        var listener = new HttpListener();
-        listener.Prefixes.Add($"http://localhost:{candidatePort}/");
-
-        try
-        {
-          listener.Start();
-
-          _listener = listener;
-          _port = candidatePort;
-
-          _cts = new CancellationTokenSource();
-          _ = Task.Run(() => ListenLoop(_cts.Token));
-
-          return; // успех
-        }
-        catch (HttpListenerException ex)
-        {
-          // Если отказ по правам (ERROR_ACCESS_DENIED = 5), повторять бессмысленно — пробрасываем.
-          if (ex.ErrorCode == 5)
-          {
-            listener.Close();
-            throw new InvalidOperationException(
-              $"Нет прав на регистрацию префикса http://localhost:{candidatePort}/. " +
-              $"Запустите от администратора или добавьте URLACL.", ex);
-          }
-
-          // Иначе попробуем ещё раз с другим портом (на случай гонки).
-          lastError = ex;
-          try { listener.Close(); } catch { /* ignore */ }
-        }
-        catch (Exception ex)
-        {
-          lastError = ex;
-          try { listener.Close(); } catch { /* ignore */ }
-        }
+        listener.Start();
+      }
+      catch (HttpListenerException ex) when (ex.ErrorCode == 5)
+      {
+        LogException($"Нет прав на регистрацию префикса http://localhost:{port}/...", ex);
+        listener.Close();
+        return;
+      }
+      catch (Exception ex)
+      {
+        LogException(ex);
+        listener.Close();
+        return;
       }
 
-      throw new InvalidOperationException(
-        "Не удалось подобрать свободный порт для Help-сервера после нескольких попыток.", lastError);
+      _listener = listener;
+      _port = port;
+
+      LogInformation($"HTTP-сервер запущен.");
+
+      _cts = new CancellationTokenSource();
+      _ = Task.Run(() => ListenLoop(_cts.Token));
     }
 
+    /// <summary>
+    /// Запрашивает у операционной системы свободный TCP-порт
+    /// из ephemeral-диапазона.
+    /// </summary>
+    /// <returns>Номер свободного TCP-порта.</returns>
     private static int GetFreeTcpPort()
     {
-      // Просим у ОС свободный порт из эпhemeral-диапазона.
-      var l = new TcpListener(IPAddress.Loopback, 0);
-      l.Start();
-      int p = ((IPEndPoint)l.LocalEndpoint).Port;
-      l.Stop();
-      return p;
+      var listener = new TcpListener(IPAddress.Loopback, 0);
+      listener.Start();
+      int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+      listener.Stop();
+
+      LogInformation($"Выбран свободный TCP-порт {port} для HTTP-сервера.");
+
+      return port;
     }
 
+    /// <summary>
+    /// Основной асинхронный цикл ожидания входящих HTTP-запросов.
+    /// </summary>
+    /// <param name="token">Токен отмены для корректной остановки сервера.</param>
     private static async Task ListenLoop(CancellationToken token)
     {
-      var helpDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Help", "AppHelp");
+      var helpDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppHelp");
+
       while (!token.IsCancellationRequested)
       {
-        HttpListenerContext ctx = null;
+
+        HttpListenerContext ctx;
+
         try
         {
           ctx = await _listener.GetContextAsync().ConfigureAwait(false);
         }
-        catch (ObjectDisposedException) { break; }
-        catch (HttpListenerException) { break; }
+        catch (ObjectDisposedException ex) when (token.IsCancellationRequested)
+        {
+          LogException(ex);
+          break;
+        }
+        catch (HttpListenerException ex) when (token.IsCancellationRequested)
+        {
+          LogException(ex);
+          break;
+        }
         catch (Exception ex)
         {
-          Debug.WriteLine($"Listener error: {ex}");
+          LogException(ex);
           continue;
         }
 
@@ -102,17 +141,24 @@ namespace Ask.Support
       }
     }
 
+    /// <summary>
+    /// Обрабатывает отдельный HTTP-запрос и отдаёт файл справочной системы.
+    /// </summary>
+    /// <param name="ctx">Контекст HTTP-запроса.</param>
+    /// <param name="helpDir">Корневая директория с HTML-контентом.</param>
     private static void ProcessRequest(HttpListenerContext ctx, string helpDir)
     {
       string urlPath = ctx.Request.Url.AbsolutePath.TrimStart('/');
 
-      // Нормализация пути и защита от выхода за корень
       string fullRoot = Path.GetFullPath(helpDir);
-      string local = Path.GetFullPath(Path.Combine(fullRoot, urlPath.Replace('/', Path.DirectorySeparatorChar)));
+      string local = Path.GetFullPath(
+        Path.Combine(fullRoot, urlPath.Replace('/', Path.DirectorySeparatorChar)));
+
       if (!local.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
       {
         ctx.Response.StatusCode = 403;
         SafeWrite(ctx, "403 Forbidden");
+        LogError("Ошибка HTTP-запроса 403: доступ запрещён!");
         return;
       }
 
@@ -123,12 +169,11 @@ namespace Ask.Support
       {
         ctx.Response.StatusCode = 404;
         SafeWrite(ctx, "404 Not Found");
+        LogError("Ошибка HTTP-запроса 404: файл не найден!");
         return;
       }
 
-      // MIME
-      string ext = Path.GetExtension(local).ToLowerInvariant();
-      ctx.Response.ContentType = ext switch
+      ctx.Response.ContentType = Path.GetExtension(local).ToLowerInvariant() switch
       {
         ".html" => "text/html; charset=utf-8",
         ".css" => "text/css",
@@ -142,53 +187,39 @@ namespace Ask.Support
         _ => "application/octet-stream"
       };
 
-      FileStream fs = null;
-      try
-      {
-        fs = File.OpenRead(local);
-        ctx.Response.ContentLength64 = fs.Length;
-        fs.CopyTo(ctx.Response.OutputStream);
-      }
-      catch (HttpListenerException hlex)
-      {
-        Debug.WriteLine($"Client closed connection: {hlex.Message}");
-      }
-      catch (IOException ioex)
-      {
-        Debug.WriteLine($"I/O error while sending file: {ioex}");
-      }
-      finally
-      {
-        fs?.Dispose();
-        try { ctx.Response.OutputStream.Close(); } catch { }
-        try { ctx.Response.Close(); } catch { }
-      }
+      using var fs = File.OpenRead(local);
+      ctx.Response.ContentLength64 = fs.Length;
+      fs.CopyTo(ctx.Response.OutputStream);
+
+      ctx.Response.OutputStream.Close();
+      ctx.Response.Close();
     }
 
+    /// <summary>
+    /// Безопасно записывает текстовый ответ клиенту
+    /// (используется для ошибок 403 / 404).
+    /// </summary>
+    /// <param name="ctx">Контекст HTTP-запроса.</param>
+    /// <param name="text">Текст ответа.</param>
     private static void SafeWrite(HttpListenerContext ctx, string text)
     {
-      try
-      {
-        using var w = new StreamWriter(ctx.Response.OutputStream, Encoding.UTF8, leaveOpen: true);
-        w.Write(text);
-      }
-      catch { /* ignore */ }
-      finally
-      {
-        try { ctx.Response.OutputStream.Close(); } catch { }
-        try { ctx.Response.Close(); } catch { }
-      }
+      using var w = new StreamWriter(ctx.Response.OutputStream, Encoding.UTF8, leaveOpen: true);
+      w.Write(text);
+      ctx.Response.OutputStream.Close();
+      ctx.Response.Close();
     }
 
-    public static int Port => _port;
-
+    /// <summary>
+    /// Останавливает HTTP-сервер и освобождает все ресурсы.
+    /// </summary>
     public static void Stop()
     {
-      try { _cts?.Cancel(); } catch { }
-      try { _listener?.Close(); } catch { }  // Close() надёжнее, чем Stop() + Dispose
+      _cts?.Cancel();
+      _listener?.Close();
       _listener = null;
       _cts = null;
       _port = 0;
+      LogInformation("HTTP-сервер остановлен.");
     }
   }
 }

@@ -24,7 +24,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           continue;
         }
 
-        // Рабочая копия текущей (и, при необходимости, следующей) строки
         var current = new StringBuilder(line);
         string? nextLine = (i + 1 < lines.Count) ? lines[i + 1] : null;
 
@@ -33,7 +32,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         {
           changed = false;
 
-          // --- 1) Фигурные { ... } (приоритет над /*...*/ если они вложены внутрь) ---
+          // 1) Фигурные { ... } (приоритет над /*...*/ если они вложены внутрь) 
           // Пытаемся найти '{' и соответствующую '}' в той же строке
           int openBrace = current.ToString().IndexOf('{');
           if (openBrace >= 0)
@@ -74,7 +73,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             }
           }
 
-          // --- 2) C-style /* ... */ ---
+          // 2) C-style /* ... */
           int openBlock = current.ToString().IndexOf("/*");
           if (openBlock >= 0)
           {
@@ -111,7 +110,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             }
           }
 
-          // --- 3) Линейные // ... (только в текущей строке) ---
+          //  3) Линейные // ... (только в текущей строке) 
           // Важно: обрабатываем в конце, чтобы не мешали блокам выше.
           var mLine = Regex.Match(current.ToString(), @"//.*$");
           if (mLine.Success)
@@ -125,9 +124,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             continue;
           }
 
-        } while (changed); // пока удаётся вырезать комментарии
+        } while (changed); 
 
-        // Склеиваем текущую строку (после вырезаний)
         string processedThis = current.ToString().TrimEnd();
         if (!string.IsNullOrWhiteSpace(processedThis))
           result.Add(processedThis);

@@ -1,38 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 {
   public class ResistanceParser
   {
-    /// <summary>
-    /// Извлекает пороговое сопротивление в формате "R&gt;100МОм".
-    /// Поддерживаются варианты "R > X Ом/МОм/ГОм".
-    /// </summary>
-    /// <param name="input">Входная строка.</param>
-    /// <returns>
-    /// Кортеж:
-    /// - ThresholdResistance — найденное сопротивление или null,  
-    /// - Remainder — остаток строки без сопротивления.
-    /// </returns>
-    public (string? ThresholdResistance, string Remainder) ParseThresholdResistance(string input)
-    {
-      // Совпадает с форматом: R>100МОм или R > 100МОм
-      var match = Regex.Match(input, @"R\s*>\s*\d+\s*(Ом|МОм|ГОм|кОм)", RegexOptions.IgnoreCase);
-      if (match.Success)
-      {
-        var resistance = match.Value.Trim();
-        // удаляем найденный фрагмент вместе с запятой и пробелами после него
-        var remainder = Regex.Replace(
-            input,
-            $@"\b{Regex.Escape(match.Value)}\s*,?",
-            "",
-            RegexOptions.IgnoreCase
-        ).Trim();
-
-        return (resistance, remainder);
-      }
-      return (null, input);
-    }
     /// <summary>
     /// Извлекает выражение сопротивления вида:
     /// "R &lt; 20 МОм", "100 &lt;= МОм" и т. п.
@@ -56,12 +28,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
           RegexOptions.IgnoreCase);
       if (m.Success)
       {
-        //string value = m.Groups["val"].Value;
-        string unit = m.Groups["unit"].Value;
-        double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        string op = m.Groups["op"].Value;
-        string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture), "Ом", remainder);
+        return ParseSiHigherLimitR(input, m);
       }
 
       // Вариант 2: "100 < МОм" / "100 <= МОм" и т.п.
@@ -70,13 +37,27 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
           RegexOptions.IgnoreCase);
       if (m.Success)
       {
-        string unit = m.Groups["unit"].Value;
-        double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture), "Ом", remainder);
+        return ParseSiLowerLimit(input, m);
       }
 
       return (null, null, input);
+    }
+
+    private (string? Value, string? Unit, string Remainder) ParseSiLowerLimit(string input, Match m)
+    {
+      string unit = m.Groups["unit"].Value;
+      double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
+      return (value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture), "Ом", remainder);
+    }
+
+    private (string? Value, string? Unit, string Remainder) ParseSiHigherLimitR(string input, Match m)
+    {
+      string unit = m.Groups["unit"].Value;
+      double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      string op = m.Groups["op"].Value;
+      string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
+      return (value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture), "Ом", remainder);
     }
 
     /// <summary>
@@ -147,7 +128,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       if (m.Success)
       {
-        string valueText = m.Groups["val"].Value.Replace(',', '.'); // нормализуем запятую
+        string valueText = m.Groups["val"].Value.Replace(',', '.');
         string unit = m.Groups["unit"].Value;
 
         double? value = UnitsConvertor.TryParseValue(valueText, unit);
@@ -187,72 +168,24 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
       if (m.Success)
       {
-        var unit = m.Groups["unit2"].Success && !string.IsNullOrEmpty(m.Groups["unit2"].Value)
-                 ? m.Groups["unit2"].Value
-                 : m.Groups["unit1"].Value;
-        double? minValue = UnitsConvertor.TryParseValue(m.Groups["low"].Value, unit);
-        double? maxValue = UnitsConvertor.TryParseValue(m.Groups["high"].Value, unit);
-
-        var remainder1 = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (
-           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           "Ом",
-           remainder1
-           );
+        return ParseBothLimitsR(input, m);
       }
 
       // 2) Порог: "R < 10 Ом" или "R <= 10 Ом" (также ≥, >, >=)
       m = Regex.Match(input,
-          @"(?<!\w)[RР]\s*(?<op><=|>=|<|>|≤|≥)\s*(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>Ом|кОм|МОм|ГОм)\b",
-          RegexOptions.IgnoreCase);
+          @"(?<!\w)(?:
+              (?<rLeft>[RР])\s*(?<op><=|>=|<|>|≤|≥)\s*(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>Ом|кОм|МОм|ГОм)
+            |
+              (?<val>\d+(?:[.,]\d+)?)\s*(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op><=|>=|<|>|≤|≥)\s*(?<rRight>[RР])
+          )\b",
+        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace
+      );
+
       if (m.Success)
       {
-        var op = m.Groups["op"].Value;
-        double? minValue = null, maxValue = null;
-        string? unit = m.Groups["unit"].Value;
-        if (op is "<" or "<=" or "≤")
-        {
-          maxValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        else
-        {
-          minValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        var remainder2 = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (
-           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           "Ом",
-           remainder2
-           );
+        return ParseLimitRUnified(input, m);
       }
 
-      // 3) Порог: "10 Ом < R" или "10 Ом <= R"
-      m = Regex.Match(input,
-          @"(?<!\w)(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op><=|>=|<|>|≤|≥)\s*[RР]\b",
-          RegexOptions.IgnoreCase);
-      if (m.Success)
-      {
-        var op = m.Groups["op"].Value;
-        double? minValue = null, maxValue = null;
-        string? unit = m.Groups["unit"].Value;
-        if (op is "<" or "<=" or "≤")
-        {
-          maxValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        else
-        {
-          minValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        var remainder3 = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (
-           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           "Ом",
-           remainder3
-           );
-      }
 
       // 4. Диапазон вида "10<МОм<20"
       m = Regex.Match(input,
@@ -261,16 +194,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       if (m.Success)
       {
-        string? unit = m.Groups["unit"].Value;
-        double? maxValue = UnitsConvertor.TryParseValue(m.Groups["max"].Value, unit);
-        double? minValue = UnitsConvertor.TryParseValue(m.Groups["min"].Value, unit);
-        var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (
-           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           "Ом",
-           remainder
-           );
+        return ParseRange(input, m);
       }
 
       // 5. Нижняя граница 
@@ -280,24 +204,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       if (m.Success)
       {
-        var op = m.Groups["op"].Value;
-        double? minValue = null, maxValue = null;
-        string? unit = m.Groups["unit"].Value;
-        if (op is "<" or "<=" or "≤")
-        {
-          maxValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        else
-        {
-          minValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (
-           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           "Ом",
-           remainder
-           );
+        return ParseLowerLimit(input, m);
       }
 
       // 6.Верхняя граница
@@ -307,29 +214,133 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       if (m.Success)
       {
-        var op = m.Groups["op"].Value;
-        double? minValue = null, maxValue = null;
-        string? unit = m.Groups["unit"].Value;
-        if (op is "<" or "<=" or "≤")
-        {
-          minValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        else
-        {
-          maxValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
-        }
-        var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-        return (
-           minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-           "Ом",
-           remainder
-           );
+        return ParseHigherLimit(input, m);
       }
 
-
-      // Ничего не нашли
       return (null, null, null, input);
+    }
+
+    private (string? Min, string? Max, string? Unit, string Remainder) ParseLimitRUnified(string input, Match m)
+    {
+      var op = m.Groups["op"].Value;
+      var unit = m.Groups["unit"].Value;
+
+      var value = UnitsConvertor.TryParseValue(
+          m.Groups["val"].Value,
+          unit
+      );
+
+      double? minValue = null;
+      double? maxValue = null;
+
+      bool rOnLeft = m.Groups["rLeft"].Success;
+      bool rOnRight = m.Groups["rRight"].Success;
+
+      if (rOnLeft)
+      {
+        // R < 10
+        if (op is "<" or "<=" or "≤")
+          maxValue = value;
+        else
+          minValue = value;
+      }
+      else if (rOnRight)
+      {
+        // 10 < R
+        if (op is "<" or "<=" or "≤")
+          minValue = value;
+        else
+          maxValue = value;
+      }
+
+      var remainder = RemoveMatchedWithNeighborComma(
+          input,
+          m.Index,
+          m.Length
+      );
+
+      return (
+          minValue?.ToString("G", CultureInfo.InvariantCulture),
+          maxValue?.ToString("G", CultureInfo.InvariantCulture),
+          "Ом",
+          remainder
+      );
+    }
+
+
+    private (string? Min, string? Max, string? Unit, string Remainder) ParseHigherLimit(string input, Match m)
+    {
+      var op = m.Groups["op"].Value;
+      double? minValue = null, maxValue = null;
+      string? unit = m.Groups["unit"].Value;
+      if (op is "<" or "<=" or "≤")
+      {
+        minValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      }
+      else
+      {
+        maxValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      }
+      var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
+      return (
+         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         "Ом",
+         remainder
+         );
+    }
+
+    private (string? Min, string? Max, string? Unit, string Remainder) ParseLowerLimit(string input, Match m)
+    {
+      var op = m.Groups["op"].Value;
+      double? minValue = null, maxValue = null;
+      string? unit = m.Groups["unit"].Value;
+      if (op is "<" or "<=" or "≤")
+      {
+        maxValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      }
+      else
+      {
+        minValue = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      }
+      var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
+      return (
+         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         "Ом",
+         remainder
+         );
+    }
+
+    private (string? Min, string? Max, string? Unit, string Remainder) ParseRange(string input, Match m)
+    {
+      string? unit = m.Groups["unit"].Value;
+      double? maxValue = UnitsConvertor.TryParseValue(m.Groups["max"].Value, unit);
+      double? minValue = UnitsConvertor.TryParseValue(m.Groups["min"].Value, unit);
+      var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
+      return (
+         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         "Ом",
+         remainder
+         );
+    }
+
+    private (string? Min, string? Max, string? Unit, string Remainder) ParseBothLimitsR(string input, Match m)
+    {
+      var unit = m.Groups["unit2"].Success && !string.IsNullOrEmpty(m.Groups["unit2"].Value)
+                       ? m.Groups["unit2"].Value
+                       : m.Groups["unit1"].Value;
+      double? minValue = UnitsConvertor.TryParseValue(m.Groups["low"].Value, unit);
+      double? maxValue = UnitsConvertor.TryParseValue(m.Groups["high"].Value, unit);
+
+      var remainder1 = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
+      return (
+         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         "Ом",
+         remainder1
+         );
     }
 
     /// <summary>
@@ -350,6 +361,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       return (left + right).Trim();
     }
-
   }
 }

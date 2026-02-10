@@ -1,121 +1,124 @@
-﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Wpf;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Threading;
+﻿using Photino.NET;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Support
 {
-  public partial class HelpViewerWindow : Window
+  /// <summary>
+  /// Управление обёрткой над окном Photino.NET для отображения справочной системы.
+  /// </summary>
+  public static class HelpViewerWindow
   {
-    private WebView2 webView;
-    private Task? _initTask;
-    private bool _initStarted;
-    private string? _pendingUrl;
+    /// <summary>
+    /// Экземпляр окна справки. Пока окно открыто — не <see langword="null"/>.
+    /// </summary>
+    private static PhotinoWindow? _helpWindow;
 
-    private const uint RPC_E_DISCONNECTED = 0x80010108;
+    /// <summary>
+    /// Признак состояния окна: <see langword="true"/> — окно закрыто,
+    /// <see langword="false"/> — окно считается открытым.
+    /// </summary>
+    /// <remarks>
+    /// Флаг используется, чтобы не входить повторно в <see cref="PhotinoWindow.WaitForClose"/>
+    /// и не блокировать логику открытия при повторных вызовах.
+    /// </remarks>
+    public static bool _IsClose { get; private set; } = true;
 
-    public HelpViewerWindow()
-    {
-      InitializeComponent();
-      Loaded += async (_, __) => await EnsureInitializedAsync();
-      Closed += (_, __) => webView?.Dispose();
+    /// <summary>
+    /// Загружает страницу справочной системы по относительному адресу.
+    /// Также поднимает окно поверх основного приложения и фокусирует его.
+    /// </summary>
+    /// <param name="page">Относительный путь страницы.</param>
+    /// <remarks>
+    /// Если окно ещё не создано (<see cref="_helpWindow"/> равен <see langword="null"/>), метод ничего не сделает.
+    /// Для типового сценария используй <see cref="LoadAndShow"/>.
+    /// </remarks>
+    public static void Load(string page) 
+    { 
+      _helpWindow?.Load($"http://localhost:{HelpServer.Port}" + page);
+      _helpWindow?.SetTopMost(true);
+      _helpWindow?.SetTopMost(false);
     }
 
-    private void InitializeComponent()
+    /// <summary>
+    /// Запускает окно и блокируется до его закрытия пользователем.
+    /// </summary>
+    public static void Show() => _helpWindow?.WaitForClose();
+
+    /// <summary>
+    /// Программно закрывает окно справки и освобождает ресурсы.
+    /// </summary>
+    public static void Close()
     {
-      Width = 1024; Height = 768;
-      MinWidth = 600; MinHeight = 600;
-      Title = "Справочная система";
-      webView = new WebView2();
-      Content = webView;
+      _helpWindow?.Close();
+      _helpWindow = null;
+      _IsClose = true;
+      LogInformation("Окно справки закрыто.");
     }
 
-    public void Navigate(string url) => _ = NavigateAsync(url);
-    public async Task NavigateAsync(string url)
+    /// <summary>
+    /// Применяет настройки к окну справки.
+    /// </summary>
+    /// <remarks>
+    /// Метод предполагает, что <see cref="_helpWindow"/> уже создано и не равно <see langword="null"/>.
+    /// </remarks>
+    private static void SetSettings()
     {
-      if (webView.CoreWebView2 == null)
+      _helpWindow
+        .SetTitle("Справочная система")
+        .SetUseOsDefaultLocation(true)
+        .SetMinSize(800, 600)
+        .SetSize(1600, 900) //TODO: Почему-то данный параметр игнорируется? Надо узнать, почему!
+        .RegisterWebMessageReceivedHandler((sender, message) =>
+        {
+          LogDebug(
+            $"A JavaScript message from the HELP-system:\n" +
+            $"Object: {sender}\n" +
+            $"Message: {message}"
+            );
+        }
+        )
+        .Center();
+
+      _helpWindow.RegisterWindowClosingHandler((sender, e) =>
       {
-        _pendingUrl = url;
-        if (!_initStarted) _ = EnsureInitializedAsync();
-        await (_initTask ?? Task.CompletedTask);
-      }
-      if (webView.CoreWebView2 != null)
-      {
-        webView.CoreWebView2.Navigate(url);
-        _pendingUrl = null;
-      }
+        _IsClose = true;
+        _helpWindow = null;
+        return false;
+      });
+
+      LogInformation("Настройки окна справки применены.");
     }
 
-    private async Task EnsureInitializedAsync()
+    /// <summary>
+    /// Подготавливает и откроывает окно помощи.
+    /// </summary>
+    /// <param name="page">Относительный адрес страницы справки.</param>
+    /// <remarks>
+    /// Если окно уже было открыто, метод просто выполнит <see cref="Load"/> (то есть переключит страницу),
+    /// а повторно в <see cref="Show"/> не войдёт.
+    /// </remarks>
+    public static void LoadAndShow(string page)
     {
-      if (!Dispatcher.CheckAccess())
+      if (_helpWindow == null)
       {
-        await Dispatcher.InvokeAsync(async () => await EnsureInitializedAsync(), DispatcherPriority.Normal);
-        return;
+        _helpWindow = new PhotinoWindow();
+        SetSettings();
+        _IsClose = true;
+        LogInformation("Инициализирован экземпляр окна справки.");
       }
-      if (_initStarted) { await (_initTask ?? Task.CompletedTask); return; }
 
-      _initStarted = true;
-      _initTask = InitAsync();
-      await _initTask;
-    }
+      Load(page);
 
-    private async Task InitAsync()
-    {
+      if (!_IsClose) return;
       try
       {
-        if (!webView.IsLoaded)
-          await webView.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
-
-        var fixedRoot = Path.Combine(AppContext.BaseDirectory, "Help", "WebView2Runtime");
-        var runtimePath = ResolveFixedRuntimeFolder(fixedRoot);
-        var userData = Path.Combine(
-          Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-          "AskMkiM", "WebView2", "UserData");
-        Directory.CreateDirectory(userData);
-
-        try
-        {
-          var env = await CoreWebView2Environment.CreateAsync(runtimePath, userData, new CoreWebView2EnvironmentOptions());
-          await webView.EnsureCoreWebView2Async(env);
-        }
-        catch (COMException ex) when ((uint)ex.HResult == RPC_E_DISCONNECTED)
-        {
-          var env = await CoreWebView2Environment.CreateAsync(null, userData, new CoreWebView2EnvironmentOptions("--disable-gpu"));
-          await webView.EnsureCoreWebView2Async(env);
-        }
-
-        webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
-
-        if (!string.IsNullOrWhiteSpace(_pendingUrl))
-          await NavigateAsync(_pendingUrl!);
+        _IsClose = false;
+        Show();
       }
       catch (Exception ex)
       {
-        LogException(ex);
-        MessageBox.Show("Ошибка инициализации справки: " + ex.Message,
-          "Ошибка WebView2", MessageBoxButton.OK, MessageBoxImage.Error);
+        LogError($"Ошмбка в HelpViewerWindow\n{ex}");
       }
-    }
-
-    private static string ResolveFixedRuntimeFolder(string fixedRoot)
-    {
-      if (File.Exists(Path.Combine(fixedRoot, "msedgewebview2.exe")))
-        return fixedRoot;
-
-      if (Directory.Exists(fixedRoot))
-      {
-        var candidate = Directory.GetDirectories(fixedRoot)
-          .Where(d => File.Exists(Path.Combine(d, "msedgewebview2.exe")))
-          .OrderByDescending(Path.GetFileName)
-          .FirstOrDefault();
-        if (candidate != null) return candidate;
-      }
-
-      return fixedRoot;
     }
   }
 }

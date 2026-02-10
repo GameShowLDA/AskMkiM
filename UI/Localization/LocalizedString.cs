@@ -39,8 +39,6 @@ namespace UI.Localization
       get
       {
         var val = LocalizationService.Get(_key);
-        LogInformation(
-          $"[LocalizedString] Culture: {CultureInfo.CurrentUICulture.Name}, Key: {_key}, Value: {val}");
         return val;
       }
     }

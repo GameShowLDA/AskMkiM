@@ -274,7 +274,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   {
     foreach (int lineNumber in margin)
     {
-      double top = textView.GetVisualTopByDocumentLine(lineNumber);
+      double top = textView.GetVisualTopByDocumentLine(lineNumber+1);
       if (double.IsNaN(top)) continue;
 
       double centerY = top - verticalOffset + lineHeight / 2;

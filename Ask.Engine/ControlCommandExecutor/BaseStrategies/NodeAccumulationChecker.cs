@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var messageService = context.MessageService;
       var cancellationToken = messageService.GetCancellationToken();
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode));
+      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
 
       foreach (var chain in groupChains.ChainModels)
       {
@@ -74,12 +74,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken, context.VoltageType, context.IsPolarityReversed);
           if (localized != null)
           {
-
-            if (context.CommandModel.PointErrors != null)
-            {
-              context.CommandManager.AddErrorMethod(context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", PointModel.ConvertToPointStrings(chain.PointModels), PointModel.ConvertToPointStrings(localized.PointModels), measured.Value.ToString(), context.CommandModel.StartLineNumber, context.CommandModel.FormattedStartLineNumber));
-            }
-
             var strError = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { chain, localized });
             errorChains.Add((chain, localized));
 
@@ -88,6 +82,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             err.IndentLevel = 3;
 
             await messageService.ShowMessageAsync(err);
+
+            if (context.CommandModel.PointErrors != null)
+            {
+              context.CommandManager.AddErrorMethod(
+                context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+                PointModel.ConvertToPointStrings(chain.PointModels),
+                PointModel.ConvertToPointStrings(localized.PointModels),
+                measured.Value.ToString(),
+                messageService.GetLastLineNumber(),
+                context.CommandModel.FormattedStartLineNumber));
+            }
 
             ErrorMessage.Add(err);
             await messageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {err.ToString()}"));
@@ -113,7 +118,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(points, messageService, context.IsPolarityReversed);
         }
       }
-
 
       if (context.IsInvokedByAnotherCommand)
       {
