@@ -58,7 +58,6 @@ namespace UI.Controls
       InitializeComponent();
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
 
-
       EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
     }

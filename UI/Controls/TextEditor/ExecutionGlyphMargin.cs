@@ -213,6 +213,11 @@ public class ExecutionGlyphMargin : AbstractMargin
     InvalidateVisual();
   }
 
+  public void ToggleBreakpointFromKeyboard(int lineNumber)
+  {
+    HandleBreakpointToggle(lineNumber);
+  }
+
   /// <summary>
   /// Пытается получить экземпляр <see cref="TextMarkerService"/>, зарегистрированный в сервисах визуального слоя AvalonEdit.
   /// </summary>
@@ -392,21 +397,30 @@ public class ExecutionGlyphMargin : AbstractMargin
   {
     base.OnMouseLeftButtonDown(e);
 
-    if (!BreakpointsInteractive) return;
+    if (!BreakpointsInteractive)
+      return;
 
     TextView.EnsureVisualLines();
 
     var pos = e.GetPosition(this);
     double visualY = pos.Y + TextView.ScrollOffset.Y;
 
-    int lineNumber = TextView.GetDocumentLineByVisualTop(visualY).LineNumber;
+    int lineNumber = TextView
+        .GetDocumentLineByVisualTop(visualY)
+        .LineNumber;
 
-    if (!_rightBreakpoints.Contains(lineNumber)) return;
+    HandleBreakpointToggle(lineNumber);
+
+    e.Handled = true;
+  }
+
+  private void HandleBreakpointToggle(int lineNumber)
+  {
+    if (!_rightBreakpoints.Contains(lineNumber))
+      return;
 
     ToggleBreakpointAtLine(lineNumber);
-
     InvalidateVisual();
-    e.Handled = true;
   }
 
   /// <summary>
