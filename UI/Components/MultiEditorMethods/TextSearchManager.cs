@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
 using ICSharpCode.AvalonEdit.Rendering;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -43,6 +44,18 @@ namespace UI.Components.MultiEditorMethods
     /// Индекс текущего результата поиска, на который нужно перейти.
     /// </summary>
     private int currentIndex = -1;
+
+    /// <summary>
+    /// Список результатов поиска, полученных для текущего документа.
+    /// </summary>
+    private List<SearchResult> foundTranslatorResults = new List<SearchResult>();
+
+    /// <summary>
+    /// Индекс текущего результата поиска, на который нужно перейти.
+    /// </summary>
+    private int currentTranslatorIndex = -1;
+
+    private static readonly Color SearchHighlightColor = (Color)ColorConverter.ConvertFromString("#b23a48");
 
     /// <summary>
     /// Текст для поиска.
@@ -139,7 +152,14 @@ namespace UI.Components.MultiEditorMethods
       {
         if (key is TextEditorUI textEditor)
         {
-          ClearHighlights(textEditor);
+          ClearHighlights(textEditor, foundResults, ref currentIndex);
+        }
+        else if (key is TranslatorItem item)
+        {
+          var leftTextEditor = item.GetLeftEditor();
+          var rightTranslator = item.GetRightEditor();
+          ClearHighlights(leftTextEditor, foundResults, ref currentIndex);
+          ClearHighlights(rightTranslator, foundTranslatorResults, ref currentTranslatorIndex);
         }
       }
     }
@@ -161,7 +181,8 @@ namespace UI.Components.MultiEditorMethods
       }
       else
       {
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
+          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
 
         if (activeTab != null)
         {
@@ -186,6 +207,7 @@ namespace UI.Components.MultiEditorMethods
                 return;
               }
               var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
+              
 
               if (allOccurrences != null)
               {
@@ -370,8 +392,10 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Коллекцию вкладок, в которых находятся текстовые редакторы, где необходимо провести поиск по тексту.</returns>
     private List<DockItem> SetSearchAreaPages(int searchArea)
     {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer activeTextEditorContainer)
+      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
+        page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] 
+        is TextEditorContainer activeTextEditorContainer)
       {
         var searchPages = new List<DockItem>();
         if (searchArea == 0 || searchArea == 2)
@@ -452,7 +476,7 @@ namespace UI.Components.MultiEditorMethods
             else if (activeDockItem.Content is TranslatorItem translatorItem)
             {
               var foundTextEditor = translatorItem.GetLeftEditor();
-              fullText.Add(foundTextEditor, foundTextEditor.Text);
+              fullText.Add(translatorItem, foundTextEditor.Text);
             }
           }
         }
@@ -485,9 +509,9 @@ namespace UI.Components.MultiEditorMethods
           else if (item.Content is TranslatorItem translatorItem)
           {
             var translator = translatorItem.GetLeftEditor();
-            if (!fullText.ContainsKey(translator))
+            if (!fullText.ContainsKey(translatorItem))
             {
-              fullText.Add(translator, translator.Text);
+              fullText.Add(translatorItem, translator.Text);
             }
           }
         }
@@ -655,6 +679,7 @@ namespace UI.Components.MultiEditorMethods
             else if (item.Content is TranslatorItem translatorItem)
             {
               ClearHighlights(translatorItem.GetLeftEditor());
+              ClearHighlights(translatorItem.GetRightEditor());
             }
           }
         }
@@ -904,54 +929,212 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private void GoToOccurrence(int index)
     {
-      if (index >= 0 && index < foundResults.Count)
+      if (index < 0 || index >= foundResults.Count)
       {
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
+        return;
+      }
+
+      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab == null || fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is not TextEditorContainer textEditorContainer)
+      {
+        return;
+      }
+
+      var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (activeDockItem == null)
+      {
+        return;
+      }
+
+      TextEditorUI textEditor;
+      TranslatorItem translatorItem = null;
+
+      if (activeDockItem.Content is TextEditorUI activeTextEditor)
+      {
+        textEditor = activeTextEditor;
+      }
+      else if (activeDockItem.Content is TranslatorItem activeTranslatorItem)
+      {
+        translatorItem = activeTranslatorItem;
+        textEditor = activeTranslatorItem.GetLeftEditor();
+      }
+      else
+      {
+        return;
+      }
+
+      if (textEditor == null || textEditor.Document == null || textEditor.Document.TextLength == 0)
+      {
+        return;
+      }
+
+      var result = foundResults[index];
+      if (result.StartOffset < 0 || result.StartOffset + result.Length > textEditor.Document.TextLength)
+      {
+        return;
+      }
+
+      textEditor.MarkerService.ClearAllMarkers();
+      textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, SearchHighlightColor);
+      textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+
+      int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
+      if (translatorItem != null)
+      {
+        HighlightTranslatorCommandBySourceLine(translatorItem, lineNumber);
+      }
+
+      textEditor.ScrollToLine(lineNumber);
+      textEditor.TextArea.Caret.Offset = result.StartOffset + result.Length;
+      textEditor.Focus();
+      textEditor.TextArea.Focus();
+      textEditor.TextArea.Caret.BringCaretToView();
+    }
+
+    private void HighlightTranslatorCommandBySourceLine(TranslatorItem translatorItem, int sourceLineNumber)
+    {
+      if (translatorItem == null)
+      {
+        return;
+      }
+
+      var rightEditor = translatorItem.GetRightEditor();
+      if (rightEditor == null)
+      {
+        return;
+      }
+
+      rightEditor.MarkerService.ClearAllMarkers();
+
+      var command = FindTranslatorCommandBySourceLine(translatorItem.TranslationModels, sourceLineNumber);
+      if (command == null || command.FormattedStartLineNumber < 0)
+      {
+        return;
+      }
+
+      HighlightCommandHeader(rightEditor, command);
+    }
+
+    private static BaseCommandModel? FindTranslatorCommandBySourceLine(IEnumerable<BaseCommandModel>? commands, int sourceLineNumber)
+    {
+      if (commands == null || sourceLineNumber <= 0)
+      {
+        return null;
+      }
+
+      var orderedCommands = commands
+        .Where(model => model != null && model.StartLineNumber > 0)
+        .OrderBy(model => model.StartLineNumber)
+        .ToList();
+
+      if (orderedCommands.Count == 0)
+      {
+        return null;
+      }
+
+      for (int i = 0; i < orderedCommands.Count; i++)
+      {
+        int startLine = orderedCommands[i].StartLineNumber;
+        int nextStartLine = i < orderedCommands.Count - 1 ? orderedCommands[i + 1].StartLineNumber : int.MaxValue;
+
+        if (sourceLineNumber >= startLine && sourceLineNumber < nextStartLine)
         {
-          if (textEditorContainer != null)
-          {
-            var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
-            if (activeDockItem != null)
-            {
-              TextEditorUI textEditor = new TextEditorUI();
-              if (activeDockItem.Content is TextEditorUI)
-              {
-                textEditor = activeDockItem.Content as TextEditorUI;
-              }
-              else if (activeDockItem.Content is TranslatorItem translatorItem)
-              {
-                textEditor = translatorItem.GetLeftEditor();
-              }
-              else
-              {
-                return;
-              }
-              var result = foundResults[index];
-              textEditor.MarkerService.ClearAllMarkers();
-              textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, (Color)ColorConverter.ConvertFromString("#b23a48"));
-              textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-              int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
-              textEditor.ScrollToLine(lineNumber);
-              textEditor.TextArea.Caret.Offset = result.StartOffset + result.Length;
-              textEditor.Focus();
-              textEditor.TextArea.Focus();
-              textEditor.TextArea.Caret.BringCaretToView();
-            }
-          }
+          return orderedCommands[i];
         }
       }
+
+      return orderedCommands.LastOrDefault(model => sourceLineNumber >= model.StartLineNumber);
+    }
+
+    private void HighlightCommandHeader(TextEditorUI rightEditor, BaseCommandModel command)
+    {
+      if (rightEditor.Document == null)
+      {
+        return;
+      }
+
+      int formattedLineNumber = command.FormattedStartLineNumber + 1;
+      if (formattedLineNumber < 1 || formattedLineNumber > rightEditor.Document.LineCount)
+      {
+        return;
+      }
+
+      var line = rightEditor.Document.GetLineByNumber(formattedLineNumber);
+      string lineText = rightEditor.Document.GetText(line);
+      if (string.IsNullOrWhiteSpace(lineText))
+      {
+        return;
+      }
+
+      string commandNumberPattern = BuildCommandNumberPattern(command.CommandNumber);
+      string mnemonicPattern = string.IsNullOrWhiteSpace(command.Mnemonic)
+        ? @"[А-ЯA-Z]{1,}"
+        : Regex.Escape(command.Mnemonic);
+
+      var strictHeaderMatch = Regex.Match(lineText, $@"^\s*(?<num>{commandNumberPattern})\s+(?<mnemo>{mnemonicPattern})\b");
+      var headerMatch = strictHeaderMatch.Success
+        ? strictHeaderMatch
+        : Regex.Match(lineText, @"^\s*(?<num>\d+(?:\s+\d+)*)\s+(?<mnemo>[А-ЯA-Z]{1,})\b");
+
+      if (!headerMatch.Success)
+      {
+        return;
+      }
+
+      var commandNumberGroup = headerMatch.Groups["num"];
+      if (commandNumberGroup.Success && commandNumberGroup.Length > 0)
+      {
+        rightEditor.MarkerService.AddMarker(line.Offset + commandNumberGroup.Index, commandNumberGroup.Length, SearchHighlightColor);
+      }
+
+      var mnemonicGroup = headerMatch.Groups["mnemo"];
+      if (mnemonicGroup.Success && mnemonicGroup.Length > 0)
+      {
+        rightEditor.MarkerService.AddMarker(line.Offset + mnemonicGroup.Index, mnemonicGroup.Length, SearchHighlightColor);
+      }
+
+      rightEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      rightEditor.ScrollToLine(formattedLineNumber);
+    }
+
+    private static string BuildCommandNumberPattern(string commandNumber)
+    {
+      if (string.IsNullOrWhiteSpace(commandNumber))
+      {
+        return @"\d+(?:\s+\d+)*";
+      }
+
+      var tokens = commandNumber
+        .Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+        .Select(Regex.Escape)
+        .ToArray();
+
+      return tokens.Length > 0
+        ? string.Join(@"\s+", tokens)
+        : @"\d+(?:\s+\d+)*";
     }
 
     /// <summary>
     /// Очистка подстветки.
     /// </summary>
+    private void ClearHighlights(TextEditorUI textEditor, List<SearchResult> searchResults, ref int index)
+    {
+      textEditor?.MarkerService?.ClearAllMarkers();
+      searchResults?.Clear();
+      if (textEditor?.TextArea != null)
+      {
+        textEditor.TextArea.SelectionBorder = null;
+      }
+      index = -1;
+    }
+
     private void ClearHighlights(TextEditorUI textEditor)
     {
       textEditor?.MarkerService?.ClearAllMarkers();
-      foundResults.Clear();
-      textEditor.TextArea.SelectionBorder = null;
-      currentIndex = -1;
+      if (textEditor?.TextArea != null)
+      {
+        textEditor.TextArea.SelectionBorder = null;
+      }
     }
 
     /// <summary>
@@ -973,6 +1156,7 @@ namespace UI.Components.MultiEditorMethods
             else if (control.Content is TranslatorItem item)
             {
               ClearHighlights(item.GetLeftEditor());
+              ClearHighlights(item.GetRightEditor());
             }
           }
 
@@ -1024,19 +1208,22 @@ namespace UI.Components.MultiEditorMethods
           }
         }
       }
-      var textEditor = new TextEditorUI();
-      if (foundDockItem.Content is TextEditorUI)
+      TextEditorUI textEditor;
+      TranslatorItem translatorItemForHighlight = null;
+      if (foundDockItem.Content is TextEditorUI editor)
       {
-        textEditor = foundDockItem.Content as TextEditorUI;
+        textEditor = editor;
       }
       else if (foundDockItem.Content is TranslatorItem translatorItem)
       {
+        translatorItemForHighlight = translatorItem;
         textEditor = translatorItem.GetLeftEditor();
       }
       else
       {
         return;
       }
+
       if (textEditor != null)
       {
 
@@ -1056,6 +1243,11 @@ namespace UI.Components.MultiEditorMethods
         if (ranges.Count > 0)
         {
           textEditor.ScrollToLine(lineNumber);
+        }
+
+        if (translatorItemForHighlight != null)
+        {
+          HighlightTranslatorCommandBySourceLine(translatorItemForHighlight, lineNumber);
         }
 
         textEditor.Focus();
