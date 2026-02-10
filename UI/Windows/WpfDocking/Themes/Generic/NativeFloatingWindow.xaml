@@ -5,9 +5,7 @@
     xmlns:common="clr-namespace:UI.Windows.WpfDocking.Windows"
     xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
     xmlns:DefaultGUI="clr-namespace:UI.Components" 
-    xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:local="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
+    xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
 
     <Style TargetType="DefaultGUI:WindowButtons">
         <Setter Property="Background" Value="Transparent"/>
@@ -45,10 +43,6 @@
                             <!-- Верхнее меню -->
                             <Grid x:Name="TopPanel" Background="{StaticResource SecondarySolidColorBrush}">
 
-                                <i:Interaction.Behaviors>
-                                    <local:DragMoveBehavior />
-                                </i:Interaction.Behaviors>
-
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
@@ -80,13 +74,10 @@
                                         x:Name="exitButton" ChoiceElement="Exit" 
                                         Command="{x:Static SystemCommands.CloseWindowCommand}" />
 
-                                <Thumb x:Name="PART_DragThumb"
-                                       Grid.Column="0"
-                                       Background="{StaticResource SecondarySolidColorBrush}"
-                                       Height="30"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalAlignment="Stretch"
-                                       IsHitTestVisible="True" />
+                                <Border x:Name="PART_DragThumb"
+                                        Grid.Column="0"
+                                        Background="{StaticResource SecondarySolidColorBrush}"
+                                        primitives:DockManager.CanDrag="True" />
                             </Grid>
 
                             <!-- Основной контент -->
