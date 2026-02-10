@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Windows.Controls;
+using System.Windows.Media.TextFormatting;
 using UI.Controls.TextEditor;
 
 namespace UI.Controls
@@ -57,7 +58,6 @@ namespace UI.Controls
       InitializeComponent();
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
 
-
       EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
     }
@@ -95,7 +95,7 @@ namespace UI.Controls
         decorator.Child = null;
       }
 
-      LeftBox.Children.Clear(); // Можно просто очистить всё, если нужно заменить
+      LeftBox.Children.Clear();
       LeftBox.Children.Add(textEditorUI);
     }
 
@@ -150,22 +150,57 @@ namespace UI.Controls
       FirstFileName.Text = newText;
     }
 
+    /// <summary>
+    /// Обработчик события установки точки.
+    /// Обновляет модель команды и синхронизирует точки в обоих редакторах
+    /// без повторной генерации событий.
+    /// </summary>
+    /// <param name="obj">Событие установки точки (содержит номер команды).</param>
     private void BreakpointSet(BreakpointEvents.BreakpointSet obj)
     {
       var model = GetCommandByNumber(obj.CommandNumber);
-      if (model == null)
-        return;
+      if (model == null) return;
 
       model.HasBreakpoint = true;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: true, raiseEvents: false);
+
+      right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: true, raiseEvents: false);
+
+      if (obj.LineNumber == leftLine - 1)
+        right.GoToLine(rightLine);
     }
 
+    /// <summary>
+    /// Обработчик события снятия точки.
+    /// Обновляет модель команды и синхронизирует снятие точки в обоих редакторах
+    /// без повторной генерации событий.
+    /// </summary>
+    /// <param name="obj">Событие снятия точки (содержит номер команды).</param>
     private void BreakpointRemoved(BreakpointEvents.BreakpointRemoved obj)
     {
       var model = GetCommandByNumber(obj.CommandNumber);
-      if (model == null)
-        return;
+      if (model == null) return;
 
       model.HasBreakpoint = false;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: false, raiseEvents: false);
+      right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: false, raiseEvents: false);
+
+      if (obj.LineNumber == leftLine - 1)
+        right.GoToLine(rightLine);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)
