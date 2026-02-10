@@ -247,7 +247,7 @@ namespace MainWindowProgram.Services
     private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
       string text = editor.Text;
-      var translateEditor = _fileService.CreateTranslationFileAsync();
+      var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
 
       var manager = new CommandTranslationManager();
       var models = manager.ParseAllAndDisplay(text, translateEditor);
@@ -272,7 +272,7 @@ namespace MainWindowProgram.Services
     {
       try
       {
-        var translateEditor = _fileService.CreateTranslationFileAsync();
+        var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
         editor.TextArea.Document.Text = text;
         editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
         CancellationTokenSource redrawToken = null;

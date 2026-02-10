@@ -222,9 +222,9 @@ namespace UI.Components
     /// <returns>
     /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
     /// </returns>
-    public TextEditorUI CreateTranslationFileAsync()
+    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
     {
-      return MultiEditor.CreateTranslationFileAsync();
+      return MultiEditor.CreateTranslationFileAsync(parentFilePath);
     }
 
     /// <summary>

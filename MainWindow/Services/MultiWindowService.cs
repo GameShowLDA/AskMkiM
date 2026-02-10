@@ -110,9 +110,9 @@ namespace MainWindowProgram.Services
     /// Создает файл трансляции.
     /// </summary>
     /// <returns>Текстовый редактор с файлом трансляции.</returns>
-    public TextEditorUI CreateTranslationFileAsync()
+    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
     {
-      return _multiWindowControl.CreateTranslationFileAsync();
+      return _multiWindowControl.CreateTranslationFileAsync(parentFilePath);
     }
 
     /// <summary>
