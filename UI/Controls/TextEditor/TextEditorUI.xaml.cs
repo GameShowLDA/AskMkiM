@@ -205,7 +205,13 @@ namespace UI.Controls.TextEditor
     /// </summary>
     public void SetActiveLine(int lineNumber)
     {
-      _executionMargin.SetActiveLine(lineNumber);
+      if (Dispatcher.CheckAccess())
+      {
+        _executionMargin.SetActiveLine(lineNumber);
+        return;
+      }
+
+      Dispatcher.Invoke(() => _executionMargin.SetActiveLine(lineNumber));
     }
 
     /// <summary>

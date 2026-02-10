@@ -71,8 +71,8 @@ namespace MainWindowProgram.Services
       var allowedCommands = new HashSet<int>(models.Count);
       for (int i = 0; i < models.Count; i++)
       {
-        if (IsBreakpointAllowed(models[i]))
-          allowedCommands.Add(int.Parse(models[i].CommandNumber));
+        if (IsBreakpointAllowed(models[i]) && int.TryParse(models[i].CommandNumber, out var commandNumber))
+          allowedCommands.Add(commandNumber);
       }
 
       var result = new List<int>(allowedCommands.Count);
@@ -81,9 +81,13 @@ namespace MainWindowProgram.Services
       {
         var line = doc.GetLineByNumber(lineNumber);
         var text = doc.GetText(line);
+        if (string.IsNullOrWhiteSpace(text))
+          continue;
 
         int i = 0;
-        while (text[i] == ' ' || text[i] == '\t') i++;
+        while (i < text.Length && (text[i] == ' ' || text[i] == '\t')) i++;
+        if (i >= text.Length)
+          continue;
 
         int value = 0;
         bool hasDigits = false;
@@ -102,6 +106,104 @@ namespace MainWindowProgram.Services
       }
 
       return result;
+    }
+
+    /// <summary>
+    /// Собирает номера команд, для которых установлены точки останова
+    /// в текущем элементе транслятора (из модели и визуального состояния редакторов).
+    /// </summary>
+    private static HashSet<int> CollectBreakpoints(TranslatorItem item)
+    {
+      var result = new HashSet<int>();
+
+      for (int i = 0; i < item.TranslationModels.Count; i++)
+      {
+        var model = item.TranslationModels[i];
+        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out var commandNumber))
+          result.Add(commandNumber);
+      }
+
+      var leftEditor = item.GetLeftEditor();
+      if (leftEditor != null)
+      {
+        for (int i = 0; i < leftEditor.BreakpointCommandsNumbers.Count; i++)
+          result.Add(leftEditor.BreakpointCommandsNumbers[i]);
+      }
+
+      var rightEditor = item.GetRightEditor();
+      if (rightEditor != null)
+      {
+        for (int i = 0; i < rightEditor.BreakpointCommandsNumbers.Count; i++)
+          result.Add(rightEditor.BreakpointCommandsNumbers[i]);
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Восстанавливает точки останова после пересборки:
+    /// обновляет флаги моделей и синхронизирует два редактора.
+    /// </summary>
+    private static void RestoreBreakpoints(
+      List<BaseCommandModel> models,
+      TextEditorUI leftEditor,
+      TextEditorUI rightEditor,
+      HashSet<int> preservedCommandNumbers)
+    {
+      var requiredCommands = new HashSet<int>();
+      var leftLineByCommand = new Dictionary<int, int>();
+      var rightLineByCommand = new Dictionary<int, int>();
+
+      for (int i = 0; i < models.Count; i++)
+      {
+        var model = models[i];
+        if (!int.TryParse(model.CommandNumber, out var commandNumber))
+        {
+          model.HasBreakpoint = false;
+          continue;
+        }
+
+        bool isAllowed = IsBreakpointAllowed(model);
+        bool hasBreakpoint = isAllowed && preservedCommandNumbers.Contains(commandNumber);
+        model.HasBreakpoint = hasBreakpoint;
+
+        if (!isAllowed)
+          continue;
+
+        leftLineByCommand[commandNumber] = model.StartLineNumber;
+        rightLineByCommand[commandNumber] = model.FormattedStartLineNumber + 1;
+
+        if (hasBreakpoint)
+          requiredCommands.Add(commandNumber);
+      }
+
+      SyncEditorBreakpoints(leftEditor, requiredCommands, leftLineByCommand);
+      SyncEditorBreakpoints(rightEditor, requiredCommands, rightLineByCommand);
+    }
+
+    /// <summary>
+    /// Синхронизирует набор точек останова в редакторе:
+    /// снимает лишние и добавляет отсутствующие.
+    /// </summary>
+    private static void SyncEditorBreakpoints(
+      TextEditorUI editor,
+      HashSet<int> requiredCommands,
+      Dictionary<int, int> lineByCommand)
+    {
+      var existing = editor.BreakpointCommandsNumbers.ToList();
+
+      for (int i = 0; i < existing.Count; i++)
+      {
+        int commandNumber = existing[i];
+        if (!requiredCommands.Contains(commandNumber))
+          editor.EnsureBreakpoint(1, commandNumber, isSet: false, raiseEvents: false);
+      }
+
+      foreach (var commandNumber in requiredCommands)
+      {
+        if (lineByCommand.TryGetValue(commandNumber, out int lineNumber))
+          editor.EnsureBreakpoint(lineNumber, commandNumber, isSet: true, raiseEvents: false);
+      }
     }
 
     /// <summary>
@@ -337,12 +439,16 @@ namespace MainWindowProgram.Services
 
       if (foundDockItem.Content is TranslatorItem item)
       {
+        var preservedBreakpoints = CollectBreakpoints(item);
+
         item.SetRightEditor(translateEditor);
         item.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
         item.TranslationModels = models;
 
         translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
         translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+
+        RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
       }
     }
 
