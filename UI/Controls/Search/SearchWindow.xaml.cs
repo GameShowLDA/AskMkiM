@@ -536,7 +536,10 @@ namespace UI.Controls.Search
       if (Resources["HideAnimation"] is Storyboard hideAnimation)
         hideAnimation.Stop();
 
-      WindowContainer.RenderTransform = new TranslateTransform(0, 0); // Сброс
+      var resetGroup = new TransformGroup();
+      resetGroup.Children.Add(new ScaleTransform(1, 1));
+      resetGroup.Children.Add(new TranslateTransform(0, 0));
+      WindowContainer.RenderTransform = resetGroup; // Сброс
       WindowContainer.Opacity = 1;
     }
 
