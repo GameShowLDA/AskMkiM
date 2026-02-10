@@ -54,38 +54,62 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
-                        <DockPanel x:Name="ItemDockPanel" Background="Transparent">
+                        <Border x:Name="ItemBg" Background="Transparent">
+                            <Grid Margin="6,2,6,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="IconCol"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ArrowCol"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="GestureCol"/>
+                                </Grid.ColumnDefinitions>
 
-                            <!-- Иконка (если задана) -->
-                            <ContentPresenter x:Name="Icon"
-                                              ContentSource="Icon"
-                                              Margin="4,0,6,0"
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                              VerticalAlignment="Center"/>
+                                <!-- Иконка (если задана) -->
+                                <ContentPresenter x:Name="Icon"
+                                                  Grid.Column="0"
+                                                  ContentSource="Icon"
+                                                  Margin="0,0,8,0"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                  VerticalAlignment="Center"/>
 
-                            <!-- Дополнительный значок (галочка, стрелка и т.п.) -->
-                            <Path x:Name="GlyphPanel"
-                                  Fill="#f3f0f9"
-                                  FlowDirection="LeftToRight"
-                                  Margin="7,0,0,0"
-                                  Visibility="Collapsed"
-                                  VerticalAlignment="Center"/>
+                                <!-- Основной текст -->
+                                <TextBlock x:Name="HeaderText"
+                                           Grid.Column="1"
+                                           Text="{TemplateBinding Header}"
+                                           Foreground="{DynamicResource ForegrounfBrushes}"
+                                           VerticalAlignment="Center"
+                                           Margin="{TemplateBinding Padding}"/>
 
-                            <!-- Основной текст -->
-                            <TextBlock x:Name="HeaderText"
-                                       Text="{TemplateBinding Header}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       Margin="{TemplateBinding Padding}"/>
+                                <!-- Стрелка для подменю -->
+                                <Path x:Name="GlyphPanel"
+                                      Grid.Column="2"
+                                      Width="6"
+                                      Height="10"
+                                      Stretch="Uniform"
+                                      SnapsToDevicePixels="True"
+                                      Stroke="{DynamicResource ForegrounfBrushes}"
+                                      StrokeThickness="1.2"
+                                      StrokeEndLineCap="Round"
+                                      StrokeStartLineCap="Round"
+                                      Opacity="0.75"
+                                      FlowDirection="LeftToRight"
+                                      Margin="8,0,4,0"
+                                      Visibility="Collapsed"
+                                      VerticalAlignment="Center">
+                                    <Path.RenderTransform>
+                                        <RotateTransform x:Name="ArrowRotate" Angle="0" CenterX="3" CenterY="5"/>
+                                    </Path.RenderTransform>
+                                </Path>
 
-                            <!-- Горячая клавиша -->
-                            <TextBlock x:Name="HotkeyText"
-                                       Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       Margin="10,0,10,0"/>
-                        </DockPanel>
+                                <!-- Горячая клавиша -->
+                                <TextBlock x:Name="HotkeyText"
+                                           Grid.Column="3"
+                                           Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
+                                           Foreground="{DynamicResource ForegrounfBrushes}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           Margin="10,0,0,0"/>
+                            </Grid>
+                        </Border>
 
                         <!-- Подменю -->
                         <Popup x:Name="PART_Popup"
@@ -116,12 +140,40 @@
                     <!-- Триггеры -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="GlyphPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="GlyphPanel" Property="Data" Value="M0,1 L4,5 L0,9"/>
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ArrowRotate"
+                                                         Storyboard.TargetProperty="Angle"
+                                                         To="90"
+                                                         Duration="0:0:0.12"
+                                                         FillBehavior="HoldEnd"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ArrowRotate"
+                                                         Storyboard.TargetProperty="Angle"
+                                                         To="0"
+                                                         Duration="0:0:0.12"
+                                                         FillBehavior="Stop"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -135,34 +187,58 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
-                        <DockPanel x:Name="ItemDockPanel" Background="Transparent">
+                        <Border x:Name="ItemBg" Background="Transparent">
+                            <Grid Margin="6,2,6,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="IconCol"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ArrowCol"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="GestureCol"/>
+                                </Grid.ColumnDefinitions>
 
-                            <ContentPresenter x:Name="Icon"
-                                              ContentSource="Icon"
-                                              Margin="4,0,6,0"
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                              VerticalAlignment="Center"/>
+                                <ContentPresenter x:Name="Icon"
+                                                  Grid.Column="0"
+                                                  ContentSource="Icon"
+                                                  Margin="0,0,8,0"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                  VerticalAlignment="Center"/>
 
-                            <Path x:Name="GlyphPanel"
-                                  Fill="#f3f0f9"
-                                  FlowDirection="LeftToRight"
-                                  Margin="7,0,0,0"
-                                  Visibility="Collapsed"
-                                  VerticalAlignment="Center"/>
+                                <TextBlock x:Name="HeaderText"
+                                           Grid.Column="1"
+                                           Text="{TemplateBinding Header}"
+                                           Foreground="{DynamicResource ForegrounfBrushes}"
+                                           VerticalAlignment="Center"
+                                           Margin="{TemplateBinding Padding}"/>
 
-                            <TextBlock x:Name="HeaderText"
-                                       Text="{TemplateBinding Header}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       Margin="{TemplateBinding Padding}"/>
+                                <Path x:Name="GlyphPanel"
+                                      Grid.Column="2"
+                                      Width="6"
+                                      Height="10"
+                                      Stretch="Uniform"
+                                      SnapsToDevicePixels="True"
+                                      Stroke="{DynamicResource ForegrounfBrushes}"
+                                      StrokeThickness="1.2"
+                                      StrokeEndLineCap="Round"
+                                      StrokeStartLineCap="Round"
+                                      Opacity="0.75"
+                                      FlowDirection="LeftToRight"
+                                      Margin="8,0,4,0"
+                                      Visibility="Collapsed"
+                                      VerticalAlignment="Center">
+                                    <Path.RenderTransform>
+                                        <RotateTransform x:Name="ArrowRotate" Angle="0" CenterX="3" CenterY="5"/>
+                                    </Path.RenderTransform>
+                                </Path>
 
-                            <TextBlock x:Name="HotkeyText"
-                                       Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
-                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       Margin="10,0,0,0"/>
-                        </DockPanel>
+                                <TextBlock x:Name="HotkeyText"
+                                           Grid.Column="3"
+                                           Text="{Binding InputGestureText, RelativeSource={RelativeSource TemplatedParent}}"
+                                           Foreground="{DynamicResource ForegrounfBrushes}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           Margin="10,0,0,0"/>
+                            </Grid>
+                        </Border>
 
                         <!-- Подменю -->
                         <Popup x:Name="PART_Popup"
@@ -193,12 +269,40 @@
                     <!-- Триггеры -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="ItemDockPanel" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="GlyphPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="GlyphPanel" Property="Data" Value="M0,1 L4,5 L0,9"/>
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ArrowRotate"
+                                                         Storyboard.TargetProperty="Angle"
+                                                         To="90"
+                                                         Duration="0:0:0.12"
+                                                         FillBehavior="HoldEnd"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ArrowRotate"
+                                                         Storyboard.TargetProperty="Angle"
+                                                         To="0"
+                                                         Duration="0:0:0.12"
+                                                         FillBehavior="Stop"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
