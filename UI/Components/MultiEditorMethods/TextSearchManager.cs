@@ -56,6 +56,7 @@ namespace UI.Components.MultiEditorMethods
     private int currentTranslatorIndex = -1;
 
     private static readonly Color SearchHighlightColor = (Color)ColorConverter.ConvertFromString("#b23a48");
+    private const string SourceCommandHeaderPattern = @"^\s*(?<num>\d+(?:\s+\d+)*)\s+(?<mnemo>[А-ЯЁA-Z]{1,})\b";
 
     /// <summary>
     /// Текст для поиска.
@@ -998,6 +999,12 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
+      var leftEditor = translatorItem.GetLeftEditor();
+      if (leftEditor == null)
+      {
+        return;
+      }
+
       var rightEditor = translatorItem.GetRightEditor();
       if (rightEditor == null)
       {
@@ -1006,7 +1013,7 @@ namespace UI.Components.MultiEditorMethods
 
       rightEditor.MarkerService.ClearAllMarkers();
 
-      var command = FindTranslatorCommandBySourceLine(translatorItem.TranslationModels, sourceLineNumber);
+      var command = FindTranslatorCommandBySourceLine(translatorItem.TranslationModels, leftEditor, sourceLineNumber);
       if (command == null || command.FormattedStartLineNumber < 0)
       {
         return;
@@ -1015,21 +1022,52 @@ namespace UI.Components.MultiEditorMethods
       HighlightCommandHeader(rightEditor, command);
     }
 
-    private static BaseCommandModel? FindTranslatorCommandBySourceLine(IEnumerable<BaseCommandModel>? commands, int sourceLineNumber)
+    private static BaseCommandModel? FindTranslatorCommandBySourceLine(IEnumerable<BaseCommandModel>? commands, TextEditorUI leftEditor, int sourceLineNumber)
     {
-      if (commands == null || sourceLineNumber <= 0)
+      if (commands == null || leftEditor?.Document == null || sourceLineNumber <= 0)
       {
         return null;
       }
 
+      var sourceHeader = FindNearestSourceCommandHeader(leftEditor, sourceLineNumber);
+      if (sourceHeader.HasValue)
+      {
+        var (sourceCommandNumber, sourceMnemonic) = sourceHeader.Value;
+
+        var exactCommand = commands.FirstOrDefault(model =>
+          string.Equals(NormalizeCommandNumber(model.CommandNumber), sourceCommandNumber, StringComparison.Ordinal)
+          && string.Equals(model.Mnemonic?.Trim(), sourceMnemonic, StringComparison.OrdinalIgnoreCase));
+
+        if (exactCommand != null)
+        {
+          return exactCommand;
+        }
+
+        var numberMatchCommand = commands.FirstOrDefault(model =>
+          string.Equals(NormalizeCommandNumber(model.CommandNumber), sourceCommandNumber, StringComparison.Ordinal));
+
+        if (numberMatchCommand != null)
+        {
+          return numberMatchCommand;
+        }
+      }
+
       var orderedCommands = commands
-        .Where(model => model != null && model.StartLineNumber > 0)
+        .Where(model => model != null && model.StartLineNumber > 0 && IsModelPresentInSource(leftEditor, model))
         .OrderBy(model => model.StartLineNumber)
         .ToList();
 
       if (orderedCommands.Count == 0)
       {
-        return null;
+        orderedCommands = commands
+          .Where(model => model != null && model.StartLineNumber > 0)
+          .OrderBy(model => model.StartLineNumber)
+          .ToList();
+
+        if (orderedCommands.Count == 0)
+        {
+          return null;
+        }
       }
 
       for (int i = 0; i < orderedCommands.Count; i++)
@@ -1044,6 +1082,68 @@ namespace UI.Components.MultiEditorMethods
       }
 
       return orderedCommands.LastOrDefault(model => sourceLineNumber >= model.StartLineNumber);
+    }
+
+    private static (string CommandNumber, string Mnemonic)? FindNearestSourceCommandHeader(TextEditorUI leftEditor, int sourceLineNumber)
+    {
+      if (leftEditor?.Document == null || leftEditor.Document.LineCount == 0 || sourceLineNumber <= 0)
+      {
+        return null;
+      }
+
+      int lineToCheck = Math.Min(sourceLineNumber, leftEditor.Document.LineCount);
+      for (int lineNumber = lineToCheck; lineNumber >= 1; lineNumber--)
+      {
+        var line = leftEditor.Document.GetLineByNumber(lineNumber);
+        string lineText = leftEditor.Document.GetText(line);
+        var match = Regex.Match(lineText, SourceCommandHeaderPattern);
+        if (!match.Success)
+        {
+          continue;
+        }
+
+        string commandNumber = NormalizeCommandNumber(match.Groups["num"].Value);
+        string mnemonic = match.Groups["mnemo"].Value.Trim();
+        return (commandNumber, mnemonic);
+      }
+
+      return null;
+    }
+
+    private static bool IsModelPresentInSource(TextEditorUI leftEditor, BaseCommandModel model)
+    {
+      if (leftEditor?.Document == null || model == null)
+      {
+        return false;
+      }
+
+      int modelLine = model.StartLineNumber;
+      if (modelLine <= 0 || modelLine > leftEditor.Document.LineCount)
+      {
+        return false;
+      }
+
+      var line = leftEditor.Document.GetLineByNumber(modelLine);
+      string lineText = leftEditor.Document.GetText(line);
+      var match = Regex.Match(lineText, SourceCommandHeaderPattern);
+      if (!match.Success)
+      {
+        return false;
+      }
+
+      string lineCommandNumber = NormalizeCommandNumber(match.Groups["num"].Value);
+      string modelCommandNumber = NormalizeCommandNumber(model.CommandNumber);
+      if (!string.Equals(lineCommandNumber, modelCommandNumber, StringComparison.Ordinal))
+      {
+        return false;
+      }
+
+      if (string.IsNullOrWhiteSpace(model.Mnemonic))
+      {
+        return true;
+      }
+
+      return string.Equals(match.Groups["mnemo"].Value.Trim(), model.Mnemonic.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
     private void HighlightCommandHeader(TextEditorUI rightEditor, BaseCommandModel command)
@@ -1074,7 +1174,7 @@ namespace UI.Components.MultiEditorMethods
       var strictHeaderMatch = Regex.Match(lineText, $@"^\s*(?<num>{commandNumberPattern})\s+(?<mnemo>{mnemonicPattern})\b");
       var headerMatch = strictHeaderMatch.Success
         ? strictHeaderMatch
-        : Regex.Match(lineText, @"^\s*(?<num>\d+(?:\s+\d+)*)\s+(?<mnemo>[А-ЯA-Z]{1,})\b");
+        : Regex.Match(lineText, SourceCommandHeaderPattern);
 
       if (!headerMatch.Success)
       {
@@ -1099,19 +1199,31 @@ namespace UI.Components.MultiEditorMethods
 
     private static string BuildCommandNumberPattern(string commandNumber)
     {
-      if (string.IsNullOrWhiteSpace(commandNumber))
+      var normalizedCommandNumber = NormalizeCommandNumber(commandNumber);
+      if (string.IsNullOrWhiteSpace(normalizedCommandNumber))
       {
         return @"\d+(?:\s+\d+)*";
       }
 
-      var tokens = commandNumber
-        .Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+      var tokens = normalizedCommandNumber
+        .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
         .Select(Regex.Escape)
         .ToArray();
 
       return tokens.Length > 0
         ? string.Join(@"\s+", tokens)
         : @"\d+(?:\s+\d+)*";
+    }
+
+    private static string NormalizeCommandNumber(string? commandNumber)
+    {
+      if (string.IsNullOrWhiteSpace(commandNumber))
+      {
+        return string.Empty;
+      }
+
+      return string.Join(" ", commandNumber
+        .Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries));
     }
 
     /// <summary>
