@@ -180,6 +180,9 @@ namespace UI.Components.MultiEditorMethods
               {
                 SaveDataFromTextEditor(textEditor, filePath);
                 RenamePage(activeDockItem, filePath);
+
+                textEditor.TextEditorModel.FilePath = filePath;
+                textEditor.TextEditorModel.FileName = Path.GetFileName(filePath);
               }
             }
           }
