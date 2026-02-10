@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Support;
-using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
@@ -232,19 +231,6 @@ namespace UI.Controls.TextEditor
       LogInformation("TextMarkerService инициализирован.");
 
       _pendingHighlights.Clear();
-    }
-
-    public void ConfigureBreakpoints(bool interactive, bool visible)
-    {
-      _executionMargin.BreakpointsInteractive = interactive;
-      _executionMargin.BreakpointsVisible = visible;
-
-      _executionMargin.InvalidateVisual();
-    }
-
-    public void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false)
-    {
-      _executionMargin.EnsureBreakpoint(formattedLine, commandNumber, isSet, raiseEvents);
     }
 
     /// <summary>
