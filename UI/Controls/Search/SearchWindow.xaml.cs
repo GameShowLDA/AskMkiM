@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Threading.Tasks;
 using UI.Components.SearchControls;
 using static Ask.LogLib.LoggerUtility;
 using Application = System.Windows.Application;
@@ -29,7 +30,7 @@ namespace UI.Controls.Search
     /// </summary>
     private bool _isExpanded = false;
 
-    private const double MinWindowHeight = 80;  // Высота окна без строки 2
+    private const double MinWindowHeight = 90;  // Высота окна без строки 2 (увеличено под более высокую 3ю строку)
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
@@ -42,12 +43,14 @@ namespace UI.Controls.Search
     private bool _isDraggingSlider = false;
     private Point _dragStartScreenPoint;
     private double _windowStartLeft;
+    private Grid ReplaceRowPanelElement => (Grid)FindName("ReplaceRowPanel");
+    private Grid OptionsRowPanelElement => (Grid)FindName("OptionsRowPanel");
 
 
     /// <summary>
     /// Высота окна при развернутой строке замены.
     /// </summary>
-    private double ExpandedWindowHeight => 120;
+    private double ExpandedWindowHeight => 130;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="SearchWindow"/>.
@@ -86,6 +89,9 @@ namespace UI.Controls.Search
 
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
+      ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
+      ReplaceRowPanelElement.Opacity = 0;
+      OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
       UpdateWindowHeight(MinWindowHeight);
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
       showAnimation.Begin();
@@ -214,10 +220,26 @@ namespace UI.Controls.Search
 
       ToggleArrow.IsArrowUp = !_isExpanded;
 
-      await Task.Delay(250);
-      ReplaceRow.Height = _isExpanded ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
-
-      UpdateWindowHeight(_isExpanded ? ExpandedWindowHeight : MinWindowHeight);
+      if (_isExpanded)
+      {
+        UpdateWindowHeight(ExpandedWindowHeight);
+        ReplaceRow.Height = new GridLength(1, GridUnitType.Star);
+        ReplaceRowPanelElement.Visibility = Visibility.Visible;
+        await Task.WhenAll(
+          PlayStoryboardAsync("ExpandReplaceRowAnimation"),
+          PlayStoryboardAsync("OptionsShiftDownAnimation"));
+        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
+      }
+      else
+      {
+        await Task.WhenAll(
+          PlayStoryboardAsync("CollapseReplaceRowAnimation"),
+          PlayStoryboardAsync("OptionsShiftUpAnimation"));
+        ReplaceRow.Height = new GridLength(0);
+        ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
+        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
+        UpdateWindowHeight(MinWindowHeight);
+      }
     }
     private void PART_EditableTextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -516,6 +538,27 @@ namespace UI.Controls.Search
 
       WindowContainer.RenderTransform = new TranslateTransform(0, 0); // Сброс
       WindowContainer.Opacity = 1;
+    }
+
+    private Task PlayStoryboardAsync(string storyboardResourceKey)
+    {
+      if (Resources[storyboardResourceKey] is Storyboard baseStoryboard)
+      {
+        var storyboard = baseStoryboard.Clone();
+        var tcs = new TaskCompletionSource<bool>();
+
+        void OnCompleted(object sender, EventArgs args)
+        {
+          storyboard.Completed -= OnCompleted;
+          tcs.TrySetResult(true);
+        }
+
+        storyboard.Completed += OnCompleted;
+        storyboard.Begin(this, true);
+        return tcs.Task;
+      }
+
+      return Task.CompletedTask;
     }
   }
 }
