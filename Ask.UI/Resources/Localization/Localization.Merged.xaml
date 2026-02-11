@@ -4,16 +4,16 @@
                     xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization"
                     >
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.File.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Admin.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Execution.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Help.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Settings.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Test.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.File.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Admin.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Execution.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Help.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Settings.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Test.xaml"/>
         
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Input.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Protocol.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Executor/Input.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Executor/Protocol.xaml"/>
         
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Settings.Execution.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.Execution.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

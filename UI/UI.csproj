@@ -58,21 +58,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="Localization\Strings.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Strings.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Localization\Strings.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Update="MKI_OPKW.xshd">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -111,9 +96,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Resources\Localization\Menu.File.xaml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Page>
 		<Page Update="Windows\WpfDocking\Themes\Generic.xaml">
 			<Generator>
 				XamlIntelliSenseFileGenerator
