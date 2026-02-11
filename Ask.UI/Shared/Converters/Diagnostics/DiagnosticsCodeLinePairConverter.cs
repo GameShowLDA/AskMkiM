@@ -1,8 +1,13 @@
 ﻿using Ask.Core.Services.Errors.Models;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace UI.Controls.ErrorList
+namespace Ask.UI.Shared.Converters.Diagnostics
 {
   /// <summary>
   /// Формирует строковое представление номеров строк 

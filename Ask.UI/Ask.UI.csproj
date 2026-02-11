@@ -1,32 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\" />
-    <Folder Include="Infrastructure\DI\" />
-    <Folder Include="Infrastructure\State\" />
-    <Folder Include="Infrastructure\Messaging\" />
-    <Folder Include="Resources\Assets\Image\" />
-    <Folder Include="Resources\Assets\Fonts\" />
-    <Folder Include="Resources\Theme\" />
-    <Folder Include="Resources\Styles\" />
-    <Folder Include="Resources\Localization\" />
-    <Folder Include="Shared\Components\Icons\" />
-    <Folder Include="Shared\Converters\Boolean\" />
-    <Folder Include="Shared\Converters\Brush\" />
-    <Folder Include="Shared\Converters\Layout\" />
-    <Folder Include="Shared\Converters\Text\" />
-    <Folder Include="Shared\Converters\DateTime\" />
-    <Folder Include="Shared\Converters\Diagnostics\" />
-    <Folder Include="Shared\Converters\Math\" />
-    <Folder Include="Shared\Converters\Localization\" />
-    <Folder Include="Shared\Validation\" />
-    <Folder Include="Shared\Contracts\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Features\" />
+		<Folder Include="Infrastructure\DI\" />
+		<Folder Include="Infrastructure\State\" />
+		<Folder Include="Infrastructure\Messaging\" />
+		<Folder Include="Resources\Assets\Image\" />
+		<Folder Include="Resources\Assets\Fonts\" />
+		<Folder Include="Resources\Theme\" />
+		<Folder Include="Resources\Styles\" />
+		<Folder Include="Resources\Localization\" />
+		<Folder Include="Shared\Components\Icons\" />
+		<Folder Include="Shared\Validation\" />
+		<Folder Include="Shared\Contracts\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+	  <ProjectReference Include="..\UI\UI.csproj" />
+	</ItemGroup>
 
 </Project>
