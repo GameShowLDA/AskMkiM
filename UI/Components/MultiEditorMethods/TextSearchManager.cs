@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.TextEditor;
@@ -286,7 +287,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      List<DockItem> searchPages = SetSearchAreaPages(searchArea);
+      Dictionary<DockItem, OpenFileButton> searchPages = SetSearchAreaPages(searchArea);
       ClearPreviousSearchResults();
 
       List<Task> searchTasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
@@ -342,17 +343,22 @@ namespace UI.Components.MultiEditorMethods
     /// <summary>
     /// Выполняет поиск в отдельных задачах для каждого открытого документа.
     /// </summary>
-    /// <param name="searchPages">Список страниц для поиска.</param>
+    /// <param name="searchPages">Словарь страниц для поиска и соответствующих им вкладок контейнеров.</param>
     /// <param name="searchText">Текст для поиска.</param>
     /// <param name="wholeWord">Флаг поиска целых слов.</param>
     /// <param name="caseWord">Флаг чувствительности к регистру.</param>
     /// <returns>Список задач поиска.</returns>
-    private List<Task> ExecuteSearchTasks(List<DockItem> searchPages, string searchText, bool? wholeWord, bool? caseWord)
+    private List<Task> ExecuteSearchTasks(Dictionary<DockItem, OpenFileButton> searchPages, string searchText, bool? wholeWord, bool? caseWord)
     {
+      if (searchPages == null || searchPages.Count == 0)
+      {
+        return new List<Task>();
+      }
+
       object lockObj = new object();
 
       // Сначала получаем нужные данные на UI-потоке
-      var searchData = searchPages.Select(page =>
+      var searchData = searchPages.Keys.Select(page =>
       {
         string pageName = page.Dispatcher.Invoke(() => page.Title);
         string pageText = null;
@@ -390,44 +396,63 @@ namespace UI.Components.MultiEditorMethods
     /// Задает страницы, в которых необходимо провести поиск по тексту.
     /// </summary>
     /// <param name="searchArea">Область поиска текста.</param>
-    /// <returns>Коллекцию вкладок, в которых находятся текстовые редакторы, где необходимо провести поиск по тексту.</returns>
-    private List<DockItem> SetSearchAreaPages(int searchArea)
+    /// <returns>
+    /// Словарь, где ключ — вкладка редактора, а значение — родительская вкладка контейнера.
+    /// </returns>
+    private Dictionary<DockItem, OpenFileButton> SetSearchAreaPages(int searchArea)
     {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
-        page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] 
-        is TextEditorContainer activeTextEditorContainer)
+      var searchPages = new Dictionary<DockItem, OpenFileButton>();
+      var openPages = fileManager.EditorWorkspaceModel.OpenPages;
+      var userControls = fileManager.EditorWorkspaceModel.UserControls;
+
+      if (openPages == null || userControls == null || openPages.Count == 0 || userControls.Count == 0)
       {
-        var searchPages = new List<DockItem>();
-        if (searchArea == 0 || searchArea == 2)
+        return searchPages;
+      }
+
+      if (searchArea == 0 || searchArea == 2)
+      {
+        var activeTab = openPages.FirstOrDefault(
+          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+
+        if (activeTab == null)
         {
-          if (activeTextEditorContainer != null)
-          {
-            var dockItems = activeTextEditorContainer.DockManager.DockItems;
-            var index = dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
-            if (dockItems[index].Content is TextEditorUI || dockItems[index].Content is TranslatorItem)
-            {
-              searchPages.Add(dockItems[index]);
-            }
-          }
+          return searchPages;
         }
-        else
+
+        int activeIndex = openPages.IndexOf(activeTab);
+        if (activeIndex < 0 || activeIndex >= userControls.Count || userControls[activeIndex] is not TextEditorContainer activeTextEditorContainer)
         {
-          foreach (var item in activeTextEditorContainer.DockManager.DockItems)
-          {
-            if (item.Content.GetType() == typeof(TextEditorUI) || item.Content.GetType() == typeof(TranslatorItem))
-            {
-              searchPages.Add(item);
-            }
-          }
+          return searchPages;
+        }
+
+        var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true
+          && (item.Content is TextEditorUI || item.Content is TranslatorItem));
+        if (activeDockItem != null)
+        {
+          searchPages[activeDockItem] = activeTab;
         }
 
         return searchPages;
       }
-      else
+
+      for (int i = 0; i < openPages.Count && i < userControls.Count; i++)
       {
-        return null;
+        if (userControls[i] is not TextEditorContainer textEditorContainer)
+        {
+          continue;
+        }
+
+        foreach (var item in textEditorContainer.DockManager.DockItems)
+        {
+          if (item.Content is TextEditorUI || item.Content is TranslatorItem)
+          {
+            searchPages[item] = openPages[i];
+          }
+        }
       }
+
+      return searchPages;
     }
 
     /// <summary>
@@ -766,138 +791,79 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="textEditor">Текстовый редактор.</param>
     private void NextOccurrence(int searchArea, TextEditorUI textEditor)
     {
-      if (foundResults.Count > 0)
-      {
-        currentIndex++;
-        textEditor.MarkerService.ClearAllMarkers();
-
-        if (currentIndex >= foundResults.Count)
-        {
-          int index = -1;
-          if (searchArea == 1)
-          {
-            index = SwitchToNextDocument();
-            if (index > -1)
-            {
-              var allOccurrences = FindAllOccurrences(_fullText.Values.ElementAt(index), _searchText, _wholeWord, _caseWord, searchArea);
-              if (allOccurrences != null)
-              {
-                InitializeCurrentIndex();
-                GoToOccurrence(currentIndex);
-              }
-            }
-
-            if (index == -1)
-            {
-              MessageBoxCustom.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
-              return;
-            }
-          }
-
-          currentIndex = 0;
-        }
-
-        GoToOccurrence(currentIndex);
-      }
-      else
+      if (foundResults.Count == 0)
       {
         MessageBoxCustom.Show($"Текст {_searchText} не найден", "Ошибка", image: MessageBoxImage.Error);
         return;
       }
+
+      textEditor?.MarkerService?.ClearAllMarkers();
+
+      int nextIndex = currentIndex + 1;
+      if (nextIndex < foundResults.Count)
+      {
+        currentIndex = nextIndex;
+        GoToOccurrence(currentIndex);
+        return;
+      }
+
+      if (searchArea == 1)
+      {
+        if (TrySwitchDocumentWithMatches(moveForward: true))
+        {
+          return;
+        }
+
+        MessageBoxCustom.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
+        return;
+      }
+
+      currentIndex = 0;
+      GoToOccurrence(currentIndex);
     }
 
     /// <summary>
-    /// Переходит к следующему документу в списке открытых вкладок.
+    /// Переходит к следующему/предыдущему документу и выбирает в нём первое/последнее совпадение.
     /// </summary>
-    /// <returns>Индекс следующего документа, или -1, если переход невозможен.</returns>
-    private int SwitchToNextDocument()
+    /// <param name="moveForward">
+    /// true — переход вперёд к следующему документу;
+    /// false — переход назад к предыдущему документу.
+    /// </param>
+    /// <returns>true, если удалось перейти к документу с совпадениями; иначе false.</returns>
+    private bool TrySwitchDocumentWithMatches(bool moveForward)
     {
-      int currentIndex = GetCurrentIndex();
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
+      var targets = GetSearchNavigationTargets();
+      if (targets.Count == 0)
       {
-        if (currentIndex >= 0 && currentIndex < textEditorContainer.DockManager.DockItems.Count - 1)
-        {
-          int nextIndex = GetNextValidIndex(currentIndex + 1);
+        return false;
+      }
 
-          if (nextIndex >= 0)
-          {
-            ShowNextPage(nextIndex);
-            return nextIndex;
-          }
-        }
-        else
+      int activeTargetIndex = GetActiveSearchTargetIndex(targets);
+
+      if (moveForward)
+      {
+        int startIndex = activeTargetIndex >= 0 ? activeTargetIndex + 1 : 0;
+        for (int i = startIndex; i < targets.Count; i++)
         {
-          int nextIndex = GetNextValidIndex(0);
-          if (nextIndex >= 0)
+          if (TryActivateTargetAndGoToOccurrence(targets[i], moveForward))
           {
-            ShowNextPage(nextIndex);
-            return nextIndex;
+            return true;
           }
         }
       }
-      return -1;
-    }
-
-    /// <summary>
-    /// Получает индекс текущей активной вкладки.
-    /// </summary>
-    /// <returns>Индекс текущей активной вкладки, или -1 если активная вкладка не найдена.</returns>
-    private int GetCurrentIndex()
-    {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
+      else
       {
-        if (textEditorContainer != null)
+        int startIndex = activeTargetIndex >= 0 ? activeTargetIndex - 1 : targets.Count - 1;
+        for (int i = startIndex; i >= 0; i--)
         {
-          var dockItems = textEditorContainer.DockManager.DockItems;
-          return dockItems.IndexOf(dockItems.FirstOrDefault(item => item.IsActiveItem == true));
-        }
-      }
-      return -1;
-    }
-
-    /// <summary>
-    /// Находит индекс следующей вкладки, которая является текстовым редактором.
-    /// </summary>
-    /// <param name="startIndex">Индекс, с которого начинаем искать следующую вкладку.</param>
-    /// <returns>Индекс следующей вкладки с текстовым редактором, или -1, если таковой не найден.</returns>
-    private int GetNextValidIndex(int startIndex)
-    {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
-      {
-        if (textEditorContainer != null)
-        {
-          var dockItems = textEditorContainer.DockManager.DockItems;
-          for (int i = startIndex; i < dockItems.Count; i++)
+          if (TryActivateTargetAndGoToOccurrence(targets[i], moveForward))
           {
-            if (dockItems[i].Content is TextEditorUI || dockItems[i].Content is TranslatorItem)
-            {
-              return i;
-            }
+            return true;
           }
         }
       }
 
-      return -1;
-    }
-
-    /// <summary>
-    /// Показывает следующую вкладку и обновляет её отображение.
-    /// </summary>
-    /// <param name="nextIndex">Индекс следующей вкладки, которую нужно отобразить.</param>
-    private void ShowNextPage(int nextIndex)
-    {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
-      {
-        if (textEditorContainer != null)
-        {
-          var dockItems = textEditorContainer.DockManager.DockItems;
-          dockItems[nextIndex].Show(textEditorContainer.DockManager);
-        }
-      }
+      return false;
     }
 
     /// <summary>
@@ -907,22 +873,138 @@ namespace UI.Components.MultiEditorMethods
     {
       if (foundResults.Count == 0)
       {
+        MessageBoxCustom.Show($"Текст {_searchText} не найден", "Ошибка", image: MessageBoxImage.Error);
         return;
       }
 
-      textEditor.MarkerService.ClearAllMarkers();
-      currentIndex = (currentIndex - 1 + foundResults.Count) % foundResults.Count;
-      if (currentIndex >= foundResults.Count)
-      {
-        if (searchArea == 1)
-        {
-          SwitchToNextDocument();
-        }
+      textEditor?.MarkerService?.ClearAllMarkers();
 
-        currentIndex = 0;
+      if (currentIndex < 0)
+      {
+        currentIndex = foundResults.Count - 1;
+        GoToOccurrence(currentIndex);
+        return;
       }
 
+      if (currentIndex > 0)
+      {
+        currentIndex--;
+        GoToOccurrence(currentIndex);
+        return;
+      }
+
+      if (searchArea == 1)
+      {
+        if (TrySwitchDocumentWithMatches(moveForward: false))
+        {
+          return;
+        }
+
+        MessageBoxCustom.Show("Достигнуто первое совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
+        return;
+      }
+
+      currentIndex = foundResults.Count - 1;
       GoToOccurrence(currentIndex);
+    }
+
+    /// <summary>
+    /// Формирует последовательность всех вкладок редактора для навигации поиска.
+    /// </summary>
+    private List<(OpenFileButton page, TextEditorContainer container, DockItem item)> GetSearchNavigationTargets()
+    {
+      var targets = new List<(OpenFileButton page, TextEditorContainer container, DockItem item)>();
+      var searchPages = SetSearchAreaPages(1);
+
+      foreach (var searchPage in searchPages)
+      {
+        var dockItem = searchPage.Key;
+        var page = searchPage.Value;
+        int pageIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(page);
+
+        if (pageIndex < 0 || pageIndex >= fileManager.EditorWorkspaceModel.UserControls.Count)
+        {
+          continue;
+        }
+
+        if (fileManager.EditorWorkspaceModel.UserControls[pageIndex] is TextEditorContainer textEditorContainer)
+        {
+          targets.Add((page, textEditorContainer, dockItem));
+        }
+      }
+
+      return targets;
+    }
+
+    /// <summary>
+    /// Находит индекс активной вкладки редактора в общей последовательности навигации.
+    /// </summary>
+    private int GetActiveSearchTargetIndex(List<(OpenFileButton page, TextEditorContainer container, DockItem item)> targets)
+    {
+      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
+        page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      if (activeTab == null)
+      {
+        return -1;
+      }
+
+      int activePageIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+      if (activePageIndex < 0 || activePageIndex >= fileManager.EditorWorkspaceModel.UserControls.Count
+        || fileManager.EditorWorkspaceModel.UserControls[activePageIndex] is not TextEditorContainer activeContainer)
+      {
+        return -1;
+      }
+
+      var activeDockItem = activeContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      if (activeDockItem == null)
+      {
+        return -1;
+      }
+
+      return targets.FindIndex(target => target.page == activeTab && target.item == activeDockItem);
+    }
+
+    /// <summary>
+    /// Активирует вкладку документа, выполняет поиск в ней и переходит к нужному вхождению.
+    /// </summary>
+    private bool TryActivateTargetAndGoToOccurrence((OpenFileButton page, TextEditorContainer container, DockItem item) target, bool moveForward)
+    {
+      string pageText = GetDockItemText(target.item);
+      if (string.IsNullOrEmpty(pageText))
+      {
+        return false;
+      }
+
+      var occurrences = FindAllOccurrences(pageText, _searchText, _wholeWord, _caseWord, _searchArea);
+      if (occurrences == null || occurrences.Count == 0)
+      {
+        return false;
+      }
+
+      multiEditorControl.controlManager.ShowControl(target.container, target.page);
+      target.item.Show(target.container.DockManager);
+
+      currentIndex = moveForward ? 0 : foundResults.Count - 1;
+      GoToOccurrence(currentIndex);
+      return true;
+    }
+
+    /// <summary>
+    /// Получает текст документа из вкладки редактора.
+    /// </summary>
+    private string GetDockItemText(DockItem dockItem)
+    {
+      if (dockItem?.Content is TextEditorUI textEditor)
+      {
+        return textEditor.Text;
+      }
+
+      if (dockItem?.Content is TranslatorItem translatorItem)
+      {
+        return translatorItem.GetLeftEditor()?.Text;
+      }
+
+      return null;
     }
 
     /// <summary>
