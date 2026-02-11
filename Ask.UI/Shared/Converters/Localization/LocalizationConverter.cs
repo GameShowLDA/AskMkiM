@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Ask.UI.Infrastructure.Localization;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Shared.Converters.Localization
 {
-  using global::UI.Localization;
-  using System;
-  using System.Diagnostics;
-  using System.Globalization;
-  using System.Windows.Data;
-
   /// <summary>
   /// Возвращает локализованную строку по ключу,
   /// переданному через <see cref="IValueConverter"/>.
@@ -59,8 +50,7 @@ namespace Ask.UI.Shared.Converters.Localization
         return "!InvalidLocalizationKey!";
 
       string localizedValue = LocalizationService.Get(key) ?? $"!{key}!";
-
-      LogLocalization(key, localizedValue);
+      LogInformation($"[LocalizationConverter] Culture: {CultureInfo.CurrentUICulture.Name}, Key: {key}, Value: {localizedValue}");
 
       return localizedValue;
     }
@@ -73,17 +63,6 @@ namespace Ask.UI.Shared.Converters.Localization
     /// </exception>
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
-
-    /// <summary>
-    /// Выполняет отладочное логирование результата локализации.
-    /// </summary>
-    private static void LogLocalization(string key, string value)
-    {
-#if DEBUG
-      Debug.WriteLine(
-          $"[LocalizationConverter] Culture: {CultureInfo.CurrentUICulture.Name}, Key: {key}, Value: {value}");
-#endif
-    }
   }
 
 }

@@ -16,7 +16,6 @@
 		<Folder Include="Resources\Assets\Fonts\" />
 		<Folder Include="Resources\Theme\" />
 		<Folder Include="Resources\Styles\" />
-		<Folder Include="Resources\Localization\" />
 		<Folder Include="Shared\Components\Icons\" />
 		<Folder Include="Shared\Validation\" />
 		<Folder Include="Shared\Contracts\" />
@@ -24,7 +23,27 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
-	  <ProjectReference Include="..\UI\UI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\Localization\Language\Strings.Designer.cs">
+	    <DependentUpon>Strings.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Localization\Language\Strings.resx">
+	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+	    <Generator>ResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Resources\Localization\Menu\Menu.File.xaml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Page>
 	</ItemGroup>
 
 </Project>

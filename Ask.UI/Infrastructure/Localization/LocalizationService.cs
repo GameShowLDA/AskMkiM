@@ -4,8 +4,10 @@ using System.Resources;
 using System.Windows;
 using static Ask.LogLib.LoggerUtility;
 
-namespace UI.Localization
+
+namespace Ask.UI.Infrastructure.Localization
 {
+
   /// <summary>
   /// Сервис локализации для получения строк из ресурсов по текущему языку.
   /// Поддерживает автоматическое переключение языка при изменении настроек.
@@ -13,7 +15,9 @@ namespace UI.Localization
   public static class LocalizationService
   {
     private static readonly ResourceManager _resourceManager =
-        new ResourceManager("UI.Localization.Strings", typeof(LocalizationService).Assembly);
+        new ResourceManager(
+          "Ask.UI.Resources.Localization.Language.Strings",
+          typeof(LocalizationService).Assembly);
 
     static LocalizationService()
     {
@@ -100,8 +104,8 @@ namespace UI.Localization
     }
 
     /// <summary>
-    /// Возвращает список культур, для которых реально есть ресурсы "UI.Localization.Strings".
-    /// Включает и нейтральный ресурс (Strings.resx), если он есть.
+    /// Возвращает список культур, для которых реально есть ресурсы.
+    /// Обязательно добавляем нейтральный ресурс (Strings.resx), который у нас содержит русский.
     /// </summary>
     public static IReadOnlyList<CultureInfo> GetAvailableCultures()
     {
@@ -110,9 +114,7 @@ namespace UI.Localization
       try
       {
         if (_resourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, false) != null)
-        {
-          list.Add(new CultureInfo(LanguageSettings.CurrentLanguage));
-        }
+          list.Add(new CultureInfo("ru")); // нейтральные ресурсы — русский
       }
       catch { }
 
