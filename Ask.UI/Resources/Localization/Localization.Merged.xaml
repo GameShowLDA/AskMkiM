@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeConv="clr-namespace:Ask.UI.Infrastructure.Localization"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization"
+                    >
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.File.xaml"/>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Admin.xaml"/>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Execution.xaml"/>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Help.xaml"/>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Settings.xaml"/>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Test.xaml"/>
+        
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Input.xaml"/>
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Protocol.xaml"/>
+        
+        <ResourceDictionary Source="/UI;component/Resources/Localization/Settings.Execution.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>
