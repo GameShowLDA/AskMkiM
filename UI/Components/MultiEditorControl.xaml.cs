@@ -383,11 +383,60 @@ namespace UI.Components
     {
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
-        var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
-        var lineStartOffset = searchResult.Value.FirstOrDefault().StartOffset;
-        if (lineStartOffset >= 0)
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
+          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+
+        if (activeTab != null)
         {
-          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), lineStartOffset, replaceText, searchText);
+          int pageIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+          if (pageIndex >= 0 && pageIndex < fileManager.EditorWorkspaceModel.UserControls.Count
+            && fileManager.EditorWorkspaceModel.UserControls[pageIndex] is TextEditorContainer textEditorContainer)
+          {
+            var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+            TextEditorUI textEditor = null;
+            string activeTitle = null;
+
+            if (activeDockItem != null)
+            {
+              activeTitle = activeDockItem.Title;
+              if (activeDockItem.Content is TextEditorUI te)
+              {
+                textEditor = te;
+              }
+              else if (activeDockItem.Content is TranslatorItem translatorItem)
+              {
+                textEditor = translatorItem.GetLeftEditor();
+              }
+            }
+
+            if (!string.IsNullOrEmpty(activeTitle) && textSearchManager.foundInOpenedFiles.TryGetValue(activeTitle, out var occurrences) && occurrences.Count > 0)
+            {
+              int caretOffset = textEditor?.TextArea?.Caret?.Offset ?? 0;
+              var next = occurrences.FirstOrDefault(r => r.StartOffset >= caretOffset) ?? occurrences.First();
+              if (next != null)
+              {
+                var lineStartOffset = next.StartOffset;
+                int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, next.SubstringFromWord, searchText);
+                if (globalStartOffset >= 0)
+                {
+                  textReplacementManager.ReplaceWord(activeTitle, next, globalStartOffset, replaceText, searchText);
+                }
+                return;
+              }
+            }
+          }
+        }
+
+        // Fallback: используем первое совпадение, если активный документ не определён
+        var first = textSearchManager.foundInOpenedFiles.FirstOrDefault();
+        var firstOccurrence = first.Value.FirstOrDefault();
+        if (firstOccurrence != null)
+        {
+          int globalStartOffset = CalculateGlobalStartOffset(firstOccurrence.StartOffset, firstOccurrence.SubstringFromWord, searchText);
+          if (globalStartOffset >= 0)
+          {
+            textReplacementManager.ReplaceWord(first.Key, firstOccurrence, globalStartOffset, replaceText, searchText);
+          }
         }
       }
     }
