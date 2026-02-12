@@ -112,6 +112,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
 
         double minResistance = commandInfo.LowerLimit;
         double maxResistance = commandInfo.UpperLimit;
+        char infinity = '\u221E';
 
         bool hasErrors = false;
 
@@ -188,19 +189,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
           model.LowerLimitResistance = finalLower;
           model.LowerLimitResistanceSource = $"{finalLower} {unit}";
 
-          double finalHigher = -1;
           if (higher == null)
           {
-            finalHigher = maxResistance;
-            model.Warnings.Add(GeneralWarnings.DefaultResistainceLowLimit(model.StartLineNumber, $"{commandNumber} {mnemonic}", $"{finalHigher} {model.ResistanceUnit}"));
+            model.HigherLimitResistance = higher;
+            model.HigherLimitResistanceSource = $"{infinity} {unit}";
           }
           else
           {
-            finalHigher = (double)higher;
+            model.HigherLimitResistance = (double)higher;
+            model.HigherLimitResistanceSource = $"{(double)higher} {unit}";
           }
-          model.HigherLimitResistance = finalHigher;
-          model.HigherLimitResistanceSource = $"{finalHigher} {unit}";
-
         }
 
         if (HasInvalidParameterOrder(body, model.AlgorithmKey, lowerLimitResistance ?? higherLimitResistance, time, out string err))
