@@ -7,7 +7,8 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Возвращает очищенные строки программы и список всех найденных комментариев.
     /// </summary>
-    public static (Dictionary<int, string> CleanLines, List<(int LineIndex, string Text)> Comments) PreprocessTextAndExtractComments(string text)
+    public static (Dictionary<int, string> CleanLines, List<(int LineIndex, string Text)> Comments)
+    PreprocessTextAndExtractComments(string text)
     {
       var lines = text.Replace("\r\n", "\n").Split('\n').ToList();
       var cleanLines = new Dictionary<int, string>();
@@ -31,15 +32,22 @@ namespace Ask.Engine.ControlCommandAnalyser
           {
             currentComment.Append(line[index]);
 
-            // открытие вложенных блоков
-            if (index < line.Length - 1 && line[index] == '/' && line[index + 1] == '*')
+            // вложенный /* */
+            if (index < line.Length - 1 &&
+                line[index] == '/' &&
+                line[index + 1] == '*')
             {
               stack.Push("slash");
               currentComment.Append('*');
               index += 2;
               continue;
             }
-            if (index < line.Length - 1 && line[index] == '*' && line[index + 1] == '/' && stack.Peek() == "slash")
+
+            // закрытие */
+            if (index < line.Length - 1 &&
+                line[index] == '*' &&
+                line[index + 1] == '/' &&
+                stack.Peek() == "slash")
             {
               stack.Pop();
               currentComment.Append('/');
@@ -47,21 +55,28 @@ namespace Ask.Engine.ControlCommandAnalyser
 
               if (stack.Count == 0)
               {
-                comments.Add((commentStartLine, currentComment.ToString().TrimEnd()));
+                comments.Add((commentStartLine,
+                              currentComment.ToString().TrimEnd()));
                 currentComment.Clear();
                 commentStartLine = -1;
               }
+
               continue;
             }
 
+            // вложенные { }
             if (line[index] == '{')
+            {
               stack.Push("brace");
+            }
             else if (line[index] == '}' && stack.Peek() == "brace")
             {
               stack.Pop();
+
               if (stack.Count == 0)
               {
-                comments.Add((commentStartLine, currentComment.ToString().TrimEnd()));
+                comments.Add((commentStartLine,
+                              currentComment.ToString().TrimEnd()));
                 currentComment.Clear();
                 commentStartLine = -1;
               }
@@ -73,8 +88,10 @@ namespace Ask.Engine.ControlCommandAnalyser
 
           // === вне комментариев ===
 
-          // начало /* ... */
-          if (index < line.Length - 1 && line[index] == '/' && line[index + 1] == '*')
+          // начало /* */
+          if (index < line.Length - 1 &&
+              line[index] == '/' &&
+              line[index + 1] == '*')
           {
             if (cleanBuilder.Length > 0)
             {
@@ -90,7 +107,7 @@ namespace Ask.Engine.ControlCommandAnalyser
             continue;
           }
 
-          // начало { ... }
+          // начало { }
           if (line[index] == '{')
           {
             if (cleanBuilder.Length > 0)
@@ -105,6 +122,26 @@ namespace Ask.Engine.ControlCommandAnalyser
             commentStartLine = i;
             index++;
             continue;
+          }
+
+          // начало // комментария
+          if (index < line.Length - 1 &&
+              line[index] == '/' &&
+              line[index + 1] == '/')
+          {
+            // если перед комментарием был код — сохраняем его
+            if (cleanBuilder.Length > 0)
+            {
+              cleanLines[i] = cleanBuilder.ToString().TrimEnd();
+            }
+
+            // сохраняем однострочный комментарий
+            string commentText = line.Substring(index).TrimEnd();
+            comments.Add((i, commentText));
+
+            // прекращаем обработку строки
+            commentLine = true;
+            break;
           }
 
           cleanBuilder.Append(line[index]);
