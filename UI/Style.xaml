@@ -2,26 +2,17 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:CustomControls="clr-namespace:UI.Components" 
                     xmlns:SliderConcerter="clr-namespace:UI"
-                    xmlns:LocalizeConv="clr-namespace:UI.Localization"
-                    xmlns:LocalizeStrings="clr-namespace:UI.Localization"
+                    xmlns:LocalizeConv="clr-namespace:Ask.UI.Shared.Converters.Localization;assembly=Ask.UI"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
                     >
     <ResourceDictionary.MergedDictionaries>
+        
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Localization.Merged.xaml"/>
         
         <ResourceDictionary Source="/UI;component/Resources/Theme/dark.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/Theme/light.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/Theme/Colors.Dark.xaml"/>
-        
-        <!--#region Локализационные файлы -->
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.File.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Admin.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Execution.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Help.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Settings.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Menu.Test.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Input.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Protocol.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/Localization/Settings.Execution.xaml"/>
-        <!--#endregion-->
+
 
         <ResourceDictionary Source="/UI;component/Resources/Font/Font.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/AppColors.xaml"/>

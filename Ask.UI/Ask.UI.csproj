@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Folder Include="Features\" />
+		<Folder Include="Infrastructure\DI\" />
+		<Folder Include="Infrastructure\State\" />
+		<Folder Include="Infrastructure\Messaging\" />
+		<Folder Include="Resources\Assets\Image\" />
+		<Folder Include="Resources\Assets\Fonts\" />
+		<Folder Include="Resources\Theme\" />
+		<Folder Include="Resources\Styles\" />
+		<Folder Include="Shared\Components\Icons\" />
+		<Folder Include="Shared\Validation\" />
+		<Folder Include="Shared\Contracts\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\Localization\Language\Strings.Designer.cs">
+	    <DependentUpon>Strings.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Localization\Language\Strings.resx">
+	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+	    <Generator>ResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Resources\Localization\Menu\Menu.File.xaml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Page>
+	</ItemGroup>
+
+</Project>

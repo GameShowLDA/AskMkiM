@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:LocalizeStrings="clr-namespace:UI.Localization"
-                    >
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
     
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Settings" Key="menu.settings" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Settings_Configuration" Key="menu.settings.configuration" />
