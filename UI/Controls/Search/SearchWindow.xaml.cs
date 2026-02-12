@@ -557,6 +557,23 @@ namespace UI.Controls.Search
         }
       }
 
+      // Внутри окна: Alt+R — Replace current, Alt+A — Replace all
+      if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+      {
+        if (e.SystemKey == Key.R || e.Key == Key.R)
+        {
+          e.Handled = true;
+          _ = SetReplaceRowStateAsync(true, focusReplaceField: true);
+          OnReplaceWordButtonPressed();
+        }
+        else if (e.SystemKey == Key.A || e.Key == Key.A)
+        {
+          e.Handled = true;
+          _ = SetReplaceRowStateAsync(true, focusReplaceField: false);
+          OnReplaceAllWordsButtonPressed();
+        }
+      }
+
       if (e.Key == Key.Tab && _isExpanded && ReplaceRowPanelElement.Visibility == Visibility.Visible)
       {
         e.Handled = true;

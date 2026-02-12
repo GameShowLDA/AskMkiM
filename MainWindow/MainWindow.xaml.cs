@@ -196,7 +196,27 @@ namespace MainWindowProgram
         ke.Handled = true;
       }
 
-      // Горячие для замены убраны (конфликты с внешними программами). Управление — через само окно поиска.
+      // Alt+R / Alt+A — локально в SearchWindow
+      if (SearchWindow != null && SearchWindow.IsVisible && alt)
+      {
+        var key = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
+
+        if (key == Key.R)
+        {
+          _ = SearchWindow.ShowWindow(expandReplaceRow: true, focusReplaceField: true);
+          SearchEventAdapter.RaiseReplaceWordButtonPressed();
+          ke.Handled = true;
+          return;
+        }
+
+        if (key == Key.A)
+        {
+          _ = SearchWindow.ShowWindow(expandReplaceRow: true, focusReplaceField: false);
+          SearchEventAdapter.RaiseReplaceAllWordsButtonPressed();
+          ke.Handled = true;
+          return;
+        }
+      }
     }
   }
 }
