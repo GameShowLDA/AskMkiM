@@ -298,7 +298,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         LogDebug($"Для времени установлено значение по умолчанию 5 с.'");
         time = "5с";
         timeValue = 5;
-        model.Warnings.Add(GeneralWarnings.DefaultTime(model.StartLineNumber, $"{commandNumber} {mnemonic}", time));
       }
       else
       {
