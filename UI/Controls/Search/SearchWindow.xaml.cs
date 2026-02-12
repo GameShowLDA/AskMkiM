@@ -37,6 +37,7 @@ namespace UI.Controls.Search
 
     public event Action SelectFileForSearch;
     public string SearchTextData { get; set; }
+    public bool IsReplaceExpanded => _isExpanded;
 
     private bool _isDraggingSlider = false;
     private Point _dragStartScreenPoint;
@@ -207,16 +208,28 @@ namespace UI.Controls.Search
         await SetReplaceRowStateAsync(true, focusReplaceField);
       }
 
-      // Гарантируем фокус на строке поиска после показа окна.
+      // Фокус: если нужно сразу вводить замену — ставим курсор в Replace; иначе в поиск.
       this.Dispatcher.InvokeAsync(() =>
       {
         this.Focus();
-        SearchTextBox.Focus();
-        Keyboard.Focus(SearchTextBox);
+        if (focusReplaceField)
+        {
+          FocusReplaceTextBox();
+        }
+        else
+        {
+          SearchTextBox.Focus();
+          Keyboard.Focus(SearchTextBox);
+        }
       }, System.Windows.Threading.DispatcherPriority.Input);
     }
 
     public void FocusReplaceField() => FocusReplaceTextBox();
+
+    public Task CollapseReplaceRowAsync() => SetReplaceRowStateAsync(false);
+
+    /// <summary>Возвращает true, если поле поиска непустое.</summary>
+    public bool HasSearchText() => !string.IsNullOrWhiteSpace(SearchTextBox.Text);
 
     public void CloseDialog()
     {
@@ -543,6 +556,13 @@ namespace UI.Controls.Search
           SendSearchRequest("FindNext");
         }
       }
+
+      if (e.Key == Key.Tab && _isExpanded && ReplaceRowPanelElement.Visibility == Visibility.Visible)
+      {
+        e.Handled = true;
+        FocusReplaceTextBox();
+      }
+
     }
 
     private void SearchSlider_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

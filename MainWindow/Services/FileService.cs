@@ -231,18 +231,39 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchReplaceFileAsync()
     {
-      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: true, focusReplaceField: true);
+      string selectedText = null;
+      // вычислим заранее, т.к. EnsureSearchWindowAsync может менять фокус
+      var editorForSelection = _multiWindow.GetActiveTextEditor();
+      if (editorForSelection != null)
+      {
+        selectedText = editorForSelection.TextArea.Selection.GetText();
+      }
+
+      bool focusReplaceField = _mainWindow.SearchWindow.HasSearchText() || !string.IsNullOrEmpty(selectedText);
+
+      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: true, focusReplaceField: focusReplaceField);
       if (activeEditor == null)
       {
         return;
       }
 
-      string selectedText = activeEditor.TextArea.Selection.GetText();
+      if (string.IsNullOrEmpty(selectedText))
+      {
+        selectedText = activeEditor.TextArea.Selection.GetText();
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          focusReplaceField = true;
+        }
+      }
+
       if (!string.IsNullOrEmpty(selectedText))
       {
         SearchEventAdapter.RaiseSearchTextRequested(selectedText);
       }
-      _mainWindow.SearchWindow.FocusReplaceField();
+      if (focusReplaceField)
+      {
+        _mainWindow.SearchWindow.FocusReplaceField();
+      }
     }
 
     private async Task<TextEditorUI?> EnsureSearchWindowAsync(bool expandReplaceRow, bool focusReplaceField)
@@ -262,6 +283,11 @@ namespace MainWindowProgram.Services
           _selectFileHandlerAttached = true;
         }
         _isSearchWindowOpen = true;
+      }
+
+      if (!expandReplaceRow && _mainWindow.SearchWindow.IsReplaceExpanded)
+      {
+        await _mainWindow.SearchWindow.CollapseReplaceRowAsync();
       }
 
       await _mainWindow.SearchWindow.ShowWindow(expandReplaceRow, focusReplaceField);

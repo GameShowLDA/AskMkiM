@@ -146,7 +146,7 @@ namespace MainWindowProgram
         return;
       }
 
-      if (SearchWindow == null || !SearchWindow.IsVisible)
+      if (SearchWindow == null)
       {
         return;
       }
@@ -172,25 +172,31 @@ namespace MainWindowProgram
         return;
       }
 
-      // Ctrl/Alt комбинации пропускаем — ими заведуют другие биндинги.
-      if ((Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) != 0)
+      var mods = Keyboard.Modifiers;
+      bool ctrl = (mods & ModifierKeys.Control) != 0;
+      bool alt = (mods & ModifierKeys.Alt) != 0;
+
+      // Пропускаем только «чистый» Ctrl (без Alt) — им заведуют другие биндинги.
+      if (ctrl && !alt)
       {
         return;
       }
 
-      if (ke.Key == Key.Escape)
+      if (SearchWindow.IsVisible && ke.Key == Key.Escape)
       {
         SearchWindow.CloseDialog();
         ke.Handled = true;
         return;
       }
 
-      if (ke.Key == Key.F3)
+      if (SearchWindow.IsVisible && ke.Key == Key.F3)
       {
         var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
         SearchEventAdapter.RaiseSearchButtonPressed(direction);
         ke.Handled = true;
       }
+
+      // Горячие для замены убраны (конфликты с внешними программами). Управление — через само окно поиска.
     }
   }
 }
