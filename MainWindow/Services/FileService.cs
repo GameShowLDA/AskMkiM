@@ -32,6 +32,7 @@ namespace MainWindowProgram.Services
     private readonly Func<bool> _isLockedProvider;
 
     private bool _isSearchWindowOpen;
+    private bool _selectFileHandlerAttached;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
@@ -175,28 +176,17 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      TextEditorUI activeEditor = _multiWindow.GetActiveTextEditor();
-
-      if (_isSearchWindowOpen == false && activeEditor != null)
-      {
-        _mainWindow.SearchWindow.Owner = _mainWindow;
-        _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
-        _mainWindow.SearchWindow.ShowWindow();
-        _isSearchWindowOpen = true;
-      }
-
-      if (activeEditor != null)
-      {
-        string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-        if (!string.IsNullOrEmpty(selectedText))
-        {
-          SearchEventAdapter.RaiseSearchTextRequested(selectedText);
-        }
-      }
-      else
+      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: false, focusReplaceField: false);
+      if (activeEditor == null)
       {
         return;
+      }
+
+      string selectedText = activeEditor.TextArea.Selection.GetText();
+
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        SearchEventAdapter.RaiseSearchTextRequested(selectedText);
       }
     }
 
@@ -235,5 +225,47 @@ namespace MainWindowProgram.Services
       }
     }
     internal void OpenFolder() => _multiWindow.OpenFolder();
+
+    /// <summary>
+    /// Открывает окно поиска сразу с раскрытой строкой замены.
+    /// </summary>
+    public async Task SearchReplaceFileAsync()
+    {
+      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: true, focusReplaceField: true);
+      if (activeEditor == null)
+      {
+        return;
+      }
+
+      string selectedText = activeEditor.TextArea.Selection.GetText();
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        SearchEventAdapter.RaiseSearchTextRequested(selectedText);
+      }
+      _mainWindow.SearchWindow.FocusReplaceField();
+    }
+
+    private async Task<TextEditorUI?> EnsureSearchWindowAsync(bool expandReplaceRow, bool focusReplaceField)
+    {
+      var activeEditor = _multiWindow.GetActiveTextEditor();
+      if (activeEditor == null)
+      {
+        return null;
+      }
+
+      if (!_isSearchWindowOpen)
+      {
+        _mainWindow.SearchWindow.Owner = _mainWindow;
+        if (!_selectFileHandlerAttached)
+        {
+          _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
+          _selectFileHandlerAttached = true;
+        }
+        _isSearchWindowOpen = true;
+      }
+
+      await _mainWindow.SearchWindow.ShowWindow(expandReplaceRow, focusReplaceField);
+      return activeEditor;
+    }
   }
 }

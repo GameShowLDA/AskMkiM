@@ -6,6 +6,7 @@ using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
@@ -70,6 +71,8 @@ namespace MainWindowProgram
       InitializeComponent();
 
       this.Visibility = Visibility.Hidden;
+      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+      InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
       (var vm, var usb) = AppServices.Build(this);
       _viewModel = vm;
@@ -124,6 +127,70 @@ namespace MainWindowProgram
     private void ErrorMenuItem_Click(object sender, RoutedEventArgs e)
     {
 
+    }
+
+    /// <summary>
+    /// Глобальные хоткеи для навигации по результатам поиска (F3/Shift+F3), даже когда окно SearchWindow не в фокусе.
+    /// </summary>
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.Escape && SearchWindow != null && SearchWindow.IsVisible)
+      {
+        SearchWindow.CloseDialog();
+        e.Handled = true;
+        return;
+      }
+
+      if (e.Key != Key.F3 || Keyboard.Modifiers == ModifierKeys.Control || Keyboard.Modifiers == ModifierKeys.Alt)
+      {
+        return;
+      }
+
+      if (SearchWindow == null || !SearchWindow.IsVisible)
+      {
+        return;
+      }
+
+      var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
+      SearchEventAdapter.RaiseSearchButtonPressed(direction);
+      e.Handled = true;
+    }
+
+    /// <summary>
+    /// Глобальный перехват Esc/F3 вне зависимости от того, где фокус (включая окно поиска).
+    /// Работает через InputManager, поэтому охватывает все окна приложения.
+    /// </summary>
+    private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
+    {
+      if (SearchWindow == null || !SearchWindow.IsVisible)
+      {
+        return;
+      }
+
+      if (e.StagingItem.Input is not KeyEventArgs ke || ke.RoutedEvent != Keyboard.KeyDownEvent)
+      {
+        return;
+      }
+
+      // Ctrl/Alt комбинации пропускаем — ими заведуют другие биндинги.
+      if ((Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) != 0)
+      {
+        return;
+      }
+
+      if (ke.Key == Key.Escape)
+      {
+        SearchWindow.CloseDialog();
+        ke.Handled = true;
+        return;
+      }
+
+      if (ke.Key == Key.F3)
+      {
+        var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
+        SearchEventAdapter.RaiseSearchButtonPressed(direction);
+        ke.Handled = true;
+      }
     }
   }
 }

@@ -4,11 +4,9 @@ using Ask.Core.Services.EventCore.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Threading.Tasks;
 using UI.Components.SearchControls;
 using static Ask.LogLib.LoggerUtility;
 using Application = System.Windows.Application;
@@ -65,6 +63,7 @@ namespace UI.Controls.Search
       EventAggregator.Subscribe<SearchEvents.ReplaceAllWordsButtonPressed>(_ => OnReplaceAllWordsButtonPressed());
       EventAggregator.Subscribe<SearchEvents.CloseSearchWindow>(_ => OnCloseSearchWindowRequested());
       EventAggregator.Subscribe<SearchEvents.SearchTextRequested>(e => OnSearchTextRequested(e.SelectedText));
+      this.PreviewKeyDown += SearchWindow_PreviewKeyDown;
 
       this.Focus();
       SearchTextBox.Focus();
@@ -134,7 +133,7 @@ namespace UI.Controls.Search
 
       // Получаем рабочую область экрана, на котором находится родительское окно
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
-      Screen screen = Screen.FromHandle(parentWindowHandle);
+      System.Windows.Forms.Screen screen = System.Windows.Forms.Screen.FromHandle(parentWindowHandle);
       System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
 
       // Располагаем окно поиска по центру сверху относительно родительского окна
@@ -190,7 +189,7 @@ namespace UI.Controls.Search
     {
       CloseDialog();
     }
-    public void ShowWindow()
+    public async Task ShowWindow(bool expandReplaceRow = false, bool focusReplaceField = false)
     {
       if (this.Top < 0)
       {
@@ -202,7 +201,22 @@ namespace UI.Controls.Search
 
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
       showAnimation.Begin();
+
+      if (expandReplaceRow || focusReplaceField)
+      {
+        await SetReplaceRowStateAsync(true, focusReplaceField);
+      }
+
+      // Гарантируем фокус на строке поиска после показа окна.
+      this.Dispatcher.InvokeAsync(() =>
+      {
+        this.Focus();
+        SearchTextBox.Focus();
+        Keyboard.Focus(SearchTextBox);
+      }, System.Windows.Threading.DispatcherPriority.Input);
     }
+
+    public void FocusReplaceField() => FocusReplaceTextBox();
 
     public void CloseDialog()
     {
@@ -216,30 +230,7 @@ namespace UI.Controls.Search
 
     private async void ToggleArrow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      _isExpanded = !_isExpanded;
-
-      ToggleArrow.IsArrowUp = !_isExpanded;
-
-      if (_isExpanded)
-      {
-        UpdateWindowHeight(ExpandedWindowHeight);
-        ReplaceRow.Height = new GridLength(1, GridUnitType.Star);
-        ReplaceRowPanelElement.Visibility = Visibility.Visible;
-        await Task.WhenAll(
-          PlayStoryboardAsync("ExpandReplaceRowAnimation"),
-          PlayStoryboardAsync("OptionsShiftDownAnimation"));
-        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
-      }
-      else
-      {
-        await Task.WhenAll(
-          PlayStoryboardAsync("CollapseReplaceRowAnimation"),
-          PlayStoryboardAsync("OptionsShiftUpAnimation"));
-        ReplaceRow.Height = new GridLength(0);
-        ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
-        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
-        UpdateWindowHeight(MinWindowHeight);
-      }
+      await SetReplaceRowStateAsync(!_isExpanded);
     }
     private void PART_EditableTextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -357,6 +348,53 @@ namespace UI.Controls.Search
       return null;
     }
 
+    private async Task SetReplaceRowStateAsync(bool expand, bool focusReplaceField = false)
+    {
+      if (_isExpanded == expand)
+      {
+        if (expand && focusReplaceField)
+        {
+          FocusReplaceTextBox();
+        }
+        return;
+      }
+
+      _isExpanded = expand;
+      ToggleArrow.IsArrowUp = !expand;
+
+      if (expand)
+      {
+        UpdateWindowHeight(ExpandedWindowHeight);
+        ReplaceRow.Height = new GridLength(1, GridUnitType.Star);
+        ReplaceRowPanelElement.Visibility = Visibility.Visible;
+        await Task.WhenAll(
+          PlayStoryboardAsync("ExpandReplaceRowAnimation"),
+          PlayStoryboardAsync("OptionsShiftDownAnimation"));
+        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
+        if (focusReplaceField)
+        {
+          FocusReplaceTextBox();
+        }
+      }
+      else
+      {
+        await Task.WhenAll(
+          PlayStoryboardAsync("CollapseReplaceRowAnimation"),
+          PlayStoryboardAsync("OptionsShiftUpAnimation"));
+        ReplaceRow.Height = new GridLength(0);
+        ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
+        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
+        UpdateWindowHeight(MinWindowHeight);
+      }
+    }
+
+    private void FocusReplaceTextBox()
+    {
+      ReplaceTextBox.Focus();
+      ReplaceTextBox.CaretIndex = ReplaceTextBox.Text.Length;
+      ReplcePlaceholder.Visibility = Visibility.Collapsed;
+    }
+
     private void searchArrows_MouseEnter(object sender, MouseEventArgs e)
     {
       var searchArrows = (SearchArrows)sender;
@@ -384,6 +422,11 @@ namespace UI.Controls.Search
 
     private void OnSearchButtonPressed(string searchParameters)
     {
+      SendSearchRequest(searchParameters);
+    }
+
+    private void SendSearchRequest(string searchParameters)
+    {
       var searchText = SearchTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
@@ -391,6 +434,7 @@ namespace UI.Controls.Search
       if (searchArea == 2)
       {
         searchAreaParameters.SelectedIndex = 0;
+        searchArea = 0;
       }
 
       SearchEventAdapter.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
@@ -474,6 +518,30 @@ namespace UI.Controls.Search
         SearchTextBox.Focus();
         SearchPlaceholder.Visibility = Visibility.Collapsed;
         SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
+      }
+    }
+
+    private void SearchWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.Escape)
+      {
+        e.Handled = true;
+        CloseDialog();
+        return;
+      }
+
+      if (e.Key == Key.F3)
+      {
+        if (Keyboard.Modifiers == ModifierKeys.Shift)
+        {
+          e.Handled = true;
+          SendSearchRequest("FindPrevious");
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.None)
+        {
+          e.Handled = true;
+          SendSearchRequest("FindNext");
+        }
       }
     }
 
