@@ -6,6 +6,7 @@ using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
@@ -68,6 +69,7 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
+      AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), true);
 
       this.Visibility = Visibility.Hidden;
 
@@ -124,6 +126,25 @@ namespace MainWindowProgram
     private void ErrorMenuItem_Click(object sender, RoutedEventArgs e)
     {
 
+    }
+
+    private async void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      if (!IsCloseActiveTabShortcut(e))
+      {
+        return;
+      }
+
+      if (await MultiWindow.TryCloseActiveTabAsync(e.Handled))
+      {
+        e.Handled = true;
+      }
+    }
+
+    private static bool IsCloseActiveTabShortcut(KeyEventArgs e)
+    {
+      return (e.Key == Key.F4 || (e.Key == Key.System && e.SystemKey == Key.F4))
+        && Keyboard.Modifiers == ModifierKeys.Control;
     }
   }
 }

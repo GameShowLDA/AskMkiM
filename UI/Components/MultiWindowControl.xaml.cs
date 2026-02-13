@@ -211,6 +211,11 @@ namespace UI.Components
       return MultiEditor.RemoveActiveTextEditor(isTranslation);
     }
 
+    public Task<bool> TryCloseActiveTabAsync(bool eventAlreadyHandled = false)
+    {
+      return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
+    }
+
     public void RemoveControl(EditorType editorType)
     {
       MultiEditor.RemoveControl(editorType);
