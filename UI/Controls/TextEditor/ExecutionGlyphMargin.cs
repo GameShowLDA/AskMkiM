@@ -52,6 +52,7 @@ public class ExecutionGlyphMargin : AbstractMargin
 
   private readonly HashSet<int> _rightBreakpoints = new();        
   private readonly Dictionary<int, TextAnchor> _bpByCommand = new();
+  private readonly HashSet<int> _disabledBreakpoints = new();
 
   /// <summary>
   /// Ссылка на редактор AvalonEdit для прокрутки.
@@ -71,6 +72,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Clear();
       BreakpointCommandsNumbers.Clear();
       _bpByCommand.Clear();
+      _disabledBreakpoints.Clear();
       ActiveLines.Clear();
 
       RebuildBreakpointLineHighlights();
@@ -94,6 +96,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   public void SetRightBreakpoints(List<int> lines)
   {
     _rightBreakpoints.Clear();
+    if (lines == null) return;
+
     for (int i = 0; i < lines.Count; i++)
       _rightBreakpoints.Add(lines[i]);
   }
@@ -119,7 +123,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   public void EnsureBreakpoint(int lineNumber, int commandNumber, bool isSet, bool raiseEvents)
   {
     if (isSet) SetBreakpoint(lineNumber, commandNumber, raiseEvents);
-    else RemoveBreakpoint(commandNumber, raiseEvents);
+    else RemoveBreakpoint(lineNumber, commandNumber, raiseEvents);
   }
 
   /// <summary>
@@ -142,6 +146,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     _bpByCommand.Add(commandNumber, anchor);
     BreakpointLines.Add(anchor);
     BreakpointCommandsNumbers.Add(commandNumber);
+    _disabledBreakpoints.Remove(commandNumber);
 
     anchor.Deleted += (_, __) =>
     {
@@ -163,29 +168,80 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
 
+  //TODO: сделать метод RemoveBreakpoint с такими же входными данными, как и SetBreakpoint, для унификации.
+
   /// <summary>
-  /// Снимает точку остановки для указанной команды.
+  /// Снимает точку остановки для указанной команды, привязанной к указанной строке.
   /// </summary>
+  /// <param name="lineNumber">Номер строки в текущем документе.</param>
   /// <param name="commandNumber">Номер команды.</param>
   /// <param name="raiseEvents">Нужно ли поднять событие снятия точки остановки.</param>
-  private void RemoveBreakpoint(int commandNumber, bool raiseEvents)
+  private void RemoveBreakpoint(int lineNumber, int commandNumber, bool raiseEvents)
   {
     if (!_bpByCommand.TryGetValue(commandNumber, out var anchor)) return;
 
     _bpByCommand.Remove(commandNumber);
+    _disabledBreakpoints.Remove(commandNumber);
 
     int idx = BreakpointCommandsNumbers.IndexOf(commandNumber);
-    BreakpointCommandsNumbers.RemoveAt(idx);
-    BreakpointLines.RemoveAt(idx);
+    if (idx >= 0)
+    {
+      BreakpointCommandsNumbers.RemoveAt(idx);
+      BreakpointLines.RemoveAt(idx);
+    }
 
     RebuildBreakpointLineHighlights();
     InvalidateVisual();
 
     if (raiseEvents)
-    {
-      int lineNumber = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
       BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
-    }
+  }
+
+  /// <summary>
+  /// Проверяет, включена ли точка остановки на команде.
+  /// </summary>
+  /// <remarks>Если точки нет — вернёт <see langword="false"/>.</remarks>
+  public bool IsBreakpointEnabled(int commandNumber)
+  {
+    return _bpByCommand.ContainsKey(commandNumber) && !_disabledBreakpoints.Contains(commandNumber);
+  }
+
+  /// <summary>
+  /// Включает точку остановки для команды.
+  /// </summary>
+  public void EnableBreakpoint(int commandNumber, bool raiseEvents)
+  {
+    if (!_bpByCommand.TryGetValue(commandNumber, out var anchor))
+      return;
+
+    _disabledBreakpoints.Remove(commandNumber);
+
+    RebuildBreakpointLineHighlights();
+    InvalidateVisual();
+
+    if (!raiseEvents) return;
+
+    int line0 = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
+    BreakpointEventAdapter.RaiseBreakpointOn(line0, commandNumber);
+  }
+
+  /// <summary>
+  /// Выключает точку остановки для команды (точка должна существовать).
+  /// </summary>
+  public void DisableBreakpoint(int commandNumber, bool raiseEvents)
+  {
+    if (!_bpByCommand.TryGetValue(commandNumber, out var anchor))
+      return;
+
+    _disabledBreakpoints.Add(commandNumber);
+
+    RebuildBreakpointLineHighlights();
+    InvalidateVisual();
+
+    if (!raiseEvents) return;
+
+    int line0 = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
+    BreakpointEventAdapter.RaiseBreakpointOff(line0, commandNumber);
   }
 
   /// <summary>
@@ -239,15 +295,19 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   private void RebuildBreakpointLineHighlights()
   {
-    if (!BreakpointsVisible) return;
-
-    var doc = _textEditor.Document;
     var svc = GetMarkerService();
 
     svc.ClearAllMarkers();
 
+    if (!BreakpointsVisible) return;
+
+    var doc = _textEditor.Document;
+
     for (int i = 0; i < BreakpointLines.Count; i++)
     {
+      if (_disabledBreakpoints.Contains(BreakpointCommandsNumbers[i]))
+        continue;
+
       var line = doc.GetLineByOffset(BreakpointLines[i].Offset);
       svc.AddMarker(line.Offset, line.Length, LineBrush);
     }
@@ -315,7 +375,7 @@ public class ExecutionGlyphMargin : AbstractMargin
 
     if (_bpByCommand.ContainsKey(commandNumber))
     {
-      RemoveBreakpoint(commandNumber, raiseEvents: true);
+      RemoveBreakpoint(lineNumber, commandNumber, raiseEvents: true);
       return;
     }
 

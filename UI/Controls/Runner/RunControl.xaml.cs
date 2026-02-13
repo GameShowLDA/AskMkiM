@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Message;
@@ -13,12 +12,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using UI.Components.Invoke;
-using UI.Components.MultiEditorMethods;
+using UI.Controls.ErrorList;
 using UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
-using UI.Services;
-using UI.Services.FileManager;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -102,6 +98,16 @@ namespace UI.Controls.Runner
 
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
+
+      // Вкладка "Точки остановки"
+      ErrorListBoxVertical.BreakpointItemDoubleClicked += BreakpointItemDoubleClicked;
+      ErrorListBoxVertical.BreakpointEnabledChanged += BreakpointEnabledChanged;
+
+      // События брейкпоинтов, чтобы вкладка обновлялась в Run
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => OnBreakpointSet(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => OnBreakpointRemoved(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => OnBreakpointOn(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => OnBreakpointOff(e));
     }
     /// <summary>
     /// Обрабатывает событие изменения состояния блокировки интерфейса.
@@ -260,6 +266,14 @@ namespace UI.Controls.Runner
             SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
             dockItemDeviceState.Show(dockManager, DockPosition.Document);
             capturedDockItem.Show(dockManager, DockPosition.Document);
+
+            dockItemDeviceState.Show(dockManager, DockPosition.Document);
+            capturedDockItem.Show(dockManager, DockPosition.Document);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+              SyncBreakpointsFromEditor(textEditorUI);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
           }
           catch (Exception ex)
           {
@@ -274,6 +288,12 @@ namespace UI.Controls.Runner
         SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
         dockItemDeviceState.Show(dockManager, DockPosition.Document);
         dockItemPk.Show(dockManager, DockPosition.Document);
+        dockItemPk.Show(dockManager, DockPosition.Document);
+
+        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+          SyncBreakpointsFromEditor(textEditorUI);
+        }), System.Windows.Threading.DispatcherPriority.Loaded);
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
       }
     }
@@ -406,6 +426,119 @@ namespace UI.Controls.Runner
 
       BottomRow.Height = GridLength.Auto;
       ErrorListBoxVertical.MaxHeight = desired;
+    }
+
+    private void SyncBreakpointsFromEditor(TextEditorUI editor)
+    {
+      if (editor == null)
+        return;
+
+      ErrorListBoxVertical.ClearBreakpoints();
+
+      var doc = editor.Document;
+      var cmdNumbers = editor.BreakpointCommandsNumbers;
+      var anchors = editor.BreakPointLines;
+
+      int count = Math.Min(cmdNumbers.Count, anchors.Count);
+
+      for (int i = 0; i < count; i++)
+      {
+        int cmd = cmdNumbers[i];
+        int line1 = doc.GetLineByOffset(anchors[i].Offset).LineNumber; // 1-based
+        bool enabled = editor.IsBreakpointEnabled(cmd);
+
+        ErrorListBoxVertical.UpsertBreakpoint(cmd, line1, enabled);
+        SetModelBreakpoint(cmd, has: true, enabled: enabled);
+      }
+    }
+
+    private void BreakpointItemDoubleClicked(BreakpointListItem bp)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      if (bp.RightLine.HasValue && bp.RightLine.Value > 0)
+        editor.GoToLine(bp.RightLine.Value);
+    }
+
+    private void BreakpointEnabledChanged(BreakpointListItem bp, bool enabled)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      if (!editor.HasBreakpointCommand(bp.CommandNumber))
+        return;
+
+      if (editor.IsBreakpointEnabled(bp.CommandNumber) == enabled)
+        return;
+
+      // Поднимаем события: On/Off обработчики обновят вкладку и модель
+      if (enabled)
+        editor.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
+      else
+        editor.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
+    }
+
+    private void OnBreakpointSet(BreakpointEvents.BreakpointSet e)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, isEnabled: true);
+
+      SetModelBreakpoint(e.CommandNumber, has: true, enabled: true);
+    }
+
+    private void OnBreakpointRemoved(BreakpointEvents.BreakpointRemoved e)
+    {
+      ErrorListBoxVertical.RemoveBreakpoint(e.CommandNumber);
+      SetModelBreakpoint(e.CommandNumber, has: false, enabled: true);
+    }
+
+    private void OnBreakpointOn(BreakpointEvents.BreakpointOn e)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, isEnabled: true);
+
+      SetModelBreakpoint(e.CommandNumber, has: true, enabled: true);
+    }
+
+    private void OnBreakpointOff(BreakpointEvents.BreakpointOff e)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, isEnabled: false);
+
+      SetModelBreakpoint(e.CommandNumber, has: true, enabled: false);
+    }
+
+    private static int GetLine1BasedByCommand(TextEditorUI editor, int commandNumber)
+    {
+      var doc = editor.Document;
+      int idx = editor.BreakpointCommandsNumbers.IndexOf(commandNumber);
+      return doc.GetLineByOffset(editor.BreakPointLines[idx].Offset).LineNumber; // 1-based
+    }
+
+    private void SetModelBreakpoint(int commandNumber, bool has, bool enabled)
+    {
+      var model = translationModels.FirstOrDefault(m =>
+        int.TryParse(m.CommandNumber, out var num) && num == commandNumber);
+
+      if (model == null) return;
+
+      model.HasBreakpoint = has;
+      model.IsBreakpointEnabled = enabled;
     }
   }
 }

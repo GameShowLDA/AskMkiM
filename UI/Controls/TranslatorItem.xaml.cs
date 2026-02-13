@@ -1,10 +1,9 @@
 ﻿using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Windows.Controls;
-using System.Windows.Media.TextFormatting;
+using UI.Controls.ErrorList;
 using UI.Controls.TextEditor;
 
 namespace UI.Controls
@@ -24,13 +23,11 @@ namespace UI.Controls
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
     public List<BaseCommandModel> TranslationModels
     {
-      get
-      {
-        return translationModels;
-      }
+      get => translationModels;
       set
       {
         translationModels = value;
+
         ErrorClear();
         ErrorListBoxVertical.ClearAll();
 
@@ -48,27 +45,36 @@ namespace UI.Controls
             WarningCount += model.Warnings.Count;
           }
         }
-        MessageEventAdapter.RaiseInfoMessage(
-               $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+
+        Ask.Core.Services.EventCore.Adapters.MessageEventAdapter.RaiseInfoMessage(
+          $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
       }
     }
 
     public TranslatorItem()
     {
       InitializeComponent();
+
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
 
+      // Новое: вкладка "Точки остановки"
+      ErrorListBoxVertical.BreakpointItemDoubleClicked += ErrorListBoxVertical_BreakpointItemDoubleClicked;
+      ErrorListBoxVertical.BreakpointEnabledChanged += ErrorListBoxVertical_BreakpointEnabledChanged;
+
+      // События брейкпоинтов
       EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => BreakpointOn(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => BreakpointOff(e));
     }
 
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(IDisplayIssue item)
     {
       var leftEditor = GetLeftEditor();
-      leftEditor.GoToLine(item.SourceLineNumber);
+      leftEditor?.GoToLine(item.SourceLineNumber);
 
       var rightEditor = GetRightEditor();
-      rightEditor.GoToLine(item.FormattedLineNumber);
+      rightEditor?.GoToLine(item.FormattedLineNumber);
     }
 
     private void ErrorClear()
@@ -83,17 +89,11 @@ namespace UI.Controls
         return;
 
       if (textEditorUI.Parent is Panel oldParent)
-      {
         oldParent.Children.Remove(textEditorUI);
-      }
       else if (textEditorUI.Parent is ContentControl oldContent)
-      {
         oldContent.Content = null;
-      }
       else if (textEditorUI.Parent is Decorator decorator)
-      {
         decorator.Child = null;
-      }
 
       LeftBox.Children.Clear();
       LeftBox.Children.Add(textEditorUI);
@@ -102,9 +102,7 @@ namespace UI.Controls
     public void SetRightEditor(TextEditorUI textEditorUI)
     {
       if (RightBox == null || textEditorUI == null)
-      {
         return;
-      }
 
       RightBox.Children.Clear();
       RightBox.Children.Add(textEditorUI);
@@ -112,42 +110,64 @@ namespace UI.Controls
 
     public TextEditorUI GetRightEditor()
     {
-      if (RightBox == null)
-      {
-        return null;
-      }
-
+      if (RightBox == null) return null;
       return RightBox.Children[0] as TextEditorUI;
     }
 
     public TextEditorUI GetLeftEditor()
     {
-      if (LeftBox == null)
-      {
-        return null;
-      }
-
+      if (LeftBox == null) return null;
       return LeftBox.Children[0] as TextEditorUI;
     }
 
-    public string GetLeftEditorName()
+    public string GetLeftEditorName() => FirstFileName.Text;
+    public string GetRightEditorName() => SecondFileName.Text;
+
+    public void SetRightEditorName(string newText) => SecondFileName.Text = newText;
+    public void SetLeftEditorName(string newText) => FirstFileName.Text = newText;
+
+    private void ErrorListBoxVertical_BreakpointItemDoubleClicked(BreakpointListItem bp)
     {
-      return FirstFileName.Text;
+      var model = GetCommandByNumber(bp.CommandNumber);
+      if (model == null) return;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+      if (left == null || right == null) return;
+
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.GoToLine(leftLine);
+      right.GoToLine(rightLine);
     }
 
-    public string GetRightEditorName()
+    private void ErrorListBoxVertical_BreakpointEnabledChanged(BreakpointListItem bp, bool enabled)
     {
-      return SecondFileName.Text;
-    }
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+      if (left == null || right == null) return;
 
-    public void SetRightEditorName(string newText)
-    {
-      SecondFileName.Text = newText;
-    }
+      if (!left.HasBreakpointCommand(bp.CommandNumber) && !right.HasBreakpointCommand(bp.CommandNumber))
+        return;
 
-    public void SetLeftEditorName(string newText)
-    {
-      FirstFileName.Text = newText;
+      bool current = left.HasBreakpointCommand(bp.CommandNumber)
+        ? left.IsBreakpointEnabled(bp.CommandNumber)
+        : right.IsBreakpointEnabled(bp.CommandNumber);
+
+      if (current == enabled)
+        return;
+
+      if (enabled)
+      {
+        left.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
+        right.EnableBreakpoint(bp.CommandNumber, raiseEvents: false);
+      }
+      else
+      {
+        left.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
+        right.DisableBreakpoint(bp.CommandNumber, raiseEvents: false);
+      }
     }
 
     /// <summary>
@@ -165,16 +185,18 @@ namespace UI.Controls
 
       var left = GetLeftEditor();
       var right = GetRightEditor();
+      if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: true, raiseEvents: false);
-
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: true, raiseEvents: false);
 
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: true);
+
       if (obj.LineNumber == leftLine - 1)
-        right.GoToLine(rightLine);
+        right.ScrollToLine(rightLine);
     }
 
     /// <summary>
@@ -192,6 +214,7 @@ namespace UI.Controls
 
       var left = GetLeftEditor();
       var right = GetRightEditor();
+      if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;
@@ -199,16 +222,54 @@ namespace UI.Controls
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: false, raiseEvents: false);
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: false, raiseEvents: false);
 
+      ErrorListBoxVertical.RemoveBreakpoint(obj.CommandNumber);
+
       if (obj.LineNumber == leftLine - 1)
-        right.GoToLine(rightLine);
+        right.ScrollToLine(rightLine);
+    }
+
+    private void BreakpointOn(BreakpointEvents.BreakpointOn obj)
+    {
+      var model = GetCommandByNumber(obj.CommandNumber);
+      if (model == null) return;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+      if (left == null || right == null) return;
+
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
+      right.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
+
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: true);
+    }
+
+    private void BreakpointOff(BreakpointEvents.BreakpointOff obj)
+    {
+      var model = GetCommandByNumber(obj.CommandNumber);
+      if (model == null) return;
+
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+      if (left == null || right == null) return;
+
+      int leftLine = model.StartLineNumber + 1;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
+      right.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
+
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: false);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)
     {
       return translationModels
-          .FirstOrDefault(x =>
-              int.TryParse(x.CommandNumber, out var num) &&
-              num == commandNumber);
+        .FirstOrDefault(x =>
+          int.TryParse(x.CommandNumber, out var num) &&
+          num == commandNumber);
     }
   }
 }

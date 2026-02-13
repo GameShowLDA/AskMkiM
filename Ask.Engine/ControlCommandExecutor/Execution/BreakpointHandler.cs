@@ -21,6 +21,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     {
       if (!command.HasBreakpoint)
         return;
+      if (!command.IsBreakpointEnabled)
+        return;
 
       OnBreakpointHit(command);
     }

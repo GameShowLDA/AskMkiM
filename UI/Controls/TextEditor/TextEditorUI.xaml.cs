@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Support;
-using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
@@ -251,6 +250,67 @@ namespace UI.Controls.TextEditor
     public void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false)
     {
       _executionMargin.EnsureBreakpoint(formattedLine, commandNumber, isSet, raiseEvents);
+    }
+
+    /// <summary>
+    /// Включает точку остановки по номеру команды.
+    /// </summary>
+    public void EnableBreakpoint(int commandNumber, bool raiseEvents = false)
+    {
+      _executionMargin.EnableBreakpoint(commandNumber, raiseEvents);
+    }
+
+    /// <summary>
+    /// Выключает точку остановки по номеру команды.
+    /// </summary>
+    public void DisableBreakpoint(int commandNumber, bool raiseEvents = false)
+    {
+      _executionMargin.DisableBreakpoint(commandNumber, raiseEvents);
+    }
+
+    /// <summary>
+    /// Проверяет, установлена ли точка остановки на команде.
+    /// </summary>
+    public bool HasBreakpointCommand(int commandNumber)
+    {
+      return _executionMargin.HasBreakpointCommand(commandNumber);
+    }
+
+    /// <summary>
+    /// Проверяет, включена ли точка остановки на команде.
+    /// </summary>
+    public bool IsBreakpointEnabled(int commandNumber)
+    {
+      return _executionMargin.IsBreakpointEnabled(commandNumber);
+    }
+
+    /// <summary>
+    /// Снимок точки остановки для отображения в списке.
+    /// </summary>
+    public readonly record struct BreakpointSnapshot(int CommandNumber, int LineNumber, bool IsEnabled);
+
+    /// <summary>
+    /// Возвращает снимок всех точек остановки в текущем документе.
+    /// </summary>
+    public IReadOnlyList<BreakpointSnapshot> GetBreakpointsSnapshot()
+    {
+      var doc = textEditor.Document;
+
+      var cmds = _executionMargin.BreakpointCommandsNumbers;
+      var anchors = _executionMargin.BreakpointLines;
+
+      var result = new List<BreakpointSnapshot>(cmds.Count);
+
+      for (int i = 0; i < cmds.Count; i++)
+      {
+        int cmd = cmds[i];
+        int line = doc.GetLineByOffset(anchors[i].Offset).LineNumber; // 1-based
+        bool enabled = _executionMargin.IsBreakpointEnabled(cmd);
+
+        result.Add(new BreakpointSnapshot(cmd, line, enabled));
+      }
+
+      return result;
     }
 
     /// <summary>

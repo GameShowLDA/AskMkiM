@@ -51,6 +51,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// </summary>
     public bool HasBreakpoint { get; set; }
 
+    /// <summary>
+    /// Признак включенной точки установки для данной команды.
+    /// </summary>
+    /// <remarks>Если точка включена - <see langword="true"/>.</remarks>
+    public bool IsBreakpointEnabled { get; set; } = true;
+
     #region Методы
     public virtual T GetModel<T>(BaseCommandModel baseCommandModel) where T : class
     {

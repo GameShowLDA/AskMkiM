@@ -109,35 +109,49 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Собирает номера команд, для которых установлены точки останова
-    /// в текущем элементе транслятора (из модели и визуального состояния редакторов).
+    /// Собирает номера команд, для которых установлены точки останова,
+    /// и их состояние (включена/выключена).
     /// </summary>
-    private static HashSet<int> CollectBreakpoints(TranslatorItem item)
+    private static Dictionary<int, bool> CollectBreakpoints(TranslatorItem item)
     {
-      var result = new HashSet<int>();
+      var result = new Dictionary<int, bool>();
 
       for (int i = 0; i < item.TranslationModels.Count; i++)
       {
         var model = item.TranslationModels[i];
-        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out var commandNumber))
-          result.Add(commandNumber);
+        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out var cmd))
+          Merge(result, cmd, model.IsBreakpointEnabled);
       }
 
       var leftEditor = item.GetLeftEditor();
       if (leftEditor != null)
       {
         for (int i = 0; i < leftEditor.BreakpointCommandsNumbers.Count; i++)
-          result.Add(leftEditor.BreakpointCommandsNumbers[i]);
+        {
+          int cmd = leftEditor.BreakpointCommandsNumbers[i];
+          Merge(result, cmd, leftEditor.IsBreakpointEnabled(cmd));
+        }
       }
 
       var rightEditor = item.GetRightEditor();
       if (rightEditor != null)
       {
         for (int i = 0; i < rightEditor.BreakpointCommandsNumbers.Count; i++)
-          result.Add(rightEditor.BreakpointCommandsNumbers[i]);
+        {
+          int cmd = rightEditor.BreakpointCommandsNumbers[i];
+          Merge(result, cmd, rightEditor.IsBreakpointEnabled(cmd));
+        }
       }
 
       return result;
+
+      static void Merge(Dictionary<int, bool> map, int cmd, bool enabled)
+      {
+        if (map.TryGetValue(cmd, out bool prev))
+          map[cmd] = prev && enabled;
+        else
+          map[cmd] = enabled;
+      }
     }
 
     /// <summary>
@@ -148,37 +162,48 @@ namespace MainWindowProgram.Services
       List<BaseCommandModel> models,
       TextEditorUI leftEditor,
       TextEditorUI rightEditor,
-      HashSet<int> preservedCommandNumbers)
+      Dictionary<int, bool> preserved)
     {
       var requiredCommands = new HashSet<int>();
+
       var leftLineByCommand = new Dictionary<int, int>();
-      var rightLineByCommand = new Dictionary<int, int>();
+      var rightLineByCommand = new Dictionary<int, int>(); 
+      var enabledByCommand = new Dictionary<int, bool>();
 
       for (int i = 0; i < models.Count; i++)
       {
         var model = models[i];
-        if (!int.TryParse(model.CommandNumber, out var commandNumber))
+
+        if (!int.TryParse(model.CommandNumber, out var cmd))
         {
           model.HasBreakpoint = false;
+          model.IsBreakpointEnabled = true;
           continue;
         }
 
         bool isAllowed = IsBreakpointAllowed(model);
-        bool hasBreakpoint = isAllowed && preservedCommandNumbers.Contains(commandNumber);
+
+        bool hasPreserved = preserved.TryGetValue(cmd, out bool preservedEnabled);
+
+        bool hasBreakpoint = isAllowed && hasPreserved;
         model.HasBreakpoint = hasBreakpoint;
+        model.IsBreakpointEnabled = hasBreakpoint ? preservedEnabled : true;
 
         if (!isAllowed)
           continue;
 
-        leftLineByCommand[commandNumber] = model.StartLineNumber;
-        rightLineByCommand[commandNumber] = model.FormattedStartLineNumber + 1;
+        leftLineByCommand[cmd] = model.StartLineNumber + 1;
+        rightLineByCommand[cmd] = model.FormattedStartLineNumber + 1; // FormattedStartLineNumber 0-based
 
         if (hasBreakpoint)
-          requiredCommands.Add(commandNumber);
+        {
+          requiredCommands.Add(cmd);
+          enabledByCommand[cmd] = preservedEnabled;
+        }
       }
 
-      SyncEditorBreakpoints(leftEditor, requiredCommands, leftLineByCommand);
-      SyncEditorBreakpoints(rightEditor, requiredCommands, rightLineByCommand);
+      SyncEditorBreakpoints(leftEditor, requiredCommands, leftLineByCommand, enabledByCommand);
+      SyncEditorBreakpoints(rightEditor, requiredCommands, rightLineByCommand, enabledByCommand);
     }
 
     /// <summary>
@@ -188,21 +213,28 @@ namespace MainWindowProgram.Services
     private static void SyncEditorBreakpoints(
       TextEditorUI editor,
       HashSet<int> requiredCommands,
-      Dictionary<int, int> lineByCommand)
+      Dictionary<int, int> lineByCommand,
+      Dictionary<int, bool> enabledByCommand)
     {
       var existing = editor.BreakpointCommandsNumbers.ToList();
 
       for (int i = 0; i < existing.Count; i++)
       {
-        int commandNumber = existing[i];
-        if (!requiredCommands.Contains(commandNumber))
-          editor.EnsureBreakpoint(1, commandNumber, isSet: false, raiseEvents: false);
+        int cmd = existing[i];
+        if (!requiredCommands.Contains(cmd))
+          editor.EnsureBreakpoint(1, cmd, isSet: false, raiseEvents: false);
       }
 
-      foreach (var commandNumber in requiredCommands)
+      foreach (var cmd in requiredCommands)
       {
-        if (lineByCommand.TryGetValue(commandNumber, out int lineNumber))
-          editor.EnsureBreakpoint(lineNumber, commandNumber, isSet: true, raiseEvents: false);
+        if (lineByCommand.TryGetValue(cmd, out int line1Based))
+          editor.EnsureBreakpoint(line1Based, cmd, isSet: true, raiseEvents: false);
+
+        if (enabledByCommand.TryGetValue(cmd, out bool enabled))
+        {
+          if (enabled) editor.EnableBreakpoint(cmd, raiseEvents: false);
+          else editor.DisableBreakpoint(cmd, raiseEvents: false);
+        }
       }
     }
 

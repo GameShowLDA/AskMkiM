@@ -21,6 +21,12 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public ObservableCollection<IDisplayIssue> Items { get; } = new();
 
+    /// <summary>
+    /// Коллекция точек остановки для вкладки "Точки остановки".
+    /// Должна обновляться сразу при появлении/удалении/переключении точки.
+    /// </summary>
+    public ObservableCollection<BreakpointListItem> Breakpoints { get; } = new();
+
     private readonly List<IDisplayIssue> _allIssues = new();
 
     private bool _warningsHidden = false;
@@ -34,6 +40,7 @@ namespace UI.Controls.ErrorList
       InitializeComponent();
       Loaded += ErrorListControl_Loaded;
       DataContext = this;
+
       EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
 
       if (AdminConfig.GetDebugRights())
@@ -47,45 +54,41 @@ namespace UI.Controls.ErrorList
       };
     }
 
+    #region События для вкладки "Точки остановки"
+
+    /// <summary>
+    /// Срабатывает при двойном клике по брейкпоинту в таблице (нужно перейти к нему в редакторе).
+    /// </summary>
+    public event Action<BreakpointListItem>? BreakpointItemDoubleClicked;
+
+    /// <summary>
+    /// Срабатывает при изменении состояния чекбокса брейкпоинта (вкл/выкл).
+    /// </summary>
+    public event Action<BreakpointListItem, bool>? BreakpointEnabledChanged;
+
+    #endregion
+
     private void DebugChanged(bool isDebug)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-
-        if (isDebug)
-        {
-          DebugColumn.Visibility = Visibility.Visible;
-        }
-        else
-        {
-          DebugColumn.Visibility = Visibility.Collapsed;
-        }
+        DebugColumn.Visibility = isDebug ? Visibility.Visible : Visibility.Collapsed;
       });
     }
 
     public Visibility StringsNumberVisible
     {
-      get
-      {
-        return StringsNumber.Visibility;
-      }
-      set
-      {
-        StringsNumber.Visibility = value;
-      }
+      get => StringsNumber.Visibility;
+      set => StringsNumber.Visibility = value;
     }
 
     public Visibility MeasureResultVisible
     {
-      get
-      {
-        return MeasureResult.Visibility;
-      }
-      set
-      {
-        MeasureResult.Visibility = value;
-      }
+      get => MeasureResult.Visibility;
+      set => MeasureResult.Visibility = value;
     }
+
+    #region Ошибки/предупреждения (старый функционал)
 
     /// <summary>
     /// Очищает все элементы.
@@ -164,7 +167,6 @@ namespace UI.Controls.ErrorList
       UpdateButtons();
     }
 
-
     /// <summary>
     /// Событие вызывается при двойном клике по строке с ошибкой или предупреждением.
     /// </summary>
@@ -225,25 +227,20 @@ namespace UI.Controls.ErrorList
 
     private void ApplyInitialButtonState()
     {
-      // Определяем количество
       _warningTotal = _allIssues.Count(i => i.IsWarning);
       _errorTotal = _allIssues.Count(i => !i.IsWarning);
 
-      // Предупреждения
       if (_warningTotal == 0)
       {
         WarningButton.Visibility = Visibility.Collapsed;
-        WarningButton.IsChecked = true; // просто для логики, скрывать нечего
+        WarningButton.IsChecked = true;
       }
       else
       {
         WarningButton.Visibility = Visibility.Visible;
-
-        // показываем все => IsChecked = true
         WarningButton.IsChecked = !_warningsHidden;
       }
 
-      // Ошибки
       if (_errorTotal == 0)
       {
         ErrorsButton.Visibility = Visibility.Collapsed;
@@ -252,12 +249,9 @@ namespace UI.Controls.ErrorList
       else
       {
         ErrorsButton.Visibility = Visibility.Visible;
-
-        // показываем все => IsChecked = true
         ErrorsButton.IsChecked = !_errorsHidden;
       }
 
-      // Перерисовываем видимость сразу
       UpdateButtons();
     }
 
@@ -268,5 +262,103 @@ namespace UI.Controls.ErrorList
         ItemDoubleClicked?.Invoke(selectedError);
       }
     }
+
+    #endregion
+
+    #region Точки остановки (новый функционал)
+
+    /// <summary>
+    /// Добавляет брейкпоинт в список или обновляет существующий по номеру команды.
+    /// </summary>
+    public void UpsertBreakpoint(int commandNumber, int? lineNumber, bool isEnabled)
+    {
+      if (Dispatcher.CheckAccess())
+      {
+        UpsertBreakpointCore(commandNumber, lineNumber, isEnabled);
+        return;
+      }
+
+      Dispatcher.Invoke(() => UpsertBreakpointCore(commandNumber, lineNumber, isEnabled));
+    }
+
+    private void UpsertBreakpointCore(int commandNumber, int? lineNumber, bool isEnabled)
+    {
+      var existing = Breakpoints.FirstOrDefault(b => b.CommandNumber == commandNumber);
+      if (existing != null)
+      {
+        existing.RightLine = lineNumber;
+        existing.IsEnabled = isEnabled;
+        return;
+      }
+
+      Breakpoints.Add(new BreakpointListItem(
+        commandNumber: commandNumber,
+        leftLine: null,
+        rightLine: lineNumber,
+        isEnabled: isEnabled
+      ));
+    }
+
+    /// <summary>
+    /// Удаляет брейкпоинт из списка по номеру команды.
+    /// </summary>
+    public void RemoveBreakpoint(int commandNumber)
+    {
+      if (Dispatcher.CheckAccess())
+      {
+        RemoveBreakpointCore(commandNumber);
+        return;
+      }
+
+      Dispatcher.Invoke(() => RemoveBreakpointCore(commandNumber));
+    }
+
+    private void RemoveBreakpointCore(int commandNumber)
+    {
+      var existing = Breakpoints.FirstOrDefault(b => b.CommandNumber == commandNumber);
+      if (existing != null)
+        Breakpoints.Remove(existing);
+    }
+
+    /// <summary>
+    /// Полностью очищает список брейкпоинтов.
+    /// </summary>
+    public void ClearBreakpoints()
+    {
+      if (Dispatcher.CheckAccess())
+      {
+        Breakpoints.Clear();
+        return;
+      }
+
+      Dispatcher.Invoke(() => Breakpoints.Clear());
+    }
+
+    /// <summary>
+    /// Двойной клик по таблице брейкпоинтов -> запрос перехода к месту в редакторе.
+    /// </summary>
+    private void BreakpointsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      if (sender is DataGrid grid && grid.SelectedItem is BreakpointListItem bp)
+      {
+        BreakpointItemDoubleClicked?.Invoke(bp);
+        e.Handled = true;
+      }
+    }
+
+    /// <summary>
+    /// Клик по чекбоксу брейкпоинта -> запрос включить/выключить.
+    /// </summary>
+    private void BreakpointEnabled_Click(object sender, RoutedEventArgs e)
+    {
+      if (sender is CheckBox cb && cb.DataContext is BreakpointListItem bp)
+      {
+        bool enabled = cb.IsChecked == true;
+        BreakpointEnabledChanged?.Invoke(bp, enabled);
+        e.Handled = true;
+      }
+    }
+
+    #endregion
   }
 }
