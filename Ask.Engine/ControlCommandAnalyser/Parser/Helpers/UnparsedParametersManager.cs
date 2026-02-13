@@ -33,7 +33,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
-    public static void HandleUnparsedParameters(IeCommandModel model, int numberLine, string? remainder, string lowerLimitCapacity, string higherLimitCapacity)
+    public static void HandleUnparsedParameters(IeCommandModel model, int numberLine, string? remainder)
     {
 
       if (!string.IsNullOrEmpty(remainder))
@@ -42,14 +42,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
-
-      // Валидация
-      if (string.IsNullOrWhiteSpace(lowerLimitCapacity) && string.IsNullOrWhiteSpace(higherLimitCapacity))
-      {
-        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
-        model.Errors.Add(IeErrors.CannotParseParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
-
     }
   }
 }

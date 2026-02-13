@@ -17,16 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Eht
 
       (cabel, cabelUnit, remainder) = CommonParameterParser.ResistanceParser.ParseCabelResistance(remainder);
 
-      ResistanceManager.ProcessResistance(
-          model,
-          lower,
-          higher,
-          cabel,
-          unit,
-          cabelUnit,
-          ctx.CommandNumber,
-          ctx.Mnemonic,
-          ctx.LineNumber);
+      ResistanceManager.ProcessResistance(model, lower, higher, cabel, unit, cabelUnit, ctx.CommandNumber, ctx.Mnemonic, ctx.LineNumber);
 
       return remainder;
     }

@@ -39,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       var remainder = PreprocessSourceLines.GetClearCommandBody(model, lines);
 
-      remainder = RemoveCommandPrefix(remainder);
+      remainder = TextRemoveManager.RemoveCommandPrefix(remainder);
 
       var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
 
@@ -55,13 +55,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       return model;
     }
-
-    private static string RemoveCommandPrefix(string remainder)
-    {
-      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
-      return match.Success ? match.Groups[1].Value.Trim() : remainder;
-    }
   }
-
 }
 

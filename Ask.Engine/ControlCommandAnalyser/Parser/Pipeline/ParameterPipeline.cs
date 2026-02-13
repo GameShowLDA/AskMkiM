@@ -1,7 +1,7 @@
 ﻿using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 
-namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
+namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
 {
   public class ParameterPipeline<TModel>
   {

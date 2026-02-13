@@ -1,21 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
+﻿namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
 {
   public static class InvalidParametersOrderManager
   {
-    public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? resistanceStart, out string errorDescription)
+    public static bool HasInvalidParameterOrder(
+    string firstLine,
+    List<string> algorithmKeys,
+    string? capacityStart,
+    out string errorDescription)
     {
       errorDescription = string.Empty;
 
       int idxKey = -1;
-      int idxResistance = -1;
-      int idxPoint = firstLine.IndexOf('*');
+      int idxCapacity = -1;
 
+      int idxPointStart = firstLine.IndexOf('*');
+      int idxPointEnd = firstLine.LastIndexOf('*');
+
+      // ищем самый ранний ключ
       foreach (var key in algorithmKeys)
       {
         int idx = firstLine.IndexOf(key, StringComparison.OrdinalIgnoreCase);
@@ -23,24 +24,23 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
           idxKey = idx;
       }
 
-      // Сопротивление
-      if (!string.IsNullOrWhiteSpace(resistanceStart))
+      if (!string.IsNullOrWhiteSpace(capacityStart))
       {
-        idxResistance = firstLine.IndexOf(resistanceStart, StringComparison.OrdinalIgnoreCase);
+        idxCapacity = firstLine.IndexOf(capacityStart, StringComparison.OrdinalIgnoreCase);
       }
 
-      // Ключ должен идти до сопротивления
-      if (idxKey != -1 && idxResistance != -1 && idxKey > idxResistance)
+      // ключ после параметра
+      if (idxKey != -1 && idxCapacity != -1 && idxKey > idxCapacity)
       {
         errorDescription = "Ключ алгоритма указан после электрической емкости.";
         return true;
       }
 
-      // Все параметры должны быть до точек
-      if (idxPoint != -1)
+      // параметры после блока точек
+      if (idxPointEnd != -1)
       {
-        if ((idxKey != -1 && idxKey > idxPoint)
-         || (idxResistance != -1 && idxResistance > idxPoint))
+        if ((idxKey != -1 && idxKey > idxPointEnd)
+         || (idxCapacity != -1 && idxCapacity > idxPointEnd))
         {
           errorDescription = "Один из параметров указан после точек.";
           return true;
@@ -49,5 +49,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
 
       return false;
     }
+
   }
 }
