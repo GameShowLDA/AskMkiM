@@ -206,6 +206,21 @@ namespace MainWindowProgram
       var mods = Keyboard.Modifiers;
       bool ctrl = (mods & ModifierKeys.Control) != 0;
       bool alt = (mods & ModifierKeys.Alt) != 0;
+      var pressedKey = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
+
+      if (ctrl && !alt && pressedKey == Key.F)
+      {
+        SearchWindow.CloseDialog();
+        ke.Handled = true;
+        return;
+      }
+
+      if (ctrl && !alt && pressedKey == Key.H)
+      {
+        _ = SearchWindow.ToggleReplaceRowAsync();
+        ke.Handled = true;
+        return;
+      }
 
       // Пропускаем только «чистый» Ctrl (без Alt) — им заведуют другие биндинги.
       if (ctrl && !alt)

@@ -228,6 +228,12 @@ namespace UI.Controls.Search
 
     public Task CollapseReplaceRowAsync() => SetReplaceRowStateAsync(false);
 
+    public Task ToggleReplaceRowAsync()
+    {
+      bool expand = !_isExpanded;
+      return SetReplaceRowStateAsync(expand, focusReplaceField: expand);
+    }
+
     /// <summary>Возвращает true, если поле поиска непустое.</summary>
     public bool HasSearchText() => !string.IsNullOrWhiteSpace(SearchTextBox.Text);
 
