@@ -53,6 +53,36 @@
     <SolidColorBrush x:Key="ComboBoxBorderColor" Color="{DynamicResource SecondaryColor}"/>
     <SolidColorBrush x:Key="ComboBoxSecondActiveBorderColor" Color="{DynamicResource IsCheckedColor}"/>
 
+    <Style TargetType="{x:Type ToolTip}">
+        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource FadedRedSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="MaxWidth" Value="420"/>
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToolTip}">
+                    <Border Background="Transparent" SnapsToDevicePixels="True">
+                        <Border CornerRadius="9"
+                                Background="{TemplateBinding BorderBrush}"
+                                Padding="{TemplateBinding BorderThickness}">
+                            <Border CornerRadius="8"
+                                    Background="{TemplateBinding Background}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    RecognizesAccessKey="True"/>
+                            </Border>
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="AnimatedSwitch" TargetType="{x:Type ToggleButton}">
         <Setter Property="Foreground" Value="Black" />
         <Setter Property="Background" Value="#FAFAFB" />
