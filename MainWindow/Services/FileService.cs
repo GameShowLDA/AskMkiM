@@ -72,7 +72,7 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает диалог выбора файла и загружает его в редактор.
+    /// Открывает диалог выбора файлов и загружает их в редактор.
     /// </summary>
     public void OpenFileAsync()
     {
@@ -86,12 +86,15 @@ namespace MainWindowProgram.Services
         {
           Filter = "PKW files (*.pkw, *.Pkw, *.PKW)|*.pkw; *.Pkw; *.PKW|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK|ACS files (*.ACS, *.Acs, *.acs)|*.ACS; *.Acs; *.ACs; *.AcS; *.aCS; *.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
           Title = "Выберите файл",
+          Multiselect = true
         };
 
         if (openFileDialog.ShowDialog() == true)
         {
-          string filePath = openFileDialog.FileName;
-          _multiWindow.OpenFileInEditor(filePath);
+          foreach (string filePath in openFileDialog.FileNames)
+          {
+            _multiWindow.OpenFileInEditor(filePath);
+          }
         }
       }
     }
