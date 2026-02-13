@@ -132,7 +132,7 @@ namespace MainWindowProgram
     /// <summary>
     /// Глобальные хоткеи для навигации по результатам поиска (F3/Shift+F3), даже когда окно SearchWindow не в фокусе.
     /// </summary>
-    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    private async void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.Escape && SearchWindow != null && SearchWindow.IsVisible)
       {
@@ -151,9 +151,40 @@ namespace MainWindowProgram
         return;
       }
 
+      if (SearchWindow.IsVisible)
+      {
+        return;
+      }
+
       var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
+      var selectedText = MultiWindow?.GetActiveTextEditor()?.TextArea?.Selection?.GetText();
+
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        e.Handled = true;
+        await ShowSearchWindowAndRunSearchAsync(selectedText, direction);
+        return;
+      }
+
       SearchEventAdapter.RaiseSearchButtonPressed(direction);
       e.Handled = true;
+    }
+
+    private async Task ShowSearchWindowAndRunSearchAsync(string selectedText, string direction)
+    {
+      if (SearchWindow == null)
+      {
+        return;
+      }
+
+      if (SearchWindow.Owner == null)
+      {
+        SearchWindow.Owner = this;
+      }
+
+      await SearchWindow.ShowWindow(expandReplaceRow: false, focusReplaceField: false);
+      SearchEventAdapter.RaiseSearchTextRequested(selectedText);
+      SearchEventAdapter.RaiseSearchButtonPressed(direction);
     }
 
     /// <summary>
@@ -191,9 +222,17 @@ namespace MainWindowProgram
 
       if (SearchWindow.IsVisible && ke.Key == Key.F3)
       {
+        var selectedText = MultiWindow?.GetActiveTextEditor()?.TextArea?.Selection?.GetText();
         var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          SearchEventAdapter.RaiseSearchTextRequested(selectedText);
+        }
+
         SearchEventAdapter.RaiseSearchButtonPressed(direction);
         ke.Handled = true;
+        return;
       }
 
       // Alt+R / Alt+A — локально в SearchWindow
