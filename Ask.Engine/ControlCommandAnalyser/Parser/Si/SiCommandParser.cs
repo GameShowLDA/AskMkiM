@@ -9,6 +9,7 @@ using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
+using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
@@ -33,18 +34,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         StartLineNumber = numberLine,
       };
 
-      if (lines == null || lines.Count == 0)
+      var rmCommandModel = CheckPoints.CheckRm(model, numberLine, commandNumber, mnemonic);
+      if (!SourceLinesManager.Check(model, lines, numberLine))
       {
-        LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(SiErrors.EmptyCommandBody(numberLine, $"{commandNumber} {mnemonic}"));
-      }
-
-      var rmCommandModel = CommandsModel.GetRMModel();
-
-      if (rmCommandModel == null)
-      {
-        LogError($"Команда РМ не найдена");
-        model.Errors.Add(SiErrors.EmptyPoints(numberLine, $"{commandNumber} {mnemonic}"));
+        return model;
       }
 
       var breakDown = ServiceLocator.GetRequired<IBreakdownTester>();
@@ -60,9 +53,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
 
         var maxVoltage = breakDown.SiMaxVoltage;
 
-        string body = AllLinesInOne(model, lines);
-
-        var remainder = body;
+        var remainder = PreprocessSourceLines.GetClearCommandBody(model, lines);
 
         remainder = ManageSiParametersParse(model, commandNumber, mnemonic, numberLine, remainder, breakDown);
 
@@ -333,25 +324,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         model.Errors.Add(SiErrors.CannotParseParameters("Не указано время", numberLine, $"{commandNumber} {mnemonic}"));
         LogWarning($"Не указано время (строка {numberLine}): {commandNumber} {mnemonic}");
       }
-    }
-    
-    private static string AllLinesInOne(SiCommandModel model, List<string> lines)
-    {
-      List<string> processedLines = CommentsParser.ParseComments(lines, model);
-      lines.Clear();
-      lines.AddRange(processedLines);
-      model.SourceLines = model.SourceLines
-        .Where(l => !string.IsNullOrWhiteSpace(l))
-        .ToList();
-
-      var body = string.Concat(processedLines.Count > 0 && processedLines.FindAll(l => string.IsNullOrEmpty(l) || string.IsNullOrWhiteSpace(l)).Count == 0 ?
-        processedLines : model.SourceLines)
-        .Replace("\r", "")
-        .Replace("\n", "")
-        .Replace("\t", "");
-
-      LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
-      return body;
     }
   }
 }
