@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using System.Text.RegularExpressions;
@@ -25,8 +26,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
 
       return scheme;
     }
+    public static List<SwitchingBus> GetBusList(CkCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
+    {
+      string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
 
-    private static bool TryExtractPointsBlock( string body, out int firstStar, out int lastStar)
+      if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
+      {
+        return HandleNoBusBlock(model, numberLine);
+      }
+      model.BusList = ParseBusList(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
+
+      remainder = ClearLineFromPoints(remainder);
+
+      return model.BusList;
+    }
+
+    private static bool TryExtractPointsBlock(string body, out int firstStar, out int lastStar)
     {
       firstStar = body.IndexOf('*');
       lastStar = body.LastIndexOf('*');
@@ -39,6 +54,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {model.CommandNumber} {model.Mnemonic}");
 
       model.Errors.Add(EhtErrors.EmptyPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+    }
+
+    private static List<SwitchingBus> HandleNoBusBlock(CkCommandModel model, int numberLine)
+    {
+      LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {model.CommandNumber} {model.Mnemonic}");
+
+      return Enum.GetValues<SwitchingBus>().Where(x => !x.ToString().StartsWith("AB")).ToList();
     }
 
     private static SchemeModel? ParseScheme(
@@ -68,6 +90,31 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
           $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
 
       return scheme;
+    }
+
+    private static List<SwitchingBus> ParseBusList(
+    CkCommandModel model,
+    string body,
+    RmCommandModel rmCommandModel,
+    int firstStar,
+    int lastStar,
+    int numberLine)
+    {
+      var busBlob = body.Substring(firstStar, lastStar - firstStar + 1);
+
+      LogDebug($"Парсинг шин из общего блока: '{busBlob}'");
+
+      var busList = PointParser.ParseBusList(busBlob);
+
+      if (busList.Count > 0)
+      {
+        LogInformation($"Шины распознаны: количество = {model.BusList.Count}");
+        return busList;
+      }
+      else
+      {
+        return Enum.GetValues<SwitchingBus>().Where(x => !x.ToString().StartsWith("AB")).ToList();
+      }
     }
 
     private static void HandleEmptyScheme(BaseCommandModel model, int numberLine)

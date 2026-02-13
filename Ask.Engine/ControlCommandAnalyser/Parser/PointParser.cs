@@ -452,7 +452,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
 
-    public static List<SwitchingBus> ParseBusList(string expr, RmCommandModel rmCommandModel, int lineNumber, string command)
+    public static List<SwitchingBus> ParseBusList(string expr)
     {
       var errors = new List<ErrorItem>();
       var buses = new List<SwitchingBus>();

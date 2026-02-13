@@ -5,9 +5,9 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
 {
-  public class CheckSourceLines
+  public class SourceLinesManager
   {
-    public static bool ManageCheck(BaseCommandModel model, List<string> lines, int numberLine)
+    public static bool Check(BaseCommandModel model, List<string> lines, int numberLine)
     {
       if (LinesExist(model, lines, numberLine) == true)
       {

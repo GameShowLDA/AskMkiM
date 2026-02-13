@@ -28,7 +28,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       var rmCommandModel = CheckPoints.CheckRm(model, numberLine, commandNumber, mnemonic);
 
-      if (!CheckSourceLines.ManageCheck(model, lines, numberLine))
+      if (!SourceLinesManager.Check(model, lines, numberLine))
       {
         return model;
       }
@@ -66,7 +66,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 
       model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
 
-      UnparsedParameters.HandleUnparsedParameters(model, numberLine, remainder);
+      UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
       LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
