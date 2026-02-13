@@ -34,14 +34,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Ie
         return remainder;
       }
 
-      CapacityManager.ProcessCapacity(
-          model,
-          lower,
-          higher,
-          unit,
-          ctx.LineNumber,
-          ctx.CommandNumber,
-          ctx.Mnemonic);
+      CapacityManager.ProcessCapacity(model, lower, higher, unit, ctx.LineNumber, ctx.CommandNumber, ctx.Mnemonic);
 
       return remainder;
     }

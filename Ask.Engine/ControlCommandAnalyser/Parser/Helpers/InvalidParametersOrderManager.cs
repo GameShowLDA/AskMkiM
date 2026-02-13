@@ -2,11 +2,7 @@
 {
   public static class InvalidParametersOrderManager
   {
-    public static bool HasInvalidParameterOrder(
-    string firstLine,
-    List<string> algorithmKeys,
-    string? capacityStart,
-    out string errorDescription)
+    public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? capacityStart, out string errorDescription)
     {
       errorDescription = string.Empty;
 
@@ -16,7 +12,6 @@
       int idxPointStart = firstLine.IndexOf('*');
       int idxPointEnd = firstLine.LastIndexOf('*');
 
-      // ищем самый ранний ключ
       foreach (var key in algorithmKeys)
       {
         int idx = firstLine.IndexOf(key, StringComparison.OrdinalIgnoreCase);
@@ -29,14 +24,12 @@
         idxCapacity = firstLine.IndexOf(capacityStart, StringComparison.OrdinalIgnoreCase);
       }
 
-      // ключ после параметра
       if (idxKey != -1 && idxCapacity != -1 && idxKey > idxCapacity)
       {
         errorDescription = "Ключ алгоритма указан после электрической емкости.";
         return true;
       }
 
-      // параметры после блока точек
       if (idxPointEnd != -1)
       {
         if ((idxKey != -1 && idxKey > idxPointEnd)
@@ -49,6 +42,5 @@
 
       return false;
     }
-
   }
 }

@@ -33,6 +33,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+    public static void HandleUnparsedParameters(SiCommandModel model, int numberLine, string? remainder)
+    {
+      if (!string.IsNullOrEmpty(remainder))
+      {
+        model.UnparsedParameters = "! Не распознанные параметры: ";
+        model.UnparsedParameters += remainder;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+    }
     public static void HandleUnparsedParameters(IeCommandModel model, int numberLine, string? remainder)
     {
 

@@ -84,20 +84,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 
         var modelSi = new SiCommandModel();
         modelSi.SourceLines = new List<string> { siPart };
-        var siRemainder = SiCommandParser.ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, siPart, breakDown);
+        //var siRemainder = ManageSiParametersParse(modelSi, commandNumber, mnemonic, numberLine, siPart, breakDown);
 
-        if (!string.IsNullOrEmpty(siRemainder))
-        {
-          model.UnparsedParameters = "! Не распознанные параметры: ";
-          model.UnparsedParameters += siRemainder;
-          model.Errors.Add(GeneralErrors.UnrecognizedParameters(siRemainder, numberLine, $"{commandNumber} {mnemonic}"));
-        }
+        //if (!string.IsNullOrEmpty(siRemainder))
+        //{
+        //  model.UnparsedParameters = "! Не распознанные параметры: ";
+        //  model.UnparsedParameters += siRemainder;
+        //  model.Errors.Add(GeneralErrors.UnrecognizedParameters(siRemainder, numberLine, $"{commandNumber} {mnemonic}"));
+        //}
 
-        model.SiCommand = modelSi;
-        if (modelSi.Errors.Count > 0)
-        {
-          model.Errors.AddRange(modelSi.Errors);
-        }
+        //model.SiCommand = modelSi;
+        //if (modelSi.Errors.Count > 0)
+        //{
+        //  model.Errors.AddRange(modelSi.Errors);
+        //}
 
         var remainderPi = piPart;
 
@@ -243,49 +243,49 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
           {
             remainderPi = remainderPi.Trim();
           }
-          if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
-            || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
-          {
-            // находим цепи точек из предыдущей команды проверки
-            var newScheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
-            if (newScheme != null)
-            {
-              model.Scheme = newScheme;
-              model.SiCommand.Scheme = model.Scheme;
-            }
-            else
-            {
-              model.Errors.Add(PiErrors.PreviousCommandHasNoPoints(numberLine, $"{commandNumber} {mnemonic}"));
-            }
-          }
-          else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
-            || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-          {
-            model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-            model.SiCommand.Scheme = model.Scheme;
-          }
+          //if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+          //  || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+          //{
+          //  // находим цепи точек из предыдущей команды проверки
+          //  var newScheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
+          //  if (newScheme != null)
+          //  {
+          //    model.Scheme = newScheme;
+          //    model.SiCommand.Scheme = model.Scheme;
+          //  }
+          //  else
+          //  {
+          //    model.Errors.Add(PiErrors.PreviousCommandHasNoPoints(numberLine, $"{commandNumber} {mnemonic}"));
+          //  }
+          //}
+          //else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+          //  || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+          //{
+          //  model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+          //  model.SiCommand.Scheme = model.Scheme;
+          //}
         }
-        else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
-          || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
-        {
-          // находим цепи точек из предыдущей команды проверки
-          var newScheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
-          if (newScheme != null)
-          {
-            model.Scheme = newScheme;
-            model.SiCommand.Scheme = model.Scheme;
-          }
-          else
-          {
-            model.Errors.Add(PiErrors.PreviousCommandHasNoPoints(numberLine, $"{commandNumber} {mnemonic}"));
-          }
-        }
-        else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
-          || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
-        {
-          model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-          model.SiCommand.Scheme = model.Scheme;
-        }
+        //else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+        //  || model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+        //{
+        //  // находим цепи точек из предыдущей команды проверки
+        //  var newScheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
+        //  if (newScheme != null)
+        //  {
+        //    model.Scheme = newScheme;
+        //    model.SiCommand.Scheme = model.Scheme;
+        //  }
+        //  else
+        //  {
+        //    model.Errors.Add(PiErrors.PreviousCommandHasNoPoints(numberLine, $"{commandNumber} {mnemonic}"));
+        //  }
+        //}
+        //else if (model.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+        //  || model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+        //{
+        //  model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+        //  model.SiCommand.Scheme = model.Scheme;
+        //}
         else
         {
           LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {commandNumber} {mnemonic}");
@@ -293,33 +293,34 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
         }
 
         CheckUnparsedParameters(commandNumber, mnemonic, numberLine, model, remainderPi);
-        if (model.AlgorithmKey.Count == 0
-          && model.SiCommand.AlgorithmKey.Count != 0
-          && model.AlgorithmKey != null
-          && model.SiCommand.AlgorithmKey != null)
-        {
-          var type = model.GetType();
-          var attribute = type.GetCustomAttributes(typeof(AllowedKeysAttribute), false)
-                          .FirstOrDefault() as AllowedKeysAttribute;
-          foreach (var key in model.SiCommand.AlgorithmKey)
-          {
-            if (!model.AlgorithmKey.Contains(key) && attribute.Keys.Where(item => item.ToString() == key).Count() == 1)
-            {
-              model.AlgorithmKey.Add(key);
-            }
-          }
-        }
+        //if (model.AlgorithmKey.Count == 0
+        //  && model.SiCommand.AlgorithmKey.Count != 0
+        //  && model.AlgorithmKey != null
+        //  && model.SiCommand.AlgorithmKey != null)
+        //{
+        //  var type = model.GetType();
+        //  var attribute = type.GetCustomAttributes(typeof(AllowedKeysAttribute), false)
+        //                  .FirstOrDefault() as AllowedKeysAttribute;
+        //  foreach (var key in model.SiCommand.AlgorithmKey)
+        //  {
+        //    if (!model.AlgorithmKey.Contains(key) && attribute.Keys.Where(item => item.ToString() == key).Count() == 1)
+        //    {
+        //      model.AlgorithmKey.Add(key);
+        //    }
+        //  }
+        //}
 
         LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
 
-        model.SiCommand.CommandNumber = model.CommandNumber;
-        model.SiCommand.FormattedStartLineNumber = model.FormattedStartLineNumber;
-        model.SiCommand.Scheme = model.Scheme;
-        model.SiCommand.StartLineNumber = model.StartLineNumber;
+        //model.SiCommand.CommandNumber = model.CommandNumber;
+        //model.SiCommand.FormattedStartLineNumber = model.FormattedStartLineNumber;
+        //model.SiCommand.Scheme = model.Scheme;
+        //model.SiCommand.StartLineNumber = model.StartLineNumber;
 
         return model;
       }
     }
+
 
     private static void CheckUnparsedParameters(string commandNumber, string mnemonic, int numberLine, PiCommandModel model, string remainderPi)
     {
