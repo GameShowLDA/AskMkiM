@@ -123,6 +123,16 @@ namespace MainWindowProgram
       get => this.WindowState;
     }
 
+    public void OpenFileFromExternalRequest(string filePath)
+    {
+      if (string.IsNullOrWhiteSpace(filePath))
+      {
+        return;
+      }
+
+      FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(filePath);
+    }
+
     private void ErrorMenuItem_Click(object sender, RoutedEventArgs e)
     {
 

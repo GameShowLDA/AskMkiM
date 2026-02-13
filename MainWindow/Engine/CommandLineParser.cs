@@ -1,4 +1,6 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
+using MainWindowProgram.Init;
 using MainWindowProgram.Services;
 
 namespace MainWindowProgram.Engine
@@ -28,19 +30,26 @@ namespace MainWindowProgram.Engine
       ResetDefaults();
 
       bool isAdmin = false;
+      var filesToOpen = new List<string>();
+      var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
       foreach (var raw in App.CommandLineArgs)
       {
-        var token = raw.TrimStart('-', '/');
-
-        if (token.Equals("admin", StringComparison.OrdinalIgnoreCase))
+        if (IsSwitch(raw, "admin"))
         {
           isAdmin = true;
           HandleAdminMode();
         }
-        else if (token.Equals("debug", StringComparison.OrdinalIgnoreCase))
+        else if (IsSwitch(raw, "debug"))
         {
           AdminConfig.SetDebugRights(true).ConfigureAwait(false);
+        }
+        else if (SupportedFileExtensions.TryResolveSupportedExistingFile(raw, out var filePath))
+        {
+          if (seenPaths.Add(filePath))
+          {
+            filesToOpen.Add(filePath);
+          }
         }
         else
         {
@@ -49,6 +58,7 @@ namespace MainWindowProgram.Engine
       }
 
       _usbServices.SetUsbMonitoring(isAdmin);
+      OpenRequestedFiles(filesToOpen);
     }
 
     /// <summary>
@@ -77,6 +87,25 @@ namespace MainWindowProgram.Engine
     private void ResetDefaults()
     {
       _usbServices.SetUsbMonitoring(false);
+    }
+
+    private static bool IsSwitch(string rawArg, string switchName)
+    {
+      if (string.IsNullOrWhiteSpace(rawArg))
+      {
+        return false;
+      }
+
+      var token = rawArg.Trim().TrimStart('-', '/');
+      return token.Equals(switchName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void OpenRequestedFiles(IEnumerable<string> filesToOpen)
+    {
+      foreach (var filePath in filesToOpen)
+      {
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(filePath);
+      }
     }
   }
 }

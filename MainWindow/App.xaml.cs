@@ -39,7 +39,9 @@ namespace MainWindowProgram
     public static string[] CommandLineArgs { get; private set; }
     static App()
     {
-      if (!SingleInstanceManager.CheckOrSignal())
+      var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+
+      if (!SingleInstanceManager.CheckOrSignal(args))
       {
         Environment.Exit(0);
       }
@@ -54,6 +56,8 @@ namespace MainWindowProgram
     protected override async void OnStartup(StartupEventArgs e)
     {
       RegisterGlobalExceptionHandlers();
+      CommandLineArgs = e.Args;
+      FileAssociationRegistrar.RegisterCurrentUserAssociations();
 
       SplashScreenManager.ShowSplash();
 
@@ -65,7 +69,6 @@ namespace MainWindowProgram
 
       base.OnStartup(e);
 
-      CommandLineArgs = e.Args;
       Console.SetOut(new ConsoleRedirector());
 
       try
@@ -74,17 +77,16 @@ namespace MainWindowProgram
         {
           Visibility = Visibility.Hidden
         };
+        Application.Current.MainWindow = mainWindow;
 
         await mainWindow.InitializeAsync();
+        ApplicationActivator.FlushPendingFileRequests();
 
         await SplashScreenManager.CloseSplashAsync();
 
 
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
         mainWindow.Visibility = Visibility.Visible;
-
-
-        Application.Current.MainWindow = mainWindow;
 
         mainWindow.Topmost = true;
 

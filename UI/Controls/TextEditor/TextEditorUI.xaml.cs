@@ -406,17 +406,32 @@ namespace UI.Controls.TextEditor
         return;
       }
 
-      string xshdFile = FileTypeDock switch
+      string? xshdFile = FileTypeDock switch
       {
         FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
         FileType.PK or FileType.PKW => "MKI_PK.xshd",
         FileType.Protocol => "MKI_PROTOCOL.xshd",
-        _ => "MKI.xshd"
+        _ => null
       };
+
+      if (string.IsNullOrWhiteSpace(xshdFile))
+      {
+        textEditor.SyntaxHighlighting = null;
+        LogDebug($"Для типа файла {FileTypeDock} подсветка не назначена.");
+        return;
+      }
+
+      var xshdPath = ResolveHighlightingPath(xshdFile);
+      if (xshdPath == null)
+      {
+        textEditor.SyntaxHighlighting = null;
+        LogWarning($"Файл подсветки не найден: {xshdFile}");
+        return;
+      }
 
       try
       {
-        using var stream = File.OpenRead(xshdFile);
+        using var stream = File.OpenRead(xshdPath);
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
@@ -426,6 +441,26 @@ namespace UI.Controls.TextEditor
         LogError($"Ошибка загрузки подсветки: {ex.Message}");
         textEditor.SyntaxHighlighting = null;
       }
+    }
+
+    private static string? ResolveHighlightingPath(string fileName)
+    {
+      var candidates = new[]
+      {
+        Path.Combine(AppContext.BaseDirectory, fileName),
+        Path.Combine(AppContext.BaseDirectory, "UI", fileName),
+        Path.GetFullPath(fileName),
+      };
+
+      foreach (var candidate in candidates)
+      {
+        if (File.Exists(candidate))
+        {
+          return candidate;
+        }
+      }
+
+      return null;
     }
 
     #region Конструкторы
