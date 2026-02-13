@@ -84,7 +84,7 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Filter = "PKW files (*.pkw, *.Pkw, *.PKW)|*.pkw; *.Pkw; *.PKW|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK|ACS files (*.ACS, *.Acs, *.acs)|*.ACS; *.Acs; *.ACs; *.AcS; *.aCS; *.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+          Filter = "Supported files (*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt)|*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt|PK/PKW files (*.pk;*.pkw)|*.pk;*.pkw|OPK/OPKW files (*.opk;*.opkw)|*.opk;*.opkw|Protocol files (*.lst;*.lstw)|*.lst;*.lstw|ACS files (*.acs)|*.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
           Title = "Выберите файл",
           Multiselect = true
         };

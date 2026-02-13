@@ -1,5 +1,6 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Pipes;
+using System.Text;
 
 namespace MainWindowProgram.Init
 {
@@ -10,34 +11,48 @@ namespace MainWindowProgram.Init
   {
     private const string MutexName = "Global\\ASK-MKIM-M-SingleInstance";
     private const string PipeName = "ASK-MKIM-M-Pipe";
+    private const string OpenFileCommandPrefix = "OPENFILE|";
 
     private static Mutex? _mutex;
 
-    public static bool CheckOrSignal()
+    public static bool CheckOrSignal(string[]? args)
     {
       bool createdNew;
       _mutex = new Mutex(true, MutexName, out createdNew);
 
       if (createdNew)
       {
-        // Первый экземпляр: запускаем слушатель
+        // Первый экземпляр: запускаем слушатель.
         StartPipeServer();
-        return true; // продолжаем запуск
+        return true;
       }
       else
       {
-        // Второй экземпляр: посылаем команду "ACTIVATE" первому
+        // Второй экземпляр: передаем команды первому и выходим.
         try
         {
+          var filesToOpen = SupportedFileExtensions.ExtractSupportedExistingFiles(args);
+
           using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
-          client.Connect(100); // 100 ms
+          client.Connect(500);
+
           using var writer = new StreamWriter(client);
           writer.WriteLine("ACTIVATE");
+
+          foreach (var filePath in filesToOpen)
+          {
+            var encodedPath = Convert.ToBase64String(Encoding.UTF8.GetBytes(filePath));
+            writer.WriteLine($"{OpenFileCommandPrefix}{encodedPath}");
+          }
+
           writer.Flush();
         }
-        catch { /* ignore */ }
+        catch
+        {
+          // ignore
+        }
 
-        return false; // НЕ продолжаем запуск
+        return false;
       }
     }
 
@@ -60,10 +75,10 @@ namespace MainWindowProgram.Init
             server.WaitForConnection();
 
             using var reader = new StreamReader(server);
-            string? line = reader.ReadLine();
-            if (line == "ACTIVATE")
+            string? line;
+            while ((line = reader.ReadLine()) != null)
             {
-              ApplicationActivator.ActivateMainWindow();
+              ApplicationActivator.HandlePipeCommand(line);
             }
           }
           catch
