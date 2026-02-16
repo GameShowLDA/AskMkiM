@@ -36,8 +36,7 @@
                                 Opacity="0"
                                 IsHitTestVisible="False"/>
 
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="Center"
+                        <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           RecognizesAccessKey="True"/>
                     </Grid>
@@ -160,8 +159,7 @@
                             CornerRadius="15"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="Center"
+                        <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           RecognizesAccessKey="True"/>
                     </Border>
@@ -195,8 +193,11 @@
     
     <Style x:Key="ButtonStyleV9" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
         <Setter Property="Height" Value="50"/>
-        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontSize" Value="16"/>
         <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -208,8 +209,7 @@
                             CornerRadius="0" 
                             BorderThickness="{TemplateBinding BorderThickness}" 
                             BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="Center"
+                        <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           RecognizesAccessKey="True"/>
                     </Border>
@@ -231,9 +231,10 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ButtonStyleV10" TargetType="Button">
+    <Style x:Key="ButtonStyleV10" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
         <Setter Property="Height" Value="50"/>
         <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Background" Value="{DynamicResource TestsMainButtonBackgroundBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource TestsMainButtonForegroundBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -242,10 +243,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}" 
-                    CornerRadius="15" 
-                    BorderThickness="{TemplateBinding BorderThickness}" 
-                    BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            CornerRadius="15" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -257,14 +260,18 @@
                 <Setter Property="Foreground" Value="{DynamicResource PrimarySolidColorBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Cursor" Value="Arrow"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ButtonStyleV11" TargetType="Button">
+    <Style x:Key="ButtonStyleV11" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
         <Setter Property="Height" Value="50"/>
         <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Background" Value="{DynamicResource PrimarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -273,10 +280,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}" 
-             CornerRadius="0" 
-             BorderThickness="{TemplateBinding BorderThickness}" 
-             BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            CornerRadius="0" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -289,12 +298,17 @@
                 <Setter Property="BorderThickness" Value="5,0,0,0"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
             </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+            </Trigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ButtonStyleV12" TargetType="Button">
+    <Style x:Key="ButtonStyleV12" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
         <Setter Property="Height" Value="50"/>
         <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -303,10 +317,13 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}" 
-      CornerRadius="0" 
-      BorderThickness="{TemplateBinding BorderThickness}" 
-      BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            CornerRadius="0" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -319,12 +336,17 @@
                 <Setter Property="BorderThickness" Value="5,0,0,0"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
             </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+            </Trigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ButtonStyleV13" TargetType="Button">
+    <Style x:Key="ButtonStyleV13" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
         <Setter Property="Height" Value="50"/>
         <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -333,10 +355,13 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}" 
-                    CornerRadius="15" 
-                    BorderThickness="{TemplateBinding BorderThickness}" 
-                    BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            CornerRadius="15" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -348,7 +373,10 @@
                 <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Cursor" Value="Arrow"/>
             </Trigger>
         </Style.Triggers>
     </Style>

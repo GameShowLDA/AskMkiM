@@ -113,7 +113,7 @@
                                 Grid.Column="2"
                                 Width="100"
                                 Height="30"
-                                Style="{DynamicResource ButtonStyleV13}"
+                                Style="{DynamicResource ButtonStyleV10}"
                                 BorderThickness="1"
                                 Content="Печать"
                                 Foreground="{DynamicResource ForegrounfBrushes}"
