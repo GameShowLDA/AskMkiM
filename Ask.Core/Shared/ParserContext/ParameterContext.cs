@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 
 namespace Ask.Core.Shared.ParserContext
 {
@@ -6,7 +7,8 @@ namespace Ask.Core.Shared.ParserContext
     string CommandNumber,
     string Mnemonic,
     int LineNumber,
-    IBreakdownTester? Breakdown = null)
+    IBreakdownTester? Breakdown = null,
+    IFastMeter? Fastmeter = null)
   {
     public string CommandId => $"{CommandNumber} {Mnemonic}";
 
@@ -18,5 +20,8 @@ namespace Ask.Core.Shared.ParserContext
 
     public ParameterContext WithBreakdown(IBreakdownTester breakdown)
         => this with { Breakdown = breakdown };
+
+    public ParameterContext WithFastMeter(IFastMeter fastmeter)
+        => this with { Fastmeter = fastmeter };
   }
 }

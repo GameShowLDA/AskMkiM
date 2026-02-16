@@ -2,6 +2,7 @@
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
 
@@ -21,19 +22,39 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
     string mnemonic,
     int numberLine)
     {
-      var defaults = GetResistanceDefaults();
-      var parsed = ParseResistanceInputs(lowerLimitResistance, higherLimitResistance, cabelLimitResistance, unit, cabelUnit, defaults.DefaultUnit);
+      var defaults = GetResistanceDefaults(MeasurementTypeCommand.EHT);
+      var parsed = ParseResistanceInputs(lowerLimitResistance, higherLimitResistance, unit, defaults.DefaultUnit, cabelLimitResistance, cabelUnit);
 
       if (!ValidateResistanceLimits(model, parsed, defaults, commandNumber, mnemonic, numberLine))
       {
         return;
       }
-
       ApplyResistanceToModel(model, parsed, defaults, commandNumber, mnemonic);
     }
-    private static ResistanceDefaults GetResistanceDefaults()
+
+    public static void ProcessResistance(
+    KsCommandModel model,
+    string lower,
+    string higher,
+    string unit,
+    string commandNumber,
+    string mnemonic,
+    int numberLine)
     {
-      var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.EHT);
+      var defaults = GetResistanceDefaults(MeasurementTypeCommand.KC);
+
+      var parsed = ParseResistanceInputs(lower, higher, unit, defaults.DefaultUnit);
+
+      if (!ValidateResistanceLimits(model, parsed, defaults, unit, commandNumber, mnemonic, numberLine))
+        return;
+
+      ApplyResistanceToModel(model, parsed, defaults);
+    }
+
+
+    private static ResistanceDefaults GetResistanceDefaults(MeasurementTypeCommand typeCommand)
+    {
+      var commandInfo = EnumExtensions.GetDisplayInfo(typeCommand);
 
       return new ResistanceDefaults(
           commandInfo.LowerLimit,
@@ -43,7 +64,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
 
     private record ResistanceDefaults(double DefaultLower, double DefaultHigher, string DefaultUnit);
 
-    private static ParsedResistance ParseResistanceInputs(string lowerRaw, string higherRaw, string cabelRaw, string unit, string cabelUnit, string defaultUnit)
+    private static ParsedResistance ParseResistanceInputs(string lowerRaw, string higherRaw, string unit, string defaultUnit, string cabelRaw = null, string cabelUnit = null)
     {
       double? lower = !string.IsNullOrWhiteSpace(lowerRaw)
           ? CommonParameterParser.ParseToDouble(lowerRaw)
@@ -88,6 +109,108 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       return true;
     }
 
+    private static bool ValidateResistanceLimits(
+    KsCommandModel model,
+    ParsedResistance parsed,
+    ResistanceDefaults defaults,
+    string unit,
+    string commandNumber,
+    string mnemonic,
+    int numberLine)
+    {
+      double minResistance = defaults.DefaultLower;
+      double maxResistance = defaults.DefaultHigher;
+
+      bool hasErrors = false;
+
+      if (parsed.Lower.HasValue && parsed.Higher.HasValue)
+      {
+        if (parsed.Lower.Value >= parsed.Higher.Value)
+        {
+          var lowerValue = UnitsConvertor.TryConvertBack(parsed.Lower.Value, unit);
+          var higherValue = UnitsConvertor.TryConvertBack(parsed.Higher.Value, unit);
+
+          LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) нижняя граница больше или равна верхней.");
+
+          model.Errors.Add(KsErrors.ResistanceLimitsConflict(
+              numberLine,
+              $"{commandNumber} {mnemonic}",
+              $"Нижняя граница сопротивления ({lowerValue.Item1} {lowerValue.Item2}) больше или равна верхней ({higherValue.Item1} {higherValue.Item2})."));
+
+          hasErrors = true;
+        }
+      }
+
+      if (parsed.Lower.HasValue && !hasErrors)
+      {
+        var lowerValue = UnitsConvertor.TryConvertBack(parsed.Lower.Value, unit);
+
+        if (parsed.Lower.Value < minResistance)
+        {
+          var minValue = UnitsConvertor.TryConvertBack(minResistance, "Ом");
+
+          LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) нижняя граница меньше минимальной.");
+
+          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+              numberLine,
+              $"{commandNumber} {mnemonic}",
+              $"Нижняя граница сопротивления ({lowerValue.Item1} {lowerValue.Item2}) меньше минимально измеряемого ({minValue.Item1} {minValue.Item2})."));
+
+          hasErrors = true;
+        }
+
+        if (parsed.Lower.Value > maxResistance)
+        {
+          var maxValue = UnitsConvertor.TryConvertBack(maxResistance, "Ом");
+
+          LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) нижняя граница больше максимальной.");
+
+          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+              numberLine,
+              $"{commandNumber} {mnemonic}",
+              $"Нижняя граница сопротивления ({lowerValue.Item1} {lowerValue.Item2}) больше максимально возможной ({maxValue.Item1} {maxValue.Item2})."));
+
+          hasErrors = true;
+        }
+      }
+
+      if (parsed.Higher.HasValue && !hasErrors)
+      {
+        var higherValue = UnitsConvertor.TryConvertBack(parsed.Higher.Value, unit);
+
+        if (parsed.Higher.Value > maxResistance)
+        {
+          var maxValue = UnitsConvertor.TryConvertBack(maxResistance, "Ом");
+
+          LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) верхняя граница больше максимальной.");
+
+          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+              numberLine,
+              $"{commandNumber} {mnemonic}",
+              $"Верхняя граница сопротивления ({higherValue.Item1} {higherValue.Item2}) больше максимально возможной ({maxValue.Item1} {maxValue.Item2})."));
+
+          hasErrors = true;
+        }
+
+        if (parsed.Higher.Value < minResistance)
+        {
+          var minValue = UnitsConvertor.TryConvertBack(minResistance, "Ом");
+
+          LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) верхняя граница меньше минимальной.");
+
+          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+              numberLine,
+              $"{commandNumber} {mnemonic}",
+              $"Верхняя граница сопротивления ({higherValue.Item1} {higherValue.Item2}) меньше минимально измеряемого ({minValue.Item1} {minValue.Item2})."));
+
+          hasErrors = true;
+        }
+      }
+
+      return !hasErrors;
+    }
+
+
     private static bool AddError(BaseCommandModel model, int numberLine, string commandNumber, string mnemonic, string message)
     {
       LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) {message}");
@@ -119,5 +242,64 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
             $"{parsed.Cabel.Value} {parsed.CabelUnit}";
       }
     }
+
+    private static void ApplyResistanceToModel(
+    KsCommandModel model,
+    ParsedResistance parsed,
+    ResistanceDefaults defaults)
+    {
+      char infinity = '\u221E';
+
+      double minResistance = defaults.DefaultLower;
+
+      model.ResistanceUnit = parsed.Unit ?? string.Empty;
+
+      double lowerFinal = parsed.Lower ?? minResistance;
+
+      model.LowerLimitResistance = lowerFinal;
+      model.LowerLimitResistanceSource = $"{lowerFinal} {parsed.Unit}";
+
+      if (parsed.Higher == null)
+      {
+        model.HigherLimitResistance = null;
+        model.HigherLimitResistanceSource = $"{infinity} {parsed.Unit}";
+      }
+      else
+      {
+        model.HigherLimitResistance = parsed.Higher.Value;
+        model.HigherLimitResistanceSource = $"{parsed.Higher.Value} {parsed.Unit}";
+      }
+    }
+
+
+    private static void ApplyResistanceToModel(
+    KsCommandModel model,
+    ParsedResistance parsed,
+    ResistanceDefaults defaults,
+    string commandNumber,
+    string mnemonic)
+    {
+      char infinity = '\u221E';
+
+      double lowerFinal = parsed.Lower ?? defaults.DefaultLower;
+      double? higherFinal = parsed.Higher;
+
+      model.ResistanceUnit = parsed.Unit;
+
+      model.LowerLimitResistance = lowerFinal;
+      model.LowerLimitResistanceSource = $"{lowerFinal} {parsed.Unit}";
+
+      if (higherFinal == null)
+      {
+        model.HigherLimitResistance = null;
+        model.HigherLimitResistanceSource = $"{infinity} {parsed.Unit}";
+      }
+      else
+      {
+        model.HigherLimitResistance = higherFinal.Value;
+        model.HigherLimitResistanceSource = $"{higherFinal.Value} {parsed.Unit}";
+      }
+    }
+
   }
 }

@@ -42,6 +42,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       {
         scheme = ParseScheme(piCommandModel, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
         piCommandModel = HandleKeysSP(numberLine, piCommandModel);
+        piCommandModel.Scheme = scheme;
       }
       else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
         || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
