@@ -1,14 +1,15 @@
-п»їusing Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   /// <summary>
-  /// Р‘Р°Р·РѕРІР°СЏ РјРѕРґРµР»СЊ Р»СЋР±РѕР№ РєРѕРјР°РЅРґС‹ РїРѕСЃР»Рµ СЂР°Р·Р±РѕСЂР°.
+  /// Базовая модель любой команды после разбора.
   /// </summary>
-  public abstract class BaseCommandModel : IError
+  public abstract class BaseCommandModel : IError, IExecutionCommandInfo
   {
     public virtual MeasurementTypeCommand TypeCommand { get; set; }
     public List<string> SourceLines { get; set; } = new List<string>();
@@ -17,23 +18,23 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     public List<WarningItem> Warnings { get; set; } = new List<WarningItem>();
 
     /// <summary>
-    /// РќРѕРјРµСЂ СЃС‚СЂРѕРєРё, СЃ РєРѕС‚РѕСЂРѕР№ РЅР°С‡РёРЅР°РµС‚СЃСЏ РєРѕРјР°РЅРґР° (РІ РёСЃС…РѕРґРЅРѕРј С‚РµРєСЃС‚Рµ).
+    /// Номер строки, с которой начинается команда (в исходном тексте).
     /// </summary>
     public int StartLineNumber { get; set; }
 
     /// <summary>
-    /// РќРѕРјРµСЂ СЃС‚СЂРѕРєРё, СЃ РєРѕС‚РѕСЂРѕР№ РЅР°С‡РёРЅР°РµС‚СЃСЏ РєРѕРјР°РЅРґР° РІ РѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРЅРѕРј (С‚СЂР°РЅСЃР»СЏС†РёРѕРЅРЅРѕРј) С‚РµРєСЃС‚Рµ.
-    /// РџСЂРѕСЃС‚Р°РІР»СЏРµС‚СЃСЏ РїРѕСЃР»Рµ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ.
+    /// Номер строки, с которой начинается команда в отформатированном (трансляционном) тексте.
+    /// Проставляется после форматирования.
     /// </summary>
     public int FormattedStartLineNumber { get; set; } = -1;
 
     /// <summary>
-    /// РљР»СЋС‡Рё Р°Р»РіРѕСЂРёС‚РјР° РїСЂРѕРІРµСЂРєРё, СѓРєР°Р·Р°РЅРЅС‹Рµ РІ РєРѕРјР°РЅРґРµ.
+    /// Ключи алгоритма проверки, указанные в команде.
     /// </summary>
     public List<string> AlgorithmKey { get; set; } = new();
 
     /// <summary>
-    /// РљРѕРјРјРµРЅС‚Р°СЂРёРё, СѓРєР°Р·Р°РЅРЅС‹Рµ РІ РєРѕРјР°РЅРґРµ.
+    /// Комментарии, указанные в команде.
     /// </summary>
     public List<string> Comment { get; set; } = new();
 
@@ -46,12 +47,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     public string PointsSourse { get; set; }
 
     /// <summary>
-    /// РџСЂРёР·РЅР°Рє СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕР№ С‚РѕС‡РєРё РѕСЃС‚Р°РЅРѕРІР° РґР»СЏ РґР°РЅРЅРѕР№ РєРѕРјР°РЅРґС‹.
-    /// РЈРєР°Р·С‹РІР°РµС‚, С‡С‚Рѕ РІС‹РїРѕР»РЅРµРЅРёРµ Р°РЅР°Р»РёР·Р° РёР»Рё РѕР±СЂР°Р±РѕС‚РєРё РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РѕСЃС‚Р°РЅРѕРІР»РµРЅРѕ РїСЂРё РґРѕСЃС‚РёР¶РµРЅРёРё СЌС‚РѕР№ РєРѕРјР°РЅРґС‹.
+    /// Текстовое тело команды в исходном виде.
+    /// </summary>
+    public virtual string CommandBody => SourceLines.Count == 0
+      ? string.Empty
+      : string.Join(Environment.NewLine, SourceLines);
+
+    /// <summary>
+    /// Признак установленной точки останова для данной команды.
+    /// Указывает, что выполнение анализа или обработки должно быть остановлено при достижении этой команды.
     /// </summary>
     public bool HasBreakpoint { get; set; }
 
-    #region РњРµС‚РѕРґС‹
+    #region Методы
     public virtual T GetModel<T>(BaseCommandModel baseCommandModel) where T : class
     {
       return baseCommandModel as T;
