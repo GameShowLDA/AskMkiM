@@ -135,6 +135,7 @@ namespace UI.Controls.ProtocolNew
         : command.CommandBody;
 
       LogInformation($"[KEYBOARD] F4 pressed on breakpoint command: {caption}");
+      ExecutionEventAdapter.RaiseBreakpointF4Pressed(command);
       MessageEventAdapter.RaiseInfoMessage(
         $"Нажата клавиша: F4 на команде {caption}. Тело команды: {body}",
         true);
