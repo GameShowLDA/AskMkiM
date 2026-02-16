@@ -111,8 +111,8 @@ namespace UI.Components
         _clickTimer.Stop();
       };
 
-      this.KeyDown -= MultiWindowControl_KeyDown;
-      this.KeyDown += MultiWindowControl_KeyDown;
+      this.RemoveHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MultiWindowControl_KeyDown));
+      this.AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MultiWindowControl_KeyDown), true);
 
       EventAggregator.Subscribe<SearchEvents.FoundTextSelectRow>(e => OnFoundTextSelectRow(e.FileName, e.LineNumber, e.StartOffset, e.LineText, e.SearchText));
 
@@ -154,34 +154,95 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Обрабатывает событие нажатия клавиш. 
-    /// Позволяет закрыть активную вкладку при нажатии Alt+System+X.
+    /// Обрабатывает событие нажатия клавиш.
+    /// Позволяет закрыть активную вкладку при нажатии Ctrl+F4.
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Данные события клавиатуры.</param>
     private async void MultiWindowControl_KeyDown(object sender, KeyEventArgs e)
     {
-      if (e.Key == Key.System && e.SystemKey == Key.X && Keyboard.Modifiers == ModifierKeys.Alt)
+      if (e.Handled || !IsCloseActiveTabShortcut(e))
       {
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-          page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        if (activeTab != null)
+        return;
+      }
+
+      if (await TryCloseActiveTabAsync(e.Handled))
+      {
+        e.Handled = true;
+      }
+    }
+
+    internal async Task<bool> TryCloseActiveTabAsync(bool eventAlreadyHandled)
+    {
+      if (!TryGetActiveTab(out var activeTab, out int index))
+      {
+        return false;
+      }
+
+      if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer textEditorContainer)
+      {
+        // Для текстового контейнера Ctrl+F4 также обрабатывается самим DockManager.
+        // Если событие уже обработано, повторно не закрываем, чтобы избежать двойного закрытия.
+        if (eventAlreadyHandled)
         {
-          int index = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
-          if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer textEditorContainer)
+          return false;
+        }
+
+        var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveDocument == true);
+        if (foundItem == null)
+        {
+          return false;
+        }
+
+        foundItem.PerformClose();
+
+        return true;
+      }
+
+      await RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
+
+      return true;
+    }
+
+    private static bool IsCloseActiveTabShortcut(KeyEventArgs e)
+    {
+      bool isCtrlF4 = (e.Key == Key.F4 || (e.Key == Key.System && e.SystemKey == Key.F4))
+        && Keyboard.Modifiers == ModifierKeys.Control;
+
+      return isCtrlF4;
+    }
+
+    private bool TryGetActiveTab(out OpenFileButton activeTab, out int index)
+    {
+      activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
+        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      index = activeTab == null ? -1 : fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+
+      if (activeTab == null || index < 0 || index >= fileManager.EditorWorkspaceModel.UserControls.Count)
+      {
+        var visibleControl = fileManager.EditorWorkspaceModel.UserControls
+          .FirstOrDefault(control => control.Visibility == Visibility.Visible);
+        if (visibleControl != null)
+        {
+          index = fileManager.EditorWorkspaceModel.UserControls.IndexOf(visibleControl);
+          if (index >= 0 && index < fileManager.EditorWorkspaceModel.OpenPages.Count)
           {
-            var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveDocument == true);
-            if (foundItem != null)
-            {
-              foundItem.PerformClose();
-            }
-          }
-          else
-          {
-            await RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
+            activeTab = fileManager.EditorWorkspaceModel.OpenPages[index];
           }
         }
       }
+
+      if (activeTab == null)
+      {
+        return false;
+      }
+
+      if (index < 0 || index >= fileManager.EditorWorkspaceModel.UserControls.Count)
+      {
+        return false;
+      }
+
+      return true;
     }
 
     /// <summary>
