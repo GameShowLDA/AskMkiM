@@ -572,14 +572,14 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Name="CancelButton" Grid.Column="0" Content="Отменить" 
-                    Style="{DynamicResource ConfigButtonStyle}" 
+                    Style="{DynamicResource ButtonStyleV10}" 
                     Margin="0,10" Width="250" 
                     HorizontalAlignment="Left"
                     PreviewMouseDown="CancelButton_PreviewMouseDown"
                     />
 
                 <Button Name="SaveButton" Grid.Column="1" Content="Сохранить" 
-             Style="{DynamicResource ConfigButtonStyle}" 
+             Style="{DynamicResource ButtonStyleV10}" 
              Width="250" HorizontalAlignment="Left" 
              Margin="20,0"
              PreviewMouseDown="SaveButton_PreviewMouseDown"       

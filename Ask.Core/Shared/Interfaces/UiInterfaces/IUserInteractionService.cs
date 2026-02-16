@@ -12,12 +12,6 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     IButtonService ButtonService { get; set; }
 
     /// <summary>
-    /// Ожидает подтверждение действия пользователем (например, нажатием кнопки администратора).
-    /// </summary>
-    /// <returns>True, если пользователь подтвердил действие; иначе — false.</returns>
-    Task<bool> WaitAdminButtonAsync();
-
-    /// <summary>
     /// Асинхронно ожидает выбора пользователя (повторить, продолжить, завершить) после сообщения.
     /// </summary>
     /// <returns>Выбранное пользователем действие.</returns>

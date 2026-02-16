@@ -261,43 +261,6 @@ namespace UI.Controls.ProtocolNew
       return protocolTextBox.GetText();
     }
 
-    /// <summary>
-    /// Ожидает нажатия одной из двух административных кнопок.
-    /// Возвращает true, если нажали ПРОПУСТИТЬ, false — если ЗАВЕРШИТЬ.
-    /// </summary>
-    public Task<bool> WaitAdminButtonAsync()
-    {
-      _adminButtonTcs = new TaskCompletionSource<bool>();
-
-      adminContinue.Click += OnAdminContinueClicked;
-      adminExit.Click += OnAdminExitClicked;
-
-      SetupAdminButton();
-
-      return _adminButtonTcs.Task;
-    }
-
-    private void OnAdminContinueClicked(object sender, RoutedEventArgs e)
-    {
-      CleanupAdminButtonHandlers();
-      _adminButtonTcs?.TrySetResult(true);
-    }
-
-    private void OnAdminExitClicked(object sender, RoutedEventArgs e)
-    {
-      CleanupAdminButtonHandlers();
-      _adminButtonTcs?.TrySetResult(false);
-    }
-
-    /// <summary>
-    /// Снимает обработчики после клика (чтобы не было дублирования).
-    /// </summary>
-    private void CleanupAdminButtonHandlers()
-    {
-      adminContinue.Click -= OnAdminContinueClicked;
-      adminExit.Click -= OnAdminExitClicked;
-    }
-
     public void MenuButtonVisibility(bool visibility)
     {
       MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;

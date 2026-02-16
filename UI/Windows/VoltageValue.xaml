@@ -41,7 +41,7 @@
             </Border>
             <Button Grid.Row="2"
     Content="Сохранить" 
-    Style="{StaticResource ConfigButtonStyle}" 
+    Style="{DynamicResource ButtonStyleV10}" 
     HorizontalAlignment="Center" 
     Width="250"
     Margin="20,0"

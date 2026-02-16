@@ -15,7 +15,7 @@
 
         <Border>
             <Grid>
-                <Button x:Name="UpdateState" Content="Обновить состояние" Style="{DynamicResource CompareButtonStyle}" HorizontalAlignment="Left" Width="230" />
+                <Button x:Name="UpdateState" Content="Обновить состояние" Style="{DynamicResource ButtonStyleV8}" HorizontalAlignment="Left" Width="230" />
             </Grid>
         </Border>
 
