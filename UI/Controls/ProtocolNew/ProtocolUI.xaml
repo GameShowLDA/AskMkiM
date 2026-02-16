@@ -137,18 +137,18 @@
 
                             <Button x:Name="StartButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Start}, Path=Value}" 
-                                    Style="{StaticResource ShadowButtonStyle}"/>
+                                    Style="{DynamicResource ShadowButtonStyle}"/>
 
                             <Button x:Name="RepeatButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" 
                                     Margin="0,10,0,0" 
-                                    Style="{StaticResource ShadowButtonStyle}" 
+                                    Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
                             <Button x:Name="loopButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
                                     Margin="0,10,0,0" 
-                                    Style="{StaticResource ShadowButtonStyle}" 
+                                    Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
                             <Button x:Name="PauseButton" 

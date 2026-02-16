@@ -1,111 +1,83 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Style x:Key="ShadowButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyleV1}">
-        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
-    </Style>
-    
-    <Style x:Key="ButtonStyleV1" TargetType="Button">
-        <Setter Property="Height" Value="50"/>
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="Background" Value="{DynamicResource TestsMainButtonBackgroundBrush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource TestsMainButtonForegroundBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Cursor" Value="Hand"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                        CornerRadius="15" 
-                        BorderThickness="{TemplateBinding BorderThickness}" 
-                        BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
-                <Setter Property="Foreground" Value="{DynamicResource PrimarySolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="Cursor" Value="Hand"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-    
-    <Style x:Key="ButtonStyleV2" TargetType="Button">
-        <Setter Property="Height" Value="50"/>
-        <Setter Property="FontSize" Value="20"/>
+    <Style x:Key="ButtonStyleBase" TargetType="Button">
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="16,8"/>
         <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                     CornerRadius="15" 
-                     BorderThickness="{TemplateBinding BorderThickness}" 
-                     BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-                <Setter Property="Cursor" Value="Hand"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-    
-    <Style x:Key="ButtonStyleV3" TargetType="Button">
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="Height" Value="40"/>
-        <Setter Property="Width" Value="Auto"/>
-        <Setter Property="Margin" Value="10"/>
-        <Setter Property="Padding" Value="10"/>
-        <Setter Property="Background" Value="{DynamicResource LightPrimarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="border"
-                    Background="{TemplateBinding Background}"
-                    CornerRadius="15"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
+                    <Grid SnapsToDevicePixels="True">
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="12"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"/>
+
+                        <Border x:Name="HoverOverlay"
+                                Background="{TemplateBinding Foreground}"
+                                CornerRadius="12"
+                                Opacity="0"
+                                IsHitTestVisible="False"/>
+
+                        <Border x:Name="FocusRing"
+                                CornerRadius="13"
+                                BorderThickness="1.5"
+                                BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
+                                Margin="-1"
+                                Opacity="0"
+                                IsHitTestVisible="False"/>
+
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"/>
+                    </Grid>
+
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource PrimarySolidColorBrush}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0.08"
+                                                         Duration="0:0:0.12"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.18"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                             <Setter Property="Cursor" Value="Hand"/>
                         </Trigger>
 
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource PrimarySolidColorBrush}"/>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.14"/>
                         </Trigger>
 
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Opacity" Value="1"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -113,34 +85,42 @@
         </Setter>
     </Style>
 
-    <Style x:Key="ButtonStyleV4" TargetType="Button">
+    <Style x:Key="ButtonStyleV1" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{DynamicResource TestsMainButtonBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TestsMainButtonForegroundBrush}"/>
+    </Style>
+
+    <Style x:Key="ShadowButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyleV1}">
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+    </Style>
+
+    <Style x:Key="ButtonStyleV2" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+    </Style>
+
+    <Style x:Key="ButtonStyleV3" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Width" Value="Auto"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="Background" Value="{DynamicResource LightPrimarySolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+    </Style>
+
+    <Style x:Key="ButtonStyleV4" TargetType="Button" BasedOn="{StaticResource ButtonStyleBase}">
         <Setter Property="Height" Value="50"/>
         <Setter Property="FontSize" Value="20"/>
         <Setter Property="Background" Value="{DynamicResource PrimarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                            CornerRadius="0" 
-                            BorderThickness="{TemplateBinding BorderThickness}" 
-                            BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="5,0,0,0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimarySolidColorBrush}"/>
     </Style>
 
     <Style x:Key="ButtonStyleV5" TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
@@ -148,79 +128,19 @@
         <Setter Property="FontSize" Value="20"/>
         <Setter Property="Background" Value="{DynamicResource PrimarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                            CornerRadius="0" 
-                            BorderThickness="{TemplateBinding BorderThickness}" 
-                            BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="5,0,0,0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimarySolidColorBrush}"/>
     </Style>
 
     <Style x:Key="ButtonStyleV6" TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="1"/>
-                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="0"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Background" Value="{DynamicResource TestsMainButtonGreenEndBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background">
-                    <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="1"/>
-                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="0"/>
-                        </LinearGradientBrush>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="Foreground" Value="Black"/>
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="BorderBrush" Value="{DynamicResource TestsMainButtonGreenEndBrush}"/>
     </Style>
 
     <Style x:Key="ButtonStyleV7" TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeEndBrush}}" Offset="1"/>
-                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeStartBrush}}" Offset="0"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Background" Value="{DynamicResource TestsMainButtonOrangeEndBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background">
-                    <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeEndBrush}}" Offset="1"/>
-                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeStartBrush}}" Offset="0"/>
-                        </LinearGradientBrush>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="BorderBrush" Value="{DynamicResource TestsMainButtonOrangeStartBrush}"/>
     </Style>
 
 </ResourceDictionary>
