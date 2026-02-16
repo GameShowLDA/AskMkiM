@@ -25,6 +25,55 @@
             <Setter Property="Margin" Value="0,0,0,15"/>
         </Style>
 
+        <Style x:Key="TopMenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Margin" Value="3,4"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="MinWidth" Value="34"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractivePressedSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TopMenuStartButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuButtonStyle}">
+            <Setter Property="MinWidth" Value="150"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
         <DataTemplate x:Key="DynamicContentTemplate">
             <StackPanel>
                 <ContentPresenter Content="{Binding}" />
@@ -42,7 +91,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Background="{DynamicResource IsCheckedColorSolidColorBrush}" Name="TopMenuButton" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
+        <Grid Background="{DynamicResource IsCheckedColorSolidColorBrush}" Name="TopMenuButton" MinHeight="40" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -53,25 +102,43 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Icons:ContinueIcon x:Name="ContinueButtonTop" Grid.Column="0"  Size="20"/>
-            <Grid x:Name="StartButtonTop" Grid.Column="1" Background="{DynamicResource IsCheckedColorSolidColorBrush}" Cursor="Hand" Margin="5,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
+            <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Continue (P)">
+                <Icons:ContinueIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
 
-                <Icons:PlayIcon  Size="20"/>
-                <TextBlock Name="headerFile" 
-                           Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+            <Button x:Name="StartButtonTop" Grid.Column="1" Style="{StaticResource TopMenuStartButtonStyle}" ToolTip="Run (Enter/F5)">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            </Grid>
+                    <Icons:PlayIcon Size="16" IsHitTestVisible="False"/>
+                    <TextBlock Name="headerFile" 
+                               Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+            </Button>
 
-            <Icons:PauseIcon x:Name="PauseButtonTop" Grid.Column="2" Margin="5,0" Size="20"/>
-            <Icons:StopIcon x:Name="StopButtonTop" Grid.Column="3" Margin="5,0" Size="20"/>
-            <Icons:RepeatIcon x:Name="RepeatButtonTop" Grid.Column="4" Size="15" Margin="5,2,5,2" HorizontalAlignment="Left" Width="15"/>
-            <Icons:StepOverIcon x:Name="StepOverTop" Grid.Column="5" Size="20" Margin="5,0"  HorizontalAlignment="Left" Width="15"/>
-            <Icons:StepIntoIcon x:Name="StepIntoTop" Grid.Column="6" Size="20" Margin="5,0" HorizontalAlignment="Left" Width="15"/>
+            <Button x:Name="PauseButtonTop" Grid.Column="2" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Pause (P/F5)">
+                <Icons:PauseIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StopButtonTop" Grid.Column="3" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Stop (Esc)">
+                <Icons:StopIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="RepeatButtonTop" Grid.Column="4" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Repeat (R)">
+                <Icons:RepeatIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StepOverTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Step Over (F10)">
+                <Icons:StepOverIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Step Into (F11)">
+                <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
 
         </Grid>
 
