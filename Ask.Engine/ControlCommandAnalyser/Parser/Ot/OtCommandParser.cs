@@ -2,9 +2,12 @@
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
+using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
+using Ask.Engine.ControlCommandAnalyser.Parser.Pipeline;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
@@ -27,130 +30,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
         StartLineNumber = numberLine,
       };
 
-      var rmCommandModel = CommandsModel.GetRMModel();
-
-      if (rmCommandModel == null)
-      {
-        LogError($"Команда РМ не найдена");
-        model.Errors.Add(PrErrors.EmptyPoints(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
-      }
-
-      if (lines == null || lines.Count == 0)
-      {
-        LogWarning($"Пустое тело команды: {commandNumber} {mnemonic} (строка {numberLine})");
-        model.Errors.Add(OtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+      var rmCommandModel = CheckPoints.CheckRm(model, numberLine, commandNumber, mnemonic);
+      if (!SourceLinesManager.Check(model, lines, numberLine))
         return model;
-      }
+      var remainder = PreprocessSourceLines.GetClearCommandBody(model, lines);
+      remainder = TextRemoveManager.RemoveCommandPrefix(remainder);
+      var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
 
-      var errors = IndentationCheker.CheckIndentationErrors(lines, commandNumber, mnemonic);
-      if (errors.Count > 0)
-      {
-        foreach (var error in errors)
-        {
-          LogError(error);
-          model.Errors.Add(GeneralErrors.IndentationError(mnemonic, numberLine, $"{commandNumber} {mnemonic}"));
-          return model;
-        }
-      }
+      remainder = OtParameterPipeline.Execute(model, remainder, ctx);
 
-      List<string> processedLines = CommentsParser.ParseComments(lines, model);
+      model.BusPointsDictionary = SchemeManager.GetBusPointsDictionary(model, rmCommandModel, numberLine, commandNumber, mnemonic, ref remainder);
 
-      model.SourceLines = model.SourceLines
-          .Where(l => !string.IsNullOrWhiteSpace(l))
-          .ToList();
-
-      var body = string.Concat(processedLines.Count > 0 && processedLines.FindAll(l => string.IsNullOrEmpty(l) || string.IsNullOrWhiteSpace(l)).Count == 0 ?
-        processedLines : model.SourceLines)
-        .Replace("\r", "")
-        .Replace("\n", "")
-        .Replace("\t", "");
-
-      LogDebug($"Нормализованное тело команды (в одну строку): \"{body}\"");
-      var remainder = body;
-
-      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
-      if (match.Success)
-        remainder = match.Groups[1].Value.Trim();
-
-      string time = string.Empty, unitTime = string.Empty;
-
-      remainder = KeyParser.ParseKeys(numberLine, model, remainder);
-
-      (time, unitTime, remainder) = CommonParameterParser.TimeParser.ParseTime(remainder);
-      LogDebug($"После парсинга времени: time='{time}{unitTime}', remainder='{remainder}'");
-
-
-      double? timeValue = -1;
-      if (!string.IsNullOrEmpty(time) && time != null)
-      {
-        timeValue = CommonParameterParser.ParseToDouble(time);
-      }
-      if (timeValue.HasValue)
-      {
-        model.Time = timeValue.Value;
-        model.TimeSource = $"{time} {unitTime}";
-      }
-
-      string bodyNoWs = string.Concat(processedLines.Select(l => Regex.Replace(l ?? string.Empty, @"\s+", "")));
-
-      // Ищем первую и последнюю '*'
-      int firstStar = bodyNoWs.IndexOf('*');
-      int lastStar = bodyNoWs.LastIndexOf('*');
-
-      if (firstStar >= 0 && lastStar > firstStar)
-      {
-        // Выделяем блок точек (включительно) — PointParser сам Trim('*')
-        string pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
-        model.PointsSourse = pointsBlob;
-        LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
-
-        var (busDictionary, pointErrors) = PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {model.Mnemonic}");
-
-        // Поднимем ошибки парсера точек
-        if (pointErrors?.Count > 0)
-        {
-          foreach (var error in pointErrors)
-          {
-            error.SourceLineNumber = numberLine;
-            error.Command = $"{commandNumber} {mnemonic}";
-            model.Errors.Add(error);
-            LogError(
-               $"При парсинге точек команды {commandNumber} {mnemonic} произошла ошибка: {error.Description} (строка {error.SourceLineNumber}).");
-          }
-        }
-
-        if (busDictionary.Count > 0)
-        {
-          model.BusPointsDictionary = busDictionary;
-        }
-
-        int idxStarInFirstLine = remainder.IndexOf('*');
-        int idxStarInSecondLine = remainder.LastIndexOf('*');
-        if (idxStarInFirstLine >= 0 && idxStarInSecondLine > idxStarInFirstLine)
-        {
-          remainder =
-              remainder[..idxStarInFirstLine].Trim()
-              + remainder[(idxStarInSecondLine + 1)..].Trim();
-        }
-        else
-        {
-          remainder = remainder.Trim();
-        }
-      }
-
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{commandNumber} {mnemonic}"));
-      }
-
-      if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
-      {
-        LogWarning($"В команде {commandNumber} {mnemonic} не указано ни время, ни точки (строка {numberLine})");
-        model.Errors.Add(OtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
-        return model;
-      }
+      UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
 
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
 

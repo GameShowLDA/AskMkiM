@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -114,6 +115,41 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
 
       return model.BusList;
     }
+
+    public static Dictionary<SwitchingBus, List<PointModel>> GetBusPointsDictionary(
+    BaseCommandModel model,
+    RmCommandModel rmCommandModel,
+    int numberLine,
+    string commandNumber,
+    string mnemonic,
+    ref string remainder)
+    {
+      string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
+
+      if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
+      {
+        if (model is OtCommandModel == false)
+        {
+          HandleNoPointsBlock(model, numberLine);
+        }
+        return new();
+      }
+
+      var pointsBlob = bodyNoWs.Substring(firstStar, lastStar - firstStar + 1);
+      model.PointsSourse = pointsBlob;
+
+      LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
+
+      var (busDictionary, pointErrors) =
+          PointParser.ParseBusPoints(pointsBlob, rmCommandModel, numberLine, $"{commandNumber} {mnemonic}");
+
+      CheckPointsErrors(model, numberLine, pointErrors);
+
+      remainder = ClearLineFromPoints(remainder);
+
+      return busDictionary ?? new();
+    }
+
 
     private static bool TryExtractPointsBlock(string body, out int firstStar, out int lastStar)
     {
