@@ -8,6 +8,7 @@
     <ResourceDictionary.MergedDictionaries>
         
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Localization.Merged.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/Styles.Merged.xaml"/>
         
         <ResourceDictionary Source="/UI;component/Resources/Theme/dark.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/Theme/light.xaml"/>

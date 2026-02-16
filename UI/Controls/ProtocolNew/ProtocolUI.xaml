@@ -31,10 +31,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <Style x:Key="ShadowButtonStyle" TargetType="Button" BasedOn="{StaticResource ConfigButtonStyle}">
-            <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
-        </Style>
-
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <local:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
 
@@ -141,47 +137,25 @@
 
                             <Button x:Name="StartButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Start}, Path=Value}" 
-                                    Cursor="Hand" 
                                     Style="{StaticResource ShadowButtonStyle}"/>
 
                             <Button x:Name="RepeatButton" 
-                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" Margin="0,10,0,0" Cursor="Hand" 
-                        Style="{StaticResource ShadowButtonStyle}" 
-                        />
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" 
+                                    Margin="0,10,0,0" 
+                                    Style="{StaticResource ShadowButtonStyle}" 
+                                    />
 
                             <Button x:Name="loopButton" 
-                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" Margin="0,10,0,0" Cursor="Hand" 
-                        Style="{StaticResource ShadowButtonStyle}" 
-                        />
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
+                                    Margin="0,10,0,0" 
+                                    Style="{StaticResource ShadowButtonStyle}" 
+                                    />
 
-                            <Button x:Name="PauseButton" Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" Cursor="Hand" Margin="0,10,0,0">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeEndBrush}}" Offset="1"/>
-                                                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeStartBrush}}" Offset="0"/>
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeEndBrush}}" Offset="1"/>
-                                                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeStartBrush}}" Offset="0"/>
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <Button x:Name="PauseButton" 
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" 
+                                    Margin="0,10,0,0"
+                                    Style="{DynamicResource ButtonStyleV5}"
+                                    />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -191,127 +165,39 @@
 
                                 <Button x:Name="StepOver" 
                                         Content="{Binding Source={StaticResource LS_Protocol_Btn_StepOver}, Path=Value}" 
-                                        FontSize="18" Grid.Column="0" Margin="0,10,5,0" Cursor="Hand" Style="{StaticResource ShadowButtonStyle}" PreviewMouseDown="stepOverButton_PreviewMouseDown" />
+                                        FontSize="18" 
+                                        Grid.Column="0" 
+                                        Margin="0,10,5,0" 
+                                        Style="{StaticResource ShadowButtonStyle}" 
+                                        PreviewMouseDown="stepOverButton_PreviewMouseDown" />
+                                
                                 <Button x:Name="StepInto" 
-                                        Content="{Binding Source={StaticResource LS_Protocol_Btn_StepInto}, Path=Value}" FontSize="18" Grid.Column="1" Margin="5,10,0,0" Cursor="Hand" Style="{StaticResource ShadowButtonStyle}" PreviewMouseDown="stepIntoButton_PreviewMouseDown"/>
+                                        Content="{Binding Source={StaticResource LS_Protocol_Btn_StepInto}, Path=Value}" 
+                                        FontSize="18" 
+                                        Grid.Column="1" 
+                                        Margin="5,10,0,0" 
+                                        Cursor="Hand" 
+                                        Style="{StaticResource ShadowButtonStyle}" 
+                                        PreviewMouseDown="stepIntoButton_PreviewMouseDown"/>
 
                             </Grid>
 
-                            <Button x:Name="ContinueButton"  Content="{Binding Source={StaticResource LS_Protocol_Btn_Continue}, Path=Value}" FontSize="18" Grid.Column="0" Margin="0,10,0,0" Cursor="Hand" >
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="1"/>
-                                                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="0"/>
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="1"/>
-                                                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonGreenEndBrush}}" Offset="0"/>
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <Button x:Name="ContinueButton"  
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Continue}, Path=Value}" 
+                                    FontSize="18" 
+                                    Grid.Column="0" 
+                                    Margin="0,10,0,0" 
+                                    Style="{DynamicResource ButtonStyleV6}"
+                                    />
 
                             <Button x:Name="StopButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Exit}, Path=Value}" 
-                                    FontSize="18" Grid.Column="1" Margin="0,10,0,0" Cursor="Hand" >
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeEndBrush}}" Offset="1"/>
-                                                    <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeStartBrush}}" Offset="0"/>
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeEndBrush}}" Offset="1"/>
-                                                            <GradientStop Color="{Binding Color, Source={StaticResource TestsMainButtonOrangeStartBrush}}" Offset="0"/>
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter Property="Foreground" Value="{DynamicResource TestsInputHeaderSolidColorBrush}"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                                    FontSize="18" 
+                                    Grid.Column="1" 
+                                    Margin="0,10,0,0" 
+                                    Style="{DynamicResource ButtonStyleV7}"
+                                    />
 
-                            <Button x:Name="adminContinue" Content="ПРОПУСТИТЬ" FontSize="18" Margin="0,10,0,0" Cursor="Hand" >
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                    <GradientStop Color="{StaticResource RedColor}" Offset="1"/>
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="Foreground" Value="#f3f0f9"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#fcaa3f" Offset="1"/>
-                                                            <GradientStop Color="#f47842" Offset="0"/>
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-
-                            <Button x:Name="adminExit" Content="ЗАВЕРШИТЬ" FontSize="18" Margin="0,10,0,0" Cursor="Hand" >
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ShadowButtonStyle}">
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                    <GradientStop Color="{StaticResource RedColor}" Offset="1"/>
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="Foreground" Value="#f3f0f9"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#fcaa3f" Offset="1"/>
-                                                            <GradientStop Color="#f47842" Offset="0"/>
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
