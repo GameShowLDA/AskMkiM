@@ -102,11 +102,11 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Continue (P)">
+            <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Continue}, Path=Value}">
                 <Icons:ContinueIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StartButtonTop" Grid.Column="1" Style="{StaticResource TopMenuStartButtonStyle}" ToolTip="Run (Enter/F5)">
+            <Button x:Name="StartButtonTop" Grid.Column="1" Style="{StaticResource TopMenuStartButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Start}, Path=Value}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -120,23 +120,23 @@
                 </Grid>
             </Button>
 
-            <Button x:Name="PauseButtonTop" Grid.Column="2" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Pause (P/F5)">
+            <Button x:Name="PauseButtonTop" Grid.Column="2" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Pause}, Path=Value}">
                 <Icons:PauseIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StopButtonTop" Grid.Column="3" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Stop (Esc)">
+            <Button x:Name="StopButtonTop" Grid.Column="3" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Stop}, Path=Value}">
                 <Icons:StopIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="RepeatButtonTop" Grid.Column="4" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Repeat (R)">
+            <Button x:Name="RepeatButtonTop" Grid.Column="4" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Repeat}, Path=Value}">
                 <Icons:RepeatIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StepOverTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Step Over (F10)">
+            <Button x:Name="StepOverTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepOver}, Path=Value}">
                 <Icons:StepOverIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="Step Into (F11)">
+            <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
                 <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
