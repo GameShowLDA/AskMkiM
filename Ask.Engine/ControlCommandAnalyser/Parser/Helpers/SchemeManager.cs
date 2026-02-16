@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using System.Text.RegularExpressions;
@@ -13,19 +14,91 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
     public static SchemeModel GetScheme(BaseCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
-
-      if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
+      var scheme = new SchemeModel(new List<GroupModel>());
+      if (model is PiCommandModel == false)
       {
-        HandleNoPointsBlock(model, numberLine);
-        return null;
-      }
+        if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
+        {
+          HandleNoPointsBlock(model, numberLine);
+          return null;
+        }
 
-      var scheme = ParseScheme(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
+        scheme = ParseScheme(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
+      }
+      if (model is PiCommandModel piCommandModel)
+      {
+        piCommandModel = HandlePiCommandModel(bodyNoWs, piCommandModel, numberLine, ref scheme, rmCommandModel);
+        scheme = piCommandModel.Scheme;
+      }
 
       remainder = ClearLineFromPoints(remainder);
 
       return scheme;
     }
+
+    private static PiCommandModel HandlePiCommandModel(string bodyNoWs, PiCommandModel piCommandModel, int numberLine, ref SchemeModel? scheme, RmCommandModel rmCommandModel)
+    {
+      if (TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
+      {
+        scheme = ParseScheme(piCommandModel, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
+        piCommandModel = HandleKeysSP(numberLine, piCommandModel);
+      }
+      else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+        || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      {
+        piCommandModel = HandleKeyP(piCommandModel, numberLine);
+      }
+      else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+        || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        piCommandModel = HandleKeyS(piCommandModel);
+      }
+      else
+      {
+        HandleNoPointsBlock(piCommandModel, numberLine);
+      }
+      return piCommandModel;
+    }
+
+    private static PiCommandModel HandleKeysSP(int numberLine, PiCommandModel piCommandModel)
+    {
+      if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
+                  || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
+      {
+        piCommandModel = HandleKeyP(piCommandModel, numberLine);
+      }
+      else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
+        || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
+      {
+        piCommandModel = HandleKeyS(piCommandModel);
+      }
+
+      return piCommandModel;
+    }
+
+    private static PiCommandModel HandleKeyS(PiCommandModel model)
+    {
+      model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
+      model.SiCommand.Scheme = model.Scheme;
+      return model;
+    }
+
+    private static PiCommandModel HandleKeyP(PiCommandModel model, int numberLine)
+    {
+      var newScheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
+      if (newScheme != null)
+      {
+        model.Scheme = newScheme;
+        model.SiCommand.Scheme = model.Scheme;
+      }
+      else
+      {
+        model.Errors.Add(PiErrors.PreviousCommandHasNoPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+
+      return model;
+    }
+
     public static List<SwitchingBus> GetBusList(CkCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");

@@ -10,7 +10,7 @@ using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
-  [AllowedKeys(Г, К, Т1)]
+  [AllowedKeys(Г, К, Т1, П, С)]
   [MeasurementDevice(MeasurementDevice.BreakdownTester)]
   public class PiCommandModel : BaseCommandModel, IHasScheme
   {

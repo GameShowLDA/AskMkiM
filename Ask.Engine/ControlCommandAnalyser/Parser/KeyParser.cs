@@ -41,6 +41,27 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           }
         }
       }
+      if (model is PiCommandModel piCommandModel)
+      {
+        if (piCommandModel.AlgorithmKey.Count == 0
+            && piCommandModel.SiCommand.AlgorithmKey.Count != 0
+            && piCommandModel.AlgorithmKey != null
+            && piCommandModel.SiCommand.AlgorithmKey != null)
+        {
+          var type = piCommandModel.GetType();
+          var attribute = type.GetCustomAttributes(typeof(AllowedKeysAttribute), false)
+                          .FirstOrDefault() as AllowedKeysAttribute;
+          foreach (var key in piCommandModel.SiCommand.AlgorithmKey)
+          {
+            if (!piCommandModel.AlgorithmKey.Contains(key) && attribute.Keys.Where(item => item.ToString() == key).Count() == 1)
+            {
+              piCommandModel.AlgorithmKey.Add(key);
+            }
+          }
+          model = piCommandModel;
+        }
+      }
+
 
       foreach (var (key, hasError) in result)
       {
