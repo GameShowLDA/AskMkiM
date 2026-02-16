@@ -16,10 +16,6 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
 
-        <Style x:Key="ShadowButtonStyle" TargetType="Button" BasedOn="{StaticResource ConfigButtonStyle}">
-            <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
-        </Style>
-
         <Style TargetType="ScrollBar">
             <Setter Property="Width" Value="10"/>
             <Setter Property="Template">
@@ -117,7 +113,7 @@
                                 Grid.Column="2"
                                 Width="100"
                                 Height="30"
-                                Style="{DynamicResource SettingsButtonStyle}"
+                                Style="{DynamicResource ButtonStyleV13}"
                                 BorderThickness="1"
                                 Content="Печать"
                                 Foreground="{DynamicResource ForegrounfBrushes}"

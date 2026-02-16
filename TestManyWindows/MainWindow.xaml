@@ -242,10 +242,10 @@
                 </Grid.RowDefinitions>
                 
                 <Button x:Name="UpDown" Grid.Row="3" Content="Сверху/снизу" 
-                        Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" Visibility="Collapsed"/>
+                        Style="{DynamicResource ButtonStyleV8}" PreviewMouseDown="ToggleOrientation" Visibility="Collapsed"/>
 
                 <Button x:Name="LeftRight" Grid.Row="3"  Content="Слева/справа"                
-                Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" />
+                Style="{DynamicResource ButtonStyleV8}" PreviewMouseDown="ToggleOrientation" />
             </Grid>
         </Grid>
     </Grid>

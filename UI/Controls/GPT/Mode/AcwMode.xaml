@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
 
         <Grid>
-            <Button Name="ConnectButton" Style="{StaticResource CompareButtonStyle}" Content="Включить режим ACW" PreviewMouseDown="Button_PreviewMouseDown"/>
+            <Button Name="ConnectButton" Style="{DynamicResource ButtonStyleV8}" Content="Включить режим ACW" PreviewMouseDown="Button_PreviewMouseDown"/>
         </Grid>
         
         <Grid Grid.Row="1" Name="PanelManagment" Visibility="Collapsed">
@@ -104,7 +104,7 @@
 
             <!-- MANU_ACW_ARCCURRENT -->
             <Button Grid.Row="8" Grid.Column="0" 
-                    Style="{StaticResource CompareButtonStyle}" Content="Сохранить" 
+                    Style="{DynamicResource ButtonStyleV8}" Content="Сохранить" 
                     Margin="10"
                     PreviewMouseDown="Button_PreviewMouseDown_1"
                     >
