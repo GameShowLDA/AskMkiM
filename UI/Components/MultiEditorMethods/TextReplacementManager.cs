@@ -58,16 +58,24 @@ namespace UI.Components.MultiEditorMethods
 
     private void ReplaceTextInEditor(TextEditorUI textEditor, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      if (searchResult != null)
+      if (searchResult == null || textEditor?.Document == null)
       {
-        var document = textEditor.Document;
-        var text = document.Text;
-        var endOffset = startOffset + searchResult.Length;
-        var beforeText = text.Substring(0, startOffset);
-        var afterText = text.Substring(startOffset + searchText.Length);
-        var newText = beforeText + replaceText + afterText;
-        document.Text = newText;
+        return;
       }
+
+      var document = textEditor.Document;
+      if (startOffset < 0 || startOffset + searchResult.Length > document.TextLength)
+      {
+        return;
+      }
+
+      string replacement = replaceText ?? string.Empty;
+      document.Replace(startOffset, searchResult.Length, replacement);
+
+      int nextCaretOffset = Math.Min(startOffset + replacement.Length, document.TextLength);
+      textEditor.TextArea.ClearSelection();
+      textEditor.TextArea.Caret.Offset = nextCaretOffset;
+      textEditor.TextArea.Caret.BringCaretToView();
     }
 
     public TextReplacementManager(FileManager fileManager)

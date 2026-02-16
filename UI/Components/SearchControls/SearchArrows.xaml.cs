@@ -29,8 +29,8 @@ namespace UI.Components.SearchControls
     {
       var arrows = new List<ArrowItem>
       {
-        new ArrowItem { Name = "FindNext", Description = "Найти далее", GeometryData = Geometry.Parse("M 2 10 L 18 10 M 14 6 L 18 10 L 14 14") },
-        new ArrowItem { Name = "FindPrevious", Description = "Найти предыдущий", GeometryData = Geometry.Parse("M 18 10 L 2 10 M 6 6 L 2 10 L 6 14") },
+        new ArrowItem { Name = "FindNext", Description = "Найти далее (F3)", GeometryData = Geometry.Parse("M 2 10 L 18 10 M 14 6 L 18 10 L 14 14") },
+        new ArrowItem { Name = "FindPrevious", Description = "Найти предыдущий (Shift+F3)", GeometryData = Geometry.Parse("M 18 10 L 2 10 M 6 6 L 2 10 L 6 14") },
         new ArrowItem { Name = "FindAll", Description = "Найти все", GeometryData = Geometry.Parse("M 6 5 A 5 5 0 1 1 4.99 5.5 Z M 11 12 L 16 16.3") },
       };
 

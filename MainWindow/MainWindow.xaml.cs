@@ -72,6 +72,8 @@ namespace MainWindowProgram
       AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), true);
 
       this.Visibility = Visibility.Hidden;
+      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+      InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
       (var vm, var usb) = AppServices.Build(this);
       _viewModel = vm;
@@ -138,23 +140,148 @@ namespace MainWindowProgram
 
     }
 
+    /// <summary>
+    /// Глобальные хоткеи для навигации по результатам поиска (F3/Shift+F3), даже когда окно SearchWindow не в фокусе.
+    /// </summary>
     private async void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-      if (!IsCloseActiveTabShortcut(e))
+      if (e.Key == Key.Escape && SearchWindow != null && SearchWindow.IsVisible)
+      {
+        SearchWindow.CloseDialog();
+        e.Handled = true;
+        return;
+      }
+
+      if (e.Key != Key.F3 || Keyboard.Modifiers == ModifierKeys.Control || Keyboard.Modifiers == ModifierKeys.Alt)
       {
         return;
       }
 
-      if (await MultiWindow.TryCloseActiveTabAsync(e.Handled))
+      if (SearchWindow == null)
+      {
+        return;
+      }
+
+      if (SearchWindow.IsVisible)
+      {
+        return;
+      }
+
+      var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
+      var selectedText = MultiWindow?.GetActiveTextEditor()?.TextArea?.Selection?.GetText();
+
+      if (!string.IsNullOrEmpty(selectedText))
       {
         e.Handled = true;
+        await ShowSearchWindowAndRunSearchAsync(selectedText, direction);
+        return;
       }
+
+      SearchEventAdapter.RaiseSearchButtonPressed(direction);
+      e.Handled = true;
     }
 
-    private static bool IsCloseActiveTabShortcut(KeyEventArgs e)
+    private async Task ShowSearchWindowAndRunSearchAsync(string selectedText, string direction)
     {
-      return (e.Key == Key.F4 || (e.Key == Key.System && e.SystemKey == Key.F4))
-        && Keyboard.Modifiers == ModifierKeys.Control;
+      if (SearchWindow == null)
+      {
+        return;
+      }
+
+      if (SearchWindow.Owner == null)
+      {
+        SearchWindow.Owner = this;
+      }
+
+      await SearchWindow.ShowWindow(expandReplaceRow: false, focusReplaceField: false);
+      SearchEventAdapter.RaiseSearchTextRequested(selectedText);
+      SearchEventAdapter.RaiseSearchButtonPressed(direction);
+    }
+
+    /// <summary>
+    /// Глобальный перехват Esc/F3 вне зависимости от того, где фокус (включая окно поиска).
+    /// Работает через InputManager, поэтому охватывает все окна приложения.
+    /// </summary>
+    private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
+    {
+      if (SearchWindow == null || !SearchWindow.IsVisible)
+      {
+        return;
+      }
+
+      if (e.StagingItem.Input is not KeyEventArgs ke || ke.RoutedEvent != Keyboard.KeyDownEvent)
+      {
+        return;
+      }
+
+      var mods = Keyboard.Modifiers;
+      bool ctrl = (mods & ModifierKeys.Control) != 0;
+      bool alt = (mods & ModifierKeys.Alt) != 0;
+      var pressedKey = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
+
+      if (ctrl && !alt && pressedKey == Key.F)
+      {
+        SearchWindow.CloseDialog();
+        ke.Handled = true;
+        return;
+      }
+
+      if (ctrl && !alt && pressedKey == Key.H)
+      {
+        _ = SearchWindow.ToggleReplaceRowAsync();
+        ke.Handled = true;
+        return;
+      }
+
+      // Пропускаем только «чистый» Ctrl (без Alt) — им заведуют другие биндинги.
+      if (ctrl && !alt)
+      {
+        return;
+      }
+
+      if (SearchWindow.IsVisible && ke.Key == Key.Escape)
+      {
+        SearchWindow.CloseDialog();
+        ke.Handled = true;
+        return;
+      }
+
+      if (SearchWindow.IsVisible && ke.Key == Key.F3)
+      {
+        var selectedText = MultiWindow?.GetActiveTextEditor()?.TextArea?.Selection?.GetText();
+        var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
+
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          SearchEventAdapter.RaiseSearchTextRequested(selectedText);
+        }
+
+        SearchEventAdapter.RaiseSearchButtonPressed(direction);
+        ke.Handled = true;
+        return;
+      }
+
+      // Alt+R / Alt+A — локально в SearchWindow
+      if (SearchWindow != null && SearchWindow.IsVisible && alt)
+      {
+        var key = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
+
+        if (key == Key.R)
+        {
+          _ = SearchWindow.ShowWindow(expandReplaceRow: true, focusReplaceField: true);
+          SearchEventAdapter.RaiseReplaceWordButtonPressed();
+          ke.Handled = true;
+          return;
+        }
+
+        if (key == Key.A)
+        {
+          _ = SearchWindow.ShowWindow(expandReplaceRow: true, focusReplaceField: false);
+          SearchEventAdapter.RaiseReplaceAllWordsButtonPressed();
+          ke.Handled = true;
+          return;
+        }
+      }
     }
   }
 }

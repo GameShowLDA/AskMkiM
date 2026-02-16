@@ -412,7 +412,11 @@ namespace UI.Components
       await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
       if (string.Equals(searchParameters, "FindNext"))
       {
-        ReplaceNextWord(replaceText, searchText);
+        bool replaced = ReplaceNextWord(replaceText, searchText);
+        if (replaced)
+        {
+          await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, "FindNext");
+        }
       }
       else if (string.Equals(searchParameters, "FindAll"))
       {
@@ -429,42 +433,116 @@ namespace UI.Components
           for (int i = file.Value.Count - 1; i >= 0; i--)
           {
             var result = file.Value[i];
-            var lineStartOffset = result.StartOffset;
-            int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, result.SubstringFromWord, searchText);
-            if (globalStartOffset >= 0)
-            {
-              textReplacementManager.ReplaceWord(file.Key, result, globalStartOffset, replaceText, searchText);
-            }
+            textReplacementManager.ReplaceWord(file.Key, result, result.StartOffset, replaceText, searchText);
           }
         }
       }
     }
 
-    private void ReplaceNextWord(string replaceText, string searchText)
+    private bool ReplaceNextWord(string replaceText, string searchText)
     {
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
-        var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
-        var lineStartOffset = searchResult.Value.FirstOrDefault().StartOffset;
-        if (lineStartOffset >= 0)
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
+          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+
+        if (activeTab != null)
         {
-          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), lineStartOffset, replaceText, searchText);
+          int pageIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+          if (pageIndex >= 0 && pageIndex < fileManager.EditorWorkspaceModel.UserControls.Count
+            && fileManager.EditorWorkspaceModel.UserControls[pageIndex] is TextEditorContainer textEditorContainer)
+          {
+            var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+            TextEditorUI textEditor = null;
+            string activeTitle = null;
+
+            if (activeDockItem != null)
+            {
+              activeTitle = activeDockItem.Title;
+              if (activeDockItem.Content is TextEditorUI te)
+              {
+                textEditor = te;
+              }
+              else if (activeDockItem.Content is TranslatorItem translatorItem)
+              {
+                textEditor = translatorItem.GetLeftEditor();
+              }
+            }
+
+            if (!string.IsNullOrEmpty(activeTitle) && textSearchManager.foundInOpenedFiles.TryGetValue(activeTitle, out var occurrences) && occurrences.Count > 0)
+            {
+              var selectedOccurrence = TryGetSelectedOccurrence(textEditor, occurrences, searchText);
+              int caretOffset = textEditor?.TextArea?.Caret?.Offset ?? 0;
+              var currentOccurrence = TryGetCurrentOccurrenceByCaret(occurrences, caretOffset);
+              var next = selectedOccurrence
+                ?? currentOccurrence
+                ?? occurrences.FirstOrDefault(r => r.StartOffset >= caretOffset)
+                ?? occurrences.First();
+
+              if (next != null)
+              {
+                textReplacementManager.ReplaceWord(activeTitle, next, next.StartOffset, replaceText, searchText);
+                return true;
+              }
+            }
+          }
+        }
+
+        // Fallback: используем первое совпадение, если активный документ не определён
+        var first = textSearchManager.foundInOpenedFiles.FirstOrDefault();
+        var firstOccurrence = first.Value.FirstOrDefault();
+        if (firstOccurrence != null)
+        {
+          textReplacementManager.ReplaceWord(first.Key, firstOccurrence, firstOccurrence.StartOffset, replaceText, searchText);
+          return true;
         }
       }
+
+      return false;
     }
 
-    private int CalculateGlobalStartOffset(int lineStartOffset, string lineText, string searchText)
+    private static SearchResult TryGetCurrentOccurrenceByCaret(List<SearchResult> occurrences, int caretOffset)
     {
-      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.OrdinalIgnoreCase);
+      if (occurrences == null || occurrences.Count == 0)
+      {
+        return null;
+      }
 
-      if (wordStartIndex >= 0)
+      return occurrences.FirstOrDefault(occurrence =>
+        occurrence.StartOffset <= caretOffset && caretOffset <= occurrence.StartOffset + occurrence.Length);
+    }
+
+    private SearchResult TryGetSelectedOccurrence(TextEditorUI textEditor, List<SearchResult> occurrences, string searchText)
+    {
+      if (textEditor?.TextEditor == null || occurrences == null || occurrences.Count == 0)
       {
-        return lineStartOffset + wordStartIndex;
+        return null;
       }
-      else
+
+      if (textEditor.TextEditor.SelectionLength <= 0)
       {
-        return -1;
+        return null;
       }
+
+      if (!IsMatchedSelectedText(textEditor.TextEditor.SelectedText, searchText, textSearchManager._caseWord))
+      {
+        return null;
+      }
+
+      int selectionStart = textEditor.TextEditor.SelectionStart;
+      int selectionLength = textEditor.TextEditor.SelectionLength;
+      return occurrences.FirstOrDefault(occurrence => occurrence.StartOffset == selectionStart && occurrence.Length == selectionLength);
+    }
+
+    private static bool IsMatchedSelectedText(string selectedText, string searchText, bool? caseWord)
+    {
+      if (string.IsNullOrEmpty(selectedText) || string.IsNullOrEmpty(searchText))
+      {
+        return false;
+      }
+
+      var comparison = caseWord == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+      return string.Equals(selectedText, searchText, comparison);
     }
 
     internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType) =>

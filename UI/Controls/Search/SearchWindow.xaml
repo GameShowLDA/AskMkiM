@@ -186,6 +186,7 @@
                       HoverArrowColor="{StaticResource ActiveBorderSolidColorBrush}" 
                       IsArrowUp="False"
                       Cursor="Hand"
+                      ToolTip="Показать/скрыть строку замены (Ctrl+H)"
                       PreviewMouseDown="ToggleArrow_PreviewMouseDown"/>
 
             <TextBox
@@ -217,8 +218,9 @@
              Height="30"
              HorizontalAlignment="Right"
              Cursor="Hand"
+             ToolTip="Закрыть окно поиска (Esc / Ctrl+F)"
              PreviewMouseDown="exitButton_PreviewMouseDown"
-             />
+              />
             <Rectangle Width="Auto" Grid.Column="1" Grid.Row="0" Margin="2 0" 
                    HorizontalAlignment="Stretch" 
                    Height="2" 
@@ -282,8 +284,8 @@
                         <ColumnDefinition Width="50*"/>
                         <ColumnDefinition Width="50*"/>
                     </Grid.ColumnDefinitions>
-                    <Elements:ReplaseWordButton Height="25" Width="25" Cursor="Hand" ToolTip="Заменить текущее совпадение"/>
-                    <Elements:ReplaseAllWordsButton Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Заменить все совпадения"/>
+                    <Elements:ReplaseWordButton Height="25" Width="25" Cursor="Hand" ToolTip="Заменить текущее совпадение (Alt+R)"/>
+                    <Elements:ReplaseAllWordsButton Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Заменить все совпадения (Alt+A)"/>
                 </Grid>
             </Grid>
                 <Elements:SearchSliderHandle x:Name="SearchSlider" Grid.Row="2" Grid.Column="0" Margin="4 10 2 2"

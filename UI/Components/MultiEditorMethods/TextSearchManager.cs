@@ -213,6 +213,8 @@ namespace UI.Components.MultiEditorMethods
 
               if (allOccurrences != null)
               {
+                currentIndex = -1; // сброс перед вычислением позиции от каретки
+                SetCurrentIndexFromCaret(textEditor);
                 InitializeCurrentIndex();
                 GoToOccurrence(currentIndex);
               }
@@ -727,6 +729,30 @@ namespace UI.Components.MultiEditorMethods
         {
           currentIndex = foundResults.Count - 1;
         }
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает currentIndex так, чтобы поиск начинался от позиции каретки.
+    /// </summary>
+    private void SetCurrentIndexFromCaret(TextEditorUI textEditor)
+    {
+      if (textEditor?.TextArea?.Caret == null || foundResults.Count == 0)
+      {
+        return;
+      }
+
+      int caretOffset = textEditor.TextArea.Caret.Offset;
+
+      if (_searchParameters == "FindNext")
+      {
+        int idx = foundResults.FindIndex(r => r.StartOffset >= caretOffset);
+        currentIndex = idx >= 0 ? idx : 0; // если дальше нет совпадений — переходим к первому
+      }
+      else if (_searchParameters == "FindPrevious")
+      {
+        int idx = foundResults.FindLastIndex(r => r.StartOffset < caretOffset);
+        currentIndex = idx >= 0 ? idx : foundResults.Count - 1; // если левее нет — переходим к последнему
       }
     }
 

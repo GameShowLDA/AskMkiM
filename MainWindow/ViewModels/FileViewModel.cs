@@ -47,6 +47,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private async Task SearchFile() => await _fileService.SearchFileAsync();
 
+    /// <summary>Команда открытия окна поиска в режиме замены.</summary>
+    [RelayCommand]
+    private async Task SearchReplaceFile() => await _fileService.SearchReplaceFileAsync();
+
     /// <summary>Команда сравнения файлов.</summary>
     [RelayCommand]
     private async Task CompareFile() => await _fileService.CompareFileAsync();
