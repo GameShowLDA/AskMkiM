@@ -271,35 +271,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       }
     }
 
-
-    private static void ApplyResistanceToModel(
-    KsCommandModel model,
-    ParsedResistance parsed,
-    ResistanceDefaults defaults,
-    string commandNumber,
-    string mnemonic)
-    {
-      char infinity = '\u221E';
-
-      double lowerFinal = parsed.Lower ?? defaults.DefaultLower;
-      double? higherFinal = parsed.Higher;
-
-      model.ResistanceUnit = parsed.Unit;
-
-      model.LowerLimitResistance = lowerFinal;
-      model.LowerLimitResistanceSource = $"{lowerFinal} {parsed.Unit}";
-
-      if (higherFinal == null)
-      {
-        model.HigherLimitResistance = null;
-        model.HigherLimitResistanceSource = $"{infinity} {parsed.Unit}";
-      }
-      else
-      {
-        model.HigherLimitResistance = higherFinal.Value;
-        model.HigherLimitResistanceSource = $"{higherFinal.Value} {parsed.Unit}";
-      }
-    }
-
   }
 }

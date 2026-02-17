@@ -74,14 +74,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
           if (rawTokensSingle.Count == 1 && rawTokensSingle[0].EndsWith("-") && (i + 1) < chainSegs.Length)
           {
-            string leftWithDash = rawTokensSingle[0];                  
-            string rightSeg = CleanToken(chainSegs[i + 1]);            
+            string leftWithDash = rawTokensSingle[0];
+            string rightSeg = CleanToken(chainSegs[i + 1]);
             // правый сегмент не должен содержать '#', ',' — иначе это не продолжение диапазона
             if (!string.IsNullOrEmpty(rightSeg)
                 && !rightSeg.Contains('#')
                 && !rightSeg.Contains(','))
             {
-              string combinedRange = leftWithDash + rightSeg;          
+              string combinedRange = leftWithDash + rightSeg;
               var expanded = ExpandRangeToken(combinedRange, errors);
               if (expanded.Count > 0)
               {
@@ -206,7 +206,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (count < 2 && count != 0
                 && (model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName
                 || model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName
-                || model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName))
+                || model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName)
+                && !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
       {
         model.AlgorithmKey.Add(AlgorithmKey.ЗР.ToString());
         model.Warnings.Add(GeneralWarnings.KeyZR(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));

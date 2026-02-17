@@ -1,8 +1,9 @@
 ﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
-using System.Timers;
+using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
@@ -107,6 +108,45 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
         model.UnparsedParameters = "! Не распознанные параметры: ";
         model.UnparsedParameters += remainder;
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+    }
+    public static void HandleUnparsedParameters(PrCommandModel model, int numberLine, string? remainder)
+    {
+
+      if (!string.IsNullOrEmpty(remainder) && !string.IsNullOrWhiteSpace(remainder))
+      {
+        model.UnparsedParameters = "! Не распознанные параметры: ";
+        model.UnparsedParameters += remainder;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+
+      // Валидация
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.DisconnectedHigherLimitResistanceSource)
+        && string.IsNullOrWhiteSpace(model.ConnectedLowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.ConnectedHigherLimitResistanceSource))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(PrErrors.CannotParseParameters(
+          $"Сопротивление было неправильно задано, или неверно указаны его границы",
+          model.StartLineNumber,
+          $"{model.CommandNumber}   {model.Mnemonic}"));
+      }
+
+      if (string.IsNullOrWhiteSpace(model.ConnectedHigherLimitResistanceSource) && !model.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(PrErrors.ResistanceLimitsConflict(
+          model.StartLineNumber,
+          $"{model.CommandNumber}   {model.Mnemonic}",
+          $"Не указана верхняя граница при проверке на сообщение"));
+      }
+
+      if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource) && !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(PrErrors.ResistanceLimitsConflict(
+          model.StartLineNumber,
+          $"{model.CommandNumber}   {model.Mnemonic}",
+          $"Не указана нижняя граница при проверке на разобщение"));
       }
     }
   }

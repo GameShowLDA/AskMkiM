@@ -13,9 +13,4 @@
     <ProjectReference Include="..\Message\Message.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ControlCommandAnalyser\Parser\Processors\Ot\" />
-    <Folder Include="ControlCommandAnalyser\Parser\Processors\Pt\" />
-  </ItemGroup>
-
 </Project>
