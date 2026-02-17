@@ -23,7 +23,7 @@ namespace UI.Components
   /// <summary>
   /// Логика взаимодействия для MultiWindowControl.xaml.
   /// </summary>
-  public partial class MultiWindowControl : UserControl, IRunService
+  public partial class MultiWindowControl : UserControl, IEditorDocumentService
   {
     /// <summary>
     /// Список вкладок открытых файлов. Каждая вкладка представлена экземпляром <see cref="OpenFileButton"/>.
@@ -34,6 +34,8 @@ namespace UI.Components
     /// Список пользовательских элементов управления, соответствующих открытым вкладкам. Каждый элемент управления представляет собой экземпляр <see cref="UserControl"/>.
     /// </summary>
     internal List<UserControl> userControls = new List<UserControl>();
+
+    public IRunService RunService => MultiEditor.RunService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
@@ -93,7 +95,7 @@ namespace UI.Components
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileInEditor(string filePath)
+    public void OpenFile(string filePath)
     {
       if (MultiEditor == null)
       {
@@ -702,10 +704,6 @@ namespace UI.Components
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-    public Task AddRunItem(IRunView runControl, EditorType editorType)
-    {
-      return MultiEditor.AddRunItem(runControl, editorType);
-    }
 
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
@@ -725,11 +723,6 @@ namespace UI.Components
       }
 
       MultiEditor.OpenFolder();
-    }
-
-    public async Task CloseRunItem(IRunView runControl, EditorType editorType)
-    {
-      await MultiEditor.CloseRunItem(runControl, editorType);
     }
   }
 }

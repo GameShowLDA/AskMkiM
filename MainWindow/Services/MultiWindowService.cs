@@ -2,6 +2,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Windows.Controls;
+using System.Windows.Forms.Design;
 using UI.Components;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -21,15 +22,17 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly MultiWindowControl _multiWindowControl;
     private readonly IRunService _runService;
+    private readonly IEditorDocumentService _editorDocumentService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowService"/>.
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
-    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService)
+    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService, IEditorDocumentService editorDocumentService)
     {
       _multiWindowControl = multiWindowControl;
       _runService = runService;
+      _editorDocumentService = editorDocumentService;
     }
 
     /// <summary>
@@ -44,7 +47,7 @@ namespace MainWindowProgram.Services
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileInEditor(string filePath) => _multiWindowControl.OpenFileInEditor(filePath);
+    public void OpenFile(string filePath) => _editorDocumentService.OpenFile(filePath);
 
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
@@ -56,7 +59,7 @@ namespace MainWindowProgram.Services
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileFromEvent(string filePath) => _multiWindowControl.OpenFileInEditor(filePath);
+    public void OpenFileFromEvent(string filePath) => _multiWindowControl.OpenFile(filePath);
 
     /// <summary>
     /// Создает новый файл в редакторе.
@@ -65,22 +68,22 @@ namespace MainWindowProgram.Services
     /// Этот метод вызывает создание нового файла в редакторе, если редактор был инициализирован.
     /// Если редактор не инициализирован, выводится сообщение об ошибке.
     /// </remarks>
-    public void CreateNewFile() => _multiWindowControl.CreateNewFile();
+    public void CreateNewFile() => _editorDocumentService.CreateNewFile();
 
     /// <summary>
     /// Сохраняет файл.
     /// </summary>
-    public void SaveFile() => _multiWindowControl.SaveFile();
+    public void SaveFile() => _editorDocumentService.SaveFile();
 
     /// <summary>
     /// Сохранить файл как.
     /// </summary>
-    public void SaveFileAs() => _multiWindowControl.SaveFileAs();
+    public void SaveFileAs() => _editorDocumentService.SaveFileAs();
 
     /// <summary>
     /// Выводит файл на печать.
     /// </summary>
-    public void PrintFile() => _multiWindowControl.PrintFile();
+    public void PrintFile() => _editorDocumentService.PrintFile();
 
     /// <summary>
     /// Получает активный текстовый редактор.
@@ -145,17 +148,17 @@ namespace MainWindowProgram.Services
 
     internal Task AddRunItem(IRunView runControl, EditorType editorType)
     {
-      return _multiWindowControl.AddRunItem(runControl, editorType);
+      return _runService.AddRunItem(runControl, editorType);
     }
 
     /// <summary>
     /// Открывает папку, содержащую файл, в проводнике.
     /// </summary>
-    internal void OpenFolder() => _multiWindowControl.OpenFolder();
+    internal void OpenFolder() => _editorDocumentService.OpenFolder();
 
     internal async Task CloseRunItem(IRunView runControl, EditorType editorType)
     {
-      await _multiWindowControl.CloseRunItem(runControl, editorType);
+      await _runService.CloseRunItem(runControl, editorType);
     }
   }
 }

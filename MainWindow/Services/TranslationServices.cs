@@ -523,7 +523,7 @@ namespace MainWindowProgram.Services
         LogError($"Не удалось запустить трансляцию программы контроля: {ex}.");
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
-        _multiWindow.OpenFileInEditor(editor.TextEditorModel.FilePath);
+        _multiWindow.OpenFile(editor.TextEditorModel.FilePath);
       }
     }
   }

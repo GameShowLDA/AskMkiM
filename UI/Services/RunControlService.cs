@@ -20,7 +20,7 @@ namespace UI.Services
   ///   <item>Закрытие и удаление вкладок управления запуском.</item>
   /// </list>
   /// </summary>
-  public class RunControlService
+  public class RunControlService : IRunService
   {
     private readonly UI.Components.MultiEditorMethods.FileManager _fileManager;
 
@@ -40,7 +40,7 @@ namespace UI.Services
     /// </summary>
     /// <param name="runControl">Экземпляр элемента управления запуском.</param>
     /// <param name="editorType">Тип контейнера, в который нужно добавить вкладку (например, <see cref="EditorType.Run"/>).</param>
-    public async Task AddRunTabAsync(IRunView runControl, EditorType editorType)
+    public async Task AddRunItem(IRunView runControl, EditorType editorType)
     {
       try
       {
@@ -62,7 +62,7 @@ namespace UI.Services
     /// </summary>
     /// <param name="runControl">Экземпляр элемента управления запуском, который необходимо закрыть.</param>
     /// <param name="editorType">Тип контейнера, из которого нужно удалить вкладку.</param>
-    public async Task CloseRunTabAsync(IRunView runControl, EditorType editorType)
+    public async Task CloseRunItem(IRunView runControl, EditorType editorType)
     {
       try
       {

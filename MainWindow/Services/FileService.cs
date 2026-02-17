@@ -94,7 +94,7 @@ namespace MainWindowProgram.Services
         {
           foreach (string filePath in openFileDialog.FileNames)
           {
-            _multiWindow.OpenFileInEditor(filePath);
+            _multiWindow.OpenFile(filePath);
           }
         }
       }
@@ -123,7 +123,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.OpenFileInEditor(filePath);
+        _multiWindow.OpenFile(filePath);
       }
     }
 

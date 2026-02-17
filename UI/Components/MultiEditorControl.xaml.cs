@@ -61,6 +61,8 @@ namespace UI.Components
     /// </summary>
     internal SaveFileManager saveFileManager;
 
+    public IRunService RunService => fileManager.RunControlService;
+
     /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
     /// </summary>
@@ -549,16 +551,11 @@ namespace UI.Components
     internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType) =>
       fileManager.TranslationService.AddTranslatorItem(editor, translateEditor, editorType);
 
-    internal Task AddRunItem(IRunView runControl, EditorType editorType) =>
-      fileManager.RunControlService.AddRunTabAsync(runControl, editorType);
 
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType) =>
       await fileManager.TranslationService.RemoveTranslatorTabAsync(translatorItem, editorType);
 
     internal void OpenFolder() =>
       fileManager.FolderService.OpenActiveFileFolder();
-
-    internal async Task CloseRunItem(IRunView runControl, EditorType editorType) =>
-      await fileManager.RunControlService.CloseRunTabAsync(runControl, editorType);
   }
 }
