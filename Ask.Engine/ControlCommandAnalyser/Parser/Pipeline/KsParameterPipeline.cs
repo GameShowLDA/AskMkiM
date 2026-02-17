@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
+using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.Processors.Ks;
+using static Ask.Engine.ControlCommandAnalyser.Parser.Processors.ProcessorFactory;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
 {
@@ -11,7 +13,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
     private static readonly ParameterPipeline<KsCommandModel> _pipeline =
         new(new IParameterProcessor<KsCommandModel>[]
         {
-            new KsKeyProcessor(),
+            Keys<KsCommandModel>(),
             new KsResistanceProcessor(),
         });
 

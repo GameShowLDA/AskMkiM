@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
@@ -12,7 +13,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [AllowedKeys(Д)]
-  public class EhtCommandModel : BaseCommandModel, IHasScheme
+  public class EhtCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.

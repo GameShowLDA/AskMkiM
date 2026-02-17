@@ -3,6 +3,8 @@ using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Processors.Eht;
+using static Ask.Engine.ControlCommandAnalyser.Parser.Processors.ProcessorFactory;
+
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
 {
@@ -11,9 +13,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
     private static readonly ParameterPipeline<EhtCommandModel> _pipeline =
         new(new IParameterProcessor<EhtCommandModel>[]
         {
-            new EhtKeyProcessor(),
+            Keys<EhtCommandModel>(),
             new EhtResistanceProcessor(),
-            new EhtTimeProcessor()
+            Time<EhtCommandModel>(),
         });
 
     public static string Execute(

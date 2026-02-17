@@ -2,13 +2,9 @@
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Parser.Processors.Pi;
-using Ask.Engine.ControlCommandAnalyser.Parser.Processors.Si;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static Ask.Engine.ControlCommandAnalyser.Parser.Processors.ProcessorFactory;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
 {
@@ -17,9 +13,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
     private static readonly ParameterPipeline<PiCommandModel> _pipeline =
         new(new IParameterProcessor<PiCommandModel>[]
         {
-            new PiKeyProcessor(),
+            Keys<PiCommandModel>(),
             new PiVoltageProcessor(),
-            new PiTimeProcessor()
+            Time<PiCommandModel>(),
         });
 
     public static string Execute(

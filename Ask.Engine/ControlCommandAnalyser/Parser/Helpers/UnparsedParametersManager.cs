@@ -26,6 +26,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
           $"сопротивление было неправильно задано, или неверно указаны границы сопроитвления", numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+    public static void HandleUnparsedParameters(PtCommandModel model, int numberLine, string? remainder)
+    {
+      if (!string.IsNullOrEmpty(remainder))
+      {
+        model.UnparsedParameters = "! Не распознанные параметры: ";
+        model.UnparsedParameters += remainder;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+
+      if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
+      {
+        LogWarning($"Пустое тело команды: {model.CommandNumber} {model.Mnemonic} (строка {numberLine})");
+        model.Errors.Add(PtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
+      }
+    }
     public static void HandleUnparsedParameters(OtCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))

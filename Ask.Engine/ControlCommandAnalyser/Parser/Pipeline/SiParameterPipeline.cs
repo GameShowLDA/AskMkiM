@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Processors.Si;
+using static Ask.Engine.ControlCommandAnalyser.Parser.Processors.ProcessorFactory;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
 {
@@ -11,10 +12,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
     private static readonly ParameterPipeline<SiCommandModel> _pipeline =
         new(new IParameterProcessor<SiCommandModel>[]
         {
-            new SiKeyProcessor(),
+            Keys<SiCommandModel>(),
             new SiVoltageProcessor(),
             new SiResistanceProcessor(),
-            new SiTimeProcessor()
+            Time<SiCommandModel>(),
         });
 
     public static string Execute(
