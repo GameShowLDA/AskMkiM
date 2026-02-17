@@ -1,6 +1,10 @@
-﻿using Ask.Support;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.View;
+using Ask.Support;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
+using System.Windows;
 
 namespace MainWindowProgram.Engine
 {
@@ -14,10 +18,12 @@ namespace MainWindowProgram.Engine
     /// </summary>
     /// <param name="window">Главное окно приложения.</param>
     /// <returns>Кортеж из ViewModel и UsbServices.</returns>
-    public static (MainWindowViewModel viewModel, UsbServices usb) Build(MainWindow window)
+    public static (MainWindowViewModel viewModel, IUsbMonitorView usb) Build(MainWindow window)
     {
       var multi = new MultiWindowService(window.MultiWindow);
-      var usb = new UsbServices();
+      var usb = ServiceLocator.GetRequired<IUsbMonitorView>();
+
+
       var file = new FileService(window, multi, () => window.IsLocked);
       var metrology = new MetrologyService(multi);
       var admin = new AdminServices(window, multi);

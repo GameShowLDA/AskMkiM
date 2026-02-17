@@ -1,10 +1,15 @@
 ﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.View;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewCore.Device;
+using System.Windows;
+using System.Windows.Threading;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init
@@ -65,11 +70,16 @@ namespace MainWindowProgram.Init
       AppHost = Host.CreateDefaultBuilder()
           .ConfigureServices(services =>
           {
+            services.AddSingleton<Dispatcher>(_ => Application.Current.Dispatcher);
+
             services.AddSingleton<IBreakdownTester, GPT79904>();
             services.AddSingleton<BreakdownTesterServices>();
+
+            services.AddSingleton<IUsbMonitorView, UsbMonitorService>();
           })
           .Build();
 
+      AppHost.StartAsync().GetAwaiter().GetResult();
       ServiceLocator.Initialize(AppHost);
       _ = Task.Run(() => InitializeChassisDevices());
     }
