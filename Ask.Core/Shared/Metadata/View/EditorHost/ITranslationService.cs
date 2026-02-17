@@ -12,19 +12,19 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
   /// </summary>
   public interface ITranslationService
   {
-    /// <summary>
-    /// Создаёт файл трансляции на основе исходного.
-    /// </summary>
-    TextEditorUI CreateTranslationFile(string parentFilePath);
+    ///// <summary>
+    ///// Создаёт файл трансляции на основе исходного.
+    ///// </summary>
+    //TextEditorUI CreateTranslationFile(string parentFilePath);
 
-    /// <summary>
-    /// Добавляет элемент трансляции.
-    /// </summary>
-    Task<TranslatorItem> AddTranslatorItem(TextEditorUI source, TextEditorUI translated, EditorType type);
+    ///// <summary>
+    ///// Добавляет элемент трансляции.
+    ///// </summary>
+    //Task<TranslatorItem> AddTranslatorItem(TextEditorUI source, TextEditorUI translated, EditorType type);
 
-    /// <summary>
-    /// Удаляет элемент трансляции.
-    /// </summary>
-    Task DeleteTranslatorItem(TranslatorItem item, EditorType type);
+    ///// <summary>
+    ///// Удаляет элемент трансляции.
+    ///// </summary>
+    //Task DeleteTranslatorItem(TranslatorItem item, EditorType type);
   }
 }

@@ -2,6 +2,7 @@
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using Message;
 using System.Windows;
 using System.Windows.Controls.Primitives;
@@ -22,7 +23,7 @@ namespace UI.Components
   /// <summary>
   /// Логика взаимодействия для MultiWindowControl.xaml.
   /// </summary>
-  public partial class MultiWindowControl : UserControl
+  public partial class MultiWindowControl : UserControl, IRunService
   {
     /// <summary>
     /// Список вкладок открытых файлов. Каждая вкладка представлена экземпляром <see cref="OpenFileButton"/>.
@@ -701,7 +702,7 @@ namespace UI.Components
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-    public Task AddRunItem(RunControl runControl, EditorType editorType)
+    public Task AddRunItem(IRunView runControl, EditorType editorType)
     {
       return MultiEditor.AddRunItem(runControl, editorType);
     }
@@ -726,7 +727,7 @@ namespace UI.Components
       MultiEditor.OpenFolder();
     }
 
-    public async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    public async Task CloseRunItem(IRunView runControl, EditorType editorType)
     {
       await MultiEditor.CloseRunItem(runControl, editorType);
     }

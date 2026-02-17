@@ -2,6 +2,7 @@
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -548,7 +549,7 @@ namespace UI.Components
     internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType) =>
       fileManager.TranslationService.AddTranslatorItem(editor, translateEditor, editorType);
 
-    internal Task AddRunItem(RunControl runControl, EditorType editorType) =>
+    internal Task AddRunItem(IRunView runControl, EditorType editorType) =>
       fileManager.RunControlService.AddRunTabAsync(runControl, editorType);
 
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType) =>
@@ -557,7 +558,7 @@ namespace UI.Components
     internal void OpenFolder() =>
       fileManager.FolderService.OpenActiveFileFolder();
 
-    internal async Task CloseRunItem(RunControl runControl, EditorType editorType) =>
+    internal async Task CloseRunItem(IRunView runControl, EditorType editorType) =>
       await fileManager.RunControlService.CloseRunTabAsync(runControl, editorType);
   }
 }

@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using Message;
 using System.Windows;
 using UI.Components.Invoke;
@@ -39,14 +40,14 @@ namespace UI.Services
     /// </summary>
     /// <param name="runControl">Экземпляр элемента управления запуском.</param>
     /// <param name="editorType">Тип контейнера, в который нужно добавить вкладку (например, <see cref="EditorType.Run"/>).</param>
-    public async Task AddRunTabAsync(RunControl runControl, EditorType editorType)
+    public async Task AddRunTabAsync(IRunView runControl, EditorType editorType)
     {
       try
       {
         TextEditorContainer runContainer = _fileManager.ContainerService.GetEditorContainer(editorType)
           ?? _fileManager.ContainerService.CreateEditorContainer(editorType, OpenFileButton.TypeWindow.DeviceControl);
 
-        _fileManager.DockItemService.ShowEditorDockItem(runControl.FileName, runContainer, runControl, editorType);
+        _fileManager.DockItemService.ShowEditorDockItem(runControl.FileName, runContainer, runControl.View, editorType);
         _fileManager.ControlManagerService.ShowEditorContainer(runContainer, EditorType.Translator);
       }
       catch (Exception ex)
@@ -61,7 +62,7 @@ namespace UI.Services
     /// </summary>
     /// <param name="runControl">Экземпляр элемента управления запуском, который необходимо закрыть.</param>
     /// <param name="editorType">Тип контейнера, из которого нужно удалить вкладку.</param>
-    public async Task CloseRunTabAsync(RunControl runControl, EditorType editorType)
+    public async Task CloseRunTabAsync(IRunView runControl, EditorType editorType)
     {
       try
       {
@@ -71,7 +72,7 @@ namespace UI.Services
         var foundTab = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(tab => tab.Text == editorType.ToString());
         if (foundTab != null)
         {
-          await controlManager.RemoveControl(foundTab, runControl);
+          await controlManager.RemoveControl(foundTab, runControl.View);
         }
       }
       catch (Exception ex)

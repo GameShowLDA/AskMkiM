@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Windows.Controls;
 using UI.Components;
 using UI.Controls;
@@ -19,14 +20,16 @@ namespace MainWindowProgram.Services
     /// Компонент, управляющий отображением множества окон и вкладок.
     /// </summary>
     private readonly MultiWindowControl _multiWindowControl;
+    private readonly IRunService _runService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowService"/>.
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
-    public MultiWindowService(MultiWindowControl multiWindowControl)
+    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService)
     {
       _multiWindowControl = multiWindowControl;
+      _runService = runService;
     }
 
     /// <summary>
@@ -140,7 +143,7 @@ namespace MainWindowProgram.Services
       return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-    internal Task AddRunItem(RunControl runControl, EditorType editorType)
+    internal Task AddRunItem(IRunView runControl, EditorType editorType)
     {
       return _multiWindowControl.AddRunItem(runControl, editorType);
     }
@@ -150,7 +153,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     internal void OpenFolder() => _multiWindowControl.OpenFolder();
 
-    internal async Task CloseRunItem(RunControl runControl, EditorType editorType)
+    internal async Task CloseRunItem(IRunView runControl, EditorType editorType)
     {
       await _multiWindowControl.CloseRunItem(runControl, editorType);
     }
