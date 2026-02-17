@@ -21,11 +21,13 @@ namespace MainWindowProgram.Engine
     public static (MainWindowViewModel viewModel, IUsbMonitorView usb) Build(MainWindow window)
     {
       var multi = new MultiWindowService(window.MultiWindow);
+
       var usb = ServiceLocator.GetRequired<IUsbMonitorView>();
-
-
       var file = new FileService(window, multi, () => window.IsLocked);
+
+      // TODO : Как толкьо разберусь с MultiWindowService, надо будет пихнуть в синглтон. Интерфейс IMetrologyServiceView
       var metrology = new MetrologyService(multi);
+      
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
       var settings = new SettingsService(multi);

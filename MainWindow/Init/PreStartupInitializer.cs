@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
+using MainWindowProgram.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewCore.Device;

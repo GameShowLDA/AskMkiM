@@ -1,4 +1,5 @@
-﻿using UI.Controls.ExecutorControls.MetrologyControls;
+﻿using Ask.Core.Shared.Metadata.View;
+using UI.Controls.ExecutorControls.MetrologyControls;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -7,7 +8,7 @@ namespace MainWindowProgram.Services
   /// Реализация сервиса управления режимами метрологии.
   /// Осуществляет отображение пользовательских элементов управления для каждого режима через многооконный сервис.
   /// </summary>
-  public class MetrologyService
+  public class MetrologyService : IMetrologyServiceView
   {
     /// <summary>
     /// Сервис для управления многооконным пользовательским интерфейсом.

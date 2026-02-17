@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Ask.Core.Shared.Metadata.View;
+using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
@@ -9,12 +10,12 @@ namespace MainWindowProgram.ViewModels
   /// </summary>
   public partial class MetrologyViewModel
   {
-    private readonly MetrologyService _service;
+    private readonly IMetrologyServiceView _service;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MetrologyViewModel"/>.
     /// </summary>
-    public MetrologyViewModel(MetrologyService service)
+    public MetrologyViewModel(IMetrologyServiceView service)
     {
       _service = service;
     }
