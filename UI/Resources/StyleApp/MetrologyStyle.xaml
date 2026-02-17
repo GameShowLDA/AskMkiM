@@ -32,37 +32,6 @@
     </Style>
     <!--#endregion-->
 
-    <!--Кнопоки метрологии-->
-    <Style x:Key="MetrologyButtonStyle" TargetType="Button">
-        <Setter Property="Height" Value="50"/>
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-          CornerRadius="0" 
-          BorderThickness="{TemplateBinding BorderThickness}" 
-          BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="5,0,0,0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <!--#region Текст метрологии -->
     <Style x:Key ="MetrologyTextBlockStyle" TargetType="TextBlock">
         <Setter Property="Background" Value="Transparent"/>

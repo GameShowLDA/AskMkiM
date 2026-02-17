@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Components"
              xmlns:Icon="clr-namespace:UI.Icon"
              mc:Ignorable="d" 
-             d:DesignHeight="220" d:DesignWidth="300">
+             d:DesignHeight="220" d:DesignWidth="300" Cursor="">
              
     <!--<Border Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="20">
         <Border Background="{StaticResource PrimarySolidColorBrush}" CornerRadius="20" Margin="5,0,0,0" Padding="10">
