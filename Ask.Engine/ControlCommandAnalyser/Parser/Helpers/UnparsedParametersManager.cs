@@ -73,6 +73,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
         model.Errors.Add(KsErrors.CannotParseParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+    public static void HandleUnparsedParameters(NeCommandModel model, int numberLine, string? remainder)
+    {
+      if (!string.IsNullOrEmpty(remainder))
+      {
+        model.UnparsedParameters = "! Не распознанные параметры: ";
+        model.UnparsedParameters += remainder;
+        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+
+      // Валидация
+      if (string.IsNullOrWhiteSpace(model.HigherLimitVoltageSource) && string.IsNullOrWhiteSpace(model.LowerLimitVoltageSource))
+      {
+        LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
+        model.Errors.Add(NeErrors.CannotParseParameters(
+          $"Диапазон напряжения был неправильно задан или неверно указаны его границы",
+          model.StartLineNumber,
+          $"{model.CommandNumber}   {model.Mnemonic}"));
+      }
+    }
     public static void HandleUnparsedParameters(CkCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))

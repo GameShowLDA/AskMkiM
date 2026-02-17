@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr;
+using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Si
 {
@@ -11,36 +12,27 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Si
     public string Process(SiCommandModel model, string remainder, ParameterContext ctx)
     {
       var breakdown = ctx.Breakdown!;
-      var (voltage, unit, rest) =
+
+      var (voltageRaw, unit, rest) =
           CommonParameterParser.VoltageParser.ParseVoltage(remainder);
 
-      if (string.IsNullOrWhiteSpace(voltage))
+      if (string.IsNullOrWhiteSpace(voltageRaw))
       {
         model.Errors.Add(SiErrors.EmptyVoltage(ctx.LineNumber, $"{ctx.CommandNumber} {ctx.Mnemonic}"));
         return rest;
       }
 
-      var value = CommonParameterParser.ParseToDouble(voltage);
-      model.Voltage = value;
+      var value = CommonParameterParser.ParseToDouble(voltageRaw);
 
-      if (value > breakdown.SiMaxVoltage)
-      {
-        model.Errors.Add(
-            GeneralErrors.VoltageConflict(
-                ctx.LineNumber,
-                $"{ctx.CommandNumber} {ctx.Mnemonic}",
-                "Напряжение превышает максимально допустимое"));
-      }
-      else if (value < breakdown.IRMinVoltage)
-      {
-        model.Errors.Add(
-            GeneralErrors.VoltageConflict(
-                ctx.LineNumber,
-                $"{ctx.CommandNumber} {ctx.Mnemonic}",
-                "Напряжение меньше минимально допустимого"));
-      }
+      VoltageManager.ApplySingleVoltage(
+          model,
+          value,
+          unit,
+          breakdown.IRMinVoltage,
+          breakdown.SiMaxVoltage,
+          ctx.LineNumber,
+          $"{ctx.CommandNumber} {ctx.Mnemonic}");
 
-      model.VoltageSource = $"{value}{unit}";
       return rest;
     }
   }
