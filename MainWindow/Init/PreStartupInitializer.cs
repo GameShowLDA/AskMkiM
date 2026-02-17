@@ -1,7 +1,10 @@
 ﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Metrology;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Atributes;
+using Ask.Core.Shared.Metadata.Enums.MetrologyEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
@@ -9,7 +12,9 @@ using MainWindowProgram.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewCore.Device;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using static Ask.LogLib.LoggerUtility;
 
@@ -77,11 +82,14 @@ namespace MainWindowProgram.Init
             services.AddSingleton<BreakdownTesterServices>();
 
             services.AddSingleton<IUsbMonitorView, UsbMonitorService>();
+            services.AddSingleton<MetrologyControlFactory>();
+
+            RegisterMetrologyControls(services);
           })
           .Build();
 
-      AppHost.StartAsync().GetAwaiter().GetResult();
       ServiceLocator.Initialize(AppHost);
+      AppHost.StartAsync().GetAwaiter().GetResult();
       _ = Task.Run(() => InitializeChassisDevices());
     }
 
@@ -111,6 +119,29 @@ namespace MainWindowProgram.Init
         LogException(ex);
       }
     }
+
+    private static void RegisterMetrologyControls(IServiceCollection services)
+    {
+      var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+      var controls = assemblies
+          .SelectMany(a =>
+          {
+            try { return a.GetTypes(); }
+            catch { return Array.Empty<Type>(); }
+          })
+          .Where(t => !t.IsAbstract && typeof(UserControl).IsAssignableFrom(t))
+          .Select(t => new
+          {
+            Type = t,
+            Attr = t.GetCustomAttribute<MetrologyModeAttribute>()
+          })
+          .Where(x => x.Attr != null);
+
+      foreach (var c in controls)
+        services.AddTransient(c.Type);
+    }
+
 
     private static void InitializeHelpServer()
     {

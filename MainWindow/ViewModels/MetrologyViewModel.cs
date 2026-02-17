@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.View;
+﻿using Ask.Core.Shared.Metadata.Enums.MetrologyEnums;
+using Ask.Core.Shared.Metadata.View;
 using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
 
@@ -22,38 +23,38 @@ namespace MainWindowProgram.ViewModels
 
     /// <summary>Открыть режим КС.</summary>
     [RelayCommand]
-    private void KC() => _service.OpenKCModeAsync();
+    private void KC() => _service.OpenMetrologyMode(MetrologyType.KC);
 
     /// <summary>Открыть режим ИЕ.</summary>
     [RelayCommand]
-    private void IE() => _service.OpenIEModeAsync();
+    private void IE() => _service.OpenMetrologyMode(MetrologyType.IE);
 
     /// <summary>Открыть режим СИ.</summary>
     [RelayCommand]
-    private void CI() => _service.OpenCIModeAsync();
+    private void CI() => _service.OpenMetrologyMode(MetrologyType.SI);
 
     /// <summary>Открыть режим ПР.</summary>
     [RelayCommand]
-    private void PR() => _service.OpenPRModeAsync();
+    private void PR() => _service.OpenMetrologyMode(MetrologyType.PR);
 
     /// <summary>Открыть режим ПИ (DCW).</summary>
     [RelayCommand]
-    private void PIDCW() => _service.OpenPIDCWModeAsync();
+    private void PIDCW() => _service.OpenMetrologyMode(MetrologyType.PI_DCW);
 
     /// <summary>Открыть режим ПИ (ACW).</summary>
     [RelayCommand]
-    private void PIACW() => _service.OpenPIACWModeAsync();
+    private void PIACW() => _service.OpenMetrologyMode(MetrologyType.PI_ACW);
 
     /// <summary>Открыть режим КН (ACW).</summary>
     [RelayCommand]
-    private void KNACW() => _service.OpenKNACWModeAsync();
+    private void KNACW() => _service.OpenMetrologyMode(MetrologyType.KN_ACW);
 
     /// <summary>Открыть режим КН (DCW).</summary>
     [RelayCommand]
-    private void KNDCW() => _service.OpenKNDCWModeAsync();
+    private void KNDCW() => _service.OpenMetrologyMode(MetrologyType.KN_DCW);
 
     /// <summary>Открыть режим ЭТ.</summary>
     [RelayCommand]
-    private void EHT() => _service.OpenEHTModeAsync();
+    private void EHT() => _service.OpenMetrologyMode(MetrologyType.EHT);
   }
 }

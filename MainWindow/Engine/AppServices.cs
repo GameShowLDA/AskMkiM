@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.View;
 using Ask.Support;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
 namespace MainWindowProgram.Engine
@@ -26,8 +27,8 @@ namespace MainWindowProgram.Engine
       var file = new FileService(window, multi, () => window.IsLocked);
 
       // TODO : Как толкьо разберусь с MultiWindowService, надо будет пихнуть в синглтон. Интерфейс IMetrologyServiceView
-      var metrology = new MetrologyService(multi);
-      
+      var metrology = ActivatorUtilities.CreateInstance<MetrologyService>(ServiceLocator.Services, multi);
+
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
       var settings = new SettingsService(multi);
