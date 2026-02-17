@@ -12,6 +12,7 @@ using UI.Controls;
 using UI.Controls.TextEditor;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
+using Ask.Core.Shared.DTO.Executor;
 
 namespace UI.Components.MultiEditorMethods
 {

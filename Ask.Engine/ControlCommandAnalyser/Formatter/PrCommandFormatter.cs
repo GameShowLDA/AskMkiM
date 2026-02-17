@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
