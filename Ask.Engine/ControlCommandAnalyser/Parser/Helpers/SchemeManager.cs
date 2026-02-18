@@ -173,20 +173,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       {
         return HandleNoBusBlock(model, numberLine);
       }
-      model.BusList = ParseBusList(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
+      model.BusList = ParseBusList(model, bodyNoWs, rmCommandModel, firstStar, lastStar);
 
       remainder = ClearLineFromPoints(remainder);
 
       return model.BusList;
     }
 
-    public static Dictionary<SwitchingBus, List<PointModel>> GetBusPointsDictionary(
-    BaseCommandModel model,
-    RmCommandModel rmCommandModel,
-    int numberLine,
-    string commandNumber,
-    string mnemonic,
-    ref string remainder)
+    public static Dictionary<SwitchingBus, List<PointModel>> GetBusPointsDictionary(BaseCommandModel model, RmCommandModel rmCommandModel, int numberLine,
+      string commandNumber, string mnemonic, ref string remainder)
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
 
@@ -237,13 +232,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       return Enum.GetValues<SwitchingBus>().Where(x => !x.ToString().StartsWith("AB")).ToList();
     }
 
-    private static SchemeModel? ParseScheme(
-    BaseCommandModel model,
-    string body,
-    RmCommandModel rmCommandModel,
-    int firstStar,
-    int lastStar,
-    int numberLine)
+    private static SchemeModel? ParseScheme(BaseCommandModel model, string body, RmCommandModel rmCommandModel,
+      int firstStar, int lastStar, int numberLine)
     {
       var pointsBlob = body.Substring(firstStar, lastStar - firstStar + 1);
       model.PointsSourse = pointsBlob;
@@ -266,13 +256,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       return scheme;
     }
 
-    private static List<SwitchingBus> ParseBusList(
-    CkCommandModel model,
-    string body,
-    RmCommandModel rmCommandModel,
-    int firstStar,
-    int lastStar,
-    int numberLine)
+    private static List<SwitchingBus> ParseBusList(CkCommandModel model, string body, RmCommandModel rmCommandModel, int firstStar, int lastStar)
     {
       var busBlob = body.Substring(firstStar, lastStar - firstStar + 1);
 
@@ -299,8 +283,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       model.Errors.Add(
           EhtErrors.EmptyPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
     }
-
-
 
     private static void CheckPointsErrors(BaseCommandModel model, int numberLine, List<ErrorItem> pointErrors)
     {
