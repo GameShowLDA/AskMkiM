@@ -2,6 +2,7 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit;
 using Message;
 using System.ComponentModel;
@@ -118,7 +119,7 @@ namespace UI.Services
     /// <param name="leftEditor">Левый редактор с исходным содержимым.</param>
     /// <param name="rightEditor">Правый редактор с результатом трансляции.</param>
     /// <returns>Экземпляр <see cref="TranslatorItem"/>, отображающий оба редактора.</returns>
-    public async Task<TranslatorItem> ShowTranslatorDockItemAsync(string nameFile, TextEditorContainer textEditorContainer, TextEditorUI textEditor, TextEditorUI translatorEditor)
+    public async Task<TranslatorItem> ShowTranslatorDockItemAsync(string nameFile, TextEditorContainer textEditorContainer, ITextEditorView textEditor, ITextEditorView translatorEditor)
     {
       try
       {

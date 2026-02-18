@@ -1,5 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.View;
 using MainWindowProgram.Init;
 using MainWindowProgram.Services;
 
@@ -10,13 +12,13 @@ namespace MainWindowProgram.Engine
   /// </summary>
   internal class CommandLineParser
   {
-    private readonly UsbServices _usbServices;
+    private readonly IUsbMonitorView _usbServices;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="CommandLineParser"/>.
     /// </summary>
     /// <param name="usbServices">Сервис управления USB-мониторингом.</param>
-    public CommandLineParser(UsbServices usbServices)
+    public CommandLineParser(IUsbMonitorView usbServices)
     {
       _usbServices = usbServices ?? throw new ArgumentNullException(nameof(usbServices));
     }

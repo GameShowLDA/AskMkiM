@@ -1,7 +1,10 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -55,10 +58,17 @@ namespace UI.Components
     /// </summary>
     internal ControlManager controlManager;
 
-    /// <summary>
-    /// Объект, управляющей операциями связанными с сохранением файлов.
-    /// </summary>
-    internal SaveFileManager saveFileManager;
+    public IRunService RunService => fileManager.RunControlService;
+
+    public IEditorDocumentService EditorDocumentService => fileManager.EditorDocumentService;
+
+    public IProtocolViewerService ProtocolViewerService => fileManager.ProtocolService;
+
+    public IWorkspaceService WorkspaceService => controlManager;
+
+    public ITranslationService TranslationService => fileManager.TranslationService;
+
+
 
     /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
@@ -89,7 +99,6 @@ namespace UI.Components
       fileManager = new FileManager(this);
       textSearchManager = new TextSearchManager(fileManager, this);
       controlManager = new ControlManager(fileManager, this);
-      saveFileManager = new SaveFileManager(fileManager);
       textReplacementManager = new TextReplacementManager(fileManager);
     }
 
@@ -149,7 +158,7 @@ namespace UI.Components
       {
         _clickTimer.Stop();
         _clickCount = 0;
-        CreateNewFile();
+        EditorDocumentService.CreateNewFile();
       }
     }
 
@@ -199,7 +208,7 @@ namespace UI.Components
         return true;
       }
 
-      await RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
+      await controlManager.RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
 
       return true;
     }
@@ -288,99 +297,9 @@ namespace UI.Components
 
     #endregion
 
-    #region Translator
-
-    /// <summary>
-    /// Получает активный текстовый редактор.
-    /// </summary>
-    /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
-    /// </returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath) => fileManager.TranslationService.CreateTranslationEditor(parentFilePath);
-
-    #endregion
-
-    /// <summary>
-    /// Удаляет указанный элемент управления и соответствующую вкладку.
-    /// </summary>
-    public void RemoveControl(EditorType editorType)
-    {
-      var control = fileManager.ContainerService.GetEditorContainer(editorType);
-      var page = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
-      if (control != null && page != null)
-      {
-        controlManager.RemoveControl(page, control).ConfigureAwait(true);
-      }
-    }
-
-    /// <summary>
-    /// Добавляет элемент управления и соответствующую вкладку в панель управления.
-    /// </summary>
-    /// <param name="header">Заголовок для кнопки, отображаемой в панели вкладок.</param>
-    /// <param name="control">Элемент управления для отображения в панели управления.</param>
-    /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
-    public void AddControl(string header, UserControl control, TypeWindow tabType, string description = null) => controlManager.AddControl(header, control, tabType, description);
 
     public bool GetEmtyControl() => controlManager.GetEmtyControl();
 
-    /// <summary>
-    /// Открывает диалоговое окно для открытия файла.
-    /// </summary>
-    /// <param name="path">Путь к файлу.</param>
-    public void OpenFile(string path) => fileManager.FileService.Opening.OpenFile(path);
-
-
-    /// <summary>
-    /// Открывает диалоговое окно для открытия файла.
-    /// </summary>
-    /// <param name="path">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware) => fileManager.ProtocolService.DisplayProtocol(protocol, showInSoftware);
-
-    /// <summary>
-    /// Создаёт новый файл.
-    /// </summary>
-    public void CreateNewFile() => fileManager.FileService.Creation.CreateNewFile();
-
-    /// <summary>
-    /// Открывает диалоговое окно для сохранения файла в новом месте.
-    /// В случае успешного сохранения, возвращает true, в противном случае false.
-    /// </summary>
-    /// <returns>True, если файл был успешно сохранен, иначе false.</returns>
-    public bool SaveFileAs() => saveFileManager.SaveFileAs();
-
-    /// <summary>
-    /// Удаляет указанный элемент управления и соответствующую вкладку.
-    /// </summary>
-    /// <param name="tabButton">Вкладка для удаления.</param>
-    /// <param name="control">Элемент управления для удаления.</param>
-    private async Task RemoveControl(OpenFileButton tabButton, UserControl control) => await controlManager.RemoveControl(tabButton, control);
-
-    /// <summary>
-    /// Обрабатывает сохранение файла.
-    /// </summary>
-    /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
-    public bool SaveFile()
-    {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      int index = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
-      if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer)
-      {
-        var activeTextEditorContainer = fileManager.EditorWorkspaceModel.UserControls[index] as TextEditorContainer;
-        if (activeTextEditorContainer != null)
-        {
-          var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab =>
-            tab.IsActiveItem == true);
-          return saveFileManager.SaveFile(activeDockItem);
-        }
-      }
-      return false;
-    }
-
-    /// <summary>
-    /// Выводит файл на печать.
-    /// </summary>
-    public void PrintFile() => PrintFileManager.PrintFile(fileManager.EditorWorkspaceModel.OpenPages, fileManager.EditorWorkspaceModel.UserControls);
 
     /// <summary>
     /// Выполняет поиск по тектсу.
@@ -545,19 +464,11 @@ namespace UI.Components
       return string.Equals(selectedText, searchText, comparison);
     }
 
-    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType) =>
+    internal Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType) =>
       fileManager.TranslationService.AddTranslatorItem(editor, translateEditor, editorType);
 
-    internal Task AddRunItem(RunControl runControl, EditorType editorType) =>
-      fileManager.RunControlService.AddRunTabAsync(runControl, editorType);
 
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType) =>
       await fileManager.TranslationService.RemoveTranslatorTabAsync(translatorItem, editorType);
-
-    internal void OpenFolder() =>
-      fileManager.FolderService.OpenActiveFileFolder();
-
-    internal async Task CloseRunItem(RunControl runControl, EditorType editorType) =>
-      await fileManager.RunControlService.CloseRunTabAsync(runControl, editorType);
   }
 }

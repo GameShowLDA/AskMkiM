@@ -1,5 +1,5 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using Ask.Engine.ControlCommandAnalyser.Model.Interface;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model.Ie
 {

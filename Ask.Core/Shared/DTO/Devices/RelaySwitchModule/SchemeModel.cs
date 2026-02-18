@@ -1,6 +1,11 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Ask.Engine.ControlCommandAnalyser.Model.Chains
+namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {
   /// <summary>
   /// Модель данных, содержащая все цепи схемы.

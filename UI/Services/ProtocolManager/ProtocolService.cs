@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using Message;
 using System.IO;
 using System.Windows;
@@ -21,7 +23,7 @@ namespace UI.Services.ProtocolManager
   ///   <item>Создание и открытие вкладки редактора с протоколом.</item>
   /// </list>
   /// </summary>
-  public class ProtocolService
+  public class ProtocolService : IProtocolViewerService
   {
     private readonly Components.MultiEditorMethods.FileManager _fileManager;
 
@@ -39,7 +41,7 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     /// <param name="protocol">Модель протокола.</param>
     /// <param name="showInSoftware">Если <c>true</c> — открыть в редакторе, иначе — экспортировать в PDF.</param>
-    public void DisplayProtocol(ProtocolModel protocol, bool showInSoftware)
+    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware)
     {
       string protocolText = BuildProtocolText(protocol);
       if (string.IsNullOrEmpty(protocolText))

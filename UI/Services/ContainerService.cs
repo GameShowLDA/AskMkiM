@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Metadata.Static;
 using System.Windows.Controls;
 using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
@@ -39,7 +40,7 @@ namespace UI.Services
     /// <returns>Созданный экземпляр <see cref="TextEditorContainer"/>.</returns>
     public TextEditorContainer CreateEditorContainer(
         EditorType editorType,
-        OpenFileButton.TypeWindow fileType = OpenFileButton.TypeWindow.Files)
+        TypeWindow fileType = TypeWindow.Files)
     {
       var container = new TextEditorContainer();
       AddContainerToManager(editorType.ToString(), container, fileType);
@@ -109,7 +110,7 @@ namespace UI.Services
     /// <summary>
     /// Добавляет контейнер вкладок в менеджер интерфейса.
     /// </summary>
-    private void AddContainerToManager(string name, UserControl container, OpenFileButton.TypeWindow fileType)
+    private void AddContainerToManager(string name, UserControl container, TypeWindow fileType)
     {
       var controlManager = CreateControlManager();
       controlManager.AddControl(name, container, fileType);
