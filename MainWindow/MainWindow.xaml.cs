@@ -1,6 +1,7 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.View;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
@@ -62,6 +63,9 @@ namespace MainWindowProgram
     public SearchWindow SearchWindow;
 
     private readonly TextEditorStatusViewModel _statusBarViewModel = new();
+
+    public IRunService RunService => MultiWindow.RunService;
+    public IEditorDocumentService EditorDocumentService => MultiWindow.EditorDocumentService;
 
     #endregion
 

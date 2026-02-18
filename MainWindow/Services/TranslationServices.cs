@@ -356,7 +356,7 @@ namespace MainWindowProgram.Services
 
       if (runContainer == null)
       {
-        await _multiWindow.AddRunItem(runControl, EditorType.Run);
+        await _multiWindow.RunService.AddRunItem(runControl, EditorType.Run);
       }
       else
       {
@@ -366,7 +366,7 @@ namespace MainWindowProgram.Services
           dockItem.PerformClose();
         }
 
-        await _multiWindow.AddRunItem(runControl, EditorType.Run);
+        await _multiWindow.RunService.AddRunItem(runControl, EditorType.Run);
       }
 
       await runControl.Start(runControl.TranslationModels);
@@ -523,7 +523,7 @@ namespace MainWindowProgram.Services
         LogError($"Не удалось запустить трансляцию программы контроля: {ex}.");
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
-        _multiWindow.OpenFile(editor.TextEditorModel.FilePath);
+        _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
       }
     }
   }

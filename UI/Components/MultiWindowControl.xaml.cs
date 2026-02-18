@@ -23,7 +23,7 @@ namespace UI.Components
   /// <summary>
   /// Логика взаимодействия для MultiWindowControl.xaml.
   /// </summary>
-  public partial class MultiWindowControl : UserControl, IEditorDocumentService
+  public partial class MultiWindowControl : UserControl
   {
     /// <summary>
     /// Список вкладок открытых файлов. Каждая вкладка представлена экземпляром <see cref="OpenFileButton"/>.
@@ -34,8 +34,10 @@ namespace UI.Components
     /// Список пользовательских элементов управления, соответствующих открытым вкладкам. Каждый элемент управления представляет собой экземпляр <see cref="UserControl"/>.
     /// </summary>
     internal List<UserControl> userControls = new List<UserControl>();
-
+    
     public IRunService RunService => MultiEditor.RunService;
+
+    public IEditorDocumentService EditorDocumentService => MultiEditor.EditorDocumentService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
@@ -89,22 +91,6 @@ namespace UI.Components
           RemoveControl(foundPage, activeDataGrid);
         }
       }
-    }
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFile(string filePath)
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.OpenFile(filePath);
     }
 
     /// <summary>
@@ -247,83 +233,6 @@ namespace UI.Components
     public void AddControl(string name, UserControl userControl, TypeWindow tabType)
     {
       MultiEditor.AddControl(name, userControl, tabType);
-    }
-
-    /// <summary>
-    /// Создает новый файл в редакторе.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает создание нового файла в редакторе, если редактор был инициализирован.
-    /// Если редактор не инициализирован, выводится сообщение об ошибке.
-    /// </remarks>
-    public void CreateNewFile()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.CreateNewFile();
-    }
-
-    /// <summary>
-    /// Сохраняет текущий файл в редакторе.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает сохранение файла в редакторе. Если редактор не инициализирован,
-    /// выводится сообщение об ошибке.
-    /// </remarks>
-    public void SaveFile()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.SaveFile();
-    }
-
-    /// <summary>
-    /// Сохраняет файл под новым именем.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает сохранение файла под новым именем в редакторе. Если редактор не инициализирован,
-    /// выводится сообщение об ошибке.
-    /// </remarks>
-    public void SaveFileAs()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.SaveFileAs();
-    }
-
-
-    /// <summary>
-    /// Отправляет текущий файл на печать.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает функцию печати файла в редакторе. Если редактор не инициализирован,
-    /// выводится сообщение об ошибке.
-    /// </remarks>
-    public void PrintFile()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.PrintFile();
     }
 
     /// <summary>
@@ -708,21 +617,6 @@ namespace UI.Components
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
-    }
-
-    /// <summary>
-    /// Открывает папку, содержащую файл, в проводнике.
-    /// </summary>
-    public void OpenFolder()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.OpenFolder();
     }
   }
 }

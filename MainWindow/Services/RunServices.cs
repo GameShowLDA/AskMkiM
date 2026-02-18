@@ -45,7 +45,7 @@ namespace MainWindowProgram.Services
     {
       if (userControl != null && userControl is IRunView runControl)
       {
-        await _multiWindow.CloseRunItem(runControl, EditorType.Run);
+        await _multiWindow.RunService.CloseRunItem(runControl, EditorType.Run);
       }
     }
   }

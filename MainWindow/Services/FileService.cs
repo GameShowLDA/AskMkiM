@@ -94,7 +94,7 @@ namespace MainWindowProgram.Services
         {
           foreach (string filePath in openFileDialog.FileNames)
           {
-            _multiWindow.OpenFile(filePath);
+            _multiWindow.EditorDocumentService.OpenFile(filePath);
           }
         }
       }
@@ -123,7 +123,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.OpenFile(filePath);
+        _multiWindow.EditorDocumentService.OpenFile(filePath);
       }
     }
 
@@ -138,7 +138,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.CreateNewFile();
+        _multiWindow.EditorDocumentService.CreateNewFile();
       }
     }
 
@@ -147,7 +147,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void SaveFileAsync()
     {
-      _multiWindow.SaveFile();
+      _multiWindow.EditorDocumentService.SaveFile();
     }
 
     /// <summary>
@@ -155,7 +155,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void SaveFileAsAsync()
     {
-      _multiWindow.SaveFileAs();
+      _multiWindow.EditorDocumentService.SaveFileAs();
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void PrintFileAsync()
     {
-      _multiWindow.PrintFile();
+      _multiWindow.EditorDocumentService.PrintFile();
     }
 
     /// <summary>
@@ -227,7 +227,7 @@ namespace MainWindowProgram.Services
         return _multiWindow.CreateTranslationFileAsync(parentFilePath);
       }
     }
-    internal void OpenFolder() => _multiWindow.OpenFolder();
+    internal void OpenFolder() => _multiWindow.EditorDocumentService.OpenFolder();
 
     /// <summary>
     /// Открывает окно поиска сразу с раскрытой строкой замены.
