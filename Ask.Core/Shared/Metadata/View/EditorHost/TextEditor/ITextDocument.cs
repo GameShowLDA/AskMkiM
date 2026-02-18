@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
 
 namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
 {

@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit.Document;
 
@@ -75,11 +76,6 @@ namespace UI.Controls.TextEditor
     /// </summary>
     public event EventHandler TextChanged;
 
-    private void OnDocumentChanged(object sender, DocumentChangeEventArgs e)
-    {
-      TextChanged?.Invoke(this, EventArgs.Empty);
-    }
-
     /// <summary>
     /// Возвращает строку по номеру (1-based).
     /// </summary>
@@ -153,5 +149,9 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    private void OnDocumentChanged(object sender, DocumentChangeEventArgs e)
+    {
+      TextChanged?.Invoke(this, EventArgs.Empty);
+    }
   }
 }

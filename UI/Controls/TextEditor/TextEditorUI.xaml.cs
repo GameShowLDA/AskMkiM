@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Support;
 using Ask.UI.Shared.Contracts;
+using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
