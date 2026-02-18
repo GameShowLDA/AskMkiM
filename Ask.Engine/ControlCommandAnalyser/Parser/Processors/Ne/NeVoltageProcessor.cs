@@ -14,7 +14,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Ne
   {
     public string Process(NeCommandModel model, string remainder, ParameterContext ctx)
     {
-      // 👉 1. Диапазон напряжения
       string lowerRaw, higherRaw, unitRange;
 
       (lowerRaw, higherRaw, unitRange, remainder) =
@@ -43,7 +42,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Ne
 
       LogDebug($"После парсинга диапазона напряжения: {lowerRaw} - {higherRaw} {unitRange}");
 
-      // 👉 2. Одиночное напряжение (рабочее)
       string voltageRaw, unitSingle;
 
       (voltageRaw, unitSingle, remainder) =
@@ -62,7 +60,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Processors.Ne
       }
       else
       {
-        // если не указано и нет ключа Н — ставим дефолт
         if (!model.AlgorithmKey.Contains(AlgorithmKey.Н.ToString()))
         {
           VoltageManager.ApplyDefaultVoltage(
