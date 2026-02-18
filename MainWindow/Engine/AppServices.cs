@@ -21,7 +21,7 @@ namespace MainWindowProgram.Engine
     /// <returns>Кортеж из ViewModel и UsbServices.</returns>
     public static (MainWindowViewModel viewModel, IUsbMonitorView usb) Build(MainWindow window)
     {
-      var multi = new MultiWindowService(window.MultiWindow, window.RunService, window.EditorDocumentService);
+      var multi = new MultiWindowService(window.MultiWindow, window.RunService, window.EditorDocumentService, window.ProtocolViewerService);
 
       var usb = ServiceLocator.GetRequired<IUsbMonitorView>();
       var file = new FileService(window, multi, () => window.IsLocked);

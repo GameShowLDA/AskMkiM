@@ -39,6 +39,8 @@ namespace UI.Components
 
     public IEditorDocumentService EditorDocumentService => MultiEditor.EditorDocumentService;
 
+    public IProtocolViewerService ProtocolViewerService => MultiEditor.ProtocolViewerService;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
     /// </summary>
@@ -91,22 +93,6 @@ namespace UI.Components
           RemoveControl(foundPage, activeDataGrid);
         }
       }
-    }
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware)
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.ViewProtocol(protocol, showInSoftware);
     }
 
     /// <summary>

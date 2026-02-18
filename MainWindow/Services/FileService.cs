@@ -108,7 +108,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
+        _multiWindow.ProtocolViewerService.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
       }
     }
 

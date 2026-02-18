@@ -66,6 +66,7 @@ namespace MainWindowProgram
 
     public IRunService RunService => MultiWindow.RunService;
     public IEditorDocumentService EditorDocumentService => MultiWindow.EditorDocumentService;
+    public IProtocolViewerService ProtocolViewerService => MultiWindow.ProtocolViewerService;
 
     #endregion
 

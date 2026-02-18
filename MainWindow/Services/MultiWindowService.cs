@@ -31,16 +31,18 @@ namespace MainWindowProgram.Services
     /// Подсистема документов: обеспечивает операции создания, открытия, сохранения и печати документов редактора.
     /// </summary>
     public readonly IEditorDocumentService EditorDocumentService;
+    public readonly IProtocolViewerService ProtocolViewerService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowService"/>.
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
-    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService, IEditorDocumentService editorDocumentService)
+    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService, IEditorDocumentService editorDocumentService, IProtocolViewerService protocolViewerService)
     {
       _multiWindowControl = multiWindowControl;
       RunService = runService;
       EditorDocumentService = editorDocumentService;
+      ProtocolViewerService = protocolViewerService;
     }
 
     /// <summary>
@@ -50,12 +52,6 @@ namespace MainWindowProgram.Services
     /// <param name="control">Элемент управления, который необходимо отобразить.</param>
     /// <param name="type">Тип окна, в котором должен отображаться элемент управления.</param>
     public void AddControl(string name, UserControl control, TypeWindow type) => _multiWindowControl.AddControl(name, control, type);
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware) => _multiWindowControl.ViewProtocol(protocol, showInSoftware);
 
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.

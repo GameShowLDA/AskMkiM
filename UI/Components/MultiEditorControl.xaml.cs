@@ -60,6 +60,8 @@ namespace UI.Components
 
     public IEditorDocumentService EditorDocumentService => fileManager.EditorDocumentService;
 
+    public IProtocolViewerService ProtocolViewerService => fileManager.ProtocolService;
+
     /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
     /// </summary>
@@ -321,13 +323,6 @@ namespace UI.Components
     public void AddControl(string header, UserControl control, TypeWindow tabType, string description = null) => controlManager.AddControl(header, control, tabType, description);
 
     public bool GetEmtyControl() => controlManager.GetEmtyControl();
-
-
-    /// <summary>
-    /// Открывает диалоговое окно для открытия файла.
-    /// </summary>
-    /// <param name="path">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware) => fileManager.ProtocolService.DisplayProtocol(protocol, showInSoftware);
 
     /// <summary>
     /// Удаляет указанный элемент управления и соответствующую вкладку.
