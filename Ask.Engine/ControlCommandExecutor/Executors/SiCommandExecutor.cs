@@ -28,7 +28,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
 
       SetActiveLine(context, command);
-      BreakpointHandler.Handle(command, context.Console);
 
       if (context.IsInvokedByAnotherCommand)
       {
@@ -42,7 +41,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
       }
 
-      BreakpointHandler.Handle(command, context.Console);
       if (!string.IsNullOrEmpty(message) && !context.IsInvokedByAnotherCommand)
       {
         await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение команды {nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: message, type: ShowMessageModel.MessageType.Command) { IndentLevel = 1 }, IsBlockStart: true);
@@ -99,7 +97,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (errorMessage.Count > 0)
       {
-        protocolModel.Errors.Add(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, errorMessage);
       }
     }
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
@@ -163,3 +161,4 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     }
   }
 }
+

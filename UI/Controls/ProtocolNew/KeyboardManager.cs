@@ -1,4 +1,4 @@
-using Ask.Core.Services.App;
+п»їusing Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Adapters;
 using System.Windows;
 using System.Windows.Input;
@@ -7,40 +7,40 @@ using static Ask.LogLib.LoggerUtility;
 namespace UI.Controls.ProtocolNew
 {
   /// <summary>
-  /// Менеджер для глобальной обработки клавиш, связанных с пошаговым режимом выполнения.
-  /// Обрабатывает клавиши F5, F10, F11 и специальный F4,
-  /// и позволяет асинхронно ожидать следующую команду пользователя.
+  /// РњРµРЅРµРґР¶РµСЂ РґР»СЏ РіР»РѕР±Р°Р»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё РєР»Р°РІРёС€, СЃРІСЏР·Р°РЅРЅС‹С… СЃ РїРѕС€Р°РіРѕРІС‹Рј СЂРµР¶РёРјРѕРј РІС‹РїРѕР»РЅРµРЅРёСЏ.
+  /// РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РєР»Р°РІРёС€Рё F5, F10, F11 Рё СЃРїРµС†РёР°Р»СЊРЅС‹Р№ F4,
+  /// Рё РїРѕР·РІРѕР»СЏРµС‚ Р°СЃРёРЅС…СЂРѕРЅРЅРѕ РѕР¶РёРґР°С‚СЊ СЃР»РµРґСѓСЋС‰СѓСЋ РєРѕРјР°РЅРґСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.
   /// </summary>
   public static class KeyboardManager
   {
     /// <summary>
-    /// Объект для управления задачей ожидания пользовательского действия.
+    /// РћР±СЉРµРєС‚ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ Р·Р°РґР°С‡РµР№ РѕР¶РёРґР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РґРµР№СЃС‚РІРёСЏ.
     /// </summary>
     private static TaskCompletionSource<bool>? _tcs;
 
     /// <summary>
-    /// Делегат, вызываемый при нажатии клавиши Enter (запуск).
+    /// Р”РµР»РµРіР°С‚, РІС‹Р·С‹РІР°РµРјС‹Р№ РїСЂРё РЅР°Р¶Р°С‚РёРё РєР»Р°РІРёС€Рё Enter (Р·Р°РїСѓСЃРє).
     /// </summary>
     public static Action? OnStartPressed;
 
     public static Action? OnStartPressedByStepMode;
 
     /// <summary>
-    /// Делегат, вызываемый при нажатии клавиши P (остановка или продолжение).
+    /// Р”РµР»РµРіР°С‚, РІС‹Р·С‹РІР°РµРјС‹Р№ РїСЂРё РЅР°Р¶Р°С‚РёРё РєР»Р°РІРёС€Рё P (РѕСЃС‚Р°РЅРѕРІРєР° РёР»Рё РїСЂРѕРґРѕР»Р¶РµРЅРёРµ).
     /// </summary>
     public static Action? OnPausePressed;
     public static Action? OnContinuePressed;
 
     /// <summary>
-    /// Делегат, вызываемый при нажатии клавиши Escape (завершить).
+    /// Р”РµР»РµРіР°С‚, РІС‹Р·С‹РІР°РµРјС‹Р№ РїСЂРё РЅР°Р¶Р°С‚РёРё РєР»Р°РІРёС€Рё Escape (Р·Р°РІРµСЂС€РёС‚СЊ).
     /// </summary>
     public static Action? OnExitPressed;
     public static Action? OnRepeatPressed;
 
 
     /// <summary>
-    /// Регистрирует глобальный обработчик нажатий клавиш.
-    /// Используется для отслеживания F5, F10, F11 и F4 во всех окнах приложения.
+    /// Р РµРіРёСЃС‚СЂРёСЂСѓРµС‚ РіР»РѕР±Р°Р»СЊРЅС‹Р№ РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёР№ РєР»Р°РІРёС€.
+    /// РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ F5, F10, F11 Рё F4 РІРѕ РІСЃРµС… РѕРєРЅР°С… РїСЂРёР»РѕР¶РµРЅРёСЏ.
     /// </summary>
     public static void RegisterGlobalStepHooks()
     {
@@ -48,7 +48,7 @@ namespace UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Отменяет регистрацию глобального обработчика нажатий клавиш.
+    /// РћС‚РјРµРЅСЏРµС‚ СЂРµРіРёСЃС‚СЂР°С†РёСЋ РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РѕР±СЂР°Р±РѕС‚С‡РёРєР° РЅР°Р¶Р°С‚РёР№ РєР»Р°РІРёС€.
     /// </summary>
     public static void UnregisterGlobalStepHooks()
     {
@@ -56,20 +56,26 @@ namespace UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Обработчик глобальных нажатий клавиш.
-    /// Отслеживает F10 (Step Over), F11 (Step Into), F5 (Continue)
-    /// и F4 для режима, активированного от брейкпоинта.
+    /// РћР±СЂР°Р±РѕС‚С‡РёРє РіР»РѕР±Р°Р»СЊРЅС‹С… РЅР°Р¶Р°С‚РёР№ РєР»Р°РІРёС€.
+    /// РћС‚СЃР»РµР¶РёРІР°РµС‚ F10 (Step Over), F11 (Step Into), F5 (Continue)
+    /// Рё F4 РґР»СЏ СЂРµР¶РёРјР°, Р°РєС‚РёРІРёСЂРѕРІР°РЅРЅРѕРіРѕ РѕС‚ Р±СЂРµР№РєРїРѕРёРЅС‚Р°.
     /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события нажатия клавиши.</param>
+    /// <param name="sender">РСЃС‚РѕС‡РЅРёРє СЃРѕР±С‹С‚РёСЏ.</param>
+    /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РєР»Р°РІРёС€Рё.</param>
     private static void OnGlobalKeyPressed(object sender, PreProcessInputEventArgs e)
     {
-      if (_tcs == null) return;
-
       var args = e.StagingItem.Input as KeyEventArgs;
       if (args == null || args.RoutedEvent != Keyboard.KeyDownEvent) return;
 
       var key = args.Key == Key.System ? args.SystemKey : args.Key;
+
+      if (key == Key.F4 && Keyboard.Modifiers == ModifierKeys.None && TryHandleBreakpointF4())
+      {
+        args.Handled = true;
+        return;
+      }
+
+      if (_tcs == null) return;
 
       LogInformation($"[KEYBOARD] Detected key: {key}");
 
@@ -79,7 +85,7 @@ namespace UI.Controls.ProtocolNew
           StepControlManager.IsStepInto = false;
           _tcs.TrySetResult(true);
           args.Handled = true;
-          MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F10", true);
+          MessageEventAdapter.RaiseInfoMessage("РќР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р°: F10", true);
           Application.Current.Dispatcher.InvokeAsync(() =>
           {
             var win = Application.Current.MainWindow;
@@ -91,7 +97,7 @@ namespace UI.Controls.ProtocolNew
         case Key.F11:
           StepControlManager.IsStepInto = true;
           _tcs.TrySetResult(true);
-          MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F11", true);
+          MessageEventAdapter.RaiseInfoMessage("РќР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р°: F11", true);
           break;
 
         case Key.F5:
@@ -102,14 +108,7 @@ namespace UI.Controls.ProtocolNew
             _tcs.TrySetResult(true);
           }
           args.Handled = true;
-          MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F5", true);
-          break;
-
-        case Key.F4:
-          if (Keyboard.Modifiers == ModifierKeys.None && TryHandleBreakpointF4())
-          {
-            args.Handled = true;
-          }
+          MessageEventAdapter.RaiseInfoMessage("РќР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р°: F5", true);
           break;
 
         default:
@@ -118,9 +117,9 @@ namespace UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Обрабатывает F4 только для пошагового режима, включенного из BreakpointHandler.
+    /// РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ F4 С‚РѕР»СЊРєРѕ РґР»СЏ РїРѕС€Р°РіРѕРІРѕРіРѕ СЂРµР¶РёРјР°, РІРєР»СЋС‡РµРЅРЅРѕРіРѕ РёР· BreakpointHandler.
     /// </summary>
-    /// <returns><c>true</c>, если F4 был обработан.</returns>
+    /// <returns><c>true</c>, РµСЃР»Рё F4 Р±С‹Р» РѕР±СЂР°Р±РѕС‚Р°РЅ.</returns>
     private static bool TryHandleBreakpointF4()
     {
       if (!StepControlManager.IsBreakpointStepModeActive || StepControlManager.BreakpointCommandInfo == null)
@@ -131,23 +130,23 @@ namespace UI.Controls.ProtocolNew
       var command = StepControlManager.BreakpointCommandInfo;
       var caption = $"{command.CommandNumber} {command.Mnemonic}".Trim();
       var body = string.IsNullOrWhiteSpace(command.CommandBody)
-        ? "<пусто>"
+        ? "<РїСѓСЃС‚Рѕ>"
         : command.CommandBody;
 
       LogInformation($"[KEYBOARD] F4 pressed on breakpoint command: {caption}");
       ExecutionEventAdapter.RaiseBreakpointF4Pressed(command);
       MessageEventAdapter.RaiseInfoMessage(
-        $"Нажата клавиша: F4 на команде {caption}. Тело команды: {body}",
+        $"РќР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р°: F4 РЅР° РєРѕРјР°РЅРґРµ {caption}. РўРµР»Рѕ РєРѕРјР°РЅРґС‹: {body}",
         true);
 
       return true;
     }
 
     /// <summary>
-    /// Ожидает нажатие одной из клавиш управления пошаговым выполнением.
-    /// Может быть отменено с помощью переданного CancellationToken.
+    /// РћР¶РёРґР°РµС‚ РЅР°Р¶Р°С‚РёРµ РѕРґРЅРѕР№ РёР· РєР»Р°РІРёС€ СѓРїСЂР°РІР»РµРЅРёСЏ РїРѕС€Р°РіРѕРІС‹Рј РІС‹РїРѕР»РЅРµРЅРёРµРј.
+    /// РњРѕР¶РµС‚ Р±С‹С‚СЊ РѕС‚РјРµРЅРµРЅРѕ СЃ РїРѕРјРѕС‰СЊСЋ РїРµСЂРµРґР°РЅРЅРѕРіРѕ CancellationToken.
     /// </summary>
-    /// <param name="cancellationToken">Токен отмены ожидания.</param>
+    /// <param name="cancellationToken">РўРѕРєРµРЅ РѕС‚РјРµРЅС‹ РѕР¶РёРґР°РЅРёСЏ.</param>
     public static async Task WaitForNextStepKeyAsync(CancellationToken cancellationToken)
     {
       _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -160,7 +159,7 @@ namespace UI.Controls.ProtocolNew
         }
         catch (TaskCanceledException)
         {
-          throw new OperationCanceledException("Ожидание пошаговой команды было прервано.", cancellationToken);
+          throw new OperationCanceledException("РћР¶РёРґР°РЅРёРµ РїРѕС€Р°РіРѕРІРѕР№ РєРѕРјР°РЅРґС‹ Р±С‹Р»Рѕ РїСЂРµСЂРІР°РЅРѕ.", cancellationToken);
         }
         finally
         {
@@ -170,8 +169,8 @@ namespace UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Принудительно завершает ожидание следующего шага.
-    /// Используется, например, для внешнего управления пошаговым режимом.
+    /// РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ Р·Р°РІРµСЂС€Р°РµС‚ РѕР¶РёРґР°РЅРёРµ СЃР»РµРґСѓСЋС‰РµРіРѕ С€Р°РіР°.
+    /// РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, РЅР°РїСЂРёРјРµСЂ, РґР»СЏ РІРЅРµС€РЅРµРіРѕ СѓРїСЂР°РІР»РµРЅРёСЏ РїРѕС€Р°РіРѕРІС‹Рј СЂРµР¶РёРјРѕРј.
     /// </summary>
     public static void TriggerStep() => _tcs?.TrySetResult(true);
   }

@@ -33,7 +33,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       List<ShowMessageModel> infoMessage = new();
       
       SetActiveLine(context, command);
-      BreakpointHandler.Handle(command, context.Console);
 
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
@@ -88,11 +87,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (errorMessage.Count > 0)
       {
-        protocolModel.Errors.Add(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, errorMessage);
       }
       if (infoMessage.Count > 0)
       {
-        protocolModel.Info.Add(nameCommand, infoMessage);
+        protocolModel.AddInfo(nameCommand, infoMessage);
       }
     }
 
@@ -122,3 +121,4 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     }
   }
 }
+

@@ -1,0 +1,92 @@
+<UserControl x:Class="Ask.UI.Features.ExecutionSelection.Views.DrawerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Focusable="True"
+             KeyboardNavigation.TabNavigation="Cycle"
+             KeyboardNavigation.DirectionalNavigation="Contained">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </UserControl.Resources>
+
+  <Grid Visibility="{Binding IsOpen, Converter={StaticResource BoolToVisibility}}">
+    <Border x:Name="Backdrop"
+            Background="#66000000"
+            Opacity="0" />
+
+    <Border x:Name="Panel"
+            HorizontalAlignment="Right"
+            Width="860"
+            Background="#1F1F1F"
+            BorderBrush="#3A3A3A"
+            BorderThickness="1,0,0,0">
+      <Border.RenderTransform>
+        <TranslateTransform x:Name="PanelTranslate" X="860" />
+      </Border.RenderTransform>
+
+      <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="320" />
+          <ColumnDefinition Width="12" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Grid.ColumnSpan="3"
+                   Margin="0,0,0,10"
+                   Foreground="#F2F2F2"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Text="Выбор команды (F4)" />
+
+        <ListBox x:Name="CommandsList"
+                 Grid.Row="1"
+                 Grid.Column="0"
+                 ItemsSource="{Binding Commands}"
+                 SelectedItem="{Binding SelectedCommand, Mode=TwoWay}"
+                 Background="#262626"
+                 Foreground="#F2F2F2"
+                 BorderThickness="0"
+                 ScrollViewer.CanContentScroll="True"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 VirtualizingStackPanel.IsVirtualizing="True"
+                 VirtualizingStackPanel.VirtualizationMode="Recycling"
+                 VirtualizingPanel.ScrollUnit="Item"
+                 KeyboardNavigation.TabNavigation="None">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="{x:Type ListBoxItem}">
+              <Setter Property="Padding" Value="8,6" />
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <EventSetter Event="MouseDoubleClick" Handler="OnItemDoubleClick" />
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Name}"
+                         TextTrimming="CharacterEllipsis" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Border Grid.Row="1"
+                Grid.Column="2"
+                Background="#262626"
+                Padding="10">
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <TextBlock Text="{Binding SelectedCommandText}"
+                       Foreground="#EAEAEA"
+                       FontFamily="Consolas"
+                       TextWrapping="Wrap" />
+          </ScrollViewer>
+        </Border>
+      </Grid>
+    </Border>
+
+  </Grid>
+</UserControl>

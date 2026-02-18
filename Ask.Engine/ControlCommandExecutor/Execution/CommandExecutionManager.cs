@@ -80,6 +80,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     public List<BaseCommandModel> CommandsToExecute { get; set; } = new();
 
+    public IReadOnlyList<BaseCommandModel> GetCommandsSnapshot() => _commands.Snapshot();
+
     public CommandExecutionManager(
      IUserInteractionService console,
      ITextEditorAdapter textEditor,
@@ -105,6 +107,26 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       while (index < _commands.Count)
       {
         var command = _commands[index];
+        if (command.FormattedStartLineNumber >= 0)
+        {
+          _textEditor.SetActiveLine(command.FormattedStartLineNumber);
+        }
+
+        var selected = await BreakpointHandler.OnBreakpointHitAsync(command, _commands.Snapshot(), _console);
+        if (selected == null)
+        {
+          break;
+        }
+
+        if (!ReferenceEquals(selected, command))
+        {
+          var selectedIndex = _commands.IndexOf(selected);
+          if (selectedIndex >= 0)
+          {
+            index = selectedIndex;
+            command = selected;
+          }
+        }
 
         var context = new CommandExecutionContext(
             this, command, _console, _textEditor, _opkFilePath);
