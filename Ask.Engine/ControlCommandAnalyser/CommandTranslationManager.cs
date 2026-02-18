@@ -6,6 +6,7 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -64,7 +65,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Парсит, форматирует, выводит в адаптер. Возвращает модели команд.
     /// </summary>
-    public List<BaseCommandModel> ParseAllAndDisplay(string text, ITextEditorAdapter adapter)
+    public List<BaseCommandModel> ParseAllAndDisplay(string text, ITextEditorView adapter)
     {
       MessageEventAdapter.RaiseInfoMessage("Начало трансляции");
       var models = ParseAll(text);
@@ -129,7 +130,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Форматирует модели команд и выводит их через адаптер.
     /// </summary>
-    private void FormatAndDisplay(List<BaseCommandModel> models, ITextEditorAdapter adapter)
+    private void FormatAndDisplay(List<BaseCommandModel> models, ITextEditorView adapter)
     {
       var formattedLines = new List<string>();
 

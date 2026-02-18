@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
     /// <summary>
     /// Создаёт файл трансляции на основе исходного.
     /// </summary>
-    TextEditorUI CreateTranslationFile(string parentFilePath);
+    ITextEditorView CreateTranslationFile(string parentFilePath);
 
     ///// <summary>
     ///// Добавляет элемент трансляции.

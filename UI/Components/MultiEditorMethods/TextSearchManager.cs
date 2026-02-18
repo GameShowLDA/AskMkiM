@@ -1203,7 +1203,7 @@ namespace UI.Components.MultiEditorMethods
       int lineToCheck = Math.Min(sourceLineNumber, leftEditor.Document.LineCount);
       for (int lineNumber = lineToCheck; lineNumber >= 1; lineNumber--)
       {
-        var line = leftEditor.Document.GetLineByNumber(lineNumber);
+        var line = leftEditor.Document.GetLine(lineNumber);
         string lineText = leftEditor.Document.GetText(line);
         var match = Regex.Match(lineText, SourceCommandHeaderPattern);
         if (!match.Success)
@@ -1232,7 +1232,7 @@ namespace UI.Components.MultiEditorMethods
         return false;
       }
 
-      var line = leftEditor.Document.GetLineByNumber(modelLine);
+      var line = leftEditor.Document.GetLine(modelLine);
       string lineText = leftEditor.Document.GetText(line);
       var match = Regex.Match(lineText, SourceCommandHeaderPattern);
       if (!match.Success)
@@ -1268,7 +1268,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      var line = rightEditor.Document.GetLineByNumber(formattedLineNumber);
+      var line = rightEditor.Document.GetLine(formattedLineNumber);
       string lineText = rightEditor.Document.GetText(line);
       if (string.IsNullOrWhiteSpace(lineText))
       {

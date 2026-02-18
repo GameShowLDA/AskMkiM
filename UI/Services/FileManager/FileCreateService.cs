@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.Metadata.Static;
 using System.Windows;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;

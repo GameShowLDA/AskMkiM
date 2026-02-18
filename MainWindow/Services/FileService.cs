@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Microsoft.Win32;
 using System.Windows;
 using UI.Components.FileComparerControls;
@@ -215,7 +216,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Создает новый файл трансляции (.opkw) в редакторе.
     /// </summary>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
+    public ITextEditorView CreateTranslationFileAsync(string parentFilePath)
     {
       if (_isLockedProvider())
       {
@@ -224,7 +225,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        return _multiWindow.CreateTranslationFileAsync(parentFilePath);
+        return _multiWindow.TranslationService.CreateTranslationFile(parentFilePath);
       }
     }
     internal void OpenFolder() => _multiWindow.EditorDocumentService.OpenFolder();

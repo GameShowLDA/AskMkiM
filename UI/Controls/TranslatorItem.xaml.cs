@@ -3,7 +3,10 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.UI.Shared.Contracts;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.TextFormatting;
 using UI.Controls.TextEditor;
@@ -78,29 +81,21 @@ namespace UI.Controls
       WarningCount = 0;
     }
 
-    public void SetLeftEditor(TextEditorUI textEditorUI)
+    public void SetLeftEditor(ITextEditorView editor)
     {
-      if (textEditorUI == null)
+      if (editor is not IUiViewAdapter adapter)
         return;
 
-      if (textEditorUI.Parent is Panel oldParent)
-      {
-        oldParent.Children.Remove(textEditorUI);
-      }
-      else if (textEditorUI.Parent is ContentControl oldContent)
-      {
-        oldContent.Content = null;
-      }
-      else if (textEditorUI.Parent is Decorator decorator)
-      {
-        decorator.Child = null;
-      }
+      if (adapter.NativeView is not UIElement element)
+        return;
+
+      DetachFromParent(element);
 
       LeftBox.Children.Clear();
-      LeftBox.Children.Add(textEditorUI);
+      LeftBox.Children.Add(element);
     }
 
-    public void SetRightEditor(TextEditorUI textEditorUI)
+    public void SetRightEditor(ITextEditorView textEditorUI)
     {
       if (RightBox == null || textEditorUI == null)
       {
@@ -108,7 +103,7 @@ namespace UI.Controls
       }
 
       RightBox.Children.Clear();
-      RightBox.Children.Add(textEditorUI);
+      RightBox.Children.Add(textEditorUI.View);
     }
 
     public TextEditorUI GetRightEditor()
@@ -149,6 +144,24 @@ namespace UI.Controls
     public void SetLeftEditorName(string newText)
     {
       FirstFileName.Text = newText;
+    }
+
+    private static void DetachFromParent(UIElement element)
+    {
+      switch (element)
+      {
+        case FrameworkElement fe when fe.Parent is Panel panel:
+          panel.Children.Remove(element);
+          break;
+
+        case FrameworkElement fe when fe.Parent is ContentControl content:
+          content.Content = null;
+          break;
+
+        case FrameworkElement fe when fe.Parent is Decorator decorator:
+          decorator.Child = null;
+          break;
+      }
     }
 
     /// <summary>

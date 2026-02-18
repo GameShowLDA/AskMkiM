@@ -2,6 +2,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using System.Windows.Controls;
 using System.Windows.Forms.Design;
 using UI.Components;
@@ -34,18 +35,26 @@ namespace MainWindowProgram.Services
     public readonly IEditorDocumentService EditorDocumentService;
     public readonly IProtocolViewerService ProtocolViewerService;
     public readonly IWorkspaceService WorkspaceService;
+    public readonly ITranslationService TranslationService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowService"/>.
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
-    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService, IEditorDocumentService editorDocumentService, IProtocolViewerService protocolViewerService, IWorkspaceService workspaceService)
+    public MultiWindowService(
+      MultiWindowControl multiWindowControl, 
+      IRunService runService, 
+      IEditorDocumentService editorDocumentService, 
+      IProtocolViewerService protocolViewerService, 
+      IWorkspaceService workspaceService,
+      ITranslationService translationService)
     {
       _multiWindowControl = multiWindowControl;
       RunService = runService;
       EditorDocumentService = editorDocumentService;
       ProtocolViewerService = protocolViewerService;
       WorkspaceService = workspaceService;
+      TranslationService = translationService;
     }
 
     /// <summary>
@@ -73,15 +82,6 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Создает файл трансляции.
-    /// </summary>
-    /// <returns>Текстовый редактор с файлом трансляции.</returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
-    {
-      return _multiWindowControl.CreateTranslationFileAsync(parentFilePath);
-    }
-
-    /// <summary>
     /// Получает активный контейнер с вкладками.
     /// </summary>
     /// <param name="editorType">Тип вкладок.</param>
@@ -101,7 +101,7 @@ namespace MainWindowProgram.Services
     /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
     /// <param name="editorType">Тип вкладки.</param>
     /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
-    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    internal Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType)
     {
       return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
     }

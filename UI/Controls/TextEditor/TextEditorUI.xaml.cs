@@ -1,10 +1,12 @@
 ﻿using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Support;
+using Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -24,7 +26,7 @@ namespace UI.Controls.TextEditor
   /// <summary>
   /// Логика взаимодействия для TextEditorUI.xaml.
   /// </summary>
-  public partial class TextEditorUI : UserControl, ITextEditorAdapter
+  public partial class TextEditorUI : UserControl, ITextEditorAdapter, ITextEditorView, IUiViewAdapter
   {
 
     #region Поля.
@@ -65,9 +67,15 @@ namespace UI.Controls.TextEditor
     /// </summary>
     private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
 
+    private AvalonTextDocumentAdapter _documentAdapter;
+
     #endregion
 
     #region Св-ва.
+
+    public UserControl View => this;
+
+    public object NativeView => this;
 
     /// <summary>
     /// Переопределяет фоновую кисть элемента управления,
@@ -114,7 +122,7 @@ namespace UI.Controls.TextEditor
     /// <value>
     /// Возвращает объект <see cref="TextDocument"/>, который представляет текст, загруженный в редактор.
     /// </value>
-    public TextDocument Document => textEditor.Document;
+    public ITextDocumentView Document => _documentAdapter;
 
     /// <summary>
     /// Получает экземпляр текстового редактора AvalonEdit.
@@ -524,6 +532,11 @@ namespace UI.Controls.TextEditor
       EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(
         e => ApplySyntaxHighlighting(e.IsEnabled)
       );
+
+      if (textEditor.Document == null)
+        textEditor.Document = new TextDocument();
+
+      _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
     }
 
     #endregion

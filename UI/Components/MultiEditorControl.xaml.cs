@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -64,6 +65,9 @@ namespace UI.Components
     public IProtocolViewerService ProtocolViewerService => fileManager.ProtocolService;
 
     public IWorkspaceService WorkspaceService => controlManager;
+
+    public ITranslationService TranslationService => fileManager.TranslationService;
+
 
 
     /// <summary>
@@ -293,18 +297,6 @@ namespace UI.Components
 
     #endregion
 
-    #region Translator
-
-    /// <summary>
-    /// Получает активный текстовый редактор.
-    /// </summary>
-    /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
-    /// </returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath) => fileManager.TranslationService.CreateTranslationEditor(parentFilePath);
-
-    #endregion
-
 
     public bool GetEmtyControl() => controlManager.GetEmtyControl();
 
@@ -472,7 +464,7 @@ namespace UI.Components
       return string.Equals(selectedText, searchText, comparison);
     }
 
-    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType) =>
+    internal Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType) =>
       fileManager.TranslationService.AddTranslatorItem(editor, translateEditor, editorType);
 
 

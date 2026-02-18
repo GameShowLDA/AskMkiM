@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Message;
 using System.Windows;
 using System.Windows.Controls.Primitives;
@@ -42,6 +43,9 @@ namespace UI.Components
 
     public IProtocolViewerService ProtocolViewerService => MultiEditor.ProtocolViewerService;
     public IWorkspaceService WorkspaceService => MultiEditor.WorkspaceService;
+
+    public ITranslationService TranslationService => MultiEditor.TranslationService;
+
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
@@ -193,16 +197,6 @@ namespace UI.Components
       return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
     }
 
-    /// <summary>
-    /// Получает активный текстовый редактор.
-    /// </summary>
-    /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
-    /// </returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
-    {
-      return MultiEditor.CreateTranslationFileAsync(parentFilePath);
-    }
 
     /// <summary>
     /// Выполняет поиск по тексту в редакторе.
@@ -577,7 +571,7 @@ namespace UI.Components
     /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
     /// <param name="editorType">Тип вкладки.</param>
     /// <returns>Асинхронная задача, представляющая результат добавления вкладки с <see cref="TranslatorItem"/>.</returns>
-    public Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    public Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType)
     {
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
