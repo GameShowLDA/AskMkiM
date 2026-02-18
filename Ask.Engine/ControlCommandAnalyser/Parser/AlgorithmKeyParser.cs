@@ -27,69 +27,86 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         .ToList();
     }
 
-    public static List<(string Key, bool HasError)> ExtractKeysWithTrailingCommaCheck(string line, BaseCommandModel model)
+    /// <summary>
+    /// Извлекает ключи из строки и проверяет наличие запятой после последнего.
+    /// </summary>
+    public static List<(string Key, bool HasError)>
+    ExtractKeysWithTrailingCommaCheck(string line, BaseCommandModel model)
     {
       var result = new List<(string, bool)>();
 
       if (string.IsNullOrWhiteSpace(line))
         return result;
 
-      var allowedEnumKeys = KeysHelper
-        .GetAllowedKeysForModel(model)
-        .Select(k => k.ToString())
-        .ToHashSet();
+      var tokens = SplitTokens(line);
 
-      var tokens = line.Split(new[] { ' ', '\t', ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries);
-      var matchedKeys = tokens.Where(token => allowedEnumKeys.Contains(token)).ToList();
+      var allowedKeys = GetAllowedKeys(model);
+      var notAllowedKeys = GetNotAllowedKeys(model);
 
-      var notAllowedKeys = KeysHelper
-        .GetNotAllowedKeysForModel(model)
-        .Select(k => k.ToString())
-        .ToHashSet();
-      var foundNotAllowedKeys = tokens.Where(token => notAllowedKeys.Contains(token)).ToList();
+      var matchedAllowed = tokens.Where(allowedKeys.Contains).ToList();
+      var matchedNotAllowed = tokens.Where(notAllowedKeys.Contains).ToList();
 
-      if (matchedKeys.Count == 0 && foundNotAllowedKeys.Count == 0)
+      if (matchedAllowed.Count == 0 && matchedNotAllowed.Count == 0)
         return result;
 
-      if (matchedKeys.Count > 0)
-      {
-        string lastKey = matchedKeys.Last();
-        int lastKeyIndex = line.LastIndexOf(lastKey, StringComparison.Ordinal);
+      result.AddRange(ProcessKeyGroup(line, matchedAllowed, false));
+      result.AddRange(ProcessKeyGroup(line, matchedNotAllowed, true));
 
-        bool hasTrailingComma = false;
-
-        if (lastKeyIndex >= 0 && lastKeyIndex + lastKey.Length < line.Length)
-        {
-          char nextChar = line[lastKeyIndex + lastKey.Length];
-          hasTrailingComma = nextChar == ',';
-        }
-
-        for (int i = 0; i < matchedKeys.Count; i++)
-        {
-          var key = matchedKeys[i];
-          bool hasError = (i == matchedKeys.Count - 1) && !hasTrailingComma;
-          result.Add((key, false));
-        }
-      }
-      if (foundNotAllowedKeys.Count > 0)
-      {
-        string lastKey = foundNotAllowedKeys.Last();
-        int lastKeyIndex = line.LastIndexOf(lastKey, StringComparison.Ordinal);
-        bool hasTrailingComma = false;
-
-        if (lastKeyIndex >= 0 && lastKeyIndex + lastKey.Length < line.Length)
-        {
-          char nextChar = line[lastKeyIndex + lastKey.Length];
-          hasTrailingComma = nextChar == ',';
-        }
-        for (int i = 0; i < foundNotAllowedKeys.Count; i++)
-        {
-          var key = foundNotAllowedKeys[i];
-          bool hasError = (i == foundNotAllowedKeys.Count - 1) && !hasTrailingComma;
-          result.Add((key, true));
-        }
-      }
       return result;
+    }
+
+    private static List<string> SplitTokens(string line) =>
+  line.Split(new[] { ' ', '\t', ',', ';', '|' },
+             StringSplitOptions.RemoveEmptyEntries)
+      .ToList();
+
+    private static HashSet<string> GetAllowedKeys(BaseCommandModel model) =>
+  KeysHelper.GetAllowedKeysForModel(model)
+            .Select(k => k.ToString())
+            .ToHashSet();
+
+    private static HashSet<string> GetNotAllowedKeys(BaseCommandModel model) =>
+      KeysHelper.GetNotAllowedKeysForModel(model)
+                .Select(k => k.ToString())
+                .ToHashSet();
+
+    /// <summary>
+    /// Проверяет последнюю запятую и формирует результат.
+    /// </summary>
+    private static List<(string Key, bool HasError)>
+    ProcessKeyGroup(string line, List<string> keys, bool markAsError)
+    {
+      var result = new List<(string, bool)>();
+
+      if (keys.Count == 0)
+        return result;
+
+      bool hasTrailingComma = HasTrailingComma(line, keys.Last());
+
+      for (int i = 0; i < keys.Count; i++)
+      {
+        //bool isLast = i == keys.Count - 1;
+        //bool missingComma = isLast && !hasTrailingComma;
+
+        bool error = markAsError;
+          //|| missingComma;
+
+        result.Add((keys[i], error));
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Проверяет, стоит ли запятая сразу после ключа.
+    /// </summary>
+    private static bool HasTrailingComma(string line, string key)
+    {
+      int index = line.LastIndexOf(key, StringComparison.Ordinal);
+      if (index < 0 || index + key.Length >= line.Length)
+        return false;
+
+      return line[index + key.Length] == ',';
     }
   }
 }

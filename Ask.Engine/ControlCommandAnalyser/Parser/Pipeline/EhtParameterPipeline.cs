@@ -15,6 +15,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pipeline
         {
             Keys<EhtCommandModel>(),
             new EhtResistanceProcessor(),
+            new EhtAmperageProcessor(),
             Time<EhtCommandModel>(),
         });
 

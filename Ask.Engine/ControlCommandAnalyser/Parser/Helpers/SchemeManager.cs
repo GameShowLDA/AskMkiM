@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
       var scheme = new SchemeModel(new List<GroupModel>());
-      if (model is PiCommandModel == false && model is PrCommandModel == false)
+      if (model is PiCommandModel == false && model is PrCommandModel == false && model is SiCommandModel == false)
       {
         if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
         {
@@ -32,10 +32,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
         piCommandModel = HandlePiCommandModel(bodyNoWs, piCommandModel, numberLine, ref scheme, rmCommandModel);
         scheme = piCommandModel.Scheme;
       }
+      if (model is SiCommandModel siCommandModel)
+      {
+        scheme = HandlePrCommandModel(bodyNoWs, siCommandModel, siCommandModel.Scheme, numberLine, ref scheme, rmCommandModel);
+      }
       if (model is PrCommandModel prCommandModel)
       {
-        prCommandModel = HandlePrCommandModel(bodyNoWs, prCommandModel, numberLine, ref scheme, rmCommandModel);
-        scheme = prCommandModel.Scheme;
+        scheme = HandlePrCommandModel(bodyNoWs, prCommandModel, prCommandModel.Scheme, numberLine, ref scheme, rmCommandModel);
       }
 
       remainder = ClearLineFromPoints(remainder);
@@ -54,12 +57,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
         || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
-        piCommandModel = HandleKeyP(piCommandModel, numberLine);
+        piCommandModel.Scheme = HandleKeyP(piCommandModel, piCommandModel.Scheme, numberLine, piCommandModel.SiCommand);
       }
       else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
         || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        piCommandModel = HandleKeyS(piCommandModel);
+        piCommandModel.Scheme = HandleKeyS(piCommandModel.Scheme, piCommandModel.SiCommand);
       }
       else
       {
@@ -68,102 +71,97 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Helpers
       return piCommandModel;
     }
 
-    private static PrCommandModel HandlePrCommandModel(string bodyNoWs, PrCommandModel model, int numberLine, ref SchemeModel? scheme, RmCommandModel rmCommandModel)
+    private static SchemeModel HandlePrCommandModel(string bodyNoWs, BaseCommandModel model, SchemeModel modelScheme, int numberLine, ref SchemeModel? scheme, RmCommandModel rmCommandModel)
     {
       if (TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
       {
         scheme = ParseScheme(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
-        model.Scheme = scheme;
-        model = HandleKeysSP(numberLine, model);
+        modelScheme = scheme;
+        modelScheme = HandleKeysSP(numberLine,model, modelScheme);
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
-        model = HandleKeyP(model, numberLine);
+        modelScheme = HandleKeyP(model, modelScheme, numberLine);
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        model = HandleKeyS(model);
+        modelScheme = HandleKeyS(modelScheme);
       }
       else
       {
         HandleNoPointsBlock(model, numberLine);
       }
-      return model;
+      return modelScheme;
     }
+
 
     private static PiCommandModel HandleKeysSP(int numberLine, PiCommandModel piCommandModel)
     {
       if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
                   || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
-        piCommandModel = HandleKeyP(piCommandModel, numberLine);
+        piCommandModel.Scheme = HandleKeyP(piCommandModel, piCommandModel.Scheme, numberLine, piCommandModel.SiCommand);
       }
       else if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.С.ToString())
         || piCommandModel.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        piCommandModel = HandleKeyS(piCommandModel);
+        piCommandModel.Scheme = HandleKeyS(piCommandModel.Scheme, piCommandModel.SiCommand);
       }
 
       return piCommandModel;
     }
 
-    private static PrCommandModel HandleKeysSP(int numberLine, PrCommandModel model)
+    private static SchemeModel HandleKeysSP(int numberLine, BaseCommandModel model, SchemeModel scheme)
     {
       if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
-        model = HandleKeyP(model, numberLine);
+        scheme = HandleKeyP(model, scheme, numberLine);
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.С.ToString()))
       {
-        model = HandleKeyS(model);
+        scheme = HandleKeyS(scheme);
       }
 
-      return model;
+      return scheme;
     }
 
-    private static PiCommandModel HandleKeyS(PiCommandModel model)
+    private static SchemeModel HandleKeyS(SchemeModel scheme, SiCommandModel siCommand = null)
     {
-      model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-      model.SiCommand.Scheme = model.Scheme;
-      return model;
+      scheme = CommandsModel.CheckKeyS(scheme);
+      if (siCommand != null)
+      {
+        siCommand.Scheme = scheme;
+      }
+      return scheme;
     }
 
-    private static PrCommandModel HandleKeyS(PrCommandModel model)
+    private static SchemeModel HandleKeyP(BaseCommandModel model, SchemeModel scheme, int numberLine, SiCommandModel siCommand = null)
     {
-      model.Scheme = CommandsModel.CheckKeyS(model.Scheme);
-      return model;
-    }
-
-    private static PiCommandModel HandleKeyP(PiCommandModel model, int numberLine)
-    {
-      var newScheme = CommandsModel.CheckKeyP(model, model.Scheme, model.SiCommand);
+      var newScheme = new SchemeModel(new List<GroupModel>());
+      if (siCommand != null)
+      {
+        newScheme = CommandsModel.CheckKeyP(model, scheme, siCommand);
+      }
+      else
+      {
+        newScheme = CommandsModel.CheckKeyP(model, scheme);
+      }
       if (newScheme != null)
       {
-        model.Scheme = newScheme;
-        model.SiCommand.Scheme = model.Scheme;
+        scheme = newScheme;
+        if (siCommand != null)
+        {
+          siCommand.Scheme = scheme;
+        }
       }
       else
       {
         model.Errors.Add(PiErrors.PreviousCommandHasNoPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
 
-      return model;
+      return scheme;
     }
 
-    private static PrCommandModel HandleKeyP(PrCommandModel model, int numberLine)
-    {
-      var newScheme = CommandsModel.CheckKeyP(model, model.Scheme);
-      if (newScheme != null)
-      {
-        model.Scheme = newScheme;
-      }
-      else
-      {
-        model.Errors.Add(PrErrors.PreviousCommandHasNoPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
-
-      return model;
-    }
 
     public static List<SwitchingBus> GetBusList(CkCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
     {
